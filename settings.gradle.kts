@@ -1,4 +1,7 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
+    includeBuild("build-logic")
+
     repositories {
         google {
             content {
@@ -21,4 +24,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "Neki"
 include(":app")
- 
+include(":core:common")
+include(":core:designsystem")
+include(":core:domain")
+include(":core:data")
+include(":feature:sample")
