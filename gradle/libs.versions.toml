@@ -45,7 +45,7 @@ neki-android-application-compose = { id = "neki.android.application.compose", ve
 neki-android-library = { id = "neki.android.library", version = "unspecified" }
 neki-android-library-compose = { id = "neki.android.library.compose", version = "unspecified" }
 neki-android-feature = { id = "neki.android.feature", version = "unspecified" }
-neki-jvm-library = { id = "neki.jvm.library", version = "unspecified" }
+neki-kotlin-library = { id = "neki.kotlin.library", version = "unspecified" }
 
 
 android-application = { id = "com.android.application", version.ref = "agp" }

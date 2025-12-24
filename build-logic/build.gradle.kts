@@ -27,9 +27,9 @@ gradlePlugin {
             id = "neki.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
         }
-        register("jvmLibrary") {
-            id = "neki.jvm.library"
-            implementationClass = "JvmLibraryConventionPlugin"
+        register("kotlinLibrary") {
+            id = "neki.kotlin.library"
+            implementationClass = "KotlinLibraryConventionPlugin"
         }
         register("androidFeatureCompose") {
             id = "neki.android.feature"
