@@ -31,10 +31,6 @@ internal fun Project.configureKotlin(
                 )
             }
         }
-
-        dependencies {
-            "implementation"(libs.findLibrary("kotlinx-serialization-json").get())
-        }
     }
 }
 
