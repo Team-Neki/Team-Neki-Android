@@ -1,4 +1,4 @@
-package com.neki.android
+package com.neki.android.app
 
 import android.app.Application
 
