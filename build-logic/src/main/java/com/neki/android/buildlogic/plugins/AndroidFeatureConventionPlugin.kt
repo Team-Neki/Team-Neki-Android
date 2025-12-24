@@ -8,6 +8,7 @@ class AndroidFeatureConventionPlugin: Plugin<Project> {
             with(pluginManager) {
                 apply("neki.android.library")
                 apply("neki.android.library.compose")
+                apply("neki.hilt")
             }
 
             dependencies {

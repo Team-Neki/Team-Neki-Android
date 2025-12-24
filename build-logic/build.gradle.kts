@@ -6,7 +6,7 @@ plugins {
 dependencies {
     compileOnly(libs.android.gradle.plugin)
     compileOnly(libs.kotlin.gradle.plugin)
-    compileOnly(libs.ksp.gradle.plugin)
+    compileOnly(libs.compose.compiler.gradle.plugin)
 }
 
 gradlePlugin {
@@ -34,6 +34,10 @@ gradlePlugin {
         register("androidFeatureCompose") {
             id = "neki.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
+        }
+        register("hilt") {
+            id = "neki.hilt"
+            implementationClass = "HiltConventionPlugin"
         }
     }
 }

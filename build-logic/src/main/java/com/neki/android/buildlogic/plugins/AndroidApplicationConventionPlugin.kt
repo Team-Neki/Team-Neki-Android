@@ -11,6 +11,7 @@ class AndroidApplicationConventionPlugin: Plugin<Project> {
             with(plugins) {
                 apply("com.android.application")
                 apply("org.jetbrains.kotlin.android")
+                apply("neki.hilt")
             }
 
             extensions.configure<ApplicationExtension> {

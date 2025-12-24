@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Neki">
 
         <activity
-            android:name="com.neki.android.MainActivity"
+            android:name="com.neki.android.sample.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
