@@ -1,10 +1,8 @@
 import com.android.build.gradle.LibraryExtension
-import com.neki.android.buildlogic.extensions.configureKotlin
-import com.neki.android.buildlogic.extensions.libs
+import com.neki.android.buildlogic.extensions.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
 
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -15,7 +13,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             }
 
             extensions.configure<LibraryExtension> {
-                configureKotlin(this)
+                configureKotlinAndroid(this)
             }
         }
     }

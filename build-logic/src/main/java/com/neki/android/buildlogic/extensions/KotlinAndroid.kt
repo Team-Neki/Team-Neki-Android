@@ -4,10 +4,9 @@ import com.neki.android.buildlogic.const.BuildConst
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
-internal fun Project.configureKotlin(
+internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>
 ) {
     commonExtension.apply {
@@ -18,7 +17,7 @@ internal fun Project.configureKotlin(
             targetCompatibility = BuildConst.JAVA_VERSION
         }
 
-        configureKotlinOptions {
+        configureKotlinAndroidOptions {
             jvmTarget = BuildConst.JDK_VERSION.toString()
         }
 
@@ -34,7 +33,7 @@ internal fun Project.configureKotlin(
     }
 }
 
-internal fun CommonExtension<*, *, *, *, *, *>.configureKotlinOptions(
+internal fun CommonExtension<*, *, *, *, *, *>.configureKotlinAndroidOptions(
     block: KotlinJvmOptions.() -> Unit,
 ) {
     (this as ExtensionAware).extensions.configure("kotlinOptions", block)
