@@ -1,4 +1,4 @@
-package com.neki.android.ui.theme
+package com.neki.android.core.designsystem.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
