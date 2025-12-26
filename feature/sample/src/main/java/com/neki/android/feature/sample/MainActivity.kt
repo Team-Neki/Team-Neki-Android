@@ -1,4 +1,4 @@
-package com.neki.android.sample
+package com.neki.android.feature.sample
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.neki.android.ui.theme.NekiTheme
+import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
