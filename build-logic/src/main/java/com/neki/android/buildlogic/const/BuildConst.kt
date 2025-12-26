@@ -12,6 +12,6 @@ object BuildConst {
     const val TARGET_SDK = 35
     const val COMPILE_SDK = 35
 
-    const val JDK_VERSION = 17
-    val JAVA_VERSION = JavaVersion.VERSION_17
+    const val JDK_VERSION = 21
+    val JAVA_VERSION = JavaVersion.VERSION_21
 }
