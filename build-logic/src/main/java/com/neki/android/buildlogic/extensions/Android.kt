@@ -6,7 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
-internal fun Project.configureKotlinAndroid(
+internal fun Project.configureAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>
 ) {
     commonExtension.apply {
@@ -17,7 +17,7 @@ internal fun Project.configureKotlinAndroid(
             targetCompatibility = BuildConst.JAVA_VERSION
         }
 
-        configureKotlinAndroidOptions {
+        configureAndroidOptions {
             jvmTarget = BuildConst.JDK_VERSION.toString()
         }
 
@@ -33,7 +33,7 @@ internal fun Project.configureKotlinAndroid(
     }
 }
 
-internal fun CommonExtension<*, *, *, *, *, *>.configureKotlinAndroidOptions(
+internal fun CommonExtension<*, *, *, *, *, *>.configureAndroidOptions(
     block: KotlinJvmOptions.() -> Unit,
 ) {
     (this as ExtensionAware).extensions.configure("kotlinOptions", block)
