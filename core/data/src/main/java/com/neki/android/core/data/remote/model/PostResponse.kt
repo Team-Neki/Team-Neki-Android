@@ -1,6 +1,6 @@
-package com.neki.android.data.remote.model
+package com.neki.android.core.data.remote.model
 
-import com.neki.android.model.Post
+import com.neki.android.core.model.Post
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

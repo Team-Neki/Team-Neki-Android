@@ -1,8 +1,7 @@
-package com.neki.android.data.remote.di
+package com.neki.android.core.data.remote.di
 
-import android.util.Log
-import com.neki.android.common.const.Const.TAG_REST_API
-import com.neki.android.data.remote.api.ApiService
+import com.neki.android.core.common.const.Const.TAG_REST_API
+import com.neki.android.core.data.remote.api.ApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

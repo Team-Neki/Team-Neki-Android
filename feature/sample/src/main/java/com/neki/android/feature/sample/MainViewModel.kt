@@ -1,8 +1,8 @@
-package com.neki.android.sample
+package com.neki.android.feature.sample
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dataapi.repository.SampleRepository
+import com.neki.android.core.dataapi.repository.SampleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

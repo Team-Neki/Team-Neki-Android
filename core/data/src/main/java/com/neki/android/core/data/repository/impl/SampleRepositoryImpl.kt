@@ -1,8 +1,9 @@
-package com.neki.android.data.repository.impl
+package com.neki.android.core.data.repository.impl
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.neki.android.core.data.remote.api.ApiService
+import com.neki.android.core.dataapi.repository.SampleRepository
 import com.neki.android.core.model.Post
 import javax.inject.Inject
 

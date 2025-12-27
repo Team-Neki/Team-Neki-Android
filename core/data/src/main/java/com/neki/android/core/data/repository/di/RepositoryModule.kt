@@ -1,7 +1,7 @@
-package com.neki.android.data.repository.di
+package com.neki.android.core.data.repository.di
 
-import com.example.dataapi.repository.SampleRepository
-import com.neki.android.data.repository.impl.SampleRepositoryImpl
+import com.neki.android.core.data.repository.impl.SampleRepositoryImpl
+import com.neki.android.core.dataapi.repository.SampleRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

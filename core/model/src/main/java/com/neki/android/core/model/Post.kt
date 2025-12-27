@@ -1,4 +1,4 @@
-package com.neki.android.model
+package com.neki.android.core.model
 
 data class Post(
     val userId: Int = 0,

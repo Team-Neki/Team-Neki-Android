@@ -1,6 +1,6 @@
-package com.neki.android.data.remote.api
+package com.neki.android.core.data.remote.api
 
-import com.neki.android.data.remote.model.PostResponse
+import com.neki.android.core.data.remote.model.PostResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
