@@ -6,3 +6,8 @@ plugins {
 android {
     namespace = "com.neki.android.core.common"
 }
+
+dependencies {
+    api(libs.timber)
+
+}

@@ -4,6 +4,10 @@ plugins {
 
 android {
     namespace = "com.neki.android.app"
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -14,4 +18,14 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.designsystem)
     implementation(projects.feature.sample)
+
+    implementation(projects.core.common)
+    implementation(projects.core.data)
+    implementation(projects.core.dataApi)
+    implementation(projects.core.designsystem)
+    implementation(projects.core.domain)
+    implementation(projects.core.model)
+
+    implementation(libs.timber)
+
 }
