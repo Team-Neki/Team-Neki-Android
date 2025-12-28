@@ -1,23 +1,59 @@
-name: Discord Notify
+name: Discord PR Review
 
 on:
-  issue_comment:
-    types: [created]
   pull_request_review_comment:
     types: [created]
   pull_request_review:
     types: [submitted]
 
 jobs:
-  notify:
+  notify_review:
+    if: ${{ github.actor != 'coderabbitai[bot]' && github.actor != 'coderabbitai' }}
     runs-on: ubuntu-latest
-    # ✅ 특정 사람 제외
-    if: github.actor != 'coderabbitai' && github.actor != 'coderabbitai[bot]'
+
     steps:
-      - name: Send to Discord
+      - name: Send PR review comment/review to Discord
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+          EVENT_NAME: ${{ github.event_name }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          COMMENT_URL: ${{ github.event.comment.html_url }}
+
+          REVIEW_AUTHOR: ${{ github.event.review.user.login }}
+          REVIEW_BODY: ${{ github.event.review.body }}
+          REVIEW_URL: ${{ github.event.review.html_url }}
         run: |
-          curl -H "Content-Type: application/json" \
-            -d "{\"content\":\"${{ github.repository }}: ${{ github.event_name }} by ${{ github.actor }}\"}" \
-            "$DISCORD_WEBHOOK"
+          set -e
+
+          if [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
+            AUTHOR="$COMMENT_AUTHOR"
+            BODY="$COMMENT_BODY"
+            LINK="$COMMENT_URL"
+          else
+            AUTHOR="$REVIEW_AUTHOR"
+            BODY="$REVIEW_BODY"
+            LINK="$REVIEW_URL"
+          fi
+
+          # 링크가 비면 PR 링크로 fallback
+          if [ -z "$LINK" ]; then
+            LINK="$PR_URL"
+          fi
+
+          # ✅ 멀티라인 문자열(문제 원인) 제거: printf로 안전하게 조립
+          msg=$(printf "%s\n%s\n%s\n%s\n%s\n\n%s\n" \
+            "📝 PR 리뷰" \
+            "- PR: ${PR_TITLE}" \
+            "- 작성자: ${AUTHOR}" \
+            "- 본문:" \
+            "${BODY}" \
+            "🔗 ${LINK}"
+          )
+
+          payload=$(jq -n --arg content "$msg" '{content: $content}')
+          curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL" > /dev/null
