@@ -1,4 +1,4 @@
-package com.neki.android.core.data.remote.model
+package com.neki.android.core.data.remote.model.response
 
 import com.neki.android.core.model.Post
 import kotlinx.serialization.SerialName

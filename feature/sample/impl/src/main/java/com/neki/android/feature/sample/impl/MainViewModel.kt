@@ -1,4 +1,4 @@
-package com.neki.android.feature.sample
+package com.neki.android.feature.sample.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.neki.android.feature.sample"
+    namespace = "com.neki.android.feature.sample.impl"
 }
 
 dependencies {
