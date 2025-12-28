@@ -9,7 +9,7 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     # ✅ 특정 사람 제외
-    if: github.actor != 'coderabbitai'
+    if: github.actor != 'coderabbitai' && github.actor != 'coderabbitai[bot]'
     steps:
       - name: Send to Discord
         env:
