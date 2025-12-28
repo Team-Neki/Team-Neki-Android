@@ -1,0 +1,20 @@
+name: Discord Notify
+
+on:
+  push:
+  pull_request:
+  issues:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    # ✅ 특정 사람 제외
+    if: github.actor != 'coderabbitai'
+    steps:
+      - name: Send to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\":\"${{ github.repository }}: ${{ github.event_name }} by ${{ github.actor }}\"}" \
+            "$DISCORD_WEBHOOK"
