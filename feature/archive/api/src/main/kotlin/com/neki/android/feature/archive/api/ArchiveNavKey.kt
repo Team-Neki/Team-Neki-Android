@@ -1,4 +1,4 @@
-package com.neki.android.feature.archive.com.neki.android.feature.archive.api
+package com.neki.android.feature.archive.api
 
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.Navigator

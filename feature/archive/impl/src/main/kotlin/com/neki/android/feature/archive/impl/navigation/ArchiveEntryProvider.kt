@@ -1,10 +1,10 @@
-package navigation.com.neki.android.feature.archive.impl.navigation
+package com.neki.android.feature.archive.impl.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.Navigator
-import com.neki.android.feature.archive.com.neki.android.feature.archive.api.ArchiveNavKey
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +13,7 @@ import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object PoseArchiveProviderModule {
+object ArchiveEntryProviderModule {
 
     @IntoSet
     @Provides

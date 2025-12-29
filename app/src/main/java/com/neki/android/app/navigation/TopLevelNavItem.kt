@@ -4,7 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.app.R
-import com.neki.android.feature.archive.com.neki.android.feature.archive.api.ArchiveNavKey
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.map.api.MapNavKey
 import com.neki.android.feature.pose.api.PoseNavKey
 
