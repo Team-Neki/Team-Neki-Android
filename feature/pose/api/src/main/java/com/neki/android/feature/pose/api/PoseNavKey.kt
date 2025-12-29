@@ -13,4 +13,3 @@ sealed interface PoseNavKey : NavKey {
 fun Navigator.navigateToPose() {
     navigate(PoseNavKey.Pose)
 }
-
