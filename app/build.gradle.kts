@@ -25,6 +25,8 @@ dependencies {
     implementation(projects.feature.pose.impl)
     implementation(projects.feature.archive.api)
     implementation(projects.feature.archive.impl)
+    implementation(projects.feature.map.api)
+    implementation(projects.feature.map.impl)
 
     implementation(libs.timber)
 
