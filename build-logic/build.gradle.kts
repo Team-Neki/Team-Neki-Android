@@ -31,6 +31,10 @@ gradlePlugin {
             id = "neki.kotlin.library"
             implementationClass = "KotlinLibraryConventionPlugin"
         }
+        register("androidFeatureApi") {
+            id = "neki.android.feature.api"
+            implementationClass = "AndroidFeatureApiConventionPlugin"
+        }
         register("androidFeatureCompose") {
             id = "neki.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
