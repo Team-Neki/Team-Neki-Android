@@ -13,6 +13,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import javax.inject.Inject
 
 @Composable
 fun rememberNavigationState(
@@ -31,7 +32,7 @@ fun rememberNavigationState(
     }
 }
 
-class NavigationState(
+class NavigationState @Inject constructor(
     val startKey: NavKey,
     val topLevelStack: NavBackStack<NavKey>,
     val subStacks: Map<NavKey, NavBackStack<NavKey>>,
