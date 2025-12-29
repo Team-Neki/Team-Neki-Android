@@ -1,4 +1,4 @@
-package com.neki.android.core.navigation.di
+package com.neki.android.app.navigation.di
 
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.core.navigation.NavigatorImpl
@@ -9,7 +9,7 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-interface NavigatorModule {
+interface AppModule {
 
     @Binds
     fun bindsNavigator(
