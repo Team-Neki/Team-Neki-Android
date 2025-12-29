@@ -23,6 +23,8 @@ dependencies {
     implementation(projects.feature.sample.api)
     implementation(projects.feature.pose.api)
     implementation(projects.feature.pose.impl)
+    implementation(projects.feature.archive.api)
+    implementation(projects.feature.archive.impl)
 
     implementation(libs.timber)
 
