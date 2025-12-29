@@ -7,12 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.neki.android.app.ui.BottomNavigationBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.NavigatorImpl
@@ -33,8 +34,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val shouldShowBottomBar by remember(navigator.state.currentKey) {
+                mutableStateOf(navigator.state.currentKey in navigator.state.topLevelKeys)
+            }
+
             NekiTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        BottomNavigationBar(
+                            visible = shouldShowBottomBar,
+                            currentTab = navigator.state.currentTopLevelKey,
+                            currentKey = navigator.state.currentKey,
+                            onTabSelected = { navigator.navigate(it.navKey) },
+                        )
+                    }
+                ) { innerPadding ->
                     NavDisplay(
                         modifier = Modifier.padding(innerPadding),
                         entries = navigator.state.toEntries(
