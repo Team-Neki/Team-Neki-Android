@@ -1,4 +1,4 @@
-package com.neki.android.feature.sample.impl
+package com.neki.android.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
