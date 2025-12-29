@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.neki.android.application)
+    alias(libs.plugins.neki.android.application.compose)
 }
 
 android {
@@ -23,4 +24,6 @@ dependencies {
 
     implementation(libs.timber)
 
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation3.ui)
 }
