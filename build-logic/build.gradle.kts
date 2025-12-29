@@ -35,9 +35,9 @@ gradlePlugin {
             id = "neki.android.feature.api"
             implementationClass = "AndroidFeatureApiConventionPlugin"
         }
-        register("androidFeatureCompose") {
-            id = "neki.android.feature"
-            implementationClass = "AndroidFeatureConventionPlugin"
+        register("androidFeatureImplCompose") {
+            id = "neki.android.feature.impl"
+            implementationClass = "AndroidFeatureImplConventionPlugin"
         }
         register("hilt") {
             id = "neki.hilt"
