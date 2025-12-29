@@ -9,8 +9,8 @@ object BuildConst {
     const val VERSION_NAME = "1.0.0"
 
     const val MIN_SDK = 29
-    const val TARGET_SDK = 35
-    const val COMPILE_SDK = 35
+    const val TARGET_SDK = 36
+    const val COMPILE_SDK = 36
 
     const val JDK_VERSION = 21
     val JAVA_VERSION = JavaVersion.VERSION_21
