@@ -13,11 +13,11 @@ import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object FeatureArchiveModule {
+object PoseArchiveProviderModule {
 
     @IntoSet
     @Provides
-    fun provideFeatureArchiveEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
+    fun provideArchiveEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
         archiveEntry(navigator)
     }
 }

@@ -13,11 +13,11 @@ import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object FeatureAModule {
+object MapEntryProviderModule {
 
     @IntoSet
     @Provides
-    fun provideFeatureAEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
+    fun provideMapEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
         mapEntry(navigator)
     }
 }

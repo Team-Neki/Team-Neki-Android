@@ -13,11 +13,11 @@ import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object FeatureAModule {
+object PoseEntryProviderModule {
 
     @IntoSet
     @Provides
-    fun provideFeatureAEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
+    fun providePoseEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
         poseEntry(navigator)
     }
 }
