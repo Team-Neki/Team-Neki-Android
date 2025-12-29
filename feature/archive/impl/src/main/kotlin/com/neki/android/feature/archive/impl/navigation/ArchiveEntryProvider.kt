@@ -3,7 +3,7 @@ package navigation.com.neki.android.feature.archive.impl.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
-import com.neki.android.core.navigation.NavigatorImpl
+import com.neki.android.core.navigation.Navigator
 import com.neki.android.feature.archive.com.neki.android.feature.archive.api.ArchiveNavKey
 import dagger.Module
 import dagger.Provides
@@ -17,11 +17,11 @@ object FeatureArchiveModule {
 
     @IntoSet
     @Provides
-    fun provideFeatureArchiveEntryBuilder(navigatorImpl: NavigatorImpl): EntryProviderInstaller = {
-        archiveEntry()
+    fun provideFeatureArchiveEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
+        archiveEntry(navigator)
     }
 }
 
-private fun EntryProviderScope<NavKey>.archiveEntry() {
+private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.Archive> {}
 }
