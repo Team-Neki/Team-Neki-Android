@@ -1,8 +1,10 @@
 import com.neki.android.buildlogic.const.BuildConst
+import com.neki.android.buildlogic.extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 class KotlinLibraryConventionPlugin: Plugin<Project> {
@@ -20,6 +22,10 @@ class KotlinLibraryConventionPlugin: Plugin<Project> {
 
             extensions.configure<KotlinProjectExtension> {
                 jvmToolchain(BuildConst.JDK_VERSION)
+            }
+
+            dependencies {
+                add("detektPlugins", libs.findLibrary("detekt.formatting").get())
             }
         }
     }
