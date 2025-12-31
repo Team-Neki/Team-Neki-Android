@@ -10,7 +10,7 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object NavigationModule {
+internal object NavigationModule {
 
     @Provides
     fun providesNavigationState(): NavigationState {

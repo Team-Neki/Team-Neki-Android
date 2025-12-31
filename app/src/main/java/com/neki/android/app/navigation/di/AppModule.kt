@@ -9,7 +9,7 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-interface AppModule {
+internal interface AppModule {
 
     @Binds
     fun bindsNavigator(
