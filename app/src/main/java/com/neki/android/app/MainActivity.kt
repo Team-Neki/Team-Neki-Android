@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                             currentKey = navigator.state.currentKey,
                             onTabSelected = { navigator.navigate(it.navKey) },
                         )
-                    }
+                    },
                 ) { innerPadding ->
                     NavDisplay(
                         modifier = Modifier.padding(innerPadding),

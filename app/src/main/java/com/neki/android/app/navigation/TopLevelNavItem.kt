@@ -24,13 +24,13 @@ enum class TopLevelNavItem(
         selectedIcon = R.drawable.ic_nav_archive_selected,
         unselectedIcon = R.drawable.ic_nav_archive_unselected,
         iconTextId = R.string.top_level_nav_archive,
-        navKey = ArchiveNavKey.Archive
+        navKey = ArchiveNavKey.Archive,
     ),
     MAP(
         selectedIcon = R.drawable.ic_nav_map_selected,
         unselectedIcon = R.drawable.ic_nav_map_unselected,
         iconTextId = R.string.top_level_nav_map,
-        navKey = MapNavKey.Map
+        navKey = MapNavKey.Map,
     );
 
     companion object {
