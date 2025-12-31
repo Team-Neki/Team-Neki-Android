@@ -5,7 +5,9 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 import javax.inject.Inject
 
 @ActivityRetainedScoped
-class NavigatorImpl @Inject constructor(val state: NavigationState) : Navigator {
+class NavigatorImpl @Inject constructor(
+    val state: NavigationState,
+) : Navigator {
 
     override fun navigate(key: NavKey) {
         when (key) {
