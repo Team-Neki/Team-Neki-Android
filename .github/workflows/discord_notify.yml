@@ -3,13 +3,11 @@ name: Discord PR Review
 on:
   pull_request_review:
     types: [submitted]
-  pull_request_review_comment:
-    types: [created]
   issue_comment:
     types: [created]
 
 jobs:
-  notify_review:
+  notify:
     if: |
       github.actor != 'coderabbitai[bot]' &&
       github.actor != 'coderabbitai' &&
@@ -24,23 +22,24 @@ jobs:
         run: |
           set -e
 
-          EVENT_NAME="$GITHUB_EVENT_NAME"
+          EVENT="$GITHUB_EVENT_NAME"
           REPO=$(jq -r '.repository.full_name' "$GITHUB_EVENT_PATH")
 
           PR_TITLE=""
           AUTHOR=""
           BODY=""
-          STATE=""
+          TITLE=""
 
-          if [ "$EVENT_NAME" = "pull_request_review" ]; then
+          if [ "$EVENT" = "pull_request_review" ]; then
             PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
             AUTHOR=$(jq -r '.review.user.login' "$GITHUB_EVENT_PATH")
-            BODY=$(jq -r '.review.body // ""' "$GITHUB_EVENT_PATH")
             STATE=$(jq -r '.review.state' "$GITHUB_EVENT_PATH")
+            REVIEW_BODY=$(jq -r '.review.body // ""' "$GITHUB_EVENT_PATH")
+
             PR_NUMBER=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
             REVIEW_ID=$(jq -r '.review.id' "$GITHUB_EVENT_PATH")
 
-            # 리뷰 요약 본문이 비어있으면: 이 리뷰에 달린 인라인 코멘트들을 붙여서 "본문"을 채움
+            # 이 리뷰에 포함된 인라인 코멘트들을 가져와서 본문에 합치기
             COMMENTS_JSON=$(curl -sS -L \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer $GITHUB_TOKEN" \
@@ -55,10 +54,7 @@ jobs:
               end
             ')
 
-            if [ -z "$BODY" ] || [ "$BODY" = "null" ]; then
-              BODY=""
-            fi
-
+            BODY="$REVIEW_BODY"
             if [ -n "$COMMENTS" ]; then
               if [ -n "$BODY" ]; then
                 BODY="$BODY\n\n💬 인라인 코멘트:\n$COMMENTS"
@@ -73,19 +69,8 @@ jobs:
 
             TITLE="📝 PR 리뷰 (${STATE})"
 
-          elif [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
-            PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
-            AUTHOR=$(jq -r '.comment.user.login' "$GITHUB_EVENT_PATH")
-            BODY=$(jq -r '.comment.body // ""' "$GITHUB_EVENT_PATH")
-
-            if [ -z "$BODY" ] || [ "$BODY" = "null" ]; then
-              BODY="(본문 없음)"
-            fi
-
-            TITLE="💬 PR 인라인 코멘트"
-
-          elif [ "$EVENT_NAME" = "issue_comment" ]; then
-            # PR Conversation 댓글(= issue_comment but issue.pull_request 존재)
+          elif [ "$EVENT" = "issue_comment" ]; then
+            # PR Conversation 댓글 (issue_comment지만 PR만 필터링됨)
             PR_TITLE=$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")
             AUTHOR=$(jq -r '.comment.user.login' "$GITHUB_EVENT_PATH")
             BODY=$(jq -r '.comment.body // ""' "$GITHUB_EVENT_PATH")
@@ -95,15 +80,13 @@ jobs:
             fi
 
             TITLE="💬 PR 댓글"
+
           else
             exit 0
           fi
 
           msg=$(printf "%s\n- PR: %s\n- 작성자: %s\n- 본문:\n%s\n" \
-            "$TITLE" \
-            "$PR_TITLE" \
-            "$AUTHOR" \
-            "$BODY"
+            "$TITLE" "$PR_TITLE" "$AUTHOR" "$BODY"
           )
 
           # Discord 2000자 제한 대비
