@@ -13,8 +13,6 @@ internal abstract class RepositoryModule {
 
     @Binds
     abstract fun bindSampleRepositoryImpl(
-        sampleRepositoryImpl: SampleRepositoryImpl
+        sampleRepositoryImpl: SampleRepositoryImpl,
     ): SampleRepository
-
-
 }

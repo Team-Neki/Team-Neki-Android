@@ -21,6 +21,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Singleton
+
 @Module
 @InstallIn(SingletonComponent::class)
 internal object NetworkModule {
@@ -31,7 +32,7 @@ internal object NetworkModule {
     @Provides
     @Singleton
     fun provideApiService(
-        client: HttpClient
+        client: HttpClient,
     ): ApiService = ApiService(client)
 
     @Provides
@@ -44,11 +45,13 @@ internal object NetworkModule {
             }
 
             install(ContentNegotiation) {
-                json(Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                })
+                json(
+                    Json {
+                        prettyPrint = true
+                        isLenient = true
+                        ignoreUnknownKeys = true
+                    },
+                )
             }
 
             install(Logging) {
@@ -69,7 +72,4 @@ internal object NetworkModule {
             expectSuccess = true
         }
     }
-
-
 }
-

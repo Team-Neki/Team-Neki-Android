@@ -23,7 +23,7 @@ object MapEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.mapEntry(navigator: Navigator) {
-    entry<MapNavKey.Map> {}
+    entry<MapNavKey.Map> {
+        navigator
+    }
 }
-
-

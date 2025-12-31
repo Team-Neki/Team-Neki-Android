@@ -31,7 +31,8 @@ enum class TopLevelNavItem(
         unselectedIcon = R.drawable.ic_nav_map_unselected,
         iconTextId = R.string.top_level_nav_map,
         navKey = MapNavKey.Map,
-    );
+    ),
+    ;
 
     companion object {
         val startTopLevelItem = ARCHIVE
