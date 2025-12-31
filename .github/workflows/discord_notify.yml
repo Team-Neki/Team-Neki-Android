@@ -3,45 +3,111 @@ name: Discord PR Review
 on:
   pull_request_review:
     types: [submitted]
+  pull_request_review_comment:
+    types: [created]
+  issue_comment:
+    types: [created]
 
 jobs:
   notify_review:
-    if: ${{ github.actor != 'coderabbitai[bot]' && github.actor != 'coderabbitai' }}
+    if: |
+      github.actor != 'coderabbitai[bot]' &&
+      github.actor != 'coderabbitai' &&
+      (github.event_name != 'issue_comment' || github.event.issue.pull_request)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send PR review to Discord
+      - name: Send PR activity to Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-
-          REVIEW_AUTHOR: ${{ github.event.review.user.login }}
-          REVIEW_BODY: ${{ github.event.review.body }}
-          REVIEW_URL: ${{ github.event.review.html_url }}
-          REVIEW_STATE: ${{ github.event.review.state }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
 
-          AUTHOR="$REVIEW_AUTHOR"
-          BODY="$REVIEW_BODY"
-          LINK="$REVIEW_URL"
-          STATE="$REVIEW_STATE"
+          EVENT_NAME="$GITHUB_EVENT_NAME"
+          REPO=$(jq -r '.repository.full_name' "$GITHUB_EVENT_PATH")
 
-          # 링크가 비면 PR 링크로 fallback
-          if [ -z "$LINK" ]; then
-            LINK="$PR_URL"
+          PR_TITLE=""
+          AUTHOR=""
+          BODY=""
+          STATE=""
+
+          if [ "$EVENT_NAME" = "pull_request_review" ]; then
+            PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
+            AUTHOR=$(jq -r '.review.user.login' "$GITHUB_EVENT_PATH")
+            BODY=$(jq -r '.review.body // ""' "$GITHUB_EVENT_PATH")
+            STATE=$(jq -r '.review.state' "$GITHUB_EVENT_PATH")
+            PR_NUMBER=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
+            REVIEW_ID=$(jq -r '.review.id' "$GITHUB_EVENT_PATH")
+
+            # 리뷰 요약 본문이 비어있으면: 이 리뷰에 달린 인라인 코멘트들을 붙여서 "본문"을 채움
+            COMMENTS_JSON=$(curl -sS -L \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/reviews/$REVIEW_ID/comments?per_page=100")
+
+            COMMENTS=$(echo "$COMMENTS_JSON" | jq -r '
+              if type=="array" and length>0 then
+                .[] | "- [\(.path)] \(.body | gsub("\r";""))"
+              else
+                ""
+              end
+            ')
+
+            if [ -z "$BODY" ] || [ "$BODY" = "null" ]; then
+              BODY=""
+            fi
+
+            if [ -n "$COMMENTS" ]; then
+              if [ -n "$BODY" ]; then
+                BODY="$BODY\n\n💬 인라인 코멘트:\n$COMMENTS"
+              else
+                BODY="💬 인라인 코멘트:\n$COMMENTS"
+              fi
+            fi
+
+            if [ -z "$BODY" ] || [ "$BODY" = "null" ]; then
+              BODY="(본문 없음)"
+            fi
+
+            TITLE="📝 PR 리뷰 (${STATE})"
+
+          elif [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
+            PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
+            AUTHOR=$(jq -r '.comment.user.login' "$GITHUB_EVENT_PATH")
+            BODY=$(jq -r '.comment.body // ""' "$GITHUB_EVENT_PATH")
+
+            if [ -z "$BODY" ] || [ "$BODY" = "null" ]; then
+              BODY="(본문 없음)"
+            fi
+
+            TITLE="💬 PR 인라인 코멘트"
+
+          elif [ "$EVENT_NAME" = "issue_comment" ]; then
+            # PR Conversation 댓글(= issue_comment but issue.pull_request 존재)
+            PR_TITLE=$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")
+            AUTHOR=$(jq -r '.comment.user.login' "$GITHUB_EVENT_PATH")
+            BODY=$(jq -r '.comment.body // ""' "$GITHUB_EVENT_PATH")
+
+            if [ -z "$BODY" ] || [ "$BODY" = "null" ]; then
+              BODY="(본문 없음)"
+            fi
+
+            TITLE="💬 PR 댓글"
+          else
+            exit 0
           fi
 
-          # 상태 표시(approved/changes_requested/commented)
-          msg=$(printf "%s\n%s\n%s\n%s\n\n%s\n" \
-            "📝 PR 리뷰 (${STATE})" \
-            "- PR: ${PR_TITLE}" \
-            "- 작성자: ${AUTHOR}" \
-            "- 본문: ${BODY}" \
-            "🔗 ${LINK}"
+          msg=$(printf "%s\n- PR: %s\n- 작성자: %s\n- 본문:\n%s\n" \
+            "$TITLE" \
+            "$PR_TITLE" \
+            "$AUTHOR" \
+            "$BODY"
           )
+
+          # Discord 2000자 제한 대비
+          msg=$(echo "$msg" | head -c 1800)
 
           payload=$(jq -n --arg content "$msg" '{content: $content}')
           curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL" > /dev/null
