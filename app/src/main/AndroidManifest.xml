@@ -15,7 +15,7 @@
         android:theme="@style/Theme.Neki">
 
         <activity
-            android:name="com.neki.android.feature.sample.impl.MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,0 +1,15 @@
+package com.neki.android.feature.map.api
+
+import androidx.navigation3.runtime.NavKey
+import com.neki.android.core.navigation.Navigator
+import kotlinx.serialization.Serializable
+
+sealed interface MapNavKey : NavKey {
+
+    @Serializable
+    data object Map : MapNavKey
+}
+
+fun Navigator.navigateToMap() {
+    navigate(MapNavKey.Map)
+}

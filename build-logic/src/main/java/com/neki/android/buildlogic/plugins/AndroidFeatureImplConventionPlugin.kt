@@ -1,8 +1,9 @@
+import com.neki.android.buildlogic.extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 
-class AndroidFeatureConventionPlugin: Plugin<Project> {
+class AndroidFeatureImplConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
@@ -16,6 +17,9 @@ class AndroidFeatureConventionPlugin: Plugin<Project> {
                 "implementation"(project(":core:model"))
                 "implementation"(project(":core:data-api"))
                 "implementation"(project(":core:common"))
+
+                "implementation"(libs.findLibrary("androidx.navigation3.runtime").get())
+                "implementation"(libs.findLibrary("androidx.hilt.lifecycle.viewModel.compose").get())
             }
         }
     }

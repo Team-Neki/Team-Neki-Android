@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.neki.android.library)
+    alias(libs.plugins.neki.android.feature.api)
 }
 
 android {
