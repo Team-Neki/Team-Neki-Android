@@ -25,10 +25,11 @@ object SampleEntryProviderModule {
 
 private fun EntryProviderScope<NavKey>.sampleEntry(navigator: Navigator) {
     entry<SampleNavKey.Sample> { key ->
+        navigator
         val viewModel = hiltViewModel<SampleViewModel, SampleViewModel.Factory>(
             creationCallback = { factory ->
                 factory.create(key)
-            }
+            },
         )
         SampleScreen(viewModel = viewModel)
     }

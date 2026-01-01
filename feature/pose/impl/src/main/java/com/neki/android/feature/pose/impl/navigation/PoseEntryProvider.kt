@@ -23,7 +23,7 @@ object PoseEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
-    entry<PoseNavKey.Pose> { }
+    entry<PoseNavKey.Pose> {
+        navigator
+    }
 }
-
-

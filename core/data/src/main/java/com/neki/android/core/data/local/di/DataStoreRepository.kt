@@ -22,7 +22,7 @@ internal object DataStoreModule {
     @Singleton
     @Provides
     fun provideDataStore(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): DataStore<Preferences> {
         return PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler(
@@ -31,6 +31,4 @@ internal object DataStoreModule {
             produceFile = { context.preferencesDataStoreFile(DATASTORE_NAME) },
         )
     }
-
-
 }

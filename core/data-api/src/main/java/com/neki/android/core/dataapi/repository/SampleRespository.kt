@@ -5,8 +5,6 @@ import com.neki.android.core.model.Post
 interface SampleRepository {
     suspend fun getPosts(): List<Post>
     suspend fun getPost(
-        id: Int
+        id: Int,
     ): Post
-
-
 }

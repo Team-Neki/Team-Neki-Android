@@ -23,5 +23,7 @@ object ArchiveEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
-    entry<ArchiveNavKey.Archive> {}
+    entry<ArchiveNavKey.Archive> {
+        navigator
+    }
 }

@@ -51,14 +51,14 @@ fun BottomNavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                horizontalArrangement = Arrangement.spacedBy(2.5.dp),
             ) {
                 tabs.forEach { tab ->
                     BottomNavigationBarItem(
                         modifier = Modifier.weight(1f),
                         selected = tab.navKey == currentTab,
                         tab = tab,
-                        onClick = { if (tab.navKey != currentKey) onTabSelected(tab) }
+                        onClick = { if (tab.navKey != currentKey) onTabSelected(tab) },
                     )
                 }
             }
@@ -78,7 +78,7 @@ fun BottomNavigationBarItem(
 
     Surface(
         modifier = modifier,
-        onClick = onClick
+        onClick = onClick,
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),

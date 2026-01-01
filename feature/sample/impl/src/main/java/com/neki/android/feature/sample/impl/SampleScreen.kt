@@ -10,5 +10,9 @@ fun SampleScreen(
     modifier: Modifier = Modifier,
     viewModel: SampleViewModel = hiltViewModel(),
 ) {
-    Text("Sample")
+    viewModel
+    Text(
+        modifier = modifier,
+        text = "Sample",
+    )
 }
