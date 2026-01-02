@@ -7,7 +7,6 @@ import javax.inject.Inject
 
 class SampleRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-//    private val dataStore: DataStore<Preferences>,
 ) : SampleRepository {
     override suspend fun getPosts(): List<Post> {
         return apiService.getPosts()
