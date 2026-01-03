@@ -17,13 +17,13 @@ internal interface RepositoryModule {
     @Binds
     @Singleton
     fun bindSampleRepositoryImpl(
-        sampleRepositoryImpl: SampleRepositoryImpl
+        sampleRepositoryImpl: SampleRepositoryImpl,
     ): SampleRepository
 
     @Binds
     @Singleton
     fun bindDataStoreRepositoryImpl(
-        dataStoreRepositoryImpl: DataStoreRepositoryImpl
+        dataStoreRepositoryImpl: DataStoreRepositoryImpl,
     ): DataStoreRepository
 
 

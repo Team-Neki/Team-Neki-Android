@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class DataStoreRepositoryImpl @Inject constructor(
-    private val dataStore: DataStore<Preferences>
-): DataStoreRepository {
+    private val dataStore: DataStore<Preferences>,
+) : DataStoreRepository {
     companion object {
         private val ACCESS_TOKEN = stringPreferencesKey("access_token")
         private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
@@ -20,7 +20,7 @@ class DataStoreRepositoryImpl @Inject constructor(
 
     override suspend fun saveTokens(
         accessToken: String,
-        refreshToken: String
+        refreshToken: String,
     ) {
         dataStore.edit { preferences ->
             preferences[ACCESS_TOKEN] = CryptoManager.encrypt(accessToken)
