@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.neki.android.application)
     alias(libs.plugins.neki.android.application.compose)
@@ -8,6 +10,14 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    defaultConfig {
+        buildConfigField(
+            "String",
+            "NAVER_MAP_CLIENT_ID",
+            getLocalPropertiesValue("NAVER_MAP_CLIENT_ID"),
+        )
     }
 }
 
@@ -30,4 +40,8 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.ui)
+}
+
+fun getLocalPropertiesValue(propertyKey: String): String {
+    return gradleLocalProperties(rootDir, providers).getProperty(propertyKey)
 }
