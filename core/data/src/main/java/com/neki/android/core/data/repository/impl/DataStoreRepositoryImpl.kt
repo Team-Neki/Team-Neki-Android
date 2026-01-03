@@ -31,7 +31,6 @@ class DataStoreRepositoryImpl @Inject constructor(
     override fun getAccessToken(): Flow<String?> {
         return dataStore.data.map { preferences ->
             preferences[ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) }
-//            preferences[ACCESS_TOKEN]
         }
     }
 
@@ -44,5 +43,4 @@ class DataStoreRepositoryImpl @Inject constructor(
     override suspend fun clearTokens() {
         dataStore.edit { it.clear() }
     }
-
 }

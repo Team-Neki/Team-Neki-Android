@@ -25,6 +25,4 @@ internal interface RepositoryModule {
     fun bindDataStoreRepositoryImpl(
         dataStoreRepositoryImpl: DataStoreRepositoryImpl,
     ): DataStoreRepository
-
-
 }
