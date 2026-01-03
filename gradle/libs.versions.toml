@@ -17,6 +17,8 @@ jetbrainsKotlinJvmVersion = "2.1.0"
 hilt = "2.54"
 ktor = "2.3.12"
 androidxDatastore = "1.1.2"
+kotlinxCoroutines = "1.8.1"
+securityCrypto = "1.1.0"
 timber = "5.0.1"
 androidxNavigation3 = "1.0.0"
 androidxLifecycleViewModelNavigation3 = "2.10.0"
@@ -45,6 +47,7 @@ androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigat
 androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "androidxNavigation3" }
 androidx-lifecycle-viewModel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "androidxLifecycleViewModelNavigation3" }
 
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
@@ -59,6 +62,7 @@ androidx-annotation-experimental = { module = "androidx.annotation:annotation-ex
 
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore", version.ref = "androidxDatastore" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "androidxDatastore" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
