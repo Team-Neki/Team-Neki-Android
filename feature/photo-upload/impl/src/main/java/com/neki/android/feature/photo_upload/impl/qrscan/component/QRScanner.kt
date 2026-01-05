@@ -28,7 +28,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.neki.android.feature.photo_upload.impl.qrscan.QRImageAnalyzer
+import com.neki.android.feature.photo_upload.impl.qrscan.util.QRImageAnalyzer
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.concurrent.TimeUnit
 

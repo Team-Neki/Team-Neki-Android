@@ -1,4 +1,4 @@
-package com.neki.android.feature.photo_upload.impl.qrscan
+package com.neki.android.feature.photo_upload.impl.qrscan.util
 
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
@@ -38,7 +38,7 @@ class QRImageAnalyzer(
                         } else continue
                     }
                 }
-                .addOnFailureListener { e -> Timber.e(e, "Barcode scanning failed") }
+                .addOnFailureListener { e -> Timber.Forest.e(e, "Barcode scanning failed") }
                 .addOnCompleteListener { imageProxy.close() }
         } else {
             imageProxy.close()

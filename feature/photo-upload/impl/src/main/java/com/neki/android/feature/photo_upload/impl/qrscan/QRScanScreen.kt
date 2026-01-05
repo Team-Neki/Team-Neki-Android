@@ -9,24 +9,21 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.collectWithLifecycle
-import com.neki.android.feature.photo_upload.impl.PhotoUploadIntent
-import com.neki.android.feature.photo_upload.impl.PhotoUploadSideEffect
-import com.neki.android.feature.photo_upload.impl.PhotoUploadState
-import com.neki.android.feature.photo_upload.impl.PhotoUploadViewModel
 import com.neki.android.feature.photo_upload.impl.qrscan.component.QRScanner
 
 @Composable
 internal fun QRScanRoute(
-    viewModel: PhotoUploadViewModel = hiltViewModel(),
+    viewModel: QRScanViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToPhotoWebView: () -> Unit,
+    navigateToHome: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            PhotoUploadSideEffect.NavigateBack -> navigateBack()
-            PhotoUploadSideEffect.NavigateToPhotoWebView -> navigateToPhotoWebView()
+            QRScanSideEffect.NavigateBack -> navigateBack()
+            QRScanSideEffect.NavigateToHome -> navigateToHome()
+            is QRScanSideEffect.ShowToast -> {}
         }
     }
     QRScanScreen(
@@ -37,12 +34,12 @@ internal fun QRScanRoute(
 
 @Composable
 internal fun QRScanScreen(
-    uiState: PhotoUploadState = PhotoUploadState(),
-    onIntent: (PhotoUploadIntent) -> Unit = {},
+    uiState: QRScanState = QRScanState(),
+    onIntent: (QRScanIntent) -> Unit = {},
 ) {
     QRScanner(
         modifier = Modifier.fillMaxSize(),
-        onQRCodeScanned = { url -> onIntent(PhotoUploadIntent.ScanQRCode(url)) },
+        onQRCodeScanned = { url -> onIntent(QRScanIntent.ScanQRCode(url)) },
     )
 }
 
