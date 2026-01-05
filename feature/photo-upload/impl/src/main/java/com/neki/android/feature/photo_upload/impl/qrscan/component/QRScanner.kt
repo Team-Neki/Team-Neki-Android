@@ -3,13 +3,17 @@ package com.neki.android.feature.photo_upload.impl.qrscan.component
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceOrientedMeteringPointFactory
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.camera.viewfinder.compose.MutableCoordinateTransformer
 import androidx.camera.viewfinder.core.ImplementationMode
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -20,11 +24,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.neki.android.feature.photo_upload.impl.qrscan.QRImageAnalyzer
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.util.concurrent.TimeUnit
 
 @Composable
 internal fun QRScanner(
@@ -33,7 +39,9 @@ internal fun QRScanner(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    
+
+    var camera by remember { mutableStateOf<Camera?>(null) }
+
     val surfaceRequests = remember { MutableStateFlow<SurfaceRequest?>(null) }
     val surfaceRequest by surfaceRequests.collectAsState(initial = null)
 
@@ -58,7 +66,7 @@ internal fun QRScanner(
             }
 
         provider.unbindAll()
-        provider.bindToLifecycle(
+        camera = provider.bindToLifecycle(
             lifecycleOwner = lifecycleOwner,
             cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
             preview,
@@ -72,7 +80,50 @@ internal fun QRScanner(
                 surfaceRequest = req,
                 implementationMode = ImplementationMode.EXTERNAL,
                 coordinateTransformer = coordinateTransformer,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(camera) {
+                        // Tap-to-focus
+                        detectTapGestures { offset ->
+                            val cam = camera ?: return@detectTapGestures
+
+                            // Transform Compose coordinates to camera surface
+                            val surfacePoint = with(coordinateTransformer) {
+                                offset.transform()
+                            }
+
+                            val meteringFactory = SurfaceOrientedMeteringPointFactory(
+                                req.resolution.width.toFloat(),
+                                req.resolution.height.toFloat(),
+                            )
+
+                            val focusPoint = meteringFactory.createPoint(
+                                surfacePoint.x,
+                                surfacePoint.y,
+                            )
+
+                            val action = FocusMeteringAction.Builder(
+                                focusPoint,
+                                FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE,
+                            ).setAutoCancelDuration(3, TimeUnit.SECONDS).build()
+
+                            cam.cameraControl.startFocusAndMetering(action)
+                        }
+                    }
+                    .pointerInput(camera) {
+                        // Pinch-to-zoom
+                        detectTransformGestures { _, _, zoom, _ ->
+                            val cam = camera ?: return@detectTransformGestures
+                            val zoomState = cam.cameraInfo.zoomState.value ?: return@detectTransformGestures
+
+                            val newRatio = (zoomState.zoomRatio * zoom).coerceIn(
+                                zoomState.minZoomRatio,
+                                zoomState.maxZoomRatio,
+                            )
+
+                            cam.cameraControl.setZoomRatio(newRatio)
+                        }
+                    },
             )
         }
     }
