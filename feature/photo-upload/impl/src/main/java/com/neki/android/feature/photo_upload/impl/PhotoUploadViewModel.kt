@@ -23,7 +23,10 @@ internal class PhotoUploadViewModel @Inject constructor() : ViewModel() {
     ) {
         when (intent) {
             PhotoUploadIntent.ClickCloseQRScan -> postSideEffect(PhotoUploadSideEffect.NavigateBack)
-            is PhotoUploadIntent.ScanQRCode -> {}
+            is PhotoUploadIntent.ScanQRCode -> {
+                reduce { copy(scannedUrl = intent.scannedUrl) }
+                postSideEffect(PhotoUploadSideEffect.NavigateToPhotoWebView)
+            }
 
             is PhotoUploadIntent.DetectImageUrl -> {}
         }
