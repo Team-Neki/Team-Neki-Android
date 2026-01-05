@@ -1,5 +1,7 @@
 package com.neki.android.feature.photo_upload.impl.qrscan
 
+import androidx.annotation.OptIn
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
@@ -18,6 +20,7 @@ class QRImageAnalyzer(
 
     private val scanner = BarcodeScanning.getClient(qrScannerOptions)
 
+    @OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image
         if (mediaImage != null) {
@@ -29,11 +32,10 @@ class QRImageAnalyzer(
             scanner.process(inputImage)
                 .addOnSuccessListener { barcodes ->
                     for (barcode in barcodes) {
-                        val rawValue = barcode.rawValue
-                        if (!rawValue.isNullOrEmpty()) {
-                            onQRCodeScanned(rawValue)
-                            return@addOnSuccessListener
-                        }
+                        if (barcode.valueType == Barcode.TYPE_URL) {
+                            val url = barcode.url?.url ?: continue
+                            onQRCodeScanned(url)
+                        } else continue
                     }
                 }
                 .addOnFailureListener { e -> Timber.e(e, "Barcode scanning failed") }
