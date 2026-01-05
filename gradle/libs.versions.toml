@@ -1,6 +1,7 @@
 [versions]
 agp = "8.13.1"
 annotationExperimental = "1.5.1"
+cameraCamera2 = "1.5.2"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -25,8 +26,13 @@ androidxLifecycleViewModelNavigation3 = "2.10.0"
 androidxHiltLifecycleViewmodelCompose = "1.3.0-alpha02"
 material = "1.13.0"
 detekt = "1.23.8"
+barcodeScanning = "17.3.0"
 
 [libraries]
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCamera2" }
+androidx-camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "cameraCamera2" }
+androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "cameraCamera2" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -67,6 +73,8 @@ androidx-security-crypto = { module = "androidx.security:security-crypto", versi
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+
+mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "barcodeScanning" }
 
 # Dependencies of the included build-logic
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
