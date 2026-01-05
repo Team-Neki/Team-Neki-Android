@@ -8,8 +8,15 @@ sealed interface PhotoUploadNavKey : NavKey {
 
     @Serializable
     data object QRScan : PhotoUploadNavKey
+
+    @Serializable
+    data object PhotoWebView : PhotoUploadNavKey
 }
 
 fun Navigator.navigateToQRScan() {
     navigate(PhotoUploadNavKey.QRScan)
+}
+
+fun Navigator.navigateToPhotoWebView() {
+    navigate(PhotoUploadNavKey.PhotoWebView)
 }

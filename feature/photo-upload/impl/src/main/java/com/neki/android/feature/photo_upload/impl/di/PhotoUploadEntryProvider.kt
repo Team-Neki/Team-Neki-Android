@@ -5,6 +5,8 @@ import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
+import com.neki.android.feature.photo_upload.api.navigateToPhotoWebView
+import com.neki.android.feature.photo_upload.impl.qrscan.QRScanRoute
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,6 +26,9 @@ object PhotoUploadEntryProvider {
 
 private fun EntryProviderScope<NavKey>.photoUploadEntry(navigator: Navigator) {
     entry<PhotoUploadNavKey.QRScan> {
-        navigator
+        QRScanRoute(
+            navigateBack = navigator::goBack,
+            navigateToPhotoWebView = navigator::navigateToPhotoWebView,
+        )
     }
 }
