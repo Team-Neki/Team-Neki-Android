@@ -2,6 +2,7 @@ package com.neki.android.feature.photo_upload.impl.qrscan
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,12 +51,18 @@ internal fun QRScanScreen(
         }
 
         QRScanViewType.WEB_VIEW -> {
-            uiState.scannedUrl?.let { url ->
+            val scannedUrl = uiState.scannedUrl
+
+            if (scannedUrl != null)
                 PhotoWebViewContent(
-                    scannedUrl = url,
+                    scannedUrl = scannedUrl,
                     onDetectImageUrl = { imageUrl -> onIntent(QRScanIntent.DetectImageUrl(imageUrl)) },
                 )
-            } ?: run { onIntent(QRScanIntent.SetViewType(viewType = QRScanViewType.QR_SCAN)) }
+            else {
+                LaunchedEffect(Unit) {
+                    onIntent(QRScanIntent.SetViewType(viewType = QRScanViewType.QR_SCAN))
+                }
+            }
         }
     }
 }
