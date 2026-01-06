@@ -9,7 +9,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.collectWithLifecycle
-import com.neki.android.feature.photo_upload.impl.qrscan.component.PhotoWebView
+import com.neki.android.feature.photo_upload.impl.qrscan.component.PhotoWebViewContent
 import com.neki.android.feature.photo_upload.impl.qrscan.component.QRScannerContent
 
 @Composable
@@ -51,7 +51,7 @@ internal fun QRScanScreen(
 
         QRScanViewType.WEB_VIEW -> {
             uiState.scannedUrl?.let { url ->
-                PhotoWebView(
+                PhotoWebViewContent(
                     scannedUrl = url,
                     onDetectImageUrl = { imageUrl -> onIntent(QRScanIntent.DetectImageUrl(imageUrl)) },
                 )

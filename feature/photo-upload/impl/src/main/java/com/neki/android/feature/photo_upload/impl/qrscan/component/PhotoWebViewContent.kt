@@ -2,17 +2,27 @@ package com.neki.android.feature.photo_upload.impl.qrscan.component
 
 import android.webkit.WebView
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.viewinterop.AndroidView
 import com.neki.android.feature.photo_upload.impl.qrscan.util.PhotoWebViewClient
 
 @Composable
-internal fun PhotoWebView(
+internal fun PhotoWebViewContent(
     scannedUrl: String,
     onDetectImageUrl: (String) -> Unit,
 ) {
+    var webView: WebView? = null
+
+    DisposableEffect(Unit) {
+        onDispose {
+            webView?.destroy()
+        }
+    }
+
     AndroidView(
         factory = { context ->
             WebView(context).apply {
+                webView = this
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
                 settings.loadWithOverviewMode = true
