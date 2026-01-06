@@ -11,7 +11,7 @@ data class QRScanState(
 sealed interface QRScanIntent {
     data object ClickCloseQRScan : QRScanIntent
     data class ScanQRCode(val scannedUrl: String) : QRScanIntent
-    data object DetectInaccurateQRCode : QRScanIntent
+    data class SetViewType(val viewType: QRScanViewType) : QRScanIntent
     data class DetectImageUrl(val imageUrl: String) : QRScanIntent
 }
 
