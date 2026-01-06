@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,7 +24,6 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
         when (intent) {
             QRScanIntent.ClickCloseQRScan -> postSideEffect(QRScanSideEffect.NavigateBack)
             is QRScanIntent.ScanQRCode -> reduce {
-                Timber.d("TEST : ${intent.scannedUrl}")
                 copy(
                     scannedUrl = intent.scannedUrl,
                     viewType = QRScanViewType.WEB_VIEW,

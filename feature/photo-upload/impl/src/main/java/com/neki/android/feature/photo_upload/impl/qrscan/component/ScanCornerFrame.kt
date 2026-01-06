@@ -17,14 +17,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRAME_CORNER_LENGTH
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRAME_CORNER_RADIUS
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRAME_STROKE_WIDTH
 
 @Composable
 fun ScanCornerFrame(
     modifier: Modifier = Modifier,
     color: Color = Color.White,
-    strokeWidth: Dp = 6.dp,
-    cornerRadius: Dp = 28.96.dp,
-    cornerLength: Dp = 53.dp,
+    strokeWidth: Dp = FRAME_STROKE_WIDTH.dp,
+    cornerRadius: Dp = FRAME_CORNER_RADIUS.dp,
+    cornerLength: Dp = FRAME_CORNER_LENGTH.dp,
 ) {
     Canvas(modifier = modifier) {
         val sw = strokeWidth.toPx()
@@ -104,7 +107,7 @@ fun ScanCornerFrame(
 private fun ScanCornerFramePreview() {
     NekiTheme {
         Box(
-            Modifier
+            modifier = Modifier
                 .padding(20.dp)
                 .size(340.dp)
                 .background(Color(0xFF5A5A66)),

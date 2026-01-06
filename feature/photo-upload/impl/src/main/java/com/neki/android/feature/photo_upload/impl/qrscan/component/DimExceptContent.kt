@@ -23,6 +23,7 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.CUTOUT_RADIUS
 import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.DIM_COLOR
 
 @Immutable
@@ -37,7 +38,7 @@ private data class CutoutRectPx(
 fun DimExceptContent(
     modifier: Modifier = Modifier,
     dimColor: Color = Color(DIM_COLOR),
-    cutoutRadius: Dp = 0.dp,
+    cutoutRadius: Dp = CUTOUT_RADIUS.dp,
     cutoutPadding: Dp = 0.dp,
     cutout: @Composable BoxScope.(Modifier) -> Unit,
     foreground: @Composable BoxScope.() -> Unit = {},
@@ -49,7 +50,6 @@ fun DimExceptContent(
     val radiusPx = with(density) { cutoutRadius.toPx() }
 
     Box(modifier = modifier.fillMaxSize()) {
-
         cutout(
             Modifier.onGloballyPositioned { coords ->
                 val pos = coords.positionInParent()
