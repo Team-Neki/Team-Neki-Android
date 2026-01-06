@@ -22,7 +22,7 @@ import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRA
 import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRAME_STROKE_WIDTH
 
 @Composable
-fun ScanCornerFrame(
+internal fun ScanCornerFrame(
     modifier: Modifier = Modifier,
     color: Color = Color.White,
     strokeWidth: Dp = FRAME_STROKE_WIDTH.dp,

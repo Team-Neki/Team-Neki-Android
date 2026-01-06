@@ -35,7 +35,7 @@ private data class CutoutRectPx(
 )
 
 @Composable
-fun DimExceptContent(
+internal fun DimExceptContent(
     modifier: Modifier = Modifier,
     dimColor: Color = Color(DIM_COLOR),
     cutoutRadius: Dp = CUTOUT_RADIUS.dp,

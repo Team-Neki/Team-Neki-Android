@@ -36,7 +36,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.VerticalSpacer
 
 @Composable
-fun QRScannerContent(
+internal fun QRScannerContent(
     modifier: Modifier = Modifier,
     isTorchEnabled: Boolean = false,
     onTorchClick: () -> Unit = {},
