@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 internal fun QRScanner(
     modifier: Modifier = Modifier,
+    isTorchEnabled: Boolean = false,
     onQRCodeScanned: (String) -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -73,6 +74,10 @@ internal fun QRScanner(
             preview,
             imageAnalyzer,
         )
+    }
+
+    LaunchedEffect(isTorchEnabled, camera) {
+        camera?.cameraControl?.enableTorch(isTorchEnabled)
     }
 
     Box(modifier = modifier) {

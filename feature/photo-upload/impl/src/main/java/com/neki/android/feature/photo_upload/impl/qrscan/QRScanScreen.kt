@@ -42,6 +42,7 @@ internal fun QRScanScreen(
         QRScanViewType.QR_SCAN -> {
             QRScannerContent(
                 modifier = Modifier.fillMaxSize(),
+                isTorchEnabled = uiState.isTorchEnabled,
                 onTorchClick = { onIntent(QRScanIntent.ToggleTorch) },
                 onCloseClick = { onIntent(QRScanIntent.ClickCloseQRScan) },
                 onQRCodeScanned = { url -> onIntent(QRScanIntent.ScanQRCode(url)) },

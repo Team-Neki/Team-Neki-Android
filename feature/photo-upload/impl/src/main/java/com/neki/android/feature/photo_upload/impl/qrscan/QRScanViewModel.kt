@@ -22,7 +22,7 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (QRScanSideEffect) -> Unit,
     ) {
         when (intent) {
-            QRScanIntent.ToggleTorch -> reduce { copy(isTorchEnabled = !isTorchEnabled) }
+            QRScanIntent.ToggleTorch -> reduce { copy(isTorchEnabled = !this.isTorchEnabled) }
             QRScanIntent.ClickCloseQRScan -> postSideEffect(QRScanSideEffect.NavigateBack)
             is QRScanIntent.ScanQRCode -> reduce {
                 copy(

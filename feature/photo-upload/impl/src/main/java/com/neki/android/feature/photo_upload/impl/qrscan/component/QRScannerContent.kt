@@ -38,6 +38,7 @@ import com.neki.android.core.ui.VerticalSpacer
 @Composable
 fun QRScannerContent(
     modifier: Modifier = Modifier,
+    isTorchEnabled: Boolean = false,
     onTorchClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
     onQRCodeScanned: (String) -> Unit = {},
@@ -48,6 +49,7 @@ fun QRScannerContent(
         modifier = modifier.fillMaxSize(),
     ) {
         QRScanner(
+            isTorchEnabled = isTorchEnabled,
             onQRCodeScanned = onQRCodeScanned,
         )
         DimExceptContent(
@@ -121,13 +123,16 @@ fun QRScannerContent(
                 .offset(y = cutoutSize / 2 + 41.dp)
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.1f)),
+                .background(
+                    if (isTorchEnabled) Color.White
+                    else Color.White.copy(alpha = 0.1f),
+                ),
             onClick = onTorchClick,
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.icon_qr_light),
                 contentDescription = null,
-                tint = Color.White,
+                tint = if (isTorchEnabled) Color.Black else Color.White,
             )
         }
     }
