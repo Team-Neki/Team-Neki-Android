@@ -40,13 +40,16 @@ fun QRScannerContent(
     modifier: Modifier = Modifier,
     onTorchClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
+    onQRCodeScanned: (String) -> Unit = {},
 ) {
     val cutoutSize = LocalConfiguration.current.screenWidthDp.dp * 0.82f
 
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
-        QRScanner()
+        QRScanner(
+            onQRCodeScanned = onQRCodeScanned,
+        )
         DimExceptContent(
             modifier = Modifier.fillMaxSize(),
             cutout = { cutoutModifier ->

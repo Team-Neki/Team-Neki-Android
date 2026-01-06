@@ -6,9 +6,11 @@ data class QRScanState(
     val scannedUrl: String? = null,
     val detectedImageUrl: String? = null,
     val showInfoDialog: Boolean = false,
+    val isTorchEnabled: Boolean = false,
 )
 
 sealed interface QRScanIntent {
+    data object ToggleTorch : QRScanIntent
     data object ClickCloseQRScan : QRScanIntent
     data class ScanQRCode(val scannedUrl: String) : QRScanIntent
     data class SetViewType(val viewType: QRScanViewType) : QRScanIntent

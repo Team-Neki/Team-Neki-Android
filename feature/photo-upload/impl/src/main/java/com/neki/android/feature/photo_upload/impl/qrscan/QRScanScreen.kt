@@ -10,7 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.collectWithLifecycle
 import com.neki.android.feature.photo_upload.impl.qrscan.component.PhotoWebView
-import com.neki.android.feature.photo_upload.impl.qrscan.component.QRScanner
+import com.neki.android.feature.photo_upload.impl.qrscan.component.QRScannerContent
 
 @Composable
 internal fun QRScanRoute(
@@ -40,8 +40,10 @@ internal fun QRScanScreen(
 ) {
     when (uiState.viewType) {
         QRScanViewType.QR_SCAN -> {
-            QRScanner(
+            QRScannerContent(
                 modifier = Modifier.fillMaxSize(),
+                onTorchClick = { onIntent(QRScanIntent.ToggleTorch) },
+                onCloseClick = { onIntent(QRScanIntent.ClickCloseQRScan) },
                 onQRCodeScanned = { url -> onIntent(QRScanIntent.ScanQRCode(url)) },
             )
         }
