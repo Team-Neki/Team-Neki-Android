@@ -17,11 +17,13 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -42,6 +44,10 @@ internal fun QRScanner(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    val scope = rememberCoroutineScope()
+
+    var provider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
+
     var camera by remember { mutableStateOf<Camera?>(null) }
 
     val surfaceRequests = remember { MutableStateFlow<SurfaceRequest?>(null) }
@@ -50,7 +56,7 @@ internal fun QRScanner(
     val coordinateTransformer = remember { MutableCoordinateTransformer() }
 
     LaunchedEffect(Unit) {
-        val provider = ProcessCameraProvider.awaitInstance(context)
+        provider = ProcessCameraProvider.awaitInstance(context)
         val preview = Preview.Builder().build().apply {
             setSurfaceProvider { req -> surfaceRequests.value = req }
         }
@@ -67,13 +73,19 @@ internal fun QRScanner(
                 )
             }
 
-        provider.unbindAll()
-        camera = provider.bindToLifecycle(
+        provider?.unbindAll()
+        camera = provider?.bindToLifecycle(
             lifecycleOwner = lifecycleOwner,
             cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
             preview,
             imageAnalyzer,
         )
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        onDispose {
+            provider?.unbindAll()
+        }
     }
 
     LaunchedEffect(isTorchEnabled, camera) {
