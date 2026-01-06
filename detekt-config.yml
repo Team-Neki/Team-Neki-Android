@@ -50,6 +50,8 @@ formatting:
         active: false
 
 style:
+    UnusedParameter:
+        active: false
     MagicNumber:
         active: false
         ignoreAnnotated: [ 'AllowMagicNumber' ]
