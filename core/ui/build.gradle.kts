@@ -13,6 +13,5 @@ dependencies {
     implementation(projects.core.designsystem)
     implementation(projects.core.model)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
-
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 }
