@@ -44,8 +44,6 @@ internal fun QRScanner(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val scope = rememberCoroutineScope()
-
     var provider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
 
     var camera by remember { mutableStateOf<Camera?>(null) }
