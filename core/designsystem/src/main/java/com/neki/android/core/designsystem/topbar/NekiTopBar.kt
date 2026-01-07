@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 fun NekiTopBar(
@@ -26,4 +28,26 @@ fun NekiTopBar(
         title?.invoke(Modifier.align(Alignment.Center))
         actions?.invoke(Modifier.align(Alignment.CenterEnd))
     }
+}
+
+@Composable
+fun NekiTitleTopBar(
+    title: String,
+    modifier: Modifier = Modifier,
+    leadingIcon: @Composable ((Modifier) -> Unit)? = null,
+    actions: @Composable ((Modifier) -> Unit)? = null,
+) {
+    NekiTopBar(
+        modifier = modifier,
+        leadingIcon = leadingIcon,
+        actions = actions,
+        title = { modifier ->
+            Text(
+                modifier = modifier,
+                text = title,
+                style = NekiTheme.typography.title18SemiBold,
+                color = NekiTheme.colorScheme.gray900,
+            )
+        },
+    )
 }
