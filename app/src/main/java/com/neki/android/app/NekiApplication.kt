@@ -22,7 +22,6 @@ class NekiApplication : Application() {
             )
         }
 
-        NaverMapSdk.getInstance(this).client= NaverMapSdk.NcpKeyClient(BuildConfig.NAVER_MAP_CLIENT_ID)
-
+        NaverMapSdk.getInstance(this).client = NaverMapSdk.NcpKeyClient(BuildConfig.NAVER_MAP_CLIENT_ID)
     }
 }

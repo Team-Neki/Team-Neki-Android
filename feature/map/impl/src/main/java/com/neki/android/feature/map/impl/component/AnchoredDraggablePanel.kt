@@ -34,9 +34,9 @@ fun AnchoredDraggablePanel() {
     }
 
     val anchors = DraggableAnchors {
-        DragValue.Start at screenHeightPx * 0.8f   // 20%
-        DragValue.Center at screenHeightPx * 0.5f  // 50%
-        DragValue.End at screenHeightPx * 0.2f     // 80%
+        DragValue.Start at screenHeightPx * 0.8f
+        DragValue.Center at screenHeightPx * 0.5f
+        DragValue.End at screenHeightPx * 0.2f
     }
 
     val state = remember {
