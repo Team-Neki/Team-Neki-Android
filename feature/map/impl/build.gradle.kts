@@ -9,5 +9,5 @@ android {
 dependencies {
     implementation(projects.feature.map.api)
     api(libs.map.sdk)
-    api(libs.naver.map.compose)
+    implementation(libs.naver.map.compose)
 }
