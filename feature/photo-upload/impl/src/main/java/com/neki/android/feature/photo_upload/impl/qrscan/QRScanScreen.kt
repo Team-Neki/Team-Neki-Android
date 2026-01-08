@@ -9,7 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.ui.collectWithLifecycle
+import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.photo_upload.impl.qrscan.component.PhotoWebViewContent
 import com.neki.android.feature.photo_upload.impl.qrscan.component.QRScannerContent
 

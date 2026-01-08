@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.ui.VerticalSpacer
+import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
 internal fun QRScannerContent(

@@ -1,4 +1,4 @@
-package com.neki.android.core.ui
+package com.neki.android.core.ui.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

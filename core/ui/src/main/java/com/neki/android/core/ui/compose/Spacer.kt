@@ -1,4 +1,4 @@
-package com.neki.android.core.ui
+package com.neki.android.core.ui.compose
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
