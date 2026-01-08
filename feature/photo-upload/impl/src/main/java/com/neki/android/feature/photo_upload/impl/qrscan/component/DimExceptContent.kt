@@ -49,7 +49,7 @@ internal fun DimExceptContent(
     val paddingPx = with(density) { cutoutPadding.toPx() }
     val radiusPx = with(density) { cutoutRadius.toPx() }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier) {
         cutout(
             Modifier.onGloballyPositioned { coords ->
                 val pos = coords.positionInParent()
