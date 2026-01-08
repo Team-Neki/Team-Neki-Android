@@ -29,12 +29,15 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.model)
     implementation(projects.core.navigation)
+    implementation(projects.core.ui)
     implementation(projects.feature.pose.api)
     implementation(projects.feature.pose.impl)
     implementation(projects.feature.archive.api)
     implementation(projects.feature.archive.impl)
     implementation(projects.feature.map.api)
     implementation(projects.feature.map.impl)
+    implementation(projects.feature.photoUpload.api)
+    implementation(projects.feature.photoUpload.impl)
 
     implementation(libs.timber)
 
