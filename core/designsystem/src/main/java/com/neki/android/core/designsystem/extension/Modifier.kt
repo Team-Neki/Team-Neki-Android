@@ -31,7 +31,7 @@ fun Modifier.clickableSingle(
     onClick: () -> Unit,
 ) = composed(
     inspectorInfo = debugInspectorInfo {
-        name = "clickable"
+        name = "clickableSingle"
         properties["enabled"] = enabled
         properties["onClickLabel"] = onClickLabel
         properties["role"] = role
