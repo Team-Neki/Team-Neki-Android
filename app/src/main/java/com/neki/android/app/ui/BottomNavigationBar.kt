@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -74,7 +73,7 @@ fun BottomNavigationBarItem(
     onClick: () -> Unit = {},
 ) {
     val icon = if (selected) tab.selectedIcon else tab.unselectedIcon
-    val color = if (selected) Color(0xFF3C3E48) else Color(0xFFB7B9C3)
+    val color = if (selected) NekiTheme.colorScheme.gray800 else NekiTheme.colorScheme.gray100
 
     Surface(
         modifier = modifier,
@@ -93,6 +92,7 @@ fun BottomNavigationBarItem(
             Text(
                 text = stringResource(tab.iconTextId),
                 color = color,
+                style = NekiTheme.typography.caption12Medium,
             )
         }
     }
