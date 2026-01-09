@@ -44,7 +44,8 @@ fun SingleButtonAlertDialog(
     ) {
         Column(
             modifier = Modifier
-                .width(320.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(NekiTheme.colorScheme.white)
                 .padding(top = 20.dp),
