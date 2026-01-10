@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     NavDisplay(
                         modifier = Modifier.padding(innerPadding),
-                        entries = navigator.state.toEntries(
+                        entries = navigator.state.  toEntries(
                             entryProvider = entryProvider {
                                 entryProviderScopes.forEach { builder -> this.builder() }
                             },

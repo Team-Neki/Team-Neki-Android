@@ -20,6 +20,8 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.navigation)
     implementation(projects.core.ui)
+    implementation(projects.feature.auth.api)
+    implementation(projects.feature.auth.impl)
     implementation(projects.feature.pose.api)
     implementation(projects.feature.pose.impl)
     implementation(projects.feature.archive.api)
