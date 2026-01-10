@@ -8,6 +8,6 @@ import androidx.compose.ui.tooling.preview.Preview
     showBackground = true,
     backgroundColor = 0xFFFFFFFF,
     uiMode = UI_MODE_NIGHT_NO,
-    device = "spec:width=375dp,height=812dp,dpi=411",
+    device = "spec:width=375dp,height=812dp,dpi=480",
 )
 annotation class DevicePreview
