@@ -1,6 +1,7 @@
 package com.neki.android.app
 
 import android.app.Application
+import com.kakao.sdk.common.KakaoSdk
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -20,5 +21,7 @@ class NekiApplication : Application() {
                 },
             )
         }
+
+        KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
     }
 }
