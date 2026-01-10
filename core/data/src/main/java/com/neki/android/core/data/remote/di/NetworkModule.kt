@@ -1,6 +1,7 @@
 package com.neki.android.core.data.remote.di
 
 import com.neki.android.core.common.const.Const.TAG_REST_API
+import com.neki.android.core.data.BuildConfig
 import com.neki.android.core.data.remote.api.ApiService
 import dagger.Module
 import dagger.Provides
@@ -26,7 +27,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 internal object NetworkModule {
 
-    const val BASE_URL = "https://jsonplaceholder.typicode.com"
+    const val BASE_URL = BuildConfig.BASE_URL
     const val TIME_OUT = 5000L
 
     @Provides

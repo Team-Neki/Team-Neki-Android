@@ -1,11 +1,29 @@
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.neki.android.library)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.neki.hilt)
 }
 
+val localPropertiesFile = project.rootProject.file("local.properties")
+val properties = Properties().apply {
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
 android {
     namespace = "com.neki.android.core.data"
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    defaultConfig {
+        buildConfigField("String", "BASE_URL", properties["BASE_URL"].toString())
+    }
 }
 
 dependencies {
