@@ -1,6 +1,16 @@
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.neki.android.application)
     alias(libs.plugins.neki.android.application.compose)
+}
+
+val localPropertiesFile = project.rootProject.file("local.properties")
+val properties = Properties().apply {
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
 }
 
 android {
@@ -8,6 +18,10 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    defaultConfig {
+        buildConfigField("String", "NAVER_MAP_CLIENT_ID", properties["NAVER_MAP_CLIENT_ID"].toString())
     }
 }
 
@@ -34,3 +48,4 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.ui)
 }
+
