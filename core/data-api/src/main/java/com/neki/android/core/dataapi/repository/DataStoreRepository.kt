@@ -3,7 +3,7 @@ package com.neki.android.core.dataapi.repository
 import kotlinx.coroutines.flow.Flow
 
 interface DataStoreRepository {
-    suspend fun saveTokens(
+    suspend fun setTokens(
         accessToken: String,
         refreshToken: String,
     )

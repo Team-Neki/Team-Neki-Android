@@ -18,7 +18,7 @@ class DataStoreRepositoryImpl @Inject constructor(
         private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
     }
 
-    override suspend fun saveTokens(
+    override suspend fun setTokens(
         accessToken: String,
         refreshToken: String,
     ) {
