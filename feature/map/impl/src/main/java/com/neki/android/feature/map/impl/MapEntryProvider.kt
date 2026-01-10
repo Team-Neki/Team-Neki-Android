@@ -24,6 +24,6 @@ object MapEntryProviderModule {
 
 private fun EntryProviderScope<NavKey>.mapEntry(navigator: Navigator) {
     entry<MapNavKey.Map> {
-        navigator
+        MapRoute()
     }
 }

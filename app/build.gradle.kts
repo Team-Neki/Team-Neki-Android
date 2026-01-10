@@ -21,6 +21,7 @@ android {
     }
 
     defaultConfig {
+        buildConfigField("String", "NAVER_MAP_CLIENT_ID", properties["NAVER_MAP_CLIENT_ID"].toString())
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = buildConfigField(
             "String",
             "KAKAO_NATIVE_APP_KEY",
