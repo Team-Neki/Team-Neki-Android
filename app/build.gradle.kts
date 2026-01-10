@@ -1,6 +1,16 @@
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.neki.android.application)
     alias(libs.plugins.neki.android.application.compose)
+}
+
+val localPropertiesFile = project.rootProject.file("local.properties")
+val properties = Properties().apply {
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
 }
 
 android {
@@ -8,6 +18,14 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    defaultConfig {
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = buildConfigField(
+            "String",
+            "KAKAO_NATIVE_APP_KEY",
+            properties["KAKAO_NATIVE_APP_KEY"].toString()
+        )
     }
 }
 
