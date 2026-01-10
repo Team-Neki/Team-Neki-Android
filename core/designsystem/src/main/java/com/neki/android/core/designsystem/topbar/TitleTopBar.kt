@@ -1,10 +1,14 @@
 package com.neki.android.core.designsystem.topbar
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.TopBarTextButton
@@ -138,6 +142,48 @@ fun BackTitleOptionTopBar(
     )
 }
 
+@Composable
+fun BackTitleTextButtonOptionTopBar(
+    title: String,
+    buttonLabel: String,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
+    onTextButtonClick: () -> Unit = {},
+    onIconClick: () -> Unit = {},
+) {
+    NekiTitleTopBar(
+        modifier = modifier,
+        leadingIcon = { modifier ->
+            Icon(
+                modifier = modifier.clickableSingle { onBack() },
+                imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
+                tint = NekiTheme.colorScheme.gray800,
+                contentDescription = null,
+            )
+        },
+        title = title,
+        actions = { modifier ->
+            Row(
+                modifier = modifier,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                TopBarTextButton(
+                    buttonText = buttonLabel,
+                    modifier = modifier,
+                    onClick = onTextButtonClick,
+                )
+                Icon(
+                    modifier = modifier.clickableSingle { onIconClick() },
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_kebab),
+                    tint = NekiTheme.colorScheme.gray800,
+                    contentDescription = null,
+                )
+            }
+        },
+    )
+}
+
 @ComponentPreview
 @Composable
 private fun NekiTitleTopBarPreview() {
@@ -196,6 +242,17 @@ private fun BackTitleOptionTopBarPreview() {
     NekiTheme {
         BackTitleOptionTopBar(
             title = "텍스트",
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun BackTitleTwoOptionTopBarPreview() {
+    NekiTheme {
+        BackTitleTextButtonOptionTopBar(
+            title = "텍스트",
+            buttonLabel = "텍스트버튼",
         )
     }
 }
