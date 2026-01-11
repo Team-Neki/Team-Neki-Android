@@ -7,6 +7,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.activity.compose)
+
     implementation(projects.feature.auth.api)
     api(libs.kakao.user)
 }
