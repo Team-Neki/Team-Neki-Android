@@ -32,6 +32,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Singleton
@@ -82,21 +83,21 @@ internal object NetworkModule {
                         Timber.d("BearerAuth - loadTokens")
                         if (dataStoreRepository.isSavedJwtTokens().first()) {
                             BearerTokens(
-                                accessToken = dataStoreRepository.getAccessToken().first()!!,
-                                refreshToken = dataStoreRepository.getRefreshToken().first()!!,
+                                accessToken = dataStoreRepository.getAccessToken().firstOrNull() ?: "",
+                                refreshToken = dataStoreRepository.getRefreshToken().firstOrNull() ?: "",
                             )
                         } else null
                     }
 
                     refreshTokens {
                         Timber.d("BearerAuth - AccessToken 갱신 시도")
-                        Timber.d("RefreshToken : ${dataStoreRepository.getRefreshToken().first()}")
+                        Timber.d("RefreshToken : ${dataStoreRepository.getRefreshToken().firstOrNull()}")
                         if (oldTokens != null) {
                             return@refreshTokens try {
                                 val response = client.post("/api/auth/refresh") {
                                     setBody(
                                         RefreshTokenRequest(
-                                            refreshToken = dataStoreRepository.getRefreshToken().first()!!,
+                                            refreshToken = dataStoreRepository.getRefreshToken().firstOrNull() ?: "",
                                         ),
                                     )
                                 }.body<BasicResponse<AuthResponse>>()
