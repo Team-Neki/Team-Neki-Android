@@ -40,7 +40,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 internal object NetworkModule {
 
-    const val BASE_URL = BuildConfig.BASE_URL
+    val BASE_URL = BuildConfig.BASE_URL
     const val TIME_OUT = 5000L
 
     val sendWithoutJwtUrls = listOf(
