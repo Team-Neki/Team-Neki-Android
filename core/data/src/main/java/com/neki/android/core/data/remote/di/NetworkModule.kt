@@ -91,7 +91,6 @@ internal object NetworkModule {
 
                     refreshTokens {
                         Timber.d("BearerAuth - AccessToken 갱신 시도")
-                        Timber.d("RefreshToken : ${dataStoreRepository.getRefreshToken().firstOrNull()}")
                         if (oldTokens != null) {
                             return@refreshTokens try {
                                 val response = client.post("/api/auth/refresh") {
@@ -106,9 +105,6 @@ internal object NetworkModule {
                                     accessToken = response.data.accessToken,
                                     refreshToken = response.data.refreshToken,
                                 )
-
-                                Timber.d("New AccessToken : ${response.data.accessToken}")
-                                Timber.d("New RefreshToken : ${response.data.refreshToken}")
 
                                 BearerTokens(
                                     accessToken = response.data.accessToken,
