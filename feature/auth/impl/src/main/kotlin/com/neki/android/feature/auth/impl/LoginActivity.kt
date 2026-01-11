@@ -26,7 +26,7 @@ class LoginActivity : ComponentActivity() {
         setContent {
             NekiTheme {
                 LoginRoute(
-                    navigateBack = {}
+                    navigateBack = {},
                 )
             }
         }
@@ -40,7 +40,7 @@ class LoginActivity : ComponentActivity() {
                         Toast.makeText(
                             this@LoginActivity,
                             "RefreshToken이 만료되었습니다.",
-                            Toast.LENGTH_SHORT
+                            Toast.LENGTH_SHORT,
                         ).show()
                     }
                 }

@@ -22,6 +22,4 @@ class ApiService(
     suspend fun updateAccessToken(requestBody: RefreshTokenRequest): BasicResponse<AuthResponse> {
         return client.post("/api/auth/refresh") { setBody(requestBody) }.body()
     }
-
-
 }

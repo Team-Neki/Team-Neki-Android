@@ -45,7 +45,7 @@ internal object NetworkModule {
 
     val sendWithoutJwtUrls = listOf(
         "/api/auth/kakao/login",
-        "/api/auth/refresh"
+        "/api/auth/refresh",
     )
 
     @Provides
@@ -83,7 +83,7 @@ internal object NetworkModule {
                         if (dataStoreRepository.isSavedJwtTokens().first()) {
                             BearerTokens(
                                 accessToken = dataStoreRepository.getAccessToken().first()!!,
-                                refreshToken = dataStoreRepository.getRefreshToken().first()!!
+                                refreshToken = dataStoreRepository.getRefreshToken().first()!!,
                             )
                         } else null
                     }
@@ -96,14 +96,14 @@ internal object NetworkModule {
                                 val response = client.post("/api/auth/refresh") {
                                     setBody(
                                         RefreshTokenRequest(
-                                            refreshToken = dataStoreRepository.getRefreshToken().first()!!
-                                        )
+                                            refreshToken = dataStoreRepository.getRefreshToken().first()!!,
+                                        ),
                                     )
                                 }.body<BasicResponse<AuthResponse>>()
 
                                 dataStoreRepository.saveJwtTokens(
                                     accessToken = response.data.accessToken,
-                                    refreshToken = response.data.refreshToken
+                                    refreshToken = response.data.refreshToken,
                                 )
 
                                 Timber.d("New AccessToken : ${response.data.accessToken}")

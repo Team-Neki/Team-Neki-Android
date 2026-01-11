@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.neki.android.core.common.crypto.CryptoManager
 import com.neki.android.core.dataapi.repository.DataStoreRepository
-import com.neki.android.core.model.Auth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

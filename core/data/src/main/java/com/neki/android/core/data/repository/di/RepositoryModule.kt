@@ -33,5 +33,4 @@ internal interface RepositoryModule {
     fun bindAuthEventManagerImpl(
         authEventManagerImpl: AuthEventManagerImpl,
     ): AuthEventManager
-
 }

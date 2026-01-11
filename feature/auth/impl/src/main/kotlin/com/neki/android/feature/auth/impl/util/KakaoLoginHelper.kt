@@ -1,7 +1,6 @@
 package com.neki.android.feature.auth.impl.util
 
 import android.content.Context
-import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 
 class KakaoLoginHelper(

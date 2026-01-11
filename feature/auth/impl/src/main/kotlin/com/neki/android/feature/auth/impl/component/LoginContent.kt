@@ -1,7 +1,6 @@
 package com.neki.android.feature.auth.impl.component
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -17,14 +16,14 @@ fun LoginContent(
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Button(
             onClick = onClickKakaoLogin,
         ) {
             Text(
                 text = "카카오 로그인",
-                fontSize = 22.sp
+                fontSize = 22.sp,
             )
         }
     }

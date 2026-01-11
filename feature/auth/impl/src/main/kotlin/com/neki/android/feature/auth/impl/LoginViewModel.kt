@@ -1,10 +1,7 @@
 package com.neki.android.feature.auth.impl
 
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.dataapi.auth.AuthEvent
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.DataStoreRepository
@@ -21,7 +18,7 @@ internal class LoginViewModel @Inject constructor(
     private val authEventManager: AuthEventManager,
     private val dataStoreRepository: DataStoreRepository,
     private val authRepository: AuthRepository,
-): ViewModel() {
+) : ViewModel() {
     val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
         mviIntentStore(
             initialState = LoginState(),
@@ -49,7 +46,7 @@ internal class LoginViewModel @Inject constructor(
         if (dataStoreRepository.isSavedJwtTokens().first()) {
             Timber.d("JWT 토큰 O")
             authRepository.updateAccessToken(
-                refreshToken = dataStoreRepository.getRefreshToken().first()!!
+                refreshToken = dataStoreRepository.getRefreshToken().first()!!,
             ).onSuccess {
                 postSideEffect(LoginSideEffect.NavigateToHome)
             }.onFailure {
@@ -71,7 +68,7 @@ internal class LoginViewModel @Inject constructor(
             .onSuccess {
                 dataStoreRepository.saveJwtTokens(
                     accessToken = it.accessToken,
-                    refreshToken = it.refreshToken
+                    refreshToken = it.refreshToken,
                 )
 
                 postSideEffect(LoginSideEffect.NavigateToHome)
@@ -80,6 +77,4 @@ internal class LoginViewModel @Inject constructor(
                 Timber.d(it.message.toString())
             }
     }
-
-
 }
