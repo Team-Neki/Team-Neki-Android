@@ -1,7 +1,11 @@
 package com.neki.android.feature.auth.impl
 
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.auth.AuthEvent
+import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.DataStoreRepository
 import com.neki.android.core.ui.MviIntentStore
@@ -14,6 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class LoginViewModel @Inject constructor(
+    private val authEventManager: AuthEventManager,
     private val dataStoreRepository: DataStoreRepository,
     private val authRepository: AuthRepository,
 ): ViewModel() {
@@ -49,6 +54,7 @@ internal class LoginViewModel @Inject constructor(
                 postSideEffect(LoginSideEffect.NavigateToHome)
             }.onFailure {
                 Timber.d(it.message.toString())
+                authEventManager.emitTokenExpired()
             }
         } else {
             Timber.d("JWT 토큰 X")

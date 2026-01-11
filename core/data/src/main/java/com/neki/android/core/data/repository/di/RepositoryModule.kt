@@ -1,7 +1,9 @@
 package com.neki.android.core.data.repository.di
 
+import com.neki.android.core.data.auth.AuthEventManagerImpl
 import com.neki.android.core.data.repository.impl.AuthRepositoryImpl
 import com.neki.android.core.data.repository.impl.DataStoreRepositoryImpl
+import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.DataStoreRepository
 import dagger.Binds
@@ -25,5 +27,11 @@ internal interface RepositoryModule {
     fun bindAuthRepositoryImpl(
         authRepositoryImpl: AuthRepositoryImpl,
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    fun bindAuthEventManagerImpl(
+        authEventManagerImpl: AuthEventManagerImpl,
+    ): AuthEventManager
 
 }

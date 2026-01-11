@@ -6,6 +6,7 @@ import com.neki.android.core.data.remote.api.ApiService
 import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
+import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.DataStoreRepository
 import dagger.Module
 import dagger.Provides
@@ -57,6 +58,7 @@ internal object NetworkModule {
     @Singleton
     fun provideHttpClient(
         dataStoreRepository: DataStoreRepository,
+        authEventManager: AuthEventManager,
     ): HttpClient {
         return HttpClient(Android) {
             install(DefaultRequest) {
@@ -114,6 +116,7 @@ internal object NetworkModule {
                             } catch (e: Exception) {
                                 Timber.e(e)
                                 dataStoreRepository.clearTokens()
+                                authEventManager.emitTokenExpired()
                                 null
                             }
                         } else null
