@@ -66,6 +66,7 @@ internal class LoginViewModel @Inject constructor(
         reduce { copy(isLoading = true) }
         authRepository.loginWithKakao(idToken)
             .onSuccess {
+                reduce { copy(isLoading = false) }
                 dataStoreRepository.saveJwtTokens(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
