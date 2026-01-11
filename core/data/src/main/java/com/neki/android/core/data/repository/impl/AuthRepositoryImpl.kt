@@ -2,6 +2,7 @@ package com.neki.android.core.data.repository.impl
 
 import com.neki.android.core.data.remote.api.ApiService
 import com.neki.android.core.data.remote.model.request.KakaoLoginRequest
+import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.model.Auth
@@ -17,4 +18,13 @@ class AuthRepositoryImpl @Inject constructor(
             )
         ).data.toModel()
     }
+
+    override suspend fun updateAccessToken(refreshToken: String): Result<Auth> = runSuspendCatching {
+        apiService.updateAccessToken(
+            requestBody = RefreshTokenRequest(
+                refreshToken = refreshToken
+            )
+        ).data.toModel()
+    }
+
 }
