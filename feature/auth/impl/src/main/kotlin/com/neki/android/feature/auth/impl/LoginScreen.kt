@@ -1,12 +1,19 @@
 package com.neki.android.feature.auth.impl
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -26,7 +33,10 @@ internal fun LoginRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToHome -> {}
+            LoginSideEffect.NavigateToHome -> {
+                Timber.d("홈 화면으로 이동하거나 API를 호출하거나")
+            }
+
             LoginSideEffect.NavigateToKakaoRedirectingUri -> {
                 kakaoLoginHelper.loginWithKakao(
                     onSuccess = { idToken ->
@@ -38,7 +48,15 @@ internal fun LoginRoute(
                     }
                 )
             }
+
+            is LoginSideEffect.ShowToastMessage -> {
+                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+            }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.store.onIntent(LoginIntent.EnterLoginScreen)
     }
 
     LoginScreen(

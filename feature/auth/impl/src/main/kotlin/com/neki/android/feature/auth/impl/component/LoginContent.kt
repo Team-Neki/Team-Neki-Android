@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 
@@ -15,19 +16,16 @@ fun LoginContent(
     onClickKakaoLogin: () -> Unit,
 ) {
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = modifier.fillMaxSize()
+        Button(
+            onClick = onClickKakaoLogin,
         ) {
-            Button(
-                onClick = onClickKakaoLogin,
-            ) {
-                Text(
-                    text = "카카오 로그인",
-                    fontSize = 22.sp
-                )
-            }
+            Text(
+                text = "카카오 로그인",
+                fontSize = 22.sp
+            )
         }
     }
 }
