@@ -36,7 +36,7 @@ internal class LoginViewModel @Inject constructor(
             LoginIntent.EnterLoginScreen -> checkLoginState(reduce, postSideEffect)
             LoginIntent.ClickKakaoLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
             is LoginIntent.SuccessLogin -> loginFromKakao(intent.idToken, reduce, postSideEffect)
-            LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
+            LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
         }
     }
 
