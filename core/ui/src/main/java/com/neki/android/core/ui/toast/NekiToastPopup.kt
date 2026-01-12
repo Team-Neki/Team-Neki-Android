@@ -1,6 +1,7 @@
 package com.neki.android.core.ui.toast
 
 import android.content.Context
+import android.content.res.Resources
 import android.view.Gravity
 import android.widget.Toast
 import androidx.annotation.DrawableRes
@@ -10,13 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.savedstate.compose.LocalSavedStateRegistryOwner
+import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.toast.ToastActionPopup
@@ -25,31 +25,30 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 class NekiToastPopup(
     private val context: Context,
+    private val lifecycleOwner: LifecycleOwner,
+    private val savedStateRegistryOwner: SavedStateRegistryOwner,
+    private val viewModelStoreOwner: ViewModelStoreOwner,
 ) : Toast(context) {
-    @Composable
-    private fun MakeText(
+    private fun makeText(
         toastPopup: @Composable () -> Unit,
         duration: Int = LENGTH_SHORT,
     ) {
-        val density = LocalDensity.current
-        val composeView = ComposeView(context)
-
-        composeView.setContent {
-            NekiTheme {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                ) {
-                    toastPopup()
+        val composeView = ComposeView(context).apply {
+            setContent {
+                NekiTheme {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                    ) {
+                        toastPopup()
+                    }
                 }
             }
-        }
 
-        composeView.apply {
-            setViewTreeLifecycleOwner(LocalLifecycleOwner.current)
-            setViewTreeSavedStateRegistryOwner(LocalSavedStateRegistryOwner.current)
-            setViewTreeViewModelStoreOwner(LocalViewModelStoreOwner.current)
+            setViewTreeLifecycleOwner(lifecycleOwner)
+            setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+            setViewTreeViewModelStoreOwner(viewModelStoreOwner)
         }
 
         this.duration = duration
@@ -57,19 +56,18 @@ class NekiToastPopup(
         setGravity(
             Gravity.FILL_HORIZONTAL or Gravity.BOTTOM,
             0,
-            with(density) { 28.dp.toPx().toInt() },
+            (28 * Resources.getSystem().displayMetrics.density).toInt(),
         )
 
         show()
     }
 
-    @Composable
-    fun ShowToastPopup(
+    fun showToastPopup(
         text: String,
         @DrawableRes iconRes: Int = R.drawable.icon_checkbox_on_24,
         duration: Int = LENGTH_SHORT,
     ) {
-        MakeText(
+        makeText(
             toastPopup = {
                 ToastPopup(
                     iconRes = iconRes,
@@ -80,15 +78,14 @@ class NekiToastPopup(
         )
     }
 
-    @Composable
-    fun ShowToastActionPopup(
+    fun showToastActionPopup(
         @DrawableRes iconRes: Int,
         text: String,
         buttonText: String,
         onClickActionButton: () -> Unit,
         duration: Int = LENGTH_SHORT,
     ) {
-        MakeText(
+        makeText(
             toastPopup = {
                 ToastActionPopup(
                     iconRes = iconRes,
