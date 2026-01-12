@@ -166,7 +166,7 @@ fun BackTitleTextButtonOptionTopBar(
             Row(
                 modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 TopBarTextButton(
                     buttonText = buttonLabel,

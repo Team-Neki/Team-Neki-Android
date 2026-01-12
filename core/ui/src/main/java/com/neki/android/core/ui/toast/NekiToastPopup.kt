@@ -24,7 +24,7 @@ import com.neki.android.core.designsystem.toast.ToastPopup
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 class NekiToastPopup(
-    private val context: Context
+    private val context: Context,
 ) : Toast(context) {
     @Composable
     private fun MakeText(
@@ -39,7 +39,7 @@ class NekiToastPopup(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 20.dp),
                 ) {
                     toastPopup()
                 }
@@ -57,7 +57,7 @@ class NekiToastPopup(
         setGravity(
             Gravity.FILL_HORIZONTAL or Gravity.BOTTOM,
             0,
-            with(density) { 28.dp.toPx().toInt() }
+            with(density) { 28.dp.toPx().toInt() },
         )
 
         show()
@@ -66,8 +66,8 @@ class NekiToastPopup(
     @Composable
     fun ShowToastPopup(
         text: String,
-        @DrawableRes iconRes: Int= R.drawable.icon_checkbox_on_24,
-        duration: Int = LENGTH_SHORT
+        @DrawableRes iconRes: Int = R.drawable.icon_checkbox_on_24,
+        duration: Int = LENGTH_SHORT,
     ) {
         MakeText(
             toastPopup = {
@@ -76,7 +76,7 @@ class NekiToastPopup(
                     text = text,
                 )
             },
-            duration = duration
+            duration = duration,
         )
     }
 
@@ -86,7 +86,7 @@ class NekiToastPopup(
         text: String,
         buttonText: String,
         onClickActionButton: () -> Unit,
-        duration: Int = LENGTH_SHORT
+        duration: Int = LENGTH_SHORT,
     ) {
         MakeText(
             toastPopup = {
@@ -94,10 +94,10 @@ class NekiToastPopup(
                     iconRes = iconRes,
                     text = text,
                     buttonText = buttonText,
-                    onClickActionButton = onClickActionButton
+                    onClickActionButton = onClickActionButton,
                 )
             },
-            duration = duration
+            duration = duration,
         )
     }
 }

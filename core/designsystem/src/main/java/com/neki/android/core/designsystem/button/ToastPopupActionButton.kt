@@ -23,9 +23,9 @@ fun ToastPopupActionButton(
             .clickableSingle(onClick = onClick)
             .background(
                 color = NekiTheme.colorScheme.gray700,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
             )
-            .padding(horizontal = 8.dp, vertical = 3.dp)
+            .padding(horizontal = 8.dp, vertical = 3.dp),
     ) {
         Text(
             text = buttonText,
@@ -45,4 +45,3 @@ private fun ToastPopupActionButtonPreview() {
         )
     }
 }
-

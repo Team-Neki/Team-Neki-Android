@@ -97,7 +97,7 @@ private fun ToastPopupWithActionPreview() {
             iconRes = R.drawable.icon_checkbox_on_24,
             text = "텍스트",
             buttonText = "텍스트",
-            onClickActionButton = {}
+            onClickActionButton = {},
         )
     }
 }
