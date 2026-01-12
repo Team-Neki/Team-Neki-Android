@@ -50,7 +50,7 @@ fun ToastPopup(
             )
             Text(
                 text = text,
-                style = NekiTheme.typography.body14SemiBold,
+                style = NekiTheme.typography.body16Medium,
                 color = NekiTheme.colorScheme.gray25,
             )
         }
