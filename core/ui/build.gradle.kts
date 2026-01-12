@@ -14,4 +14,5 @@ dependencies {
     implementation(projects.core.model)
 
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 }
