@@ -28,7 +28,7 @@ sealed interface PoseIntent {
 
 sealed interface PoseEffect {
     data class ShowToast(val message: String) : PoseEffect
-    data class NavigateToPoseDetail(val id: Long) : PoseEffect
+    data object NavigateToPoseDetail : PoseEffect
 }
 
 enum class NumberOfPeople(val displayText: String, val value: Int) {
