@@ -50,7 +50,7 @@ private fun PoseItem(
         modifier = modifier,
         model = imageUrl,
         contentDescription = null,
-        contentScale = ContentScale.FillWidth
+        contentScale = ContentScale.FillWidth,
     )
 }
 
