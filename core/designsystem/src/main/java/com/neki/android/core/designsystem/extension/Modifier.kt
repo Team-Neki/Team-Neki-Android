@@ -32,6 +32,34 @@ inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier
 }
 
 /**
+ * 클릭의 리플 효과를 없애고 500L 내에 중복 클릭을를 막아주는 [Modifier]
+ * */
+fun Modifier.noRippleClickableSingle(
+    enabled: Boolean = true,
+    onClickLabel: String? = null,
+    role: Role? = null,
+    onClick: () -> Unit,
+) = composed(
+    inspectorInfo = debugInspectorInfo {
+        name = "clickableSingle"
+        properties["enabled"] = enabled
+        properties["onClickLabel"] = onClickLabel
+        properties["role"] = role
+        properties["onClick"] = onClick
+    },
+) {
+    val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+    Modifier.clickable(
+        enabled = enabled,
+        onClickLabel = onClickLabel,
+        onClick = { multipleEventsCutter.processEvent { onClick() } },
+        role = role,
+        indication = null,
+        interactionSource = remember { MutableInteractionSource() },
+    )
+}
+
+/**
  * 500L 내의 중복 클릭을 막아주는 [Modifier]
  * */
 fun Modifier.clickableSingle(
