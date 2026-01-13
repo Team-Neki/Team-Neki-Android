@@ -8,8 +8,15 @@ sealed interface PoseNavKey : NavKey {
 
     @Serializable
     data object Pose : PoseNavKey
+
+    @Serializable
+    data object Detail : PoseNavKey
 }
 
 fun Navigator.navigateToPose() {
     navigate(PoseNavKey.Pose)
+}
+
+fun Navigator.navigateToPoseDetail() {
+    navigate(PoseNavKey.Detail)
 }
