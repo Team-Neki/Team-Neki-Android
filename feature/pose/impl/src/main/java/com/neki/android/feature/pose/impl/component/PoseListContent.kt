@@ -20,6 +20,7 @@ import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.extension.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.Pose
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_VERTICAL_SPACING
 import kotlinx.collections.immutable.ImmutableList
@@ -29,9 +30,9 @@ import kotlinx.collections.immutable.persistentListOf
 internal fun PoseListContent(
     topPadding: Dp,
     modifier: Modifier = Modifier,
-    poseList: ImmutableList<String> = persistentListOf(),
+    poseList: ImmutableList<Pose> = persistentListOf(),
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
-    onItemClick: (String) -> Unit = {},
+    onItemClick: (Pose) -> Unit = {},
 ) {
     LazyVerticalStaggeredGrid(
         modifier = modifier
@@ -43,9 +44,9 @@ internal fun PoseListContent(
         verticalItemSpacing = POSE_LAYOUT_VERTICAL_SPACING.dp,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(poseList) { imageUrl ->
+        items(poseList) { pose ->
             PoseItem(
-                imageUrl = imageUrl,
+                pose = pose,
                 onItemClick = onItemClick,
             )
         }
@@ -54,15 +55,15 @@ internal fun PoseListContent(
 
 @Composable
 private fun PoseItem(
-    imageUrl: String,
+    pose: Pose,
     modifier: Modifier = Modifier,
-    onItemClick: (String) -> Unit = {},
+    onItemClick: (Pose) -> Unit = {},
 ) {
     AsyncImage(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .noRippleClickable { onItemClick(imageUrl) },
-        model = imageUrl,
+            .noRippleClickable { onItemClick(pose) },
+        model = pose.poseImageUrl,
         contentDescription = null,
         contentScale = ContentScale.FillWidth,
     )

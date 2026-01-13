@@ -23,6 +23,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.component.FilterBar
 import com.neki.android.feature.pose.impl.component.NumberOfPeopleBottomSheet
@@ -38,7 +39,7 @@ internal fun PoseRoute(
     navigateToPoseDetail: () -> Unit,
     navigateToNotification: () -> Unit,
 ) {
-    val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
@@ -96,11 +97,11 @@ fun PoseContent(
     modifier: Modifier = Modifier,
     selectedNumberOfPeople: NumberOfPeople,
     isScrapSelected: Boolean,
-    poseList: ImmutableList<String>,
+    poseList: ImmutableList<Pose>,
     onAlarmIconClick: () -> Unit = {},
     onNumberOfPeopleClick: () -> Unit = {},
     onScrapClick: () -> Unit = {},
-    onPoseItemClick: (String) -> Unit = {},
+    onPoseItemClick: (Pose) -> Unit = {},
 ) {
     val lazyState = rememberLazyStaggeredGridState()
     val density = LocalDensity.current
