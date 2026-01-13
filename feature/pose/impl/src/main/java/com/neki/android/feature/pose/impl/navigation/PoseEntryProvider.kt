@@ -3,9 +3,11 @@ package com.neki.android.feature.pose.impl.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
+import com.neki.android.core.navigation.HiltSharedViewModelStoreNavEntryDecorator
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.feature.pose.api.PoseNavKey
 import com.neki.android.feature.pose.api.navigateToPoseDetail
+import com.neki.android.feature.pose.impl.PoseDetailRoute
 import com.neki.android.feature.pose.impl.PoseRoute
 import dagger.Module
 import dagger.Provides
@@ -25,12 +27,22 @@ object PoseEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
-    entry<PoseNavKey.Pose> {
+    entry<PoseNavKey.Pose>(
+        clazzContentKey = { key -> key.toString() },
+    ) {
         PoseRoute(
             navigateToPoseDetail = navigator::navigateToPoseDetail,
             navigateToNotification = {},
         )
     }
 
-    entry<PoseNavKey.Detail> { }
+    entry<PoseNavKey.Detail>(
+        metadata = HiltSharedViewModelStoreNavEntryDecorator.parent(
+            PoseNavKey.Pose.toString(),
+        ),
+    ) {
+        PoseDetailRoute(
+            navigateBack = navigator::goBack,
+        )
+    }
 }
