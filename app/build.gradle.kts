@@ -22,6 +22,11 @@ android {
 
     defaultConfig {
         buildConfigField("String", "NAVER_MAP_CLIENT_ID", properties["NAVER_MAP_CLIENT_ID"].toString())
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = buildConfigField(
+            "String",
+            "KAKAO_NATIVE_APP_KEY",
+            properties["KAKAO_NATIVE_APP_KEY"].toString()
+        )
     }
 }
 
@@ -34,6 +39,8 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.navigation)
     implementation(projects.core.ui)
+    implementation(projects.feature.auth.api)
+    implementation(projects.feature.auth.impl)
     implementation(projects.feature.pose.api)
     implementation(projects.feature.pose.impl)
     implementation(projects.feature.archive.api)
@@ -48,4 +55,3 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.ui)
 }
-
