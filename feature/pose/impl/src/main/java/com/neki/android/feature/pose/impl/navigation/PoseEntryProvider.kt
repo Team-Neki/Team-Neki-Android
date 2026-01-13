@@ -5,6 +5,8 @@ import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.feature.pose.api.PoseNavKey
+import com.neki.android.feature.pose.api.navigateToPoseDetail
+import com.neki.android.feature.pose.impl.PoseRoute
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,6 +26,11 @@ object PoseEntryProviderModule {
 
 private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
     entry<PoseNavKey.Pose> {
-        navigator
+        PoseRoute(
+            navigateToPoseDetail = navigator::navigateToPoseDetail,
+            navigateToNotification = {},
+        )
     }
+
+    entry<PoseNavKey.Detail> { }
 }

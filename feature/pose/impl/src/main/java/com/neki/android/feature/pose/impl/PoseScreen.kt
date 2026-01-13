@@ -34,12 +34,14 @@ import kotlinx.collections.immutable.ImmutableList
 internal fun PoseRoute(
     viewModel: PoseViewModel = hiltViewModel(),
     navigateToPoseDetail: () -> Unit,
+    navigateToNotification: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
+            PoseEffect.NavigateToNotification-> navigateToNotification()
             PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail()
             is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             else -> {}
