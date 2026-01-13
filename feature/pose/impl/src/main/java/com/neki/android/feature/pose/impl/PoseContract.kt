@@ -8,7 +8,7 @@ data class PoseState(
     val selectedNumberOfPeople: NumberOfPeople = NumberOfPeople.UNSELECTED,
     val showScrappedPose: Boolean = false,
     val randomPoseList: ImmutableList<String> = persistentListOf(),
-    val scrappedPosLise: ImmutableList<String> = persistentListOf(),
+    val scrappedPoseList: ImmutableList<String> = persistentListOf(),
     val selectedPose: String = "",
 )
 
@@ -17,7 +17,7 @@ sealed interface PoseIntent {
     data object ClickAlarmIcon : PoseIntent
     data object ClickNumberOfPeople : PoseIntent
     data object ClickScrap : PoseIntent
-    data class ClickPoseItem(val id: Long) : PoseIntent
+    data class ClickPoseItem(val imageUrl: String) : PoseIntent
     data object ClickRandomPoseRecommendation : PoseIntent
     data class ClickNumberOfPeopleSheetItem(val numberOfPeople: NumberOfPeople) : PoseIntent
 
