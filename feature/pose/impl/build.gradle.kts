@@ -8,4 +8,6 @@ android {
 
 dependencies {
     implementation(projects.feature.pose.api)
+
+    implementation(libs.kotlinx.collections.immutable)
 }
