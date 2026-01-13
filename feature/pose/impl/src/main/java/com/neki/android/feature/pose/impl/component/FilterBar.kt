@@ -1,11 +1,12 @@
 package com.neki.android.feature.pose.impl.component
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -35,12 +36,15 @@ internal fun FilterBar(
     onScrapClick: () -> Unit = {},
 ) {
     AnimatedVisibility(
-        modifier = modifier,
+        modifier = modifier
+            .background(NekiTheme.colorScheme.white)
+            .fillMaxWidth(),
         visible = visible,
-        enter = slideInVertically { -it },
-        exit = slideOutVertically { -it },
+        enter = expandVertically(),
+        exit = shrinkVertically(),
     ) {
         Row(
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -62,7 +66,7 @@ private fun NumberOfPeopleFilter(
     numberOfPeople: NumberOfPeople = NumberOfPeople.UNSELECTED,
     onClick: () -> Unit = {},
 ) {
-    val isSelected by remember { derivedStateOf { numberOfPeople != NumberOfPeople.UNSELECTED } }
+    val isSelected by remember(numberOfPeople) { derivedStateOf { numberOfPeople != NumberOfPeople.UNSELECTED } }
     Row(
         modifier = modifier
             .background(

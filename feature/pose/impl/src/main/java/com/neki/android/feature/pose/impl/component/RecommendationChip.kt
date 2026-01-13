@@ -10,12 +10,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.extension.noRippleClickable
+import com.neki.android.core.designsystem.extension.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.pose.impl.R
 
@@ -26,7 +27,8 @@ internal fun RecommendationChip(
 ) {
     Row(
         modifier = modifier
-            .noRippleClickable(onClick = onClick)
+            .clip(CircleShape)
+            .clickableSingle(onClick = onClick)
             .background(shape = CircleShape, color = NekiTheme.colorScheme.gray800)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
