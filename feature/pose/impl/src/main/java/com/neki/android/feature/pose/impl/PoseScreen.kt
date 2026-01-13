@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -41,7 +43,7 @@ internal fun PoseRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            PoseEffect.NavigateToNotification-> navigateToNotification()
+            PoseEffect.NavigateToNotification -> navigateToNotification()
             PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail()
             is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             else -> {}
@@ -102,8 +104,14 @@ fun PoseContent(
 ) {
     val lazyState = rememberLazyStaggeredGridState()
     val density = LocalDensity.current
-    val filterBarHeightPx = remember { mutableIntStateOf(0) }
-    val topPadding = with(density) { filterBarHeightPx.intValue.toDp() }
+    var filterBarHeightPx by remember { mutableIntStateOf(0) }
+    val topPadding = with(density) { filterBarHeightPx.toDp() }
+    val showFilterBar by remember {
+        derivedStateOf {
+            !lazyState.canScrollBackward ||
+                lazyState.lastScrolledBackward
+        }
+    }
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -111,25 +119,30 @@ fun PoseContent(
         PoseTopBar(
             onIconClick = onAlarmIconClick,
         )
-        FilterBar(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp, horizontal = 20.dp)
-                .onSizeChanged { size ->
-                    filterBarHeightPx.intValue = size.height
-                },
-            numberOfPeople = selectedNumberOfPeople,
-            isScrapSelected = isScrapSelected,
-            visible = lazyState.lastScrolledBackward, // Up-Scroll 상태 (올려볼 때)
-            onNumberOfPeopleClick = onNumberOfPeopleClick,
-            onScrapClick = onScrapClick,
-        )
-        PoseListContent(
-            topPadding = topPadding + POSE_LAYOUT_DEFAULT_TOP_PADDING.dp,
-            poseList = poseList,
-            state = lazyState,
-            onItemClick = onPoseItemClick,
-        )
+                .weight(1f),
+        ) {
+            PoseListContent(
+                topPadding = topPadding + POSE_LAYOUT_DEFAULT_TOP_PADDING.dp,
+                poseList = poseList,
+                state = lazyState,
+                onItemClick = onPoseItemClick,
+            )
+            FilterBar(
+                modifier = Modifier
+                    .onSizeChanged { size ->
+                        if (filterBarHeightPx != 0) return@onSizeChanged
+                        else filterBarHeightPx = size.height
+                    },
+                numberOfPeople = selectedNumberOfPeople,
+                isScrapSelected = isScrapSelected,
+                visible = showFilterBar,
+                onNumberOfPeopleClick = onNumberOfPeopleClick,
+                onScrapClick = onScrapClick,
+            )
+        }
     }
 }
 
