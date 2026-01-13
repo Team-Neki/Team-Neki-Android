@@ -2,6 +2,8 @@ package com.neki.android.feature.pose.impl.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.extension.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_VERTICAL_SPACING
@@ -26,9 +29,12 @@ internal fun PoseListContent(
     modifier: Modifier = Modifier,
     poseList: ImmutableList<String> = persistentListOf(),
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+    onItemClick: (String) -> Unit = {},
 ) {
     LazyVerticalStaggeredGrid(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
         columns = StaggeredGridCells.Fixed(2),
         state = state,
         contentPadding = PaddingValues(top = topPadding, bottom = POSE_LAYOUT_BOTTOM_PADDING.dp),
@@ -36,7 +42,10 @@ internal fun PoseListContent(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(poseList) { imageUrl ->
-            PoseItem(imageUrl = imageUrl)
+            PoseItem(
+                imageUrl = imageUrl,
+                onItemClick = onItemClick,
+            )
         }
     }
 }
@@ -45,9 +54,10 @@ internal fun PoseListContent(
 private fun PoseItem(
     imageUrl: String,
     modifier: Modifier = Modifier,
+    onItemClick: (String) -> Unit = {},
 ) {
     AsyncImage(
-        modifier = modifier,
+        modifier = modifier.noRippleClickable { onItemClick(imageUrl) },
         model = imageUrl,
         contentDescription = null,
         contentScale = ContentScale.FillWidth,

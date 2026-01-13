@@ -35,12 +35,12 @@ internal fun FilterBar(
     onScrapClick: () -> Unit = {},
 ) {
     AnimatedVisibility(
+        modifier = modifier,
         visible = visible,
         enter = slideInVertically { -it },
         exit = slideOutVertically { -it },
     ) {
         Row(
-            modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
