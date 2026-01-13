@@ -19,16 +19,36 @@ internal class PoseViewModel @Inject constructor() : ViewModel() {
         intent: PoseIntent,
         state: PoseState,
         reduce: (PoseState.() -> PoseState) -> Unit,
-        poseSideEffect: (PoseEffect) -> Unit,
+        postSideEffect: (PoseEffect) -> Unit,
     ) {
-        when(intent) {
-            PoseIntent.ClickAlarmIcon -> TODO()
-            PoseIntent.ClickBackIcon -> TODO()
-            PoseIntent.ClickNumberOfPeople -> TODO()
-            is PoseIntent.ClickNumberOfPeopleSheetItem -> TODO()
-            is PoseIntent.ClickPoseItem -> TODO()
-            PoseIntent.ClickRandomPoseRecommendation -> TODO()
-            PoseIntent.ClickScrap -> TODO()
+        when (intent) {
+            // Pose Main
+            PoseIntent.ClickAlarmIcon -> postSideEffect(PoseEffect.NavigateToNotification)
+            PoseIntent.ClickNumberOfPeopleChip -> reduce { copy(showNumberOfPeopleBottomSheet = true) }
+            is PoseIntent.ClickNumberOfPeopleSheetItem -> reduce {
+                copy(
+                    showScrappedPose = false,
+                    selectedNumberOfPeople = intent.numberOfPeople,
+                    showNumberOfPeopleBottomSheet = false,
+                )
+            }
+            PoseIntent.DismissNumberOfPeopleBottomSheet -> reduce { copy(showNumberOfPeopleBottomSheet = false) }
+            PoseIntent.ClickScrapChip -> reduce {
+                copy(
+                    showScrappedPose = !showScrappedPose,
+                    selectedNumberOfPeople = NumberOfPeople.UNSELECTED,
+                )
+            }
+
+            is PoseIntent.ClickPoseItem -> {
+                reduce { copy(selectedPose = intent.imageUrl) }
+                postSideEffect(PoseEffect.NavigateToPoseDetail)
+            }
+
+            PoseIntent.ClickRandomPoseRecommendation -> {}
+
+            // Pose Detail
+            PoseIntent.ClickBackIcon -> postSideEffect(PoseEffect.NavigateBack)
             PoseIntent.ClickScrapIcon -> TODO()
         }
     }

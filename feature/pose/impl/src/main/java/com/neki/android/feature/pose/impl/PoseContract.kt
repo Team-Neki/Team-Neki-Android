@@ -10,13 +10,15 @@ data class PoseState(
     val randomPoseList: ImmutableList<String> = persistentListOf(),
     val scrappedPoseList: ImmutableList<String> = persistentListOf(),
     val selectedPose: String = "",
+    val showNumberOfPeopleBottomSheet: Boolean = false,
 )
 
 sealed interface PoseIntent {
     // Pose Main
     data object ClickAlarmIcon : PoseIntent
-    data object ClickNumberOfPeople : PoseIntent
-    data object ClickScrap : PoseIntent
+    data object ClickNumberOfPeopleChip : PoseIntent
+    data object DismissNumberOfPeopleBottomSheet : PoseIntent
+    data object ClickScrapChip : PoseIntent
     data class ClickPoseItem(val imageUrl: String) : PoseIntent
     data object ClickRandomPoseRecommendation : PoseIntent
     data class ClickNumberOfPeopleSheetItem(val numberOfPeople: NumberOfPeople) : PoseIntent
@@ -27,8 +29,10 @@ sealed interface PoseIntent {
 }
 
 sealed interface PoseEffect {
-    data class ShowToast(val message: String) : PoseEffect
+    data object NavigateBack : PoseEffect
+    data object NavigateToNotification : PoseEffect
     data object NavigateToPoseDetail : PoseEffect
+    data class ShowToast(val message: String) : PoseEffect
 }
 
 enum class NumberOfPeople(val displayText: String, val value: Int) {
