@@ -30,8 +30,8 @@ class NekiToastPopup(
     private val viewModelStoreOwner: ViewModelStoreOwner,
 ) : Toast(context) {
     private fun makeText(
-        toastPopup: @Composable () -> Unit,
         duration: Int = LENGTH_SHORT,
+        toastPopup: @Composable () -> Unit,
     ) {
         val composeView = ComposeView(context).apply {
             setContent {
@@ -68,14 +68,13 @@ class NekiToastPopup(
         duration: Int = LENGTH_SHORT,
     ) {
         makeText(
-            toastPopup = {
-                ToastPopup(
-                    iconRes = iconRes,
-                    text = text,
-                )
-            },
             duration = duration,
-        )
+        ) {
+            ToastPopup(
+                iconRes = iconRes,
+                text = text,
+            )
+        }
     }
 
     fun showToastActionPopup(
@@ -86,15 +85,14 @@ class NekiToastPopup(
         duration: Int = LENGTH_SHORT,
     ) {
         makeText(
-            toastPopup = {
-                ToastActionPopup(
-                    iconRes = iconRes,
-                    text = text,
-                    buttonText = buttonText,
-                    onClickActionButton = onClickActionButton,
-                )
-            },
             duration = duration,
-        )
+        ) {
+            ToastActionPopup(
+                iconRes = iconRes,
+                text = text,
+                buttonText = buttonText,
+                onClickActionButton = onClickActionButton,
+            )
+        }
     }
 }
