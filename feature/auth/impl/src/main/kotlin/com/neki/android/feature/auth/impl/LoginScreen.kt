@@ -16,9 +16,9 @@ import com.neki.android.feature.auth.impl.util.KakaoLoginHelper
 import timber.log.Timber
 
 @Composable
-internal fun LoginRoute(
+fun LoginRoute(
     viewModel: LoginViewModel = hiltViewModel(),
-    navigateBack: () -> Unit,
+    navigateMain: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
@@ -35,6 +35,7 @@ internal fun LoginRoute(
                 kakaoLoginHelper.loginWithKakao(
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
+                        navigateMain()
                         viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))
                     },
                     onFailure = { message ->
