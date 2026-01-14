@@ -41,7 +41,7 @@ fun Modifier.noRippleClickableSingle(
     onClick: () -> Unit,
 ) = composed(
     inspectorInfo = debugInspectorInfo {
-        name = "clickableSingle"
+        name = "noRippleClickableSingle"
         properties["enabled"] = enabled
         properties["onClickLabel"] = onClickLabel
         properties["role"] = role
