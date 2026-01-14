@@ -6,9 +6,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -20,6 +22,7 @@ interface MviIntentStore<STATE, INTENT, EFFECT> {
 
 class MviIntentStoreImpl<STATE, INTENT, EFFECT>(
     initialState: STATE,
+    initialFetchData: () -> Unit,
     private val coroutineScope: CoroutineScope,
     private val onIntent: (
         intent: INTENT,
@@ -29,7 +32,13 @@ class MviIntentStoreImpl<STATE, INTENT, EFFECT>(
     ) -> Unit,
 ) : MviIntentStore<STATE, INTENT, EFFECT> {
     private val _uiState = MutableStateFlow(initialState)
-    override val uiState: StateFlow<STATE> = _uiState.asStateFlow()
+    override val uiState: StateFlow<STATE> = _uiState
+        .onStart { initialFetchData() }
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = initialState,
+        )
     private val _sideEffects = Channel<EFFECT>(Channel.BUFFERED)
     override val sideEffects: Flow<EFFECT> = _sideEffects.receiveAsFlow()
     private fun setState(reduce: STATE.() -> STATE) {
@@ -53,8 +62,10 @@ class MviIntentStoreImpl<STATE, INTENT, EFFECT>(
 fun <STATE, INTENT, EFFECT> ViewModel.mviIntentStore(
     initialState: STATE,
     onIntent: (INTENT, STATE, (STATE.() -> STATE) -> Unit, (EFFECT) -> Unit) -> Unit,
+    initialFetchData: () -> Unit = {},
 ): MviIntentStore<STATE, INTENT, EFFECT> = MviIntentStoreImpl(
     initialState = initialState,
     coroutineScope = viewModelScope,
     onIntent = onIntent,
+    initialFetchData = initialFetchData,
 )

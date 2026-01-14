@@ -8,7 +8,7 @@ import androidx.compose.ui.res.vectorResource
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.TopBarTextButton
-import com.neki.android.core.designsystem.extension.clickableSingle
+import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -21,7 +21,7 @@ fun CloseTitleTopBar(
         modifier = modifier,
         leadingIcon = { modifier ->
             Icon(
-                modifier = modifier.clickableSingle { onClose() },
+                modifier = modifier.noRippleClickableSingle { onClose() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_close_24),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
@@ -43,7 +43,7 @@ fun CloseTitleTextButtonTopBar(
         modifier = modifier,
         leadingIcon = { modifier ->
             Icon(
-                modifier = modifier.clickableSingle { onClose() },
+                modifier = modifier.noRippleClickableSingle { onClose() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_close_24),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
@@ -72,7 +72,7 @@ fun BackTitleTextButtonTopBar(
         modifier = modifier,
         leadingIcon = { modifier ->
             Icon(
-                modifier = modifier.clickableSingle { onBack() },
+                modifier = modifier.noRippleClickableSingle { onBack() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
@@ -99,7 +99,7 @@ fun BackTitleTopBar(
         modifier = modifier,
         leadingIcon = { modifier ->
             Icon(
-                modifier = modifier.clickableSingle { onBack() },
+                modifier = modifier.noRippleClickableSingle { onBack() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
@@ -120,7 +120,7 @@ fun BackTitleOptionTopBar(
         modifier = modifier,
         leadingIcon = { modifier ->
             Icon(
-                modifier = modifier.clickableSingle { onBack() },
+                modifier = modifier.noRippleClickableSingle { onBack() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
@@ -129,7 +129,7 @@ fun BackTitleOptionTopBar(
         title = title,
         actions = { modifier ->
             Icon(
-                modifier = modifier.clickableSingle { onIconClick() },
+                modifier = modifier.noRippleClickableSingle { onIconClick() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_kebab),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,

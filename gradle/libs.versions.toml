@@ -19,6 +19,7 @@ hilt = "2.54"
 ktor = "2.3.12"
 androidxDatastore = "1.1.2"
 kotlinxCoroutines = "1.8.1"
+kotlinxCollectionsImmutable = "0.4.0"
 mapSdk = "3.23.0"
 naverMapCompose = "1.9.0"
 securityCrypto = "1.1.0"
@@ -30,6 +31,7 @@ material = "1.13.0"
 detekt = "1.23.8"
 barcodeScanning = "17.3.0"
 kakao = "2.23.1"
+coil = "3.3.0"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
@@ -57,6 +59,7 @@ androidx-lifecycle-viewModel-navigation3 = { group = "androidx.lifecycle", name 
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidxLifecycleViewModel" }
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
@@ -83,6 +86,9 @@ detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-form
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "barcodeScanning" }
 
 kakao-user = { module = "com.kakao.sdk:v2-user", version.ref = "kakao" }
+
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 
 # Dependencies of the included build-logic
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
