@@ -5,6 +5,9 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
 import com.neki.android.core.navigation.root.RootNavKey
@@ -49,6 +52,7 @@ class MainActivity : ComponentActivity() {
 
                     RootNavKey.Main -> {
                         MainScreen(
+                            modifier = Modifier.navigationBarsPadding(),
                             currentKey = navigator.state.currentKey,
                             currentTopLevelKey = navigator.state.currentTopLevelKey,
                             topLevelKeys = navigator.state.topLevelKeys,
