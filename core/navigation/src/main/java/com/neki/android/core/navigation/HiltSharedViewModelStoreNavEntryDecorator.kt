@@ -39,7 +39,7 @@ fun <T : Any> rememberHiltSharedViewModelStoreNavEntryDecorator(
     return remember(viewModelStoreOwner, currentRemoveViewModelStoreOnPop) {
         HiltSharedViewModelStoreNavEntryDecorator(
             viewModelStore = viewModelStoreOwner.viewModelStore,
-            removeViewModelStoreOnPop = removeViewModelStoreOnPop,
+            removeViewModelStoreOnPop = currentRemoveViewModelStoreOnPop,
         )
     }
 }
