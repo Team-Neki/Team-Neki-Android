@@ -39,7 +39,7 @@ internal fun PoseRoute(
     navigateToPoseDetail: () -> Unit,
     navigateToNotification: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->

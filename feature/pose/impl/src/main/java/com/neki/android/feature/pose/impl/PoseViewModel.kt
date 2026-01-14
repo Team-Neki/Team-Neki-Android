@@ -1,15 +1,11 @@
 package com.neki.android.feature.pose.impl
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,14 +16,6 @@ internal class PoseViewModel @Inject constructor() : ViewModel() {
             initialState = PoseState(),
             onIntent = ::onIntent,
         )
-
-    val uiState = store.uiState.onStart {
-        store.onIntent(PoseIntent.EnterPoseScreen)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = PoseState(),
-    )
 
     private fun onIntent(
         intent: PoseIntent,
