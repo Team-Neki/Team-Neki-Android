@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.ui.graphics.vector.RootGroupName
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
 import com.neki.android.app.navigation.root.RootNavKey
@@ -81,6 +82,8 @@ class MainActivity : ComponentActivity() {
                             "RefreshToken이 만료되었습니다.",
                             Toast.LENGTH_SHORT,
                         ).show()
+
+                        rootNavigationState.navigateRoot(RootNavKey.Login)
                     }
                 }
             }
