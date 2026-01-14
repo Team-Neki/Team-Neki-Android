@@ -54,9 +54,7 @@ class MainActivity : ComponentActivity() {
                             topLevelKeys = navigator.state.topLevelKeys,
                             entries = navigator.state.toEntries(
                                 entryProvider = entryProvider {
-                                    entryProviderScopes.forEach { installer ->
-                                        this.installer()
-                                    }
+                                    entryProviderScopes.forEach { builder -> this.builder() }
                                 },
                             ),
                             onTabSelected = { navigator.navigate(it) },
