@@ -1,13 +1,20 @@
 package com.neki.android.core.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.neki.android.core.navigation.root.RootNavKey
+import com.neki.android.core.navigation.root.RootNavigationState
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import javax.inject.Inject
 
 @ActivityRetainedScoped
 class NavigatorImpl @Inject constructor(
+    private val rootState: RootNavigationState,
     val state: NavigationState,
 ) : Navigator {
+    override fun navigateRoot(rootNavKey: RootNavKey) {
+        rootState.stack.clear()
+        rootState.stack.add(rootNavKey)
+    }
 
     override fun navigate(key: NavKey) {
         when (key) {

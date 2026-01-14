@@ -7,8 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
-import com.neki.android.app.navigation.root.RootNavKey
-import com.neki.android.app.navigation.root.RootNavigationState
+import com.neki.android.core.navigation.root.RootNavKey
+import com.neki.android.core.navigation.root.RootNavigationState
 import com.neki.android.core.dataapi.auth.AuthEvent
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                 when (rootNavigationState.currentRootKey) {
                     RootNavKey.Login -> {
                         LoginRoute(
-                            navigateMain = { rootNavigationState.navigateRoot(RootNavKey.Main) },
+                            navigateMain = { navigator.navigateRoot(RootNavKey.Main) },
                         )
                     }
 
@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
                             ),
                             onTabSelected = { navigator.navigate(it) },
                             onBack = { navigator.goBack() },
-                            navigateLogin = { rootNavigationState.navigateRoot(RootNavKey.Login) },
+                            navigateLogin = { navigator.navigateRoot(RootNavKey.Login) },
                         )
                     }
                 }
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                             Toast.LENGTH_SHORT,
                         ).show()
 
-                        rootNavigationState.navigateRoot(RootNavKey.Login)
+                        navigator.navigateRoot(RootNavKey.Login)
                     }
                 }
             }

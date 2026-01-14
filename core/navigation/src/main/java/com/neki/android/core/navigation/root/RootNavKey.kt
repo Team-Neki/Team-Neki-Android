@@ -1,4 +1,4 @@
-package com.neki.android.app.navigation.root
+package com.neki.android.core.navigation.root
 
 import androidx.navigation3.runtime.NavKey
 
