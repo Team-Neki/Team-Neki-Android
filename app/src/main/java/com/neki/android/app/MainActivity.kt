@@ -6,8 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.ui.NavDisplay
-import com.neki.android.app.ui.BottomNavigationBar
+import com.neki.android.app.navigation.root.RootNavKey
+import com.neki.android.app.navigation.root.RootNavigationState
 import com.neki.android.core.dataapi.auth.AuthEvent
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
