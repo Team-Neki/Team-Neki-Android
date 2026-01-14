@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.ui.graphics.vector.RootGroupName
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
 import com.neki.android.app.navigation.root.RootNavKey
@@ -44,7 +43,7 @@ class MainActivity : ComponentActivity() {
                 when (rootNavigationState.currentRootKey) {
                     RootNavKey.Login -> {
                         LoginRoute(
-                            navigateMain = { rootNavigationState.navigateRoot(RootNavKey.Main) }
+                            navigateMain = { rootNavigationState.navigateRoot(RootNavKey.Main) },
                         )
                     }
 
@@ -62,7 +61,7 @@ class MainActivity : ComponentActivity() {
                             ),
                             onTabSelected = { navigator.navigate(it) },
                             onBack = { navigator.goBack() },
-                            navigateLogin = { rootNavigationState.navigateRoot(RootNavKey.Login) }
+                            navigateLogin = { rootNavigationState.navigateRoot(RootNavKey.Login) },
                         )
                     }
                 }
