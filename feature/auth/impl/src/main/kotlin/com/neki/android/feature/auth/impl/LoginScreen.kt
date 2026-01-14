@@ -35,7 +35,7 @@ fun LoginRoute(
                 kakaoLoginHelper.loginWithKakao(
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
-                        navigateMain()
+                        navigateMain() // 제거 예정
                         viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))
                     },
                     onFailure = { message ->
