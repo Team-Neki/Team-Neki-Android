@@ -15,7 +15,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-internal class LoginViewModel @Inject constructor(
+class LoginViewModel @Inject constructor(
     private val authEventManager: AuthEventManager,
     private val dataStoreRepository: DataStoreRepository,
     private val authRepository: AuthRepository,
