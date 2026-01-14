@@ -1,0 +1,81 @@
+name: Discord Push Notify
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send push to Discord (Embed)
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          set -e
+
+          # ---- push info ----
+          REF=$(jq -r '.ref' "$GITHUB_EVENT_PATH")
+          BRANCH="${REF#refs/heads/}"
+
+          REPO_URL=$(jq -r '.repository.html_url' "$GITHUB_EVENT_PATH")
+          URL=$(jq -r '.compare // .repository.html_url' "$GITHUB_EVENT_PATH")
+          TIMESTAMP=$(jq -r '.head_commit.timestamp // empty' "$GITHUB_EVENT_PATH")
+
+          COUNT=$(jq -r '.commits | length' "$GITHUB_EVENT_PATH")
+
+          # "• [hash] — message" (hash는 링크)
+          COMMITS=$(jq -r --arg repo_url "$REPO_URL" '
+           (.commits // [])[:20]
+           | map(
+             "• [" + (.id[0:7]) + "](" + ($repo_url + "/commit/" + .id) + ") — " +
+             ((.message | split("\n")[0]) | gsub("\r";""))
+            )
+           | join("\n")
+          ' "$GITHUB_EVENT_PATH")
+
+          TITLE="🚀 New Push · [${BRANCH}] · ${COUNT} commits"
+
+          if [ -z "$COMMITS" ]; then
+           DESC=$(printf "총 %s개 커밋\n(커밋 정보 없음)" "$COUNT")
+          else
+           DESC=$(printf "총 %s개 커밋\n%s" "$COUNT" "$COMMITS")
+          fi
+
+          payload=$(jq -n \
+           --arg username "네키 디스코드 알림 봇" \
+           --arg avatar "https://i.ifh.cc/PbdkGM.jpg" \
+           --arg title "$TITLE" \
+           --arg url "$URL" \
+           --arg desc "$DESC" \
+           --arg ts "$TIMESTAMP" \
+           --argjson color 3066993 \
+           '{
+            username: $username,
+            avatar_url: $avatar,
+            embeds: [
+             {
+              title: $title,
+              url: $url,
+              description: $desc,
+              color: $color
+             }
+            ]
+           }
+           | (if ($ts|length) > 0 then .embeds[0].timestamp = $ts else . end)
+           ')
+
+          resp=$(curl -sS -X POST -H "Content-Type: application/json" -d "$payload" \
+           -w "\nHTTP_STATUS:%{http_code}\n" \
+           "$DISCORD_WEBHOOK_URL" || true)
+
+          echo "$resp"
+
+          status=$(echo "$resp" | sed -n 's/HTTP_STATUS://p')
+          if [ -z "$status" ] || [ "$status" -ge 400 ]; then
+           echo "Discord webhook failed"
+           exit 1
+          fi
