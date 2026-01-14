@@ -10,4 +10,6 @@ dependencies {
     implementation(projects.feature.map.api)
     api(libs.map.sdk)
     implementation(libs.naver.map.compose)
+
+    implementation(libs.coil.compose)
 }
