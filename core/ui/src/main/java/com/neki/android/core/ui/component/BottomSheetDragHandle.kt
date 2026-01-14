@@ -9,15 +9,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
-private const val DRAG_HANDLE_RADIUS = 13
-
 @Composable
 fun BottomSheetDragHandle(
     modifier: Modifier = Modifier,
+    width: Dp = 45.dp,
+    height: Dp = 4.dp,
+    color: Color = NekiTheme.colorScheme.gray300,
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -25,10 +28,10 @@ fun BottomSheetDragHandle(
         Box(
             modifier = Modifier
                 .padding(vertical = 10.dp)
-                .size(width = 45.dp, height = 4.dp)
+                .size(width = width, height = height)
                 .background(
-                    color = NekiTheme.colorScheme.gray100,
-                    shape = RoundedCornerShape(DRAG_HANDLE_RADIUS.dp),
+                    color = color,
+                    shape = RoundedCornerShape(13.dp),
                 )
                 .align(Alignment.Center),
         )
