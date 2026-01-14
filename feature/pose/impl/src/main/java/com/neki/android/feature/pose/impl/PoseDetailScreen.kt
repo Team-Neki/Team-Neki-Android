@@ -20,6 +20,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.DevicePreview
+import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
@@ -82,6 +83,7 @@ fun PoseDetailScreen(
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.End)
+                .noRippleClickableSingle { onIntent(PoseIntent.ClickScrapIcon) }
                 .padding(20.dp),
             tint = NekiTheme.colorScheme.gray500,
         )
