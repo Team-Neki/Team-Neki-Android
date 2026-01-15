@@ -1,4 +1,4 @@
-package com.neki.android.core.ui.component
+package com.neki.android.core.designsystem.bottomsheet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,7 +17,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 fun BottomSheetDragHandle(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.Companion,
     width: Dp = 45.dp,
     height: Dp = 4.dp,
     color: Color = NekiTheme.colorScheme.gray300,
@@ -26,14 +26,14 @@ fun BottomSheetDragHandle(
         modifier = modifier.fillMaxWidth(),
     ) {
         Box(
-            modifier = Modifier
+            modifier = Modifier.Companion
                 .padding(vertical = 10.dp)
                 .size(width = width, height = height)
                 .background(
                     color = color,
                     shape = RoundedCornerShape(13.dp),
                 )
-                .align(Alignment.Center),
+                .align(Alignment.Companion.Center),
         )
     }
 }
