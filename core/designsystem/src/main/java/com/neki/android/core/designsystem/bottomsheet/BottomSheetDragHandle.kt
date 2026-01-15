@@ -1,4 +1,4 @@
-package com.neki.android.core.ui.component
+package com.neki.android.core.designsystem.bottomsheet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
