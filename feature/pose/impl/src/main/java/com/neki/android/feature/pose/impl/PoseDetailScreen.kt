@@ -1,6 +1,7 @@
 package com.neki.android.feature.pose.impl
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -60,7 +62,6 @@ fun PoseDetailScreen(
             title = "포즈 상세",
             onBack = { onIntent(PoseIntent.ClickBackIcon) },
         )
-        VerticalSpacer(28.dp)
         AsyncImage(
             model = uiState.selectedPose.poseImageUrl,
             contentDescription = null,
@@ -69,7 +70,6 @@ fun PoseDetailScreen(
                 .weight(1f),
             contentScale = ContentScale.Crop,
         )
-        VerticalSpacer(57.dp)
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
             thickness = 1.dp,
