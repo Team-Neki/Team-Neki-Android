@@ -18,7 +18,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.extension.noRippleClickable
+import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -51,13 +51,19 @@ internal fun PhotoActionBar(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    modifier = Modifier.noRippleClickable(onClick = onDownloadClick),
+                    modifier = Modifier.noRippleClickableSingle(
+                        enabled = isEnabled,
+                        onClick = onDownloadClick,
+                    ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_download),
                     contentDescription = null,
                     tint = if (isEnabled) NekiTheme.colorScheme.gray600 else NekiTheme.colorScheme.gray200,
                 )
                 Icon(
-                    modifier = Modifier.noRippleClickable(onClick = onDeleteClick),
+                    modifier = Modifier.noRippleClickableSingle(
+                        enabled = isEnabled,
+                        onClick = onDownloadClick,
+                    ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
                     contentDescription = null,
                     tint = if (isEnabled) NekiTheme.colorScheme.gray600 else NekiTheme.colorScheme.gray200,
