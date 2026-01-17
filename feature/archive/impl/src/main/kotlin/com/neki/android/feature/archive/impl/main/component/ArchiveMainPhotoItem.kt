@@ -2,6 +2,7 @@ package com.neki.android.feature.archive.impl.main.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -35,7 +36,7 @@ internal fun ArchiveMainPhotoItem(
             .noRippleClickable { onItemClick(photo) },
     ) {
         AsyncImage(
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier.fillMaxWidth(),
             model = photo.imageUrl,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,

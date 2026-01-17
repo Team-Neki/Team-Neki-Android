@@ -3,6 +3,7 @@ package com.neki.android.feature.archive.impl.main.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -16,6 +17,7 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiTextButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ROW_TEXT_BUTTON_PADDING
 
 @Composable
 fun ArchiveMainTitleRow(
@@ -35,6 +37,7 @@ fun ArchiveMainTitleRow(
             color = NekiTheme.colorScheme.gray900,
         )
         NekiTextButton(
+            modifier = Modifier.offset(x = ARCHIVE_ROW_TEXT_BUTTON_PADDING.dp),
             onClick = onShowAllAlbumClick,
         ) {
             Row(

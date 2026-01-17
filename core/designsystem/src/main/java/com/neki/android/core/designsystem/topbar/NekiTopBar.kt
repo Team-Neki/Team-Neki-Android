@@ -63,8 +63,7 @@ fun NekiLeftTitleTopBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
-            .padding(horizontal = 20.dp),
+            .height(54.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {

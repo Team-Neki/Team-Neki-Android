@@ -1,5 +1,6 @@
 package com.neki.android.core.designsystem.button
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +20,7 @@ fun NekiTextButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     multipleEventsCutterEnabled: Boolean = true,
+    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
     content: @Composable () -> Unit = {},
 ) {
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
@@ -31,6 +33,7 @@ fun NekiTextButton(
             }
         },
         modifier = modifier,
+        contentPadding = contentPadding,
         enabled = enabled,
         colors = ButtonDefaults.textButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,

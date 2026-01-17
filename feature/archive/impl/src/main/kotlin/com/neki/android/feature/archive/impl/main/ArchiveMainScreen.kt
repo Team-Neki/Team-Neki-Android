@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,6 +29,7 @@ import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.main.component.AddPhotoDialog
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
@@ -95,7 +98,7 @@ internal fun ArchiveMainScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 20.dp),
-            visible = lazyState.isScrollInProgress,
+            visible = !lazyState.isScrollInProgress,
             onClick = { onIntent(ArchiveMainIntent.ClickGoToTopButton) },
         )
     }
@@ -122,13 +125,17 @@ private fun ArchiveMainContent(
     onPhotoItemClick: (Photo) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
     LazyVerticalStaggeredGrid(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
+        modifier = modifier.fillMaxWidth(),
         columns = StaggeredGridCells.Fixed(2),
         state = lazyState,
-        contentPadding = PaddingValues(bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp),
+        contentPadding = PaddingValues(
+            start = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
+            end = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
+            bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
+        ),
         verticalItemSpacing = 12.dp,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -149,6 +156,7 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainAlbumList(
+                modifier = Modifier.requiredWidth(screenWidth),
                 favoriteAlbum = uiState.favoriteAlbum,
                 albumList = uiState.albums,
                 onFavoriteAlbumClick = onFavoriteAlbumClick,
@@ -164,7 +172,10 @@ private fun ArchiveMainContent(
             )
         }
 
-        items(uiState.recentPhotos) { photo ->
+        items(
+            uiState.recentPhotos,
+            key = { photo -> photo.id },
+        ) { photo ->
             ArchiveMainPhotoItem(
                 photo = photo,
                 onItemClick = onPhotoItemClick,
