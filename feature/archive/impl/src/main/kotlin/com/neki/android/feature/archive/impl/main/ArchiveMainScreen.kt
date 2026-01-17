@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,11 +27,12 @@ import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.main.component.AddPhotoDialog
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
+import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
-import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
@@ -96,6 +97,14 @@ internal fun ArchiveMainScreen(
                 .padding(end = 20.dp, bottom = 20.dp),
             visible = lazyState.isScrollInProgress,
             onClick = { onIntent(ArchiveMainIntent.ClickGoToTopButton) },
+        )
+    }
+
+    if (uiState.showAddDialog) {
+        AddPhotoDialog(
+            onQRScanClick = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
+            onGalleryClick = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
+            onDismissRequest = { onIntent(ArchiveMainIntent.DismissAddDialog) },
         )
     }
 }
