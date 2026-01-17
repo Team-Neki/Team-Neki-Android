@@ -18,11 +18,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.button.ToastPopupActionButton
+import com.neki.android.core.designsystem.button.NekiToastActionButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun ToastPopup(
+fun NekiToast(
     @DrawableRes iconRes: Int,
     text: String,
     modifier: Modifier = Modifier,
@@ -59,18 +59,18 @@ fun ToastPopup(
 }
 
 @Composable
-fun ToastActionPopup(
+fun NekiActionToast(
     @DrawableRes iconRes: Int,
     text: String,
     modifier: Modifier = Modifier,
     buttonText: String,
     onClickActionButton: () -> Unit,
 ) {
-    ToastPopup(
+    NekiToast(
         iconRes = iconRes,
         text = text,
         actionButton = {
-            ToastPopupActionButton(
+            NekiToastActionButton(
                 buttonText = buttonText,
                 onClick = onClickActionButton,
             )
@@ -80,9 +80,9 @@ fun ToastActionPopup(
 
 @ComponentPreview
 @Composable
-private fun ToastPopupPreview() {
+private fun NekiToastPreview() {
     NekiTheme {
-        ToastPopup(
+        NekiToast(
             iconRes = R.drawable.icon_checkbox_on_24,
             text = "텍스트",
         )
@@ -91,9 +91,9 @@ private fun ToastPopupPreview() {
 
 @ComponentPreview
 @Composable
-private fun ToastPopupWithActionPreview() {
+private fun NekiActionToastPreview() {
     NekiTheme {
-        ToastActionPopup(
+        NekiActionToast(
             iconRes = R.drawable.icon_checkbox_on_24,
             text = "텍스트",
             buttonText = "텍스트",

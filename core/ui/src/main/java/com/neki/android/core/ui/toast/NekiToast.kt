@@ -17,16 +17,16 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.toast.ToastActionPopup
-import com.neki.android.core.designsystem.toast.ToastPopup
+import com.neki.android.core.designsystem.toast.NekiActionToast
+import com.neki.android.core.designsystem.toast.NekiToast
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
-class NekiToastPopup(
+class NekiToast(
     private val context: Context
 ) : Toast(context) {
     private fun makeText(
         duration: Int = LENGTH_SHORT,
-        toastPopup: @Composable () -> Unit,
+        toast: @Composable () -> Unit,
     ) {
         val activity = context as ComponentActivity
 
@@ -38,7 +38,7 @@ class NekiToastPopup(
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp),
                     ) {
-                        toastPopup()
+                        toast()
                     }
                 }
             }
@@ -59,7 +59,7 @@ class NekiToastPopup(
         show()
     }
 
-    fun showToastPopup(
+    fun showToast(
         text: String,
         @DrawableRes iconRes: Int = R.drawable.icon_checkbox_on_24,
         duration: Int = LENGTH_SHORT,
@@ -67,14 +67,14 @@ class NekiToastPopup(
         makeText(
             duration = duration,
         ) {
-            ToastPopup(
+            NekiToast(
                 iconRes = iconRes,
                 text = text,
             )
         }
     }
 
-    fun showToastActionPopup(
+    fun showActionToast(
         @DrawableRes iconRes: Int,
         text: String,
         buttonText: String,
@@ -84,7 +84,7 @@ class NekiToastPopup(
         makeText(
             duration = duration,
         ) {
-            ToastActionPopup(
+            NekiActionToast(
                 iconRes = iconRes,
                 text = text,
                 buttonText = buttonText,

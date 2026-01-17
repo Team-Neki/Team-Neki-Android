@@ -13,7 +13,7 @@ import com.neki.android.core.designsystem.extension.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun ToastPopupActionButton(
+fun NekiToastActionButton(
     buttonText: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
@@ -37,9 +37,9 @@ fun ToastPopupActionButton(
 
 @ComponentPreview
 @Composable
-private fun ToastPopupActionButtonPreview() {
+private fun NekiToastActionButtonPreview() {
     NekiTheme {
-        ToastPopupActionButton(
+        NekiToastActionButton(
             buttonText = "텍스트",
             onClick = {},
         )
