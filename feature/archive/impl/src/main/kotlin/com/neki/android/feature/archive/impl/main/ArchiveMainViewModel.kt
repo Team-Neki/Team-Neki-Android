@@ -22,7 +22,7 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
-        if(intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
+        if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialDate(reduce)
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
