@@ -155,7 +155,7 @@ fun BackTitleTextButtonOptionTopBar(
         modifier = modifier,
         leadingIcon = { modifier ->
             Icon(
-                modifier = modifier.clickableSingle { onBack() },
+                modifier = modifier.noRippleClickableSingle { onBack() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
@@ -174,7 +174,7 @@ fun BackTitleTextButtonOptionTopBar(
                     onClick = onTextButtonClick,
                 )
                 Icon(
-                    modifier = modifier.clickableSingle { onIconClick() },
+                    modifier = modifier.noRippleClickableSingle { onIconClick() },
                     imageVector = ImageVector.vectorResource(R.drawable.icon_kebab),
                     tint = NekiTheme.colorScheme.gray800,
                     contentDescription = null,
