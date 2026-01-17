@@ -64,6 +64,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
     ) {
         reduce {
             copy(
+                isFavoriteChipSelected = !isFavoriteChipSelected,
                 showingPhotos = if (!state.isFavoriteChipSelected) {
                     showingPhotos.filter { it.isFavorite }
                 } else {

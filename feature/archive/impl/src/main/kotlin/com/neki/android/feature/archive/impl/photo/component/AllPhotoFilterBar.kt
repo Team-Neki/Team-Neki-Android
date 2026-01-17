@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -80,6 +81,7 @@ private fun PhotoFilterPopup(
         Column(
             modifier = Modifier
                 .buttonShadow(
+                    shape = RoundedCornerShape(8.dp),
                     color = Color.Black.copy(alpha = 0.2f),
                     offsetX = 0.dp,
                     offsetY = 0.dp,
@@ -89,13 +91,13 @@ private fun PhotoFilterPopup(
                     color = NekiTheme.colorScheme.white,
                     shape = RoundedCornerShape(8.dp),
                 )
-                .width(IntrinsicSize.Max)
+                .width(96.dp)
                 .padding(vertical = 6.dp),
         ) {
             PhotoFilter.entries.forEach { filter ->
                 Text(
                     modifier = Modifier
-                        .width(96.dp)
+                        .fillMaxWidth()
                         .background(
                             color = if (selectedFilter == filter) NekiTheme.colorScheme.gray50
                             else NekiTheme.colorScheme.white,
