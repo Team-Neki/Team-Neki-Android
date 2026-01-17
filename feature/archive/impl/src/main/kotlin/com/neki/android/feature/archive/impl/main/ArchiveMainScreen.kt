@@ -31,7 +31,6 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.main.component.AddAlbumBottomSheet
-import com.neki.android.feature.archive.impl.main.component.AddPhotoDialog
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
@@ -88,6 +87,10 @@ internal fun ArchiveMainScreen(
             lazyState = lazyState,
             onPlusIconClick = { onIntent(ArchiveMainIntent.ClickAddIcon) },
             onNotificationIconClick = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
+            onQRScanClick = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
+            onGalleryClick = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
+            onNewAlbumClick = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
+            onDismissPopup = { onIntent(ArchiveMainIntent.DismissAddDialog) },
             onShowAllAlbumClick = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
             onFavoriteAlbumClick = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
             onAlbumItemClick = { album -> onIntent(ArchiveMainIntent.ClickAlbumItem(album)) },
@@ -101,14 +104,6 @@ internal fun ArchiveMainScreen(
                 .padding(end = 20.dp, bottom = 20.dp),
             visible = !lazyState.isScrollInProgress,
             onClick = { onIntent(ArchiveMainIntent.ClickGoToTopButton) },
-        )
-    }
-
-    if (uiState.showAddDialog) {
-        AddPhotoDialog(
-            onQRScanClick = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
-            onGalleryClick = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
-            onDismissRequest = { onIntent(ArchiveMainIntent.DismissAddDialog) },
         )
     }
 
@@ -129,6 +124,10 @@ private fun ArchiveMainContent(
     lazyState: LazyStaggeredGridState,
     onPlusIconClick: () -> Unit,
     onNotificationIconClick: () -> Unit,
+    onQRScanClick: () -> Unit,
+    onGalleryClick: () -> Unit,
+    onNewAlbumClick: () -> Unit,
+    onDismissPopup: () -> Unit,
     onShowAllAlbumClick: () -> Unit,
     onFavoriteAlbumClick: () -> Unit,
     onAlbumItemClick: (Album) -> Unit,
@@ -152,8 +151,13 @@ private fun ArchiveMainContent(
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTopBar(
+                showAddPopup = uiState.showAddDialog,
                 onPlusIconClick = onPlusIconClick,
                 onNotificationIconClick = onNotificationIconClick,
+                onQRScanClick = onQRScanClick,
+                onGalleryClick = onGalleryClick,
+                onNewAlbumClick = onNewAlbumClick,
+                onDismissPopup = onDismissPopup,
             )
         }
 
