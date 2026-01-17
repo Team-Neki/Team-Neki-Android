@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.Gravity
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,11 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
-import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.toast.ToastActionPopup
@@ -24,15 +22,14 @@ import com.neki.android.core.designsystem.toast.ToastPopup
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 class NekiToastPopup(
-    private val context: Context,
-    private val lifecycleOwner: LifecycleOwner,
-    private val savedStateRegistryOwner: SavedStateRegistryOwner,
-    private val viewModelStoreOwner: ViewModelStoreOwner,
+    private val context: Context
 ) : Toast(context) {
     private fun makeText(
         duration: Int = LENGTH_SHORT,
         toastPopup: @Composable () -> Unit,
     ) {
+        val activity = context as ComponentActivity
+
         val composeView = ComposeView(context).apply {
             setContent {
                 NekiTheme {
@@ -46,9 +43,9 @@ class NekiToastPopup(
                 }
             }
 
-            setViewTreeLifecycleOwner(lifecycleOwner)
-            setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-            setViewTreeViewModelStoreOwner(viewModelStoreOwner)
+            setViewTreeLifecycleOwner(activity)
+            setViewTreeSavedStateRegistryOwner(activity)
+            setViewTreeViewModelStoreOwner(activity)
         }
 
         this.duration = duration
