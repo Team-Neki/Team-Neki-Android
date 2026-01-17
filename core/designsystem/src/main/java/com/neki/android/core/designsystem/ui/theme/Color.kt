@@ -73,8 +73,8 @@ internal val defaultNekiColors = NekiColorScheme(
     primary25 = Color(0xFFFFECEB),
 
     // Album Cover
-    favoriteAlbumCover = Color(0xFFFF5647).copy(alpha = 0.9f),
-    defaultAlbumCover = Color(0xFF202227).copy(alpha = 0.92f),
+    favoriteAlbumCover = Color(0xFFFF5647),
+    defaultAlbumCover = Color(0xFF202227),
 )
 
 val LocalColorScheme = staticCompositionLocalOf { defaultNekiColors }
