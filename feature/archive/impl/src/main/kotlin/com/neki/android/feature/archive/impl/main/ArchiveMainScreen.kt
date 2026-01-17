@@ -33,7 +33,7 @@ import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
-import com.neki.android.feature.archive.impl.main.component.AddAlbumBottomSheet
+import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow

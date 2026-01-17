@@ -1,4 +1,4 @@
-package com.neki.android.feature.archive.impl.main.component
+package com.neki.android.feature.archive.impl.component
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
