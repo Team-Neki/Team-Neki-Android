@@ -60,7 +60,7 @@ internal fun ArchiveMainAlbumList(
         contentPadding = PaddingValues(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
+        item(key = "favorite_album") {
             ArchiveAlbumItem(
                 title = favoriteAlbum.title,
                 photoCount = favoriteAlbum.photoList.size,
@@ -69,7 +69,10 @@ internal fun ArchiveMainAlbumList(
                 onClick = onFavoriteAlbumClick,
             )
         }
-        items(albumList) { album ->
+        items(
+            items = albumList,
+            key = { album -> album.id },
+        ) { album ->
             ArchiveAlbumItem(
                 title = album.title,
                 photoCount = album.photoList.size,
