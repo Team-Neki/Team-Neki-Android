@@ -64,7 +64,7 @@ internal fun ArchiveMainAlbumList(
             ArchiveAlbumItem(
                 title = favoriteAlbum.title,
                 photoCount = favoriteAlbum.photoList.size,
-                thumbnailImage = favoriteAlbum.photoList.firstOrNull()?.imageUrl,
+                thumbnailImage = favoriteAlbum.thumbnailUrl,
                 isFavorite = true,
                 onClick = onFavoriteAlbumClick,
             )
@@ -73,7 +73,7 @@ internal fun ArchiveMainAlbumList(
             ArchiveAlbumItem(
                 title = album.title,
                 photoCount = album.photoList.size,
-                thumbnailImage = album.photoList.firstOrNull()?.imageUrl,
+                thumbnailImage = album.thumbnailUrl,
                 onClick = { onAlbumItemClick(album) },
             )
         }
