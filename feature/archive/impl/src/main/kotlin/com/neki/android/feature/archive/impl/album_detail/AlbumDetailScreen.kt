@@ -30,8 +30,10 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.album_detail.component.EmptyContent
 import com.neki.android.feature.archive.impl.component.DeleteOptionBottomSheet
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
-import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
+import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import kotlinx.collections.immutable.persistentListOf
 
@@ -96,11 +98,11 @@ internal fun AlbumDetailScreen(
                 columns = StaggeredGridCells.Fixed(2),
                 state = lazyState,
                 contentPadding = PaddingValues(
-                    horizontal = 20.dp,
+                    horizontal = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
                     vertical = 8.dp,
                 ),
-                verticalItemSpacing = 12.dp,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
+                horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),
             ) {
                 items(
                     items = uiState.album.photoList,

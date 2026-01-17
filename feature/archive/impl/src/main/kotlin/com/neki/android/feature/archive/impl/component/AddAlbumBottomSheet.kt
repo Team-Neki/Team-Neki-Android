@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.bottomsheet.NekiTextFieldBottomSheet
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ALBUM_NAME_MAX_LENGTH
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +29,7 @@ internal fun AddAlbumBottomSheet(
         onConfirmClick = onConfirmClick,
         modifier = modifier,
         placeholder = "앨범명을 입력하세요",
-        maxLength = 16,
+        maxLength = ARCHIVE_ALBUM_NAME_MAX_LENGTH,
         confirmButtonText = "추가하기",
         isError = isError,
         errorMessage = errorMessage,

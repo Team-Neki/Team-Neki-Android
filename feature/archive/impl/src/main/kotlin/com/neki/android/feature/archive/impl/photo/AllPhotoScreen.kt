@@ -31,6 +31,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
@@ -112,13 +113,13 @@ internal fun AllPhotoScreen(
                 columns = StaggeredGridCells.Fixed(2),
                 state = lazyState,
                 contentPadding = PaddingValues(
-                    top = if (uiState.selectMode == SelectMode.SELECTING) 12.dp else topPadding + 12.dp,
+                    top = if (uiState.selectMode == SelectMode.SELECTING) ARCHIVE_GRID_ITEM_SPACING.dp else topPadding + ARCHIVE_GRID_ITEM_SPACING.dp,
                     start = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
                     end = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
                     bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
                 ),
-                verticalItemSpacing = 12.dp,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
+                horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),
             ) {
                 items(
                     items = uiState.showingPhotos,
