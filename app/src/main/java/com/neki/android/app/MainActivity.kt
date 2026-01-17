@@ -41,7 +41,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             NekiTheme {
                 when (rootNavigationState.currentRootKey) {
-                    else -> {
+                    RootNavKey.Login -> {
+                        LoginRoute(
+                            navigateMain = { navigator.navigateRoot(RootNavKey.Main) },
+                        )
+                    }
+
+                    RootNavKey.Main -> {
                         MainScreen(
                             currentKey = navigator.state.currentKey,
                             currentTopLevelKey = navigator.state.currentTopLevelKey,
