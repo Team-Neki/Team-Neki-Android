@@ -137,3 +137,31 @@ fun Modifier.buttonShadow(
         canvas.drawOutline(outline, paint)
     }
 }
+
+/**
+ * Figma card_shadow 스타일
+ * DROP_SHADOW: color #00000040, offset (0, 2), radius 4, spread 0
+ */
+fun Modifier.cardShadow(
+    shape: Shape,
+    color: Color = Color.Black.copy(alpha = 0.25f),
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = 2.dp,
+    blurRadius: Dp = 4.dp,
+): Modifier = this.drawBehind {
+    drawIntoCanvas { canvas ->
+        val paint = Paint().apply {
+            asFrameworkPaint().apply {
+                this.color = Color.Transparent.toArgb()
+                setShadowLayer(
+                    blurRadius.toPx(),
+                    offsetX.toPx(),
+                    offsetY.toPx(),
+                    color.toArgb(),
+                )
+            }
+        }
+        val outline = shape.createOutline(size, layoutDirection, this)
+        canvas.drawOutline(outline, paint)
+    }
+}
