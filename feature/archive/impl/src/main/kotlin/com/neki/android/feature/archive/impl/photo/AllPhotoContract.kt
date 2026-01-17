@@ -1,15 +1,14 @@
 package com.neki.android.feature.archive.impl.photo
 
 import com.neki.android.core.model.Photo
-import com.neki.android.feature.archive.impl.dummyPhotos
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class AllPhotoState(
-    val photos: ImmutableList<Photo> = dummyPhotos,
-    val sortedDescendingPhotos: ImmutableList<Photo> = dummyPhotos,
-    val showingPhotos: ImmutableList<Photo> = dummyPhotos,
+    val photos: ImmutableList<Photo> = persistentListOf(),
+    val sortedDescendingPhotos: ImmutableList<Photo> = persistentListOf(),
+    val showingPhotos: ImmutableList<Photo> = persistentListOf(),
     val selectMode: SelectMode = SelectMode.DEFAULT,
     val selectedPhotoFilter: PhotoFilter = PhotoFilter.NEWEST,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
