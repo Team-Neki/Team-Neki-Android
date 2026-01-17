@@ -1,0 +1,182 @@
+name: Discord PR Review
+
+on:
+  pull_request_review:
+    types: [submitted]
+  issue_comment:
+    types: [created]
+
+jobs:
+  notify:
+    if: |
+      github.actor != 'coderabbitai[bot]' &&
+      github.actor != 'coderabbitai' &&
+      (github.event_name != 'issue_comment' || github.event.issue.pull_request)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send PR activity to Discord (Embed)
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+
+          EVENT="$GITHUB_EVENT_NAME"
+          REPO=$(jq -r '.repository.full_name' "$GITHUB_EVENT_PATH")
+
+          truncate_lines () {
+            local text="$1"
+            local max="$2"
+            echo "$text" | awk -v max="$max" 'NR<=max {print} NR==max {exit}'
+          }
+
+          truncate_chars () {
+            local s="$1"
+            local n="$2"
+            if [ "${#s}" -gt "$n" ]; then
+              echo "${s:0:$n}…"
+            else
+              echo "$s"
+            fi
+          }
+
+          quote_block () {
+            # 각 줄을 "> "로 감싸서 Discord 인용문 만들기
+            echo "$1" | sed 's/^/> /'
+          }
+
+          TITLE=""
+          DESC=""
+          URL=""
+          COLOR=7506394
+          TIMESTAMP=""
+
+          if [ "$EVENT" = "pull_request_review" ]; then
+            PR_NUMBER=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
+            PR_TITLE=$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")
+            PR_URL=$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")
+
+            REVIEWER=$(jq -r '.review.user.login' "$GITHUB_EVENT_PATH")
+            STATE=$(jq -r '.review.state' "$GITHUB_EVENT_PATH")
+            REVIEW_BODY=$(jq -r '.review.body // ""' "$GITHUB_EVENT_PATH")
+
+            REVIEW_ID=$(jq -r '.review.id' "$GITHUB_EVENT_PATH")
+            TIMESTAMP=$(jq -r '.review.submitted_at // empty' "$GITHUB_EVENT_PATH")
+
+            # state별 컬러
+            case "$STATE" in
+              approved|APPROVED) COLOR=5763719 ;;
+              changes_requested|CHANGES_REQUESTED) COLOR=15548997 ;;
+              commented|COMMENTED) COLOR=3447003 ;;
+              dismissed|DISMISSED) COLOR=9807270 ;;
+              *) COLOR=7506394 ;;
+            esac
+
+            # ✅ 타이틀: 2줄
+            TITLE=$(printf "📝 PR Review · %s\n[#%s] — “%s”" "$STATE" "$PR_NUMBER" "$PR_TITLE")
+            URL="$PR_URL"
+
+            # ✅ 리뷰 본문: 있으면 2~4줄만, 없으면 아예 출력 안 함
+            REVIEW_SNIP=""
+            if [ -n "$REVIEW_BODY" ] && [ "$REVIEW_BODY" != "null" ]; then
+              REVIEW_SNIP=$(truncate_lines "$REVIEW_BODY" 4)
+            fi
+
+            # 인라인 코멘트 가져오기 (파일 경로 제거, 코멘트만)
+            COMMENTS_JSON=$(curl -sS -L \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/reviews/$REVIEW_ID/comments?per_page=100")
+
+            INLINE_COMMENTS=$(echo "$COMMENTS_JSON" | jq -r '
+              if type=="array" and length>0 then
+                .[:10] | map(.body | gsub("\r";"")) | join("\n\n---\n\n")
+              else
+                ""
+              end
+            ')
+
+            QUOTED_INLINE=""
+            if [ -n "$INLINE_COMMENTS" ]; then
+              QUOTED_INLINE=$(quote_block "$INLINE_COMMENTS")
+            fi
+
+            # ✅ Description 조립
+            DESC=$(printf "Reviewer: %s" "$REVIEWER")
+
+            if [ -n "$REVIEW_SNIP" ]; then
+              DESC=$(printf "%s\n\n%s" "$DESC" "$REVIEW_SNIP")
+            fi
+
+            if [ -n "$QUOTED_INLINE" ]; then
+              DESC=$(printf "%s\n\n**💬 Comments**\n%s" "$DESC" "$QUOTED_INLINE")
+            fi
+
+            DESC=$(truncate_chars "$DESC" 3800)
+
+          elif [ "$EVENT" = "issue_comment" ]; then
+            PR_NUMBER=$(jq -r '.issue.number' "$GITHUB_EVENT_PATH")
+            PR_TITLE=$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")
+            ISSUE_URL=$(jq -r '.issue.html_url' "$GITHUB_EVENT_PATH")
+
+            COMMENTER=$(jq -r '.comment.user.login' "$GITHUB_EVENT_PATH")
+            COMMENT_BODY=$(jq -r '.comment.body // ""' "$GITHUB_EVENT_PATH")
+            TIMESTAMP=$(jq -r '.comment.created_at // empty' "$GITHUB_EVENT_PATH")
+
+            COLOR=15105570
+
+            TITLE=$(printf "💬 PR Comment\n[#%s] — “%s”" "$PR_NUMBER" "$PR_TITLE")
+            URL="$ISSUE_URL"
+
+            if [ -z "$COMMENT_BODY" ] || [ "$COMMENT_BODY" = "null" ]; then
+              COMMENT_BODY=""
+            fi
+
+            DESC=$(printf "Commenter: %s" "$COMMENTER")
+
+            if [ -n "$COMMENT_BODY" ]; then
+              DESC=$(printf "%s\n\n%s" "$DESC" "$(quote_block "$COMMENT_BODY")")
+            fi
+
+            DESC=$(truncate_chars "$DESC" 3800)
+
+          else
+            exit 0
+          fi
+
+          payload=$(jq -n \
+            --arg username "네키 디스코드 알림 봇" \
+            --arg avatar "https://i.ifh.cc/PbdkGM.jpg" \
+            --arg title "$TITLE" \
+            --arg url "$URL" \
+            --arg desc "$DESC" \
+            --arg ts "$TIMESTAMP" \
+            --argjson color "$COLOR" \
+            '{
+              username: $username,
+              avatar_url: $avatar,
+              embeds: [
+                {
+                  title: $title,
+                  url: $url,
+                  description: $desc,
+                  color: $color
+                }
+              ]
+            }
+            | (if ($ts|length) > 0 then .embeds[0].timestamp = $ts else . end)
+            ')
+
+          resp=$(curl -sS -X POST -H "Content-Type: application/json" -d "$payload" \
+            -w "\nHTTP_STATUS:%{http_code}\n" \
+            "$DISCORD_WEBHOOK_URL" || true)
+
+          echo "$resp"
+
+          status=$(echo "$resp" | sed -n 's/HTTP_STATUS://p')
+          if [ -z "$status" ] || [ "$status" -ge 400 ]; then
+            echo "Discord webhook failed"
+            exit 1
+          fi

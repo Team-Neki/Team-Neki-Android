@@ -18,13 +18,22 @@ class DataStoreRepositoryImpl @Inject constructor(
         private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
     }
 
-    override suspend fun saveTokens(
+    override suspend fun saveJwtTokens(
         accessToken: String,
         refreshToken: String,
     ) {
         dataStore.edit { preferences ->
             preferences[ACCESS_TOKEN] = CryptoManager.encrypt(accessToken)
             preferences[REFRESH_TOKEN] = CryptoManager.encrypt(refreshToken)
+        }
+    }
+
+    override fun isSavedJwtTokens(): Flow<Boolean> {
+        return dataStore.data.map { preferences ->
+            val accessToken = preferences[ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) }
+            val refreshToken = preferences[REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) }
+
+            !accessToken.isNullOrBlank() && !refreshToken.isNullOrBlank()
         }
     }
 
