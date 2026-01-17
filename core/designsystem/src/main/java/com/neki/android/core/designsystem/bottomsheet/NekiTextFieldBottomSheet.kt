@@ -10,13 +10,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.maxLength
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -24,13 +28,13 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.button.CTAButtonGray
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
@@ -93,15 +97,11 @@ private fun NekiTextFieldBottomSheetContent(
     errorMessage: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
-    val isOverLimit by remember(textFieldState.text.length) { derivedStateOf { maxLength?.let { textFieldState.text.length > it } ?: false } }
-    val hasError by remember(isError) { derivedStateOf { isError || isOverLimit } }
-
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
             .padding(bottom = 34.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Title & Subtitle
         Column(
@@ -118,6 +118,7 @@ private fun NekiTextFieldBottomSheetContent(
                 color = NekiTheme.colorScheme.gray700,
             )
         }
+        Spacer(modifier = Modifier.height(16.dp))
 
         // TextField
         Column(
@@ -127,19 +128,20 @@ private fun NekiTextFieldBottomSheetContent(
                 textFieldState = textFieldState,
                 placeholder = placeholder,
                 maxLength = maxLength,
-                isError = hasError,
+                isError = isError,
                 keyboardOptions = keyboardOptions,
             )
 
             // Error message
-            if (hasError && !errorMessage.isNullOrEmpty()) {
-                Text(
-                    text = errorMessage,
-                    style = NekiTheme.typography.caption12Regular,
-                    color = NekiTheme.colorScheme.primary600,
-                )
-            }
+            Text(
+                modifier = Modifier.heightIn(min = 16.dp),
+                text = if (isError) errorMessage.orEmpty() else "",
+                style = NekiTheme.typography.caption12Regular,
+                color = NekiTheme.colorScheme.primary600,
+            )
         }
+
+        Spacer(modifier = Modifier.height(18.dp))
 
         // Buttons
         Row(
@@ -147,15 +149,15 @@ private fun NekiTextFieldBottomSheetContent(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             CTAButtonGray(
-                modifier = Modifier.width(93.dp),
+                modifier = Modifier.weight(93f),
                 text = "취소",
                 onClick = onCancelClick,
             )
             CTAButtonPrimary(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(230f),
                 text = confirmButtonText,
                 onClick = onConfirmClick,
-                enabled = textFieldState.text.isNotEmpty() && !hasError,
+                enabled = textFieldState.text.isNotEmpty() && !isError,
             )
         }
     }
@@ -196,6 +198,7 @@ private fun NekiBottomSheetTextField(
         textStyle = NekiTheme.typography.body16Medium.copy(
             color = NekiTheme.colorScheme.gray900,
         ),
+        inputTransformation = maxLength?.let { InputTransformation.maxLength(it) },
         interactionSource = interactionSource,
         cursorBrush = SolidColor(NekiTheme.colorScheme.gray800),
         lineLimits = TextFieldLineLimits.SingleLine,

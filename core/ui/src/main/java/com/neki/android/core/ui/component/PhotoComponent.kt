@@ -2,7 +2,9 @@ package com.neki.android.core.ui.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,12 +26,13 @@ fun PhotoComponent(
 ) {
     Box(
         modifier = modifier
-            .size(120.dp)
             .clip(RoundedCornerShape(12.dp))
             .noRippleClickable { onItemClick(photo) },
     ) {
         AsyncImage(
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             model = photo.imageUrl,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
