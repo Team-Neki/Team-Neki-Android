@@ -104,6 +104,9 @@ fun AnchoredDraggablePanel(
             velocityThreshold = { with(density) { 100.dp.toPx() } },
             snapAnimationSpec = tween(),
             decayAnimationSpec = splineBasedDecay(density),
+            confirmValueChange = { newValue ->
+                !(dragValue == DragValue.Bottom && newValue == DragValue.Invisible)
+            }
         )
     }
 
