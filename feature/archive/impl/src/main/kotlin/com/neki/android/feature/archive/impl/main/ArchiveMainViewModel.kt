@@ -22,16 +22,32 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
+        if(intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialDate(reduce)
+            ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
             // TopBar Intent
             ArchiveMainIntent.ClickAddIcon -> reduce { copy(showAddDialog = true) }
             ArchiveMainIntent.DismissAddDialog -> reduce { copy(showAddDialog = false) }
-            ArchiveMainIntent.ClickQRScanRow -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
-            ArchiveMainIntent.ClickGalleryUploadRow -> postSideEffect(ArchiveMainSideEffect.NavigateToGalleryUpload)
-            ArchiveMainIntent.ClickAddNewAlbumRow -> reduce { copy(showAddAlbumBottomSheet = true) }
+            ArchiveMainIntent.ClickQRScanRow -> {
+                reduce { copy(showAddDialog = false) }
+                postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
+            }
+
+            ArchiveMainIntent.ClickGalleryUploadRow -> {
+                reduce { copy(showAddDialog = false) }
+                postSideEffect(ArchiveMainSideEffect.NavigateToGalleryUpload)
+            }
+
+            ArchiveMainIntent.ClickAddNewAlbumRow -> reduce {
+                copy(
+                    showAddDialog = false,
+                    showAddAlbumBottomSheet = true,
+                )
+            }
+
             ArchiveMainIntent.ClickNotificationIcon -> {}
 
             // Album Intent
@@ -45,11 +61,21 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
 
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(showAddAlbumBottomSheet = false) }
-            is ArchiveMainIntent.ClickAddAlbumButton -> {}
+            is ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(intent.albumName, reduce, postSideEffect)
         }
     }
 
     private fun fetchInitialDate(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
         reduce { copy() }
+    }
+
+    private fun handleAddAlbum(
+        albumName: String,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+    ) {
+        // TODO: Add album to repository
+        reduce { copy(showAddAlbumBottomSheet = false) }
+        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
     }
 }

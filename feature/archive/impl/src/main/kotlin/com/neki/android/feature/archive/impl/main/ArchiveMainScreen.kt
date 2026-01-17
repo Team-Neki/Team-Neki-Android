@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
@@ -71,6 +72,7 @@ internal fun ArchiveMainRoute(
     }
 
     ArchiveMainScreen(
+        lazyState = lazyState,
         uiState = uiState,
         onIntent = viewModel.store::onIntent,
     )
@@ -83,7 +85,9 @@ internal fun ArchiveMainScreen(
     onIntent: (ArchiveMainIntent) -> Unit = {},
 ) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .noRippleClickableSingle { onIntent(ArchiveMainIntent.ClickScreen) },
     ) {
         ArchiveMainContent(
             uiState = uiState,
@@ -105,7 +109,7 @@ internal fun ArchiveMainScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 20.dp),
-            visible = !lazyState.isScrollInProgress,
+            visible = !lazyState.isScrollInProgress && lazyState.firstVisibleItemIndex != 0,
             onClick = { onIntent(ArchiveMainIntent.ClickGoToTopButton) },
         )
     }
@@ -118,8 +122,6 @@ internal fun ArchiveMainScreen(
             derivedStateOf {
                 val name = textFieldState.text.toString()
                 when {
-                    name.length > 16 -> "앨범명은 최대 16자까지 입력할 수 있어요."
-                    name.isNotEmpty() && !name.matches(Regex("^[가-힣a-zA-Z0-9\\s]*$")) -> "앨범명은 한글, 영문, 숫자만 사용할 수 있어요."
                     existingAlbumNames.contains(name) -> "이미 사용 중인 앨범명이에요."
                     else -> null
                 }
@@ -175,6 +177,7 @@ private fun ArchiveMainContent(
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTopBar(
+                showTooltip = uiState.isFirstEntered,
                 showAddPopup = uiState.showAddDialog,
                 onPlusIconClick = onPlusIconClick,
                 onNotificationIconClick = onNotificationIconClick,
@@ -227,24 +230,52 @@ private fun ArchiveMainContent(
 @Composable
 private fun ArchiveMainScreenPreview() {
     val dummyPhotos = persistentListOf(
-        Photo(id = 1, imageUrl = "https://picsum.photos/200/300"),
-        Photo(id = 2, imageUrl = "https://picsum.photos/200/250"),
-        Photo(id = 3, imageUrl = "https://picsum.photos/200/350"),
-        Photo(id = 4, imageUrl = "https://picsum.photos/200/280"),
-        Photo(id = 5, imageUrl = "https://picsum.photos/200/320"),
-        Photo(id = 6, imageUrl = "https://picsum.photos/200/260"),
+        Photo(id = 1, imageUrl = "https://picsum.photos/seed/photo1/200/300", isFavorite = true),
+        Photo(id = 2, imageUrl = "https://picsum.photos/seed/photo2/200/250"),
+        Photo(id = 3, imageUrl = "https://picsum.photos/seed/photo3/200/350", isFavorite = true),
+        Photo(id = 4, imageUrl = "https://picsum.photos/seed/photo4/200/280"),
+        Photo(id = 5, imageUrl = "https://picsum.photos/seed/photo5/200/320"),
+        Photo(id = 6, imageUrl = "https://picsum.photos/seed/photo6/200/260", isFavorite = true),
+        Photo(id = 7, imageUrl = "https://picsum.photos/seed/photo7/200/290"),
+        Photo(id = 8, imageUrl = "https://picsum.photos/seed/photo8/200/310"),
+    )
+
+    val travelPhotos = persistentListOf(
+        Photo(id = 101, imageUrl = "https://picsum.photos/seed/travel1/200/300"),
+        Photo(id = 102, imageUrl = "https://picsum.photos/seed/travel2/200/280"),
+        Photo(id = 103, imageUrl = "https://picsum.photos/seed/travel3/200/320"),
+        Photo(id = 104, imageUrl = "https://picsum.photos/seed/travel4/200/260"),
+    )
+
+    val familyPhotos = persistentListOf(
+        Photo(id = 201, imageUrl = "https://picsum.photos/seed/family1/200/300"),
+        Photo(id = 202, imageUrl = "https://picsum.photos/seed/family2/200/290"),
+    )
+
+    val friendPhotos = persistentListOf(
+        Photo(id = 301, imageUrl = "https://picsum.photos/seed/friend1/200/300"),
+        Photo(id = 302, imageUrl = "https://picsum.photos/seed/friend2/200/310"),
+        Photo(id = 303, imageUrl = "https://picsum.photos/seed/friend3/200/280"),
     )
 
     val dummyAlbums = persistentListOf(
-        Album(id = 1, title = "여행 사진", photoList = dummyPhotos.take(3).let { persistentListOf(*it.toTypedArray()) }),
-        Album(id = 2, title = "가족 모임", photoList = dummyPhotos.take(2).let { persistentListOf(*it.toTypedArray()) }),
-        Album(id = 3, title = "친구들과", photoList = dummyPhotos.take(4).let { persistentListOf(*it.toTypedArray()) }),
+        Album(id = 1, title = "제주도 여행 2024", photoList = travelPhotos),
+        Album(id = 2, title = "가족 생일파티", photoList = familyPhotos),
+        Album(id = 3, title = "대학 동기 모임", photoList = friendPhotos),
+    )
+
+    val favoritePhotos = persistentListOf(
+        Photo(id = 401, imageUrl = "https://picsum.photos/seed/fav1/200/300"),
+        Photo(id = 402, imageUrl = "https://picsum.photos/seed/fav2/200/280"),
+        Photo(id = 403, imageUrl = "https://picsum.photos/seed/fav3/200/320"),
+        Photo(id = 404, imageUrl = "https://picsum.photos/seed/fav4/200/290"),
+        Photo(id = 405, imageUrl = "https://picsum.photos/seed/fav5/200/310"),
     )
 
     val favoriteAlbum = Album(
         id = 0,
         title = "즐겨찾는 사진",
-        photoList = dummyPhotos.take(5).let { persistentListOf(*it.toTypedArray()) },
+        photoList = favoritePhotos,
     )
 
     NekiTheme {

@@ -42,48 +42,56 @@ internal fun ArchiveMainTopBar(
     onGalleryClick: () -> Unit = {},
     onNewAlbumClick: () -> Unit = {},
     onDismissPopup: () -> Unit = {},
+    showTooltip: Boolean = true,
 ) {
-    NekiLeftTitleTopBar(
-        modifier = modifier,
-        title = {
-            Box(
-                modifier = Modifier
-                    .height(28.dp)
-                    .width(56.dp)
-                    .background(color = Color(0xFFB7B9C3)),
-            )
-        },
-        actions = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Box {
+    Box {
+        NekiLeftTitleTopBar(
+            modifier = modifier,
+            title = {
+                Box(
+                    modifier = Modifier
+                        .height(28.dp)
+                        .width(56.dp)
+                        .background(color = Color(0xFFB7B9C3)),
+                )
+            },
+            actions = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box {
+                        Icon(
+                            modifier = Modifier.clickableSingle(onClick = onPlusIconClick),
+                            imageVector = ImageVector.vectorResource(R.drawable.icon_plus_primary),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                        )
+
+                        if (showAddPopup) {
+                            AddPhotoPopup(
+                                onDismissRequest = onDismissPopup,
+                                onQRScanClick = onQRScanClick,
+                                onGalleryClick = onGalleryClick,
+                                onNewAlbumClick = onNewAlbumClick,
+                            )
+                        }
+                    }
                     Icon(
-                        modifier = Modifier.clickableSingle(onClick = onPlusIconClick),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_plus_primary),
+                        modifier = Modifier.clickableSingle(onClick = onNotificationIconClick),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
                         contentDescription = null,
                         tint = Color.Unspecified,
                     )
-
-                    if (showAddPopup) {
-                        AddPhotoPopup(
-                            onDismissRequest = onDismissPopup,
-                            onQRScanClick = onQRScanClick,
-                            onGalleryClick = onGalleryClick,
-                            onNewAlbumClick = onNewAlbumClick,
-                        )
-                    }
                 }
-                Icon(
-                    modifier = Modifier.clickableSingle(onClick = onNotificationIconClick),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                )
-            }
-        },
-    )
+            },
+        )
+
+        ToolTip(
+            visible = showTooltip,
+            modifier = Modifier.align(Alignment.TopEnd),
+        )
+    }
 }
 
 @Composable
@@ -105,6 +113,7 @@ private fun AddPhotoPopup(
         Column(
             modifier = Modifier
                 .buttonShadow(
+                    shape = RoundedCornerShape(12.dp),
                     color = Color.Black.copy(alpha = 0.2f),
                     offsetX = 0.dp,
                     offsetY = 0.dp,
@@ -153,6 +162,19 @@ private fun ArchiveMainTopBarPreview() {
         ArchiveMainTopBar(
             showAddPopup = false,
         )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun ArchiveMainTopBarWithTooltipPreview() {
+    NekiTheme {
+        Box(modifier = Modifier.height(200.dp)) {
+            ArchiveMainTopBar(
+                showTooltip = true,
+                showAddPopup = false,
+            )
+        }
     }
 }
 

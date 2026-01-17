@@ -2,20 +2,23 @@ package com.neki.android.feature.archive.impl.main
 
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
+import com.neki.android.feature.archive.impl.dummyAlbums
+import com.neki.android.feature.archive.impl.dummyFavoriteAlbum
+import com.neki.android.feature.archive.impl.dummyPhotos
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 
 data class ArchiveMainState(
-    val isFirstEntered: Boolean = false,
-    val favoriteAlbum: Album = Album(),
-    val albums: ImmutableList<Album> = persistentListOf(),
-    val recentPhotos: ImmutableList<Photo> = persistentListOf(),
+    val isFirstEntered: Boolean = true,
+    val favoriteAlbum: Album = dummyFavoriteAlbum,
+    val albums: ImmutableList<Album> = dummyAlbums,
+    val recentPhotos: ImmutableList<Photo> = dummyPhotos,
     val showAddDialog: Boolean = false,
     val showAddAlbumBottomSheet: Boolean = false,
 )
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent
+    data object ClickScreen : ArchiveMainIntent
     data object ClickGoToTopButton : ArchiveMainIntent
 
     // TopBar Intent

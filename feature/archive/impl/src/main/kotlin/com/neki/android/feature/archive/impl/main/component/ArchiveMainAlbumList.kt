@@ -125,7 +125,8 @@ private fun AlbumFolder(
 ) {
     AlbumFolderLayout(
         modifier = modifier.width(124.dp),
-        color = if (isFavorite) NekiTheme.colorScheme.favoriteAlbumCover.copy(alpha = 0.9f) else NekiTheme.colorScheme.defaultAlbumCover.copy(alpha = 0.92f),
+        color = if (isFavorite) NekiTheme.colorScheme.favoriteAlbumCover.copy(alpha = 0.9f)
+        else NekiTheme.colorScheme.defaultAlbumCover.copy(alpha = 0.92f),
     ) {
         Row(
             modifier = Modifier
