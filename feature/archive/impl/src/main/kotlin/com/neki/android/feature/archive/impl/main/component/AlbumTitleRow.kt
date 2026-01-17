@@ -18,7 +18,7 @@ import com.neki.android.core.designsystem.button.NekiTextButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun AlbumTitleRow(
+internal fun AlbumTitleRow(
     modifier: Modifier = Modifier,
     onShowAllAlbumClick: () -> Unit = {},
 ) {

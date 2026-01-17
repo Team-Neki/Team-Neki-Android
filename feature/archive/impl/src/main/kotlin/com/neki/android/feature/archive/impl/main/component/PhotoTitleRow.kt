@@ -20,7 +20,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ROW_TEXT_BUTTON_PADDING
 
 @Composable
-fun ArchiveMainTitleRow(
+internal fun ArchiveMainTitleRow(
     title: String,
     textButtonTitle: String,
     modifier: Modifier = Modifier,
