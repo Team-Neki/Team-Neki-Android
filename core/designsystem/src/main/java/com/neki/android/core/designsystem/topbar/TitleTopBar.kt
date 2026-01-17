@@ -3,6 +3,7 @@ package com.neki.android.core.designsystem.topbar
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.neki.android.core.designsystem.ComponentPreview
@@ -36,6 +37,7 @@ fun CloseTitleTextButtonTopBar(
     title: String,
     buttonText: String,
     modifier: Modifier = Modifier,
+    buttonLabelTextColor: Color = NekiTheme.colorScheme.primary500,
     onClose: () -> Unit = {},
     onTextButtonClick: () -> Unit = {},
 ) {
@@ -55,6 +57,7 @@ fun CloseTitleTextButtonTopBar(
                 buttonText = buttonText,
                 modifier = modifier,
                 onClick = onTextButtonClick,
+                buttonLabelTextColor = buttonLabelTextColor,
             )
         },
     )
@@ -65,6 +68,7 @@ fun BackTitleTextButtonTopBar(
     title: String,
     buttonLabel: String,
     modifier: Modifier = Modifier,
+    buttonLabelTextColor: Color = NekiTheme.colorScheme.primary500,
     onBack: () -> Unit = {},
     onTextButtonClick: () -> Unit = {},
 ) {
@@ -84,6 +88,7 @@ fun BackTitleTextButtonTopBar(
                 buttonText = buttonLabel,
                 modifier = modifier,
                 onClick = onTextButtonClick,
+                buttonLabelTextColor = buttonLabelTextColor,
             )
         },
     )

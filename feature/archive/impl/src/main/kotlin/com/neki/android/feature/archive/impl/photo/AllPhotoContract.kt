@@ -37,9 +37,9 @@ sealed interface AllPhotoIntent {
 
     // Filter Intent
     data object ClickFilterChip : AllPhotoIntent
-    data object DismissFilterDialog : AllPhotoIntent
+    data object DismissFilterPopup : AllPhotoIntent
     data object ClickFavoriteFilterChip : AllPhotoIntent
-    data class ClickFilterDialogRow(val filter: PhotoFilter) : AllPhotoIntent
+    data class ClickFilterPopupRow(val filter: PhotoFilter) : AllPhotoIntent
 
     // Photo Intent
     data class ClickPhotoItem(val photo: Photo) : AllPhotoIntent

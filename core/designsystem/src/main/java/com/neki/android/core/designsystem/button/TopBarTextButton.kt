@@ -5,6 +5,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.LayoutDirection
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -13,7 +14,8 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 fun TopBarTextButton(
     buttonText: String,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    buttonLabelTextColor: Color = NekiTheme.colorScheme.primary500,
+    onClick: () -> Unit = {},
 ) {
     NekiTextButton(
         modifier = modifier.offset(
@@ -24,7 +26,7 @@ fun TopBarTextButton(
         Text(
             text = buttonText,
             style = NekiTheme.typography.body16SemiBold,
-            color = NekiTheme.colorScheme.primary500,
+            color = buttonLabelTextColor,
         )
     }
 }

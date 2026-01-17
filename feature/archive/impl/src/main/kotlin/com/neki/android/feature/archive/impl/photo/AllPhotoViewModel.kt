@@ -40,9 +40,9 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
 
             // Filter Intent
             AllPhotoIntent.ClickFilterChip -> reduce { copy(showFilterDialog = true) }
-            AllPhotoIntent.DismissFilterDialog -> reduce { copy(showFilterDialog = false) }
+            AllPhotoIntent.DismissFilterPopup -> reduce { copy(showFilterDialog = false) }
             AllPhotoIntent.ClickFavoriteFilterChip -> handleFavoriteFilter(state, reduce)
-            is AllPhotoIntent.ClickFilterDialogRow -> handleFilterRow(intent.filter, reduce)
+            is AllPhotoIntent.ClickFilterPopupRow -> handleFilterRow(intent.filter, reduce)
 
             // Photo Intent
             is AllPhotoIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, state, reduce, postSideEffect)
