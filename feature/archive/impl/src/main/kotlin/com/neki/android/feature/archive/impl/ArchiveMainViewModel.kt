@@ -30,7 +30,8 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
             ArchiveMainIntent.ClickGoToTopButton -> {}
 
             // TopBar Intent
-            ArchiveMainIntent.ClickAddIcon -> {}
+            ArchiveMainIntent.ClickAddIcon -> reduce { copy(showAddDialog = true) }
+            ArchiveMainIntent.DismissAddDialog -> reduce { copy(showAddDialog = false) }
             ArchiveMainIntent.ClickQRScanRow -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
             ArchiveMainIntent.ClickGalleryUploadRow -> postSideEffect(ArchiveMainSideEffect.NavigateToGalleryUpload)
             ArchiveMainIntent.ClickAddNewAlbumRow -> reduce { copy(showAddAlbumBottomSheet = true) }
@@ -38,7 +39,7 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
 
             // Album Intent
             ArchiveMainIntent.ClickAllAlbumText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllAlbum)
-            ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum)
+            ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum(state.favoriteAlbum))
             is ArchiveMainIntent.ClickAlbumItem -> postSideEffect(ArchiveMainSideEffect.NavigateToAlbumDetail(intent.album))
 
             // Photo Intent

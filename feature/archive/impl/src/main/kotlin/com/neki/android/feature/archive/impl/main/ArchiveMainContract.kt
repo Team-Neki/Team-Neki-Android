@@ -11,6 +11,7 @@ data class ArchiveMainState(
     val favoriteAlbum: Album = Album(),
     val albums: ImmutableList<Album> = persistentListOf(),
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
+    val showAddDialog: Boolean = false,
     val showAddAlbumBottomSheet: Boolean = false,
     val newAlbumTitleState: TextFieldState = TextFieldState(),
 )
@@ -21,6 +22,7 @@ sealed interface ArchiveMainIntent {
 
     // TopBar Intent
     data object ClickAddIcon : ArchiveMainIntent
+    data object DismissAddDialog : ArchiveMainIntent
     data object ClickQRScanRow : ArchiveMainIntent
     data object ClickGalleryUploadRow : ArchiveMainIntent
     data object ClickAddNewAlbumRow : ArchiveMainIntent
@@ -44,7 +46,7 @@ sealed interface ArchiveMainSideEffect {
     data object NavigateToQRScan : ArchiveMainSideEffect
     data object NavigateToGalleryUpload : ArchiveMainSideEffect
     data object NavigateToAllAlbum : ArchiveMainSideEffect
-    data object NavigateToFavoriteAlbum : ArchiveMainSideEffect
+    data class NavigateToFavoriteAlbum(val album: Album) : ArchiveMainSideEffect
     data class NavigateToAlbumDetail(val album: Album) : ArchiveMainSideEffect
     data object NavigateToAllPhoto : ArchiveMainSideEffect
     data class NavigateToPhotoDetail(val photo: Photo) : ArchiveMainSideEffect
