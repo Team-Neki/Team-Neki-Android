@@ -29,7 +29,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
             AllPhotoIntent.EnterAllPhotoScreen -> fetchInitialData(reduce)
 
             // TopBar Intent
-            AllPhotoIntent.ClickTopBarBackIcon -> postSideEffect(AllPhotoSideEffect.NavigateBack)
+            AllPhotoIntent.ClickTopBarBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AllPhotoIntent.ClickTopBarSelectIcon -> reduce { copy(selectMode = PhotoSelectMode.SELECTING) }
             AllPhotoIntent.ClickTopBarCancelIcon -> reduce {
                 copy(
@@ -56,6 +56,22 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
     private fun fetchInitialData(reduce: (AllPhotoState.() -> AllPhotoState) -> Unit) {
         // TODO: Fetch photos from repository
         reduce { copy() }
+    }
+
+    private fun handleBackClick(
+        state: AllPhotoState,
+        reduce: ((AllPhotoState) -> AllPhotoState) -> Unit,
+        postSideEffect: (AllPhotoSideEffect) -> Unit,
+    ) {
+        when (state.selectMode) {
+            PhotoSelectMode.DEFAULT -> postSideEffect(AllPhotoSideEffect.NavigateBack)
+            PhotoSelectMode.SELECTING -> reduce {
+                copy(
+                    selectMode = PhotoSelectMode.DEFAULT,
+                    selectedPhotos = persistentListOf(),
+                )
+            }
+        }
     }
 
     private fun handleFavoriteFilter(
