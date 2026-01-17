@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -69,30 +70,17 @@ fun AnchoredDraggablePanel(
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
 
-    val screenHeightPx = with(density) {
-        configuration.screenHeightDp.dp.toPx()
-    }
-
-    val navigationBarHeightPx = with(density) {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx()
-    }
-
-    val bottomNavBarHeightPx = with(density) {
-        BOTTOM_NAV_BAR_HEIGHT.toPx()
-    }
-
-    // CurrentLocationButton: padding(8dp) * 2 + icon(20dp) = 36dp + bottom margin(12dp) = 48dp
-    val currentLocationButtonHeightPx = with(density) { 48.dp.toPx() }
-
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
     var collapsedHeightPx by remember { mutableIntStateOf(0) }
+    val bottomNavBarHeightPx = with(density) { BOTTOM_NAV_BAR_HEIGHT.toPx() }
+    val currentLocationButtonHeightPx = with(density) { 48.dp.toPx() }  // 36.dp + 12.dp
+    val navigationBarHeightPx = with(density) { WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx() }
+
+    var isProgrammaticTransition by remember { mutableStateOf(false) }
 
     val state = remember(collapsedHeightPx) {
         val anchors = DraggableAnchors {
-            DragValue.Bottom at if (collapsedHeightPx > 0) {
-                screenHeightPx - collapsedHeightPx - bottomNavBarHeightPx - navigationBarHeightPx - currentLocationButtonHeightPx
-            } else {
-                screenHeightPx * 0.8f
-            }
+            DragValue.Bottom at screenHeightPx - collapsedHeightPx - bottomNavBarHeightPx - currentLocationButtonHeightPx - navigationBarHeightPx
             DragValue.Center at screenHeightPx * 0.3f
             DragValue.Top at screenHeightPx * 0.05f
             DragValue.Invisible at screenHeightPx + navigationBarHeightPx
@@ -106,7 +94,7 @@ fun AnchoredDraggablePanel(
             snapAnimationSpec = tween(),
             decayAnimationSpec = splineBasedDecay(density),
             confirmValueChange = { newValue ->
-                !(dragValue == DragValue.Bottom && newValue == DragValue.Invisible)
+                newValue != DragValue.Invisible || isProgrammaticTransition
             }
         )
     }
@@ -118,14 +106,23 @@ fun AnchoredDraggablePanel(
     }
 
     LaunchedEffect(dragValue) {
+        isProgrammaticTransition = true
         state.animateTo(dragValue)
+        isProgrammaticTransition = false
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .offset {
-                IntOffset(0, state.requireOffset().roundToInt())
+                val currentOffset = state.requireOffset()
+                val shouldConstrainOffset = state.currentValue == DragValue.Bottom && !isProgrammaticTransition
+                val constrainedOffset = if (shouldConstrainOffset) {
+                    currentOffset.coerceAtMost(state.anchors.positionOf(DragValue.Bottom))
+                } else {
+                    currentOffset
+                }
+                IntOffset(0, constrainedOffset.roundToInt())
             }
             .anchoredDraggable(
                 state = state,
@@ -178,8 +175,8 @@ fun AnchoredPanelContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .onGloballyPositioned { coordinates ->
-                    onCollapsedHeightMeasured(coordinates.size.height + additionalHeightPx)
+                .onGloballyPositioned {
+                    onCollapsedHeightMeasured(it.size.height + additionalHeightPx)
                 }
         ) {
             BottomSheetDragHandle()
@@ -239,14 +236,6 @@ fun AnchoredPanelContent(
                 )
             }
         }
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun AnchoredDraggablePanelPreview() {
-    NekiTheme {
-        AnchoredDraggablePanel()
     }
 }
 
