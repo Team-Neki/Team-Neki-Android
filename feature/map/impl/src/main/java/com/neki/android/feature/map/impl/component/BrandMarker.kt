@@ -72,7 +72,7 @@ internal fun BrandMarkerContent(
 ) {
     Box(
         modifier = modifier
-            .height(IMAGE_BOX_SIZE + TRIANGLE_HEIGHT - 1.dp)
+            .height(IMAGE_BOX_SIZE + TRIANGLE_HEIGHT - 0.dp)
 //            .size(
 //                width = IMAGE_BOX_SIZE,
 //                height = IMAGE_BOX_SIZE + TRIANGLE_HEIGHT - 1.dp
