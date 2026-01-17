@@ -14,7 +14,14 @@ data class ArchiveMainState(
     val showAddDialog: Boolean = false,
     val showAddAlbumBottomSheet: Boolean = false,
     val newAlbumTitleState: TextFieldState = TextFieldState(),
+    val albumNameErrorState: AlbumNameErrorState? = null,
 )
+
+enum class AlbumNameErrorState(val message: String) {
+    EXCEED_LENGTH("앨범명은 최대 16자까지 입력할 수 있어요."),
+    INVALID_CHARACTER("앨범명은 한글, 영문, 숫자만 사용할 수 있어요."),
+    DUPLICATE("이미 사용 중인 앨범명이에요."),
+}
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent

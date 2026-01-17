@@ -30,6 +30,7 @@ import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
+import com.neki.android.feature.archive.impl.main.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.main.component.AddPhotoDialog
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
@@ -108,6 +109,16 @@ internal fun ArchiveMainScreen(
             onQRScanClick = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
             onGalleryClick = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
             onDismissRequest = { onIntent(ArchiveMainIntent.DismissAddDialog) },
+        )
+    }
+
+    if (uiState.showAddAlbumBottomSheet) {
+        AddAlbumBottomSheet(
+            textFieldState = uiState.newAlbumTitleState,
+            onDismissRequest = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
+            onCancelClick = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
+            onConfirmClick = { onIntent(ArchiveMainIntent.ClickAddAlbumButton) },
+            albumNameErrorState = uiState.albumNameErrorState,
         )
     }
 }
