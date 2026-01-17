@@ -152,6 +152,14 @@ internal fun AllPhotoScreen(
             onDeleteClick = { onIntent(AllPhotoIntent.ClickDeleteIcon) },
         )
     }
+
+    if (uiState.showDeleteDialog) {
+        DeletePhotoDialog(
+            onDismissRequest = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
+            onDeleteClick = { onIntent(AllPhotoIntent.ClickDeleteDialogConfirmButton) },
+            onCancelClick = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
+        )
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)

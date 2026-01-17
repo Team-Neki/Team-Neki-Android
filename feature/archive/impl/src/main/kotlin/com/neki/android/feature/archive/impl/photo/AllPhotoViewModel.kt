@@ -69,7 +69,6 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
                 } else {
                     if (state.selectedPhotoFilter == PhotoFilter.NEWEST) sortedDescendingPhotos
                     else photos
-
                 }.toImmutableList(),
             )
         }
