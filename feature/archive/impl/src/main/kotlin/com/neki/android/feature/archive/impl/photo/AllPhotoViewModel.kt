@@ -41,7 +41,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
             // Filter Intent
             AllPhotoIntent.ClickFilterChip -> reduce { copy(showFilterDialog = true) }
             AllPhotoIntent.DismissFilterDialog -> reduce { copy(showFilterDialog = false) }
-            AllPhotoIntent.ClickFavoriteFilterChip -> reduce { copy(showFavoritePhoto = !showFavoritePhoto) }
+            AllPhotoIntent.ClickFavoriteFilterChip -> handleFavoriteFilter(state, reduce)
             is AllPhotoIntent.ClickFilterDialogRow -> handleFilterRow(intent.filter, reduce)
 
             // Photo Intent
@@ -58,6 +58,23 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
         reduce { copy() }
     }
 
+    private fun handleFavoriteFilter(
+        state: AllPhotoState,
+        reduce: ((AllPhotoState) -> AllPhotoState) -> Unit,
+    ) {
+        reduce {
+            copy(
+                showingPhotos = if (!state.isFavoriteChipSelected) {
+                    showingPhotos.filter { it.isFavorite }
+                } else {
+                    if (state.selectedPhotoFilter == PhotoFilter.NEWEST) sortedDescendingPhotos
+                    else photos
+
+                }.toImmutableList(),
+            )
+        }
+    }
+
     private fun handleFilterRow(filter: PhotoFilter, reduce: (AllPhotoState.() -> AllPhotoState) -> Unit) {
         reduce {
             val sortedPhotos = when (filter) {
@@ -67,7 +84,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
             copy(
                 showFilterDialog = false,
                 selectedPhotoFilter = filter,
-                photos = sortedPhotos,
+                showingPhotos = sortedPhotos,
             )
         }
     }

@@ -7,10 +7,11 @@ import kotlinx.collections.immutable.persistentListOf
 data class AllPhotoState(
     val photos: ImmutableList<Photo> = persistentListOf(),
     val sortedDescendingPhotos: ImmutableList<Photo> = persistentListOf(),
+    val showingPhotos: ImmutableList<Photo> = persistentListOf(),
     val selectMode: PhotoSelectMode = PhotoSelectMode.DEFAULT,
     val selectedPhotoFilter: PhotoFilter = PhotoFilter.NEWEST,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
-    val showFavoritePhoto: Boolean = false,
+    val isFavoriteChipSelected: Boolean = false,
     val showFilterDialog: Boolean = false,
     val showDeleteDialog: Boolean = false,
 )
