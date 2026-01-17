@@ -22,7 +22,7 @@ import com.neki.android.core.designsystem.toast.NekiToast
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 class NekiToast(
-    private val context: Context
+    private val context: Context,
 ) : Toast(context) {
     private fun makeText(
         duration: Int = LENGTH_SHORT,
