@@ -30,7 +30,18 @@ class MapViewModel @Inject constructor() : ViewModel() {
             MapIntent.ClickBrand -> { }
             MapIntent.ClickNearBrand -> { reduce { copy(dragState = DragValue.Invisible) } }
             MapIntent.ClickCloseBrandCard -> { reduce { copy(dragState = DragValue.Center) } }
+            MapIntent.CloseDirectionBottomSheet -> { reduce { copy(isShowDirectionBottomSheet = false) } }
+            is MapIntent.ClickDirectionItem -> {
+                postSideEffect(MapEffect.MoveDirectionApp(intent.app))
+            }
             is MapIntent.ChangeDragValue -> { reduce { copy(dragState = intent.dragValue) } }
+            is MapIntent.ClickBrandMarker -> {
+                reduce { copy(dragState = DragValue.Invisible) }
+                postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
+            }
+            is MapIntent.ClickDirection -> {
+                reduce { copy(isShowDirectionBottomSheet = true) }
+            }
         }
     }
 

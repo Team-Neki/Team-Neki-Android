@@ -49,7 +49,7 @@ fun PanelInvisibleContent(
         VerticalSpacer(12.dp)
         BrandCard(
             brand = FourCutBrand.LIFE_FOUR_CUT,
-            onClickDirection = {}
+            onClickDirection = onClickDirection
         )
     }
 }
