@@ -101,6 +101,11 @@ fun MapScreen(
             locationSource = rememberFusedLocationSource(),
             properties = mapProperties,
             uiSettings = mapUiSettings,
+            onOptionChange = {
+                cameraPositionState.locationTrackingMode?.let {
+                    onLocationTrackingModeChange(it)
+                }
+            }
         )
 
         AnchoredDraggablePanel(
@@ -109,7 +114,7 @@ fun MapScreen(
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
             isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
             onClickCurrentLocation = {
-//                onLocationTrackingModeChange()
+                onLocationTrackingModeChange(LocationTrackingMode.Follow)
             },
             onClickBrand = { onIntent(MapIntent.ClickBrand) },
             onClickNearBrand = { onIntent(MapIntent.ClickNearBrand) }
@@ -125,6 +130,7 @@ fun MapScreen(
         } else if (uiState.dragState == DragValue.Invisible) {
             PanelInvisibleContent(
                 modifier = Modifier.align(Alignment.BottomCenter),
+                isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
                 onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
                 onClickCloseCard = { onIntent(MapIntent.ClickCloseBrandCard) },
                 onClickDirection = {}

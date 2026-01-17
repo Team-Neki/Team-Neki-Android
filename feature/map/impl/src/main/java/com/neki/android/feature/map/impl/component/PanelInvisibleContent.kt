@@ -25,6 +25,7 @@ import com.neki.android.feature.map.impl.const.FourCutBrand
 @Composable
 fun PanelInvisibleContent(
     modifier: Modifier = Modifier,
+    isCurrentLocation: Boolean = false,
     onClickCurrentLocation: () -> Unit = {},
     onClickCloseCard: () -> Unit = {},
     onClickDirection: () -> Unit = {},
@@ -40,7 +41,7 @@ fun PanelInvisibleContent(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             CurrentLocationButton(
-                isActiveCurrentLocation = false,
+                isActiveCurrentLocation = isCurrentLocation,
                 onClick = onClickCurrentLocation
             )
             BrandCardCloseButton(onClick = onClickCloseCard)
