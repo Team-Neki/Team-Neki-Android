@@ -51,5 +51,6 @@ sealed interface ArchiveMainSideEffect {
     data object NavigateToAllPhoto : ArchiveMainSideEffect
     data class NavigateToPhotoDetail(val photo: Photo) : ArchiveMainSideEffect
 
+    data object ScrollToTop : ArchiveMainSideEffect
     data class ShowToastMessage(val message: String) : ArchiveMainSideEffect
 }

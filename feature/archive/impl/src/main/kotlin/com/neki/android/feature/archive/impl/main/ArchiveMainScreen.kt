@@ -2,16 +2,20 @@ package com.neki.android.feature.archive.impl.main
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,12 +26,12 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.archive.impl.ArchiveMainViewModel
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
-import com.neki.android.feature.archive.impl.main.component.PhotoItem
+import com.neki.android.feature.archive.impl.main.component.GotoTopButton
+import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
@@ -43,6 +47,7 @@ internal fun ArchiveMainRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lazyState = rememberLazyStaggeredGridState()
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -53,6 +58,7 @@ internal fun ArchiveMainRoute(
             is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.album)
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
+            ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
             is ArchiveMainSideEffect.ShowToastMessage -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
         }
     }
@@ -65,13 +71,50 @@ internal fun ArchiveMainRoute(
 
 @Composable
 internal fun ArchiveMainScreen(
+    lazyState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     uiState: ArchiveMainState = ArchiveMainState(),
     onIntent: (ArchiveMainIntent) -> Unit = {},
 ) {
-    val lazyState = rememberLazyStaggeredGridState()
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        ArchiveMainContent(
+            uiState = uiState,
+            lazyState = lazyState,
+            onPlusIconClick = { onIntent(ArchiveMainIntent.ClickAddIcon) },
+            onNotificationIconClick = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
+            onShowAllAlbumClick = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
+            onFavoriteAlbumClick = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
+            onAlbumItemClick = { album -> onIntent(ArchiveMainIntent.ClickAlbumItem(album)) },
+            onShowAllPhotoClick = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
+            onPhotoItemClick = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
+        )
 
+        GotoTopButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 20.dp, bottom = 20.dp),
+            visible = lazyState.isScrollInProgress,
+            onClick = { onIntent(ArchiveMainIntent.ClickGoToTopButton) },
+        )
+    }
+}
+
+@Composable
+private fun ArchiveMainContent(
+    uiState: ArchiveMainState,
+    lazyState: LazyStaggeredGridState,
+    onPlusIconClick: () -> Unit,
+    onNotificationIconClick: () -> Unit,
+    onShowAllAlbumClick: () -> Unit,
+    onFavoriteAlbumClick: () -> Unit,
+    onAlbumItemClick: (Album) -> Unit,
+    onShowAllPhotoClick: () -> Unit,
+    onPhotoItemClick: (Photo) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     LazyVerticalStaggeredGrid(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
         columns = StaggeredGridCells.Fixed(2),
@@ -82,8 +125,8 @@ internal fun ArchiveMainScreen(
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTopBar(
-                onPlusIconClick = { onIntent(ArchiveMainIntent.ClickAddIcon) },
-                onNotificationIconClick = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
+                onPlusIconClick = onPlusIconClick,
+                onNotificationIconClick = onNotificationIconClick,
             )
         }
 
@@ -91,7 +134,7 @@ internal fun ArchiveMainScreen(
             ArchiveMainTitleRow(
                 title = "앨범",
                 textButtonTitle = "전체 보기",
-                onShowAllAlbumClick = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
+                onShowAllAlbumClick = onShowAllAlbumClick,
             )
         }
 
@@ -99,8 +142,8 @@ internal fun ArchiveMainScreen(
             ArchiveMainAlbumList(
                 favoriteAlbum = uiState.favoriteAlbum,
                 albumList = uiState.albums,
-                onFavoriteAlbumClick = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
-                onAlbumItemClick = { album -> onIntent(ArchiveMainIntent.ClickAlbumItem(album)) },
+                onFavoriteAlbumClick = onFavoriteAlbumClick,
+                onAlbumItemClick = onAlbumItemClick,
             )
         }
 
@@ -108,14 +151,14 @@ internal fun ArchiveMainScreen(
             ArchiveMainTitleRow(
                 title = "최근 사진",
                 textButtonTitle = "모든 사진",
-                onShowAllAlbumClick = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
+                onShowAllAlbumClick = onShowAllPhotoClick,
             )
         }
 
         items(uiState.recentPhotos) { photo ->
-            PhotoItem(
+            ArchiveMainPhotoItem(
                 photo = photo,
-                onItemClick = { onIntent(ArchiveMainIntent.ClickPhotoItem(it)) },
+                onItemClick = onPhotoItemClick,
             )
         }
     }

@@ -1,11 +1,8 @@
-package com.neki.android.feature.archive.impl
+package com.neki.android.feature.archive.impl.main
 
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.feature.archive.impl.main.ArchiveMainIntent
-import com.neki.android.feature.archive.impl.main.ArchiveMainSideEffect
-import com.neki.android.feature.archive.impl.main.ArchiveMainState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -27,7 +24,7 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
     ) {
         when (intent) {
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialDate(reduce)
-            ArchiveMainIntent.ClickGoToTopButton -> {}
+            ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
             // TopBar Intent
             ArchiveMainIntent.ClickAddIcon -> reduce { copy(showAddDialog = true) }
