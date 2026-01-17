@@ -8,4 +8,7 @@ android {
 
 dependencies {
     implementation(projects.feature.archive.api)
+    
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }
