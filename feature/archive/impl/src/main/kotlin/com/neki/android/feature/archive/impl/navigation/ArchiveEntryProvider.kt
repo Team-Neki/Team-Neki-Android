@@ -10,6 +10,7 @@ import com.neki.android.feature.archive.api.navigateToAllAlbum
 import com.neki.android.feature.archive.api.navigateToAllPhoto
 import com.neki.android.feature.archive.api.navigateToPhotoDetail
 import com.neki.android.feature.archive.impl.main.ArchiveMainRoute
+import com.neki.android.feature.archive.impl.photo.AllPhotoRoute
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import dagger.Module
 import dagger.Provides
@@ -37,6 +38,13 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
             navigateToFavoriteAlbum = { album -> navigator.navigateToAlbumDetail(isFavorite = true, album = album) },
             navigateToAlbumDetail = { album -> navigator.navigateToAlbumDetail(isFavorite = false, album = album) },
             navigateToAllPhoto = navigator::navigateToAllPhoto,
+            navigateToPhotoDetail = navigator::navigateToPhotoDetail,
+        )
+    }
+
+    entry<ArchiveNavKey.AllPhoto> {
+        AllPhotoRoute(
+            navigateBack = navigator::goBack,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
