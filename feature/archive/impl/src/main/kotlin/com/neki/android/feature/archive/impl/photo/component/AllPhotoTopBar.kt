@@ -5,11 +5,11 @@ import androidx.compose.ui.Modifier
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.archive.impl.photo.PhotoSelectMode
+import com.neki.android.feature.archive.impl.model.SelectMode
 
 @Composable
 internal fun AllPhotoTopBar(
-    selectMode: PhotoSelectMode,
+    selectMode: SelectMode,
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
     onSelectClick: () -> Unit = {},
@@ -19,17 +19,17 @@ internal fun AllPhotoTopBar(
         modifier = modifier,
         title = "모든 사진",
         buttonLabel = when (selectMode) {
-            PhotoSelectMode.DEFAULT -> "선택"
-            PhotoSelectMode.SELECTING -> "취소"
+            SelectMode.DEFAULT -> "선택"
+            SelectMode.SELECTING -> "취소"
         },
         buttonLabelTextColor = when (selectMode) {
-            PhotoSelectMode.DEFAULT -> NekiTheme.colorScheme.primary500
-            PhotoSelectMode.SELECTING -> NekiTheme.colorScheme.gray800
+            SelectMode.DEFAULT -> NekiTheme.colorScheme.primary500
+            SelectMode.SELECTING -> NekiTheme.colorScheme.gray800
         },
         onBack = onBackClick,
         onTextButtonClick = when (selectMode) {
-            PhotoSelectMode.DEFAULT -> onSelectClick
-            PhotoSelectMode.SELECTING -> onCancelClick
+            SelectMode.DEFAULT -> onSelectClick
+            SelectMode.SELECTING -> onCancelClick
         },
     )
 }
@@ -39,7 +39,7 @@ internal fun AllPhotoTopBar(
 private fun AllPhotoTopBarDefaultPreview() {
     NekiTheme {
         AllPhotoTopBar(
-            selectMode = PhotoSelectMode.DEFAULT,
+            selectMode = SelectMode.DEFAULT,
         )
     }
 }
@@ -49,7 +49,7 @@ private fun AllPhotoTopBarDefaultPreview() {
 private fun AllPhotoTopBarSelectingPreview() {
     NekiTheme {
         AllPhotoTopBar(
-            selectMode = PhotoSelectMode.SELECTING,
+            selectMode = SelectMode.SELECTING,
         )
     }
 }

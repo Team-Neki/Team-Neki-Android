@@ -3,6 +3,7 @@ package com.neki.android.feature.archive.impl.photo
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
+import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -30,10 +31,11 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
 
             // TopBar Intent
             AllPhotoIntent.ClickTopBarBackIcon -> handleBackClick(state, reduce, postSideEffect)
-            AllPhotoIntent.ClickTopBarSelectIcon -> reduce { copy(selectMode = PhotoSelectMode.SELECTING) }
+            AllPhotoIntent.ClickTopBarSelectIcon -> reduce { copy(selectMode = SelectMode.SELECTING) }
+            AllPhotoIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
             AllPhotoIntent.ClickTopBarCancelIcon -> reduce {
                 copy(
-                    selectMode = PhotoSelectMode.DEFAULT,
+                    selectMode = SelectMode.DEFAULT,
                     selectedPhotos = emptyList<Photo>().toImmutableList(),
                 )
             }
@@ -64,10 +66,10 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (AllPhotoSideEffect) -> Unit,
     ) {
         when (state.selectMode) {
-            PhotoSelectMode.DEFAULT -> postSideEffect(AllPhotoSideEffect.NavigateBack)
-            PhotoSelectMode.SELECTING -> reduce {
+            SelectMode.DEFAULT -> postSideEffect(AllPhotoSideEffect.NavigateBack)
+            SelectMode.SELECTING -> reduce {
                 copy(
-                    selectMode = PhotoSelectMode.DEFAULT,
+                    selectMode = SelectMode.DEFAULT,
                     selectedPhotos = persistentListOf(),
                 )
             }
@@ -112,11 +114,11 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (AllPhotoSideEffect) -> Unit,
     ) {
         when (state.selectMode) {
-            PhotoSelectMode.DEFAULT -> {
+            SelectMode.DEFAULT -> {
                 postSideEffect(AllPhotoSideEffect.NavigateToPhotoDetail(photo))
             }
 
-            PhotoSelectMode.SELECTING -> {
+            SelectMode.SELECTING -> {
                 val isSelected = state.selectedPhotos.any { it.id == photo.id }
                 if (isSelected) {
                     reduce {
@@ -157,7 +159,8 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
             copy(
                 photos = photos.filter { photo -> selectedPhotos.none { it.id == photo.id } }.toImmutableList(),
                 selectedPhotos = persistentListOf(),
-                selectMode = PhotoSelectMode.DEFAULT,
+                selectMode = SelectMode.DEFAULT,
+                showDeleteDialog = false,
             )
         }
         postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 삭제했어요"))

@@ -1,6 +1,7 @@
 package com.neki.android.feature.archive.impl.photo
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
+import com.neki.android.core.designsystem.DevicePreview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,6 +33,7 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
+import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoFilterBar
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoTopBar
 import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
@@ -39,7 +41,7 @@ import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
-fun AllPhotoRoute(
+internal fun AllPhotoRoute(
     viewModel: AllPhotoViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
     navigateToPhotoDetail: (Photo) -> Unit,
@@ -80,8 +82,12 @@ internal fun AllPhotoScreen(
         derivedStateOf {
             !lazyState.canScrollBackward ||
                 lazyState.lastScrolledBackward ||
-                uiState.selectMode == PhotoSelectMode.SELECTING
+                uiState.selectMode == SelectMode.SELECTING
         }
+    }
+
+    BackHandler(enabled = true) {
+        onIntent(AllPhotoIntent.OnBackPressed)
     }
 
     Column(
@@ -106,7 +112,7 @@ internal fun AllPhotoScreen(
                 columns = StaggeredGridCells.Fixed(2),
                 state = lazyState,
                 contentPadding = PaddingValues(
-                    top = topPadding,
+                    top = if (uiState.selectMode == SelectMode.SELECTING) 12.dp else topPadding + 12.dp,
                     start = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
                     end = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
                     bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
@@ -122,6 +128,7 @@ internal fun AllPhotoScreen(
                     SelectablePhotoItem(
                         photo = photo,
                         isSelected = isSelected,
+                        isSelectMode = uiState.selectMode == SelectMode.SELECTING,
                         onItemClick = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
                         onSelectClick = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
                     )
@@ -137,7 +144,7 @@ internal fun AllPhotoScreen(
                     },
                 selectedFilter = uiState.selectedPhotoFilter,
                 isFavoriteSelected = uiState.isFavoriteChipSelected,
-                visible = uiState.selectMode == PhotoSelectMode.DEFAULT && showFilterBar,
+                visible = uiState.selectMode == SelectMode.DEFAULT && showFilterBar,
                 onSortChipClick = { onIntent(AllPhotoIntent.ClickFilterChip) },
                 onFavoriteChipClick = { onIntent(AllPhotoIntent.ClickFavoriteFilterChip) },
                 onDismissPopup = { onIntent(AllPhotoIntent.DismissFilterPopup) },
@@ -146,7 +153,7 @@ internal fun AllPhotoScreen(
         }
 
         PhotoActionBar(
-            visible = uiState.selectMode == PhotoSelectMode.SELECTING,
+            visible = uiState.selectMode == SelectMode.SELECTING,
             isEnabled = uiState.selectedPhotos.isNotEmpty(),
             onDownloadClick = { onIntent(AllPhotoIntent.ClickDownloadIcon) },
             onDeleteClick = { onIntent(AllPhotoIntent.ClickDeleteIcon) },
@@ -162,16 +169,20 @@ internal fun AllPhotoScreen(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@DevicePreview
 @Composable
 private fun AllPhotoScreenPreview() {
     val dummyPhotos = persistentListOf(
-        Photo(id = 1, imageUrl = "https://picsum.photos/200/300", isFavorite = true),
-        Photo(id = 2, imageUrl = "https://picsum.photos/200/250"),
-        Photo(id = 3, imageUrl = "https://picsum.photos/200/350", isFavorite = true),
-        Photo(id = 4, imageUrl = "https://picsum.photos/200/280"),
-        Photo(id = 5, imageUrl = "https://picsum.photos/200/320"),
-        Photo(id = 6, imageUrl = "https://picsum.photos/200/260"),
+        Photo(id = 1, imageUrl = "https://picsum.photos/seed/all1/200/300", isFavorite = true),
+        Photo(id = 2, imageUrl = "https://picsum.photos/seed/all2/200/250"),
+        Photo(id = 3, imageUrl = "https://picsum.photos/seed/all3/200/350", isFavorite = true),
+        Photo(id = 4, imageUrl = "https://picsum.photos/seed/all4/200/280"),
+        Photo(id = 5, imageUrl = "https://picsum.photos/seed/all5/200/320", isFavorite = true),
+        Photo(id = 6, imageUrl = "https://picsum.photos/seed/all6/200/260"),
+        Photo(id = 7, imageUrl = "https://picsum.photos/seed/all7/200/290"),
+        Photo(id = 8, imageUrl = "https://picsum.photos/seed/all8/200/310", isFavorite = true),
+        Photo(id = 9, imageUrl = "https://picsum.photos/seed/all9/200/270"),
+        Photo(id = 10, imageUrl = "https://picsum.photos/seed/all10/200/340"),
     )
 
     NekiTheme {
@@ -183,22 +194,24 @@ private fun AllPhotoScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@DevicePreview
 @Composable
 private fun AllPhotoScreenSelectingPreview() {
     val dummyPhotos = persistentListOf(
-        Photo(id = 1, imageUrl = "https://picsum.photos/200/300", isFavorite = true),
-        Photo(id = 2, imageUrl = "https://picsum.photos/200/250"),
-        Photo(id = 3, imageUrl = "https://picsum.photos/200/350", isFavorite = true),
-        Photo(id = 4, imageUrl = "https://picsum.photos/200/280"),
+        Photo(id = 1, imageUrl = "https://picsum.photos/seed/sel1/200/300", isFavorite = true),
+        Photo(id = 2, imageUrl = "https://picsum.photos/seed/sel2/200/250"),
+        Photo(id = 3, imageUrl = "https://picsum.photos/seed/sel3/200/350", isFavorite = true),
+        Photo(id = 4, imageUrl = "https://picsum.photos/seed/sel4/200/280"),
+        Photo(id = 5, imageUrl = "https://picsum.photos/seed/sel5/200/320"),
+        Photo(id = 6, imageUrl = "https://picsum.photos/seed/sel6/200/290"),
     )
 
     NekiTheme {
         AllPhotoScreen(
             uiState = AllPhotoState(
                 photos = dummyPhotos,
-                selectMode = PhotoSelectMode.SELECTING,
-                selectedPhotos = persistentListOf(dummyPhotos[0], dummyPhotos[2]),
+                selectMode = SelectMode.SELECTING,
+                selectedPhotos = persistentListOf(dummyPhotos[0], dummyPhotos[2], dummyPhotos[4]),
             ),
         )
     }

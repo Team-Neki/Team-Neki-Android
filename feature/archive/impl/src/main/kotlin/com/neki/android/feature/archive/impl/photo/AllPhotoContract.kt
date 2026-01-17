@@ -1,14 +1,16 @@
 package com.neki.android.feature.archive.impl.photo
 
 import com.neki.android.core.model.Photo
+import com.neki.android.feature.archive.impl.dummyPhotos
+import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class AllPhotoState(
-    val photos: ImmutableList<Photo> = persistentListOf(),
-    val sortedDescendingPhotos: ImmutableList<Photo> = persistentListOf(),
-    val showingPhotos: ImmutableList<Photo> = persistentListOf(),
-    val selectMode: PhotoSelectMode = PhotoSelectMode.DEFAULT,
+    val photos: ImmutableList<Photo> = dummyPhotos,
+    val sortedDescendingPhotos: ImmutableList<Photo> = dummyPhotos,
+    val showingPhotos: ImmutableList<Photo> = dummyPhotos,
+    val selectMode: SelectMode = SelectMode.DEFAULT,
     val selectedPhotoFilter: PhotoFilter = PhotoFilter.NEWEST,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
     val isFavoriteChipSelected: Boolean = false,
@@ -21,11 +23,6 @@ enum class PhotoFilter(val label: String) {
     OLDEST("오래된순"),
 }
 
-enum class PhotoSelectMode {
-    DEFAULT,
-    SELECTING,
-}
-
 sealed interface AllPhotoIntent {
 
     data object EnterAllPhotoScreen : AllPhotoIntent
@@ -34,6 +31,7 @@ sealed interface AllPhotoIntent {
     data object ClickTopBarBackIcon : AllPhotoIntent
     data object ClickTopBarSelectIcon : AllPhotoIntent
     data object ClickTopBarCancelIcon : AllPhotoIntent
+    data object OnBackPressed : AllPhotoIntent
 
     // Filter Intent
     data object ClickFilterChip : AllPhotoIntent

@@ -27,6 +27,7 @@ import com.neki.android.core.ui.component.SelectionCheckbox
 internal fun SelectablePhotoItem(
     photo: Photo,
     isSelected: Boolean,
+    isSelectMode: Boolean = false,
     modifier: Modifier = Modifier,
     onItemClick: (Photo) -> Unit = {},
     onSelectClick: (Photo) -> Unit = {},
@@ -50,13 +51,16 @@ internal fun SelectablePhotoItem(
         ),
         onItemClick = onItemClick,
     ) {
-        SelectionCheckbox(
-            isSelected = isSelected,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 12.dp, start = 12.dp)
-                .noRippleClickable { onSelectClick(photo) },
-        )
+        if (isSelectMode) {
+            SelectionCheckbox(
+                isSelected = isSelected,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 12.dp, start = 12.dp)
+                    .noRippleClickable { onSelectClick(photo) },
+                unselectedColor = NekiTheme.colorScheme.white.copy(alpha = 0.2f),
+            )
+        }
 
         if (photo.isFavorite) {
             Icon(
@@ -93,6 +97,7 @@ private fun SelectablePhotoItemUnselectedPreview() {
 private fun SelectablePhotoItemSelectedPreview() {
     NekiTheme {
         SelectablePhotoItem(
+            isSelectMode = true,
             photo = Photo(
                 id = 1,
                 imageUrl = "https://picsum.photos/200/300",
@@ -108,6 +113,7 @@ private fun SelectablePhotoItemSelectedPreview() {
 private fun SelectablePhotoItemFavoriteUnselectedPreview() {
     NekiTheme {
         SelectablePhotoItem(
+            isSelectMode = true,
             photo = Photo(
                 id = 1,
                 imageUrl = "https://picsum.photos/200/300",
@@ -123,6 +129,7 @@ private fun SelectablePhotoItemFavoriteUnselectedPreview() {
 private fun SelectablePhotoItemFavoriteSelectedPreview() {
     NekiTheme {
         SelectablePhotoItem(
+            isSelectMode = true,
             photo = Photo(
                 id = 1,
                 imageUrl = "https://picsum.photos/200/300",
