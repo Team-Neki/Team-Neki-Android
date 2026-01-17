@@ -14,8 +14,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -108,12 +111,33 @@ internal fun ArchiveMainScreen(
     }
 
     if (uiState.showAddAlbumBottomSheet) {
+        val textFieldState = rememberTextFieldState()
+        val existingAlbumNames = remember { uiState.albums.map { it.title } }
+
+        val errorMessage by remember(textFieldState.text) {
+            derivedStateOf {
+                val name = textFieldState.text.toString()
+                when {
+                    name.length > 16 -> "앨범명은 최대 16자까지 입력할 수 있어요."
+                    name.isNotEmpty() && !name.matches(Regex("^[가-힣a-zA-Z0-9\\s]*$")) -> "앨범명은 한글, 영문, 숫자만 사용할 수 있어요."
+                    existingAlbumNames.contains(name) -> "이미 사용 중인 앨범명이에요."
+                    else -> null
+                }
+            }
+        }
+
         AddAlbumBottomSheet(
-            textFieldState = uiState.newAlbumTitleState,
+            textFieldState = textFieldState,
             onDismissRequest = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
             onCancelClick = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
-            onConfirmClick = { onIntent(ArchiveMainIntent.ClickAddAlbumButton) },
-            albumNameErrorState = uiState.albumNameErrorState,
+            onConfirmClick = {
+                val albumName = textFieldState.text.toString()
+                if (errorMessage == null && albumName.isNotBlank()) {
+                    onIntent(ArchiveMainIntent.ClickAddAlbumButton(albumName))
+                }
+            },
+            isError = errorMessage != null,
+            errorMessage = errorMessage,
         )
     }
 }

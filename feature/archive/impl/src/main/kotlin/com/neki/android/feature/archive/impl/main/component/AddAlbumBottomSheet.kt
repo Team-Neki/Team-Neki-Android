@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.bottomsheet.NekiTextFieldBottomSheet
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.archive.impl.main.AlbumNameErrorState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,7 +16,8 @@ internal fun AddAlbumBottomSheet(
     onCancelClick: () -> Unit,
     onConfirmClick: () -> Unit,
     modifier: Modifier = Modifier,
-    albumNameErrorState: AlbumNameErrorState? = null,
+    isError: Boolean = false,
+    errorMessage: String? = null,
 ) {
     NekiTextFieldBottomSheet(
         title = "새 앨범 추가",
@@ -30,8 +30,8 @@ internal fun AddAlbumBottomSheet(
         placeholder = "앨범명을 입력하세요",
         maxLength = 16,
         confirmButtonText = "추가하기",
-        isError = albumNameErrorState != null,
-        errorMessage = albumNameErrorState?.message,
+        isError = isError,
+        errorMessage = errorMessage,
     )
 }
 
@@ -50,42 +50,15 @@ private fun AddAlbumBottomSheetPreview() {
 
 @ComponentPreview
 @Composable
-private fun AddAlbumBottomSheetExceedLengthPreview() {
+private fun AddAlbumBottomSheetErrorPreview() {
     NekiTheme {
         AddAlbumBottomSheet(
             textFieldState = TextFieldState(),
             onDismissRequest = {},
             onCancelClick = {},
             onConfirmClick = {},
-            albumNameErrorState = AlbumNameErrorState.EXCEED_LENGTH,
-        )
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun AddAlbumBottomSheetInvalidCharacterPreview() {
-    NekiTheme {
-        AddAlbumBottomSheet(
-            textFieldState = TextFieldState(),
-            onDismissRequest = {},
-            onCancelClick = {},
-            onConfirmClick = {},
-            albumNameErrorState = AlbumNameErrorState.INVALID_CHARACTER,
-        )
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun AddAlbumBottomSheetDuplicatePreview() {
-    NekiTheme {
-        AddAlbumBottomSheet(
-            textFieldState = TextFieldState(),
-            onDismissRequest = {},
-            onCancelClick = {},
-            onConfirmClick = {},
-            albumNameErrorState = AlbumNameErrorState.DUPLICATE,
+            isError = true,
+            errorMessage = "앨범명은 최대 16자까지 입력할 수 있어요.",
         )
     }
 }

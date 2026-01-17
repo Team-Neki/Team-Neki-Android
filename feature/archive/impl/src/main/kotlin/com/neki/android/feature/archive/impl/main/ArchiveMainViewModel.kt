@@ -45,7 +45,7 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
 
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(showAddAlbumBottomSheet = false) }
-            ArchiveMainIntent.ClickAddAlbumButton -> {}
+            is ArchiveMainIntent.ClickAddAlbumButton -> {}
         }
     }
 

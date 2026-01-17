@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.main
 
-import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import kotlinx.collections.immutable.ImmutableList
@@ -13,15 +12,7 @@ data class ArchiveMainState(
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
     val showAddDialog: Boolean = false,
     val showAddAlbumBottomSheet: Boolean = false,
-    val newAlbumTitleState: TextFieldState = TextFieldState(),
-    val albumNameErrorState: AlbumNameErrorState? = null,
 )
-
-enum class AlbumNameErrorState(val message: String) {
-    EXCEED_LENGTH("앨범명은 최대 16자까지 입력할 수 있어요."),
-    INVALID_CHARACTER("앨범명은 한글, 영문, 숫자만 사용할 수 있어요."),
-    DUPLICATE("이미 사용 중인 앨범명이에요."),
-}
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent
@@ -46,7 +37,7 @@ sealed interface ArchiveMainIntent {
 
     // Add Album BottomSheet Intent
     data object DismissAddAlbumBottomSheet : ArchiveMainIntent
-    data object ClickAddAlbumButton : ArchiveMainIntent
+    data class ClickAddAlbumButton(val albumName: String) : ArchiveMainIntent
 }
 
 sealed interface ArchiveMainSideEffect {
