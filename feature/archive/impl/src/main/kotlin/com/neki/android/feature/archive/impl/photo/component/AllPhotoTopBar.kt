@@ -22,6 +22,10 @@ internal fun AllPhotoTopBar(
             PhotoSelectMode.DEFAULT -> "선택"
             PhotoSelectMode.SELECTING -> "취소"
         },
+        buttonLabelTextColor = when (selectMode) {
+            PhotoSelectMode.DEFAULT -> NekiTheme.colorScheme.primary500
+            PhotoSelectMode.SELECTING -> NekiTheme.colorScheme.gray800
+        },
         onBack = onBackClick,
         onTextButtonClick = when (selectMode) {
             PhotoSelectMode.DEFAULT -> onSelectClick
