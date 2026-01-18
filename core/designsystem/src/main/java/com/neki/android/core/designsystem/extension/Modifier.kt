@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -173,7 +174,9 @@ fun Modifier.cardShadow(
  * 사진 컴포넌트에 적용되는 그라데이션 배경
  * 좌하단에서 우상단으로 갈수록 어두워지는 효과
  */
-fun Modifier.photoBackground(): Modifier = this.background(
+fun Modifier.photoBackground(
+    shape: Shape = RoundedCornerShape(12.dp),
+): Modifier = this.background(
     brush = Brush.linearGradient(
         colorStops = arrayOf(
             0f to Color.Black.copy(alpha = 0f),
@@ -183,4 +186,5 @@ fun Modifier.photoBackground(): Modifier = this.background(
         start = Offset(0f, Float.POSITIVE_INFINITY),
         end = Offset(Float.POSITIVE_INFINITY, 0f),
     ),
+    shape = shape,
 )
