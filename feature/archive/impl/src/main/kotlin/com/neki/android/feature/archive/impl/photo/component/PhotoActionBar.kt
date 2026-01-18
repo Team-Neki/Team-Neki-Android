@@ -62,7 +62,7 @@ internal fun PhotoActionBar(
                 Icon(
                     modifier = Modifier.noRippleClickableSingle(
                         enabled = isEnabled,
-                        onClick = onDownloadClick,
+                        onClick = onDeleteClick,
                     ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
                     contentDescription = null,
