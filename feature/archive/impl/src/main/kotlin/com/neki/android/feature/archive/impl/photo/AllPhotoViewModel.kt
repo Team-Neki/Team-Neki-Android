@@ -44,7 +44,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
             AllPhotoIntent.ClickFilterChip -> reduce { copy(showFilterDialog = true) }
             AllPhotoIntent.DismissFilterPopup -> reduce { copy(showFilterDialog = false) }
             AllPhotoIntent.ClickFavoriteFilterChip -> handleFavoriteFilter(state, reduce)
-            is AllPhotoIntent.ClickFilterPopupRow -> handleFilterRow(intent.filter, reduce)
+            is AllPhotoIntent.ClickFilterPopupRow -> handleFilterRow(intent.filter, reduce, postSideEffect)
 
             // Photo Intent
             is AllPhotoIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, state, reduce, postSideEffect)
@@ -87,24 +87,29 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
                     showingPhotos.filter { it.isFavorite }
                 } else {
                     if (state.selectedPhotoFilter == PhotoFilter.NEWEST) sortedDescendingPhotos
-                    else photos
+                    else photos.sortedBy { it.date }
                 }.toImmutableList(),
             )
         }
     }
 
-    private fun handleFilterRow(filter: PhotoFilter, reduce: (AllPhotoState.() -> AllPhotoState) -> Unit) {
+    private fun handleFilterRow(
+        filter: PhotoFilter,
+        reduce: (AllPhotoState.() -> AllPhotoState) -> Unit,
+        postSideEffect: (AllPhotoSideEffect) -> Unit,
+    ) {
         reduce {
             val sortedPhotos = when (filter) {
                 PhotoFilter.NEWEST -> sortedDescendingPhotos.ifEmpty { photos.sortedByDescending { it.date } }
-                PhotoFilter.OLDEST -> photos
-            }.toImmutableList()
+                PhotoFilter.OLDEST -> photos.sortedBy { it.date }
+            }.filter { if (isFavoriteChipSelected) it.isFavorite else true }.toImmutableList()
             copy(
                 showFilterDialog = false,
                 selectedPhotoFilter = filter,
                 showingPhotos = sortedPhotos,
             )
         }
+        postSideEffect(AllPhotoSideEffect.ScrollToTop)
     }
 
     private fun handlePhotoClick(
