@@ -3,8 +3,8 @@ package com.neki.android.feature.archive.impl.photo
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
-import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -146,8 +146,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
             postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 선택해주세요."))
             return
         }
-        // TODO: Download selected photos
-        postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 갤러리에 다운로드했어요"))
+        postSideEffect(AllPhotoSideEffect.DownloadImages(state.selectedPhotos.map { it.imageUrl }))
     }
 
     private fun deleteSelectedPhotos(

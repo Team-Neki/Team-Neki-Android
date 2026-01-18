@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
-import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -121,8 +121,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
             postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
             return
         }
-        // TODO: Download selected photos
-        postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 갤러리에 다운로드했어요"))
+        postSideEffect(AlbumDetailSideEffect.DownloadImages(state.selectedPhotos.map { it.imageUrl }))
     }
 
     private fun handleDeleteIconClick(

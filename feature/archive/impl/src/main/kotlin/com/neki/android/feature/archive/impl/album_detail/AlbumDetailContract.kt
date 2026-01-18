@@ -54,4 +54,5 @@ sealed interface AlbumDetailSideEffect {
     data object NavigateBack : AlbumDetailSideEffect
     data class NavigateToPhotoDetail(val photo: Photo) : AlbumDetailSideEffect
     data class ShowToastMessage(val message: String) : AlbumDetailSideEffect
+    data class DownloadImages(val imageUrls: List<String>) : AlbumDetailSideEffect
 }

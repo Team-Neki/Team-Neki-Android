@@ -36,7 +36,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             PhotoDetailIntent.ClickBackIcon -> postSideEffect(PhotoDetailSideEffect.NavigateBack)
 
             // ActionBar Intent
-            PhotoDetailIntent.ClickDownloadIcon -> handleDownload(state, postSideEffect)
+            PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce, postSideEffect)
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(showDeleteDialog = true) }
 
@@ -45,14 +45,6 @@ class PhotoDetailViewModel @AssistedInject constructor(
             PhotoDetailIntent.ClickDeleteDialogCancelButton -> reduce { copy(showDeleteDialog = false) }
             PhotoDetailIntent.ClickDeleteDialogConfirmButton -> handleDelete(reduce, postSideEffect)
         }
-    }
-
-    private fun handleDownload(
-        state: PhotoDetailState,
-        postSideEffect: (PhotoDetailSideEffect) -> Unit,
-    ) {
-        // TODO: Download photo
-        postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진을 갤러리에 다운로드했어요"))
     }
 
     private fun handleFavoriteToggle(

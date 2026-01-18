@@ -51,5 +51,5 @@ sealed interface AllPhotoSideEffect {
     data object ScrollToTop : AllPhotoSideEffect
     data class NavigateToPhotoDetail(val photo: Photo) : AllPhotoSideEffect
     data class ShowToastMessage(val message: String) : AllPhotoSideEffect
-    data class DownloadImage(val imageUrl: String) : AllPhotoSideEffect
+    data class DownloadImages(val imageUrls: List<String>) : AllPhotoSideEffect
 }

@@ -11,16 +11,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import com.neki.android.core.designsystem.DevicePreview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
+import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.number
 
@@ -37,6 +38,16 @@ internal fun PhotoDetailRoute(
             PhotoDetailSideEffect.NavigateBack -> navigateBack()
             is PhotoDetailSideEffect.ShowToastMessage -> {
                 Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+            }
+
+            is PhotoDetailSideEffect.DownloadImage -> {
+                ImageDownloader.downloadImage(context, sideEffect.imageUrl)
+                    .onSuccess {
+                        Toast.makeText(context, "사진을 갤러리에 다운로드했어요", Toast.LENGTH_SHORT).show()
+                    }
+                    .onFailure {
+                        Toast.makeText(context, "다운로드에 실패했어요", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
     }

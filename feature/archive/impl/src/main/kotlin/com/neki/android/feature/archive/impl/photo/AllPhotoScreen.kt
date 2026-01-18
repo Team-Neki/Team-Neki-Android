@@ -25,10 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import com.neki.android.core.designsystem.DevicePreview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -41,6 +41,7 @@ import com.neki.android.feature.archive.impl.photo.component.AllPhotoFilterBar
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoTopBar
 import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
+import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
@@ -64,8 +65,14 @@ internal fun AllPhotoRoute(
                 Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             }
 
-            is AllPhotoSideEffect.DownloadImage -> {
-                // TODO: Implement download
+            is AllPhotoSideEffect.DownloadImages -> {
+                ImageDownloader.downloadImages(context, sideEffect.imageUrls)
+                    .onSuccess {
+                        Toast.makeText(context, "사진을 갤러리에 다운로드했어요", Toast.LENGTH_SHORT).show()
+                    }
+                    .onFailure {
+                        Toast.makeText(context, "다운로드에 실패했어요", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
     }
