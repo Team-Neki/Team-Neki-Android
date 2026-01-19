@@ -45,6 +45,8 @@ fun DoubleButtonAlertDialog(
     ) {
         Column(
             modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
                 .widthIn(max = 400.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(NekiTheme.colorScheme.white)
