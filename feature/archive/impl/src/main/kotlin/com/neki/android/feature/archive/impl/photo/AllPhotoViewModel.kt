@@ -62,7 +62,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
 
     private fun handleBackClick(
         state: AllPhotoState,
-        reduce: ((AllPhotoState) -> AllPhotoState) -> Unit,
+        reduce: (AllPhotoState.() -> AllPhotoState) -> Unit,
         postSideEffect: (AllPhotoSideEffect) -> Unit,
     ) {
         when (state.selectMode) {
@@ -78,7 +78,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
 
     private fun handleFavoriteFilter(
         state: AllPhotoState,
-        reduce: ((AllPhotoState) -> AllPhotoState) -> Unit,
+        reduce: (AllPhotoState.() -> AllPhotoState) -> Unit,
     ) {
         reduce {
             copy(
