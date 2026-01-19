@@ -10,7 +10,4 @@ dependencies {
     implementation(projects.feature.pose.api)
 
     implementation(libs.kotlinx.collections.immutable)
-
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
 }
