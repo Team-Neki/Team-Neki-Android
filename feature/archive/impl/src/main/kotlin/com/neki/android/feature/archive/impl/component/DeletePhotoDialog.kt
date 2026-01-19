@@ -1,10 +1,6 @@
-package com.neki.android.feature.archive.impl.photo.component
+package com.neki.android.feature.archive.impl.component
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
@@ -18,9 +14,6 @@ internal fun DeletePhotoDialog(
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
 ) {
     DoubleButtonAlertDialog(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
         title = "사진을 삭제하시겠어요?",
         content = "이 작업은 실행취소할 수 없어요",
         grayButtonText = "취소",

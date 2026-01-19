@@ -39,7 +39,7 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_H
 import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoFilterBar
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoTopBar
-import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
+import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.persistentListOf

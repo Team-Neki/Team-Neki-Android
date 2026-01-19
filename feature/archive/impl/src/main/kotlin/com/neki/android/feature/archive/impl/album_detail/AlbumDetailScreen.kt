@@ -34,7 +34,7 @@ import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
-import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
+import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.persistentListOf
