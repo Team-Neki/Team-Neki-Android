@@ -32,6 +32,7 @@ import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.component.DeleteOptionBottomSheet
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun AllAlbumRoute(
@@ -150,7 +151,7 @@ internal fun AllAlbumScreen(
     if (uiState.showDeleteAlbumBottomSheet) {
         DeleteOptionBottomSheet(
             title = "앨범을 삭제하시겠어요?",
-            options = AlbumDeleteOption.entries,
+            options = AlbumDeleteOption.entries.toImmutableList(),
             selectedOption = uiState.selectedDeleteOption,
             onDismissRequest = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
             onCancelClick = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },

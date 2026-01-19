@@ -26,12 +26,13 @@ import com.neki.android.core.designsystem.button.CTAButtonGray
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.extension.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun <T> DeleteOptionBottomSheet(
     title: String,
-    options: List<T>,
+    options: ImmutableList<T>,
     selectedOption: T,
     onDismissRequest: () -> Unit,
     onCancelClick: () -> Unit,

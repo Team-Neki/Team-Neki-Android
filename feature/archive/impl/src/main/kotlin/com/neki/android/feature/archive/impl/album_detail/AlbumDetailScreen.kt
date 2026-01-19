@@ -38,6 +38,7 @@ import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun AlbumDetailRoute(
@@ -160,7 +161,7 @@ internal fun AlbumDetailScreen(
     if (uiState.showDeleteBottomSheet) {
         DeleteOptionBottomSheet(
             title = "사진을 삭제하시겠어요?",
-            options = PhotoDeleteOption.entries,
+            options = PhotoDeleteOption.entries.toImmutableList(),
             selectedOption = uiState.selectedDeleteOption,
             onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteBottomSheet) },
             onCancelClick = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
