@@ -23,7 +23,6 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.core.ui.compose.collectWithLifecycle
 
 @Composable
@@ -60,16 +59,14 @@ fun PoseDetailScreen(
             title = "포즈 상세",
             onBack = { onIntent(PoseIntent.ClickBackIcon) },
         )
-        VerticalSpacer(28.dp)
         AsyncImage(
             model = uiState.selectedPose.poseImageUrl,
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Fit,
         )
-        VerticalSpacer(57.dp)
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
             thickness = 1.dp,

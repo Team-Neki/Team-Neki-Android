@@ -23,7 +23,7 @@ fun NekiTopBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 13.dp)
+            .height(54.dp)
             .padding(horizontal = 20.dp),
     ) {
         leadingIcon?.invoke(Modifier.align(Alignment.CenterStart))
