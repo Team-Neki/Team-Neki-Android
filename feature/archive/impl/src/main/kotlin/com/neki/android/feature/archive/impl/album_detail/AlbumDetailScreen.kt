@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.album_detail
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +15,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -27,6 +27,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album_detail.component.EmptyContent
 import com.neki.android.feature.archive.impl.component.DeleteOptionBottomSheet
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
@@ -46,22 +47,23 @@ internal fun AlbumDetailRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             AlbumDetailSideEffect.NavigateBack -> navigateBack()
             is AlbumDetailSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             is AlbumDetailSideEffect.ShowToastMessage -> {
-                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+                nekiToast.showToast(text = sideEffect.message)
             }
 
             is AlbumDetailSideEffect.DownloadImages -> {
                 ImageDownloader.downloadImages(context, sideEffect.imageUrls)
                     .onSuccess {
-                        Toast.makeText(context, "사진을 갤러리에 다운로드했어요", Toast.LENGTH_SHORT).show()
+                        nekiToast.showToast(text = "사진을 갤러리에 다운로드했어요")
                     }
                     .onFailure {
-                        Toast.makeText(context, "다운로드에 실패했어요", Toast.LENGTH_SHORT).show()
+                        nekiToast.showToast(text = "다운로드에 실패했어요")
                     }
             }
         }

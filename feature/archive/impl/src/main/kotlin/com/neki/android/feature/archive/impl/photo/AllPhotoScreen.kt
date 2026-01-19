@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.photo
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +31,7 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
@@ -55,6 +55,7 @@ internal fun AllPhotoRoute(
     val context = LocalContext.current
     val lazyState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
+    val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -62,16 +63,16 @@ internal fun AllPhotoRoute(
             AllPhotoSideEffect.ScrollToTop -> coroutineScope.launch { lazyState.animateScrollToItem(0) }
             is AllPhotoSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             is AllPhotoSideEffect.ShowToastMessage -> {
-                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+                nekiToast.showToast(text = sideEffect.message)
             }
 
             is AllPhotoSideEffect.DownloadImages -> {
                 ImageDownloader.downloadImages(context, sideEffect.imageUrls)
                     .onSuccess {
-                        Toast.makeText(context, "사진을 갤러리에 다운로드했어요", Toast.LENGTH_SHORT).show()
+                        nekiToast.showToast(text = "사진을 갤러리에 다운로드했어요")
                     }
                     .onFailure {
-                        Toast.makeText(context, "다운로드에 실패했어요", Toast.LENGTH_SHORT).show()
+                        nekiToast.showToast(text = "다운로드에 실패했어요")
                     }
             }
         }

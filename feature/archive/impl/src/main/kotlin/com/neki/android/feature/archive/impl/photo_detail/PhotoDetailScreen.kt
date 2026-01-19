@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -19,6 +19,7 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
@@ -32,21 +33,22 @@ internal fun PhotoDetailRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PhotoDetailSideEffect.NavigateBack -> navigateBack()
             is PhotoDetailSideEffect.ShowToastMessage -> {
-                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+                nekiToast.showToast(text = sideEffect.message)
             }
 
             is PhotoDetailSideEffect.DownloadImage -> {
                 ImageDownloader.downloadImage(context, sideEffect.imageUrl)
                     .onSuccess {
-                        Toast.makeText(context, "사진을 갤러리에 다운로드했어요", Toast.LENGTH_SHORT).show()
+                        nekiToast.showToast(text = "사진을 갤러리에 다운로드했어요")
                     }
                     .onFailure {
-                        Toast.makeText(context, "다운로드에 실패했어요", Toast.LENGTH_SHORT).show()
+                        nekiToast.showToast(text = "다운로드에 실패했어요")
                     }
             }
         }

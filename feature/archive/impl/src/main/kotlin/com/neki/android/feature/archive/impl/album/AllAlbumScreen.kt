@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.album
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +26,7 @@ import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.AlbumRowComponent
 import com.neki.android.core.ui.component.FavoriteAlbumRowComponent
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album.component.AllAlbumTopBar
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.component.DeleteOptionBottomSheet
@@ -42,6 +42,7 @@ internal fun AllAlbumRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -49,7 +50,7 @@ internal fun AllAlbumRoute(
             is AllAlbumSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.album)
             is AllAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.album)
             is AllAlbumSideEffect.ShowToastMessage -> {
-                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+                nekiToast.showToast(text = sideEffect.message)
             }
         }
     }

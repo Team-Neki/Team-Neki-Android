@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.main
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,10 +31,11 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
-import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
@@ -57,6 +57,7 @@ internal fun ArchiveMainRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lazyState = rememberLazyStaggeredGridState()
+    val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -68,7 +69,7 @@ internal fun ArchiveMainRoute(
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
-            is ArchiveMainSideEffect.ShowToastMessage -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+            is ArchiveMainSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
         }
     }
 
