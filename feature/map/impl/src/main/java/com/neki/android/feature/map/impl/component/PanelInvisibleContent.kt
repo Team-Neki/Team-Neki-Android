@@ -66,13 +66,12 @@ fun BrandCardCloseButton(
                 shape = CircleShape,
                 color = NekiTheme.colorScheme.white
             )
+            .clickable(onClick = onClick)
             .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
-            modifier = Modifier
-                .size(20.dp)
-                .clickable(onClick = onClick),
+            modifier = Modifier.size(20.dp),
             model = R.drawable.icon_close_20,
             contentDescription = null
         )
