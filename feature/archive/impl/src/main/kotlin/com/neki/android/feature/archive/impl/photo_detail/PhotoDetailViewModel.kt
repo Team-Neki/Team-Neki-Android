@@ -55,7 +55,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
         val newFavoriteStatus = !state.photo.isFavorite
         // TODO: Update favorite status in repository
         reduce {
-            copy(photo = photo.copy(isFavorite = newFavoriteStatus))
+            copy(photo = state.photo.copy(isFavorite = newFavoriteStatus))
         }
     }
 
