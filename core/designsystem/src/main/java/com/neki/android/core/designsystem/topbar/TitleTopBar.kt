@@ -152,6 +152,7 @@ fun BackTitleTextButtonOptionTopBar(
     title: String,
     buttonLabel: String,
     modifier: Modifier = Modifier,
+    optionIconRes: Int = R.drawable.icon_kebab,
     onBack: () -> Unit = {},
     onTextButtonClick: () -> Unit = {},
     onIconClick: () -> Unit = {},
@@ -175,12 +176,11 @@ fun BackTitleTextButtonOptionTopBar(
             ) {
                 TopBarTextButton(
                     buttonText = buttonLabel,
-                    modifier = modifier,
                     onClick = onTextButtonClick,
                 )
                 Icon(
-                    modifier = modifier.noRippleClickableSingle { onIconClick() },
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_kebab),
+                    modifier = Modifier.noRippleClickableSingle { onIconClick() },
+                    imageVector = ImageVector.vectorResource(optionIconRes),
                     tint = NekiTheme.colorScheme.gray800,
                     contentDescription = null,
                 )
