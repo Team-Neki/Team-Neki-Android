@@ -5,6 +5,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 
 @Composable
 fun ProvideTypographyAndColor(
@@ -23,16 +25,23 @@ fun ProvideTypographyAndColor(
 fun NekiTheme(
     content: @Composable () -> Unit,
 ) {
-    ProvideTypographyAndColor(
-        typography = defaultNekiTypography,
-        colors = defaultNekiColors,
+    CompositionLocalProvider(
+        LocalDensity provides Density(
+            density = LocalDensity.current.density,
+            fontScale = 1f,
+        ),
     ) {
-        MaterialTheme(
-            colorScheme = lightColorScheme(
-                background = NekiTheme.colorScheme.white,
-            ),
-            content = content,
-        )
+        ProvideTypographyAndColor(
+            typography = defaultNekiTypography,
+            colors = defaultNekiColors,
+        ) {
+            MaterialTheme(
+                colorScheme = lightColorScheme(
+                    background = NekiTheme.colorScheme.white,
+                ),
+                content = content,
+            )
+        }
     }
 }
 
