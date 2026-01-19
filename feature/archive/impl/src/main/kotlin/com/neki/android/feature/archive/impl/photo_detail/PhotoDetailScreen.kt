@@ -20,11 +20,9 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import com.neki.android.feature.archive.impl.photo.component.DeletePhotoDialog
+import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.number
 
 @Composable
 internal fun PhotoDetailRoute(
@@ -71,7 +69,7 @@ internal fun PhotoDetailScreen(
             .background(NekiTheme.colorScheme.white),
     ) {
         BackTitleTopBar(
-            title = formatDate(uiState.photo.date),
+            title = uiState.photo.date,
             onBack = { onIntent(PhotoDetailIntent.ClickBackIcon) },
         )
 
@@ -107,11 +105,6 @@ internal fun PhotoDetailScreen(
     }
 }
 
-private fun formatDate(date: LocalDate?): String {
-    if (date == null) return ""
-    return "${date.year}.${date.month.number.toString().padStart(2, '0')}.${date.day.toString().padStart(2, '0')}"
-}
-
 @DevicePreview
 @Composable
 private fun PhotoDetailScreenPreview() {
@@ -122,7 +115,7 @@ private fun PhotoDetailScreenPreview() {
                     id = 1,
                     imageUrl = "https://picsum.photos/400/400",
                     isFavorite = false,
-                    date = LocalDate(2025, 12, 26),
+                    date = "2025-12-26",
                 ),
             ),
         )
@@ -139,7 +132,7 @@ private fun PhotoDetailScreenFavoritePreview() {
                     id = 1,
                     imageUrl = "https://picsum.photos/400/400",
                     isFavorite = true,
-                    date = LocalDate(2025, 12, 26),
+                    date = "2025-12-26",
                 ),
             ),
         )
