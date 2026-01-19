@@ -2,6 +2,7 @@ package com.neki.android.core.designsystem.topbar
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +21,7 @@ fun NekiTopBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 13.dp)
+            .height(54.dp)
             .padding(horizontal = 20.dp),
     ) {
         leadingIcon?.invoke(Modifier.align(Alignment.CenterStart))
