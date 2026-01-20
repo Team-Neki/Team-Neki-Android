@@ -13,12 +13,13 @@ import kotlinx.collections.immutable.toPersistentList
 
 @HiltViewModel(assistedFactory = UploadAlbumViewModel.Factory::class)
 class UploadAlbumViewModel @AssistedInject constructor(
+    @Assisted private val imageUrl: String?,
     @Assisted private val uriStrings: List<String>,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(uriStrings: List<String>): UploadAlbumViewModel
+        fun create(imageUrl: String?, uriStrings: List<String>): UploadAlbumViewModel
     }
 
     val store: MviIntentStore<UploadAlbumState, UploadAlbumIntent, UploadAlbumSideEffect> =
@@ -55,7 +56,10 @@ class UploadAlbumViewModel @AssistedInject constructor(
     private fun fetchInitialData(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
         // TODO: Fetch albums from repository
         reduce {
-            copy(selectedUris = uriStrings.map { it.toUri() }.toImmutableList())
+            copy(
+                imageUrl = imageUrl,
+                selectedUris = uriStrings.map { it.toUri() }.toImmutableList(),
+            )
         }
     }
 

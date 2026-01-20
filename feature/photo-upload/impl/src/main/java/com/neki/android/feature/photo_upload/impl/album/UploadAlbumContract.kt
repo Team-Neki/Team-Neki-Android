@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 
 data class UploadAlbumState(
+    val imageUrl: String? = null,
     val selectedUris: ImmutableList<Uri> = persistentListOf(Uri.EMPTY),
     val favoriteAlbum: Album = Album(),
     val albums: ImmutableList<Album> = persistentListOf(
@@ -16,7 +17,10 @@ data class UploadAlbumState(
         ),
     ),
     val selectedAlbumIds: PersistentList<Long> = persistentListOf(),
-)
+) {
+    val count: Int
+        get() = if (imageUrl == null) 1 else selectedUris.size
+}
 
 sealed interface UploadAlbumIntent {
     data object EnterUploadAlbumScreen : UploadAlbumIntent

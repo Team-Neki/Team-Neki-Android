@@ -26,6 +26,13 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
     ) {
         if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
+            is ArchiveMainIntent.QRCodeScanned -> reduce {
+                copy(
+                    scannedImageUrl = intent.imageUrl,
+                    showChooseWithAlbumDialog = true,
+                )
+            }
+
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialDate(reduce)
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
@@ -55,10 +62,13 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
                 reduce {
                     copy(
                         showChooseWithAlbumDialog = false,
+                        scannedImageUrl = null,
                         selectedUris = persistentListOf(),
                     )
                 }
-                postSideEffect(ArchiveMainSideEffect.NavigateToUploadAlbum(state.selectedUris.map { it.toString() }))
+                if (state.scannedImageUrl == null)
+                    postSideEffect(ArchiveMainSideEffect.NavigateToUploadAlbumWithGallery(state.selectedUris.map { it.toString() }))
+                else postSideEffect(ArchiveMainSideEffect.NavigateToUploadAlbumWithQRScan(state.scannedImageUrl))
             }
 
             ArchiveMainIntent.ClickUploadWithoutAlbumRow -> uploadWithoutAlbum(state, reduce, postSideEffect)

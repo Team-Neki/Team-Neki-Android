@@ -11,6 +11,7 @@ data class ArchiveMainState(
     val favoriteAlbum: Album = Album(),
     val albums: ImmutableList<Album> = persistentListOf(),
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
+    val scannedImageUrl: String? = null,
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
     val showAddDialog: Boolean = false,
     val showChooseWithAlbumDialog: Boolean = false,
@@ -19,6 +20,7 @@ data class ArchiveMainState(
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent
+    data class QRCodeScanned(val imageUrl: String) : ArchiveMainIntent
     data object ClickScreen : ArchiveMainIntent
     data object ClickGoToTopButton : ArchiveMainIntent
 
@@ -52,7 +54,8 @@ sealed interface ArchiveMainIntent {
 
 sealed interface ArchiveMainSideEffect {
     data object NavigateToQRScan : ArchiveMainSideEffect
-    data class NavigateToUploadAlbum(val uriStrings: List<String>) : ArchiveMainSideEffect
+    data class NavigateToUploadAlbumWithGallery(val uriStrings: List<String>) : ArchiveMainSideEffect
+    data class NavigateToUploadAlbumWithQRScan(val imageUrl: String) : ArchiveMainSideEffect
     data object NavigateToAllAlbum : ArchiveMainSideEffect
     data class NavigateToFavoriteAlbum(val albumId: Long) : ArchiveMainSideEffect
     data class NavigateToAlbumDetail(val albumId: Long) : ArchiveMainSideEffect

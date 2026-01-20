@@ -63,7 +63,7 @@ internal fun UploadAlbumScreen(
             .background(NekiTheme.colorScheme.white),
     ) {
         UploadAlbumTopBar(
-            count = uiState.selectedUris.size,
+            count = uiState.count,
             onBackClick = { onIntent(UploadAlbumIntent.ClickBackIcon) },
             onUploadClick = { onIntent(UploadAlbumIntent.ClickUploadButton) },
         )

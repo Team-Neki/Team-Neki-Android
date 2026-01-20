@@ -52,7 +52,8 @@ import timber.log.Timber
 internal fun ArchiveMainRoute(
     viewModel: ArchiveMainViewModel = hiltViewModel(),
     navigateToQRScan: () -> Unit,
-    navigateToUploadAlbum: (List<String>) -> Unit,
+    navigateToUploadAlbumWithGallery: (List<String>) -> Unit,
+    navigateToUploadAlbumWithQRScan: (String) -> Unit,
     navigateToAllAlbum: () -> Unit,
     navigateToFavoriteAlbum: (Long) -> Unit,
     navigateToAlbumDetail: (Long) -> Unit,
@@ -74,7 +75,8 @@ internal fun ArchiveMainRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             ArchiveMainSideEffect.NavigateToQRScan -> navigateToQRScan()
-            is ArchiveMainSideEffect.NavigateToUploadAlbum -> navigateToUploadAlbum(sideEffect.uriStrings)
+            is ArchiveMainSideEffect.NavigateToUploadAlbumWithGallery -> navigateToUploadAlbumWithGallery(sideEffect.uriStrings)
+            is ArchiveMainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
             is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
