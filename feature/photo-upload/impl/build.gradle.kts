@@ -27,6 +27,7 @@ android {
 
 dependencies {
     implementation(projects.feature.photoUpload.api)
+    implementation(projects.feature.archive.api)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.mlkit.barcode.scanning)
