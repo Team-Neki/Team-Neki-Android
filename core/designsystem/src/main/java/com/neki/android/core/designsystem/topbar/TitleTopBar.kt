@@ -41,7 +41,9 @@ fun CloseTitleTextButtonTopBar(
     title: String,
     buttonText: String,
     modifier: Modifier = Modifier,
-    buttonLabelTextColor: Color = NekiTheme.colorScheme.primary500,
+    enabled: Boolean = true,
+    enabledTextColor: Color = NekiTheme.colorScheme.primary500,
+    disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     onClose: () -> Unit = {},
     onTextButtonClick: () -> Unit = {},
 ) {
@@ -61,7 +63,9 @@ fun CloseTitleTextButtonTopBar(
                 buttonText = buttonText,
                 modifier = modifier,
                 onClick = onTextButtonClick,
-                buttonLabelTextColor = buttonLabelTextColor,
+                enabled = enabled,
+                enabledTextColor = enabledTextColor,
+                disabledTextColor = disabledTextColor,
             )
         },
     )
@@ -72,7 +76,9 @@ fun BackTitleTextButtonTopBar(
     title: String,
     buttonLabel: String,
     modifier: Modifier = Modifier,
-    buttonLabelTextColor: Color = NekiTheme.colorScheme.primary500,
+    enabled: Boolean = true,
+    enabledTextColor: Color = NekiTheme.colorScheme.primary500,
+    disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     onBack: () -> Unit = {},
     onTextButtonClick: () -> Unit = {},
 ) {
@@ -92,7 +98,9 @@ fun BackTitleTextButtonTopBar(
                 buttonText = buttonLabel,
                 modifier = modifier,
                 onClick = onTextButtonClick,
-                buttonLabelTextColor = buttonLabelTextColor,
+                enabled = enabled,
+                enabledTextColor = enabledTextColor,
+                disabledTextColor = disabledTextColor,
             )
         },
     )
@@ -152,6 +160,9 @@ fun BackTitleTextButtonOptionTopBar(
     title: String,
     buttonLabel: String,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    enabledTextColor: Color = NekiTheme.colorScheme.primary500,
+    disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     optionIconRes: Int = R.drawable.icon_kebab,
     onBack: () -> Unit = {},
     onTextButtonClick: () -> Unit = {},
@@ -177,6 +188,9 @@ fun BackTitleTextButtonOptionTopBar(
                 TopBarTextButton(
                     buttonText = buttonLabel,
                     onClick = onTextButtonClick,
+                    enabled = enabled,
+                    enabledTextColor = enabledTextColor,
+                    disabledTextColor = disabledTextColor,
                 )
                 Icon(
                     modifier = Modifier.noRippleClickableSingle { onIconClick() },
