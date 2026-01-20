@@ -39,7 +39,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.Archive> {
         ArchiveMainRoute(
             navigateToQRScan = navigator::navigateToQRScan,
-            navigateToGalleryUpload = {},
+            navigateToGalleryUpload = { },
             navigateToAllAlbum = navigator::navigateToAllAlbum,
             navigateToFavoriteAlbum = { album -> navigator.navigateToAlbumDetail(isFavorite = true, album = album) },
             navigateToAlbumDetail = { album -> navigator.navigateToAlbumDetail(isFavorite = false, album = album) },

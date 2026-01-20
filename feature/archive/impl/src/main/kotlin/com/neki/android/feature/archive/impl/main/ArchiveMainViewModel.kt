@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,8 +40,28 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
 
             ArchiveMainIntent.ClickGalleryUploadRow -> {
                 reduce { copy(showAddDialog = false) }
-                postSideEffect(ArchiveMainSideEffect.NavigateToGalleryUpload)
+                postSideEffect(ArchiveMainSideEffect.OpenGallery)
             }
+
+            is ArchiveMainIntent.SelectGalleryImage -> reduce {
+                copy(
+                    showChooseWithAlbumDialog = true,
+                    selectedUris = intent.uris.toImmutableList(),
+                )
+            }
+
+            ArchiveMainIntent.DismissChooseWithAlbumDialog -> reduce { copy(showChooseWithAlbumDialog = false) }
+            ArchiveMainIntent.ClickUploadWithAlbumRow -> {
+                reduce {
+                    copy(
+                        showChooseWithAlbumDialog = false,
+                        selectedUris = persistentListOf(),
+                    )
+                }
+                postSideEffect(ArchiveMainSideEffect.NavigateToGalleryUpload(state.selectedUris.map { it.toString() }))
+            }
+
+            ArchiveMainIntent.ClickUploadWithoutAlbumRow -> uploadWithoutAlbum(state, reduce, postSideEffect)
 
             ArchiveMainIntent.ClickAddNewAlbumRow -> reduce {
                 copy(
@@ -67,6 +89,16 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
 
     private fun fetchInitialDate(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
         reduce { copy() }
+    }
+
+    private fun uploadWithoutAlbum(
+        state: ArchiveMainState,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+    ) {
+        reduce { copy(showChooseWithAlbumDialog = false) }
+        // TODO: Upload photo without album to repository
+        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
     }
 
     private fun handleAddAlbum(

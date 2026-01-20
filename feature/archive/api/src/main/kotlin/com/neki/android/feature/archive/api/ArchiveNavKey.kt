@@ -36,7 +36,7 @@ fun Navigator.navigateToAllAlbum() {
     navigate(ArchiveNavKey.AllAlbum)
 }
 
-fun Navigator.navigateToAlbumDetail(isFavorite: Boolean, album: Album) {
+fun Navigator.navigateToAlbumDetail(album: Album, isFavorite: Boolean = false) {
     navigate(ArchiveNavKey.AlbumDetail(isFavorite, album))
 }
 

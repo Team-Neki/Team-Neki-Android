@@ -1,5 +1,8 @@
 package com.neki.android.feature.archive.impl.main
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,14 +43,16 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
+import com.neki.android.feature.archive.impl.main.component.ChooseWithAlbumDialog
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
 import kotlinx.collections.immutable.persistentListOf
+import timber.log.Timber
 
 @Composable
 internal fun ArchiveMainRoute(
     viewModel: ArchiveMainViewModel = hiltViewModel(),
     navigateToQRScan: () -> Unit,
-    navigateToGalleryUpload: () -> Unit,
+    navigateToGalleryUpload: (List<String>) -> Unit,
     navigateToAllAlbum: () -> Unit,
     navigateToFavoriteAlbum: (Album) -> Unit,
     navigateToAlbumDetail: (Album) -> Unit,
@@ -58,17 +63,25 @@ internal fun ArchiveMainRoute(
     val context = LocalContext.current
     val lazyState = rememberLazyStaggeredGridState()
     val nekiToast = remember { NekiToast(context) }
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+        if (uris.isNotEmpty()) {
+            viewModel.store.onIntent(ArchiveMainIntent.SelectGalleryImage(uris))
+        } else {
+            Timber.d("No media selected")
+        }
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             ArchiveMainSideEffect.NavigateToQRScan -> navigateToQRScan()
-            ArchiveMainSideEffect.NavigateToGalleryUpload -> navigateToGalleryUpload()
+            is ArchiveMainSideEffect.NavigateToGalleryUpload -> navigateToGalleryUpload(sideEffect.uriStrings)
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.album)
             is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.album)
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
+            ArchiveMainSideEffect.OpenGallery -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             is ArchiveMainSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
         }
     }
@@ -142,6 +155,14 @@ internal fun ArchiveMainScreen(
             },
             isError = errorMessage != null,
             errorMessage = errorMessage,
+        )
+    }
+
+    if (uiState.showChooseWithAlbumDialog) {
+        ChooseWithAlbumDialog(
+            onDismissRequest = { onIntent(ArchiveMainIntent.DismissChooseWithAlbumDialog) },
+            onUploadWithOutAlbumClick = { onIntent(ArchiveMainIntent.ClickUploadWithoutAlbumRow) },
+            onUploadWithAlbumClick = { onIntent(ArchiveMainIntent.ClickUploadWithAlbumRow) },
         )
     }
 }
