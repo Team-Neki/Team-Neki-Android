@@ -57,13 +57,7 @@ internal class PoseViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    private fun fetchInitialData(reduce: ((PoseState) -> PoseState) -> Unit) {
-        reduce {
-            copy(
-                randomPoseList = PoseState.dummy.map {
-                    Pose(poseImageUrl = it)
-                }.toImmutableList(),
-            )
-        }
+    private fun fetchInitialData(reduce: (PoseState.() -> PoseState) -> Unit) {
+        reduce { copy() }
     }
 }
