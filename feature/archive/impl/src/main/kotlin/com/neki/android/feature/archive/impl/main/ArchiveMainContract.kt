@@ -39,7 +39,7 @@ sealed interface ArchiveMainIntent {
     // Album Intent
     data object ClickAllAlbumText : ArchiveMainIntent
     data object ClickFavoriteAlbum : ArchiveMainIntent
-    data class ClickAlbumItem(val album: Album) : ArchiveMainIntent
+    data class ClickAlbumItem(val albumId: Long) : ArchiveMainIntent
 
     // Photo Intent
     data object ClickAllPhotoText : ArchiveMainIntent
@@ -52,10 +52,10 @@ sealed interface ArchiveMainIntent {
 
 sealed interface ArchiveMainSideEffect {
     data object NavigateToQRScan : ArchiveMainSideEffect
-    data class NavigateToGalleryUpload(val uriStrings: List<String>) : ArchiveMainSideEffect
+    data class NavigateToUploadAlbum(val uriStrings: List<String>) : ArchiveMainSideEffect
     data object NavigateToAllAlbum : ArchiveMainSideEffect
-    data class NavigateToFavoriteAlbum(val album: Album) : ArchiveMainSideEffect
-    data class NavigateToAlbumDetail(val album: Album) : ArchiveMainSideEffect
+    data class NavigateToFavoriteAlbum(val albumId: Long) : ArchiveMainSideEffect
+    data class NavigateToAlbumDetail(val albumId: Long) : ArchiveMainSideEffect
     data object NavigateToAllPhoto : ArchiveMainSideEffect
     data class NavigateToPhotoDetail(val photo: Photo) : ArchiveMainSideEffect
 

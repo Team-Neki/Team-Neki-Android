@@ -52,10 +52,10 @@ import timber.log.Timber
 internal fun ArchiveMainRoute(
     viewModel: ArchiveMainViewModel = hiltViewModel(),
     navigateToQRScan: () -> Unit,
-    navigateToGalleryUpload: (List<String>) -> Unit,
+    navigateToUploadAlbum: (List<String>) -> Unit,
     navigateToAllAlbum: () -> Unit,
-    navigateToFavoriteAlbum: (Album) -> Unit,
-    navigateToAlbumDetail: (Album) -> Unit,
+    navigateToFavoriteAlbum: (Long) -> Unit,
+    navigateToAlbumDetail: (Long) -> Unit,
     navigateToAllPhoto: () -> Unit,
     navigateToPhotoDetail: (Photo) -> Unit,
 ) {
@@ -74,10 +74,10 @@ internal fun ArchiveMainRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             ArchiveMainSideEffect.NavigateToQRScan -> navigateToQRScan()
-            is ArchiveMainSideEffect.NavigateToGalleryUpload -> navigateToGalleryUpload(sideEffect.uriStrings)
+            is ArchiveMainSideEffect.NavigateToUploadAlbum -> navigateToUploadAlbum(sideEffect.uriStrings)
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
-            is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.album)
-            is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.album)
+            is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
+            is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
@@ -115,7 +115,7 @@ internal fun ArchiveMainScreen(
             onDismissPopup = { onIntent(ArchiveMainIntent.DismissAddDialog) },
             onShowAllAlbumClick = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
             onFavoriteAlbumClick = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
-            onAlbumItemClick = { album -> onIntent(ArchiveMainIntent.ClickAlbumItem(album)) },
+            onAlbumItemClick = { onIntent(ArchiveMainIntent.ClickAlbumItem(it)) },
             onShowAllPhotoClick = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
             onPhotoItemClick = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
         )
@@ -179,7 +179,7 @@ private fun ArchiveMainContent(
     onDismissPopup: () -> Unit,
     onShowAllAlbumClick: () -> Unit,
     onFavoriteAlbumClick: () -> Unit,
-    onAlbumItemClick: (Album) -> Unit,
+    onAlbumItemClick: (Long) -> Unit,
     onShowAllPhotoClick: () -> Unit,
     onPhotoItemClick: (Photo) -> Unit,
     modifier: Modifier = Modifier,

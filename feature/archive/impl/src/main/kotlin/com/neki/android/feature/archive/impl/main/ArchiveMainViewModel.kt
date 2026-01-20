@@ -58,7 +58,7 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
                         selectedUris = persistentListOf(),
                     )
                 }
-                postSideEffect(ArchiveMainSideEffect.NavigateToGalleryUpload(state.selectedUris.map { it.toString() }))
+                postSideEffect(ArchiveMainSideEffect.NavigateToUploadAlbum(state.selectedUris.map { it.toString() }))
             }
 
             ArchiveMainIntent.ClickUploadWithoutAlbumRow -> uploadWithoutAlbum(state, reduce, postSideEffect)
@@ -74,8 +74,8 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
 
             // Album Intent
             ArchiveMainIntent.ClickAllAlbumText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllAlbum)
-            ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum(state.favoriteAlbum))
-            is ArchiveMainIntent.ClickAlbumItem -> postSideEffect(ArchiveMainSideEffect.NavigateToAlbumDetail(intent.album))
+            ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum(-1L))
+            is ArchiveMainIntent.ClickAlbumItem -> postSideEffect(ArchiveMainSideEffect.NavigateToAlbumDetail(intent.albumId))
 
             // Photo Intent
             ArchiveMainIntent.ClickAllPhotoText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllPhoto)

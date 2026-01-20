@@ -40,10 +40,10 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.Archive> {
         ArchiveMainRoute(
             navigateToQRScan = navigator::navigateToQRScan,
-            navigateToGalleryUpload = navigator::navigateToUploadAlbum,
+            navigateToUploadAlbum = navigator::navigateToUploadAlbum,
             navigateToAllAlbum = navigator::navigateToAllAlbum,
-            navigateToFavoriteAlbum = { album -> navigator.navigateToAlbumDetail(isFavorite = true, album = album) },
-            navigateToAlbumDetail = { album -> navigator.navigateToAlbumDetail(isFavorite = false, album = album) },
+            navigateToFavoriteAlbum = { id -> navigator.navigateToAlbumDetail(isFavorite = true, id = id) },
+            navigateToAlbumDetail = { id -> navigator.navigateToAlbumDetail(isFavorite = false, id = id) },
             navigateToAllPhoto = navigator::navigateToAllPhoto,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
@@ -59,15 +59,15 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AllAlbum> {
         AllAlbumRoute(
             navigateBack = navigator::goBack,
-            navigateToFavoriteAlbum = { album -> navigator.navigateToAlbumDetail(isFavorite = true, album = album) },
-            navigateToAlbumDetail = { album -> navigator.navigateToAlbumDetail(isFavorite = false, album = album) },
+            navigateToFavoriteAlbum = { id -> navigator.navigateToAlbumDetail(isFavorite = true, id = id) },
+            navigateToAlbumDetail = { id -> navigator.navigateToAlbumDetail(isFavorite = false, id = id) },
         )
     }
     entry<ArchiveNavKey.AlbumDetail> { key ->
         AlbumDetailRoute(
             viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
                 creationCallback = { factory ->
-                    factory.create(key.album, key.isFavorite)
+                    factory.create(key.albumId, key.isFavorite)
                 },
             ),
             navigateBack = navigator::goBack,

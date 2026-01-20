@@ -9,8 +9,13 @@ import kotlinx.collections.immutable.persistentListOf
 data class UploadAlbumState(
     val selectedUris: ImmutableList<Uri> = persistentListOf(Uri.EMPTY),
     val favoriteAlbum: Album = Album(),
-    val albums: ImmutableList<Album> = persistentListOf(Album(title = "sdf", thumbnailUrl = "https://tistory1.daumcdn.net/tistory/5417065/attach/2e12bf06d8f1431cbc08dbe151bd4505")),
-    val selectedAlbums: PersistentList<Album> = persistentListOf(),
+    val albums: ImmutableList<Album> = persistentListOf(
+        Album(
+            title = "sdf",
+            thumbnailUrl = "https://tistory1.daumcdn.net/tistory/5417065/attach/2e12bf06d8f1431cbc08dbe151bd4505",
+        ),
+    ),
+    val selectedAlbumIds: PersistentList<Long> = persistentListOf(),
 )
 
 sealed interface UploadAlbumIntent {
@@ -21,11 +26,11 @@ sealed interface UploadAlbumIntent {
     data object ClickUploadButton : UploadAlbumIntent
 
     // Album Intent
-    data class ClickAlbumItem(val album: Album) : UploadAlbumIntent
+    data class ClickAlbumItem(val albumId: Long) : UploadAlbumIntent
 }
 
 sealed interface UploadAlbumSideEffect {
     data object NavigateBack : UploadAlbumSideEffect
-    data class NavigateToAlbumDetail(val album: Album) : UploadAlbumSideEffect
+    data class NavigateToAlbumDetail(val albumId: Long) : UploadAlbumSideEffect
     data class ShowToastMessage(val message: String) : UploadAlbumSideEffect
 }

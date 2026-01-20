@@ -41,10 +41,10 @@ class UploadAlbumViewModel @AssistedInject constructor(
             is UploadAlbumIntent.ClickAlbumItem -> {
                 reduce {
                     copy(
-                        selectedAlbums = if (state.selectedAlbums.any { it.id == intent.album.id }) {
-                            selectedAlbums.remove(intent.album)
+                        selectedAlbumIds = if (state.selectedAlbumIds.any { it == intent.albumId }) {
+                            selectedAlbumIds.remove(intent.albumId)
                         } else {
-                            selectedAlbums.add(intent.album)
+                            selectedAlbumIds.add(intent.albumId)
                         }.toPersistentList(),
                     )
                 }
@@ -66,6 +66,6 @@ class UploadAlbumViewModel @AssistedInject constructor(
     ) {
         postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
         // TODO: Upload photos to repository
-        postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(state.selectedAlbums.first()))
+        postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(state.selectedAlbumIds.first()))
     }
 }

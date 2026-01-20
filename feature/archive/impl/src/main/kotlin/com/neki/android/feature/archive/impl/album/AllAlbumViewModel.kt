@@ -52,10 +52,10 @@ class AllAlbumViewModel @Inject constructor() : ViewModel() {
 
             // Album Intent
             AllAlbumIntent.ClickFavoriteAlbum -> postSideEffect(
-                AllAlbumSideEffect.NavigateToFavoriteAlbum(state.favoriteAlbum),
+                AllAlbumSideEffect.NavigateToFavoriteAlbum(state.favoriteAlbum.id),
             )
 
-            is AllAlbumIntent.ClickAlbumItem -> handleAlbumClick(intent.album, state, reduce, postSideEffect)
+            is AllAlbumIntent.ClickAlbumItem -> handleAlbumClick(intent.albumId, state, reduce, postSideEffect)
 
             // Add Album BottomSheet Intent
             AllAlbumIntent.DismissAddAlbumBottomSheet -> reduce { copy(showAddAlbumBottomSheet = false) }
@@ -102,21 +102,22 @@ class AllAlbumViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun handleAlbumClick(
-        album: Album,
+        albumId: Long,
         state: AllAlbumState,
         reduce: (AllAlbumState.() -> AllAlbumState) -> Unit,
         postSideEffect: (AllAlbumSideEffect) -> Unit,
     ) {
         when (state.selectMode) {
             SelectMode.DEFAULT -> {
-                postSideEffect(AllAlbumSideEffect.NavigateToAlbumDetail(album))
+                postSideEffect(AllAlbumSideEffect.NavigateToAlbumDetail(albumId))
             }
 
             SelectMode.SELECTING -> {
-                val isSelected = state.selectedAlbums.any { it.id == album.id }
+                val album = state.albums.find { it.id == albumId } ?: return
+                val isSelected = state.selectedAlbums.any { it.id == albumId }
                 if (isSelected) {
                     reduce {
-                        copy(selectedAlbums = selectedAlbums.filter { it.id != album.id }.toImmutableList())
+                        copy(selectedAlbums = selectedAlbums.filter { it.id != albumId }.toImmutableList())
                     }
                 } else {
                     reduce {

@@ -42,9 +42,9 @@ private fun EntryProviderScope<NavKey>.photoUploadEntry(navigator: Navigator) {
                 },
             ),
             navigateBack = navigator::goBack,
-            navigateToAlbumDetail = {
+            navigateToAlbumDetail = { id ->
                 navigator.remove(key)
-                navigator.navigateToAlbumDetail(album = it)
+                navigator.navigateToAlbumDetail(id = id)
             },
         )
     }

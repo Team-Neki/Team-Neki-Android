@@ -38,8 +38,8 @@ import kotlinx.collections.immutable.toImmutableList
 internal fun AllAlbumRoute(
     viewModel: AllAlbumViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToFavoriteAlbum: (Album) -> Unit,
-    navigateToAlbumDetail: (Album) -> Unit,
+    navigateToFavoriteAlbum: (Long) -> Unit,
+    navigateToAlbumDetail: (Long) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -48,8 +48,8 @@ internal fun AllAlbumRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             AllAlbumSideEffect.NavigateBack -> navigateBack()
-            is AllAlbumSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.album)
-            is AllAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.album)
+            is AllAlbumSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
+            is AllAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
             is AllAlbumSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)
             }
@@ -112,7 +112,7 @@ internal fun AllAlbumScreen(
                     album = album,
                     isSelectable = uiState.selectMode == SelectMode.SELECTING,
                     isSelected = isSelected,
-                    onClick = { onIntent(AllAlbumIntent.ClickAlbumItem(album)) },
+                    onClick = { onIntent(AllAlbumIntent.ClickAlbumItem(album.id)) },
                 )
             }
         }
