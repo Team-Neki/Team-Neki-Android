@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -48,17 +49,19 @@ import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.extension.buttonShadow
 import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.Brand
+import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.map.impl.DragValue
-import com.neki.android.feature.map.impl.const.FourCutBrand
+import com.neki.android.feature.map.impl.const.MapConst
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.roundToInt
-
-//TODO: BottomNavigationBar 컴포넌트 디자인 변경사항에 맞춰 바꿔야 함
-private val BOTTOM_NAV_BAR_HEIGHT = 72.dp
 
 @Composable
 fun AnchoredDraggablePanel(
-    modifier: Modifier = Modifier,
+    brands: ImmutableList<Brand> = persistentListOf(),
+    nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     dragValue: DragValue = DragValue.Bottom,
     isCurrentLocation: Boolean = false,
     onDragValueChanged: (DragValue) -> Unit = {},
@@ -69,11 +72,10 @@ fun AnchoredDraggablePanel(
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
-
     val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
     var collapsedHeightPx by remember { mutableIntStateOf(0) }
-    val bottomNavBarHeightPx = with(density) { BOTTOM_NAV_BAR_HEIGHT.toPx() }
     val currentLocationButtonHeightPx = with(density) { 48.dp.toPx() }  // 36.dp + 12.dp
+    val bottomNavBarHeightPx = with(density) { MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp.toPx() }
     val navigationBarHeightPx = with(density) { WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx() }
 
     var isProgrammaticTransition by remember { mutableStateOf(false) }
@@ -83,7 +85,7 @@ fun AnchoredDraggablePanel(
             DragValue.Bottom at screenHeightPx - collapsedHeightPx - bottomNavBarHeightPx - currentLocationButtonHeightPx - navigationBarHeightPx
             DragValue.Center at screenHeightPx * 0.3f
             DragValue.Top at screenHeightPx * 0.05f
-            DragValue.Invisible at screenHeightPx + navigationBarHeightPx
+            DragValue.Invisible at screenHeightPx
         }
 
         AnchoredDraggableState(
@@ -140,6 +142,7 @@ fun AnchoredDraggablePanel(
             AnchoredPanelContent(
                 brands = brands,
                 nearbyBrands = nearbyBrands,
+                dragValue = dragValue,
                 onCollapsedHeightMeasured = { collapsedHeightPx = it },
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = { onClickBrand(it) },
@@ -154,14 +157,24 @@ fun AnchoredPanelContent(
     modifier: Modifier = Modifier,
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
+    dragValue: DragValue = DragValue.Bottom,
     onCollapsedHeightMeasured: (Int) -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Boolean) -> Unit = {},
     onClickNearBrand: () -> Unit = {},
 ) {
     val density = LocalDensity.current
-    // "가까운 네컷 사진 브랜드" 텍스트 높이의 절반 + VerticalSpacer(24.dp)
+    val configuration = LocalConfiguration.current
+    val screenHeightDp = configuration.screenHeightDp.dp
+
+    /** 패널 외부 상단 현위치 버튼 영역 **/
     val additionalHeightPx = with(density) { (24.dp + 12.dp).toPx().toInt() }
+
+    val extraBottomPadding = when (dragValue) {
+        DragValue.Center -> screenHeightDp * 0.3f
+        DragValue.Top -> screenHeightDp * 0.05f
+        else -> 0.dp
+    }
 
     Column(
         modifier = Modifier
@@ -180,7 +193,8 @@ fun AnchoredPanelContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned {
-                    onCollapsedHeightMeasured(it.size.height + additionalHeightPx)
+                    val newHeight = it.size.height + additionalHeightPx
+                    onCollapsedHeightMeasured(newHeight)
                 }
         ) {
             BottomSheetDragHandle()
@@ -230,8 +244,11 @@ fun AnchoredPanelContent(
         }
         VerticalSpacer(8.dp)
         LazyColumn(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = extraBottomPadding)
         ) {
             items(nearbyBrands) { brandInfo ->
                 HorizontalBrandItem(

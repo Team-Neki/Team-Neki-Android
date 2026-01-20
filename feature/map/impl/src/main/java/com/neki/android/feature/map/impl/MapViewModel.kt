@@ -73,6 +73,9 @@ class MapViewModel @Inject constructor() : ViewModel() {
                 BrandInfo(brandName = "하루필름", brandImageRes = R.drawable.icon_haru_film, branchName = "신촌점", distance = "720m"),
                 BrandInfo(brandName = "플랜비스튜디오", brandImageRes = R.drawable.icon_planb_studio, branchName = "잠실역점", distance = "890m"),
                 BrandInfo(brandName = "포토시그니처", brandImageRes = R.drawable.icon_photo_signature, branchName = "건대입구점", distance = "1.2km"),
+                BrandInfo(brandName = "포토시그니처11", brandImageRes = R.drawable.icon_photo_signature, branchName = "건대입구점", distance = "1.2km"),
+                BrandInfo(brandName = "포토시그니처22", brandImageRes = R.drawable.icon_photo_signature, branchName = "건대입구점", distance = "1.2km"),
+                BrandInfo(brandName = "포토시그니처333", brandImageRes = R.drawable.icon_photo_signature, branchName = "건대입구점", distance = "1.2km"),
             )
 
             reduce {
