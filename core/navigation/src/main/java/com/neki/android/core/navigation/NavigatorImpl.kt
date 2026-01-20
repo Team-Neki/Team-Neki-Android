@@ -55,4 +55,10 @@ class NavigatorImpl @Inject constructor(
             if (size > 1) subList(1, size).clear()
         }
     }
+
+    override fun remove(key: NavKey) {
+        state.currentSubStack.apply {
+            remove(key)
+        }
+    }
 }
