@@ -8,4 +8,7 @@ android {
 
 dependencies {
     implementation(projects.feature.archive.api)
+    implementation(projects.feature.photoUpload.api)
+
+    implementation(libs.androidx.activity.compose)
 }

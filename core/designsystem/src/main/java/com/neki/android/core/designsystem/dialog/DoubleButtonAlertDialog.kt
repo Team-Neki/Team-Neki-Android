@@ -36,6 +36,7 @@ fun DoubleButtonAlertDialog(
     onDismissRequest: () -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onGrayButtonClick: () -> Unit,
+    modifier: Modifier = Modifier,
     properties: DialogProperties = DialogProperties(),
 ) {
     Dialog(
@@ -43,7 +44,7 @@ fun DoubleButtonAlertDialog(
         properties = properties,
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
                 .widthIn(max = 400.dp)

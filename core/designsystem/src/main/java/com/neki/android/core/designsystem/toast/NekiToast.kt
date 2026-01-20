@@ -69,6 +69,7 @@ fun NekiActionToast(
     NekiToast(
         iconRes = iconRes,
         text = text,
+        modifier = modifier,
         actionButton = {
             NekiToastActionButton(
                 buttonText = buttonText,
