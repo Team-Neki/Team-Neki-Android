@@ -5,14 +5,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.net.toUri
 
-class DirectionHelper() {
+class DirectionHelper {
     fun moveAppOrStore(
         context: Context,
         url: String,
         packageName: String,
     ) {
         val intent = if (isInstalled(context.packageManager, packageName)) {
-            Intent(Intent.ACTION_VIEW, url.toUri())
+            Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+                setPackage(packageName)
+            }
         } else {
             Intent(
                 Intent.ACTION_VIEW,
