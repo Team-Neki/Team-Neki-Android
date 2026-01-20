@@ -56,8 +56,43 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun fetchInitialData(reduce: (AllPhotoState.() -> AllPhotoState) -> Unit) {
-        // TODO: Fetch photos from repository
-        reduce { copy() }
+        val dummyPhotos = listOf(
+            Photo(id = 1, imageUrl = "https://picsum.photos/seed/all1/400/520", isFavorite = true, date = "2025.01.15"),
+            Photo(id = 2, imageUrl = "https://picsum.photos/seed/all2/400/680", isFavorite = false, date = "2025.01.15"),
+            Photo(id = 3, imageUrl = "https://picsum.photos/seed/all3/400/450", isFavorite = true, date = "2025.01.14"),
+            Photo(id = 4, imageUrl = "https://picsum.photos/seed/all4/400/600", isFavorite = false, date = "2025.01.14"),
+            Photo(id = 5, imageUrl = "https://picsum.photos/seed/all5/400/550", isFavorite = false, date = "2025.01.13"),
+            Photo(id = 6, imageUrl = "https://picsum.photos/seed/all6/400/720", isFavorite = true, date = "2025.01.13"),
+            Photo(id = 7, imageUrl = "https://picsum.photos/seed/all7/400/480", isFavorite = false, date = "2025.01.12"),
+            Photo(id = 8, imageUrl = "https://picsum.photos/seed/all8/400/650", isFavorite = false, date = "2025.01.12"),
+            Photo(id = 9, imageUrl = "https://picsum.photos/seed/all9/400/500", isFavorite = true, date = "2025.01.11"),
+            Photo(id = 10, imageUrl = "https://picsum.photos/seed/all10/400/580", isFavorite = false, date = "2025.01.11"),
+            Photo(id = 11, imageUrl = "https://picsum.photos/seed/all11/400/700", isFavorite = false, date = "2025.01.10"),
+            Photo(id = 12, imageUrl = "https://picsum.photos/seed/all12/400/460", isFavorite = true, date = "2025.01.10"),
+            Photo(id = 13, imageUrl = "https://picsum.photos/seed/all13/400/620", isFavorite = false, date = "2025.01.09"),
+            Photo(id = 14, imageUrl = "https://picsum.photos/seed/all14/400/540", isFavorite = false, date = "2025.01.09"),
+            Photo(id = 15, imageUrl = "https://picsum.photos/seed/all15/400/690", isFavorite = true, date = "2025.01.08"),
+            Photo(id = 16, imageUrl = "https://picsum.photos/seed/all16/400/470", isFavorite = false, date = "2025.01.08"),
+            Photo(id = 17, imageUrl = "https://picsum.photos/seed/all17/400/610", isFavorite = false, date = "2025.01.07"),
+            Photo(id = 18, imageUrl = "https://picsum.photos/seed/all18/400/530", isFavorite = true, date = "2025.01.07"),
+            Photo(id = 19, imageUrl = "https://picsum.photos/seed/all19/400/670", isFavorite = false, date = "2025.01.06"),
+            Photo(id = 20, imageUrl = "https://picsum.photos/seed/all20/400/490", isFavorite = false, date = "2025.01.06"),
+            Photo(id = 21, imageUrl = "https://picsum.photos/seed/all21/400/640", isFavorite = true, date = "2025.01.05"),
+            Photo(id = 22, imageUrl = "https://picsum.photos/seed/all22/400/560", isFavorite = false, date = "2025.01.05"),
+            Photo(id = 23, imageUrl = "https://picsum.photos/seed/all23/400/710", isFavorite = false, date = "2025.01.04"),
+            Photo(id = 24, imageUrl = "https://picsum.photos/seed/all24/400/440", isFavorite = true, date = "2025.01.04"),
+            Photo(id = 25, imageUrl = "https://picsum.photos/seed/all25/400/590", isFavorite = false, date = "2025.01.03"),
+        ).toImmutableList()
+
+        val sortedPhotos = dummyPhotos.sortedByDescending { it.date }.toImmutableList()
+
+        reduce {
+            copy(
+                photos = dummyPhotos,
+                sortedDescendingPhotos = sortedPhotos,
+                showingPhotos = sortedPhotos,
+            )
+        }
     }
 
     private fun handleBackClick(

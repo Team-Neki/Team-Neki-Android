@@ -4,42 +4,50 @@ import com.neki.android.core.model.Pose
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
+private val dummyPoseList = persistentListOf(
+    Pose(id = 1, poseImageUrl = "https://picsum.photos/seed/poseA/400/520", numberOfPeople = 1),
+    Pose(id = 2, poseImageUrl = "https://picsum.photos/seed/poseB/400/680", numberOfPeople = 2),
+    Pose(id = 3, poseImageUrl = "https://picsum.photos/seed/poseC/400/450", numberOfPeople = 1),
+    Pose(id = 4, poseImageUrl = "https://picsum.photos/seed/poseD/400/600", numberOfPeople = 3),
+    Pose(id = 5, poseImageUrl = "https://picsum.photos/seed/poseE/400/550", numberOfPeople = 2),
+    Pose(id = 6, poseImageUrl = "https://picsum.photos/seed/poseF/400/720", numberOfPeople = 4),
+    Pose(id = 7, poseImageUrl = "https://picsum.photos/seed/poseG/400/480", numberOfPeople = 1),
+    Pose(id = 8, poseImageUrl = "https://picsum.photos/seed/poseH/400/650", numberOfPeople = 2),
+    Pose(id = 9, poseImageUrl = "https://picsum.photos/seed/poseI/400/500", numberOfPeople = 3),
+    Pose(id = 10, poseImageUrl = "https://picsum.photos/seed/poseJ/400/580", numberOfPeople = 1),
+    Pose(id = 11, poseImageUrl = "https://picsum.photos/seed/poseK/400/700", numberOfPeople = 5),
+    Pose(id = 12, poseImageUrl = "https://picsum.photos/seed/poseL/400/460", numberOfPeople = 2),
+    Pose(id = 13, poseImageUrl = "https://picsum.photos/seed/poseM/400/620", numberOfPeople = 1),
+    Pose(id = 14, poseImageUrl = "https://picsum.photos/seed/poseN/400/540", numberOfPeople = 4),
+    Pose(id = 15, poseImageUrl = "https://picsum.photos/seed/poseO/400/690", numberOfPeople = 2),
+    Pose(id = 16, poseImageUrl = "https://picsum.photos/seed/poseP/400/470", numberOfPeople = 3),
+    Pose(id = 17, poseImageUrl = "https://picsum.photos/seed/poseQ/400/610", numberOfPeople = 1),
+    Pose(id = 18, poseImageUrl = "https://picsum.photos/seed/poseR/400/530", numberOfPeople = 2),
+    Pose(id = 19, poseImageUrl = "https://picsum.photos/seed/poseS/400/670", numberOfPeople = 5),
+    Pose(id = 20, poseImageUrl = "https://picsum.photos/seed/poseT/400/490", numberOfPeople = 1),
+    Pose(id = 21, poseImageUrl = "https://picsum.photos/seed/poseU/400/640", numberOfPeople = 2),
+    Pose(id = 22, poseImageUrl = "https://picsum.photos/seed/poseV/400/560", numberOfPeople = 3),
+)
+
+private val scrappedDummyList = persistentListOf(
+    Pose(id = 101, poseImageUrl = "https://picsum.photos/seed/scrapA/400/520", isScrapped = true, numberOfPeople = 1),
+    Pose(id = 102, poseImageUrl = "https://picsum.photos/seed/scrapB/400/680", isScrapped = true, numberOfPeople = 2),
+    Pose(id = 103, poseImageUrl = "https://picsum.photos/seed/scrapC/400/450", isScrapped = true, numberOfPeople = 1),
+    Pose(id = 104, poseImageUrl = "https://picsum.photos/seed/scrapD/400/600", isScrapped = true, numberOfPeople = 3),
+    Pose(id = 105, poseImageUrl = "https://picsum.photos/seed/scrapE/400/550", isScrapped = true, numberOfPeople = 2),
+    Pose(id = 106, poseImageUrl = "https://picsum.photos/seed/scrapF/400/720", isScrapped = true, numberOfPeople = 4),
+    Pose(id = 107, poseImageUrl = "https://picsum.photos/seed/scrapG/400/480", isScrapped = true, numberOfPeople = 1),
+)
+
 data class PoseState(
     val isLoading: Boolean = false,
     val selectedNumberOfPeople: NumberOfPeople = NumberOfPeople.UNSELECTED,
     val showScrappedPose: Boolean = false,
-    val randomPoseList: ImmutableList<Pose> = persistentListOf(),
-    val scrappedPoseList: ImmutableList<Pose> = persistentListOf(),
+    val randomPoseList: ImmutableList<Pose> = dummyPoseList,
+    val scrappedPoseList: ImmutableList<Pose> = scrappedDummyList,
     val selectedPose: Pose = Pose(),
     val showNumberOfPeopleBottomSheet: Boolean = false,
-) {
-    companion object {
-        val dummy = persistentListOf(
-            "https://images.unsplash.com/photo-1474511320723-9a56873571b7",
-            "https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f",
-            "https://images.unsplash.com/photo-1425082661705-1834bfd09dca",
-            "https://images.unsplash.com/photo-1484406566174-9da000fda645",
-            "https://images.unsplash.com/photo-1456926631375-92c8ce872def",
-            "https://images.unsplash.com/photo-1474314243412-cd4a79534427",
-            "https://images.unsplash.com/photo-1517849845537-4d257902454a",
-            "https://images.unsplash.com/photo-1518791841217-8f162f1e1131",
-            "https://images.unsplash.com/photo-1543466835-00a7907e9de1",
-            "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba",
-            "https://images.unsplash.com/photo-1452857297128-d9c29adba80b",
-            "https://images.unsplash.com/photo-1533738363-b7f9aef128ce",
-            "https://images.unsplash.com/photo-1511044568932-338cba0ad803",
-            "https://images.unsplash.com/photo-1513245533132-31f507417b26",
-            "https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13",
-            "https://images.unsplash.com/photo-1533743983669-94fa5c4338ec",
-            "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7",
-            "https://images.unsplash.com/photo-1519052537078-e6302a4968d4",
-            "https://images.unsplash.com/photo-1501824172439-08f9725f7786",
-            "https://images.unsplash.com/photo-1494256997604-768d1f608cdc",
-            "https://images.unsplash.com/photo-1495360010541-f48722b34f7d",
-            "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9",
-        )
-    }
-}
+)
 
 sealed interface PoseIntent {
     // Pose Main
