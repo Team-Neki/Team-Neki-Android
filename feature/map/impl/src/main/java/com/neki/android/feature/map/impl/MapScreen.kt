@@ -80,10 +80,12 @@ fun MapRoute(
             is MapEffect.MoveCameraToPosition -> {
                 coroutineScope.launch {
                     cameraPositionState.animate(
-                        CameraUpdate.scrollAndZoomTo(
+                        update = CameraUpdate.scrollAndZoomTo(
                             LatLng(sideEffect.latitude, sideEffect.longitude),
-                            15.0
-                        ).animate(CameraAnimation.Easing, 1000)
+                            17.0
+                        ),
+                        animation = CameraAnimation.Easing,
+                        durationMs = 800
                     )
                 }
             }
