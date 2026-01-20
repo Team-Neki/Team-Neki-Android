@@ -19,11 +19,12 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.extension.buttonShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.map.impl.const.FourCutBrand
 
 @Composable
 fun PanelInvisibleContent(
+    brandInfo: BrandInfo,
     modifier: Modifier = Modifier,
     isCurrentLocation: Boolean = false,
     onClickCurrentLocation: () -> Unit = {},
@@ -48,7 +49,7 @@ fun PanelInvisibleContent(
         }
         VerticalSpacer(12.dp)
         BrandCard(
-            brand = FourCutBrand.LIFE_FOUR_CUT,
+            brand = brandInfo,
             onClickDirection = onClickDirection
         )
     }
@@ -82,6 +83,13 @@ fun BrandCardCloseButton(
 @Composable
 private fun PanelInvisibleContentPreview() {
     NekiTheme {
-        PanelInvisibleContent()
+        PanelInvisibleContent(
+            brandInfo = BrandInfo(
+                brandName = "인생네컷",
+                brandImageRes = R.drawable.icon_life_four_cut,
+                branchName = "사당역점",
+                distance = "300m",
+            )
+        )
     }
 }

@@ -25,12 +25,12 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.extension.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.Brand
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.map.impl.const.FourCutBrand
 
 @Composable
 fun VerticalFourCutBrand(
-    brand: FourCutBrand,
+    brand: Brand,
     modifier: Modifier = Modifier,
     onItemClick: (Boolean) -> Unit = {}
 ) {
@@ -50,7 +50,7 @@ fun VerticalFourCutBrand(
         ) {
             AsyncImage(
                 modifier = Modifier.clip(CircleShape),
-                model = brand.logoRes,
+                model = brand.brandImageRes,
                 contentDescription = null,
             )
 
@@ -85,6 +85,11 @@ fun VerticalFourCutBrand(
 @Composable
 private fun VerticalFourCutBrandPreview() {
     NekiTheme {
-        VerticalFourCutBrand(brand = FourCutBrand.LIFE_FOUR_CUT)
+        VerticalFourCutBrand(
+            brand = Brand(
+                brandName = "인생네컷",
+                brandImageRes = R.drawable.icon_life_four_cut,
+            )
+        )
     }
 }

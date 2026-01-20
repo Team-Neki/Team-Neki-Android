@@ -21,13 +21,13 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.extension.buttonShadow
 import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.map.impl.const.FourCutBrand
 
 @Composable
 fun BrandCard(
-    brand: FourCutBrand,
+    brand: BrandInfo,
     modifier: Modifier = Modifier,
     onClickDirection: () -> Unit = {},
 ) {
@@ -49,7 +49,7 @@ fun BrandCard(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .size(64.dp),
-            model = brand.logoRes,
+            model = brand.brandImageRes,
             contentDescription = null,
         )
         HorizontalSpacer(16.dp)
@@ -64,14 +64,14 @@ fun BrandCard(
                 )
                 HorizontalSpacer(4.dp)
                 Text(
-                    text = "사당역점",
+                    text = brand.branchName,
                     color = NekiTheme.colorScheme.gray600,
                     style = NekiTheme.typography.caption12Medium
                 )
             }
             VerticalSpacer(4.dp)
             Text(
-                text = "300m",
+                text = brand.distance,
                 color = NekiTheme.colorScheme.gray400,
                 style = NekiTheme.typography.caption12Medium
             )
@@ -100,6 +100,13 @@ fun BrandCard(
 @Composable
 private fun BrandCardPreview() {
     NekiTheme {
-        BrandCard(brand = FourCutBrand.LIFE_FOUR_CUT)
+        BrandCard(
+            brand = BrandInfo(
+                brandName = "인생네컷",
+                brandImageRes = R.drawable.icon_life_four_cut,
+                branchName = "사당역점",
+                distance = "300m",
+            )
+        )
     }
 }

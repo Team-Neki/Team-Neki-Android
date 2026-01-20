@@ -24,9 +24,9 @@ import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.rememberUpdatedMarkerState
 import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.extension.buttonShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.map.impl.const.FourCutBrand
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_BACKGROUND_RADIUS
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_IMAGE_RADIUS
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_IMAGE_SIZE
@@ -45,7 +45,7 @@ internal fun BrandMarker(
     key: Array<String>,
     latitude: Double,
     longitude: Double,
-    brand: FourCutBrand,
+    brandImageRes: Int,
     isFocused: Boolean = false,
     onClick: () -> Unit = {},
 ) {
@@ -54,7 +54,7 @@ internal fun BrandMarker(
         state = rememberUpdatedMarkerState(
             position = LatLng(latitude, longitude),
         ),
-        captionText = "인생네컷\n강남점",
+        captionText = "인생네컷",
         captionTextSize = 12.sp,
         captionColor = NekiTheme.colorScheme.gray900,
         onClick = {
@@ -63,7 +63,7 @@ internal fun BrandMarker(
         }
     ) {
         BrandMarkerContent(
-            brand = brand,
+            brandImageRes = brandImageRes,
             isFocused = isFocused,
         )
     }
@@ -72,7 +72,7 @@ internal fun BrandMarker(
 @Composable
 internal fun BrandMarkerContent(
     modifier: Modifier = Modifier,
-    brand: FourCutBrand,
+    brandImageRes: Int,
     isFocused: Boolean = false,
 ) {
     val caretColor = if (isFocused) NekiTheme.colorScheme.gray900 else NekiTheme.colorScheme.white
@@ -178,7 +178,7 @@ internal fun BrandMarkerContent(
                             if (isFocused) FOCUSED_MARKER_IMAGE_RADIUS.dp else MARKER_IMAGE_RADIUS.dp
                         )
                     ),
-                model = brand.logoRes,
+                model = brandImageRes,
                 contentDescription = null
             )
         }
@@ -190,7 +190,7 @@ internal fun BrandMarkerContent(
 private fun BrandMarkerContentPreview() {
     NekiTheme {
         BrandMarkerContent(
-            brand = FourCutBrand.LIFE_FOUR_CUT
+            brandImageRes = R.drawable.icon_life_four_cut
         )
     }
 }
@@ -200,7 +200,7 @@ private fun BrandMarkerContentPreview() {
 private fun BrandMarkerContentSelectedPreview() {
     NekiTheme {
         BrandMarkerContent(
-            brand = FourCutBrand.LIFE_FOUR_CUT,
+            brandImageRes = R.drawable.icon_life_four_cut,
             isFocused = true
         )
     }

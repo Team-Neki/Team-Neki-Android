@@ -138,6 +138,8 @@ fun AnchoredDraggablePanel(
                 onClick = onClickCurrentLocation
             )
             AnchoredPanelContent(
+                brands = brands,
+                nearbyBrands = nearbyBrands,
                 onCollapsedHeightMeasured = { collapsedHeightPx = it },
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = { onClickBrand(it) },
@@ -150,6 +152,8 @@ fun AnchoredDraggablePanel(
 @Composable
 fun AnchoredPanelContent(
     modifier: Modifier = Modifier,
+    brands: ImmutableList<Brand> = persistentListOf(),
+    nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     onCollapsedHeightMeasured: (Int) -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Boolean) -> Unit = {},
@@ -194,9 +198,9 @@ fun AnchoredPanelContent(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    items(FourCutBrand.entries) { brand ->
+                    items(brands) { brand ->
                         VerticalBrandItem(
-                            brand,
+                            brand = brand,
                             onItemClick = { onClickBrand(it) }
                         )
                     }
@@ -229,9 +233,9 @@ fun AnchoredPanelContent(
             modifier = Modifier.padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(FourCutBrand.entries) { brand ->
+            items(nearbyBrands) { brandInfo ->
                 HorizontalBrandItem(
-                    brand,
+                    brandInfo = brandInfo,
                     onItemClick = onClickNearBrand
                 )
             }
