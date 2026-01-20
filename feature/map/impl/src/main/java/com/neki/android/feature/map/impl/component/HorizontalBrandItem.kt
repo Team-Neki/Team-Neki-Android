@@ -13,15 +13,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.map.impl.const.FourCutBrand
 
 @Composable
 fun HorizontalBrandItem(
-    brand: FourCutBrand,
+    brandInfo: BrandInfo,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit = {},
 ) {
@@ -35,7 +36,7 @@ fun HorizontalBrandItem(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .size(64.dp),
-            model = brand.logoRes,
+            model = brandInfo.brandImageRes,
             contentDescription = null,
         )
         HorizontalSpacer(16.dp)
@@ -44,20 +45,20 @@ fun HorizontalBrandItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = brand.brandName,
+                    text = brandInfo.brandName,
                     color = NekiTheme.colorScheme.gray900,
                     style = NekiTheme.typography.title18Bold
                 )
                 HorizontalSpacer(4.dp)
                 Text(
-                    text = "사당역점",
+                    text = brandInfo.branchName,
                     color = NekiTheme.colorScheme.gray600,
                     style = NekiTheme.typography.caption12Medium
                 )
             }
             VerticalSpacer(4.dp)
             Text(
-                text = "300m",
+                text = brandInfo.distance,
                 color = NekiTheme.colorScheme.gray400,
                 style = NekiTheme.typography.caption12Medium
             )
@@ -69,6 +70,13 @@ fun HorizontalBrandItem(
 @Composable
 private fun HorizontalBrandItemPreview() {
     NekiTheme {
-        HorizontalBrandItem(brand = FourCutBrand.LIFE_FOUR_CUT)
+        HorizontalBrandItem(
+            brandInfo = BrandInfo(
+                brandName = "인생네컷",
+                brandImageRes = R.drawable.icon_life_four_cut,
+                branchName = "사당역점",
+                distance = "320m"
+            )
+        )
     }
 }
