@@ -1,9 +1,11 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.component
 
+import android.R.attr.foreground
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -41,7 +43,6 @@ internal fun DimExceptContent(
     cutoutRadius: Dp = CUTOUT_RADIUS.dp,
     cutoutPadding: Dp = 0.dp,
     cutout: @Composable BoxScope.(Modifier) -> Unit,
-    foreground: @Composable BoxScope.() -> Unit = {},
 ) {
     val density = LocalDensity.current
     var cutoutRect by remember { mutableStateOf<CutoutRectPx?>(null) }
@@ -49,18 +50,21 @@ internal fun DimExceptContent(
     val paddingPx = with(density) { cutoutPadding.toPx() }
     val radiusPx = with(density) { cutoutRadius.toPx() }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier
+    ) {
         cutout(
-            Modifier.onGloballyPositioned { coords ->
-                val pos = coords.positionInParent()
-                val size = coords.size
-                cutoutRect = CutoutRectPx(
-                    left = pos.x,
-                    top = pos.y,
-                    width = size.width.toFloat(),
-                    height = size.height.toFloat(),
-                )
-            },
+            Modifier
+                .padding(bottom = 20.dp)
+                .onGloballyPositioned { coords ->
+                    val pos = coords.positionInParent()
+                    val size = coords.size
+                    cutoutRect = CutoutRectPx(
+                        left = pos.x,
+                        top = pos.y,
+                        width = size.width.toFloat(),
+                        height = size.height.toFloat(),
+                    )
+                },
         )
 
         Canvas(
@@ -94,7 +98,5 @@ internal fun DimExceptContent(
                 )
             }
         }
-
-        foreground()
     }
 }
