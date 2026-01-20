@@ -9,7 +9,6 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 internal fun UploadAlbumTopBar(
     count: Int,
-    enabled: Boolean = false,
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
     onUploadClick: () -> Unit = {},
@@ -18,7 +17,7 @@ internal fun UploadAlbumTopBar(
         modifier = modifier,
         title = "모든 앨범",
         buttonLabel = "${count}장 업로드",
-        enabled = enabled,
+        enabled = count != 0,
         onBack = onBackClick,
         onTextButtonClick = onUploadClick,
     )

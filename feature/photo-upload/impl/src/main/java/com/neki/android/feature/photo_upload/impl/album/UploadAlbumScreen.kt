@@ -41,7 +41,7 @@ internal fun UploadAlbumRoute(
         when (sideEffect) {
             UploadAlbumSideEffect.NavigateBack -> navigateBack()
             is UploadAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.album)
-            is UploadAlbumSideEffect.ShowToastMessage -> nekiToast.showToast("이미지를 추가했어요")
+            is UploadAlbumSideEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
         }
     }
 
@@ -63,7 +63,7 @@ internal fun UploadAlbumScreen(
             .background(NekiTheme.colorScheme.white),
     ) {
         UploadAlbumTopBar(
-            count = 0,
+            count = uiState.selectedUris.size,
             onBackClick = { onIntent(UploadAlbumIntent.ClickBackIcon) },
             onUploadClick = { onIntent(UploadAlbumIntent.ClickUploadButton) },
         )

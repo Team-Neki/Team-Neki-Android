@@ -8,8 +8,15 @@ sealed interface PhotoUploadNavKey : NavKey {
 
     @Serializable
     data object QRScan : PhotoUploadNavKey
+
+    @Serializable
+    data class UploadAlbum(val uriStrings: List<String>) : PhotoUploadNavKey
 }
 
 fun Navigator.navigateToQRScan() {
     navigate(PhotoUploadNavKey.QRScan)
+}
+
+fun Navigator.navigateToUploadAlbum(uriStrings: List<String>) {
+    navigate(PhotoUploadNavKey.UploadAlbum(uriStrings))
 }

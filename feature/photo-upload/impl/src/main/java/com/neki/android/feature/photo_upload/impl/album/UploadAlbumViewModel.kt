@@ -1,25 +1,24 @@
 package com.neki.android.feature.photo_upload.impl.album
 
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
-import com.neki.android.core.model.Album
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 
 @HiltViewModel(assistedFactory = UploadAlbumViewModel.Factory::class)
 class UploadAlbumViewModel @AssistedInject constructor(
-    @Assisted private val uri: Uri,
+    @Assisted private val uriStrings: List<String>,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(uri: Uri): UploadAlbumViewModel
+        fun create(uriStrings: List<String>): UploadAlbumViewModel
     }
 
     val store: MviIntentStore<UploadAlbumState, UploadAlbumIntent, UploadAlbumSideEffect> =
@@ -39,14 +38,24 @@ class UploadAlbumViewModel @AssistedInject constructor(
             UploadAlbumIntent.EnterUploadAlbumScreen -> fetchInitialData(reduce)
             UploadAlbumIntent.ClickBackIcon -> postSideEffect(UploadAlbumSideEffect.NavigateBack)
             UploadAlbumIntent.ClickUploadButton -> handleUploadButtonClick(state, reduce, postSideEffect)
-            is UploadAlbumIntent.ClickAlbumItem -> handleAlbumClick(intent.album, state, reduce, postSideEffect)
+            is UploadAlbumIntent.ClickAlbumItem -> {
+                reduce {
+                    copy(
+                        selectedAlbums = if (state.selectedAlbums.any { it.id == intent.album.id }) {
+                            selectedAlbums.remove(intent.album)
+                        } else {
+                            selectedAlbums.add(intent.album)
+                        }.toPersistentList(),
+                    )
+                }
+            }
         }
     }
 
     private fun fetchInitialData(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
         // TODO: Fetch albums from repository
         reduce {
-            copy(selectedUris = persistentListOf(uri))
+            copy(selectedUris = uriStrings.map { it.toUri() }.toImmutableList())
         }
     }
 
@@ -54,16 +63,9 @@ class UploadAlbumViewModel @AssistedInject constructor(
         state: UploadAlbumState,
         reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
         postSideEffect: (UploadAlbumSideEffect) -> Unit,
-    ){
-        postSideEffect(UploadAlbumSideEffect.NavigateBack)
-    }
-
-    private fun handleAlbumClick(
-        album: Album,
-        state: UploadAlbumState,
-        reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
-        postSideEffect: (UploadAlbumSideEffect) -> Unit,
     ) {
-        postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(album))
+        postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
+        // TODO: Upload photos to repository
+        postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(state.selectedAlbums.first()))
     }
 }

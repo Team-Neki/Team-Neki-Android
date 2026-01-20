@@ -3,13 +3,14 @@ package com.neki.android.feature.photo_upload.impl.album
 import android.net.Uri
 import com.neki.android.core.model.Album
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 
 data class UploadAlbumState(
-    val selectedUris: ImmutableList<Uri> = persistentListOf(),
+    val selectedUris: ImmutableList<Uri> = persistentListOf(Uri.EMPTY),
     val favoriteAlbum: Album = Album(),
-    val albums: ImmutableList<Album> = persistentListOf(),
-    val selectedAlbums: ImmutableList<Album> = persistentListOf(),
+    val albums: ImmutableList<Album> = persistentListOf(Album(title = "sdf", thumbnailUrl = "https://tistory1.daumcdn.net/tistory/5417065/attach/2e12bf06d8f1431cbc08dbe151bd4505")),
+    val selectedAlbums: PersistentList<Album> = persistentListOf(),
 )
 
 sealed interface UploadAlbumIntent {
