@@ -19,7 +19,7 @@ sealed interface QRScanIntent {
 
 sealed interface QRScanSideEffect {
     data object NavigateBack : QRScanSideEffect
-    data object NavigateToHome : QRScanSideEffect
+    data class NavigateToHome(val imageUrl: String) : QRScanSideEffect
     data class ShowToast(val message: String) : QRScanSideEffect
 }
 

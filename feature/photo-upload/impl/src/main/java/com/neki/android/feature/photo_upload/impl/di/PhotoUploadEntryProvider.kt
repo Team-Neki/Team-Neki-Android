@@ -5,7 +5,9 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.Navigator
+import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
+import com.neki.android.feature.archive.api.navigateToArchive
 import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
 import com.neki.android.feature.photo_upload.impl.album.UploadAlbumRoute
 import com.neki.android.feature.photo_upload.impl.album.UploadAlbumViewModel
@@ -29,16 +31,21 @@ object PhotoUploadEntryProvider {
 
 private fun EntryProviderScope<NavKey>.photoUploadEntry(navigator: Navigator) {
     entry<PhotoUploadNavKey.QRScan> {
+        val resultBus = LocalResultEventBus.current
+
         QRScanRoute(
             navigateBack = navigator::goBack,
-            navigateToHome = {},
+            navigateToHome = {
+                resultBus.sendResult<String>(result = it)
+                navigator.navigateToArchive()
+            },
         )
     }
     entry<PhotoUploadNavKey.UploadAlbum> { key ->
         UploadAlbumRoute(
             viewModel = hiltViewModel<UploadAlbumViewModel, UploadAlbumViewModel.Factory>(
                 creationCallback = { factory ->
-                    factory.create(key.uriStrings)
+                    factory.create(key.imageUrl, key.uriStrings)
                 },
             ),
             navigateBack = navigator::goBack,
