@@ -4,12 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.enableSavedStateHandles
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -63,20 +65,26 @@ class HiltSharedViewModelStoreNavEntryDecorator<T : Any>(
         val entryViewModelStore =
             viewModelStore.getHiltEntryViewModel().viewModelStoreForKey(contentKey)
 
+        val baseOwner = checkNotNull(LocalViewModelStoreOwner.current)
         val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
 
-        val childViewModelStoreOwner = remember(entryViewModelStore, savedStateRegistryOwner) {
-            object :
-                ViewModelStoreOwner,
-                SavedStateRegistryOwner by savedStateRegistryOwner {
+        val childViewModelStoreOwner = remember(entryViewModelStore, savedStateRegistryOwner, baseOwner) {
+            object : ViewModelStoreOwner,
+                SavedStateRegistryOwner by savedStateRegistryOwner,
+                HasDefaultViewModelProviderFactory {
 
                 override val viewModelStore: ViewModelStore
                     get() = entryViewModelStore
 
+                // ✅ 이게 핵심: 부모 owner의 factory/extras를 그대로 전달
+                override val defaultViewModelProviderFactory: ViewModelProvider.Factory
+                    get() = (baseOwner as HasDefaultViewModelProviderFactory).defaultViewModelProviderFactory
+
+                override val defaultViewModelCreationExtras: CreationExtras
+                    get() = (baseOwner as HasDefaultViewModelProviderFactory).defaultViewModelCreationExtras
+
                 init {
-                    require(this.lifecycle.currentState == Lifecycle.State.INITIALIZED) {
-                        "SavedStateNavEntryDecorator must be added before this decorator."
-                    }
+                    require(this.lifecycle.currentState == Lifecycle.State.INITIALIZED)
                     enableSavedStateHandles()
                 }
             }

@@ -35,6 +35,10 @@ data class NekiColorScheme(
     val primary100: Color,
     val primary50: Color,
     val primary25: Color,
+
+    // Album Cover
+    val favoriteAlbumCover: Color,
+    val defaultAlbumCover: Color,
 )
 
 internal val defaultNekiColors = NekiColorScheme(
@@ -67,6 +71,10 @@ internal val defaultNekiColors = NekiColorScheme(
     primary100 = Color(0xFFFFC7C2),
     primary50 = Color(0xFFFFDAD6),
     primary25 = Color(0xFFFFECEB),
+
+    // Album Cover
+    favoriteAlbumCover = Color(0xFFFF5647),
+    defaultAlbumCover = Color(0xFF202227),
 )
 
 val LocalColorScheme = staticCompositionLocalOf { defaultNekiColors }

@@ -1,6 +1,8 @@
 package com.neki.android.core.designsystem.topbar
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -50,4 +52,22 @@ fun NekiTitleTopBar(
             )
         },
     )
+}
+
+@Composable
+fun NekiLeftTitleTopBar(
+    modifier: Modifier = Modifier,
+    title: @Composable (() -> Unit)? = null,
+    actions: @Composable (() -> Unit)? = null,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(54.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        title?.invoke()
+        actions?.invoke()
+    }
 }

@@ -1,13 +1,17 @@
 package com.neki.android.core.designsystem.extension
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Shape
@@ -137,3 +141,50 @@ fun Modifier.buttonShadow(
         canvas.drawOutline(outline, paint)
     }
 }
+
+/**
+ * Figma card_shadow 스타일
+ * DROP_SHADOW: color #00000040, offset (0, 2), radius 4, spread 0
+ */
+fun Modifier.cardShadow(
+    shape: Shape,
+    color: Color = Color.Black.copy(alpha = 0.25f),
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = 2.dp,
+    blurRadius: Dp = 4.dp,
+): Modifier = this.drawBehind {
+    drawIntoCanvas { canvas ->
+        val paint = Paint().apply {
+            asFrameworkPaint().apply {
+                this.color = Color.Transparent.toArgb()
+                setShadowLayer(
+                    blurRadius.toPx(),
+                    offsetX.toPx(),
+                    offsetY.toPx(),
+                    color.toArgb(),
+                )
+            }
+        }
+        val outline = shape.createOutline(size, layoutDirection, this)
+        canvas.drawOutline(outline, paint)
+    }
+}
+
+/**
+ * 사진 컴포넌트에 적용되는 그라데이션 배경
+ * 좌하단에서 우상단으로 갈수록 어두워지는 효과
+ */
+fun Modifier.photoBackground(
+    shape: Shape = RoundedCornerShape(12.dp),
+): Modifier = this.background(
+    brush = Brush.linearGradient(
+        colorStops = arrayOf(
+            0f to Color.Black.copy(alpha = 0f),
+            0.7f to Color.Black.copy(alpha = 0.09f),
+            1f to Color.Black.copy(alpha = 0.3f),
+        ),
+        start = Offset(0f, Float.POSITIVE_INFINITY),
+        end = Offset(Float.POSITIVE_INFINITY, 0f),
+    ),
+    shape = shape,
+)
