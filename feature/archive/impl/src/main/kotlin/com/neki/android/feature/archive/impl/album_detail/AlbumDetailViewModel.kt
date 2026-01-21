@@ -91,7 +91,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
         reduce {
             copy(
                 album = Album(
-                    photoList = dummyPhotos
+                    photoList = dummyPhotos,
                 ),
             )
         }
