@@ -10,8 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.mypage.impl.component.MainTopBar
 import com.neki.android.feature.mypage.impl.component.ProfileCard
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
@@ -19,10 +22,28 @@ import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
 
 @Composable
-fun MyPageRoute(
-    modifier: Modifier = Modifier,
+internal fun MyPageRoute(
+    viewModel: MyPageViewModel = hiltViewModel(),
+    navigateToPermission: () -> Unit,
 ) {
-    MyPageScreen(modifier = modifier)
+    val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
+
+    viewModel.store.sideEffects.collectWithLifecycle { effect ->
+        when (effect) {
+            MyPageEffect.NavigateToNotification -> {}
+            MyPageEffect.NavigateToProfile -> {}
+            MyPageEffect.NavigateToPermission -> navigateToPermission()
+            MyPageEffect.NavigateToInquiry -> {}
+            MyPageEffect.NavigateToTermsOfService -> {}
+            MyPageEffect.NavigateToPrivacyPolicy -> {}
+            MyPageEffect.NavigateToOpenSourceLicense -> {}
+        }
+    }
+
+    MyPageScreen(
+        uiState = uiState,
+        onIntent = viewModel.store::onIntent,
+    )
 }
 
 @Composable
