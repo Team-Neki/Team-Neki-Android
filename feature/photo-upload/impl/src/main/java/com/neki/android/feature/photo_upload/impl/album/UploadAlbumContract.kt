@@ -19,7 +19,7 @@ data class UploadAlbumState(
     val selectedAlbumIds: PersistentList<Long> = persistentListOf(),
 ) {
     val count: Int
-        get() = if (imageUrl == null) 1 else selectedUris.size
+        get() = if (imageUrl == null) selectedUris.size else 1
 }
 
 sealed interface UploadAlbumIntent {
