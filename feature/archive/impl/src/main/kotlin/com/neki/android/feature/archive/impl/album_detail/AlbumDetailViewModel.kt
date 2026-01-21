@@ -35,12 +35,6 @@ class AlbumDetailViewModel @AssistedInject constructor(
         Photo(id = 1008, imageUrl = "https://picsum.photos/seed/detail8/400/650", isFavorite = false, date = "2025.01.08"),
     )
 
-    private val initialAlbum = if (album.photoList.isEmpty()) {
-        album.copy(photoList = dummyPhotos)
-    } else {
-        album
-    }
-
     val store: MviIntentStore<AlbumDetailState, AlbumDetailIntent, AlbumDetailSideEffect> =
         mviIntentStore(
             initialState = AlbumDetailState(
@@ -95,7 +89,11 @@ class AlbumDetailViewModel @AssistedInject constructor(
     ) {
         // TODO: Fetch album from repository
         reduce {
-            copy(album = Album())
+            copy(
+                album = Album(
+                    photoList = dummyPhotos
+                ),
+            )
         }
     }
 
