@@ -14,6 +14,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -152,6 +153,34 @@ fun Modifier.cardShadow(
     offsetX: Dp = 0.dp,
     offsetY: Dp = 2.dp,
     blurRadius: Dp = 4.dp,
+): Modifier = this.drawBehind {
+    drawIntoCanvas { canvas ->
+        val paint = Paint().apply {
+            asFrameworkPaint().apply {
+                this.color = Color.Transparent.toArgb()
+                setShadowLayer(
+                    blurRadius.toPx(),
+                    offsetX.toPx(),
+                    offsetY.toPx(),
+                    color.toArgb(),
+                )
+            }
+        }
+        val outline = shape.createOutline(size, layoutDirection, this)
+        canvas.drawOutline(outline, paint)
+    }
+}
+
+/**
+ * Figma tabbar_shadow 스타일
+ * DROP_SHADOW: color #0000000A, offset (0, -2), radius 10, spread 0
+ */
+fun Modifier.tabbarShadow(
+    shape: Shape = RectangleShape,
+    color: Color = Color.Black.copy(alpha = 0.04f),
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = (-2).dp,
+    blurRadius: Dp = 10.dp,
 ): Modifier = this.drawBehind {
     drawIntoCanvas { canvas ->
         val paint = Paint().apply {
