@@ -145,8 +145,8 @@ fun AnchoredDraggablePanel(
                 dragValue = dragValue,
                 onCollapsedHeightMeasured = { collapsedHeightPx = it },
                 onClickInfoIcon = onClickInfoIcon,
-                onClickBrand = { onClickBrand(it) },
-                onClickNearBrand = { onClickNearBrand(it) }
+                onClickBrand = onClickBrand,
+                onClickNearBrand = onClickNearBrand
             )
         }
     }
@@ -236,8 +236,9 @@ fun AnchoredPanelContent(
             )
             AsyncImage(
                 modifier = Modifier
-                    .size(16.dp)
-                    .noRippleClickableSingle(onClick = onClickInfoIcon),
+                    .size(24.dp)
+                    .noRippleClickableSingle(onClick = onClickInfoIcon)
+                    .padding(2.dp),
                 model = R.drawable.icon_info_gray_stroke,
                 contentDescription = null
             )
