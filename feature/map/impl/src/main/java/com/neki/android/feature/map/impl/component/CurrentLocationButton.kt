@@ -43,7 +43,7 @@ fun CurrentLocationButton(
 
 @ComponentPreview
 @Composable
-private fun CurrentLocationButtonOnPreview() {
+private fun CurrentLocationButtonOffPreview() {
     NekiTheme {
         CurrentLocationButton(isActiveCurrentLocation = false)
     }
@@ -51,7 +51,7 @@ private fun CurrentLocationButtonOnPreview() {
 
 @ComponentPreview
 @Composable
-private fun CurrentLocationButtonOffPreview() {
+private fun CurrentLocationButtonOnPreview() {
     NekiTheme {
         CurrentLocationButton(isActiveCurrentLocation = true)
     }
