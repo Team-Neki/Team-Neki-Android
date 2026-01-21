@@ -43,6 +43,43 @@ fun SectionItem(
     }
 }
 
+@Composable
+fun SectionArrowItem(
+    text: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) {
+    SectionItem(
+        text = text,
+        onClick = onClick,
+        trailingContent = {
+            Icon(
+                modifier = modifier.size(16.dp),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
+                tint = NekiTheme.colorScheme.gray300,
+                contentDescription = null,
+            )
+        },
+    )
+}
+
+@Composable
+fun SectionVersionItem(
+    version: String,
+    modifier: Modifier = Modifier,
+) {
+    SectionItem(
+        text = "앱 버전 정보",
+        trailingContent = {
+            Text(
+                text = version,
+                color = NekiTheme.colorScheme.gray500,
+                style = NekiTheme.typography.body14Medium,
+            )
+        },
+    )
+}
+
 @ComponentPreview
 @Composable
 private fun SectionItemPreview() {
@@ -53,35 +90,20 @@ private fun SectionItemPreview() {
 
 @ComponentPreview
 @Composable
-private fun SectionItemWithIconPreview() {
+private fun SectionArrowItemPreview() {
     NekiTheme {
-        SectionItem(
-            text = "기기 권한",
-            trailingContent = {
-                Icon(
-                    modifier = Modifier.size(16.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
-                    tint = NekiTheme.colorScheme.gray300,
-                    contentDescription = null,
-                )
-            },
+        SectionArrowItem(
+            text = "기기 권한"
         )
     }
 }
 
 @ComponentPreview
 @Composable
-private fun SectionItemWithTextPreview() {
+private fun SectionVersionItemPreview() {
     NekiTheme {
-        SectionItem(
-            text = "앱 버전 정보",
-            trailingContent = {
-                Text(
-                    text = "v1.3.1",
-                    color = NekiTheme.colorScheme.gray500,
-                    style = NekiTheme.typography.body14Medium,
-                )
-            },
+        SectionVersionItem(
+            version = "v1.3.1",
         )
     }
 }

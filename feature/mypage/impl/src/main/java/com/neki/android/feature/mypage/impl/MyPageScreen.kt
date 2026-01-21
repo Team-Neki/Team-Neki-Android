@@ -6,19 +6,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.mypage.impl.component.MainTopBar
 import com.neki.android.feature.mypage.impl.component.ProfileCard
-import com.neki.android.feature.mypage.impl.component.SectionItem
+import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
+import com.neki.android.feature.mypage.impl.component.SectionVersionItem
 
 @Composable
 fun MyPageRoute(
@@ -29,15 +27,19 @@ fun MyPageRoute(
 
 @Composable
 fun MyPageScreen(
-    modifier: Modifier = Modifier,
+    uiState: MyPageState,
+    onIntent: (MyPageIntent) -> Unit,
 ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
     ) {
-        MainTopBar()
+        MainTopBar(
+            onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
+        )
         ProfileCard(
-            name = "오종석"
+            name = uiState.userName,
+            onClickCard = { onIntent(MyPageIntent.ClickProfileCard) },
         )
         Box(
             modifier = Modifier
@@ -46,39 +48,31 @@ fun MyPageScreen(
                 .background(color = NekiTheme.colorScheme.gray25)
         )
         Column {
-            SectionTitleText(
-                text = "권한 설정"
-            )
-            SectionItem(
-                text = "기기 권한"
+            SectionTitleText(text = "권한 설정")
+            SectionArrowItem(
+                text = "기기 권한",
+                onClick = { onIntent(MyPageIntent.ClickPermission) },
             )
         }
         Column {
-            SectionTitleText(
-                text = "서비스 정보 및 지원"
+            SectionTitleText(text = "서비스 정보 및 지원")
+            SectionArrowItem(
+                text = "Neki에 문의하기",
+                onClick = { onIntent(MyPageIntent.ClickInquiry) },
             )
-            SectionItem(
-                text = "Neki에 문의하기"
+            SectionArrowItem(
+                text = "이용약관",
+                onClick = { onIntent(MyPageIntent.ClickTermsOfService) },
             )
-            SectionItem(
-                text = "이용약관"
+            SectionArrowItem(
+                text = "개인정보 처리방침",
+                onClick = { onIntent(MyPageIntent.ClickPrivacyPolicy) },
             )
-            SectionItem(
-                text = "개인정보 처리방침"
+            SectionArrowItem(
+                text = "오픈소스 라이선스",
+                onClick = { onIntent(MyPageIntent.ClickOpenSourceLicense) },
             )
-            SectionItem(
-                text = "오픈소스 라이선스"
-            )
-            SectionItem(
-                text = "앱 버전 정보",
-                trailingContent = {
-                    Text(
-                        text = "v1.3.1",
-                        color = NekiTheme.colorScheme.gray500,
-                        style = NekiTheme.typography.body14Medium,
-                    )
-                },
-            )
+            SectionVersionItem(uiState.appVersion)
         }
     }
 }
@@ -87,6 +81,9 @@ fun MyPageScreen(
 @Composable
 private fun MyPageScreenPreview() {
     NekiTheme {
-        MyPageScreen()
+        MyPageScreen(
+            uiState = MyPageState(),
+            onIntent = {},
+        )
     }
 }
