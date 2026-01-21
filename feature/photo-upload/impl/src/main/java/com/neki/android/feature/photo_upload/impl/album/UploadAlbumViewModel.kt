@@ -24,7 +24,10 @@ class UploadAlbumViewModel @AssistedInject constructor(
 
     val store: MviIntentStore<UploadAlbumState, UploadAlbumIntent, UploadAlbumSideEffect> =
         mviIntentStore(
-            initialState = UploadAlbumState(),
+            initialState = UploadAlbumState(
+                imageUrl = imageUrl,
+                selectedUris = uriStrings.map { it.toUri() }.toImmutableList(),
+            ),
             onIntent = ::onIntent,
             initialFetchData = { store.onIntent(UploadAlbumIntent.EnterUploadAlbumScreen) },
         )
