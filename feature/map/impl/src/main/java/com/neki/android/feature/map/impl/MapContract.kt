@@ -11,7 +11,7 @@ data class MapState(
     val brands: ImmutableList<Brand> = persistentListOf(),
     val nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     val focusedMarkerPosition: Pair<Double, Double> = Pair(0.0, 0.0),
-    val selectedBrandInfo: BrandInfo? = BrandInfo(),
+    val selectedBrandInfo: BrandInfo? = null,
     val currentLocation: Pair<Double, Double> = Pair(0.0, 0.0),
     val dragState: DragValue = DragValue.Bottom,
     val isShowInfoDialog: Boolean = false,
