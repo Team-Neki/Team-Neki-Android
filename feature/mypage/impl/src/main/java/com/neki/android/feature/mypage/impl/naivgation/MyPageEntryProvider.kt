@@ -5,7 +5,9 @@ import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.feature.mypage.api.MyPageNavKey
+import com.neki.android.feature.mypage.api.navigateToPermission
 import com.neki.android.feature.mypage.impl.MyPageRoute
+import com.neki.android.feature.mypage.impl.PermissionRoute
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,6 +27,14 @@ object MyPageEntryProviderModule {
 
 private fun EntryProviderScope<NavKey>.myPageEntry(navigator: Navigator) {
     entry<MyPageNavKey.MyPage> {
-        MyPageRoute()
+        MyPageRoute(
+            navigateToPermission = navigator::navigateToPermission,
+        )
+    }
+
+    entry<MyPageNavKey.Permission> {
+        PermissionRoute(
+            navigateBack = navigator::goBack,
+        )
     }
 }
