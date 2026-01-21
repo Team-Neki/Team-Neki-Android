@@ -27,16 +27,16 @@ fun CurrentLocationButton(
             .buttonShadow(blurRadius = 10.dp)
             .background(
                 shape = CircleShape,
-                color = NekiTheme.colorScheme.white
+                color = NekiTheme.colorScheme.white,
             )
             .clickable(onClick = onClick)
             .padding(8.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         AsyncImage(
             modifier = Modifier.size(20.dp),
             model = if (isActiveCurrentLocation) R.drawable.icon_current_location_on else R.drawable.icon_current_location_off,
-            contentDescription = null
+            contentDescription = null,
         )
     }
 }

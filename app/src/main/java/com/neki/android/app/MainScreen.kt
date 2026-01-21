@@ -44,7 +44,8 @@ fun MainScreen(
     ) { innerPadding ->
         NavDisplay(
             modifier = Modifier.padding(
-                if (currentKey == MapNavKey.Map) PaddingValues(bottom = innerPadding.calculateBottomPadding()) else innerPadding),
+                if (currentKey == MapNavKey.Map) PaddingValues(bottom = innerPadding.calculateBottomPadding()) else innerPadding,
+            ),
             entries = entries,
             onBack = onBack,
         )

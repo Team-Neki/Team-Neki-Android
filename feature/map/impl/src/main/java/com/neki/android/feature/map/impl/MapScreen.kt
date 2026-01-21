@@ -75,10 +75,10 @@ fun MapRoute(
                     cameraPositionState.animate(
                         update = CameraUpdate.scrollAndZoomTo(
                             LatLng(sideEffect.latitude, sideEffect.longitude),
-                            17.0
+                            17.0,
                         ),
                         animation = CameraAnimation.Easing,
-                        durationMs = 800
+                        durationMs = 800,
                     )
                 }
             }
@@ -88,7 +88,7 @@ fun MapRoute(
                         DirectionHelper().moveAppOrStore(
                             context = context,
                             url = "google.navigation:q=37.5256372,126.8862648(${context.getPlaceName(37.5256372, 126.8861924, "도착지")})&mode=w",
-                            packageName = sideEffect.app.packageName
+                            packageName = sideEffect.app.packageName,
                         )
                     }
 
@@ -98,7 +98,7 @@ fun MapRoute(
                         DirectionHelper().moveAppOrStore(
                             context = context,
                             url = "nmap://route/walk?slat=37.5270539&slng=126.8862648&sname=$startName&dlat=37.5256372&dlng=126.8861924&dname=$destName",
-                            packageName = sideEffect.app.packageName
+                            packageName = sideEffect.app.packageName,
                         )
                     }
 
@@ -106,7 +106,7 @@ fun MapRoute(
                         DirectionHelper().moveAppOrStore(
                             context = context,
                             url = "kakaomap://route?sp=37.5270539,126.8862648&ep=37.5256372,126.8861924&by=FOOT",
-                            packageName = sideEffect.app.packageName
+                            packageName = sideEffect.app.packageName,
                         )
                     }
                 }
@@ -126,14 +126,14 @@ fun MapRoute(
         WarningDialog(
             content = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
             onDismissRequest = { viewModel.store.onIntent(MapIntent.ClickCloseInfoIcon) },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+            properties = DialogProperties(usePlatformDefaultWidth = false),
         )
     }
 
     if (uiState.isShowDirectionBottomSheet) {
         DirectionBottomSheet(
             onDismissRequest = { viewModel.store.onIntent(MapIntent.CloseDirectionBottomSheet) },
-            onClickDirectionItem = { viewModel.store.onIntent(MapIntent.ClickDirectionItem(it)) }
+            onClickDirectionItem = { viewModel.store.onIntent(MapIntent.ClickDirectionItem(it)) },
         )
     }
 }
@@ -152,7 +152,7 @@ fun MapScreen(
 ) {
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
-            locationTrackingMode = locationTrackingMode
+            locationTrackingMode = locationTrackingMode,
         )
     }
     val mapUiSettings = remember {
@@ -162,7 +162,7 @@ fun MapScreen(
     }
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
         NaverMap(
             modifier = Modifier.fillMaxSize(),
@@ -174,7 +174,7 @@ fun MapScreen(
                 cameraPositionState.locationTrackingMode?.let {
                     onLocationTrackingModeChange(it)
                 }
-            }
+            },
         ) {
             uiState.nearbyBrands.forEachIndexed { index, brandInfo ->
                 BrandMarker(
@@ -185,7 +185,7 @@ fun MapScreen(
                     isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude),
                     onClick = {
                         onIntent(MapIntent.ClickBrandMarker(latitude = brandInfo.latitude, longitude = brandInfo.longitude))
-                    }
+                    },
                 )
             }
         }
@@ -201,7 +201,7 @@ fun MapScreen(
                 onLocationTrackingModeChange(LocationTrackingMode.Follow)
             },
             onClickBrand = { onIntent(MapIntent.ClickBrand) },
-            onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) }
+            onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) },
         )
 
         if (uiState.dragState == DragValue.Top) {
@@ -209,7 +209,7 @@ fun MapScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 32.dp),
-                onClick = { onIntent(MapIntent.ClickToMapChip) }
+                onClick = { onIntent(MapIntent.ClickToMapChip) },
             )
         } else if (uiState.dragState == DragValue.Invisible && uiState.selectedBrandInfo != null) {
             PanelInvisibleContent(
@@ -218,7 +218,7 @@ fun MapScreen(
                 isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
                 onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
                 onClickCloseCard = { onIntent(MapIntent.ClickCloseBrandCard) },
-                onClickDirection = { onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude)) }
+                onClickDirection = { onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude)) },
             )
         }
     }

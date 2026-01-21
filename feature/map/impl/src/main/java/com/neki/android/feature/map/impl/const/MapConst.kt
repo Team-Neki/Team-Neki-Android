@@ -14,7 +14,4 @@ internal object MapConst {
     internal const val FOCUSED_MARKER_PADDING = 6
     internal const val MARKER_TRIANGLE_WIDTH = 12
     internal const val MARKER_TRIANGLE_HEIGHT = 10
-
-
-
 }

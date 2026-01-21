@@ -36,14 +36,14 @@ fun BrandCard(
             .fillMaxWidth()
             .buttonShadow(
                 shape = RoundedCornerShape(20.dp),
-                blurRadius = 4.dp
+                blurRadius = 4.dp,
             )
             .background(
                 shape = RoundedCornerShape(20.dp),
-                color = NekiTheme.colorScheme.white
+                color = NekiTheme.colorScheme.white,
             )
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
             modifier = Modifier
@@ -55,25 +55,25 @@ fun BrandCard(
         HorizontalSpacer(16.dp)
         Column {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = brand.brandName,
                     color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold
+                    style = NekiTheme.typography.title18Bold,
                 )
                 HorizontalSpacer(4.dp)
                 Text(
                     text = brand.branchName,
                     color = NekiTheme.colorScheme.gray600,
-                    style = NekiTheme.typography.caption12Medium
+                    style = NekiTheme.typography.caption12Medium,
                 )
             }
             VerticalSpacer(4.dp)
             Text(
                 text = brand.distance,
                 color = NekiTheme.colorScheme.gray400,
-                style = NekiTheme.typography.caption12Medium
+                style = NekiTheme.typography.caption12Medium,
             )
         }
         HorizontalSpacer(1f)
@@ -81,11 +81,11 @@ fun BrandCard(
             modifier = Modifier
                 .background(
                     shape = CircleShape,
-                    color = NekiTheme.colorScheme.gray900
+                    color = NekiTheme.colorScheme.gray900,
                 )
                 .noRippleClickableSingle(onClick = onClickDirection)
                 .padding(4.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             AsyncImage(
                 modifier = Modifier.size(24.dp),
@@ -106,7 +106,7 @@ private fun BrandCardPreview() {
                 brandImageRes = R.drawable.icon_life_four_cut,
                 branchName = "사당역점",
                 distance = "300m",
-            )
+            ),
         )
     }
 }

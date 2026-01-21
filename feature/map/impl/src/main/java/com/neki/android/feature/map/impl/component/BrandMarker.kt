@@ -60,7 +60,7 @@ internal fun BrandMarker(
         onClick = {
             onClick()
             true
-        }
+        },
     ) {
         BrandMarkerContent(
             brandImageRes = brandImageRes,
@@ -86,9 +86,9 @@ internal fun BrandMarkerContent(
             .padding(1.dp)
             .size(
                 width = bodySize.dp,
-                height = totalHeight.dp
+                height = totalHeight.dp,
             ),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.TopCenter,
     ) {
         // 브랜드 이미지 그림자
         Box(
@@ -97,11 +97,11 @@ internal fun BrandMarkerContent(
                 .buttonShadow(
                     color = Color.Black.copy(alpha = 0.38f),
                     shape = RoundedCornerShape(
-                        if (isFocused) FOCUSED_MARKER_BACKGROUND_RADIUS.dp else MARKER_BACKGROUND_RADIUS.dp
+                        if (isFocused) FOCUSED_MARKER_BACKGROUND_RADIUS.dp else MARKER_BACKGROUND_RADIUS.dp,
                     ),
                     offsetY = 1.18.dp,
-                    blurRadius = 2.55.dp
-                )
+                    blurRadius = 2.55.dp,
+                ),
         )
 
         // 꼬리
@@ -110,8 +110,8 @@ internal fun BrandMarkerContent(
                 .align(Alignment.BottomCenter)
                 .size(
                     width = MARKER_TRIANGLE_WIDTH.dp,
-                    height = MARKER_TRIANGLE_HEIGHT.dp
-                )
+                    height = MARKER_TRIANGLE_HEIGHT.dp,
+                ),
         ) {
             val shadowColor = Color.Black.copy(alpha = 0.38f)
             val offsetY = 1.18.dp.toPx()
@@ -133,7 +133,7 @@ internal fun BrandMarkerContent(
                             blurRadius,
                             0f,
                             offsetY,
-                            shadowColor.toArgb()
+                            shadowColor.toArgb(),
                         )
                     }
                 }
@@ -153,33 +153,33 @@ internal fun BrandMarkerContent(
                                 brush = Brush.verticalGradient(
                                     colors = listOf(
                                         NekiTheme.colorScheme.gray600,
-                                        NekiTheme.colorScheme.gray900
-                                    )
+                                        NekiTheme.colorScheme.gray900,
+                                    ),
                                 ),
-                                shape = RoundedCornerShape(FOCUSED_MARKER_BACKGROUND_RADIUS.dp)
+                                shape = RoundedCornerShape(FOCUSED_MARKER_BACKGROUND_RADIUS.dp),
                             )
                             .padding(FOCUSED_MARKER_PADDING.dp)
                     } else {
                         Modifier
                             .background(
                                 color = NekiTheme.colorScheme.white,
-                                shape = RoundedCornerShape(MARKER_BACKGROUND_RADIUS.dp)
+                                shape = RoundedCornerShape(MARKER_BACKGROUND_RADIUS.dp),
                             )
                             .padding(MARKER_PADDING.dp)
-                    }
+                    },
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             AsyncImage(
                 modifier = Modifier
                     .size(if (isFocused) FOCUSED_MARKER_IMAGE_SIZE.dp else MARKER_IMAGE_SIZE.dp)
                     .clip(
                         RoundedCornerShape(
-                            if (isFocused) FOCUSED_MARKER_IMAGE_RADIUS.dp else MARKER_IMAGE_RADIUS.dp
-                        )
+                            if (isFocused) FOCUSED_MARKER_IMAGE_RADIUS.dp else MARKER_IMAGE_RADIUS.dp,
+                        ),
                     ),
                 model = brandImageRes,
-                contentDescription = null
+                contentDescription = null,
             )
         }
     }
@@ -190,7 +190,7 @@ internal fun BrandMarkerContent(
 private fun BrandMarkerContentPreview() {
     NekiTheme {
         BrandMarkerContent(
-            brandImageRes = R.drawable.icon_life_four_cut
+            brandImageRes = R.drawable.icon_life_four_cut,
         )
     }
 }
@@ -201,7 +201,7 @@ private fun BrandMarkerContentSelectedPreview() {
     NekiTheme {
         BrandMarkerContent(
             brandImageRes = R.drawable.icon_life_four_cut,
-            isFocused = true
+            isFocused = true,
         )
     }
 }

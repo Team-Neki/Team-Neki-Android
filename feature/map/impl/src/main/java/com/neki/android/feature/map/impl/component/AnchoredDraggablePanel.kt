@@ -81,7 +81,8 @@ fun AnchoredDraggablePanel(
     val bottomOffsetPx = remember(collapsedHeightPx, navigationBarHeightPx) {
         with(density) {
             collapsedHeightPx +
-                48.dp.toPx() +  // currentLocationButton (36.dp + 12.dp)
+                // currentLocationButton (36.dp + 12.dp)
+                48.dp.toPx() +
                 MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp.toPx() +
                 navigationBarHeightPx
         }
@@ -106,7 +107,7 @@ fun AnchoredDraggablePanel(
             decayAnimationSpec = splineBasedDecay(density),
             confirmValueChange = { newValue ->
                 newValue != DragValue.Invisible || isProgrammaticTransition
-            }
+            },
         )
     }
 
@@ -146,7 +147,7 @@ fun AnchoredDraggablePanel(
                     .padding(start = 20.dp, bottom = 12.dp)
                     .alpha(alpha = if (dragValue == DragValue.Top) 0f else 1f),
                 isActiveCurrentLocation = isCurrentLocation,
-                onClick = onClickCurrentLocation
+                onClick = onClickCurrentLocation,
             )
             AnchoredPanelContent(
                 brands = brands,
@@ -155,7 +156,7 @@ fun AnchoredDraggablePanel(
                 onCollapsedHeightMeasured = { collapsedHeightPx = it },
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = onClickBrand,
-                onClickNearBrand = onClickNearBrand
+                onClickNearBrand = onClickNearBrand,
             )
         }
     }
@@ -191,12 +192,12 @@ fun AnchoredPanelContent(
             .buttonShadow(
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                 offsetY = 0.dp,
-                blurRadius = 5.dp
+                blurRadius = 5.dp,
             )
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-            )
+            ),
     ) {
         Column(
             modifier = Modifier
@@ -204,27 +205,27 @@ fun AnchoredPanelContent(
                 .onGloballyPositioned {
                     val newHeight = it.size.height + additionalHeightPx
                     onCollapsedHeightMeasured(newHeight)
-                }
+                },
         ) {
             BottomSheetDragHandle()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp)
+                    .padding(start = 20.dp),
             ) {
                 Text(
                     modifier = Modifier.padding(vertical = 10.dp),
                     text = "네컷 사진 브랜드",
                     color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold
+                    style = NekiTheme.typography.title18Bold,
                 )
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     items(brands) { brand ->
                         VerticalBrandItem(
                             brand = brand,
-                            onItemClick = { onClickBrand(it) }
+                            onItemClick = { onClickBrand(it) },
                         )
                     }
                 }
@@ -236,12 +237,12 @@ fun AnchoredPanelContent(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "가까운 네컷 사진 브랜드 \uD83D\uDCCC",
                 color = NekiTheme.colorScheme.gray900,
-                style = NekiTheme.typography.title18Bold
+                style = NekiTheme.typography.title18Bold,
             )
             AsyncImage(
                 modifier = Modifier
@@ -249,7 +250,7 @@ fun AnchoredPanelContent(
                     .noRippleClickableSingle(onClick = onClickInfoIcon)
                     .padding(2.dp),
                 model = R.drawable.icon_info_gray_stroke,
-                contentDescription = null
+                contentDescription = null,
             )
         }
         VerticalSpacer(8.dp)
@@ -258,12 +259,12 @@ fun AnchoredPanelContent(
                 .weight(1f)
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = extraBottomPadding)
+            contentPadding = PaddingValues(bottom = extraBottomPadding),
         ) {
             items(nearbyBrands) { brandInfo ->
                 HorizontalBrandItem(
                     brandInfo = brandInfo,
-                    onItemClick = { onClickNearBrand(brandInfo) }
+                    onItemClick = { onClickNearBrand(brandInfo) },
                 )
             }
         }

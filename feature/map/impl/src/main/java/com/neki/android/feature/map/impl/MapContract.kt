@@ -8,12 +8,12 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class MapState(
     val isLoading: Boolean = false,
+    val dragState: DragValue = DragValue.Bottom,
+    val currentLocation: Pair<Double, Double> = Pair(0.0, 0.0),
     val brands: ImmutableList<Brand> = persistentListOf(),
     val nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     val focusedMarkerPosition: Pair<Double, Double> = Pair(0.0, 0.0),
     val selectedBrandInfo: BrandInfo? = null,
-    val currentLocation: Pair<Double, Double> = Pair(0.0, 0.0),
-    val dragState: DragValue = DragValue.Bottom,
     val isShowInfoDialog: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
 )
@@ -24,11 +24,12 @@ sealed interface MapIntent {
     // in 지도
     data class ClickBrandMarker(
         val latitude: Double,
-        val longitude: Double
+        val longitude: Double,
     ) : MapIntent
+
     data class ClickDirection(
         val latitude: Double,
-        val longitude: Double
+        val longitude: Double,
     ) : MapIntent
 
     // in 패널
@@ -42,7 +43,6 @@ sealed interface MapIntent {
     data object CloseDirectionBottomSheet : MapIntent
     data class ClickDirectionItem(val app: DirectionAppConst) : MapIntent
     data class ChangeDragValue(val dragValue: DragValue) : MapIntent
-
 }
 
 sealed interface MapEffect {
@@ -50,8 +50,9 @@ sealed interface MapEffect {
     data class ShowToastMessage(val message: String) : MapEffect
     data class MoveCameraToPosition(
         val latitude: Double,
-        val longitude: Double
+        val longitude: Double,
     ) : MapEffect
+
     data class MoveDirectionApp(
         val app: DirectionAppConst,
     ) : MapEffect

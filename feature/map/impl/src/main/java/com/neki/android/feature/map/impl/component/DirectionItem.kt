@@ -23,7 +23,7 @@ import com.neki.android.feature.map.impl.const.DirectionAppConst
 fun DirectionItem(
     app: DirectionAppConst,
     modifier: Modifier = Modifier,
-    onClickItem: (DirectionAppConst) -> Unit = {}
+    onClickItem: (DirectionAppConst) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -40,7 +40,7 @@ fun DirectionItem(
                     color = NekiTheme.colorScheme.gray50,
                     shape = RoundedCornerShape(12.dp),
                 ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             AsyncImage(
                 modifier = Modifier.clip(RoundedCornerShape(12.dp)),
@@ -53,7 +53,7 @@ fun DirectionItem(
             text = app.appName,
             color = NekiTheme.colorScheme.gray900,
             style = NekiTheme.typography.body14Medium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }

@@ -32,6 +32,7 @@ suspend fun Context.getPlaceName(
                 ?: fallback
             cont.resume(address)
         } catch (e: Exception) {
+            e.printStackTrace()
             cont.resume(fallback)
         }
     }

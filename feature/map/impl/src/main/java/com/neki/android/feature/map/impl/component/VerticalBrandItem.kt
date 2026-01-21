@@ -31,7 +31,7 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 fun VerticalBrandItem(
     brand: Brand,
     modifier: Modifier = Modifier,
-    onItemClick: (Boolean) -> Unit = {}
+    onItemClick: (Boolean) -> Unit = {},
 ) {
     var isSelected by remember { mutableStateOf(brand.isChecked) }
 
@@ -42,11 +42,11 @@ fun VerticalBrandItem(
                 isSelected = !isSelected
                 onItemClick(isSelected)
             },
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
             modifier = Modifier.size(56.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             AsyncImage(
                 modifier = Modifier.clip(CircleShape),
@@ -60,9 +60,9 @@ fun VerticalBrandItem(
                         .fillMaxSize()
                         .background(
                             shape = CircleShape,
-                            color = Color(0xFFFF5647).copy(alpha = 0.5f)
+                            color = Color(0xFFFF5647).copy(alpha = 0.5f),
                         ),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     AsyncImage(
                         modifier = Modifier.size(28.dp),
@@ -77,7 +77,7 @@ fun VerticalBrandItem(
             text = brand.brandName,
             color = if (isSelected) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray900,
             style = NekiTheme.typography.body14Medium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -89,8 +89,8 @@ private fun VerticalBrandItemPreview() {
         VerticalBrandItem(
             brand = Brand(
                 brandName = "인생네컷",
-                brandImageRes = R.drawable.icon_life_four_cut
-            )
+                brandImageRes = R.drawable.icon_life_four_cut,
+            ),
         )
     }
 }

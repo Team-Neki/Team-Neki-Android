@@ -16,9 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
@@ -32,7 +30,7 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 fun VerticalFourCutBrand(
     brand: Brand,
     modifier: Modifier = Modifier,
-    onItemClick: (Boolean) -> Unit = {}
+    onItemClick: (Boolean) -> Unit = {},
 ) {
     var isSelected by remember { mutableStateOf(false) }
 
@@ -43,10 +41,10 @@ fun VerticalFourCutBrand(
                 isSelected = !isSelected
                 onItemClick(isSelected)
             },
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier.size(56.dp)
+            modifier = Modifier.size(56.dp),
         ) {
             AsyncImage(
                 modifier = Modifier.clip(CircleShape),
@@ -59,9 +57,9 @@ fun VerticalFourCutBrand(
                     modifier = Modifier
                         .background(
                             shape = CircleShape,
-                            color = Color(0xFFFF5647).copy(alpha = 0.5f)
+                            color = Color(0xFFFF5647).copy(alpha = 0.5f),
                         ),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     AsyncImage(
                         modifier = Modifier.size(28.dp),
@@ -76,7 +74,7 @@ fun VerticalFourCutBrand(
             text = brand.brandName,
             color = if (isSelected) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray900,
             style = NekiTheme.typography.body14Medium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -89,7 +87,7 @@ private fun VerticalFourCutBrandPreview() {
             brand = Brand(
                 brandName = "인생네컷",
                 brandImageRes = R.drawable.icon_life_four_cut,
-            )
+            ),
         )
     }
 }

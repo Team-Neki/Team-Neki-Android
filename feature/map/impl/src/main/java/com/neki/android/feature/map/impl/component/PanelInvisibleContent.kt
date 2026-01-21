@@ -34,23 +34,23 @@ fun PanelInvisibleContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             CurrentLocationButton(
                 isActiveCurrentLocation = isCurrentLocation,
-                onClick = onClickCurrentLocation
+                onClick = onClickCurrentLocation,
             )
             BrandCardCloseButton(onClick = onClickCloseCard)
         }
         VerticalSpacer(12.dp)
         BrandCard(
             brand = brandInfo,
-            onClickDirection = onClickDirection
+            onClickDirection = onClickDirection,
         )
     }
 }
@@ -65,16 +65,16 @@ fun BrandCardCloseButton(
             .buttonShadow(blurRadius = 10.dp)
             .background(
                 shape = CircleShape,
-                color = NekiTheme.colorScheme.white
+                color = NekiTheme.colorScheme.white,
             )
             .clickable(onClick = onClick)
             .padding(8.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         AsyncImage(
             modifier = Modifier.size(20.dp),
             model = R.drawable.icon_close_20,
-            contentDescription = null
+            contentDescription = null,
         )
     }
 }
@@ -89,7 +89,7 @@ private fun PanelInvisibleContentPreview() {
                 brandImageRes = R.drawable.icon_life_four_cut,
                 branchName = "사당역점",
                 distance = "300m",
-            )
+            ),
         )
     }
 }

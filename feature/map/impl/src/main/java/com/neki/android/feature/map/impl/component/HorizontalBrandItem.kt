@@ -30,7 +30,7 @@ fun HorizontalBrandItem(
         modifier = modifier
             .fillMaxWidth()
             .noRippleClickableSingle(onClick = onItemClick),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
             modifier = Modifier
@@ -42,25 +42,25 @@ fun HorizontalBrandItem(
         HorizontalSpacer(16.dp)
         Column {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = brandInfo.brandName,
                     color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold
+                    style = NekiTheme.typography.title18Bold,
                 )
                 HorizontalSpacer(4.dp)
                 Text(
                     text = brandInfo.branchName,
                     color = NekiTheme.colorScheme.gray600,
-                    style = NekiTheme.typography.caption12Medium
+                    style = NekiTheme.typography.caption12Medium,
                 )
             }
             VerticalSpacer(4.dp)
             Text(
                 text = brandInfo.distance,
                 color = NekiTheme.colorScheme.gray400,
-                style = NekiTheme.typography.caption12Medium
+                style = NekiTheme.typography.caption12Medium,
             )
         }
     }
@@ -75,8 +75,8 @@ private fun HorizontalBrandItemPreview() {
                 brandName = "인생네컷",
                 brandImageRes = R.drawable.icon_life_four_cut,
                 branchName = "사당역점",
-                distance = "320m"
-            )
+                distance = "320m",
+            ),
         )
     }
 }
