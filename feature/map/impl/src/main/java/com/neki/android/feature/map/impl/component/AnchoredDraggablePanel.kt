@@ -72,17 +72,26 @@ fun AnchoredDraggablePanel(
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
+
     val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
     var collapsedHeightPx by remember { mutableIntStateOf(0) }
-    val currentLocationButtonHeightPx = with(density) { 48.dp.toPx() }  // 36.dp + 12.dp
-    val bottomNavBarHeightPx = with(density) { MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp.toPx() }
-    val navigationBarHeightPx = with(density) { WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx() }
+    val navigationBarHeightPx = with(density) {
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx()
+    }
+    val bottomOffsetPx = remember(collapsedHeightPx, navigationBarHeightPx) {
+        with(density) {
+            collapsedHeightPx +
+                48.dp.toPx() +  // currentLocationButton (36.dp + 12.dp)
+                MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp.toPx() +
+                navigationBarHeightPx
+        }
+    }
 
     var isProgrammaticTransition by remember { mutableStateOf(false) }
 
     val state = remember(collapsedHeightPx) {
         val anchors = DraggableAnchors {
-            DragValue.Bottom at screenHeightPx - collapsedHeightPx - bottomNavBarHeightPx - currentLocationButtonHeightPx - navigationBarHeightPx
+            DragValue.Bottom at screenHeightPx - bottomOffsetPx
             DragValue.Center at screenHeightPx * 0.3f
             DragValue.Top at screenHeightPx * 0.05f
             DragValue.Invisible at screenHeightPx
