@@ -1,6 +1,5 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.component
 
-import android.R.attr.foreground
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -50,8 +49,7 @@ internal fun DimExceptContent(
     val paddingPx = with(density) { cutoutPadding.toPx() }
     val radiusPx = with(density) { cutoutRadius.toPx() }
 
-    Box(modifier = modifier
-    ) {
+    Box(modifier = modifier) {
         cutout(
             Modifier
                 .padding(bottom = 20.dp)
