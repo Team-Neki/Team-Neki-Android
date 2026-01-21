@@ -68,7 +68,7 @@ fun AnchoredDraggablePanel(
     onClickCurrentLocation: () -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Boolean) -> Unit = {},
-    onClickNearBrand: () -> Unit = {},
+    onClickNearBrand: (BrandInfo) -> Unit = {},
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -146,7 +146,7 @@ fun AnchoredDraggablePanel(
                 onCollapsedHeightMeasured = { collapsedHeightPx = it },
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = { onClickBrand(it) },
-                onClickNearBrand = onClickNearBrand
+                onClickNearBrand = { onClickNearBrand(it) }
             )
         }
     }
@@ -161,7 +161,7 @@ fun AnchoredPanelContent(
     onCollapsedHeightMeasured: (Int) -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Boolean) -> Unit = {},
-    onClickNearBrand: () -> Unit = {},
+    onClickNearBrand: (BrandInfo) -> Unit = {},
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -253,7 +253,7 @@ fun AnchoredPanelContent(
             items(nearbyBrands) { brandInfo ->
                 HorizontalBrandItem(
                     brandInfo = brandInfo,
-                    onItemClick = onClickNearBrand
+                    onItemClick = { onClickNearBrand(brandInfo) }
                 )
             }
         }

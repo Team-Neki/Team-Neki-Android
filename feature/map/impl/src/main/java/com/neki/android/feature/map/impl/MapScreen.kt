@@ -32,7 +32,6 @@ import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
-import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.dialog.WarningDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -177,77 +176,18 @@ fun MapScreen(
                 }
             }
         ) {
-            // 인생네컷 (중심에서 북쪽 30m)
-            BrandMarker(
-                key = arrayOf("life_four_cut"),
-                latitude = 37.5272,
-                longitude = 126.8862,
-                brandImageRes = R.drawable.icon_life_four_cut,
-                isFocused = uiState.focusedMarkerPosition == (37.5272 to 126.8862),
-                onClick = {
-                    onIntent(MapIntent.ClickBrandMarker(latitude = 37.5272, longitude = 126.8862))
-                }
-            )
-
-            // 포토그레이 (중심에서 동쪽 50m)
-            BrandMarker(
-                key = arrayOf("photogray"),
-                latitude = 37.5269,
-                longitude = 126.8868,
-                brandImageRes = R.drawable.icon_photogray,
-                isFocused = uiState.focusedMarkerPosition == (37.5269 to 126.8868),
-                onClick = {
-                    onIntent(MapIntent.ClickBrandMarker(latitude = 37.5269, longitude = 126.8868))
-                }
-            )
-
-            // 포토이즘 (중심에서 남동쪽 60m)
-            BrandMarker(
-                key = arrayOf("photoism"),
-                latitude = 37.5265,
-                longitude = 126.8867,
-                brandImageRes = R.drawable.icon_photoism,
-                isFocused = uiState.focusedMarkerPosition == (37.5265 to 126.8867),
-                onClick = {
-                    onIntent(MapIntent.ClickBrandMarker(latitude = 37.5265, longitude = 126.8867))
-                }
-            )
-
-            // 하루필름 (중심에서 서쪽 40m)
-            BrandMarker(
-                key = arrayOf("haru_film"),
-                latitude = 37.5270,
-                longitude = 126.8857,
-                brandImageRes = R.drawable.icon_haru_film,
-                isFocused = uiState.focusedMarkerPosition == (37.5270 to 126.8857),
-                onClick = {
-                    onIntent(MapIntent.ClickBrandMarker(latitude = 37.5270, longitude = 126.8857))
-                }
-            )
-
-            // 플랜비스튜디오 (중심에서 북서쪽 70m)
-            BrandMarker(
-                key = arrayOf("planb_studio"),
-                latitude = 37.5274,
-                longitude = 126.8855,
-                brandImageRes = R.drawable.icon_planb_studio,
-                isFocused = uiState.focusedMarkerPosition == (37.5274 to 126.8855),
-                onClick = {
-                    onIntent(MapIntent.ClickBrandMarker(latitude = 37.5274, longitude = 126.8855))
-                }
-            )
-
-            // 포토시그니처 (중심에서 남쪽 80m)
-            BrandMarker(
-                key = arrayOf("photo_signature"),
-                latitude = 37.5262,
-                longitude = 126.8861,
-                brandImageRes = R.drawable.icon_photo_signature,
-                isFocused = uiState.focusedMarkerPosition == (37.5262 to 126.8861),
-                onClick = {
-                    onIntent(MapIntent.ClickBrandMarker(latitude = 37.5262, longitude = 126.8861))
-                }
-            )
+            uiState.nearbyBrands.forEachIndexed { index, brandInfo ->
+                BrandMarker(
+                    key = arrayOf("brand_$index", "${brandInfo.latitude}_${brandInfo.longitude}"),
+                    latitude = brandInfo.latitude,
+                    longitude = brandInfo.longitude,
+                    brandImageRes = brandInfo.brandImageRes,
+                    isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude),
+                    onClick = {
+                        onIntent(MapIntent.ClickBrandMarker(latitude = brandInfo.latitude, longitude = brandInfo.longitude))
+                    }
+                )
+            }
         }
 
         AnchoredDraggablePanel(
@@ -261,7 +201,7 @@ fun MapScreen(
                 onLocationTrackingModeChange(LocationTrackingMode.Follow)
             },
             onClickBrand = { onIntent(MapIntent.ClickBrand) },
-            onClickNearBrand = { onIntent(MapIntent.ClickNearBrand) }
+            onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) }
         )
 
         if (uiState.dragState == DragValue.Top) {
@@ -271,14 +211,14 @@ fun MapScreen(
                     .padding(bottom = 32.dp),
                 onClick = { onIntent(MapIntent.ClickToMapChip) }
             )
-        } else if (uiState.dragState == DragValue.Invisible && uiState.nearbyBrands.isNotEmpty()) {
+        } else if (uiState.dragState == DragValue.Invisible && uiState.selectedBrandInfo != null) {
             PanelInvisibleContent(
-                brandInfo = uiState.nearbyBrands.first(),
+                brandInfo = uiState.selectedBrandInfo,
                 modifier = Modifier.align(Alignment.BottomCenter),
                 isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
                 onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
                 onClickCloseCard = { onIntent(MapIntent.ClickCloseBrandCard) },
-                onClickDirection = { onIntent(MapIntent.ClickDirection(37.5256372, 126.8861924)) }
+                onClickDirection = { onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude)) }
             )
         }
     }

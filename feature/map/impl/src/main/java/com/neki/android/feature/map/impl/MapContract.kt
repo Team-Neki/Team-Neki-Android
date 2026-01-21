@@ -11,6 +11,7 @@ data class MapState(
     val brands: ImmutableList<Brand> = persistentListOf(),
     val nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     val focusedMarkerPosition: Pair<Double, Double> = Pair(0.0, 0.0),
+    val selectedBrandInfo: BrandInfo? = BrandInfo(),
     val currentLocation: Pair<Double, Double> = Pair(0.0, 0.0),
     val dragState: DragValue = DragValue.Bottom,
     val isShowInfoDialog: Boolean = false,
@@ -36,7 +37,7 @@ sealed interface MapIntent {
     data object ClickCloseInfoIcon : MapIntent
     data object ClickToMapChip : MapIntent
     data object ClickBrand : MapIntent
-    data object ClickNearBrand : MapIntent
+    data class ClickNearBrand(val brandInfo: BrandInfo) : MapIntent
     data object ClickCloseBrandCard : MapIntent
     data object CloseDirectionBottomSheet : MapIntent
     data class ClickDirectionItem(val app: DirectionAppConst) : MapIntent
