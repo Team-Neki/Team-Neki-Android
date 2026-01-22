@@ -211,8 +211,9 @@ class ArchiveMainViewModel @Inject constructor(
         onSuccess: () -> Unit,
     ) {
         viewModelScope.launch {
-            val imageBytes = imageUrl.urlToByteArray()
             reduce { copy(isLoading = true) }
+            val imageBytes = imageUrl.urlToByteArray()
+
             uploadSinglePhotoUseCase(
                 imageBytes = imageBytes,
             ).onSuccess {

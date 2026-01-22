@@ -133,8 +133,8 @@ class UploadAlbumViewModel @AssistedInject constructor(
         onFailureAction: (Throwable) -> Unit,
     ) {
         viewModelScope.launch {
-            val imageBytes = imageUrl.urlToByteArray()
             reduce { copy(isLoading = true) }
+            val imageBytes = imageUrl.urlToByteArray()
 
             uploadSinglePhotoUseCase(
                 imageBytes = imageBytes,
