@@ -1,9 +1,11 @@
 package com.neki.android.feature.archive.impl.main
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.util.urlToByteArray
-import com.neki.android.core.domain.usecase.UploadPhotoUseCase
+import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.UploadType
@@ -16,9 +18,12 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+private const val DEFAULT_PHOTOS_SIZE = 20
+
 @HiltViewModel
 class ArchiveMainViewModel @Inject constructor(
-    private val uploadPhotoUseCase: UploadPhotoUseCase,
+    private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
+    private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     val store: MviIntentStore<ArchiveMainState, ArchiveMainIntent, ArchiveMainSideEffect> =
@@ -43,7 +48,7 @@ class ArchiveMainViewModel @Inject constructor(
                 )
             }
 
-            ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialDate(reduce)
+            ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
@@ -107,7 +112,7 @@ class ArchiveMainViewModel @Inject constructor(
         }
     }
 
-    private fun fetchInitialDate(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
+    private fun fetchInitialData(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
         val dummyPhotos = listOf(
             Photo(id = 1, imageUrl = "https://picsum.photos/seed/pose1/400/500", isFavorite = true, date = "2025.01.15"),
             Photo(id = 2, imageUrl = "https://picsum.photos/seed/pose2/400/650", isFavorite = false, date = "2025.01.15"),
@@ -162,12 +167,26 @@ class ArchiveMainViewModel @Inject constructor(
             photoList = favoritePhotos,
         )
 
+        fetchPhotos(reduce)
+
         reduce {
             copy(
                 favoriteAlbum = favoriteAlbum,
                 albums = dummyAlbums,
-                recentPhotos = dummyPhotos,
+//                recentPhotos = dummyPhotos,
             )
+        }
+    }
+
+    private fun fetchPhotos(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit, size: Int = DEFAULT_PHOTOS_SIZE) {
+        viewModelScope.launch {
+            photoRepository.getPhotos()
+                .onSuccess { data ->
+                    reduce { copy(recentPhotos = data.toImmutableList()) }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                }
         }
     }
 
@@ -209,6 +228,7 @@ class ArchiveMainViewModel @Inject constructor(
             uploadSinglePhotoUseCase(
                 imageBytes = imageBytes,
             ).onSuccess {
+                fetchPhotos(reduce, 1) // 가장 최신 데이터 가져오기
                 onSuccess()
             }.onFailure { error ->
                 Timber.e(error)
