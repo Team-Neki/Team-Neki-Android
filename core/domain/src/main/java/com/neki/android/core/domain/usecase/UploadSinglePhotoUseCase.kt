@@ -1,5 +1,6 @@
 package com.neki.android.core.domain.usecase
 
+import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.ContentType
@@ -18,7 +19,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
         imageBytes: ByteArray,
         contentType: ContentType = ContentType.JPEG,
         folderId: Long? = null,
-    ): Result<Media> = runCatching {
+    ): Result<Media> = runSuspendCatching {
         val fileName = generateFileName(contentType)
 
         // 1. 업로드 티켓 발급 (mediaId, presignedUrl)
@@ -41,7 +42,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
             folderId = folderId,
         ).getOrThrow()
 
-        return@runCatching Media(
+        return@runSuspendCatching Media(
             mediaId = mediaId,
             folderId = folderId,
             fileName = fileName,
