@@ -5,6 +5,8 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.Navigator
+import com.neki.android.core.navigation.result.LocalResultEventBus
+import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.archive.api.navigateToAllAlbum
@@ -13,11 +15,14 @@ import com.neki.android.feature.archive.api.navigateToPhotoDetail
 import com.neki.android.feature.archive.impl.album.AllAlbumRoute
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailRoute
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailViewModel
+import com.neki.android.feature.archive.impl.main.ArchiveMainIntent
 import com.neki.android.feature.archive.impl.main.ArchiveMainRoute
+import com.neki.android.feature.archive.impl.main.ArchiveMainViewModel
 import com.neki.android.feature.archive.impl.photo.AllPhotoRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
+import com.neki.android.feature.photo_upload.api.navigateToUploadAlbum
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,12 +42,20 @@ object ArchiveEntryProviderModule {
 
 private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.Archive> {
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<ArchiveMainViewModel>()
+        ResultEffect<String>(resultBus) { imageUrl ->
+            viewModel.store.onIntent(ArchiveMainIntent.QRCodeScanned(imageUrl))
+        }
+
         ArchiveMainRoute(
+            viewModel = viewModel,
             navigateToQRScan = navigator::navigateToQRScan,
-            navigateToGalleryUpload = {},
+            navigateToUploadAlbumWithGallery = navigator::navigateToUploadAlbum,
+            navigateToUploadAlbumWithQRScan = navigator::navigateToUploadAlbum,
             navigateToAllAlbum = navigator::navigateToAllAlbum,
-            navigateToFavoriteAlbum = { album -> navigator.navigateToAlbumDetail(isFavorite = true, album = album) },
-            navigateToAlbumDetail = { album -> navigator.navigateToAlbumDetail(isFavorite = false, album = album) },
+            navigateToFavoriteAlbum = { id -> navigator.navigateToAlbumDetail(isFavorite = true, id = id) },
+            navigateToAlbumDetail = { id -> navigator.navigateToAlbumDetail(isFavorite = false, id = id) },
             navigateToAllPhoto = navigator::navigateToAllPhoto,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
@@ -58,15 +71,15 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AllAlbum> {
         AllAlbumRoute(
             navigateBack = navigator::goBack,
-            navigateToFavoriteAlbum = { album -> navigator.navigateToAlbumDetail(isFavorite = true, album = album) },
-            navigateToAlbumDetail = { album -> navigator.navigateToAlbumDetail(isFavorite = false, album = album) },
+            navigateToFavoriteAlbum = { id -> navigator.navigateToAlbumDetail(isFavorite = true, id = id) },
+            navigateToAlbumDetail = { id -> navigator.navigateToAlbumDetail(isFavorite = false, id = id) },
         )
     }
     entry<ArchiveNavKey.AlbumDetail> { key ->
         AlbumDetailRoute(
             viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
                 creationCallback = { factory ->
-                    factory.create(key.album, key.isFavorite)
+                    factory.create(key.albumId, key.isFavorite)
                 },
             ),
             navigateBack = navigator::goBack,

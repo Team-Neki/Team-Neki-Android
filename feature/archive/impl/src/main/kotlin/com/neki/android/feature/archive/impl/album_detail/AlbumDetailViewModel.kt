@@ -15,13 +15,13 @@ import kotlinx.collections.immutable.toImmutableList
 
 @HiltViewModel(assistedFactory = AlbumDetailViewModel.Factory::class)
 class AlbumDetailViewModel @AssistedInject constructor(
-    @Assisted private val album: Album,
+    @Assisted private val id: Long,
     @Assisted private val isFavoriteAlbum: Boolean,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(album: Album, isFavoriteAlbum: Boolean): AlbumDetailViewModel
+        fun create(id: Long, isFavoriteAlbum: Boolean): AlbumDetailViewModel
     }
 
     private val dummyPhotos = persistentListOf(
@@ -35,19 +35,13 @@ class AlbumDetailViewModel @AssistedInject constructor(
         Photo(id = 1008, imageUrl = "https://picsum.photos/seed/detail8/400/650", isFavorite = false, date = "2025.01.08"),
     )
 
-    private val initialAlbum = if (album.photoList.isEmpty()) {
-        album.copy(photoList = dummyPhotos)
-    } else {
-        album
-    }
-
     val store: MviIntentStore<AlbumDetailState, AlbumDetailIntent, AlbumDetailSideEffect> =
         mviIntentStore(
             initialState = AlbumDetailState(
-                album = initialAlbum,
                 isFavoriteAlbum = isFavoriteAlbum,
             ),
             onIntent = ::onIntent,
+            initialFetchData = { store.onIntent(AlbumDetailIntent.EnterAlbumDetailScreen) },
         )
 
     private fun onIntent(
@@ -58,6 +52,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     ) {
         when (intent) {
             // TopBar Intent
+            AlbumDetailIntent.EnterAlbumDetailScreen -> fetchInitialData(id, reduce)
             AlbumDetailIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.ClickSelectButton -> reduce { copy(selectMode = SelectMode.SELECTING) }
@@ -85,6 +80,20 @@ class AlbumDetailViewModel @AssistedInject constructor(
             is AlbumDetailIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AlbumDetailIntent.ClickDeleteBottomSheetCancelButton -> reduce { copy(showDeleteBottomSheet = false) }
             AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumDelete(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun fetchInitialData(
+        id: Long,
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+    ) {
+        // TODO: Fetch album from repository
+        reduce {
+            copy(
+                album = Album(
+                    photoList = dummyPhotos,
+                ),
+            )
         }
     }
 

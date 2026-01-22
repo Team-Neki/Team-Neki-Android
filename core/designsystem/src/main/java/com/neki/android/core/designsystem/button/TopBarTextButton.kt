@@ -14,7 +14,9 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 fun TopBarTextButton(
     buttonText: String,
     modifier: Modifier = Modifier,
-    buttonLabelTextColor: Color = NekiTheme.colorScheme.primary500,
+    enabled: Boolean = true,
+    enabledTextColor: Color = NekiTheme.colorScheme.primary500,
+    disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     onClick: () -> Unit = {},
 ) {
     NekiTextButton(
@@ -26,18 +28,30 @@ fun TopBarTextButton(
         Text(
             text = buttonText,
             style = NekiTheme.typography.body16SemiBold,
-            color = buttonLabelTextColor,
+            color = if (enabled) enabledTextColor else disabledTextColor,
         )
     }
 }
 
 @ComponentPreview
 @Composable
-private fun TopBarTextButtonPreview() {
+private fun EnabledTopBarTextButtonPreview() {
     NekiTheme {
         TopBarTextButton(
             buttonText = "텍스트버튼",
             onClick = {},
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun DisabledTopBarTextButtonPreview() {
+    NekiTheme {
+        TopBarTextButton(
+            buttonText = "텍스트버튼",
+            onClick = {},
+            enabled = false,
         )
     }
 }

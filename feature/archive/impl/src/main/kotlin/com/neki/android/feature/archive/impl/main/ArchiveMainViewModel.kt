@@ -28,6 +28,13 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
     ) {
         if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
+            is ArchiveMainIntent.QRCodeScanned -> reduce {
+                copy(
+                    scannedImageUrl = intent.imageUrl,
+                    showChooseWithAlbumDialog = true,
+                )
+            }
+
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialDate(reduce)
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
@@ -42,8 +49,31 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
 
             ArchiveMainIntent.ClickGalleryUploadRow -> {
                 reduce { copy(showAddDialog = false) }
-                postSideEffect(ArchiveMainSideEffect.NavigateToGalleryUpload)
+                postSideEffect(ArchiveMainSideEffect.OpenGallery)
             }
+
+            is ArchiveMainIntent.SelectGalleryImage -> reduce {
+                copy(
+                    showChooseWithAlbumDialog = true,
+                    selectedUris = intent.uris.toImmutableList(),
+                )
+            }
+
+            ArchiveMainIntent.DismissChooseWithAlbumDialog -> reduce { copy(showChooseWithAlbumDialog = false) }
+            ArchiveMainIntent.ClickUploadWithAlbumRow -> {
+                reduce {
+                    copy(
+                        showChooseWithAlbumDialog = false,
+                        scannedImageUrl = null,
+                        selectedUris = persistentListOf(),
+                    )
+                }
+                if (state.scannedImageUrl == null)
+                    postSideEffect(ArchiveMainSideEffect.NavigateToUploadAlbumWithGallery(state.selectedUris.map { it.toString() }))
+                else postSideEffect(ArchiveMainSideEffect.NavigateToUploadAlbumWithQRScan(state.scannedImageUrl))
+            }
+
+            ArchiveMainIntent.ClickUploadWithoutAlbumRow -> uploadWithoutAlbum(state, reduce, postSideEffect)
 
             ArchiveMainIntent.ClickAddNewAlbumRow -> reduce {
                 copy(
@@ -56,8 +86,8 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
 
             // Album Intent
             ArchiveMainIntent.ClickAllAlbumText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllAlbum)
-            ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum(state.favoriteAlbum))
-            is ArchiveMainIntent.ClickAlbumItem -> postSideEffect(ArchiveMainSideEffect.NavigateToAlbumDetail(intent.album))
+            ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum(-1L))
+            is ArchiveMainIntent.ClickAlbumItem -> postSideEffect(ArchiveMainSideEffect.NavigateToAlbumDetail(intent.albumId))
 
             // Photo Intent
             ArchiveMainIntent.ClickAllPhotoText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllPhoto)
@@ -131,6 +161,16 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
                 recentPhotos = dummyPhotos,
             )
         }
+    }
+
+    private fun uploadWithoutAlbum(
+        state: ArchiveMainState,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+    ) {
+        reduce { copy(showChooseWithAlbumDialog = false) }
+        // TODO: Upload photo without album to repository
+        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
     }
 
     private fun handleAddAlbum(

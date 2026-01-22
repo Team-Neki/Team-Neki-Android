@@ -17,14 +17,14 @@ import com.neki.android.feature.photo_upload.impl.qrscan.component.QRScannerCont
 internal fun QRScanRoute(
     viewModel: QRScanViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToHome: () -> Unit,
+    navigateToHome: (String) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             QRScanSideEffect.NavigateBack -> navigateBack()
-            QRScanSideEffect.NavigateToHome -> navigateToHome()
+            is QRScanSideEffect.NavigateToHome -> navigateToHome(sideEffect.imageUrl)
             is QRScanSideEffect.ShowToast -> {}
         }
     }
@@ -51,11 +51,9 @@ internal fun QRScanScreen(
         }
 
         QRScanViewType.WEB_VIEW -> {
-            val scannedUrl = uiState.scannedUrl
-
-            if (scannedUrl != null)
+            if (uiState.scannedUrl != null)
                 PhotoWebViewContent(
-                    scannedUrl = scannedUrl,
+                    scannedUrl = uiState.scannedUrl,
                     onDetectImageUrl = { imageUrl -> onIntent(QRScanIntent.DetectImageUrl(imageUrl)) },
                 )
             else {

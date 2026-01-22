@@ -22,7 +22,7 @@ internal fun AllPhotoTopBar(
             SelectMode.DEFAULT -> "선택"
             SelectMode.SELECTING -> "취소"
         },
-        buttonLabelTextColor = when (selectMode) {
+        enabledTextColor = when (selectMode) {
             SelectMode.DEFAULT -> NekiTheme.colorScheme.primary500
             SelectMode.SELECTING -> NekiTheme.colorScheme.gray800
         },
