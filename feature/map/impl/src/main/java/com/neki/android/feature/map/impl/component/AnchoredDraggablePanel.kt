@@ -164,7 +164,6 @@ internal fun AnchoredDraggablePanel(
 
 @Composable
 internal fun AnchoredPanelContent(
-    modifier: Modifier = Modifier,
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     dragValue: DragValue = DragValue.Bottom,

@@ -48,7 +48,6 @@ import com.neki.android.feature.map.impl.util.getPlaceName
 @Composable
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -141,7 +140,6 @@ fun MapRoute(
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun MapScreen(
-    modifier: Modifier = Modifier,
     uiState: MapState = MapState(),
     onIntent: (MapIntent) -> Unit = {},
     locationTrackingMode: LocationTrackingMode = LocationTrackingMode.None,
@@ -162,7 +160,7 @@ fun MapScreen(
     }
 
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
     ) {
         NaverMap(
             modifier = Modifier.fillMaxSize(),
