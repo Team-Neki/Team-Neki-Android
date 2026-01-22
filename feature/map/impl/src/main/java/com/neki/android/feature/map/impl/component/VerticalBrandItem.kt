@@ -71,7 +71,7 @@ internal fun VerticalBrandItem(
                         modifier = Modifier.size(28.dp),
                         imageVector = ImageVector.vectorResource(R.drawable.icon_check_white),
                         contentDescription = null,
-                        tint = Color.Unspecified
+                        tint = Color.Unspecified,
                     )
                 }
             }

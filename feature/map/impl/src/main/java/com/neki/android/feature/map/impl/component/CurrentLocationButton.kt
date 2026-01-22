@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.extension.buttonShadow
@@ -40,7 +39,7 @@ internal fun CurrentLocationButton(
         Icon(
             modifier = Modifier.size(20.dp),
             imageVector = ImageVector.vectorResource(
-                if (isActiveCurrentLocation) R.drawable.icon_current_location_on else R.drawable.icon_current_location_off
+                if (isActiveCurrentLocation) R.drawable.icon_current_location_on else R.drawable.icon_current_location_off,
             ),
             contentDescription = null,
             tint = Color.Unspecified,

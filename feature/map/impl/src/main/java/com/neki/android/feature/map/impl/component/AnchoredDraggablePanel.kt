@@ -34,18 +34,17 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
@@ -219,7 +218,7 @@ internal fun AnchoredPanelContent(
             )
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
-                contentPadding = PaddingValues(start = 20.dp)
+                contentPadding = PaddingValues(start = 20.dp),
             ) {
                 items(brands) { brand ->
                     VerticalBrandItem(
@@ -307,7 +306,7 @@ private fun AnchoredPanelContentPreview() {
                     latitude = 37.5274,
                     longitude = 126.8858,
                 ),
-            )
+            ),
         )
     }
 }

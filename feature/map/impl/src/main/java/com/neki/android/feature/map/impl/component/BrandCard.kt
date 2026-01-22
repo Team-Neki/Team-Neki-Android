@@ -95,7 +95,7 @@ internal fun BrandCard(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_find_direction),
                 contentDescription = null,
-                tint = Color.Unspecified
+                tint = Color.Unspecified,
             )
         }
     }
