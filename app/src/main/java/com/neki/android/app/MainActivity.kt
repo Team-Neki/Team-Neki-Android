@@ -60,21 +60,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                    RootNavKey.Main -> {
-                        MainScreen(
-                            modifier = Modifier.navigationBarsPadding(),
-                            currentKey = navigator.state.currentKey,
-                            currentTopLevelKey = navigator.state.currentTopLevelKey,
-                            topLevelKeys = navigator.state.topLevelKeys,
-                            entries = navigator.state.toEntries(
-                                entryProvider = entryProvider {
-                                    entryProviderScopes.forEach { builder -> this.builder() }
-                                },
-                            ),
-                            onTabSelected = { navigator.navigate(it) },
-                            onBack = { navigator.goBack() },
-                            navigateLogin = { navigator.navigateRoot(RootNavKey.Login) },
-                        )
                             RootNavKey.Main -> {
                                 MainScreen(
                                     currentKey = navigator.state.currentKey,
@@ -95,7 +80,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
         observeAuthEvents()
     }
 

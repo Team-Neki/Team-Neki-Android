@@ -2,6 +2,7 @@ package com.neki.android.app
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -18,7 +19,6 @@ import com.neki.android.feature.map.api.MapNavKey
 
 @Composable
 fun MainScreen(
-    modifier: Modifier = Modifier,
     currentKey: NavKey,
     currentTopLevelKey: NavKey,
     topLevelKeys: Set<NavKey>,
@@ -32,7 +32,9 @@ fun MainScreen(
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding(),
         bottomBar = {
             BottomNavigationBar(
                 visible = shouldShowBottomBar,
