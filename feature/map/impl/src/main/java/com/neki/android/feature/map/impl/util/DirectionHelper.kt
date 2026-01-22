@@ -5,7 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.net.toUri
 
-class DirectionHelper {
+internal object DirectinoHelper {
     fun moveAppOrStore(
         context: Context,
         url: String,
