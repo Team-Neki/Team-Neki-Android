@@ -15,13 +15,13 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.map.impl.const.DirectionAppConst
+import com.neki.android.feature.map.impl.const.DirectionApp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DirectionBottomSheet(
     onDismissRequest: () -> Unit = {},
-    onClickDirectionItem: (DirectionAppConst) -> Unit = {},
+    onClickDirectionItem: (DirectionApp) -> Unit = {},
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -36,7 +36,7 @@ internal fun DirectionBottomSheet(
 
 @Composable
 private fun DirectionBottomSheetContent(
-    onItemClick: (DirectionAppConst) -> Unit = {},
+    onItemClick: (DirectionApp) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -56,16 +56,16 @@ private fun DirectionBottomSheetContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             DirectionItem(
-                app = DirectionAppConst.GOOGLE_MAP,
-                onClickItem = { onItemClick(DirectionAppConst.GOOGLE_MAP) },
+                app = DirectionApp.GOOGLE_MAP,
+                onClickItem = { onItemClick(DirectionApp.GOOGLE_MAP) },
             )
             DirectionItem(
-                app = DirectionAppConst.NAVER_MAP,
-                onClickItem = { onItemClick(DirectionAppConst.NAVER_MAP) },
+                app = DirectionApp.NAVER_MAP,
+                onClickItem = { onItemClick(DirectionApp.NAVER_MAP) },
             )
             DirectionItem(
-                app = DirectionAppConst.KAKAO_MAP,
-                onClickItem = { onItemClick(DirectionAppConst.KAKAO_MAP) },
+                app = DirectionApp.KAKAO_MAP,
+                onClickItem = { onItemClick(DirectionApp.KAKAO_MAP) },
             )
         }
         VerticalSpacer(34.dp)

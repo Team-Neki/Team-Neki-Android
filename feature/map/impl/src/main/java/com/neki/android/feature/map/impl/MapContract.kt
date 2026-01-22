@@ -2,7 +2,7 @@ package com.neki.android.feature.map.impl
 
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.BrandInfo
-import com.neki.android.feature.map.impl.const.DirectionAppConst
+import com.neki.android.feature.map.impl.const.DirectionApp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -41,7 +41,7 @@ sealed interface MapIntent {
     data class ClickNearBrand(val brandInfo: BrandInfo) : MapIntent
     data object ClickCloseBrandCard : MapIntent
     data object CloseDirectionBottomSheet : MapIntent
-    data class ClickDirectionItem(val app: DirectionAppConst) : MapIntent
+    data class ClickDirectionItem(val app: DirectionApp) : MapIntent
     data class ChangeDragValue(val dragValue: DragValue) : MapIntent
 }
 
@@ -54,7 +54,7 @@ sealed interface MapEffect {
     ) : MapEffect
 
     data class MoveDirectionApp(
-        val app: DirectionAppConst,
+        val app: DirectionApp,
     ) : MapEffect
 }
 

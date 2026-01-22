@@ -3,7 +3,7 @@ package com.neki.android.feature.map.impl.const
 import androidx.annotation.DrawableRes
 import com.neki.android.core.designsystem.R
 
-enum class DirectionAppConst(
+enum class DirectionApp(
     @DrawableRes val appLogoRes: Int,
     val appName: String,
     val packageName: String,

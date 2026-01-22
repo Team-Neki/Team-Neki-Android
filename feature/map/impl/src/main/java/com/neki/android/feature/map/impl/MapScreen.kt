@@ -40,7 +40,7 @@ import com.neki.android.feature.map.impl.component.BrandMarker
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.PanelInvisibleContent
 import com.neki.android.feature.map.impl.component.ToMapChip
-import com.neki.android.feature.map.impl.const.DirectionAppConst
+import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import com.neki.android.feature.map.impl.util.getPlaceName
 
@@ -83,7 +83,7 @@ fun MapRoute(
             }
             is MapEffect.MoveDirectionApp -> {
                 when (sideEffect.app) {
-                    DirectionAppConst.GOOGLE_MAP -> {
+                    DirectionApp.GOOGLE_MAP -> {
                         DirectionHelper.moveAppOrStore(
                             context = context,
                             url = "google.navigation:q=37.5256372,126.8862648(${context.getPlaceName(37.5256372, 126.8861924, "도착지")})&mode=w",
@@ -91,7 +91,7 @@ fun MapRoute(
                         )
                     }
 
-                    DirectionAppConst.NAVER_MAP -> {
+                    DirectionApp.NAVER_MAP -> {
                         val startName = context.getPlaceName(37.5270539, 126.8862648, "출발지")
                         val destName = context.getPlaceName(37.5256372, 126.8861924, "도착지")
                         DirectionHelper.moveAppOrStore(
@@ -101,7 +101,7 @@ fun MapRoute(
                         )
                     }
 
-                    DirectionAppConst.KAKAO_MAP -> {
+                    DirectionApp.KAKAO_MAP -> {
                         DirectionHelper.moveAppOrStore(
                             context = context,
                             url = "kakaomap://route?sp=37.5270539,126.8862648&ep=37.5256372,126.8861924&by=FOOT",

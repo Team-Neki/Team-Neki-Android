@@ -18,13 +18,13 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.extension.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.map.impl.const.DirectionAppConst
+import com.neki.android.feature.map.impl.const.DirectionApp
 
 @Composable
 internal fun DirectionItem(
-    app: DirectionAppConst,
+    app: DirectionApp,
     modifier: Modifier = Modifier,
-    onClickItem: (DirectionAppConst) -> Unit = {},
+    onClickItem: (DirectionApp) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -64,7 +64,7 @@ internal fun DirectionItem(
 @Composable
 private fun GoogleMapDirectionItemPreview() {
     NekiTheme {
-        DirectionItem(app = DirectionAppConst.GOOGLE_MAP)
+        DirectionItem(app = DirectionApp.GOOGLE_MAP)
     }
 }
 
@@ -72,7 +72,7 @@ private fun GoogleMapDirectionItemPreview() {
 @Composable
 private fun NaverMapDirectionItemPreview() {
     NekiTheme {
-        DirectionItem(app = DirectionAppConst.NAVER_MAP)
+        DirectionItem(app = DirectionApp.NAVER_MAP)
     }
 }
 
@@ -80,6 +80,6 @@ private fun NaverMapDirectionItemPreview() {
 @Composable
 private fun KakaoMapDirectionItemPreview() {
     NekiTheme {
-        DirectionItem(app = DirectionAppConst.KAKAO_MAP)
+        DirectionItem(app = DirectionApp.KAKAO_MAP)
     }
 }
