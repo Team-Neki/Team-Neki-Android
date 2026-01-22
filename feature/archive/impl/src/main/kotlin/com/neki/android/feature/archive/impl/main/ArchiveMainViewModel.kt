@@ -178,18 +178,6 @@ class ArchiveMainViewModel @Inject constructor(
         }
     }
 
-    private fun fetchPhotos(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit, size: Int = DEFAULT_PHOTOS_SIZE) {
-        viewModelScope.launch {
-            photoRepository.getPhotos()
-                .onSuccess { data ->
-                    reduce { copy(recentPhotos = data.toImmutableList()) }
-                }
-                .onFailure { error ->
-                    Timber.e(error)
-                }
-        }
-    }
-
     private fun uploadWithoutAlbum(
         state: ArchiveMainState,
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
@@ -224,7 +212,7 @@ class ArchiveMainViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val imageBytes = imageUrl.urlToByteArray()
-
+            reduce { copy(isLoading = true) }
             uploadSinglePhotoUseCase(
                 imageBytes = imageBytes,
             ).onSuccess {
@@ -233,6 +221,7 @@ class ArchiveMainViewModel @Inject constructor(
             }.onFailure { error ->
                 Timber.e(error)
                 postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+                reduce { copy(isLoading = false) }
             }
         }
     }
@@ -245,6 +234,23 @@ class ArchiveMainViewModel @Inject constructor(
     ) {
         // TODO: 이미지 여러개 업로드
         postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+    }
+
+    private fun fetchPhotos(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit, size: Int = DEFAULT_PHOTOS_SIZE) {
+        viewModelScope.launch {
+            photoRepository.getPhotos()
+                .onSuccess { data ->
+                    reduce {
+                        copy(
+                            recentPhotos = data.toImmutableList(),
+                            isLoading = false,
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                }
+        }
     }
 
     private fun handleAddAlbum(

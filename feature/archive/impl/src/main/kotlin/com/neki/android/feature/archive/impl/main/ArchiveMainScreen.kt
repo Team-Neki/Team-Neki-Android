@@ -33,6 +33,7 @@ import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
+import com.neki.android.core.ui.component.LoadingIndicator
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
@@ -129,6 +130,10 @@ internal fun ArchiveMainScreen(
             visible = !lazyState.isScrollInProgress && lazyState.firstVisibleItemIndex != 0,
             onClick = { onIntent(ArchiveMainIntent.ClickGoToTopButton) },
         )
+    }
+
+    if (uiState.isLoading) {
+        LoadingIndicator()
     }
 
     if (uiState.showAddAlbumBottomSheet) {

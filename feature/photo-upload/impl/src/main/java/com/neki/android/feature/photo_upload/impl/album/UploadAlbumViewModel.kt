@@ -96,25 +96,31 @@ class UploadAlbumViewModel @AssistedInject constructor(
         postSideEffect: (UploadAlbumSideEffect) -> Unit,
     ) {
         val firstAlbumId = state.albums.firstOrNull()?.id ?: return
-        val onSuccessSideEffect = {
+        val onSuccessAction = {
+            reduce { copy(isLoading = false) }
             postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
             postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbumId))
+        }
+        val onFailureAction: (Throwable) -> Unit = { error ->
+            Timber.e(error)
+            reduce { copy(isLoading = false) }
+            postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
         }
 
         if (state.uploadType == UploadType.QR_SCAN) {
             uploadSingleImage(
                 imageUrl = state.imageUrl ?: return,
                 albumId = firstAlbumId,
-                postSideEffect = postSideEffect,
-                onSuccess = onSuccessSideEffect,
+                reduce = reduce,
+                onSuccessAction = onSuccessAction,
+                onFailureAction = onFailureAction,
             )
         } else {
-            // TODO: 이미지 여러개 업로드
             uploadMultipleImages(
                 imageUris = state.selectedUris,
                 albumId = firstAlbumId,
-                postSideEffect = postSideEffect,
-                onSuccess = onSuccessSideEffect,
+                onSuccessAction = onSuccessAction,
+                onFailureAction = onFailureAction,
             )
         }
     }
@@ -122,21 +128,22 @@ class UploadAlbumViewModel @AssistedInject constructor(
     private fun uploadSingleImage(
         imageUrl: String,
         albumId: Long,
-        postSideEffect: (UploadAlbumSideEffect) -> Unit,
-        onSuccess: () -> Unit,
+        reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
+        onSuccessAction: () -> Unit,
+        onFailureAction: (Throwable) -> Unit,
     ) {
         viewModelScope.launch {
             val imageBytes = imageUrl.urlToByteArray()
+            reduce { copy(isLoading = true) }
 
             uploadSinglePhotoUseCase(
                 imageBytes = imageBytes,
                 folderId = albumId,
             ).onSuccess { data ->
                 Timber.d(data.toString())
-                onSuccess()
+                onSuccessAction()
             }.onFailure { error ->
-                Timber.e(error)
-                postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+                onFailureAction(error)
             }
         }
     }
@@ -144,10 +151,10 @@ class UploadAlbumViewModel @AssistedInject constructor(
     private fun uploadMultipleImages(
         imageUris: List<Uri>,
         albumId: Long,
-        postSideEffect: (UploadAlbumSideEffect) -> Unit,
-        onSuccess: () -> Unit,
+        onSuccessAction: () -> Unit,
+        onFailureAction: (Throwable) -> Unit,
     ) {
         // TODO: 이미지 여러개 업로드
-        postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+        onFailureAction(Throwable("Not implemented"))
     }
 }

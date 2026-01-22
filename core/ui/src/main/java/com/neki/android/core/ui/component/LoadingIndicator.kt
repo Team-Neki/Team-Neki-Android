@@ -12,11 +12,11 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 fun LoadingIndicator(
-    onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     circleColor: Color = NekiTheme.colorScheme.primary300,
     backgroundColor: Color = NekiTheme.colorScheme.primary100,
-    properties: DialogProperties = DialogProperties(dismissOnBackPress = true),
+    properties: DialogProperties = DialogProperties(),
+    onDismissRequest: () -> Unit = {},
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,

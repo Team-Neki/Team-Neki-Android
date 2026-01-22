@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 
 data class UploadAlbumState(
+    val isLoading: Boolean = false,
     val imageUrl: String? = null,
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
     val favoriteAlbum: Album = Album(),

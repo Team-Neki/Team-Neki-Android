@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class ArchiveMainState(
+    val isLoading: Boolean = false,
     val isFirstEntered: Boolean = true,
     val favoriteAlbum: Album = Album(),
     val albums: ImmutableList<Album> = persistentListOf(),
