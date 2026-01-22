@@ -2,12 +2,14 @@ package com.neki.android.feature.photo_upload.impl.album
 
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import com.neki.android.core.model.Album
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 
@@ -58,8 +60,22 @@ class UploadAlbumViewModel @AssistedInject constructor(
 
     private fun fetchInitialData(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
         // TODO: Fetch albums from repository
+        val dummyAlbums = persistentListOf(
+            Album(
+                id = 1001,
+                title = "Travel",
+                photoList = persistentListOf(),
+            ),
+            Album(
+                id = 1002,
+                title = "Family",
+                photoList = persistentListOf(),
+            ),
+        )
+
         reduce {
             copy(
+                albums = dummyAlbums,
                 imageUrl = imageUrl,
                 selectedUris = uriStrings.map { it.toUri() }.toImmutableList(),
             )

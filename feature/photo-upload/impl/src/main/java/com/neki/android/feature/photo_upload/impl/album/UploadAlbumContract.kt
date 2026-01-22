@@ -8,14 +8,9 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class UploadAlbumState(
     val imageUrl: String? = null,
-    val selectedUris: ImmutableList<Uri> = persistentListOf(Uri.EMPTY),
+    val selectedUris: ImmutableList<Uri> = persistentListOf(),
     val favoriteAlbum: Album = Album(),
-    val albums: ImmutableList<Album> = persistentListOf(
-        Album(
-            title = "sdf",
-            thumbnailUrl = "https://tistory1.daumcdn.net/tistory/5417065/attach/2e12bf06d8f1431cbc08dbe151bd4505",
-        ),
-    ),
+    val albums: ImmutableList<Album> = persistentListOf(),
     val selectedAlbumIds: PersistentList<Long> = persistentListOf(),
 ) {
     val count: Int
