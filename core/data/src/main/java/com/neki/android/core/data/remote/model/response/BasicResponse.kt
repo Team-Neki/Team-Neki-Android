@@ -8,3 +8,10 @@ data class BasicResponse<T>(
     val message: String,
     val data: T,
 )
+
+@Serializable
+data class NullableResponse<T>(
+    val resultCode: String,
+    val message: String,
+    val data: T?,
+)
