@@ -21,8 +21,8 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 internal fun CurrentLocationButton(
-    modifier: Modifier = Modifier,
     isActiveCurrentLocation: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
     Box(
