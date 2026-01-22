@@ -95,7 +95,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
         reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
         postSideEffect: (UploadAlbumSideEffect) -> Unit,
     ) {
-        val firstAlbumId = state.albums.firstOrNull()?.id ?: return
+        val firstAlbumId = state.selectedAlbumIds.firstOrNull() ?: return
         val onSuccessAction = {
             reduce { copy(isLoading = false) }
             postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
