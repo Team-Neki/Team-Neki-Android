@@ -14,11 +14,13 @@ class MediaUploadRepositoryImpl @Inject constructor(
     private val uploadService: UploadService,
 ) : MediaUploadRepository {
     override suspend fun getUploadTicket(
+        fileName: String,
         contentType: String,
         mediaType: String,
     ) = runSuspendCatching {
         apiService.getUploadTicket(
             requestBody = MediaUploadTicketRequest(
+                filename = fileName,
                 contentType = contentType,
                 mediaType = mediaType,
             ),
@@ -26,16 +28,14 @@ class MediaUploadRepositoryImpl @Inject constructor(
     }
 
     override suspend fun uploadImage(
-        fileName: String,
         uploadUrl: String,
-        file: File,
+        imageBytes: ByteArray,
         contentType: ContentType,
     ) = runSuspendCatching {
         uploadService.uploadImage(
-            fileName = fileName,
             presignedUrl = uploadUrl,
-            imageFile = file,
-            contentType = contentType,
+            imageBytes = imageBytes,
+            contentType = contentType.label,
         )
     }
 }
