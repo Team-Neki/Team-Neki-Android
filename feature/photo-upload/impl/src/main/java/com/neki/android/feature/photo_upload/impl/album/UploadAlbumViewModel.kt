@@ -68,12 +68,12 @@ class UploadAlbumViewModel @AssistedInject constructor(
         // TODO: Fetch albums from repository
         val dummyAlbums = persistentListOf(
             Album(
-                id = 1001,
+                id = 1,
                 title = "Travel",
                 photoList = persistentListOf(),
             ),
             Album(
-                id = 1002,
+                id = 2,
                 title = "Family",
                 photoList = persistentListOf(),
             ),
@@ -102,9 +102,6 @@ class UploadAlbumViewModel @AssistedInject constructor(
                 postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbumId))
             }
         }
-
-        postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
-        postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(state.selectedAlbumIds.first()))
     }
 
     private fun uploadSingleImage(
@@ -123,7 +120,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
                 Timber.d(data.toString())
                 onSuccess()
             }.onFailure { error ->
-                Timber.d(error.message)
+                Timber.e(error)
                 postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
             }
         }
