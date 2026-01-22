@@ -56,10 +56,11 @@ class MapViewModel @Inject constructor() : ViewModel() {
                             } else {
                                 brand
                             }
-                        }.toImmutableList()
+                        }.toImmutableList(),
                     )
                 }
             }
+
             is MapIntent.ClickNearBrand -> {
                 reduce {
                     copy(
