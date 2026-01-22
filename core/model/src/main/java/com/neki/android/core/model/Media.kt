@@ -1,5 +1,13 @@
 package com.neki.android.core.model
 
+data class Media(
+    val mediaId: Long = 0L,
+    val folderId: Long = 0L,
+    val fileName: String = "",
+    val contentType: ContentType = ContentType.JPEG,
+    val mediaType: MediaType = MediaType.PHOTO_BOOTH,
+)
+
 enum class MediaType(val label: String) {
     USER_PROFILE("user-profiles"),
     PHOTO_BOOTH("photo-booth"),
