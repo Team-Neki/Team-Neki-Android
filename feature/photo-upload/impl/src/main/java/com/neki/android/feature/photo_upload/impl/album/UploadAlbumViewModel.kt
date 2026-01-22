@@ -2,6 +2,9 @@ package com.neki.android.feature.photo_upload.impl.album
 
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.common.util.urlToByteArray
+import com.neki.android.core.domain.usecase.UploadPhotoUseCase
 import com.neki.android.core.model.Album
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -12,11 +15,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel(assistedFactory = UploadAlbumViewModel.Factory::class)
 class UploadAlbumViewModel @AssistedInject constructor(
     @Assisted private val imageUrl: String?,
     @Assisted private val uriStrings: List<String>,
+    private val uploadPhotoUseCase: UploadPhotoUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -87,8 +93,39 @@ class UploadAlbumViewModel @AssistedInject constructor(
         reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
         postSideEffect: (UploadAlbumSideEffect) -> Unit,
     ) {
+        val firstAlbumId = state.albums.firstOrNull()?.id ?: return
+
+        if (state.uploadType == UploadType.QR_SCAN) {
+            val imageUrl = state.imageUrl ?: return
+            uploadSingleImage(imageUrl, firstAlbumId, postSideEffect) {
+                postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
+                postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbumId))
+            }
+        }
+
         postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
-        // TODO: Upload photos to repository
         postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(state.selectedAlbumIds.first()))
+    }
+
+    private fun uploadSingleImage(
+        imageUrl: String,
+        albumId: Long,
+        postSideEffect: (UploadAlbumSideEffect) -> Unit,
+        onSuccess: () -> Unit,
+    ) {
+        viewModelScope.launch {
+            val imageBytes = imageUrl.urlToByteArray()
+
+            uploadPhotoUseCase(
+                imageBytes = imageBytes,
+                folderId = albumId,
+            ).onSuccess { data ->
+                Timber.d(data.toString())
+                onSuccess()
+            }.onFailure { error ->
+                Timber.d(error.message)
+                postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+            }
+        }
     }
 }
