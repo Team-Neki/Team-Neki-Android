@@ -18,6 +18,7 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
+import com.neki.android.core.ui.component.LoadingIndicator
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
@@ -102,6 +103,10 @@ internal fun PhotoDetailScreen(
             onDeleteClick = { onIntent(PhotoDetailIntent.ClickDeleteDialogConfirmButton) },
             onCancelClick = { onIntent(PhotoDetailIntent.ClickDeleteDialogCancelButton) },
         )
+    }
+
+    if (uiState.isLoading) {
+        LoadingIndicator()
     }
 }
 

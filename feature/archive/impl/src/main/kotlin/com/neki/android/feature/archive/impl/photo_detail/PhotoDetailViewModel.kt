@@ -69,15 +69,18 @@ class PhotoDetailViewModel @AssistedInject constructor(
         reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
         postSideEffect: (PhotoDetailSideEffect) -> Unit,
     ) {
+        reduce { copy(isLoading = true, showDeleteDialog = false) }
+
         viewModelScope.launch {
             photoRepository.deletePhoto(state.photo.id)
                 .onSuccess {
-                    reduce { copy(showDeleteDialog = false) }
+                    reduce { copy(isLoading = false) }
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
                     postSideEffect(PhotoDetailSideEffect.NavigateBack)
                 }
                 .onFailure { error ->
                     Timber.e(error)
+                    reduce { copy(isLoading = false) }
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
                 }
         }
