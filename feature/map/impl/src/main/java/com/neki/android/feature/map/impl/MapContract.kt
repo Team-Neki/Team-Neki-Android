@@ -37,7 +37,7 @@ sealed interface MapIntent {
     data object ClickInfoIcon : MapIntent
     data object ClickCloseInfoIcon : MapIntent
     data object ClickToMapChip : MapIntent
-    data object ClickBrand : MapIntent
+    data class ClickBrand(val brand: Brand) : MapIntent
     data class ClickNearBrand(val brandInfo: BrandInfo) : MapIntent
     data object ClickCloseBrandCard : MapIntent
     data object CloseDirectionBottomSheet : MapIntent

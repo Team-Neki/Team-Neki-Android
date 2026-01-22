@@ -9,6 +9,7 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,7 +47,19 @@ class MapViewModel @Inject constructor() : ViewModel() {
                 reduce { copy(dragState = DragValue.Bottom) }
             }
 
-            MapIntent.ClickBrand -> {}
+            is MapIntent.ClickBrand -> {
+                reduce {
+                    copy(
+                        brands = state.brands.map { brand ->
+                            if (brand == intent.brand) {
+                                brand.copy(isChecked = !brand.isChecked)
+                            } else {
+                                brand
+                            }
+                        }.toImmutableList()
+                    )
+                }
+            }
             is MapIntent.ClickNearBrand -> {
                 reduce {
                     copy(

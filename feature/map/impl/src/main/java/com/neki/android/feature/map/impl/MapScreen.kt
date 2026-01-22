@@ -198,7 +198,7 @@ fun MapScreen(
             onClickCurrentLocation = {
                 onLocationTrackingModeChange(LocationTrackingMode.Follow)
             },
-            onClickBrand = { onIntent(MapIntent.ClickBrand) },
+            onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
             onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) },
         )
 
