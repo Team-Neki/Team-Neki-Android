@@ -6,6 +6,7 @@ import com.neki.android.core.data.remote.api.ApiService
 import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
+import com.neki.android.core.data.remote.qualifier.UploadHttpClient
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.DataStoreRepository
 import dagger.Module
@@ -13,6 +14,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
@@ -49,6 +51,35 @@ internal object NetworkModule {
         "/api/auth/refresh",
     )
 
+    private fun HttpClientConfig<*>.installCommonPlugins() {
+        install(ContentNegotiation) {
+            json(
+                Json {
+                    prettyPrint = true
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                },
+            )
+        }
+
+        install(Logging) {
+            logger = object : Logger {
+                override fun log(message: String) {
+                    Timber.tag(TAG_REST_API).d(message)
+                }
+            }
+
+            level = LogLevel.BODY
+        }
+
+        install(HttpTimeout) {
+            connectTimeoutMillis = TIME_OUT
+            requestTimeoutMillis = TIME_OUT
+        }
+
+        expectSuccess = true
+    }
+
     @Provides
     @Singleton
     fun provideApiService(
@@ -65,16 +96,6 @@ internal object NetworkModule {
             install(DefaultRequest) {
                 url(BASE_URL)
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
-            }
-
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        prettyPrint = true
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                    },
-                )
             }
 
             install(Auth) {
@@ -130,22 +151,23 @@ internal object NetworkModule {
                 }
             }
 
-            install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Timber.tag(TAG_REST_API).d(message)
-                    }
-                }
+            installCommonPlugins()
+        }
+    }
 
-                level = LogLevel.BODY
+    @UploadHttpClient
+    @Provides
+    @Singleton
+    fun provideUploadHttpClient(
+        dataStoreRepository: DataStoreRepository,
+        authEventManager: AuthEventManager,
+    ): HttpClient {
+        return HttpClient(Android) {
+            install(DefaultRequest) {
+//                header(HttpHeaders.ContentType, ContentType.Application.Json)
             }
 
-            install(HttpTimeout) {
-                connectTimeoutMillis = TIME_OUT
-                requestTimeoutMillis = TIME_OUT
-            }
-
-            expectSuccess = true
+            installCommonPlugins()
         }
     }
 }
