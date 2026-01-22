@@ -84,7 +84,7 @@ fun MapRoute(
             is MapEffect.MoveDirectionApp -> {
                 when (sideEffect.app) {
                     DirectionAppConst.GOOGLE_MAP -> {
-                        DirectionHelper().moveAppOrStore(
+                        DirectionHelper.moveAppOrStore(
                             context = context,
                             url = "google.navigation:q=37.5256372,126.8862648(${context.getPlaceName(37.5256372, 126.8861924, "도착지")})&mode=w",
                             packageName = sideEffect.app.packageName,
@@ -94,7 +94,7 @@ fun MapRoute(
                     DirectionAppConst.NAVER_MAP -> {
                         val startName = context.getPlaceName(37.5270539, 126.8862648, "출발지")
                         val destName = context.getPlaceName(37.5256372, 126.8861924, "도착지")
-                        DirectionHelper().moveAppOrStore(
+                        DirectionHelper.moveAppOrStore(
                             context = context,
                             url = "nmap://route/walk?slat=37.5270539&slng=126.8862648&sname=$startName&dlat=37.5256372&dlng=126.8861924&dname=$destName",
                             packageName = sideEffect.app.packageName,
@@ -102,7 +102,7 @@ fun MapRoute(
                     }
 
                     DirectionAppConst.KAKAO_MAP -> {
-                        DirectionHelper().moveAppOrStore(
+                        DirectionHelper.moveAppOrStore(
                             context = context,
                             url = "kakaomap://route?sp=37.5270539,126.8862648&ep=37.5256372,126.8861924&by=FOOT",
                             packageName = sideEffect.app.packageName,
