@@ -1,6 +1,5 @@
-package com.neki.android.feature.archive.impl.album
+package com.neki.android.feature.photo_upload.impl.album
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,10 +7,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,18 +24,13 @@ import com.neki.android.core.ui.component.AlbumRowComponent
 import com.neki.android.core.ui.component.FavoriteAlbumRowComponent
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import com.neki.android.feature.archive.impl.album.component.AllAlbumTopBar
-import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
-import com.neki.android.feature.archive.impl.component.DeleteOptionBottomSheet
-import com.neki.android.feature.archive.impl.model.SelectMode
+import com.neki.android.feature.photo_upload.impl.album.component.UploadAlbumTopBar
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 
 @Composable
-internal fun AllAlbumRoute(
-    viewModel: AllAlbumViewModel = hiltViewModel(),
+internal fun UploadAlbumRoute(
+    viewModel: UploadAlbumViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToFavoriteAlbum: (Long) -> Unit,
     navigateToAlbumDetail: (Long) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
@@ -47,16 +39,13 @@ internal fun AllAlbumRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            AllAlbumSideEffect.NavigateBack -> navigateBack()
-            is AllAlbumSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
-            is AllAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
-            is AllAlbumSideEffect.ShowToastMessage -> {
-                nekiToast.showToast(text = sideEffect.message)
-            }
+            UploadAlbumSideEffect.NavigateBack -> navigateBack()
+            is UploadAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
+            is UploadAlbumSideEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
         }
     }
 
-    AllAlbumScreen(
+    UploadAlbumScreen(
         uiState = uiState,
         onIntent = viewModel.store::onIntent,
     )
@@ -64,28 +53,19 @@ internal fun AllAlbumRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun AllAlbumScreen(
-    uiState: AllAlbumState = AllAlbumState(),
-    onIntent: (AllAlbumIntent) -> Unit = {},
+internal fun UploadAlbumScreen(
+    uiState: UploadAlbumState = UploadAlbumState(),
+    onIntent: (UploadAlbumIntent) -> Unit = {},
 ) {
-    BackHandler(enabled = true) {
-        onIntent(AllAlbumIntent.OnBackPressed)
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white),
     ) {
-        AllAlbumTopBar(
-            selectMode = uiState.selectMode,
-            showOptionPopup = uiState.showOptionPopup,
-            onBackClick = { onIntent(AllAlbumIntent.ClickBackIcon) },
-            onCreateClick = { onIntent(AllAlbumIntent.ClickCreateButton) },
-            onOptionClick = { onIntent(AllAlbumIntent.ClickOptionIcon) },
-            onDismissPopup = { onIntent(AllAlbumIntent.DismissOptionPopup) },
-            onDeleteOptionClick = { onIntent(AllAlbumIntent.ClickDeleteOptionRow) },
-            onDeleteClick = { onIntent(AllAlbumIntent.ClickDeleteButton) },
+        UploadAlbumTopBar(
+            count = uiState.count,
+            onBackClick = { onIntent(UploadAlbumIntent.ClickBackIcon) },
+            onUploadClick = { onIntent(UploadAlbumIntent.ClickUploadButton) },
         )
 
         LazyColumn(
@@ -97,73 +77,28 @@ internal fun AllAlbumScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item {
-                FavoriteAlbumRowComponent(
-                    album = uiState.favoriteAlbum,
-                    onClick = { onIntent(AllAlbumIntent.ClickFavoriteAlbum) },
-                )
+                FavoriteAlbumRowComponent(album = uiState.favoriteAlbum)
             }
 
             items(
                 items = uiState.albums,
                 key = { album -> album.id },
             ) { album ->
-                val isSelected = uiState.selectedAlbums.any { it.id == album.id }
+                val isSelected = uiState.selectedAlbumIds.any { it == album.id }
                 AlbumRowComponent(
                     album = album,
-                    isSelectable = uiState.selectMode == SelectMode.SELECTING,
+                    isSelectable = true,
                     isSelected = isSelected,
-                    onClick = { onIntent(AllAlbumIntent.ClickAlbumItem(album.id)) },
+                    onClick = { onIntent(UploadAlbumIntent.ClickAlbumItem(album.id)) },
                 )
             }
         }
-    }
-
-    if (uiState.showAddAlbumBottomSheet) {
-        val textFieldState = rememberTextFieldState()
-        val existingAlbumNames = remember { uiState.albums.map { it.title } }
-
-        val errorMessage by remember(textFieldState.text) {
-            derivedStateOf {
-                val name = textFieldState.text.toString()
-                if (existingAlbumNames.contains(name)) {
-                    "이미 사용 중인 앨범명이에요."
-                } else {
-                    null
-                }
-            }
-        }
-
-        AddAlbumBottomSheet(
-            textFieldState = textFieldState,
-            onDismissRequest = { onIntent(AllAlbumIntent.DismissAddAlbumBottomSheet) },
-            onCancelClick = { onIntent(AllAlbumIntent.DismissAddAlbumBottomSheet) },
-            onConfirmClick = {
-                val albumName = textFieldState.text.toString()
-                if (errorMessage == null && albumName.isNotBlank()) {
-                    onIntent(AllAlbumIntent.ClickAddAlbumButton(albumName))
-                }
-            },
-            isError = errorMessage != null,
-            errorMessage = errorMessage,
-        )
-    }
-
-    if (uiState.showDeleteAlbumBottomSheet) {
-        DeleteOptionBottomSheet(
-            title = "앨범을 삭제하시겠어요?",
-            options = AlbumDeleteOption.entries.toImmutableList(),
-            selectedOption = uiState.selectedDeleteOption,
-            onDismissRequest = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
-            onCancelClick = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
-            onDeleteClick = { onIntent(AllAlbumIntent.ClickDeleteConfirmButton) },
-            onOptionSelect = { onIntent(AllAlbumIntent.SelectDeleteOption(it)) },
-        )
     }
 }
 
 @DevicePreview
 @Composable
-private fun AllAlbumScreenPreview() {
+private fun UploadAlbumScreenPreview() {
     val travelPhotos = persistentListOf(
         Photo(id = 101, imageUrl = "https://picsum.photos/seed/album_travel1/200/300"),
         Photo(id = 102, imageUrl = "https://picsum.photos/seed/album_travel2/200/280"),
@@ -204,8 +139,8 @@ private fun AllAlbumScreenPreview() {
     )
 
     NekiTheme {
-        AllAlbumScreen(
-            uiState = AllAlbumState(
+        UploadAlbumScreen(
+            uiState = UploadAlbumState(
                 favoriteAlbum = Album(id = 0, title = "즐겨찾는 사진", photoList = favoritePhotos),
                 albums = dummyAlbums,
             ),
@@ -215,7 +150,7 @@ private fun AllAlbumScreenPreview() {
 
 @DevicePreview
 @Composable
-private fun AllAlbumScreenSelectingPreview() {
+private fun UploadAlbumScreenSelectingPreview() {
     val travelPhotos = persistentListOf(
         Photo(id = 101, imageUrl = "https://picsum.photos/seed/sel_travel1/200/300"),
         Photo(id = 102, imageUrl = "https://picsum.photos/seed/sel_travel2/200/280"),
@@ -244,12 +179,11 @@ private fun AllAlbumScreenSelectingPreview() {
     )
 
     NekiTheme {
-        AllAlbumScreen(
-            uiState = AllAlbumState(
+        UploadAlbumScreen(
+            uiState = UploadAlbumState(
                 favoriteAlbum = Album(id = 0, title = "즐겨찾는 사진", photoList = favoritePhotos),
                 albums = dummyAlbums,
-                selectMode = SelectMode.SELECTING,
-                selectedAlbums = persistentListOf(dummyAlbums[0], dummyAlbums[2]),
+                selectedAlbumIds = persistentListOf(),
             ),
         )
     }

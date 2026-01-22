@@ -1,5 +1,8 @@
 package com.neki.android.feature.archive.impl.main
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,17 +43,20 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
+import com.neki.android.feature.archive.impl.main.component.ChooseWithAlbumDialog
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
 import kotlinx.collections.immutable.persistentListOf
+import timber.log.Timber
 
 @Composable
 internal fun ArchiveMainRoute(
     viewModel: ArchiveMainViewModel = hiltViewModel(),
     navigateToQRScan: () -> Unit,
-    navigateToGalleryUpload: () -> Unit,
+    navigateToUploadAlbumWithGallery: (List<String>) -> Unit,
+    navigateToUploadAlbumWithQRScan: (String) -> Unit,
     navigateToAllAlbum: () -> Unit,
-    navigateToFavoriteAlbum: (Album) -> Unit,
-    navigateToAlbumDetail: (Album) -> Unit,
+    navigateToFavoriteAlbum: (Long) -> Unit,
+    navigateToAlbumDetail: (Long) -> Unit,
     navigateToAllPhoto: () -> Unit,
     navigateToPhotoDetail: (Photo) -> Unit,
 ) {
@@ -58,17 +64,26 @@ internal fun ArchiveMainRoute(
     val context = LocalContext.current
     val lazyState = rememberLazyStaggeredGridState()
     val nekiToast = remember { NekiToast(context) }
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+        if (uris.isNotEmpty()) {
+            viewModel.store.onIntent(ArchiveMainIntent.SelectGalleryImage(uris))
+        } else {
+            Timber.d("No media selected")
+        }
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             ArchiveMainSideEffect.NavigateToQRScan -> navigateToQRScan()
-            ArchiveMainSideEffect.NavigateToGalleryUpload -> navigateToGalleryUpload()
+            is ArchiveMainSideEffect.NavigateToUploadAlbumWithGallery -> navigateToUploadAlbumWithGallery(sideEffect.uriStrings)
+            is ArchiveMainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
-            is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.album)
-            is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.album)
+            is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
+            is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
+            ArchiveMainSideEffect.OpenGallery -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             is ArchiveMainSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
         }
     }
@@ -102,7 +117,7 @@ internal fun ArchiveMainScreen(
             onDismissPopup = { onIntent(ArchiveMainIntent.DismissAddDialog) },
             onShowAllAlbumClick = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
             onFavoriteAlbumClick = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
-            onAlbumItemClick = { album -> onIntent(ArchiveMainIntent.ClickAlbumItem(album)) },
+            onAlbumItemClick = { onIntent(ArchiveMainIntent.ClickAlbumItem(it)) },
             onShowAllPhotoClick = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
             onPhotoItemClick = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
         )
@@ -144,6 +159,14 @@ internal fun ArchiveMainScreen(
             errorMessage = errorMessage,
         )
     }
+
+    if (uiState.showChooseWithAlbumDialog) {
+        ChooseWithAlbumDialog(
+            onDismissRequest = { onIntent(ArchiveMainIntent.DismissChooseWithAlbumDialog) },
+            onUploadWithOutAlbumClick = { onIntent(ArchiveMainIntent.ClickUploadWithoutAlbumRow) },
+            onUploadWithAlbumClick = { onIntent(ArchiveMainIntent.ClickUploadWithAlbumRow) },
+        )
+    }
 }
 
 @Composable
@@ -158,7 +181,7 @@ private fun ArchiveMainContent(
     onDismissPopup: () -> Unit,
     onShowAllAlbumClick: () -> Unit,
     onFavoriteAlbumClick: () -> Unit,
-    onAlbumItemClick: (Album) -> Unit,
+    onAlbumItemClick: (Long) -> Unit,
     onShowAllPhotoClick: () -> Unit,
     onPhotoItemClick: (Photo) -> Unit,
     modifier: Modifier = Modifier,
