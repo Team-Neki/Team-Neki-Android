@@ -1,10 +1,11 @@
-package com.neki.android.feature.map.impl
+package com.neki.android.feature.map.impl.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.feature.map.api.MapNavKey
+import com.neki.android.feature.map.impl.MapRoute
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

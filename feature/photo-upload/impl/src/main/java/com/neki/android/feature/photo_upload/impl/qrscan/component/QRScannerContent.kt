@@ -66,6 +66,7 @@ internal fun QRScannerContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.82f)
+                .padding(bottom = 20.dp)
                 .aspectRatio(1f)
                 .align(Alignment.Center),
         ) {
@@ -120,7 +121,7 @@ internal fun QRScannerContent(
         IconButton(
             modifier = Modifier
                 .align(Alignment.Center)
-                .offset(y = cutoutSize / 2 + 41.dp)
+                .offset(y = cutoutSize / 2 + 40.dp)
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(

@@ -5,15 +5,20 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
-import com.neki.android.core.navigation.root.RootNavKey
-import com.neki.android.core.navigation.root.RootNavigationState
 import com.neki.android.core.dataapi.auth.AuthEvent
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.NavigatorImpl
+import com.neki.android.core.navigation.result.LocalResultEventBus
+import com.neki.android.core.navigation.result.ResultEventBus
+import com.neki.android.core.navigation.root.RootNavKey
+import com.neki.android.core.navigation.root.RootNavigationState
 import com.neki.android.core.navigation.toEntries
 import com.neki.android.feature.auth.impl.LoginRoute
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,35 +42,42 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
             NekiTheme {
-                when (rootNavigationState.currentRootKey) {
-                    RootNavKey.Login -> {
-                        LoginRoute(
-                            navigateMain = { navigator.navigateRoot(RootNavKey.Main) },
-                        )
-                    }
+                val resultBus = remember { ResultEventBus() }
+                NekiTheme {
+                    CompositionLocalProvider(LocalResultEventBus provides resultBus) {
+                        when (rootNavigationState.currentRootKey) {
+                            RootNavKey.Login -> {
+                                LoginRoute(
+                                    navigateMain = { navigator.navigateRoot(RootNavKey.Main) },
+                                )
+                            }
 
-                    RootNavKey.Main -> {
-                        MainScreen(
-                            currentKey = navigator.state.currentKey,
-                            currentTopLevelKey = navigator.state.currentTopLevelKey,
-                            topLevelKeys = navigator.state.topLevelKeys,
-                            entries = navigator.state.toEntries(
-                                entryProvider = entryProvider {
-                                    entryProviderScopes.forEach { builder -> this.builder() }
-                                },
-                            ),
-                            onTabSelected = { navigator.navigate(it) },
-                            onBack = { navigator.goBack() },
-                            navigateLogin = { navigator.navigateRoot(RootNavKey.Login) },
-                        )
+                            RootNavKey.Main -> {
+                                MainScreen(
+                                    currentKey = navigator.state.currentKey,
+                                    currentTopLevelKey = navigator.state.currentTopLevelKey,
+                                    topLevelKeys = navigator.state.topLevelKeys,
+                                    entries = navigator.state.toEntries(
+                                        entryProvider = entryProvider {
+                                            entryProviderScopes.forEach { builder -> this.builder() }
+                                        },
+                                    ),
+                                    onTabSelected = { navigator.navigate(it) },
+                                    onBack = { navigator.goBack() },
+                                    navigateLogin = { navigator.navigateRoot(RootNavKey.Login) },
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
-
         observeAuthEvents()
     }
 

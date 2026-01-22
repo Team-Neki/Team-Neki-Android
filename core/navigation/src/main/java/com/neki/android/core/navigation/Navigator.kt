@@ -10,4 +10,5 @@ interface Navigator {
     fun navigateRoot(rootNavKey: RootNavKey)
     fun navigate(key: NavKey)
     fun goBack()
+    fun remove(key: NavKey)
 }

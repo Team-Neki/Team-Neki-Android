@@ -1,11 +1,9 @@
 package com.neki.android.feature.pose.impl
 
 import androidx.lifecycle.ViewModel
-import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.toImmutableList
 import javax.inject.Inject
 
 @HiltViewModel

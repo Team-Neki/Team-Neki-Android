@@ -25,6 +25,8 @@ enum class PhotoDeleteOption(val label: String) {
 }
 
 sealed interface AlbumDetailIntent {
+    data object EnterAlbumDetailScreen : AlbumDetailIntent
+
     // TopBar Intent
     data object ClickBackIcon : AlbumDetailIntent
     data object OnBackPressed : AlbumDetailIntent

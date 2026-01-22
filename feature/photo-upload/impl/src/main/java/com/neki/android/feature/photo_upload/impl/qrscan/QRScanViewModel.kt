@@ -36,7 +36,7 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                 postSideEffect(QRScanSideEffect.ShowToast("QR코드를 인식하지 못했습니다."))
             }
 
-            is QRScanIntent.DetectImageUrl -> {}
+            is QRScanIntent.DetectImageUrl -> postSideEffect(QRScanSideEffect.NavigateToHome(intent.imageUrl))
         }
     }
 }
