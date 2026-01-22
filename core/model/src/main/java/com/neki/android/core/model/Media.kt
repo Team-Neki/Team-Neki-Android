@@ -2,7 +2,7 @@ package com.neki.android.core.model
 
 data class Media(
     val mediaId: Long = 0L,
-    val folderId: Long = 0L,
+    val folderId: Long? = null,
     val fileName: String = "",
     val contentType: ContentType = ContentType.JPEG,
     val mediaType: MediaType = MediaType.PHOTO_BOOTH,

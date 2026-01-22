@@ -11,7 +11,7 @@ class PhotoRepositoryImpl @Inject constructor(
 ) : PhotoRepository {
     override suspend fun registerPhoto(
         mediaId: Long,
-        folderId: Long,
+        folderId: Long?,
     ): Result<Long> = runSuspendCatching {
         photoService.registerPhoto(
             requestBody = RegisterPhotoRequest(

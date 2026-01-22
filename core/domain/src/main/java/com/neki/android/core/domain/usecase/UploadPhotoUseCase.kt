@@ -17,7 +17,7 @@ class UploadPhotoUseCase @Inject constructor(
     suspend operator fun invoke(
         imageBytes: ByteArray,
         contentType: ContentType = ContentType.JPEG,
-        folderId: Long,
+        folderId: Long? = null,
     ): Result<Media> = runCatching {
         val fileName = generateFileName(contentType)
 
