@@ -52,7 +52,7 @@ private fun DirectionBottomSheetContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 22.5.dp),
+                .padding(vertical = 8.dp, horizontal = 18.5.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             DirectionItem(
