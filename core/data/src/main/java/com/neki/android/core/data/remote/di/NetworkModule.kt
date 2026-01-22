@@ -164,10 +164,6 @@ internal object NetworkModule {
         authEventManager: AuthEventManager,
     ): HttpClient {
         return HttpClient(Android) {
-            install(DefaultRequest) {
-//                header(HttpHeaders.ContentType, ContentType.Application.Json)
-            }
-
             installCommonPlugins()
         }
     }
