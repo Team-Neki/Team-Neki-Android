@@ -45,22 +45,23 @@ internal object NetworkModule {
 
     val BASE_URL = BuildConfig.BASE_URL
     const val TIME_OUT = 5000L
+    const val UPLOAD_TIME_OUT = 10_000L
 
     val sendWithoutJwtUrls = listOf(
         "/api/auth/kakao/login",
         "/api/auth/refresh",
     )
 
+    private val json = Json {
+        prettyPrint = true
+        isLenient = true
+        ignoreUnknownKeys = true
+        explicitNulls = false
+    }
+
     private fun HttpClientConfig<*>.installCommonPlugins() {
         install(ContentNegotiation) {
-            json(
-                Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                    explicitNulls = false
-                },
-            )
+            json(json)
         }
 
         install(Logging) {
@@ -152,19 +153,54 @@ internal object NetworkModule {
                 }
             }
 
-            installCommonPlugins()
+            install(ContentNegotiation) {
+                json(json)
+            }
+
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Timber.tag(TAG_REST_API).d(message)
+                    }
+                }
+
+                level = LogLevel.BODY
+            }
+
+            install(HttpTimeout) {
+                connectTimeoutMillis = TIME_OUT
+                requestTimeoutMillis = TIME_OUT
+            }
+
+            expectSuccess = true
         }
     }
 
     @UploadHttpClient
     @Provides
     @Singleton
-    fun provideUploadHttpClient(
-        dataStoreRepository: DataStoreRepository,
-        authEventManager: AuthEventManager,
-    ): HttpClient {
+    fun provideUploadHttpClient(): HttpClient {
         return HttpClient(Android) {
-            installCommonPlugins()
+            install(ContentNegotiation) {
+                json(json)
+            }
+
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Timber.tag(TAG_REST_API).d(message)
+                    }
+                }
+
+                level = LogLevel.HEADERS
+            }
+
+            install(HttpTimeout) {
+                connectTimeoutMillis = UPLOAD_TIME_OUT
+                requestTimeoutMillis = UPLOAD_TIME_OUT
+            }
+
+            expectSuccess = true
         }
     }
 }
