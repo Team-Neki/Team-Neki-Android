@@ -14,7 +14,8 @@ import io.ktor.http.contentType
 import javax.inject.Inject
 
 class UploadService @Inject constructor(
-    @UploadHttpClient private val client: HttpClient,
+    private val client: HttpClient,
+    @UploadHttpClient private val uploadClient: HttpClient,
 ) {
     // Media Upload Ticket 받기
     suspend fun getUploadTicket(requestBody: MediaUploadTicketRequest): BasicResponse<MediaUploadTicketResponse> {
@@ -27,7 +28,7 @@ class UploadService @Inject constructor(
         imageBytes: ByteArray,
         contentType: String,
     ) {
-        client.put(presignedUrl) {
+        uploadClient.put(presignedUrl) {
             contentType(ContentType.parse(contentType))
             setBody(imageBytes)
         }
