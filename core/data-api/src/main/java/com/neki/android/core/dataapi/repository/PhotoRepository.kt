@@ -13,4 +13,6 @@ interface PhotoRepository {
         mediaId: Long,
         folderId: Long? = null,
     ): Result<Long>
+
+    suspend fun deletePhoto(photoId: Long): Result<Unit>
 }

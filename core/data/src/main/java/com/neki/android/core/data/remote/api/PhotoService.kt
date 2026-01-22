@@ -6,6 +6,7 @@ import com.neki.android.core.data.remote.model.response.PhotoResponse
 import com.neki.android.core.data.remote.model.response.RegisterPhotoResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -31,5 +32,10 @@ class PhotoService @Inject constructor(
     // 사진 등록
     suspend fun registerPhoto(requestBody: RegisterPhotoRequest): BasicResponse<RegisterPhotoResponse> {
         return client.post("/api/photos") { setBody(requestBody) }.body()
+    }
+
+    // 사진 삭제
+    suspend fun deletePhoto(photoId: Long): BasicResponse<Unit> {
+        return client.delete("/api/photos/$photoId").body()
     }
 }
