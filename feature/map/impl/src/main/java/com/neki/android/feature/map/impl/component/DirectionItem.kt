@@ -20,7 +20,7 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.map.impl.const.DirectionAppConst
 
 @Composable
-fun DirectionItem(
+internal fun DirectionItem(
     app: DirectionAppConst,
     modifier: Modifier = Modifier,
     onClickItem: (DirectionAppConst) -> Unit = {},

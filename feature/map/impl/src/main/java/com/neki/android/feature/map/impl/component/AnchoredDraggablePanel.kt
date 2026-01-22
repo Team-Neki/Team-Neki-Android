@@ -59,7 +59,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.roundToInt
 
 @Composable
-fun AnchoredDraggablePanel(
+internal fun AnchoredDraggablePanel(
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     dragValue: DragValue = DragValue.Bottom,
@@ -163,7 +163,7 @@ fun AnchoredDraggablePanel(
 }
 
 @Composable
-fun AnchoredPanelContent(
+internal fun AnchoredPanelContent(
     modifier: Modifier = Modifier,
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),

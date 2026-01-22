@@ -28,7 +28,7 @@ import com.neki.android.core.model.Brand
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
-fun VerticalBrandItem(
+internal fun VerticalBrandItem(
     brand: Brand,
     modifier: Modifier = Modifier,
     onItemClick: (Boolean) -> Unit = {},

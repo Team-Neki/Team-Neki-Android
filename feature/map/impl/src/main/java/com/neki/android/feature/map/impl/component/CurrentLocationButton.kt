@@ -17,7 +17,7 @@ import com.neki.android.core.designsystem.extension.buttonShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun CurrentLocationButton(
+internal fun CurrentLocationButton(
     modifier: Modifier = Modifier,
     isActiveCurrentLocation: Boolean,
     onClick: () -> Unit = {},

@@ -26,7 +26,7 @@ import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
-fun BrandCard(
+internal fun BrandCard(
     brand: BrandInfo,
     modifier: Modifier = Modifier,
     onClickDirection: () -> Unit = {},

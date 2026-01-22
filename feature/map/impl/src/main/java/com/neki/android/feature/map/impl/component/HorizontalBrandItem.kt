@@ -21,7 +21,7 @@ import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
-fun HorizontalBrandItem(
+internal fun HorizontalBrandItem(
     brandInfo: BrandInfo,
     modifier: Modifier = Modifier,
     onItemClick: () -> Unit = {},

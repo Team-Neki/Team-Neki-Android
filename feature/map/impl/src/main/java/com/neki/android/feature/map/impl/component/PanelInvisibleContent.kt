@@ -23,7 +23,7 @@ import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
-fun PanelInvisibleContent(
+internal fun PanelInvisibleContent(
     brandInfo: BrandInfo,
     modifier: Modifier = Modifier,
     isCurrentLocation: Boolean = false,
@@ -56,7 +56,7 @@ fun PanelInvisibleContent(
 }
 
 @Composable
-fun BrandCardCloseButton(
+internal fun BrandCardCloseButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
