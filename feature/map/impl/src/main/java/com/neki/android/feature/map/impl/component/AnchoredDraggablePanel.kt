@@ -210,26 +210,22 @@ internal fun AnchoredPanelContent(
                 },
         ) {
             BottomSheetDragHandle()
-            Column(
+            Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp),
+                    .padding(vertical = 10.dp, horizontal = 20.dp),
+                text = "네컷 사진 브랜드",
+                color = NekiTheme.colorScheme.gray900,
+                style = NekiTheme.typography.title18Bold,
+            )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                contentPadding = PaddingValues(start = 20.dp)
             ) {
-                Text(
-                    modifier = Modifier.padding(vertical = 10.dp),
-                    text = "네컷 사진 브랜드",
-                    color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold,
-                )
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    items(brands) { brand ->
-                        VerticalBrandItem(
-                            brand = brand,
-                            onItemClick = { onClickBrand(it) },
-                        )
-                    }
+                items(brands) { brand ->
+                    VerticalBrandItem(
+                        brand = brand,
+                        onItemClick = { onClickBrand(it) },
+                    )
                 }
             }
         }
@@ -277,6 +273,41 @@ internal fun AnchoredPanelContent(
 @Composable
 private fun AnchoredPanelContentPreview() {
     NekiTheme {
-        AnchoredPanelContent()
+        AnchoredPanelContent(
+            brands = persistentListOf(
+                Brand(isChecked = false, brandName = "인생네컷", brandImageRes = R.drawable.icon_life_four_cut),
+                Brand(isChecked = false, brandName = "포토그레이", brandImageRes = R.drawable.icon_photogray),
+                Brand(isChecked = false, brandName = "포토이즘", brandImageRes = R.drawable.icon_photoism),
+                Brand(isChecked = false, brandName = "하루필름", brandImageRes = R.drawable.icon_haru_film),
+                Brand(isChecked = false, brandName = "플랜비\n스튜디오", brandImageRes = R.drawable.icon_planb_studio),
+                Brand(isChecked = false, brandName = "포토시그니처", brandImageRes = R.drawable.icon_photo_signature),
+            ),
+            nearbyBrands = persistentListOf(
+                BrandInfo(
+                    brandName = "인생네컷",
+                    brandImageRes = R.drawable.icon_life_four_cut,
+                    branchName = "가산디지털점",
+                    distance = "25m",
+                    latitude = 37.5272,
+                    longitude = 126.8864,
+                ),
+                BrandInfo(
+                    brandName = "포토그레이",
+                    brandImageRes = R.drawable.icon_photogray,
+                    branchName = "가산역점",
+                    distance = "38m",
+                    latitude = 37.5268,
+                    longitude = 126.8867,
+                ),
+                BrandInfo(
+                    brandName = "포토이즘",
+                    brandImageRes = R.drawable.icon_photoism,
+                    branchName = "마리오점",
+                    distance = "52m",
+                    latitude = 37.5274,
+                    longitude = 126.8858,
+                ),
+            )
+        )
     }
 }
