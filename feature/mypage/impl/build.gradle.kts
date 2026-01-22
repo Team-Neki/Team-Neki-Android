@@ -8,4 +8,6 @@ android {
 
 dependencies {
     implementation(projects.feature.mypage.api)
+
+    implementation(libs.androidx.activity.compose)
 }
