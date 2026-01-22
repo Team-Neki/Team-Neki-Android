@@ -9,17 +9,17 @@ enum class DirectionAppConst(
     val packageName: String,
 ) {
     GOOGLE_MAP(
-        appLogoRes = R.drawable.icon_google_map,
+        appLogoRes = R.drawable.image_google_map,
         appName = "구글맵",
         packageName = "com.google.android.apps.maps",
     ),
     NAVER_MAP(
-        appLogoRes = R.drawable.icon_naver_map,
+        appLogoRes = R.drawable.image_naver_map,
         appName = "네이버 지도",
         packageName = "com.nhn.android.nmap",
     ),
     KAKAO_MAP(
-        appLogoRes = R.drawable.icon_kakao_map,
+        appLogoRes = R.drawable.image_kakao_map,
         appName = "카카오맵",
         packageName = "net.daum.android.map",
     ),
