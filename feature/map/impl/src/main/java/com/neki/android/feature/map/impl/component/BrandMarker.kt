@@ -41,7 +41,7 @@ import com.neki.android.feature.map.impl.const.MapConst.MARKER_TRIANGLE_WIDTH
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 internal fun BrandMarker(
-    key: Array<String>,
+    vararg keys: String,
     latitude: Double,
     longitude: Double,
     brandImageRes: Int,
@@ -49,7 +49,7 @@ internal fun BrandMarker(
     onClick: () -> Unit = {},
 ) {
     MarkerComposable(
-        keys = arrayOf(*key, isFocused),
+        keys = keys,
         state = rememberUpdatedMarkerState(
             position = LatLng(latitude, longitude),
         ),

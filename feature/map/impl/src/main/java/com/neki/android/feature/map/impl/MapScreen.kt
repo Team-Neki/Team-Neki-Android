@@ -176,7 +176,7 @@ fun MapScreen(
         ) {
             uiState.nearbyBrands.forEachIndexed { index, brandInfo ->
                 BrandMarker(
-                    key = arrayOf("brand_$index", "${brandInfo.latitude}_${brandInfo.longitude}"),
+                    keys = arrayOf("${brandInfo.latitude}", "${brandInfo.longitude}"),
                     latitude = brandInfo.latitude,
                     longitude = brandInfo.longitude,
                     brandImageRes = brandInfo.brandImageRes,
