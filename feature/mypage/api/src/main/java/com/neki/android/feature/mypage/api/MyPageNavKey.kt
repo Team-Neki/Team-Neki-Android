@@ -11,6 +11,9 @@ sealed interface MyPageNavKey : NavKey {
 
     @Serializable
     data object Permission : MyPageNavKey
+
+    @Serializable
+    data object Profile : MyPageNavKey
 }
 
 fun Navigator.navigateToMyPage() {
@@ -19,4 +22,8 @@ fun Navigator.navigateToMyPage() {
 
 fun Navigator.navigateToPermission() {
     navigate(MyPageNavKey.Permission)
+}
+
+fun Navigator.navigateToProfile() {
+    navigate(MyPageNavKey.Profile)
 }
