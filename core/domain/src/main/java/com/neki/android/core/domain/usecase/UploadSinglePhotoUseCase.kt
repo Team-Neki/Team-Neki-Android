@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UploadPhotoUseCase @Inject constructor(
+class UploadSinglePhotoUseCase @Inject constructor(
     private val mediaUploadRepository: MediaUploadRepository,
     private val photoRepository: PhotoRepository,
 ) {

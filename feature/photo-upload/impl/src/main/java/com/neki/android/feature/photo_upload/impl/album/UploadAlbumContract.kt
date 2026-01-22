@@ -2,6 +2,7 @@ package com.neki.android.feature.photo_upload.impl.album
 
 import android.net.Uri
 import com.neki.android.core.model.Album
+import com.neki.android.core.model.UploadType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
@@ -17,11 +18,6 @@ data class UploadAlbumState(
         get() = if (imageUrl == null) selectedUris.size else 1
     val uploadType: UploadType
         get() = if (imageUrl == null) UploadType.GALLERY else UploadType.QR_SCAN
-}
-
-enum class UploadType {
-    QR_SCAN,
-    GALLERY,
 }
 
 sealed interface UploadAlbumIntent {

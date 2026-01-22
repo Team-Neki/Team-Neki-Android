@@ -1,11 +1,13 @@
 package com.neki.android.feature.photo_upload.impl.album
 
+import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.util.urlToByteArray
-import com.neki.android.core.domain.usecase.UploadPhotoUseCase
+import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.Album
+import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.assisted.Assisted
@@ -22,7 +24,7 @@ import timber.log.Timber
 class UploadAlbumViewModel @AssistedInject constructor(
     @Assisted private val imageUrl: String?,
     @Assisted private val uriStrings: List<String>,
-    private val uploadPhotoUseCase: UploadPhotoUseCase,
+    private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -94,13 +96,26 @@ class UploadAlbumViewModel @AssistedInject constructor(
         postSideEffect: (UploadAlbumSideEffect) -> Unit,
     ) {
         val firstAlbumId = state.albums.firstOrNull()?.id ?: return
+        val onSuccessSideEffect = {
+            postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
+            postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbumId))
+        }
 
         if (state.uploadType == UploadType.QR_SCAN) {
-            val imageUrl = state.imageUrl ?: return
-            uploadSingleImage(imageUrl, firstAlbumId, postSideEffect) {
-                postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
-                postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbumId))
-            }
+            uploadSingleImage(
+                imageUrl = state.imageUrl ?: return,
+                albumId = firstAlbumId,
+                postSideEffect = postSideEffect,
+                onSuccess = onSuccessSideEffect,
+            )
+        } else {
+            // TODO: 이미지 여러개 업로드
+            uploadMultipleImages(
+                imageUris = state.selectedUris,
+                albumId = firstAlbumId,
+                postSideEffect = postSideEffect,
+                onSuccess = onSuccessSideEffect,
+            )
         }
     }
 
@@ -113,7 +128,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val imageBytes = imageUrl.urlToByteArray()
 
-            uploadPhotoUseCase(
+            uploadSinglePhotoUseCase(
                 imageBytes = imageBytes,
                 folderId = albumId,
             ).onSuccess { data ->
@@ -124,5 +139,15 @@ class UploadAlbumViewModel @AssistedInject constructor(
                 postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
             }
         }
+    }
+
+    private fun uploadMultipleImages(
+        imageUris: List<Uri>,
+        albumId: Long,
+        postSideEffect: (UploadAlbumSideEffect) -> Unit,
+        onSuccess: () -> Unit,
+    ) {
+        // TODO: 이미지 여러개 업로드
+        postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
     }
 }

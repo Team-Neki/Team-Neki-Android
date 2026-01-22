@@ -1,17 +1,25 @@
 package com.neki.android.feature.archive.impl.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.common.util.urlToByteArray
+import com.neki.android.core.domain.usecase.UploadPhotoUseCase
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class ArchiveMainViewModel @Inject constructor() : ViewModel() {
+class ArchiveMainViewModel @Inject constructor(
+    private val uploadPhotoUseCase: UploadPhotoUseCase,
+) : ViewModel() {
 
     val store: MviIntentStore<ArchiveMainState, ArchiveMainIntent, ArchiveMainSideEffect> =
         mviIntentStore(
@@ -169,8 +177,54 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
         reduce { copy(showChooseWithAlbumDialog = false) }
-        // TODO: Upload photo without album to repository
-        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
+        val onSuccessSideEffect = {
+            postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
+        }
+        if (state.uploadType == UploadType.QR_SCAN) {
+            uploadSingleImage(
+                imageUrl = state.scannedImageUrl ?: return,
+                reduce = reduce,
+                postSideEffect = postSideEffect,
+                onSuccess = onSuccessSideEffect,
+            )
+        } else {
+            uploadMultipleImages(
+                imageUris = state.selectedUris,
+                reduce = reduce,
+                postSideEffect = postSideEffect,
+                onSuccess = onSuccessSideEffect,
+            )
+        }
+    }
+
+    private fun uploadSingleImage(
+        imageUrl: String,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+        onSuccess: () -> Unit,
+    ) {
+        viewModelScope.launch {
+            val imageBytes = imageUrl.urlToByteArray()
+
+            uploadSinglePhotoUseCase(
+                imageBytes = imageBytes,
+            ).onSuccess {
+                onSuccess()
+            }.onFailure { error ->
+                Timber.e(error)
+                postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+            }
+        }
+    }
+
+    private fun uploadMultipleImages(
+        imageUris: List<Uri>,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+        onSuccess: () -> Unit,
+    ) {
+        // TODO: 이미지 여러개 업로드
+        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
     }
 
     private fun handleAddAlbum(
