@@ -20,12 +20,10 @@ import com.neki.android.feature.map.impl.const.DirectionAppConst
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DirectionBottomSheet(
-    modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit = {},
     onClickDirectionItem: (DirectionAppConst) -> Unit = {},
 ) {
     ModalBottomSheet(
-        modifier = modifier,
         onDismissRequest = onDismissRequest,
         containerColor = NekiTheme.colorScheme.white,
         dragHandle = { BottomSheetDragHandle() },
@@ -38,7 +36,6 @@ internal fun DirectionBottomSheet(
 
 @Composable
 private fun DirectionBottomSheetContent(
-    modifier: Modifier = Modifier,
     onItemClick: (DirectionAppConst) -> Unit = {},
 ) {
     Column(
