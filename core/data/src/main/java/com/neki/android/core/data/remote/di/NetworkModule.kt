@@ -14,7 +14,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
-import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
@@ -57,29 +56,6 @@ internal object NetworkModule {
         isLenient = true
         ignoreUnknownKeys = true
         explicitNulls = false
-    }
-
-    private fun HttpClientConfig<*>.installCommonPlugins() {
-        install(ContentNegotiation) {
-            json(json)
-        }
-
-        install(Logging) {
-            logger = object : Logger {
-                override fun log(message: String) {
-                    Timber.tag(TAG_REST_API).d(message)
-                }
-            }
-
-            level = LogLevel.BODY
-        }
-
-        install(HttpTimeout) {
-            connectTimeoutMillis = TIME_OUT
-            requestTimeoutMillis = TIME_OUT
-        }
-
-        expectSuccess = true
     }
 
     @Provides
