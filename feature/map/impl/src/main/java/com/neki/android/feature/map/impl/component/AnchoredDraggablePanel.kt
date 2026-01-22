@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,8 +39,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -243,12 +246,12 @@ internal fun AnchoredPanelContent(
                 color = NekiTheme.colorScheme.gray900,
                 style = NekiTheme.typography.title18Bold,
             )
-            AsyncImage(
+            Icon(
                 modifier = Modifier
                     .size(24.dp)
                     .noRippleClickableSingle(onClick = onClickInfoIcon)
                     .padding(2.dp),
-                model = R.drawable.icon_info_gray_stroke,
+                imageVector = ImageVector.vectorResource(R.drawable.icon_info_gray_stroke),
                 contentDescription = null,
             )
         }

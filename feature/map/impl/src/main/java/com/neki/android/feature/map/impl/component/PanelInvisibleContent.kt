@@ -10,9 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
@@ -71,10 +75,11 @@ internal fun BrandCardCloseButton(
             .padding(8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        AsyncImage(
+        Icon(
             modifier = Modifier.size(20.dp),
-            model = R.drawable.icon_close_20,
+            imageVector = ImageVector.vectorResource(R.drawable.icon_close_20),
             contentDescription = null,
+            tint = Color.Unspecified,
         )
     }
 }

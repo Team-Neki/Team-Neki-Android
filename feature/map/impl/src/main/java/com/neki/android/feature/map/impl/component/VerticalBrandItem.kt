@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -64,10 +67,11 @@ internal fun VerticalBrandItem(
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    AsyncImage(
+                    Icon(
                         modifier = Modifier.size(28.dp),
-                        model = R.drawable.icon_check_white,
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_check_white),
                         contentDescription = null,
+                        tint = Color.Unspecified
                     )
                 }
             }
@@ -84,10 +88,25 @@ internal fun VerticalBrandItem(
 
 @ComponentPreview
 @Composable
-private fun VerticalBrandItemPreview() {
+private fun CheckedVerticalBrandItemPreview() {
     NekiTheme {
         VerticalBrandItem(
             brand = Brand(
+                isChecked = true,
+                brandName = "인생네컷",
+                brandImageRes = R.drawable.icon_life_four_cut,
+            ),
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun NotCheckedVerticalBrandItemPreview() {
+    NekiTheme {
+        VerticalBrandItem(
+            brand = Brand(
+                isChecked = false,
                 brandName = "인생네컷",
                 brandImageRes = R.drawable.icon_life_four_cut,
             ),
