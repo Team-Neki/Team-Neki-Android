@@ -1,4 +1,4 @@
-package com.neki.android.feature.mypage.impl
+package com.neki.android.feature.mypage.impl.main
 
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.ui.MviIntentStore

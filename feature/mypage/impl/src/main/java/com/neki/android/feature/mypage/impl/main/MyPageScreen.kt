@@ -1,4 +1,4 @@
-package com.neki.android.feature.mypage.impl
+package com.neki.android.feature.mypage.impl.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,8 +15,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.mypage.impl.component.MainTopBar
-import com.neki.android.feature.mypage.impl.component.ProfileCard
+import com.neki.android.feature.mypage.impl.main.component.MainTopBar
+import com.neki.android.feature.mypage.impl.main.component.ProfileCard
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
@@ -25,13 +25,14 @@ import com.neki.android.feature.mypage.impl.component.SectionVersionItem
 internal fun MyPageRoute(
     viewModel: MyPageViewModel = hiltViewModel(),
     navigateToPermission: () -> Unit,
+    navigateToProfile: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
         when (effect) {
             MyPageEffect.NavigateToNotification -> {}
-            MyPageEffect.NavigateToProfile -> {}
+            MyPageEffect.NavigateToProfile -> navigateToProfile()
             MyPageEffect.NavigateToPermission -> navigateToPermission()
             MyPageEffect.NavigateToInquiry -> {}
             MyPageEffect.NavigateToTermsOfService -> {}
@@ -59,7 +60,7 @@ fun MyPageScreen(
             onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
         )
         ProfileCard(
-            name = uiState.userName,
+            name = "오종석",
             onClickCard = { onIntent(MyPageIntent.ClickProfileCard) },
         )
         Box(

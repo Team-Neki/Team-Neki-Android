@@ -1,4 +1,4 @@
-package com.neki.android.feature.mypage.impl
+package com.neki.android.feature.mypage.impl.main
 
 data class MyPageState(
     val isLoading: Boolean = false,
