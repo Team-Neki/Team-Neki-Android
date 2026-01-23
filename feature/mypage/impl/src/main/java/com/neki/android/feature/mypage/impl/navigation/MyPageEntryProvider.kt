@@ -1,4 +1,4 @@
-package com.neki.android.feature.mypage.impl.naivgation
+package com.neki.android.feature.mypage.impl.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
