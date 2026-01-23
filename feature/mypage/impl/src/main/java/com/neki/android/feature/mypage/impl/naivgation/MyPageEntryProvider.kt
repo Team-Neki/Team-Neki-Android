@@ -29,13 +29,20 @@ object MyPageEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.myPageEntry(navigator: Navigator) {
-    entry<MyPageNavKey.MyPage> {
+    entry<MyPageNavKey.MyPage>(
+        clazzContentKey = { key -> key.toString() },
+    ) {
         MyPageRoute(
             navigateToPermission = navigator::navigateToPermission,
+            navigateToProfile = navigator::navigateToProfile,
         )
     }
 
-    entry<MyPageNavKey.Permission> {
+    entry<MyPageNavKey.Permission>(
+        metadata = HiltSharedViewModelStoreNavEntryDecorator.parent(
+            MyPageNavKey.MyPage.toString(),
+        ),
+    ) {
         PermissionRoute(
             navigateBack = navigator::goBack,
         )

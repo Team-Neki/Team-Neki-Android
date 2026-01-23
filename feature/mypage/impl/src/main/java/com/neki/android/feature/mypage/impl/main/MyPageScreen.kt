@@ -38,6 +38,9 @@ internal fun MyPageRoute(
             MyPageEffect.NavigateToTermsOfService -> {}
             MyPageEffect.NavigateToPrivacyPolicy -> {}
             MyPageEffect.NavigateToOpenSourceLicense -> {}
+            MyPageEffect.NavigateBack -> {}
+            MyPageEffect.NavigateToLogin -> {}
+            is MyPageEffect.MoveAppSettings -> {}
         }
     }
 

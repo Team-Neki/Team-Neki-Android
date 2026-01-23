@@ -1,6 +1,7 @@
 package com.neki.android.feature.mypage.impl.main
 
 import android.net.Uri
+import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 
 data class MyPageState(
     val isLoading: Boolean = false,
@@ -10,6 +11,13 @@ data class MyPageState(
     val isShowLogoutDialog: Boolean = false,
     val isShowWithdrawDialog: Boolean = false,
     val profileMode: ProfileMode = ProfileMode.SETTING,
+    // Permission
+    val isCameraGranted: Boolean = false,
+    val isLocationGranted: Boolean = false,
+    val isStorageGranted: Boolean = false,
+    val isNotificationGranted: Boolean = false,
+    val isShowPermissionDialog: Boolean = false,
+    val selectedPermission: NekiPermission? = null,
 )
 
 sealed interface MyPageIntent {
@@ -33,6 +41,11 @@ sealed interface MyPageIntent {
     data object CancelLogout : MyPageIntent
     data object DismissSignOutDialog : MyPageIntent
     data object ConfirmSignOut : MyPageIntent
+
+    // Permission
+    data class ClickPermissionItem(val permission: NekiPermission) : MyPageIntent
+    data object DismissPermissionDialog : MyPageIntent
+    data object ConfirmPermissionDialog : MyPageIntent
 }
 
 sealed interface MyPageEffect {
@@ -45,6 +58,7 @@ sealed interface MyPageEffect {
     data object NavigateToOpenSourceLicense : MyPageEffect
     data object NavigateBack : MyPageEffect
     data object NavigateToLogin : MyPageEffect
+    data class MoveAppSettings(val permission: NekiPermission) : MyPageEffect
 }
 
 enum class ProfileMode { SETTING, EDIT }

@@ -22,6 +22,7 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (MyPageEffect) -> Unit,
     ) {
         when (intent) {
+            // MyPage Main
             MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.NavigateToNotification)
             MyPageIntent.ClickProfileCard -> postSideEffect(MyPageEffect.NavigateToProfile)
             MyPageIntent.ClickPermission -> postSideEffect(MyPageEffect.NavigateToPermission)
@@ -29,6 +30,49 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
             MyPageIntent.ClickTermsOfService -> postSideEffect(MyPageEffect.NavigateToTermsOfService)
             MyPageIntent.ClickPrivacyPolicy -> postSideEffect(MyPageEffect.NavigateToPrivacyPolicy)
             MyPageIntent.ClickOpenSourceLicense -> postSideEffect(MyPageEffect.NavigateToOpenSourceLicense)
+
+            // Profile
+            MyPageIntent.ClickBackIcon -> {
+                if (state.profileMode == ProfileMode.EDIT) {
+                    reduce { copy(profileMode = ProfileMode.SETTING) }
+                } else {
+                    postSideEffect(MyPageEffect.NavigateBack)
+                }
+            }
+            MyPageIntent.ClickEditIcon -> reduce { copy(profileMode = ProfileMode.EDIT) }
+            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageUri = intent.uri) }
+            is MyPageIntent.ClickEditComplete -> {
+                reduce { copy(userName = intent.nickname, profileMode = ProfileMode.SETTING) }
+            }
+            MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
+            MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
+            MyPageIntent.ConfirmLogout -> {
+                reduce { copy(isShowLogoutDialog = false) }
+                // TODO: 실제 로그아웃 처리
+                postSideEffect(MyPageEffect.NavigateToLogin)
+            }
+            MyPageIntent.CancelLogout -> reduce { copy(isShowWithdrawDialog = true) }
+            MyPageIntent.DismissSignOutDialog -> reduce { copy(isShowWithdrawDialog = false) }
+            MyPageIntent.ConfirmSignOut -> {
+                reduce { copy(isShowWithdrawDialog = false) }
+                // TODO: 실제 탈퇴 처리
+                postSideEffect(MyPageEffect.NavigateToLogin)
+            }
+
+            // Permission
+            is MyPageIntent.ClickPermissionItem -> {
+                reduce { copy(isShowPermissionDialog = true, selectedPermission = intent.permission) }
+            }
+            MyPageIntent.DismissPermissionDialog -> {
+                reduce { copy(isShowPermissionDialog = false, selectedPermission = null) }
+            }
+            MyPageIntent.ConfirmPermissionDialog -> {
+                val permission = state.selectedPermission
+                reduce { copy(isShowPermissionDialog = false, selectedPermission = null) }
+                if (permission != null) {
+                    postSideEffect(MyPageEffect.MoveAppSettings(permission))
+                }
+            }
         }
     }
 }

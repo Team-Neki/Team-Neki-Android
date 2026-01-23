@@ -23,7 +23,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 fun PermissionSectionItem(
     title: String,
     subTitle: String,
-    isGranted: Boolean= false,
+    isGranted: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
@@ -54,7 +54,7 @@ fun PermissionSectionItem(
 
         ) {
             Text(
-                text = if (isGranted) "허용됨" else "거부됨",
+                text = if (isGranted) "허용됨" else "허용안됨",
                 color = NekiTheme.colorScheme.gray500,
                 style = NekiTheme.typography.body14Medium,
             )
