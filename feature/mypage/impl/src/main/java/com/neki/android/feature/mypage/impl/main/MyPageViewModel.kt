@@ -40,7 +40,9 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
                 }
             }
             MyPageIntent.ClickEditIcon -> reduce { copy(profileMode = ProfileMode.EDIT) }
-            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageUri = intent.uri) }
+            MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageChooseDialog = true) }
+            MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
+            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageUri = intent.uri, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
                 reduce { copy(userName = intent.nickname, profileMode = ProfileMode.SETTING) }
             }

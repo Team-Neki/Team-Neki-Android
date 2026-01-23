@@ -10,6 +10,7 @@ data class MyPageState(
     val appVersion: String = "v1.3.1",
     val isShowLogoutDialog: Boolean = false,
     val isShowWithdrawDialog: Boolean = false,
+    val isShowImageChooseDialog: Boolean = false,
     val profileMode: ProfileMode = ProfileMode.SETTING,
     // Permission
     val isCameraGranted: Boolean = false,
@@ -33,7 +34,9 @@ sealed interface MyPageIntent {
     // Profile
     data object ClickBackIcon : MyPageIntent
     data object ClickEditIcon : MyPageIntent
-    data class SelectProfileImage(val uri: Uri) : MyPageIntent
+    data object ClickCameraIcon : MyPageIntent
+    data object DismissImageChooseDialog : MyPageIntent
+    data class SelectProfileImage(val uri: Uri?) : MyPageIntent
     data class ClickEditComplete(val nickname: String) : MyPageIntent
     data object ClickLogout : MyPageIntent
     data object DismissLogoutDialog : MyPageIntent

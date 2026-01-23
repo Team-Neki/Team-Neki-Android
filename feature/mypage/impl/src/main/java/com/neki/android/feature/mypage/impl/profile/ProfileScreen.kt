@@ -52,6 +52,7 @@ import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
 import com.neki.android.feature.mypage.impl.main.ProfileMode
 import com.neki.android.feature.mypage.impl.profile.component.ProfileEditTopBar
+import com.neki.android.feature.mypage.impl.profile.component.ProfileImageChooseDialog
 import com.neki.android.feature.mypage.impl.profile.component.ProfileSettingTopBar
 import timber.log.Timber
 
@@ -102,7 +103,10 @@ fun ProfileScreen(
                 ProfileEditContent(
                     initialNickname = uiState.userName,
                     profileImageUri = uiState.profileImageUri,
+                    isShowImageChooseDialog = uiState.isShowImageChooseDialog,
                     onBack = { onIntent(MyPageIntent.ClickBackIcon) },
+                    onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
+                    onDismissImageChooseDialog = { onIntent(MyPageIntent.DismissImageChooseDialog) },
                     onSelectImage = { uri -> onIntent(MyPageIntent.SelectProfileImage(uri)) },
                     onComplete = { nickname -> onIntent(MyPageIntent.ClickEditComplete(nickname)) },
                 )
@@ -200,8 +204,11 @@ private fun ProfileSettingContent(
 private fun ProfileEditContent(
     initialNickname: String,
     profileImageUri: Uri?,
+    isShowImageChooseDialog: Boolean,
     onBack: () -> Unit,
-    onSelectImage: (Uri) -> Unit,
+    onClickCameraIcon: () -> Unit,
+    onDismissImageChooseDialog: () -> Unit,
+    onSelectImage: (Uri?) -> Unit,
     onComplete: (String) -> Unit,
 ) {
     val textFieldState = rememberTextFieldState(initialNickname)
@@ -245,11 +252,7 @@ private fun ProfileEditContent(
                     shape = CircleShape,
                 )
                 .padding(8.dp)
-                .noRippleClickableSingle {
-                    photoPicker.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                    )
-                },
+                .noRippleClickableSingle(onClick = onClickCameraIcon),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -258,6 +261,19 @@ private fun ProfileEditContent(
                 tint = NekiTheme.colorScheme.primary400,
             )
         }
+    }
+
+    if (isShowImageChooseDialog) {
+        ProfileImageChooseDialog(
+            onDismissRequest = onDismissImageChooseDialog,
+            onClickDefaultProfile = { onSelectImage(null) },
+            onClickSelectPhoto = {
+                onDismissImageChooseDialog()
+                photoPicker.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                )
+            },
+        )
     }
     VerticalSpacer(28.dp)
     Column(
