@@ -8,6 +8,11 @@ data class Media(
     val mediaType: MediaType = MediaType.PHOTO_BOOTH,
 )
 
+data class MediaUploadTicket(
+    val mediaId: Long,
+    val uploadUrl: String,
+)
+
 enum class MediaType(val label: String) {
     USER_PROFILE("user-profiles"),
     PHOTO_BOOTH("photo-booth"),

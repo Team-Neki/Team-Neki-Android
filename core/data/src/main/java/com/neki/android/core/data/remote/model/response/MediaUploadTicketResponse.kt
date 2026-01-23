@@ -1,5 +1,6 @@
 package com.neki.android.core.data.remote.model.response
 
+import com.neki.android.core.model.MediaUploadTicket
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -11,5 +12,8 @@ data class MediaUploadTicketResponse(
     @SerialName("method") val method: String,
     @SerialName("uploadUrl") val uploadUrl: String,
 ) {
-    fun toPair(): Pair<Long, String> = mediaId to uploadUrl
+    fun toModel() = MediaUploadTicket(
+        mediaId = this.mediaId,
+        uploadUrl = this.uploadUrl,
+    )
 }
