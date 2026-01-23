@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Neki</string>
 
-    <string name="top_level_nav_pose">포즈 추천</string>
+    <string name="top_level_nav_pose">포즈</string>
     <string name="top_level_nav_archive">아카이빙</string>
     <string name="top_level_nav_map">네컷지도</string>
+    <string name="top_level_nav_mypage">마이</string>
 
 </resources>

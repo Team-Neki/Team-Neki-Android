@@ -24,6 +24,7 @@ fun TopBarTextButton(
             x = ButtonDefaults.TextButtonContentPadding.calculateLeftPadding(LayoutDirection.Ltr),
         ),
         onClick = onClick,
+        enabled = enabled,
     ) {
         Text(
             text = buttonText,

@@ -47,6 +47,8 @@ dependencies {
     implementation(projects.feature.archive.impl)
     implementation(projects.feature.map.api)
     implementation(projects.feature.map.impl)
+    implementation(projects.feature.mypage.api)
+    implementation(projects.feature.mypage.impl)
     implementation(projects.feature.photoUpload.api)
     implementation(projects.feature.photoUpload.impl)
 
