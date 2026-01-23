@@ -93,7 +93,7 @@ private fun SectionItemPreview() {
 private fun SectionArrowItemPreview() {
     NekiTheme {
         SectionArrowItem(
-            text = "기기 권한"
+            text = "기기 권한",
         )
     }
 }

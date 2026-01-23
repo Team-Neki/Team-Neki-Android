@@ -34,6 +34,7 @@ internal fun PermissionRoute(
             is MyPageEffect.MoveAppSettings -> {
                 // TODO: 앱 설정 화면으로 이동
             }
+
             else -> {}
         }
     }
@@ -54,7 +55,7 @@ fun PermissionScreen(
     ) {
         BackTitleTopBar(
             title = "기기 권한",
-            onBack = { onIntent(MyPageIntent.ClickBackIcon) }
+            onBack = { onIntent(MyPageIntent.ClickBackIcon) },
         )
         SectionTitleText(text = "권한 설정")
         PermissionSectionItem(

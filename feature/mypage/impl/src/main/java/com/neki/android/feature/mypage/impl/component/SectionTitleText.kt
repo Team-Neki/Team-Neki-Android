@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
@@ -27,7 +26,7 @@ fun SectionTitleText(
                 start = paddingStart,
                 end = paddingEnd,
                 top = paddingTop,
-                bottom = paddingBottom
+                bottom = paddingBottom,
             ),
         text = text,
         style = NekiTheme.typography.caption12Medium,
@@ -39,6 +38,6 @@ fun SectionTitleText(
 @Composable
 private fun SectionTitleTextPreview() {
     SectionTitleText(
-        text = "권한 설정"
+        text = "권한 설정",
     )
 }

@@ -247,7 +247,7 @@ private fun ProfileEditContent(
                 .padding(8.dp)
                 .noRippleClickableSingle {
                     photoPicker.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                     )
                 },
             contentAlignment = Alignment.Center,

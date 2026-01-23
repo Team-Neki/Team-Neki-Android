@@ -57,7 +57,7 @@ fun MyPageScreen(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize(),
     ) {
         MainTopBar(
             onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
@@ -70,7 +70,7 @@ fun MyPageScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(11.dp)
-                .background(color = NekiTheme.colorScheme.gray25)
+                .background(color = NekiTheme.colorScheme.gray25),
         )
         Column {
             SectionTitleText(text = "권한 설정")

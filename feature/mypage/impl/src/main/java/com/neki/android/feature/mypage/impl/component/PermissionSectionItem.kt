@@ -36,7 +36,7 @@ fun PermissionSectionItem(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
                 text = title,
@@ -51,7 +51,6 @@ fun PermissionSectionItem(
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-
         ) {
             Text(
                 text = if (isGranted) "허용됨" else "허용안됨",
@@ -87,7 +86,7 @@ private fun PermissionSectionItemLocationPreview() {
         PermissionSectionItem(
             title = "위치",
             subTitle = "QR 촬영에 필요해요.",
-            isGranted = false
+            isGranted = false,
         )
     }
 }

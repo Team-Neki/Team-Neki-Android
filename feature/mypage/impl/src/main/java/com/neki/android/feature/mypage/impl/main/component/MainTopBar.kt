@@ -28,7 +28,7 @@ fun MainTopBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 8.dp)
+            .padding(start = 20.dp, end = 8.dp),
     ) {
         NekiLeftTitleTopBar(
             modifier = modifier,

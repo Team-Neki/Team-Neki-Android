@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.extension.clickableSingle
-import com.neki.android.core.designsystem.extension.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.HorizontalSpacer
 
@@ -37,21 +36,21 @@ fun ProfileCard(
             .fillMaxWidth()
             .clickableSingle(onClick = onClickCard)
             .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
                 .size(78.dp)
                 .background(
                     color = NekiTheme.colorScheme.gray800,
-                    shape = CircleShape
-                )
+                    shape = CircleShape,
+                ),
         )
         HorizontalSpacer(16.dp)
         Column(
             modifier = Modifier
                 .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
                 text = name,
@@ -79,7 +78,6 @@ private fun ProfileCardPreview() {
     NekiTheme {
         ProfileCard(
             name = "오종석",
-
         )
     }
 }
