@@ -52,7 +52,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
 
     private fun generateFileName(contentType: ContentType): String {
         val extension = when (contentType) {
-            ContentType.JPEG -> "jpg"
+            ContentType.JPEG -> "jpeg"
             ContentType.PNG -> "png"
         }
         return "${UUID.randomUUID()}.$extension"
