@@ -21,12 +21,11 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 fun SectionItem(
     text: String,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     trailingContent: @Composable (() -> Unit)? = null,
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .noRippleClickableSingle(onClick = onClick)
             .padding(vertical = 12.dp, horizontal = 20.dp),
@@ -46,7 +45,6 @@ fun SectionItem(
 @Composable
 fun SectionArrowItem(
     text: String,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
     SectionItem(
@@ -54,7 +52,7 @@ fun SectionArrowItem(
         onClick = onClick,
         trailingContent = {
             Icon(
-                modifier = modifier.size(16.dp),
+                modifier = Modifier.size(16.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
                 tint = NekiTheme.colorScheme.gray300,
                 contentDescription = null,
@@ -66,7 +64,6 @@ fun SectionArrowItem(
 @Composable
 fun SectionVersionItem(
     version: String,
-    modifier: Modifier = Modifier,
 ) {
     SectionItem(
         text = "앱 버전 정보",

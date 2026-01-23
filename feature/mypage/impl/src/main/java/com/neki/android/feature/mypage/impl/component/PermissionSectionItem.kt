@@ -24,11 +24,10 @@ fun PermissionSectionItem(
     title: String,
     subTitle: String,
     isGranted: Boolean,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .noRippleClickableSingle(onClick = onClick)
             .padding(vertical = 12.dp, horizontal = 20.dp),

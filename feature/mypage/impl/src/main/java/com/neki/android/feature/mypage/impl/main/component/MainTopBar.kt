@@ -22,7 +22,6 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 fun MainTopBar(
-    modifier: Modifier = Modifier,
     onClickIcon: () -> Unit = {},
 ) {
     Box(
@@ -31,7 +30,6 @@ fun MainTopBar(
             .padding(start = 20.dp, end = 8.dp),
     ) {
         NekiLeftTitleTopBar(
-            modifier = modifier,
             title = {
                 Box(
                     modifier = Modifier

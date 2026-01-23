@@ -28,11 +28,10 @@ fun ProfileCard(
     profileImageUrl: String = "",
     name: String,
     loginType: String = "KAKAO",
-    modifier: Modifier = Modifier,
     onClickCard: () -> Unit = {},
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clickableSingle(onClick = onClickCard)
             .padding(horizontal = 20.dp, vertical = 16.dp),
