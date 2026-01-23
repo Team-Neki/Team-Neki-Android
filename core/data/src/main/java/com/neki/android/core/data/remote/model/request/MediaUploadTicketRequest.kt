@@ -5,10 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MediaUploadTicketRequest(
-    @SerialName("contentType")
-    val contentType: String,
-    @SerialName("filename")
-    val filename: String = "",
-    @SerialName("mediaType")
-    val mediaType: String,
+    @SerialName("contentType") val contentType: String,
+    @SerialName("filename") val filename: String = "",
+    @SerialName("mediaType") val mediaType: String,
 )

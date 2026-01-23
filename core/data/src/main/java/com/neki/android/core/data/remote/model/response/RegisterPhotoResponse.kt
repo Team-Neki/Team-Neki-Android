@@ -5,6 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RegisterPhotoResponse(
-    @SerialName("photoId")
-    val photoId: Long,
+    @SerialName("photoId") val photoId: Long,
 )

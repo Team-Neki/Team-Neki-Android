@@ -5,10 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RegisterPhotoRequest(
-    @SerialName("folderId")
-    val folderId: Long?,
-    @SerialName("mediaId")
-    val mediaId: Long,
-    @SerialName("memo")
-    val memo: String = "",
+    @SerialName("folderId") val folderId: Long?,
+    @SerialName("mediaId") val mediaId: Long,
+    @SerialName("memo") val memo: String = "",
 )

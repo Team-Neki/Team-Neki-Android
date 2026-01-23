@@ -7,23 +7,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PhotoResponse(
-    @SerialName("hasNext")
-    val hasNext: Boolean,
-    @SerialName("items")
-    val items: List<Item>,
+    @SerialName("hasNext") val hasNext: Boolean,
+    @SerialName("items") val items: List<Item>,
 ) {
     @Serializable
     data class Item(
-        @SerialName("contentType")
-        val contentType: String,
-        @SerialName("createdAt")
-        val createdAt: String,
-        @SerialName("folderId")
-        val folderId: Long?,
-        @SerialName("imageUrl")
-        val imageUrl: String,
-        @SerialName("photoId")
-        val photoId: Long,
+        @SerialName("contentType") val contentType: String,
+        @SerialName("createdAt") val createdAt: String,
+        @SerialName("folderId") val folderId: Long?,
+        @SerialName("imageUrl") val imageUrl: String,
+        @SerialName("photoId") val photoId: Long,
     ) {
         internal fun toModel() = Photo(
             id = photoId,

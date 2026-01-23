@@ -5,16 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MediaUploadTicketResponse(
-    @SerialName("contentType")
-    val contentType: String,
-    @SerialName("expiresIn")
-    val expiresIn: String,
-    @SerialName("mediaId")
-    val mediaId: Long,
-    @SerialName("method")
-    val method: String,
-    @SerialName("uploadUrl")
-    val uploadUrl: String,
+    @SerialName("contentType") val contentType: String,
+    @SerialName("expiresIn") val expiresIn: String,
+    @SerialName("mediaId") val mediaId: Long,
+    @SerialName("method") val method: String,
+    @SerialName("uploadUrl") val uploadUrl: String,
 ) {
     fun toPair(): Pair<Long, String> = mediaId to uploadUrl
 }
