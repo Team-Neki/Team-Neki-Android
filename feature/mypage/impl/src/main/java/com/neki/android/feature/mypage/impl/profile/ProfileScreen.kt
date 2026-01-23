@@ -95,7 +95,7 @@ fun ProfileScreen(
                     onBack = { onIntent(MyPageIntent.ClickBackIcon) },
                     onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
                     onClickLogout = { onIntent(MyPageIntent.ClickLogout) },
-                    onClickWithdraw = { onIntent(MyPageIntent.CancelLogout) },
+                    onClickSignOut = { onIntent(MyPageIntent.ClickSignOut) },
                 )
             }
 
@@ -127,7 +127,7 @@ fun ProfileScreen(
         )
     }
 
-    if (uiState.isShowWithdrawDialog) {
+    if (uiState.isShowSignOutDialog) {
         DoubleButtonAlertDialog(
             title = "정말 탈퇴하시겠어요?",
             content = "계정을 탈퇴하면 사진과 정보가 모두 삭제되며,\n삭제된 데이터는 복구할 수 없어요.",
@@ -147,7 +147,7 @@ private fun ProfileSettingContent(
     onBack: () -> Unit,
     onClickEdit: () -> Unit,
     onClickLogout: () -> Unit,
-    onClickWithdraw: () -> Unit,
+    onClickSignOut: () -> Unit,
 ) {
     ProfileSettingTopBar(
         onBack = onBack,
@@ -184,11 +184,6 @@ private fun ProfileSettingContent(
         )
     }
     VerticalSpacer(27.dp)
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = NekiTheme.colorScheme.gray25),
-    )
     SectionTitleText(text = "서비스 정보 및 지원")
     SectionItem(
         text = "로그아웃",
@@ -196,7 +191,7 @@ private fun ProfileSettingContent(
     )
     SectionItem(
         text = "탈퇴하기",
-        onClick = onClickWithdraw,
+        onClick = onClickSignOut,
     )
 }
 

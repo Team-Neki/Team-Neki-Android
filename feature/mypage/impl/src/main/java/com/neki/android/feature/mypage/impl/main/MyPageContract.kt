@@ -9,7 +9,7 @@ data class MyPageState(
     val profileImageUri: Uri? = null,
     val appVersion: String = "v1.3.1",
     val isShowLogoutDialog: Boolean = false,
-    val isShowWithdrawDialog: Boolean = false,
+    val isShowSignOutDialog: Boolean = false,
     val isShowImageChooseDialog: Boolean = false,
     val profileMode: ProfileMode = ProfileMode.SETTING,
     // Permission
@@ -41,7 +41,7 @@ sealed interface MyPageIntent {
     data object ClickLogout : MyPageIntent
     data object DismissLogoutDialog : MyPageIntent
     data object ConfirmLogout : MyPageIntent
-    data object CancelLogout : MyPageIntent
+    data object ClickSignOut : MyPageIntent
     data object DismissSignOutDialog : MyPageIntent
     data object ConfirmSignOut : MyPageIntent
 

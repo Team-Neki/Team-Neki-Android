@@ -53,10 +53,10 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
                 // TODO: 실제 로그아웃 처리
                 postSideEffect(MyPageEffect.NavigateToLogin)
             }
-            MyPageIntent.CancelLogout -> reduce { copy(isShowWithdrawDialog = true) }
-            MyPageIntent.DismissSignOutDialog -> reduce { copy(isShowWithdrawDialog = false) }
+            MyPageIntent.ClickSignOut -> reduce { copy(isShowSignOutDialog = true) }
+            MyPageIntent.DismissSignOutDialog -> reduce { copy(isShowSignOutDialog = false) }
             MyPageIntent.ConfirmSignOut -> {
-                reduce { copy(isShowWithdrawDialog = false) }
+                reduce { copy(isShowSignOutDialog = false) }
                 // TODO: 실제 탈퇴 처리
                 postSideEffect(MyPageEffect.NavigateToLogin)
             }
