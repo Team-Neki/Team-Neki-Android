@@ -151,7 +151,6 @@ internal fun AnchoredDraggablePanel(
             AnchoredPanelContent(
                 brands = brands,
                 nearbyBrands = nearbyBrands,
-                dragLevel = dragLevel,
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = onClickBrand,
                 onClickNearBrand = onClickNearBrand,
@@ -164,20 +163,10 @@ internal fun AnchoredDraggablePanel(
 internal fun AnchoredPanelContent(
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
-    dragLevel: DragLevel = DragLevel.FIRST,
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickNearBrand: (BrandInfo) -> Unit = {},
 ) {
-    val configuration = LocalConfiguration.current
-    val screenHeightDp = configuration.screenHeightDp.dp
-
-    val extraBottomPadding = when (dragLevel) {
-        DragLevel.SECOND -> screenHeightDp * 0.3f
-        DragLevel.THIRD -> screenHeightDp * 0.1f
-        else -> 0.dp
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -238,7 +227,7 @@ internal fun AnchoredPanelContent(
                 .weight(1f)
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = extraBottomPadding),
+            contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
         ) {
             items(nearbyBrands) { brandInfo ->
                 HorizontalBrandItem(
