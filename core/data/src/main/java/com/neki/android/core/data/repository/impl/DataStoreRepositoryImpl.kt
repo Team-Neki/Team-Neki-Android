@@ -52,4 +52,16 @@ class DataStoreRepositoryImpl @Inject constructor(
     override suspend fun clearTokens() {
         dataStore.edit { it.clear() }
     }
+
+    override suspend fun setBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[key] = value
+        }
+    }
+
+    override fun getBoolean(key: Preferences.Key<Boolean>): Flow<Boolean> {
+        return dataStore.data.map { preferences ->
+            preferences[key] ?: false
+        }
+    }
 }
