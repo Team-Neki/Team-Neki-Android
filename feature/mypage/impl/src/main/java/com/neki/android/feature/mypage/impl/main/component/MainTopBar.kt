@@ -26,7 +26,9 @@ internal fun MainTopBar(
     onClickIcon: () -> Unit = {},
 ) {
     NekiLeftTitleTopBar(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 8.dp),
         title = {
             Box(
                 modifier = Modifier
@@ -54,8 +56,6 @@ internal fun MainTopBar(
 @Composable
 private fun MainTopBarPreview() {
     NekiTheme {
-        MainTopBar(
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
-        )
+        MainTopBar()
     }
 }

@@ -23,7 +23,9 @@ internal fun PoseTopBar(
     onIconClick: () -> Unit = {},
 ) {
     NekiLeftTitleTopBar(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 8.dp),
         title = {
             Text(
                 text = "포즈",
@@ -50,8 +52,6 @@ internal fun PoseTopBar(
 @Composable
 private fun SubTitleTopBarPreview() {
     NekiTheme {
-        PoseTopBar(
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
-        )
+        PoseTopBar()
     }
 }

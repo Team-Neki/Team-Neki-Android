@@ -118,7 +118,6 @@ fun PoseContent(
         modifier = modifier.fillMaxSize(),
     ) {
         PoseTopBar(
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
             onIconClick = onAlarmIconClick,
         )
         Box(

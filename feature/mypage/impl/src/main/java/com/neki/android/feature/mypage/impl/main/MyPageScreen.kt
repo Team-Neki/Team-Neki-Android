@@ -61,7 +61,6 @@ fun MyPageScreen(
             .fillMaxSize(),
     ) {
         MainTopBar(
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
             onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
         )
         ProfileCard(
