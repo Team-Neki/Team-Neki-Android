@@ -21,7 +21,9 @@ android {
 
     defaultConfig {
         buildConfigField("String", "PHOTOISM_URL", properties["PHOTOISM_URL"].toString())
-        buildConfigField("String", "PHOTOISM_IMG_URL_END", properties["PHOTOISM_IMG_URL_END"].toString())
+        buildConfigField("String", "PHOTOISM_IMG_URL_MIME_TYPE", properties["PHOTOISM_IMG_URL_MIME_TYPE"].toString())
+        buildConfigField("String", "LIFE_4_CUT_URL", properties["LIFE_4_CUT_URL"].toString())
+        buildConfigField("String", "LIFE_4_CUT_URL_MIME_TYPE", properties["LIFE_4_CUT_URL_MIME_TYPE"].toString())
     }
 }
 
