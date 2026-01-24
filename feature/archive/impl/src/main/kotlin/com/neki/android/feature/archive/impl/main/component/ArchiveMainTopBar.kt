@@ -30,7 +30,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
-import com.neki.android.core.designsystem.extension.buttonShadow
+import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.topbar.NekiLeftTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.archive.impl.R as ArchiveR

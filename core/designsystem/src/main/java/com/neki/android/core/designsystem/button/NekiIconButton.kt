@@ -14,8 +14,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.extension.MultipleEventsCutter
-import com.neki.android.core.designsystem.extension.get
+import com.neki.android.core.designsystem.modifier.MultipleEventsCutter
+import com.neki.android.core.designsystem.modifier.get
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 /**
