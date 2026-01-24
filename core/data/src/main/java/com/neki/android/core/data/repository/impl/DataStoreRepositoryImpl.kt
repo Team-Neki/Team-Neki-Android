@@ -46,7 +46,10 @@ class DataStoreRepositoryImpl @Inject constructor(
     }
 
     override suspend fun clearTokens() {
-        dataStore.edit { it.clear() }
+        dataStore.edit { preferences ->
+            preferences.remove(DataStoreKey.ACCESS_TOKEN)
+            preferences.remove(DataStoreKey.REFRESH_TOKEN)
+        }
     }
 
     override suspend fun setBoolean(key: Preferences.Key<Boolean>, value: Boolean) {
