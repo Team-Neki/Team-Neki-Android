@@ -158,6 +158,7 @@ fun MapScreen(
     val mapUiSettings = remember {
         MapUiSettings(
             isLocationButtonEnabled = false,
+            isZoomControlEnabled = false,
         )
     }
 
