@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
+import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
@@ -29,7 +30,6 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album.component.AllAlbumTopBar
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
-import com.neki.android.feature.archive.impl.component.DeleteOptionBottomSheet
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -146,13 +146,13 @@ internal fun AllAlbumScreen(
     }
 
     if (uiState.isShowDeleteAlbumBottomSheet) {
-        DeleteOptionBottomSheet(
+        DoubleButtonOptionBottomSheet(
             title = "앨범을 삭제하시겠어요?",
             options = AlbumDeleteOption.entries.toImmutableList(),
             selectedOption = uiState.selectedDeleteOption,
             onDismissRequest = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
             onClickCancel = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
-            onClickDelete = { onIntent(AllAlbumIntent.ClickDeleteConfirmButton) },
+            onClickActionButton = { onIntent(AllAlbumIntent.ClickDeleteConfirmButton) },
             onOptionSelect = { onIntent(AllAlbumIntent.SelectDeleteOption(it)) },
         )
     }
