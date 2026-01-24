@@ -21,15 +21,15 @@ import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.pose.impl.main.NumberOfPeople
+import com.neki.android.feature.pose.impl.main.PeopleCount
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun NumberOfPeopleBottomSheet(
+internal fun PeopleCountBottomSheet(
     modifier: Modifier = Modifier,
-    selectedItem: NumberOfPeople = NumberOfPeople.UNSELECTED,
+    selectedItem: PeopleCount? = null,
     onDismissRequest: () -> Unit = {},
-    onClickItem: (NumberOfPeople) -> Unit = {},
+    onClickItem: (PeopleCount) -> Unit = {},
 ) {
     ModalBottomSheet(
         modifier = modifier,
@@ -37,7 +37,7 @@ internal fun NumberOfPeopleBottomSheet(
         containerColor = NekiTheme.colorScheme.white,
         dragHandle = { BottomSheetDragHandle() },
     ) {
-        NumberOfPeopleBottomSheetContent(
+        PeopleCountBottomSheetContent(
             selectedItem = selectedItem,
             onClickItem = onClickItem,
         )
@@ -45,10 +45,10 @@ internal fun NumberOfPeopleBottomSheet(
 }
 
 @Composable
-private fun NumberOfPeopleBottomSheetContent(
+private fun PeopleCountBottomSheetContent(
     modifier: Modifier = Modifier,
-    selectedItem: NumberOfPeople = NumberOfPeople.UNSELECTED,
-    onClickItem: (NumberOfPeople) -> Unit = {},
+    selectedItem: PeopleCount? = null,
+    onClickItem: (PeopleCount) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -65,7 +65,7 @@ private fun NumberOfPeopleBottomSheetContent(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            NumberOfPeople.entries.drop(1).forEach { item ->
+            PeopleCount.entries.drop(1).forEach { item ->
                 Row(
                     modifier = Modifier.clickableSingle { onClickItem(item) },
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -94,20 +94,20 @@ private fun NumberOfPeopleBottomSheetContent(
 
 @ComponentPreview
 @Composable
-private fun NumberOfPeopleBottomSheetContentPreview() {
+private fun PeopleCountBottomSheetContentPreview() {
     NekiTheme {
-        NumberOfPeopleBottomSheetContent(
-            selectedItem = NumberOfPeople.TWO,
+        PeopleCountBottomSheetContent(
+            selectedItem = PeopleCount.TWO,
         )
     }
 }
 
 @ComponentPreview
 @Composable
-private fun NumberOfPeopleBottomSheetPreview() {
+private fun PeopleCountBottomSheetPreview() {
     NekiTheme {
-        NumberOfPeopleBottomSheet(
-            selectedItem = NumberOfPeople.TWO,
+        PeopleCountBottomSheet(
+            selectedItem = PeopleCount.TWO,
         )
     }
 }

@@ -4,5 +4,5 @@ data class Pose(
     val id: Long = 0L,
     val poseImageUrl: String = "",
     val isScrapped: Boolean = false,
-    val numberOfPeople: Int = 0,
+    val peopleCount: Int = 0,
 )

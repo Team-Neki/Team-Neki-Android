@@ -26,11 +26,12 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.main.component.FilterBar
-import com.neki.android.feature.pose.impl.main.component.NumberOfPeopleBottomSheet
+import com.neki.android.feature.pose.impl.main.component.PeopleCountBottomSheet
 import com.neki.android.feature.pose.impl.main.component.PoseListContent
 import com.neki.android.feature.pose.impl.main.component.PoseTopBar
 import com.neki.android.feature.pose.impl.main.component.RecommendationChip
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
+import com.neki.android.feature.pose.impl.main.component.RandomPosePeopleCountBottomSheet
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -66,11 +67,11 @@ fun PoseScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         PoseContent(
-            selectedNumberOfPeople = uiState.selectedNumberOfPeople,
+            selectedPeopleCount = uiState.selectedPeopleCount,
             isScrapSelected = uiState.isShowScrappedPose,
             poseList = if (uiState.isShowScrappedPose) uiState.scrappedPoseList else uiState.randomPoseList,
             onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
-            onClickNumberOfPeople = { onIntent(PoseIntent.ClickNumberOfPeopleChip) },
+            onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickScrap = { onIntent(PoseIntent.ClickScrapChip) },
             onClickPoseItem = { onIntent(PoseIntent.ClickPoseItem(it)) },
         )
@@ -83,11 +84,19 @@ fun PoseScreen(
         )
     }
 
-    if (uiState.isShowNumberOfPeopleBottomSheet) {
-        NumberOfPeopleBottomSheet(
-            selectedItem = uiState.selectedNumberOfPeople,
-            onDismissRequest = { onIntent(PoseIntent.DismissNumberOfPeopleBottomSheet) },
-            onClickItem = { onIntent(PoseIntent.ClickNumberOfPeopleSheetItem(it)) },
+    if (uiState.isShowPeopleCountBottomSheet) {
+        PeopleCountBottomSheet(
+            selectedItem = uiState.selectedPeopleCount,
+            onDismissRequest = { onIntent(PoseIntent.DismissPeopleCountBottomSheet) },
+            onClickItem = { onIntent(PoseIntent.ClickPeopleCountSheetItem(it)) },
+        )
+    }
+
+    if (uiState.isShowRandomPosePeopleCountBottomSheet) {
+        RandomPosePeopleCountBottomSheet(
+            selectedCount = uiState.selectedPeopleCount,
+            onDismissRequest = { onIntent(PoseIntent.DismissPeopleCountBottomSheet) },
+            onOptionSelected = { onIntent(PoseIntent.ClickPeopleCountSheetItem(it)) },
         )
     }
 }
@@ -95,11 +104,11 @@ fun PoseScreen(
 @Composable
 fun PoseContent(
     modifier: Modifier = Modifier,
-    selectedNumberOfPeople: NumberOfPeople,
+    selectedPeopleCount: PeopleCount?,
     isScrapSelected: Boolean,
     poseList: ImmutableList<Pose>,
     onClickAlarmIcon: () -> Unit = {},
-    onClickNumberOfPeople: () -> Unit = {},
+    onClickPeopleCount: () -> Unit = {},
     onClickScrap: () -> Unit = {},
     onClickPoseItem: (Pose) -> Unit = {},
 ) {
@@ -137,10 +146,10 @@ fun PoseContent(
                         if (filterBarHeightPx != 0) return@onSizeChanged
                         else filterBarHeightPx = size.height
                     },
-                numberOfPeople = selectedNumberOfPeople,
+                peopleCount = selectedPeopleCount,
                 isScrapSelected = isScrapSelected,
                 visible = showFilterBar,
-                onClickNumberOfPeople = onClickNumberOfPeople,
+                onClickPeopleCount = onClickPeopleCount,
                 onClickScrap = onClickScrap,
             )
         }
