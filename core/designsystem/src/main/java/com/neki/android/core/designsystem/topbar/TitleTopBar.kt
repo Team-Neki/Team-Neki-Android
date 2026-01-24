@@ -80,7 +80,7 @@ fun CloseTitleTextButtonTopBar(
             NekiTextButton(
                 modifier = modifier.fillMaxHeight(),
                 contentPadding = PaddingValues(horizontal = 20.dp),
-                onClick = onTextButtonClick,
+                onClick = onClickTextButton,
                 enabled = enabled,
             ) {
                 Text(
@@ -126,7 +126,7 @@ fun BackTitleTextButtonTopBar(
             NekiTextButton(
                 modifier = modifier.fillMaxHeight(),
                 contentPadding = PaddingValues(horizontal = 20.dp),
-                onClick = onTextButtonClick,
+                onClick = onClickTextButton,
                 enabled = enabled,
             ) {
                 Text(
@@ -196,7 +196,7 @@ fun BackTitleOptionTopBar(
                 modifier = modifier
                     .padding(end = 8.dp)
                     .size(52.dp),
-                onClick = onIconClick,
+                onClick = onClickIcon,
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),
@@ -250,7 +250,7 @@ fun BackTitleTextButtonOptionTopBar(
                         .fillMaxHeight()
                         .padding(vertical = 3.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp),
-                    onClick = onTextButtonClick,
+                    onClick = onClickTextButton,
                     enabled = enabled,
                 ) {
                     Text(
@@ -263,7 +263,7 @@ fun BackTitleTextButtonOptionTopBar(
                     modifier = modifier
                         .padding(end = 8.dp)
                         .size(52.dp),
-                    onClick = onIconClick,
+                    onClick = onClickIcon,
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),

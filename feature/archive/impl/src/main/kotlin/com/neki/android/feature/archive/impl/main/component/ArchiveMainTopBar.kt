@@ -63,7 +63,7 @@ internal fun ArchiveMainTopBar(
             ) {
                 Box {
                     NekiIconButton(
-                        onClick = onPlusIconClick,
+                        onClick = onClickPlusIcon,
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.icon_plus_primary),
@@ -75,9 +75,9 @@ internal fun ArchiveMainTopBar(
                     if (showAddPopup) {
                         AddPhotoPopup(
                             onDismissRequest = onDismissPopup,
-                            onQRScanClick = onQRScanClick,
-                            onGalleryClick = onGalleryClick,
-                            onNewAlbumClick = onNewAlbumClick,
+                            onClickQRScan = onClickQRScan,
+                            onClickGallery = onClickGallery,
+                            onClickNewAlbum = onClickNewAlbum,
                         )
                     }
                     if (showTooltip) {
@@ -85,7 +85,7 @@ internal fun ArchiveMainTopBar(
                     }
                 }
                 NekiIconButton(
-                    onClick = onNotificationIconClick,
+                    onClick = onClickNotificationIcon,
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.icon_bell),

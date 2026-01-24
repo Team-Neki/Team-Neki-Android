@@ -35,7 +35,7 @@ internal fun PoseTopBar(
         },
         actions = {
             NekiIconButton(
-                onClick = onIconClick,
+                onClick = onClickIcon,
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),
