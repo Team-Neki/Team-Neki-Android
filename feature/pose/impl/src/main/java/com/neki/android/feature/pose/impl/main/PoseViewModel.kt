@@ -1,6 +1,9 @@
 package com.neki.android.feature.pose.impl.main
 
 import androidx.lifecycle.ViewModel
+import com.neki.android.core.model.PoseEffect
+import com.neki.android.core.model.PoseIntent
+import com.neki.android.core.model.PoseState
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +38,7 @@ internal class PoseViewModel @Inject constructor() : ViewModel() {
             }
 
             PoseIntent.DismissPeopleCountBottomSheet -> reduce { copy(isShowPeopleCountBottomSheet = false) }
+            PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
             PoseIntent.ClickScrapChip -> reduce {
                 copy(
                     isShowScrappedPose = !isShowScrappedPose,
@@ -47,7 +51,13 @@ internal class PoseViewModel @Inject constructor() : ViewModel() {
                 postSideEffect(PoseEffect.NavigateToPoseDetail)
             }
 
-            PoseIntent.ClickRandomPoseRecommendation -> {}
+            PoseIntent.ClickRandomPoseRecommendation -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = true) }
+            is PoseIntent.ClickRandomPosePeopleCountSheetItem -> reduce { copy(selectedRandomPosePeopleCount = intent.peopleCount) }
+            PoseIntent.ClickRandomPoseBottomSheetSelectButton -> {
+                val selectedCount = state.selectedRandomPosePeopleCount ?: return
+                reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
+                postSideEffect(PoseEffect.NavigateToRandomPose(selectedCount))
+            }
 
             // Pose Detail
             PoseIntent.ClickBackIcon -> postSideEffect(PoseEffect.NavigateBack)

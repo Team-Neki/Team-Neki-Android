@@ -23,15 +23,19 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
+import com.neki.android.core.model.PoseEffect
+import com.neki.android.core.model.PoseIntent
+import com.neki.android.core.model.PoseState
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
 import com.neki.android.feature.pose.impl.main.component.FilterBar
 import com.neki.android.feature.pose.impl.main.component.PeopleCountBottomSheet
 import com.neki.android.feature.pose.impl.main.component.PoseListContent
 import com.neki.android.feature.pose.impl.main.component.PoseTopBar
-import com.neki.android.feature.pose.impl.main.component.RecommendationChip
-import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
 import com.neki.android.feature.pose.impl.main.component.RandomPosePeopleCountBottomSheet
+import com.neki.android.feature.pose.impl.main.component.RecommendationChip
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -94,9 +98,10 @@ fun PoseScreen(
 
     if (uiState.isShowRandomPosePeopleCountBottomSheet) {
         RandomPosePeopleCountBottomSheet(
-            selectedCount = uiState.selectedPeopleCount,
-            onDismissRequest = { onIntent(PoseIntent.DismissPeopleCountBottomSheet) },
-            onOptionSelected = { onIntent(PoseIntent.ClickPeopleCountSheetItem(it)) },
+            selectedCount = uiState.selectedRandomPosePeopleCount,
+            onDismissRequest = { onIntent(PoseIntent.DismissRandomPosePeopleCountBottomSheet) },
+            onOptionSelected = { onIntent(PoseIntent.ClickRandomPosePeopleCountSheetItem(it)) },
+            onClickSelectButton = { onIntent(PoseIntent.ClickRandomPoseBottomSheetSelectButton) },
         )
     }
 }
