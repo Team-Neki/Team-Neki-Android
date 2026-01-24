@@ -48,8 +48,8 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
-import com.neki.android.core.designsystem.extension.buttonShadow
 import com.neki.android.core.designsystem.extension.noRippleClickableSingle
+import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.BrandInfo
@@ -190,11 +190,7 @@ internal fun AnchoredPanelContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .buttonShadow(
-                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-                offsetY = 0.dp,
-                blurRadius = 5.dp,
-            )
+            .dropdownShadow(shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),

@@ -20,7 +20,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.extension.buttonShadow
+import com.neki.android.core.designsystem.modifier.buttonShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.VerticalSpacer
@@ -65,7 +65,7 @@ internal fun BrandCardCloseButton(
 ) {
     Box(
         modifier = modifier
-            .buttonShadow(blurRadius = 10.dp)
+            .buttonShadow()
             .background(
                 shape = CircleShape,
                 color = NekiTheme.colorScheme.white,

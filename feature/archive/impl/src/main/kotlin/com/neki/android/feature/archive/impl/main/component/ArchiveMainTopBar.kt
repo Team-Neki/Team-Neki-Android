@@ -30,8 +30,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.extension.buttonShadow
 import com.neki.android.core.designsystem.extension.clickableSingle
+import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.topbar.NekiLeftTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.archive.impl.R as ArchiveR
@@ -179,13 +179,7 @@ private fun AddPhotoPopup(
     ) {
         Column(
             modifier = Modifier
-                .buttonShadow(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color.Black.copy(alpha = 0.2f),
-                    offsetX = 0.dp,
-                    offsetY = 0.dp,
-                    blurRadius = 5.dp,
-                )
+                .dropdownShadow(shape = RoundedCornerShape(12.dp))
                 .background(
                     color = NekiTheme.colorScheme.white,
                     shape = RoundedCornerShape(12.dp),

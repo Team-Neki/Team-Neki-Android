@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.app.navigation.TopLevelNavItem
-import com.neki.android.core.designsystem.extension.tabbarShadow
+import com.neki.android.core.designsystem.modifier.tabbarShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable

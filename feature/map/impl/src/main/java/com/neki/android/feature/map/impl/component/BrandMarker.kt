@@ -25,7 +25,7 @@ import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.rememberUpdatedMarkerState
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.extension.buttonShadow
+import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_BACKGROUND_RADIUS
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_IMAGE_RADIUS
@@ -93,7 +93,7 @@ internal fun BrandMarkerContent(
         Box(
             modifier = Modifier
                 .size(bodySize.dp)
-                .buttonShadow(
+                .dropdownShadow(
                     color = Color.Black.copy(alpha = 0.38f),
                     shape = RoundedCornerShape(
                         if (isFocused) FOCUSED_MARKER_BACKGROUND_RADIUS.dp else MARKER_BACKGROUND_RADIUS.dp,
