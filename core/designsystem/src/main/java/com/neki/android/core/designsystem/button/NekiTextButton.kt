@@ -10,8 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.extension.MultipleEventsCutter
-import com.neki.android.core.designsystem.extension.get
+import com.neki.android.core.designsystem.modifier.MultipleEventsCutter
+import com.neki.android.core.designsystem.modifier.get
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable

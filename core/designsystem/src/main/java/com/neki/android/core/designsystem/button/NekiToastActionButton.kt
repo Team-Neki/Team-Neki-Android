@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.extension.clickableSingle
+import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable

@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.extension.buttonShadow
-import com.neki.android.core.designsystem.extension.noRippleClickableSingle
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
+import com.neki.android.core.designsystem.modifier.cardShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.HorizontalSpacer
@@ -38,10 +38,7 @@ internal fun BrandCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .buttonShadow(
-                shape = RoundedCornerShape(20.dp),
-                blurRadius = 4.dp,
-            )
+            .cardShadow(shape = RoundedCornerShape(20.dp))
             .background(
                 shape = RoundedCornerShape(20.dp),
                 color = NekiTheme.colorScheme.white,

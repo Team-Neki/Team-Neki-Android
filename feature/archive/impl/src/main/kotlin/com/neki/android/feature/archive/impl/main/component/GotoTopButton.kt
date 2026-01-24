@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.neki.android.core.designsystem.extension.buttonShadow
-import com.neki.android.core.designsystem.extension.clickableSingle
+import com.neki.android.core.designsystem.modifier.buttonShadow
+import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.archive.impl.R
 

@@ -182,13 +182,7 @@ private fun AddPhotoPopup(
     ) {
         Column(
             modifier = Modifier
-                .buttonShadow(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color.Black.copy(alpha = 0.2f),
-                    offsetX = 0.dp,
-                    offsetY = 0.dp,
-                    blurRadius = 5.dp,
-                )
+                .dropdownShadow(shape = RoundedCornerShape(12.dp))
                 .background(
                     color = NekiTheme.colorScheme.white,
                     shape = RoundedCornerShape(12.dp),

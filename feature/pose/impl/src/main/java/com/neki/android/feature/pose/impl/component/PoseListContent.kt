@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.extension.noRippleClickable
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_BOTTOM_PADDING

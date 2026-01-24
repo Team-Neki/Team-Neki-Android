@@ -24,7 +24,7 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.button.CTAButtonGray
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
-import com.neki.android.core.designsystem.extension.noRippleClickable
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import kotlinx.collections.immutable.ImmutableList
 
