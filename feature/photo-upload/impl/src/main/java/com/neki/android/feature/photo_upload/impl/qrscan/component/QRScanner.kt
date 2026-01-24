@@ -1,5 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.component
 
+import android.graphics.RectF
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -38,6 +39,7 @@ import java.util.concurrent.TimeUnit
 internal fun QRScanner(
     modifier: Modifier = Modifier,
     isTorchEnabled: Boolean = false,
+    scanAreaRatio: () -> RectF? = { null },
     onQRCodeScanned: (String) -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -62,11 +64,14 @@ internal fun QRScanner(
             .build().apply {
                 setAnalyzer(
                     ContextCompat.getMainExecutor(context),
-                    QRImageAnalyzer { scannedUrl ->
-                        if (scannedUrl.isNotEmpty()) {
-                            onQRCodeScanned(scannedUrl)
-                        }
-                    },
+                    QRImageAnalyzer(
+                        scanAreaRatio = scanAreaRatio,
+                        onQRCodeScanned = { scannedUrl ->
+                            if (scannedUrl.isNotEmpty()) {
+                                onQRCodeScanned(scannedUrl)
+                            }
+                        },
+                    ),
                 )
             }
 

@@ -1,5 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.component
 
+import android.graphics.RectF
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,13 +50,35 @@ internal fun QRScannerContent(
 ) {
     var frameOffset: Offset? by remember { mutableStateOf(null) }
     var frameSize: IntSize? by remember { mutableStateOf(null) }
+    var containerSize: IntSize? by remember { mutableStateOf(null) }
 
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .onGloballyPositioned { coordinates ->
+                containerSize = coordinates.size
+            },
     ) {
         QRScanner(
             modifier = Modifier.fillMaxSize(),
             isTorchEnabled = isTorchEnabled,
+            scanAreaRatio = {
+                val offset = frameOffset
+                val frame = frameSize
+                val container = containerSize
+                if (offset != null && frame != null && container != null &&
+                    container.width > 0 && container.height > 0
+                ) {
+                    RectF(
+                        offset.x / container.width,
+                        offset.y / container.height,
+                        (offset.x + frame.width) / container.width,
+                        (offset.y + frame.height) / container.height,
+                    )
+                } else {
+                    null
+                }
+            },
             onQRCodeScanned = onQRCodeScanned,
         )
         DimExceptContent(

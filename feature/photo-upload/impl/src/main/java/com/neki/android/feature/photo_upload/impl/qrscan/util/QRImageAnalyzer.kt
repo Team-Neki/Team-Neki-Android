@@ -1,5 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.util
 
+import android.graphics.RectF
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
@@ -11,6 +12,7 @@ import com.google.mlkit.vision.common.InputImage
 import timber.log.Timber
 
 class QRImageAnalyzer(
+    private val scanAreaRatio: () -> RectF?,
     private val onQRCodeScanned: (String) -> Unit,
 ) : ImageAnalysis.Analyzer {
 
@@ -29,13 +31,24 @@ class QRImageAnalyzer(
                 imageProxy.imageInfo.rotationDegrees,
             )
 
+            val imageWidth = imageProxy.width.toFloat()
+            val imageHeight = imageProxy.height.toFloat()
+
             scanner.process(inputImage)
                 .addOnSuccessListener { barcodes ->
                     for (barcode in barcodes) {
                         if (barcode.valueType == Barcode.TYPE_URL) {
                             val url = barcode.url?.url ?: continue
-                            onQRCodeScanned(url)
-                        } else continue
+                            val boundingBox = barcode.boundingBox ?: continue
+
+                            val centerXRatio = boundingBox.centerX() / imageWidth
+                            val centerYRatio = boundingBox.centerY() / imageHeight
+
+                            val scanArea = scanAreaRatio()
+                            if (scanArea == null || isInScanArea(centerXRatio, centerYRatio, scanArea)) {
+                                onQRCodeScanned(url)
+                            }
+                        }
                     }
                 }
                 .addOnFailureListener { e -> Timber.Forest.e(e, "Barcode scanning failed") }
@@ -43,5 +56,12 @@ class QRImageAnalyzer(
         } else {
             imageProxy.close()
         }
+    }
+
+    private fun isInScanArea(xRatio: Float, yRatio: Float, scanArea: RectF): Boolean {
+        return xRatio >= scanArea.left &&
+            xRatio <= scanArea.right &&
+            yRatio >= scanArea.top &&
+            yRatio <= scanArea.bottom
     }
 }
