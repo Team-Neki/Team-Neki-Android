@@ -7,7 +7,7 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun ProfileSettingTopBar(
+internal fun ProfileSettingTopBar(
     onBack: () -> Unit = {},
 ) {
     BackTitleTopBar(
@@ -17,7 +17,7 @@ fun ProfileSettingTopBar(
 }
 
 @Composable
-fun ProfileEditTopBar(
+internal fun ProfileEditTopBar(
     enabled: Boolean = true,
     onBack: () -> Unit = {},
     onClickComplete: () -> Unit = {},

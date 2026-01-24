@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -15,11 +16,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.mypage.impl.main.component.MainTopBar
-import com.neki.android.feature.mypage.impl.main.component.ProfileCard
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
+import com.neki.android.feature.mypage.impl.main.component.MainTopBar
+import com.neki.android.feature.mypage.impl.main.component.ProfileCard
 
 @Composable
 internal fun MyPageRoute(
@@ -60,6 +61,7 @@ fun MyPageScreen(
             .fillMaxSize(),
     ) {
         MainTopBar(
+            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
             onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
         )
         ProfileCard(

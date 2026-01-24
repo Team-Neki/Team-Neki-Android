@@ -2,7 +2,6 @@ package com.neki.android.feature.archive.impl.main.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -30,8 +29,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.extension.buttonShadow
-import com.neki.android.core.designsystem.extension.clickableSingle
 import com.neki.android.core.designsystem.topbar.NekiLeftTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.archive.impl.R as ArchiveR
@@ -48,52 +47,55 @@ internal fun ArchiveMainTopBar(
     onDismissPopup: () -> Unit = {},
     showTooltip: Boolean = true,
 ) {
-    Box {
-        NekiLeftTitleTopBar(
-            modifier = modifier,
-            title = {
-                Box(
-                    modifier = Modifier
-                        .height(28.dp)
-                        .width(56.dp)
-                        .background(color = Color(0xFFB7B9C3)),
-                )
-            },
-            actions = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Box {
+    NekiLeftTitleTopBar(
+        modifier = modifier,
+        title = {
+            Box(
+                modifier = Modifier
+                    .height(28.dp)
+                    .width(56.dp)
+                    .background(color = Color(0xFFB7B9C3)),
+            )
+        },
+        actions = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box {
+                    NekiIconButton(
+                        onClick = onPlusIconClick,
+                    ) {
                         Icon(
-                            modifier = Modifier.clickableSingle(onClick = onPlusIconClick),
                             imageVector = ImageVector.vectorResource(R.drawable.icon_plus_primary),
                             contentDescription = null,
                             tint = Color.Unspecified,
                         )
-
-                        if (showAddPopup) {
-                            AddPhotoPopup(
-                                onDismissRequest = onDismissPopup,
-                                onQRScanClick = onQRScanClick,
-                                onGalleryClick = onGalleryClick,
-                                onNewAlbumClick = onNewAlbumClick,
-                            )
-                        }
-                        if (showTooltip) {
-                            ToolTip()
-                        }
                     }
+
+                    if (showAddPopup) {
+                        AddPhotoPopup(
+                            onDismissRequest = onDismissPopup,
+                            onQRScanClick = onQRScanClick,
+                            onGalleryClick = onGalleryClick,
+                            onNewAlbumClick = onNewAlbumClick,
+                        )
+                    }
+                    if (showTooltip) {
+                        ToolTip()
+                    }
+                }
+                NekiIconButton(
+                    onClick = onNotificationIconClick,
+                ) {
                     Icon(
-                        modifier = Modifier.clickableSingle(onClick = onNotificationIconClick),
                         imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
                         contentDescription = null,
                         tint = Color.Unspecified,
                     )
                 }
-            },
-        )
-    }
+            }
+        },
+    )
 }
 
 @Composable
@@ -101,8 +103,8 @@ private fun ToolTip() {
     val caretColor = NekiTheme.colorScheme.gray800
     val density = LocalDensity.current
 
-    val popupOffsetX = with(density) { 5.dp.toPx().toInt() }
-    val popupOffsetY = with(density) { 30.dp.toPx().toInt() }
+    val popupOffsetX = with(density) { 1.dp.toPx().toInt() }
+    val popupOffsetY = with(density) { 47.dp.toPx().toInt() }
 
     Popup(
         alignment = Alignment.TopEnd,
@@ -169,10 +171,11 @@ private fun AddPhotoPopup(
     onNewAlbumClick: () -> Unit,
 ) {
     val density = LocalDensity.current
-    val popupOffsetY = with(density) { 31.dp.toPx().toInt() }
+    val popupOffsetX = with(density) { (-4).dp.toPx().toInt() }
+    val popupOffsetY = with(density) { 48.dp.toPx().toInt() }
 
     Popup(
-        offset = IntOffset(x = 0, y = popupOffsetY),
+        offset = IntOffset(x = popupOffsetX, y = popupOffsetY),
         alignment = Alignment.TopEnd,
         onDismissRequest = onDismissRequest,
         properties = PopupProperties(focusable = true),
@@ -226,9 +229,14 @@ private fun AddPhotoPopup(
 @Composable
 private fun ArchiveMainTopBarPreview() {
     NekiTheme {
-        ArchiveMainTopBar(
-            showAddPopup = false,
-        )
+        Column(
+            modifier = Modifier.padding(bottom = 50.dp),
+        ) {
+            ArchiveMainTopBar(
+                modifier = Modifier.padding(start = 20.dp, end = 8.dp),
+                showAddPopup = false,
+            )
+        }
     }
 }
 
@@ -238,6 +246,7 @@ private fun ArchiveMainTopBarWithTooltipPreview() {
     NekiTheme {
         Box(modifier = Modifier.height(200.dp)) {
             ArchiveMainTopBar(
+                modifier = Modifier.padding(start = 20.dp, end = 8.dp),
                 showTooltip = true,
                 showAddPopup = false,
             )
@@ -251,6 +260,7 @@ private fun ArchiveMainTopBarWithPopupPreview() {
     NekiTheme {
         Box(modifier = Modifier.height(200.dp)) {
             ArchiveMainTopBar(
+                modifier = Modifier.padding(start = 20.dp, end = 8.dp),
                 showAddPopup = true,
             )
         }
