@@ -1,5 +1,9 @@
 package com.neki.android.feature.map.impl
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -87,21 +91,26 @@ fun MapRoute(
                 }
             }
             is MapEffect.MoveDirectionApp -> {
+                val startLatitude = sideEffect.startLatitude
+                val startLongitude = sideEffect.startLongitude
+                val endLatitude = sideEffect.endLatitude
+                val endLongitude = sideEffect.endLongitude
+
                 when (sideEffect.app) {
                     DirectionApp.GOOGLE_MAP -> {
                         DirectionHelper.moveAppOrStore(
                             context = context,
-                            url = "google.navigation:q=37.5256372,126.8862648(${context.getPlaceName(37.5256372, 126.8861924, "도착지")})&mode=w",
+                            url = "google.navigation:q=$endLatitude,$endLongitude&mode=w",
                             packageName = sideEffect.app.packageName,
                         )
                     }
 
                     DirectionApp.NAVER_MAP -> {
-                        val startName = context.getPlaceName(37.5270539, 126.8862648, "출발지")
-                        val destName = context.getPlaceName(37.5256372, 126.8861924, "도착지")
+                        val startName = context.getPlaceName(startLatitude, startLongitude, "출발지")
+                        val destName = context.getPlaceName(endLatitude, endLongitude, "도착지")
                         DirectionHelper.moveAppOrStore(
                             context = context,
-                            url = "nmap://route/walk?slat=37.5270539&slng=126.8862648&sname=$startName&dlat=37.5256372&dlng=126.8861924&dname=$destName",
+                            url = "nmap://route/walk?slat=$startLatitude&slng=$startLongitude&sname=$startName&dlat=$endLatitude&dlng=$endLongitude&dname=$destName",
                             packageName = sideEffect.app.packageName,
                         )
                     }
@@ -109,7 +118,7 @@ fun MapRoute(
                     DirectionApp.KAKAO_MAP -> {
                         DirectionHelper.moveAppOrStore(
                             context = context,
-                            url = "kakaomap://route?sp=37.5270539,126.8862648&ep=37.5256372,126.8861924&by=FOOT",
+                            url = "kakaomap://route?sp=$startLatitude,$startLongitude&ep=$endLatitude,$endLongitude&by=FOOT",
                             packageName = sideEffect.app.packageName,
                         )
                     }

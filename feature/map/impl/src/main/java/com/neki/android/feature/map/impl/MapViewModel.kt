@@ -86,7 +86,17 @@ class MapViewModel @Inject constructor() : ViewModel() {
 
             is MapIntent.ClickDirectionItem -> {
                 reduce { copy(isShowDirectionBottomSheet = false) }
-                postSideEffect(MapEffect.MoveDirectionApp(intent.app))
+                state.selectedBrandInfo?.let { brandInfo ->
+                    postSideEffect(
+                        MapEffect.MoveDirectionApp(
+                            app = intent.app,
+                            startLatitude = state.currentLocation.first,
+                            startLongitude = state.currentLocation.second,
+                            endLatitude = brandInfo.latitude,
+                            endLongitude = brandInfo.longitude,
+                        ),
+                    )
+                }
             }
 
             is MapIntent.ChangeDragLevel -> {

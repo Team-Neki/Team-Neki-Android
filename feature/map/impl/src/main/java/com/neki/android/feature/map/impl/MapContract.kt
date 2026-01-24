@@ -8,8 +8,8 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class MapState(
     val isLoading: Boolean = false,
-    val dragLevel: DragLevel = DragLevel.FIRST,
     val currentLocation: Pair<Double, Double> = Pair(0.0, 0.0),
+    val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     val focusedMarkerPosition: Pair<Double, Double> = Pair(0.0, 0.0),
@@ -33,6 +33,7 @@ sealed interface MapIntent {
     ) : MapIntent
 
     data object ClickRefresh : MapIntent
+    data class UpdateCurrentLocation(val latitude: Double, val longitude: Double) : MapIntent
 
     // in 패널
     data object ClickCurrentLocation : MapIntent
@@ -58,7 +59,12 @@ sealed interface MapEffect {
 
     data class MoveDirectionApp(
         val app: DirectionApp,
+        val startLatitude: Double,
+        val startLongitude: Double,
+        val endLatitude: Double,
+        val endLongitude: Double,
     ) : MapEffect
+    data object NavigateToAppSettings : MapEffect
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
