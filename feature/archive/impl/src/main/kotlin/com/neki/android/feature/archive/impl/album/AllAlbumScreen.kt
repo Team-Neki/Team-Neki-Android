@@ -80,12 +80,12 @@ internal fun AllAlbumScreen(
         AllAlbumTopBar(
             selectMode = uiState.selectMode,
             showOptionPopup = uiState.showOptionPopup,
-            onBackClick = { onIntent(AllAlbumIntent.ClickBackIcon) },
-            onCreateClick = { onIntent(AllAlbumIntent.ClickCreateButton) },
-            onOptionClick = { onIntent(AllAlbumIntent.ClickOptionIcon) },
+            onClickBack = { onIntent(AllAlbumIntent.ClickBackIcon) },
+            onClickCreate = { onIntent(AllAlbumIntent.ClickCreateButton) },
+            onClickOption = { onIntent(AllAlbumIntent.ClickOptionIcon) },
             onDismissPopup = { onIntent(AllAlbumIntent.DismissOptionPopup) },
-            onDeleteOptionClick = { onIntent(AllAlbumIntent.ClickDeleteOptionRow) },
-            onDeleteClick = { onIntent(AllAlbumIntent.ClickDeleteButton) },
+            onClickDeleteOption = { onIntent(AllAlbumIntent.ClickDeleteOptionRow) },
+            onClickDelete = { onIntent(AllAlbumIntent.ClickDeleteButton) },
         )
 
         LazyColumn(
@@ -136,8 +136,8 @@ internal fun AllAlbumScreen(
         AddAlbumBottomSheet(
             textFieldState = textFieldState,
             onDismissRequest = { onIntent(AllAlbumIntent.DismissAddAlbumBottomSheet) },
-            onCancelClick = { onIntent(AllAlbumIntent.DismissAddAlbumBottomSheet) },
-            onConfirmClick = {
+            onClickCancel = { onIntent(AllAlbumIntent.DismissAddAlbumBottomSheet) },
+            onClickConfirm = {
                 val albumName = textFieldState.text.toString()
                 if (errorMessage == null && albumName.isNotBlank()) {
                     onIntent(AllAlbumIntent.ClickAddAlbumButton(albumName))
@@ -154,8 +154,8 @@ internal fun AllAlbumScreen(
             options = AlbumDeleteOption.entries.toImmutableList(),
             selectedOption = uiState.selectedDeleteOption,
             onDismissRequest = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
-            onCancelClick = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
-            onDeleteClick = { onIntent(AllAlbumIntent.ClickDeleteConfirmButton) },
+            onClickCancel = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
+            onClickDelete = { onIntent(AllAlbumIntent.ClickDeleteConfirmButton) },
             onOptionSelect = { onIntent(AllAlbumIntent.SelectDeleteOption(it)) },
         )
     }

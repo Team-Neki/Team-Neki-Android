@@ -24,12 +24,12 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 internal fun HorizontalBrandItem(
     brandInfo: BrandInfo,
     modifier: Modifier = Modifier,
-    onItemClick: () -> Unit = {},
+    onClickItem: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .noRippleClickableSingle(onClick = onItemClick),
+            .noRippleClickableSingle(onClick = onClickItem),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(

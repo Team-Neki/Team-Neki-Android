@@ -21,12 +21,12 @@ import com.neki.android.core.ui.component.PhotoComponent
 internal fun ArchiveMainPhotoItem(
     photo: Photo,
     modifier: Modifier = Modifier,
-    onItemClick: (Photo) -> Unit = {},
+    onClickItem: (Photo) -> Unit = {},
 ) {
     PhotoComponent(
         photo = photo,
         modifier = modifier.photoBackground(),
-        onItemClick = onItemClick,
+        onClickItem = onClickItem,
     ) {
         if (photo.isFavorite) {
             Icon(

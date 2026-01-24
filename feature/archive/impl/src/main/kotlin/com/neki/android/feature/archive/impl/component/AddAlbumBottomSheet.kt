@@ -14,8 +14,8 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ALBUM_NA
 internal fun AddAlbumBottomSheet(
     textFieldState: TextFieldState,
     onDismissRequest: () -> Unit,
-    onCancelClick: () -> Unit,
-    onConfirmClick: () -> Unit,
+    onClickCancel: () -> Unit,
+    onClickConfirm: () -> Unit,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorMessage: String? = null,
@@ -25,8 +25,8 @@ internal fun AddAlbumBottomSheet(
         subtitle = "네컷사진을 모을 앨범명을 입력하세요",
         textFieldState = textFieldState,
         onDismissRequest = onDismissRequest,
-        onCancelClick = onCancelClick,
-        onConfirmClick = onConfirmClick,
+        onClickCancel = onClickCancel,
+        onClickConfirm = onClickConfirm,
         modifier = modifier,
         placeholder = "앨범명을 입력하세요",
         maxLength = ARCHIVE_ALBUM_NAME_MAX_LENGTH,
@@ -43,8 +43,8 @@ private fun AddAlbumBottomSheetPreview() {
         AddAlbumBottomSheet(
             textFieldState = TextFieldState(),
             onDismissRequest = {},
-            onCancelClick = {},
-            onConfirmClick = {},
+            onClickCancel = {},
+            onClickConfirm = {},
         )
     }
 }
@@ -56,8 +56,8 @@ private fun AddAlbumBottomSheetErrorPreview() {
         AddAlbumBottomSheet(
             textFieldState = TextFieldState(),
             onDismissRequest = {},
-            onCancelClick = {},
-            onConfirmClick = {},
+            onClickCancel = {},
+            onClickConfirm = {},
             isError = true,
             errorMessage = "앨범명은 최대 16자까지 입력할 수 있어요.",
         )

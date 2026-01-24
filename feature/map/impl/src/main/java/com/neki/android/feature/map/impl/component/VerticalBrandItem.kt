@@ -30,12 +30,12 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 internal fun VerticalBrandItem(
     brand: Brand,
     modifier: Modifier = Modifier,
-    onItemClick: () -> Unit = {},
+    onClickItem: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .width(66.dp)
-            .noRippleClickable { onItemClick() },
+            .noRippleClickable { onClickItem() },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(

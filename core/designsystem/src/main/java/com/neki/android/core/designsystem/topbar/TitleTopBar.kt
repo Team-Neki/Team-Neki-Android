@@ -45,7 +45,7 @@ fun CloseTitleTextButtonTopBar(
     enabledTextColor: Color = NekiTheme.colorScheme.primary500,
     disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     onClose: () -> Unit = {},
-    onTextButtonClick: () -> Unit = {},
+    onClickTextButton: () -> Unit = {},
 ) {
     NekiTitleTopBar(
         modifier = modifier,
@@ -62,7 +62,7 @@ fun CloseTitleTextButtonTopBar(
             TopBarTextButton(
                 buttonText = buttonText,
                 modifier = modifier,
-                onClick = onTextButtonClick,
+                onClick = onClickTextButton,
                 enabled = enabled,
                 enabledTextColor = enabledTextColor,
                 disabledTextColor = disabledTextColor,
@@ -80,7 +80,7 @@ fun BackTitleTextButtonTopBar(
     enabledTextColor: Color = NekiTheme.colorScheme.primary500,
     disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     onBack: () -> Unit = {},
-    onTextButtonClick: () -> Unit = {},
+    onClickTextButton: () -> Unit = {},
 ) {
     NekiTitleTopBar(
         modifier = modifier,
@@ -97,7 +97,7 @@ fun BackTitleTextButtonTopBar(
             TopBarTextButton(
                 buttonText = buttonLabel,
                 modifier = modifier,
-                onClick = onTextButtonClick,
+                onClick = onClickTextButton,
                 enabled = enabled,
                 enabledTextColor = enabledTextColor,
                 disabledTextColor = disabledTextColor,
@@ -131,7 +131,7 @@ fun BackTitleOptionTopBar(
     title: String,
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
-    onIconClick: () -> Unit = {},
+    onClickIcon: () -> Unit = {},
 ) {
     NekiTitleTopBar(
         modifier = modifier,
@@ -146,7 +146,7 @@ fun BackTitleOptionTopBar(
         title = title,
         actions = { modifier ->
             Icon(
-                modifier = modifier.noRippleClickableSingle { onIconClick() },
+                modifier = modifier.noRippleClickableSingle { onClickIcon() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_kebab),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
@@ -165,8 +165,8 @@ fun BackTitleTextButtonOptionTopBar(
     disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     optionIconRes: Int = R.drawable.icon_kebab,
     onBack: () -> Unit = {},
-    onTextButtonClick: () -> Unit = {},
-    onIconClick: () -> Unit = {},
+    onClickTextButton: () -> Unit = {},
+    onClickIcon: () -> Unit = {},
 ) {
     NekiTitleTopBar(
         modifier = modifier,
@@ -187,13 +187,13 @@ fun BackTitleTextButtonOptionTopBar(
             ) {
                 TopBarTextButton(
                     buttonText = buttonLabel,
-                    onClick = onTextButtonClick,
+                    onClick = onClickTextButton,
                     enabled = enabled,
                     enabledTextColor = enabledTextColor,
                     disabledTextColor = disabledTextColor,
                 )
                 Icon(
-                    modifier = Modifier.noRippleClickableSingle { onIconClick() },
+                    modifier = Modifier.noRippleClickableSingle { onClickIcon() },
                     imageVector = ImageVector.vectorResource(optionIconRes),
                     tint = NekiTheme.colorScheme.gray800,
                     contentDescription = null,

@@ -30,7 +30,7 @@ internal fun NumberOfPeopleBottomSheet(
     modifier: Modifier = Modifier,
     selectedItem: NumberOfPeople = NumberOfPeople.UNSELECTED,
     onDismissRequest: () -> Unit = {},
-    onItemClick: (NumberOfPeople) -> Unit = {},
+    onClickItem: (NumberOfPeople) -> Unit = {},
 ) {
     ModalBottomSheet(
         modifier = modifier,
@@ -40,7 +40,7 @@ internal fun NumberOfPeopleBottomSheet(
     ) {
         NumberOfPeopleBottomSheetContent(
             selectedItem = selectedItem,
-            onItemClick = onItemClick,
+            onClickItem = onClickItem,
         )
     }
 }
@@ -49,7 +49,7 @@ internal fun NumberOfPeopleBottomSheet(
 private fun NumberOfPeopleBottomSheetContent(
     modifier: Modifier = Modifier,
     selectedItem: NumberOfPeople = NumberOfPeople.UNSELECTED,
-    onItemClick: (NumberOfPeople) -> Unit = {},
+    onClickItem: (NumberOfPeople) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -68,7 +68,7 @@ private fun NumberOfPeopleBottomSheetContent(
         ) {
             NumberOfPeople.entries.drop(1).forEach { item ->
                 Row(
-                    modifier = Modifier.clickableSingle { onItemClick(item) },
+                    modifier = Modifier.clickableSingle { onClickItem(item) },
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

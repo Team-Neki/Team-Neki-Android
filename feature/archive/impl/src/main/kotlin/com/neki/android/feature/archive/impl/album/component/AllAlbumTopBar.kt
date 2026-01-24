@@ -30,29 +30,29 @@ internal fun AllAlbumTopBar(
     selectMode: SelectMode,
     showOptionPopup: Boolean,
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {},
-    onCreateClick: () -> Unit = {},
-    onOptionClick: () -> Unit = {},
+    onClickBack: () -> Unit = {},
+    onClickCreate: () -> Unit = {},
+    onClickOption: () -> Unit = {},
     onDismissPopup: () -> Unit = {},
-    onDeleteOptionClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
+    onClickDeleteOption: () -> Unit = {},
+    onClickDelete: () -> Unit = {},
 ) {
     Box {
         when (selectMode) {
             SelectMode.DEFAULT -> {
                 DefaultTopBar(
                     modifier = modifier,
-                    onBackClick = onBackClick,
-                    onCreateClick = onCreateClick,
-                    onOptionClick = onOptionClick,
+                    onClickBack = onClickBack,
+                    onClickCreate = onClickCreate,
+                    onClickOption = onClickOption,
                 )
             }
 
             SelectMode.SELECTING -> {
                 SelectingTopBar(
                     modifier = modifier,
-                    onBackClick = onBackClick,
-                    onDeleteClick = onDeleteClick,
+                    onClickBack = onClickBack,
+                    onClickDelete = onClickDelete,
                 )
             }
         }
@@ -60,7 +60,7 @@ internal fun AllAlbumTopBar(
         if (showOptionPopup) {
             OptionPopup(
                 onDismissRequest = onDismissPopup,
-                onDeleteOptionClick = onDeleteOptionClick,
+                onClickDeleteOption = onClickDeleteOption,
             )
         }
     }
@@ -69,40 +69,40 @@ internal fun AllAlbumTopBar(
 @Composable
 private fun DefaultTopBar(
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {},
-    onCreateClick: () -> Unit = {},
-    onOptionClick: () -> Unit = {},
+    onClickBack: () -> Unit = {},
+    onClickCreate: () -> Unit = {},
+    onClickOption: () -> Unit = {},
 ) {
     BackTitleTextButtonOptionTopBar(
         modifier = modifier,
         title = "모든 앨범",
         buttonLabel = "생성",
         optionIconRes = R.drawable.icon_option,
-        onBack = onBackClick,
-        onTextButtonClick = onCreateClick,
-        onIconClick = onOptionClick,
+        onBack = onClickBack,
+        onClickTextButton = onClickCreate,
+        onClickIcon = onClickOption,
     )
 }
 
 @Composable
 private fun SelectingTopBar(
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
+    onClickBack: () -> Unit = {},
+    onClickDelete: () -> Unit = {},
 ) {
     BackTitleTextButtonTopBar(
         modifier = modifier,
         title = "모든 앨범",
         buttonLabel = "삭제",
-        onBack = onBackClick,
-        onTextButtonClick = onDeleteClick,
+        onBack = onClickBack,
+        onClickTextButton = onClickDelete,
     )
 }
 
 @Composable
 private fun OptionPopup(
     onDismissRequest: () -> Unit,
-    onDeleteOptionClick: () -> Unit,
+    onClickDeleteOption: () -> Unit,
 ) {
     val density = LocalDensity.current
     val popupOffsetX = with(density) { (-20).dp.toPx().toInt() }
@@ -133,7 +133,7 @@ private fun OptionPopup(
                 modifier = Modifier
                     .width(158.dp)
                     .clickableSingle {
-                        onDeleteOptionClick()
+                        onClickDeleteOption()
                         onDismissRequest()
                     }
                     .padding(horizontal = 12.dp, vertical = 5.dp),

@@ -17,7 +17,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 internal fun PoseTopBar(
     modifier: Modifier = Modifier,
-    onIconClick: () -> Unit = {},
+    onClickIcon: () -> Unit = {},
 ) {
     NekiTopBar(
         modifier = modifier.fillMaxWidth(),
@@ -31,7 +31,7 @@ internal fun PoseTopBar(
         },
         actions = { modifier ->
             Icon(
-                modifier = modifier.clickableSingle(onClick = onIconClick),
+                modifier = modifier.clickableSingle(onClick = onClickIcon),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
                 contentDescription = null,
                 tint = Color.Unspecified,

@@ -92,8 +92,8 @@ fun PermissionScreen(
             primaryButtonText = "확인",
             properties = DialogProperties(usePlatformDefaultWidth = false),
             onDismissRequest = { onIntent(MyPageIntent.DismissPermissionDialog) },
-            onGrayButtonClick = { onIntent(MyPageIntent.DismissPermissionDialog) },
-            onPrimaryButtonClick = { onIntent(MyPageIntent.ConfirmPermissionDialog) },
+            onClickGrayButton = { onIntent(MyPageIntent.DismissPermissionDialog) },
+            onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmPermissionDialog) },
         )
     }
 }

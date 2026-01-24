@@ -27,7 +27,7 @@ fun ProfileEditTopBar(
         buttonLabel = "완료",
         enabled = enabled,
         onBack = onBack,
-        onTextButtonClick = onClickComplete,
+        onClickTextButton = onClickComplete,
     )
 }
 
