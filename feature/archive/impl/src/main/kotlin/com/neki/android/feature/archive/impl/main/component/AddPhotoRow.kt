@@ -17,7 +17,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 internal fun AddPhotoRow(
-    @DrawableRes iconResource: Int,
+    @DrawableRes iconRes: Int,
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -31,7 +31,7 @@ internal fun AddPhotoRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(iconResource),
+            imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = null,
             tint = NekiTheme.colorScheme.gray600,
         )
