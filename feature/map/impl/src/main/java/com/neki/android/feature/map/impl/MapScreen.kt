@@ -175,12 +175,13 @@ fun MapScreen(
             },
         ) {
             uiState.nearbyBrands.forEachIndexed { index, brandInfo ->
+                val isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude)
                 BrandMarker(
-                    keys = arrayOf("${brandInfo.latitude}", "${brandInfo.longitude}"),
+                    keys = arrayOf("$isFocused"),
                     latitude = brandInfo.latitude,
                     longitude = brandInfo.longitude,
                     brandImageRes = brandInfo.brandImageRes,
-                    isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude),
+                    isFocused = isFocused,
                     onClick = {
                         onIntent(MapIntent.ClickBrandMarker(latitude = brandInfo.latitude, longitude = brandInfo.longitude))
                     },
