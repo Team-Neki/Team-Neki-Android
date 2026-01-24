@@ -2,7 +2,7 @@ package com.neki.android.core.data.remote.api
 
 import com.neki.android.core.data.remote.model.request.RegisterPhotoRequest
 import com.neki.android.core.data.remote.model.response.BasicResponse
-import com.neki.android.core.data.remote.model.response.NullableResponse
+import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.PhotoResponse
 import com.neki.android.core.data.remote.model.response.RegisterPhotoResponse
 import io.ktor.client.HttpClient
@@ -36,7 +36,7 @@ class PhotoService @Inject constructor(
     }
 
     // 사진 삭제
-    suspend fun deletePhoto(photoId: Long): NullableResponse<Unit> {
+    suspend fun deletePhoto(photoId: Long): BasicNullableResponse<Unit> {
         return client.delete("/api/photos/$photoId").body()
     }
 }
