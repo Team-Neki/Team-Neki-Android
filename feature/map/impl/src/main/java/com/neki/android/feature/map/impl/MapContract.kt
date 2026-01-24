@@ -8,12 +8,13 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class MapState(
     val isLoading: Boolean = false,
-    val currentLocation: Pair<Double, Double> = Pair(0.0, 0.0),
+    val currentLocation: Pair<Double, Double>? = null,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
     val focusedMarkerPosition: Pair<Double, Double> = Pair(0.0, 0.0),
     val selectedBrandInfo: BrandInfo? = null,
+    val focusedMarkerPosition: Pair<Double, Double>? = null,
     val isShowInfoDialog: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
@@ -58,10 +59,7 @@ sealed interface MapEffect {
     data object RefreshPhotoBooth : MapEffect
     data object RefreshCurrentLocation : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
-    data class MoveCameraToPosition(
-        val latitude: Double,
-        val longitude: Double,
-    ) : MapEffect
+    data class MoveCameraToPosition(val latitude: Double, val longitude: Double) : MapEffect
 
     data class MoveDirectionApp(
         val app: DirectionApp,

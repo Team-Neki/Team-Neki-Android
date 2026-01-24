@@ -103,7 +103,11 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         reduce { copy(isShowDirectionBottomSheet = false) }
-        state.selectedBrandInfo?.let { brandInfo ->
+        if (state.currentLocation == null) {
+            postSideEffect(MapEffect.ShowToastMessage("현재 위치를 가져올 수 없습니다."))
+            return
+        }
+        state.selectedPhotoBoothInfo?.let { brandInfo ->
             postSideEffect(
                 MapEffect.MoveDirectionApp(
                     app = intent.app,
