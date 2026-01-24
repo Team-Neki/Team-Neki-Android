@@ -58,6 +58,7 @@ fun MapRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = LocalActivity.current!!
     val coroutineScope = rememberCoroutineScope()
 
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
@@ -75,6 +76,9 @@ fun MapRoute(
     }
 
     LaunchedEffect(Unit) {
+        if (!PermissionManager.hasLocationPermission(context)) {
+            viewModel.store.onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
+        }
         viewModel.store.onIntent(MapIntent.EnterMapScreen)
     }
 
@@ -225,8 +229,7 @@ fun MapScreen(
                 if (PermissionManager.hasLocationPermission(context)) {
                     onLocationTrackingModeChange(LocationTrackingMode.Follow)
                 } else {
-                    val shouldShowRationale = PermissionManager.shouldShowLocationRationale(activity)
-                    onIntent(MapIntent.RequestLocationPermission(shouldShowRationale))
+                    onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
                 }
             },
             onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
@@ -261,12 +264,17 @@ fun MapScreen(
                     if (PermissionManager.hasLocationPermission(context)) {
                         onIntent(MapIntent.ClickCurrentLocation)
                     } else {
-                        val shouldShowRationale = PermissionManager.shouldShowLocationRationale(activity)
-                        onIntent(MapIntent.RequestLocationPermission(shouldShowRationale))
+                        onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
                     }
                 },
                 onClickCloseCard = { onIntent(MapIntent.ClickCloseBrandCard) },
-                onClickDirection = { onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude)) },
+                onClickDirection = {
+                    if (PermissionManager.hasLocationPermission(context)) {
+                        onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude))
+                    } else {
+                        onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
+                    }
+                },
             )
         }
     }
