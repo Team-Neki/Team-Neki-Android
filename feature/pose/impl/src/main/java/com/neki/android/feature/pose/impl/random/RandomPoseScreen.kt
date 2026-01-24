@@ -24,6 +24,8 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.random.component.RandomPoseFloatingBarContent
 import com.neki.android.feature.pose.impl.random.component.RandomPoseTutorialOverlay
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 
 @Composable
 internal fun RandomPoseRoute(
@@ -51,13 +53,17 @@ internal fun RandomPoseScreen(
     uiState: RandomPoseUiState = RandomPoseUiState(),
     onIntent: (RandomPoseIntent) -> Unit = {},
 ) {
+    val hazeState = rememberHazeState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(NekiTheme.colorScheme.gray50),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .hazeSource(state = hazeState),
         ) {
             CloseTitleTopBar(
                 title = "랜덤포즈",
@@ -71,7 +77,9 @@ internal fun RandomPoseScreen(
                 pose = uiState.currentPose,
             )
             RandomPoseFloatingBarContent(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
                 isScrapped = uiState.currentPose.isScrapped,
                 onClickClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
                 onClickGoToDetail = { onIntent(RandomPoseIntent.ClickGoToDetailIcon) },
@@ -81,6 +89,7 @@ internal fun RandomPoseScreen(
 
         if (uiState.isShowTutorial) {
             RandomPoseTutorialOverlay(
+                hazeState = hazeState,
                 onClickStart = { onIntent(RandomPoseIntent.ClickStartRandomPose) },
             )
         }

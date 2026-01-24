@@ -28,11 +28,9 @@ internal class RandomPoseViewModel @Inject constructor(
 
     val store: MviIntentStore<RandomPoseUiState, RandomPoseIntent, RandomPoseEffect> =
         mviIntentStore(
-            initialState = RandomPoseUiState(
-                randomPoseList = dummyPoseList,
-                currentPose = dummyPoseList.firstOrNull() ?: Pose(),
-            ),
+            initialState = RandomPoseUiState(),
             onIntent = ::onIntent,
+            initialFetchData = { store.onIntent(RandomPoseIntent.EnterRandomPoseScreen) },
         )
 
     private fun onIntent(
@@ -42,7 +40,7 @@ internal class RandomPoseViewModel @Inject constructor(
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         when (intent) {
-            RandomPoseIntent.EnterRandomPoseScreen -> Unit
+            RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialData(reduce)
 
             // 튜토리얼
             RandomPoseIntent.ClickLeftSwipe -> Unit
@@ -57,9 +55,19 @@ internal class RandomPoseViewModel @Inject constructor(
                     postSideEffect(RandomPoseEffect.NavigateToDetail(state.currentPose))
                 }
             }
+
             RandomPoseIntent.ClickScrapIcon -> reduce {
                 copy(currentPose = currentPose.copy(isScrapped = !currentPose.isScrapped))
             }
+        }
+    }
+
+    private fun fetchInitialData(reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit) {
+        reduce {
+            copy(
+                randomPoseList = dummyPoseList,
+                currentPose = dummyPoseList.firstOrNull() ?: Pose(),
+            )
         }
     }
 }
