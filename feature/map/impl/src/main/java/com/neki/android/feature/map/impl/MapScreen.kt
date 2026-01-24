@@ -65,6 +65,9 @@ fun MapRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
+            is MapEffect.RefreshPhotoBooth -> {
+                // TODO: 포토부스 새로고침 로직 구현
+            }
             is MapEffect.RefreshCurrentLocation -> {
                 locationTrackingMode = LocationTrackingMode.Follow
             }
@@ -122,21 +125,6 @@ fun MapRoute(
         onLocationTrackingModeChange = { locationTrackingMode = it },
         cameraPositionState = cameraPositionState,
     )
-
-    if (uiState.isShowInfoDialog) {
-        WarningDialog(
-            content = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
-            onDismissRequest = { viewModel.store.onIntent(MapIntent.ClickCloseInfoIcon) },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        )
-    }
-
-    if (uiState.isShowDirectionBottomSheet) {
-        DirectionBottomSheet(
-            onDismissRequest = { viewModel.store.onIntent(MapIntent.CloseDirectionBottomSheet) },
-            onClickDirectionItem = { viewModel.store.onIntent(MapIntent.ClickDirectionItem(it)) },
-        )
-    }
 }
 
 @OptIn(ExperimentalNaverMapApi::class)
@@ -206,12 +194,15 @@ fun MapScreen(
             onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) },
         )
 
-        if (uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) {
+        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) &&
+            locationTrackingMode != LocationTrackingMode.Follow
+        ) {
             MapRefreshChip(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
                     .padding(top = 12.dp),
+                onClick = { onIntent(MapIntent.ClickRefresh) },
             )
         }
 
@@ -232,6 +223,21 @@ fun MapScreen(
                 onClickDirection = { onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude)) },
             )
         }
+    }
+
+    if (uiState.isShowInfoDialog) {
+        WarningDialog(
+            content = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
+            onDismissRequest = { onIntent(MapIntent.ClickCloseInfoIcon) },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        )
+    }
+
+    if (uiState.isShowDirectionBottomSheet) {
+        DirectionBottomSheet(
+            onDismissRequest = { onIntent(MapIntent.CloseDirectionBottomSheet) },
+            onClickDirectionItem = { onIntent(MapIntent.ClickDirectionItem(it)) },
+        )
     }
 }
 

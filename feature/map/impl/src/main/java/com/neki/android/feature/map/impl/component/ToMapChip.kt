@@ -30,9 +30,13 @@ internal fun ToMapChip(
 ) {
     Row(
         modifier = modifier
-            .noRippleClickableSingle(onClick = onClick)
             .buttonShadow()
-            .background(shape = CircleShape, color = NekiTheme.colorScheme.gray800)
+            .clip(CircleShape)
+            .clickableSingle(onClick = onClick)
+            .background(
+                shape = CircleShape,
+                color = NekiTheme.colorScheme.gray800
+            )
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,

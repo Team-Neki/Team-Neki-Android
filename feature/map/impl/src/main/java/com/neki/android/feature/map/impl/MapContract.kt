@@ -32,6 +32,8 @@ sealed interface MapIntent {
         val longitude: Double,
     ) : MapIntent
 
+    data object ClickRefresh : MapIntent
+
     // in 패널
     data object ClickCurrentLocation : MapIntent
     data object ClickInfoIcon : MapIntent
@@ -46,6 +48,7 @@ sealed interface MapIntent {
 }
 
 sealed interface MapEffect {
+    data object RefreshPhotoBooth : MapEffect
     data object RefreshCurrentLocation : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
     data class MoveCameraToPosition(

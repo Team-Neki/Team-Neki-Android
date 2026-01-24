@@ -31,6 +31,10 @@ class MapViewModel @Inject constructor() : ViewModel() {
                 loadBrands(reduce)
             }
 
+            MapIntent.ClickRefresh -> {
+                postSideEffect(MapEffect.RefreshPhotoBooth)
+            }
+
             MapIntent.ClickCurrentLocation -> {
                 postSideEffect(MapEffect.RefreshCurrentLocation)
             }

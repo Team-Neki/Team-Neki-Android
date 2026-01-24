@@ -31,8 +31,9 @@ internal fun MapRefreshChip(
 ) {
     Row(
         modifier = modifier
-            .noRippleClickableSingle(onClick = onClick)
             .buttonShadow()
+            .clip(CircleShape)
+            .clickableSingle(onClick = onClick)
             .background(
                 shape = CircleShape,
                 color = NekiTheme.colorScheme.white
