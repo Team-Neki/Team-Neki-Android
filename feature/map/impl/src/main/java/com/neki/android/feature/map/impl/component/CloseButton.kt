@@ -17,7 +17,6 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.buttonShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.BrandInfo
 
 @Composable
 internal fun CloseButton(
