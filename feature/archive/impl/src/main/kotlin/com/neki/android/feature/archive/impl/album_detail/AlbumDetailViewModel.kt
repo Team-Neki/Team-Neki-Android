@@ -71,14 +71,14 @@ class AlbumDetailViewModel @AssistedInject constructor(
             AlbumDetailIntent.ClickDeleteIcon -> handleDeleteIconClick(state, reduce, postSideEffect)
 
             // Delete Dialog Intent (for Favorite Album)
-            AlbumDetailIntent.DismissDeleteDialog -> reduce { copy(showDeleteDialog = false) }
-            AlbumDetailIntent.ClickDeleteDialogCancelButton -> reduce { copy(showDeleteDialog = false) }
+            AlbumDetailIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
+            AlbumDetailIntent.ClickDeleteDialogCancelButton -> reduce { copy(isShowDeleteDialog = false) }
             AlbumDetailIntent.ClickDeleteDialogConfirmButton -> handleFavoriteDelete(state, reduce, postSideEffect)
 
             // Delete BottomSheet Intent (for Regular Album)
-            AlbumDetailIntent.DismissDeleteBottomSheet -> reduce { copy(showDeleteBottomSheet = false) }
+            AlbumDetailIntent.DismissDeleteBottomSheet -> reduce { copy(isShowDeleteBottomSheet = false) }
             is AlbumDetailIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
-            AlbumDetailIntent.ClickDeleteBottomSheetCancelButton -> reduce { copy(showDeleteBottomSheet = false) }
+            AlbumDetailIntent.ClickDeleteBottomSheetCancelButton -> reduce { copy(isShowDeleteBottomSheet = false) }
             AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumDelete(state, reduce, postSideEffect)
         }
     }
@@ -161,9 +161,9 @@ class AlbumDetailViewModel @AssistedInject constructor(
         }
 
         if (state.isFavoriteAlbum) {
-            reduce { copy(showDeleteDialog = true) }
+            reduce { copy(isShowDeleteDialog = true) }
         } else {
-            reduce { copy(showDeleteBottomSheet = true) }
+            reduce { copy(isShowDeleteBottomSheet = true) }
         }
     }
 
@@ -182,7 +182,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 ),
                 selectedPhotos = persistentListOf(),
                 selectMode = SelectMode.DEFAULT,
-                showDeleteDialog = false,
+                isShowDeleteDialog = false,
             )
         }
         postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
@@ -203,7 +203,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 ),
                 selectedPhotos = persistentListOf(),
                 selectMode = SelectMode.DEFAULT,
-                showDeleteBottomSheet = false,
+                isShowDeleteBottomSheet = false,
             )
         }
 

@@ -20,7 +20,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 internal fun AlbumTitleRow(
     modifier: Modifier = Modifier,
-    onShowAllAlbumClick: () -> Unit = {},
+    onClickShowAllAlbum: () -> Unit = {},
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -33,7 +33,7 @@ internal fun AlbumTitleRow(
             color = NekiTheme.colorScheme.gray900,
         )
         NekiTextButton(
-            onClick = onShowAllAlbumClick,
+            onClick = onClickShowAllAlbum,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

@@ -67,12 +67,12 @@ fun PoseScreen(
     ) {
         PoseContent(
             selectedNumberOfPeople = uiState.selectedNumberOfPeople,
-            isScrapSelected = uiState.showScrappedPose,
-            poseList = if (uiState.showScrappedPose) uiState.scrappedPoseList else uiState.randomPoseList,
-            onAlarmIconClick = { onIntent(PoseIntent.ClickAlarmIcon) },
-            onNumberOfPeopleClick = { onIntent(PoseIntent.ClickNumberOfPeopleChip) },
-            onScrapClick = { onIntent(PoseIntent.ClickScrapChip) },
-            onPoseItemClick = { onIntent(PoseIntent.ClickPoseItem(it)) },
+            isScrapSelected = uiState.isShowScrappedPose,
+            poseList = if (uiState.isShowScrappedPose) uiState.scrappedPoseList else uiState.randomPoseList,
+            onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
+            onClickNumberOfPeople = { onIntent(PoseIntent.ClickNumberOfPeopleChip) },
+            onClickScrap = { onIntent(PoseIntent.ClickScrapChip) },
+            onClickPoseItem = { onIntent(PoseIntent.ClickPoseItem(it)) },
         )
 
         RecommendationChip(
@@ -83,11 +83,11 @@ fun PoseScreen(
         )
     }
 
-    if (uiState.showNumberOfPeopleBottomSheet) {
+    if (uiState.isShowNumberOfPeopleBottomSheet) {
         NumberOfPeopleBottomSheet(
             selectedItem = uiState.selectedNumberOfPeople,
             onDismissRequest = { onIntent(PoseIntent.DismissNumberOfPeopleBottomSheet) },
-            onItemClick = { onIntent(PoseIntent.ClickNumberOfPeopleSheetItem(it)) },
+            onClickItem = { onIntent(PoseIntent.ClickNumberOfPeopleSheetItem(it)) },
         )
     }
 }
@@ -98,10 +98,10 @@ fun PoseContent(
     selectedNumberOfPeople: NumberOfPeople,
     isScrapSelected: Boolean,
     poseList: ImmutableList<Pose>,
-    onAlarmIconClick: () -> Unit = {},
-    onNumberOfPeopleClick: () -> Unit = {},
-    onScrapClick: () -> Unit = {},
-    onPoseItemClick: (Pose) -> Unit = {},
+    onClickAlarmIcon: () -> Unit = {},
+    onClickNumberOfPeople: () -> Unit = {},
+    onClickScrap: () -> Unit = {},
+    onClickPoseItem: (Pose) -> Unit = {},
 ) {
     val lazyState = rememberLazyStaggeredGridState()
     val density = LocalDensity.current
@@ -118,7 +118,7 @@ fun PoseContent(
         modifier = modifier.fillMaxSize(),
     ) {
         PoseTopBar(
-            onIconClick = onAlarmIconClick,
+            onClickIcon = onClickAlarmIcon,
         )
         Box(
             modifier = Modifier
@@ -129,7 +129,7 @@ fun PoseContent(
                 topPadding = topPadding + POSE_LAYOUT_DEFAULT_TOP_PADDING.dp,
                 poseList = poseList,
                 state = lazyState,
-                onItemClick = onPoseItemClick,
+                onClickItem = onClickPoseItem,
             )
             FilterBar(
                 modifier = Modifier
@@ -140,8 +140,8 @@ fun PoseContent(
                 numberOfPeople = selectedNumberOfPeople,
                 isScrapSelected = isScrapSelected,
                 visible = showFilterBar,
-                onNumberOfPeopleClick = onNumberOfPeopleClick,
-                onScrapClick = onScrapClick,
+                onClickNumberOfPeople = onClickNumberOfPeople,
+                onClickScrap = onClickScrap,
             )
         }
     }

@@ -76,7 +76,7 @@ fun BottomNavigationBarItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    val icon = if (selected) tab.selectedIcon else tab.unselectedIcon
+    val icon = if (selected) tab.selectedIconRes else tab.unselectedIconRes
     val iconColor = if (selected) NekiTheme.colorScheme.gray800 else NekiTheme.colorScheme.gray200
     val textColor = if (selected) NekiTheme.colorScheme.gray800 else NekiTheme.colorScheme.gray500
 
@@ -93,11 +93,11 @@ fun BottomNavigationBarItem(
             Icon(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(icon),
-                contentDescription = stringResource(tab.iconTextId),
+                contentDescription = stringResource(tab.iconStringRes),
                 tint = iconColor,
             )
             Text(
-                text = stringResource(tab.iconTextId),
+                text = stringResource(tab.iconStringRes),
                 color = textColor,
                 style = NekiTheme.typography.caption11SemiBold,
             )

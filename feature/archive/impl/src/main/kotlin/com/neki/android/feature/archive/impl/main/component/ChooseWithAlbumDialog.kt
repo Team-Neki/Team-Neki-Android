@@ -20,8 +20,8 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 internal fun ChooseWithAlbumDialog(
     onDismissRequest: () -> Unit = {},
-    onUploadWithOutAlbumClick: () -> Unit = {},
-    onUploadWithAlbumClick: () -> Unit = {},
+    onClickUploadWithOutAlbum: () -> Unit = {},
+    onClickUploadWithAlbum: () -> Unit = {},
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -38,7 +38,7 @@ internal fun ChooseWithAlbumDialog(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickableSingle(onClick = onUploadWithOutAlbumClick)
+                    .clickableSingle(onClick = onClickUploadWithOutAlbum)
                     .padding(vertical = 14.dp),
                 text = "앨범 없이 업로드하기",
                 style = NekiTheme.typography.body16SemiBold,
@@ -48,7 +48,7 @@ internal fun ChooseWithAlbumDialog(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickableSingle(onClick = onUploadWithAlbumClick)
+                    .clickableSingle(onClick = onClickUploadWithAlbum)
                     .padding(vertical = 14.dp),
                 text = "앨범 선택 후 업로드하기",
                 style = NekiTheme.typography.body16SemiBold,

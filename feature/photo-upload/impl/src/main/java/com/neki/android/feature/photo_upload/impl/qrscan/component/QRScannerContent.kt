@@ -39,8 +39,8 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 internal fun QRScannerContent(
     modifier: Modifier = Modifier,
     isTorchEnabled: Boolean = false,
-    onTorchClick: () -> Unit = {},
-    onCloseClick: () -> Unit = {},
+    onClickTorch: () -> Unit = {},
+    onClickClose: () -> Unit = {},
     onQRCodeScanned: (String) -> Unit = {},
 ) {
     val cutoutSize = LocalConfiguration.current.screenWidthDp.dp * 0.82f
@@ -83,9 +83,10 @@ internal fun QRScannerContent(
         ) {
             IconButton(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
-                onClick = onCloseClick,
+                onClick = onClickClose,
             ) {
                 Icon(
+                    modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                     contentDescription = null,
                     tint = Color.White,
@@ -128,7 +129,7 @@ internal fun QRScannerContent(
                     if (isTorchEnabled) Color.White
                     else Color.White.copy(alpha = 0.1f),
                 ),
-            onClick = onTorchClick,
+            onClick = onClickTorch,
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.icon_qr_light),

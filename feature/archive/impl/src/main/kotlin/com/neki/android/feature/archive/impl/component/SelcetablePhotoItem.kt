@@ -29,9 +29,9 @@ internal fun SelectablePhotoItem(
     isSelected: Boolean,
     isSelectMode: Boolean = false,
     modifier: Modifier = Modifier,
-    onItemClick: (Photo) -> Unit = {},
-    onSelectClick: (Photo) -> Unit = {},
-    onFavoriteClick: (Photo) -> Unit = {},
+    onClickItem: (Photo) -> Unit = {},
+    onClickSelect: (Photo) -> Unit = {},
+    onClickFavorite: (Photo) -> Unit = {},
 ) {
     PhotoComponent(
         photo = photo,
@@ -49,7 +49,7 @@ internal fun SelectablePhotoItem(
                 .clip(RoundedCornerShape(12.dp))
                 .photoBackground(),
         ),
-        onItemClick = onItemClick,
+        onClickItem = onClickItem,
     ) {
         if (isSelectMode) {
             SelectionCheckbox(
@@ -57,7 +57,7 @@ internal fun SelectablePhotoItem(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(top = 12.dp, start = 12.dp)
-                    .noRippleClickable { onSelectClick(photo) },
+                    .noRippleClickable { onClickSelect(photo) },
                 unselectedColor = NekiTheme.colorScheme.white.copy(alpha = 0.2f),
             )
         }
@@ -68,10 +68,10 @@ internal fun SelectablePhotoItem(
                     .align(Alignment.TopEnd)
                     .padding(top = 10.dp, end = 10.dp)
                     .size(20.dp)
-                    .noRippleClickable { onFavoriteClick(photo) },
-                imageVector = ImageVector.vectorResource(R.drawable.icon_heart_white_20),
+                    .noRippleClickable { onClickFavorite(photo) },
+                imageVector = ImageVector.vectorResource(R.drawable.icon_heart),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = NekiTheme.colorScheme.white,
             )
         }
     }

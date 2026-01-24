@@ -56,9 +56,9 @@ fun SelectionCheckbox(
         if (isSelected) {
             Icon(
                 modifier = Modifier.size(iconSize),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_check_white),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = NekiTheme.colorScheme.white,
             )
         }
     }

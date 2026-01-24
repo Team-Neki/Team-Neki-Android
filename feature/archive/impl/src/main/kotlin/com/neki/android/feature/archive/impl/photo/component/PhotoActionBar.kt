@@ -26,8 +26,8 @@ internal fun PhotoActionBar(
     visible: Boolean,
     isEnabled: Boolean,
     modifier: Modifier = Modifier,
-    onDownloadClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
+    onClickDownload: () -> Unit = {},
+    onClickDelete: () -> Unit = {},
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -53,7 +53,7 @@ internal fun PhotoActionBar(
                 Icon(
                     modifier = Modifier.noRippleClickableSingle(
                         enabled = isEnabled,
-                        onClick = onDownloadClick,
+                        onClick = onClickDownload,
                     ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_download),
                     contentDescription = null,
@@ -62,7 +62,7 @@ internal fun PhotoActionBar(
                 Icon(
                     modifier = Modifier.noRippleClickableSingle(
                         enabled = isEnabled,
-                        onClick = onDeleteClick,
+                        onClick = onClickDelete,
                     ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
                     contentDescription = null,

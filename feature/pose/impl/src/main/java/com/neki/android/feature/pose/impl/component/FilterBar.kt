@@ -32,8 +32,8 @@ internal fun FilterBar(
     isScrapSelected: Boolean,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
-    onNumberOfPeopleClick: () -> Unit = {},
-    onScrapClick: () -> Unit = {},
+    onClickNumberOfPeople: () -> Unit = {},
+    onClickScrap: () -> Unit = {},
 ) {
     AnimatedVisibility(
         modifier = modifier
@@ -50,11 +50,11 @@ internal fun FilterBar(
         ) {
             NumberOfPeopleFilter(
                 numberOfPeople = numberOfPeople,
-                onClick = onNumberOfPeopleClick,
+                onClick = onClickNumberOfPeople,
             )
             ScrapFilter(
                 isSelected = isScrapSelected,
-                onClick = onScrapClick,
+                onClick = onClickScrap,
             )
         }
     }

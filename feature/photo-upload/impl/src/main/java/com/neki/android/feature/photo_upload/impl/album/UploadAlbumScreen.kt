@@ -65,16 +65,13 @@ internal fun UploadAlbumScreen(
     ) {
         UploadAlbumTopBar(
             count = uiState.count,
-            onBackClick = { onIntent(UploadAlbumIntent.ClickBackIcon) },
-            onUploadClick = { onIntent(UploadAlbumIntent.ClickUploadButton) },
+            onClickBack = { onIntent(UploadAlbumIntent.ClickBackIcon) },
+            onClickUpload = { onIntent(UploadAlbumIntent.ClickUploadButton) },
         )
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                horizontal = 20.dp,
-                vertical = 8.dp,
-            ),
+            contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item {

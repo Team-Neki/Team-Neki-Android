@@ -10,16 +10,16 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 internal fun UploadAlbumTopBar(
     count: Int,
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {},
-    onUploadClick: () -> Unit = {},
+    onClickBack: () -> Unit = {},
+    onClickUpload: () -> Unit = {},
 ) {
     BackTitleTextButtonTopBar(
         modifier = modifier,
         title = "모든 앨범",
         buttonLabel = "${count}장 업로드",
         enabled = count != 0,
-        onBack = onBackClick,
-        onTextButtonClick = onUploadClick,
+        onBack = onClickBack,
+        onClickTextButton = onClickUpload,
     )
 }
 

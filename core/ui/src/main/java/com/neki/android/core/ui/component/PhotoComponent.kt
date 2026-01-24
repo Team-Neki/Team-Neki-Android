@@ -21,13 +21,13 @@ import com.neki.android.core.model.Photo
 fun PhotoComponent(
     photo: Photo,
     modifier: Modifier = Modifier,
-    onItemClick: (Photo) -> Unit = {},
+    onClickItem: (Photo) -> Unit = {},
     additionalContent: @Composable BoxScope.() -> Unit = {},
 ) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .noRippleClickable { onItemClick(photo) },
+            .noRippleClickable { onClickItem(photo) },
     ) {
         AsyncImage(
             modifier = Modifier

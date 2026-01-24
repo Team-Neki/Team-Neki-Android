@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -14,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -36,8 +36,9 @@ fun FavoriteAlbumRowComponent(
 ) {
     Row(
         modifier = modifier
+            .noRippleClickable(onClick = onClick)
             .fillMaxWidth()
-            .noRippleClickable { onClick() },
+            .padding(vertical = 10.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -62,8 +63,9 @@ fun AlbumRowComponent(
 ) {
     Row(
         modifier = modifier
+            .noRippleClickable(onClick = onClick)
             .fillMaxWidth()
-            .noRippleClickable { onClick() },
+            .padding(vertical = 10.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -111,9 +113,9 @@ private fun FavoriteAlbumThumbnail(
 
         Icon(
             modifier = Modifier.size(20.dp),
-            imageVector = ImageVector.vectorResource(R.drawable.icon_heart_white_20),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_heart),
             contentDescription = null,
-            tint = Color.Unspecified,
+            tint = NekiTheme.colorScheme.white,
         )
     }
 }

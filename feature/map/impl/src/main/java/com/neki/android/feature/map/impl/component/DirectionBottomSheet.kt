@@ -29,14 +29,14 @@ internal fun DirectionBottomSheet(
         dragHandle = { BottomSheetDragHandle() },
     ) {
         DirectionBottomSheetContent(
-            onItemClick = onClickDirectionItem,
+            onClickItem = onClickDirectionItem,
         )
     }
 }
 
 @Composable
 private fun DirectionBottomSheetContent(
-    onItemClick: (DirectionApp) -> Unit = {},
+    onClickItem: (DirectionApp) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -57,15 +57,15 @@ private fun DirectionBottomSheetContent(
         ) {
             DirectionItem(
                 app = DirectionApp.GOOGLE_MAP,
-                onClickItem = { onItemClick(DirectionApp.GOOGLE_MAP) },
+                onClickItem = { onClickItem(DirectionApp.GOOGLE_MAP) },
             )
             DirectionItem(
                 app = DirectionApp.NAVER_MAP,
-                onClickItem = { onItemClick(DirectionApp.NAVER_MAP) },
+                onClickItem = { onClickItem(DirectionApp.NAVER_MAP) },
             )
             DirectionItem(
                 app = DirectionApp.KAKAO_MAP,
-                onClickItem = { onItemClick(DirectionApp.KAKAO_MAP) },
+                onClickItem = { onClickItem(DirectionApp.KAKAO_MAP) },
             )
         }
         VerticalSpacer(34.dp)

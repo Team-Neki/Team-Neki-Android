@@ -41,16 +41,16 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
             }
 
             // Filter Intent
-            AllPhotoIntent.ClickFilterChip -> reduce { copy(showFilterDialog = true) }
-            AllPhotoIntent.DismissFilterPopup -> reduce { copy(showFilterDialog = false) }
+            AllPhotoIntent.ClickFilterChip -> reduce { copy(isShowFilterDialog = true) }
+            AllPhotoIntent.DismissFilterPopup -> reduce { copy(isShowFilterDialog = false) }
             AllPhotoIntent.ClickFavoriteFilterChip -> handleFavoriteFilter(state, reduce)
             is AllPhotoIntent.ClickFilterPopupRow -> handleFilterRow(intent.filter, reduce, postSideEffect)
 
             // Photo Intent
             is AllPhotoIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, state, reduce, postSideEffect)
             AllPhotoIntent.ClickDownloadIcon -> downloadSelectedPhotos(state, postSideEffect)
-            AllPhotoIntent.ClickDeleteIcon -> reduce { copy(showDeleteDialog = true) }
-            AllPhotoIntent.DismissDeleteDialog -> reduce { copy(showDeleteDialog = false) }
+            AllPhotoIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
+            AllPhotoIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
             AllPhotoIntent.ClickDeleteDialogConfirmButton -> deleteSelectedPhotos(state, reduce, postSideEffect)
         }
     }
@@ -139,7 +139,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
                 PhotoFilter.OLDEST -> photos.sortedBy { it.date }
             }.filter { if (isFavoriteChipSelected) it.isFavorite else true }.toImmutableList()
             copy(
-                showFilterDialog = false,
+                isShowFilterDialog = false,
                 selectedPhotoFilter = filter,
                 showingPhotos = sortedPhotos,
             )
@@ -199,7 +199,7 @@ class AllPhotoViewModel @Inject constructor() : ViewModel() {
                 photos = photos.filter { photo -> selectedPhotos.none { it.id == photo.id } }.toImmutableList(),
                 selectedPhotos = persistentListOf(),
                 selectMode = SelectMode.DEFAULT,
-                showDeleteDialog = false,
+                isShowDeleteDialog = false,
             )
         }
         postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 삭제했어요"))

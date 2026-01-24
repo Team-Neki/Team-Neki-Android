@@ -30,12 +30,12 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 internal fun VerticalBrandItem(
     brand: Brand,
     modifier: Modifier = Modifier,
-    onItemClick: () -> Unit = {},
+    onClickItem: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .width(66.dp)
-            .noRippleClickable { onItemClick() },
+            .noRippleClickable { onClickItem() },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
@@ -60,9 +60,9 @@ internal fun VerticalBrandItem(
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_check_white),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                         contentDescription = null,
-                        tint = Color.Unspecified,
+                        tint = NekiTheme.colorScheme.white,
                     )
                 }
             }

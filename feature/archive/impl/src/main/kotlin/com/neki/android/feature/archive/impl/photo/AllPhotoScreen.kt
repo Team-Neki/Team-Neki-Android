@@ -113,9 +113,9 @@ internal fun AllPhotoScreen(
     ) {
         AllPhotoTopBar(
             selectMode = uiState.selectMode,
-            onBackClick = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
-            onSelectClick = { onIntent(AllPhotoIntent.ClickTopBarSelectIcon) },
-            onCancelClick = { onIntent(AllPhotoIntent.ClickTopBarCancelIcon) },
+            onClickBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
+            onClickSelect = { onIntent(AllPhotoIntent.ClickTopBarSelectIcon) },
+            onClickCancel = { onIntent(AllPhotoIntent.ClickTopBarCancelIcon) },
         )
 
         Box(
@@ -145,14 +145,14 @@ internal fun AllPhotoScreen(
                         photo = photo,
                         isSelected = isSelected,
                         isSelectMode = uiState.selectMode == SelectMode.SELECTING,
-                        onItemClick = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
-                        onSelectClick = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
+                        onClickItem = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
+                        onClickSelect = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
                     )
                 }
             }
 
             AllPhotoFilterBar(
-                showFilterPopup = uiState.showFilterDialog,
+                showFilterPopup = uiState.isShowFilterDialog,
                 modifier = Modifier
                     .onSizeChanged { size ->
                         if (filterBarHeightPx != 0) return@onSizeChanged
@@ -161,26 +161,26 @@ internal fun AllPhotoScreen(
                 selectedFilter = uiState.selectedPhotoFilter,
                 isFavoriteSelected = uiState.isFavoriteChipSelected,
                 visible = uiState.selectMode == SelectMode.DEFAULT && showFilterBar,
-                onSortChipClick = { onIntent(AllPhotoIntent.ClickFilterChip) },
-                onFavoriteChipClick = { onIntent(AllPhotoIntent.ClickFavoriteFilterChip) },
+                onClickSortChip = { onIntent(AllPhotoIntent.ClickFilterChip) },
+                onClickFavoriteChip = { onIntent(AllPhotoIntent.ClickFavoriteFilterChip) },
                 onDismissPopup = { onIntent(AllPhotoIntent.DismissFilterPopup) },
-                onFilterRowClick = { onIntent(AllPhotoIntent.ClickFilterPopupRow(it)) },
+                onClickFilterRow = { onIntent(AllPhotoIntent.ClickFilterPopupRow(it)) },
             )
         }
 
         PhotoActionBar(
             visible = uiState.selectMode == SelectMode.SELECTING,
             isEnabled = uiState.selectedPhotos.isNotEmpty(),
-            onDownloadClick = { onIntent(AllPhotoIntent.ClickDownloadIcon) },
-            onDeleteClick = { onIntent(AllPhotoIntent.ClickDeleteIcon) },
+            onClickDownload = { onIntent(AllPhotoIntent.ClickDownloadIcon) },
+            onClickDelete = { onIntent(AllPhotoIntent.ClickDeleteIcon) },
         )
     }
 
-    if (uiState.showDeleteDialog) {
+    if (uiState.isShowDeleteDialog) {
         DeletePhotoDialog(
             onDismissRequest = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
-            onDeleteClick = { onIntent(AllPhotoIntent.ClickDeleteDialogConfirmButton) },
-            onCancelClick = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
+            onClickDelete = { onIntent(AllPhotoIntent.ClickDeleteDialogConfirmButton) },
+            onClickCancel = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
         )
     }
 }

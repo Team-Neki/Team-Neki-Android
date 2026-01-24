@@ -15,11 +15,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.mypage.impl.main.component.MainTopBar
-import com.neki.android.feature.mypage.impl.main.component.ProfileCard
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
+import com.neki.android.feature.mypage.impl.main.component.MainTopBar
+import com.neki.android.feature.mypage.impl.main.component.ProfileCard
 
 @Composable
 internal fun MyPageRoute(

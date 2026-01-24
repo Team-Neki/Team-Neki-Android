@@ -15,9 +15,9 @@ data class ArchiveMainState(
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
     val scannedImageUrl: String? = null,
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
-    val showAddDialog: Boolean = false,
-    val showChooseWithAlbumDialog: Boolean = false,
-    val showAddAlbumBottomSheet: Boolean = false,
+    val isShowAddDialog: Boolean = false,
+    val isShowChooseWithAlbumDialog: Boolean = false,
+    val isShowAddAlbumBottomSheet: Boolean = false,
 ) {
     val uploadType: UploadType
         get() = if (scannedImageUrl == null) UploadType.GALLERY else UploadType.QR_SCAN

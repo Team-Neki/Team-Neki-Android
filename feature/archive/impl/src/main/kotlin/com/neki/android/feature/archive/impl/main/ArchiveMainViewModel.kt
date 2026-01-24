@@ -44,7 +44,7 @@ class ArchiveMainViewModel @Inject constructor(
             is ArchiveMainIntent.QRCodeScanned -> reduce {
                 copy(
                     scannedImageUrl = intent.imageUrl,
-                    showChooseWithAlbumDialog = true,
+                    isShowChooseWithAlbumDialog = true,
                 )
             }
 
@@ -53,30 +53,30 @@ class ArchiveMainViewModel @Inject constructor(
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
             // TopBar Intent
-            ArchiveMainIntent.ClickAddIcon -> reduce { copy(showAddDialog = true) }
-            ArchiveMainIntent.DismissAddDialog -> reduce { copy(showAddDialog = false) }
+            ArchiveMainIntent.ClickAddIcon -> reduce { copy(isShowAddDialog = true) }
+            ArchiveMainIntent.DismissAddDialog -> reduce { copy(isShowAddDialog = false) }
             ArchiveMainIntent.ClickQRScanRow -> {
-                reduce { copy(showAddDialog = false) }
+                reduce { copy(isShowAddDialog = false) }
                 postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
             }
 
             ArchiveMainIntent.ClickGalleryUploadRow -> {
-                reduce { copy(showAddDialog = false) }
+                reduce { copy(isShowAddDialog = false) }
                 postSideEffect(ArchiveMainSideEffect.OpenGallery)
             }
 
             is ArchiveMainIntent.SelectGalleryImage -> reduce {
                 copy(
-                    showChooseWithAlbumDialog = true,
+                    isShowChooseWithAlbumDialog = true,
                     selectedUris = intent.uris.toImmutableList(),
                 )
             }
 
-            ArchiveMainIntent.DismissChooseWithAlbumDialog -> reduce { copy(showChooseWithAlbumDialog = false) }
+            ArchiveMainIntent.DismissChooseWithAlbumDialog -> reduce { copy(isShowChooseWithAlbumDialog = false) }
             ArchiveMainIntent.ClickUploadWithAlbumRow -> {
                 reduce {
                     copy(
-                        showChooseWithAlbumDialog = false,
+                        isShowChooseWithAlbumDialog = false,
                         scannedImageUrl = null,
                         selectedUris = persistentListOf(),
                     )
@@ -90,8 +90,8 @@ class ArchiveMainViewModel @Inject constructor(
 
             ArchiveMainIntent.ClickAddNewAlbumRow -> reduce {
                 copy(
-                    showAddDialog = false,
-                    showAddAlbumBottomSheet = true,
+                    isShowAddDialog = false,
+                    isShowAddAlbumBottomSheet = true,
                 )
             }
 
@@ -107,7 +107,7 @@ class ArchiveMainViewModel @Inject constructor(
             is ArchiveMainIntent.ClickPhotoItem -> postSideEffect(ArchiveMainSideEffect.NavigateToPhotoDetail(intent.photo))
 
             // Add Album BottomSheet Intent
-            ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(showAddAlbumBottomSheet = false) }
+            ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
             is ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(intent.albumName, reduce, postSideEffect)
         }
     }
@@ -183,7 +183,7 @@ class ArchiveMainViewModel @Inject constructor(
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
-        reduce { copy(showChooseWithAlbumDialog = false) }
+        reduce { copy(isShowChooseWithAlbumDialog = false) }
         val onSuccessSideEffect = {
             postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
         }
@@ -260,7 +260,7 @@ class ArchiveMainViewModel @Inject constructor(
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
         // TODO: Add album to repository
-        reduce { copy(showAddAlbumBottomSheet = false) }
+        reduce { copy(isShowAddAlbumBottomSheet = false) }
         postSideEffect(ArchiveMainSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
     }
 }

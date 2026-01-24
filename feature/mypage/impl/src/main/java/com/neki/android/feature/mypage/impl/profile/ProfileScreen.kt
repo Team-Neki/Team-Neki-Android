@@ -122,8 +122,8 @@ fun ProfileScreen(
             primaryButtonText = "확인",
             properties = DialogProperties(usePlatformDefaultWidth = false),
             onDismissRequest = { onIntent(MyPageIntent.DismissLogoutDialog) },
-            onGrayButtonClick = { onIntent(MyPageIntent.DismissLogoutDialog) },
-            onPrimaryButtonClick = { onIntent(MyPageIntent.ConfirmLogout) },
+            onClickGrayButton = { onIntent(MyPageIntent.DismissLogoutDialog) },
+            onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmLogout) },
         )
     }
 
@@ -135,8 +135,8 @@ fun ProfileScreen(
             primaryButtonText = "탈퇴 확정",
             properties = DialogProperties(usePlatformDefaultWidth = false),
             onDismissRequest = { onIntent(MyPageIntent.DismissSignOutDialog) },
-            onGrayButtonClick = { onIntent(MyPageIntent.DismissSignOutDialog) },
-            onPrimaryButtonClick = { onIntent(MyPageIntent.ConfirmSignOut) },
+            onClickGrayButton = { onIntent(MyPageIntent.DismissSignOutDialog) },
+            onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmSignOut) },
         )
     }
 }

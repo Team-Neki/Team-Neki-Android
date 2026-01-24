@@ -32,7 +32,7 @@ internal fun PoseListContent(
     modifier: Modifier = Modifier,
     poseList: ImmutableList<Pose> = persistentListOf(),
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
-    onItemClick: (Pose) -> Unit = {},
+    onClickItem: (Pose) -> Unit = {},
 ) {
     LazyVerticalStaggeredGrid(
         modifier = modifier
@@ -47,7 +47,7 @@ internal fun PoseListContent(
         items(poseList) { pose ->
             PoseItem(
                 pose = pose,
-                onItemClick = onItemClick,
+                onClickItem = onClickItem,
             )
         }
     }
@@ -57,12 +57,12 @@ internal fun PoseListContent(
 private fun PoseItem(
     pose: Pose,
     modifier: Modifier = Modifier,
-    onItemClick: (Pose) -> Unit = {},
+    onClickItem: (Pose) -> Unit = {},
 ) {
     AsyncImage(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .noRippleClickable { onItemClick(pose) },
+            .noRippleClickable { onClickItem(pose) },
         model = pose.poseImageUrl,
         contentDescription = null,
         contentScale = ContentScale.FillWidth,
