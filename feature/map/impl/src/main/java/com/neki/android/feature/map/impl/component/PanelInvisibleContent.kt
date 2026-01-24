@@ -77,7 +77,7 @@ internal fun BrandCardCloseButton(
             modifier = Modifier.size(20.dp),
             imageVector = ImageVector.vectorResource(R.drawable.icon_close),
             contentDescription = null,
-            tint = NekiTheme.colorScheme.white,
+            tint = NekiTheme.colorScheme.gray800,
         )
     }
 }
