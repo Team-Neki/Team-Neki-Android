@@ -80,7 +80,7 @@ internal fun PoseDetailScreen(
         NekiIconButton(
             modifier = Modifier
                 .align(Alignment.End)
-                .padding(vertical = 1.dp, horizontal = 8.dp),
+                .padding(8.dp),
             onClick = { onIntent(PoseDetailIntent.ClickScrapIcon) },
         ) {
             Icon(
