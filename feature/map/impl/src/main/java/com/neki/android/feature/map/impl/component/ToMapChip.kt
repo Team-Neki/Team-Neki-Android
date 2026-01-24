@@ -20,6 +20,7 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.buttonShadow
 import com.neki.android.core.designsystem.modifier.clickableSingle
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -29,7 +30,7 @@ internal fun ToMapChip(
 ) {
     Row(
         modifier = modifier
-            .clickableSingle(onClick = onClick)
+            .noRippleClickableSingle(onClick = onClick)
             .buttonShadow()
             .background(shape = CircleShape, color = NekiTheme.colorScheme.gray800)
             .padding(horizontal = 16.dp, vertical = 8.dp),
