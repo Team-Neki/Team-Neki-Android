@@ -2,6 +2,7 @@ package com.neki.android.feature.photo_upload.impl.qrscan.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -33,7 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -62,51 +63,43 @@ internal fun QRScannerContent(
             offSet = frameOffset,
             size = frameSize,
         )
-        ConstraintLayout(
+        Column(
             modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val (topBar, text, scanFrame, torchButton) = createRefs()
+            // 상단 영역 - weight(234f)
+            Column(modifier = Modifier.weight(234f)) {
+                // TopBar (고정 크기)
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    NekiIconButton(
+                        modifier = Modifier.padding(start = 8.dp),
+                        onClick = onClickClose,
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            imageVector = ImageVector.vectorResource(R.drawable.icon_close),
+                            contentDescription = null,
+                            tint = Color.White,
+                        )
+                    }
+                }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(topBar) {
-                        top.linkTo(parent.top)
-                    },
-            ) {
-                NekiIconButton(
-                    modifier = Modifier.padding(start = 8.dp),
-                    onClick = onClickClose,
+                // TopBar 제외한 나머지에서 중앙 정렬
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_close),
-                        contentDescription = null,
-                        tint = Color.White,
-                    )
+                    QRCodeText()
                 }
             }
 
-            QRCodeText(
-                modifier = Modifier.constrainAs(text) {
-                    top.linkTo(topBar.bottom)
-                    bottom.linkTo(scanFrame.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                },
-            )
-
+            // ScanCornerFrame (고정 크기)
             ScanCornerFrame(
                 modifier = Modifier
                     .fillMaxWidth(0.82f)
                     .aspectRatio(1f)
-                    .constrainAs(scanFrame) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        verticalBias = 234f / (234f + 274f)
-                    }
                     .onGloballyPositioned { coordinates ->
                         frameOffset = coordinates.positionInParent()
                         frameSize = coordinates.size
@@ -114,26 +107,28 @@ internal fun QRScannerContent(
                 color = Color.White,
             )
 
-            NekiIconButton(
-                modifier = Modifier
-                    .constrainAs(torchButton) {
-                        top.linkTo(scanFrame.bottom, margin = 37.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isTorchEnabled) Color.White
-                        else Color.White.copy(alpha = 0.1f),
-                    ),
-                onClick = onClickTorch,
+            // 하단 영역 - weight(274f)
+            Box(
+                modifier = Modifier.weight(274f),
+                contentAlignment = Alignment.TopCenter,
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_qr_light),
-                    contentDescription = null,
-                    tint = if (isTorchEnabled) Color.Black else Color.White,
-                )
+                NekiIconButton(
+                    modifier = Modifier
+                        .padding(top = 37.dp)
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (isTorchEnabled) Color.White
+                            else Color.White.copy(alpha = 0.1f),
+                        ),
+                    onClick = onClickTorch,
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_qr_light),
+                        contentDescription = null,
+                        tint = if (isTorchEnabled) Color.Black else Color.White,
+                    )
+                }
             }
         }
     }
