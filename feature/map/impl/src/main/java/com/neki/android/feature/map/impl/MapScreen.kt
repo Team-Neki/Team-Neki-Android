@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +39,7 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
 import com.neki.android.feature.map.impl.component.BrandMarker
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
+import com.neki.android.feature.map.impl.component.MapRefreshChip
 import com.neki.android.feature.map.impl.component.PanelInvisibleContent
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.DirectionApp
@@ -202,6 +204,15 @@ fun MapScreen(
             onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
             onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) },
         )
+
+        if (uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) {
+            MapRefreshChip(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .padding(top = 12.dp),
+            )
+        }
 
         if (uiState.dragLevel == DragLevel.THIRD) {
             ToMapChip(
