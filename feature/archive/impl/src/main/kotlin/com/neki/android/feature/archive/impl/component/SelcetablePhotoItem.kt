@@ -69,9 +69,9 @@ internal fun SelectablePhotoItem(
                     .padding(top = 10.dp, end = 10.dp)
                     .size(20.dp)
                     .noRippleClickable { onClickFavorite(photo) },
-                imageVector = ImageVector.vectorResource(R.drawable.icon_heart_white_20),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_heart),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = NekiTheme.colorScheme.white,
             )
         }
     }

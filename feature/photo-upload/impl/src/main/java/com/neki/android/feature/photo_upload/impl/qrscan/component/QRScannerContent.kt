@@ -86,6 +86,7 @@ internal fun QRScannerContent(
                 onClick = onClickClose,
             ) {
                 Icon(
+                    modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                     contentDescription = null,
                     tint = Color.White,

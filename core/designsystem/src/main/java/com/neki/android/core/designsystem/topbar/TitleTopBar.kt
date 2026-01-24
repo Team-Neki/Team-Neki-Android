@@ -2,6 +2,7 @@ package com.neki.android.core.designsystem.topbar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,8 +27,10 @@ fun CloseTitleTopBar(
         modifier = modifier,
         leadingIcon = { modifier ->
             Icon(
-                modifier = modifier.noRippleClickableSingle { onClose() },
-                imageVector = ImageVector.vectorResource(R.drawable.icon_close_24),
+                modifier = modifier
+                    .size(24.dp)
+                    .noRippleClickableSingle { onClose() },
+                imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
             )
@@ -51,8 +54,10 @@ fun CloseTitleTextButtonTopBar(
         modifier = modifier,
         leadingIcon = { modifier ->
             Icon(
-                modifier = modifier.noRippleClickableSingle { onClose() },
-                imageVector = ImageVector.vectorResource(R.drawable.icon_close_24),
+                modifier = modifier
+                    .size(24.dp)
+                    .noRippleClickableSingle { onClose() },
+                imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                 tint = NekiTheme.colorScheme.gray800,
                 contentDescription = null,
             )

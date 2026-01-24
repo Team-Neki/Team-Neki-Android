@@ -131,7 +131,7 @@ private fun DeleteOptionRow(
         if (isSelected) {
             Icon(
                 modifier = Modifier.size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_check_primary),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.primary500,
             )

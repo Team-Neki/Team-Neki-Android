@@ -12,15 +12,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.extension.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.pose.impl.NumberOfPeople
 
@@ -74,9 +73,9 @@ private fun NumberOfPeopleBottomSheetContent(
                 ) {
                     if (item == selectedItem) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.icon_check_primary),
+                            imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                             contentDescription = null,
-                            tint = Color.Unspecified,
+                            tint = NekiTheme.colorScheme.primary500,
                         )
                     }
                     Text(

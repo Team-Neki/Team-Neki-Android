@@ -174,9 +174,9 @@ private fun AlbumFolder(
                 ) {
                     Icon(
                         modifier = Modifier.size(8.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_heart_white_20),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_heart),
                         contentDescription = null,
-                        tint = Color.Unspecified,
+                        tint = NekiTheme.colorScheme.white,
                     )
                 }
             }

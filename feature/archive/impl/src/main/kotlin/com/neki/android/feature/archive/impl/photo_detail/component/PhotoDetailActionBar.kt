@@ -50,9 +50,9 @@ internal fun PhotoDetailActionBar(
                     .size(28.dp)
                     .noRippleClickable { onClickFavorite() },
                 imageVector = if (isFavorite) {
-                    ImageVector.vectorResource(R.drawable.icon_heart_primary_28)
+                    ImageVector.vectorResource(R.drawable.icon_heart)
                 } else {
-                    ImageVector.vectorResource(R.drawable.icon_heart_gray_stroke_28)
+                    ImageVector.vectorResource(R.drawable.icon_heart_stroke)
                 },
                 contentDescription = null,
                 tint = Color.Unspecified,

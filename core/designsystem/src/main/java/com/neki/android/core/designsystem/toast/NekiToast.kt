@@ -84,7 +84,7 @@ fun NekiActionToast(
 private fun NekiToastPreview() {
     NekiTheme {
         NekiToast(
-            iconRes = R.drawable.icon_checkbox_on_24,
+            iconRes = R.drawable.icon_checkbox_on,
             text = "텍스트",
         )
     }
@@ -95,7 +95,7 @@ private fun NekiToastPreview() {
 private fun NekiActionToastPreview() {
     NekiTheme {
         NekiActionToast(
-            iconRes = R.drawable.icon_checkbox_on_24,
+            iconRes = R.drawable.icon_checkbox_on,
             text = "텍스트",
             buttonText = "텍스트",
             onClickActionButton = {},

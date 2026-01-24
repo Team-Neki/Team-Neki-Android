@@ -32,7 +32,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -80,12 +79,12 @@ internal object NetworkModule {
                 bearer {
                     loadTokens {
                         Timber.d("BearerAuth - loadTokens")
-                        if (dataStoreRepository.isSavedJwtTokens().first()) {
-                            BearerTokens(
-                                accessToken = dataStoreRepository.getAccessToken().firstOrNull() ?: "",
-                                refreshToken = dataStoreRepository.getRefreshToken().firstOrNull() ?: "",
-                            )
-                        } else null
+//                        if (dataStoreRepository.isSavedJwtTokens().first()) {
+                        BearerTokens(
+                            accessToken = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwicm9sZXMiOlsiUk9MRV9VU0VSIl0sIm5hbWUiOiLrjIDtmIQiLCJwcm92aWRlcl90eXBlIjoiS0FLQU8iLCJpYXQiOjE3Njg4OTQwODksImV4cCI6MTg2ODg5NDA4OX0.4oQrzjiTDJd2DNccJ89wJa3elsCpoASugqmZOQ60p4dqf2xR8xqBm7IZ-vXz3hDy8Rub0Kd_HfLpSWKNEDzB4w",
+                            refreshToken = dataStoreRepository.getRefreshToken().firstOrNull() ?: "",
+                        )
+//                        } else null
                     }
 
                     refreshTokens {
