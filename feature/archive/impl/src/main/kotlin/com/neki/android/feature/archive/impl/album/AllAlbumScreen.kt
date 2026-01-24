@@ -90,10 +90,7 @@ internal fun AllAlbumScreen(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                horizontal = 20.dp,
-                vertical = 8.dp,
-            ),
+            contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item {
