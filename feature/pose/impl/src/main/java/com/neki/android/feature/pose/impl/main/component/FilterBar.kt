@@ -1,4 +1,4 @@
-package com.neki.android.feature.pose.impl.component
+package com.neki.android.feature.pose.impl.main.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -24,7 +24,7 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.pose.impl.NumberOfPeople
+import com.neki.android.feature.pose.impl.main.NumberOfPeople
 
 @Composable
 internal fun FilterBar(

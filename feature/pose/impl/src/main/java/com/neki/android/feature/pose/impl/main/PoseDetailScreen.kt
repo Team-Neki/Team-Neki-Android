@@ -1,4 +1,4 @@
-package com.neki.android.feature.pose.impl
+package com.neki.android.feature.pose.impl.main
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -24,6 +24,7 @@ import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.feature.pose.impl.R
 
 @Composable
 internal fun PoseDetailRoute(

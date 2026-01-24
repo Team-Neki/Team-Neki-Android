@@ -1,4 +1,4 @@
-package com.neki.android.feature.pose.impl
+package com.neki.android.feature.pose.impl.main
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
@@ -25,11 +25,11 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.pose.impl.component.FilterBar
-import com.neki.android.feature.pose.impl.component.NumberOfPeopleBottomSheet
-import com.neki.android.feature.pose.impl.component.PoseListContent
-import com.neki.android.feature.pose.impl.component.PoseTopBar
-import com.neki.android.feature.pose.impl.component.RecommendationChip
+import com.neki.android.feature.pose.impl.main.component.FilterBar
+import com.neki.android.feature.pose.impl.main.component.NumberOfPeopleBottomSheet
+import com.neki.android.feature.pose.impl.main.component.PoseListContent
+import com.neki.android.feature.pose.impl.main.component.PoseTopBar
+import com.neki.android.feature.pose.impl.main.component.RecommendationChip
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
 import kotlinx.collections.immutable.ImmutableList
 

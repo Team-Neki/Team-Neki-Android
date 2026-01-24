@@ -1,4 +1,4 @@
-package com.neki.android.feature.pose.impl
+package com.neki.android.feature.pose.impl.main
 
 import com.neki.android.core.model.Pose
 import kotlinx.collections.immutable.ImmutableList

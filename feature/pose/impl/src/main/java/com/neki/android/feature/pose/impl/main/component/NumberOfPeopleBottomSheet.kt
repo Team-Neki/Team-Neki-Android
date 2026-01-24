@@ -1,4 +1,4 @@
-package com.neki.android.feature.pose.impl.component
+package com.neki.android.feature.pose.impl.main.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,7 @@ import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.pose.impl.NumberOfPeople
+import com.neki.android.feature.pose.impl.main.NumberOfPeople
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

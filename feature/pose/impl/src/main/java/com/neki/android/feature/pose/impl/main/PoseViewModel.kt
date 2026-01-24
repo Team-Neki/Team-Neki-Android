@@ -1,4 +1,4 @@
-package com.neki.android.feature.pose.impl
+package com.neki.android.feature.pose.impl.main
 
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.ui.MviIntentStore
