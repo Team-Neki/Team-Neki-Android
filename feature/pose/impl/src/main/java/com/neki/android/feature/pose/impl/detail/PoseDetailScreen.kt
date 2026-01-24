@@ -70,6 +70,7 @@ internal fun PoseDetailScreen(
                 .fillMaxWidth()
                 .weight(1f),
             contentScale = ContentScale.Fit,
+            alignment = Alignment.Center,
         )
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
