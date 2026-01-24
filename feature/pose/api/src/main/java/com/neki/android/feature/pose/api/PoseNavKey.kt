@@ -9,17 +9,17 @@ import kotlinx.serialization.Serializable
 sealed interface PoseNavKey : NavKey {
 
     @Serializable
-    data object Main : PoseNavKey
+    data object PoseMain : PoseNavKey
 
     @Serializable
     data class RandomPose(val peopleCount: PeopleCount) : PoseNavKey
 
     @Serializable
-    data class Detail(val pose: Pose) : PoseNavKey
+    data class PoseDetail(val pose: Pose) : PoseNavKey
 }
 
 fun Navigator.navigateToPose() {
-    navigate(PoseNavKey.Main)
+    navigate(PoseNavKey.PoseMain)
 }
 
 fun Navigator.navigateToRandomPose(peopleCount: PeopleCount) {
@@ -27,5 +27,5 @@ fun Navigator.navigateToRandomPose(peopleCount: PeopleCount) {
 }
 
 fun Navigator.navigateToPoseDetail(pose: Pose) {
-    navigate(PoseNavKey.Detail(pose))
+    navigate(PoseNavKey.PoseDetail(pose))
 }

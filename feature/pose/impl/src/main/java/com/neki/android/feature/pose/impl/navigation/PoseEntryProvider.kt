@@ -30,7 +30,7 @@ object PoseEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
-    entry<PoseNavKey.Main> {
+    entry<PoseNavKey.PoseMain> {
         PoseRoute(
             navigateToPoseDetail = navigator::navigateToPoseDetail,
             navigateToRandomPose = navigator::navigateToRandomPose,
@@ -38,7 +38,7 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
         )
     }
 
-    entry<PoseNavKey.Detail> { key ->
+    entry<PoseNavKey.PoseDetail> { key ->
         PoseDetailRoute(
             viewModel = hiltViewModel<PoseDetailViewModel, PoseDetailViewModel.Factory>(
                 creationCallback = { factory ->
