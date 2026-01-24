@@ -40,6 +40,7 @@ fun <T> DoubleButtonOptionBottomSheet(
     onClickActionButton: () -> Unit,
     onOptionSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    buttonEnabled: Boolean = true,
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
     ModalBottomSheet(
@@ -57,6 +58,7 @@ fun <T> DoubleButtonOptionBottomSheet(
             onClickCancel = onClickCancel,
             onClickDoubleButton = onClickActionButton,
             onOptionSelect = onOptionSelect,
+            buttonEnabled = buttonEnabled,
         )
     }
 }
@@ -70,6 +72,7 @@ internal fun <T> DoubleButtonOptionBottomSheetContent(
     onClickDoubleButton: () -> Unit,
     onOptionSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    buttonEnabled: Boolean = true,
 ) {
     Column(
         modifier = modifier
@@ -104,11 +107,13 @@ internal fun <T> DoubleButtonOptionBottomSheetContent(
                 modifier = Modifier.weight(93f),
                 text = "취소",
                 onClick = onClickCancel,
+                enabled = buttonEnabled,
             )
             CTAButtonPrimary(
                 modifier = Modifier.weight(230f),
                 text = "삭제하기",
                 onClick = onClickDoubleButton,
+                enabled = buttonEnabled,
             )
         }
     }

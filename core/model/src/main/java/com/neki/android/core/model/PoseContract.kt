@@ -1,6 +1,5 @@
-package com.neki.android.feature.pose.impl.main
+package com.neki.android.core.model
 
-import com.neki.android.core.model.Pose
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -30,13 +29,48 @@ private val dummyPoseList = persistentListOf(
 )
 
 private val scrappedDummyList = persistentListOf(
-    Pose(id = 101, poseImageUrl = "https://picsum.photos/seed/scrapA/400/520", isScrapped = true, peopleCount = 1),
-    Pose(id = 102, poseImageUrl = "https://picsum.photos/seed/scrapB/400/680", isScrapped = true, peopleCount = 2),
-    Pose(id = 103, poseImageUrl = "https://picsum.photos/seed/scrapC/400/450", isScrapped = true, peopleCount = 1),
-    Pose(id = 104, poseImageUrl = "https://picsum.photos/seed/scrapD/400/600", isScrapped = true, peopleCount = 3),
-    Pose(id = 105, poseImageUrl = "https://picsum.photos/seed/scrapE/400/550", isScrapped = true, peopleCount = 2),
-    Pose(id = 106, poseImageUrl = "https://picsum.photos/seed/scrapF/400/720", isScrapped = true, peopleCount = 4),
-    Pose(id = 107, poseImageUrl = "https://picsum.photos/seed/scrapG/400/480", isScrapped = true, peopleCount = 1),
+    Pose(
+        id = 101,
+        poseImageUrl = "https://picsum.photos/seed/scrapA/400/520",
+        isScrapped = true,
+        peopleCount = 1
+    ),
+    Pose(
+        id = 102,
+        poseImageUrl = "https://picsum.photos/seed/scrapB/400/680",
+        isScrapped = true,
+        peopleCount = 2
+    ),
+    Pose(
+        id = 103,
+        poseImageUrl = "https://picsum.photos/seed/scrapC/400/450",
+        isScrapped = true,
+        peopleCount = 1
+    ),
+    Pose(
+        id = 104,
+        poseImageUrl = "https://picsum.photos/seed/scrapD/400/600",
+        isScrapped = true,
+        peopleCount = 3
+    ),
+    Pose(
+        id = 105,
+        poseImageUrl = "https://picsum.photos/seed/scrapE/400/550",
+        isScrapped = true,
+        peopleCount = 2
+    ),
+    Pose(
+        id = 106,
+        poseImageUrl = "https://picsum.photos/seed/scrapF/400/720",
+        isScrapped = true,
+        peopleCount = 4
+    ),
+    Pose(
+        id = 107,
+        poseImageUrl = "https://picsum.photos/seed/scrapG/400/480",
+        isScrapped = true,
+        peopleCount = 1
+    ),
 )
 
 data class PoseState(
@@ -57,11 +91,13 @@ sealed interface PoseIntent {
     data object ClickAlarmIcon : PoseIntent
     data object ClickPeopleCountChip : PoseIntent
     data object DismissPeopleCountBottomSheet : PoseIntent
+    data object DismissRandomPosePeopleCountBottomSheet : PoseIntent
     data object ClickScrapChip : PoseIntent
     data class ClickPoseItem(val item: Pose) : PoseIntent
     data class ClickPeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseRecommendation : PoseIntent
     data class ClickRandomPosePeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
+    data object ClickRandomPoseBottomSheetSelectButton: PoseIntent
 
     // Pose Detail
     data object ClickBackIcon : PoseIntent
@@ -71,6 +107,7 @@ sealed interface PoseIntent {
 sealed interface PoseEffect {
     data object NavigateBack : PoseEffect
     data object NavigateToNotification : PoseEffect
+    data class NavigateToRandomPose(val peopleCount: PeopleCount) : PoseEffect
     data object NavigateToPoseDetail : PoseEffect
     data class ShowToast(val message: String) : PoseEffect
 }
