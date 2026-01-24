@@ -1,6 +1,5 @@
 package com.neki.android.feature.pose.impl.detail
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +8,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -16,36 +16,32 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.DevicePreview
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
+import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.pose.impl.R
-import com.neki.android.core.model.PeopleCount
-import com.neki.android.core.model.PoseEffect
-import com.neki.android.core.model.PoseIntent
-import com.neki.android.core.model.PoseState
-import com.neki.android.feature.pose.impl.main.PoseViewModel
 
 @Composable
 internal fun PoseDetailRoute(
-    viewModel: PoseViewModel = hiltViewModel(),
+    viewModel: PoseDetailViewModel,
     navigateBack: () -> Unit,
-    navigateToRandomPose: (PeopleCount) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            PoseEffect.NavigateBack -> navigateBack()
-            is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
-            is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
-            else -> {}
+            PoseDetailSideEffect.NavigateBack -> navigateBack()
+            is PoseDetailSideEffect.ShowToast -> {
+                nekiToast.showToast(sideEffect.message)
+            }
         }
     }
 
@@ -56,19 +52,19 @@ internal fun PoseDetailRoute(
 }
 
 @Composable
-fun PoseDetailScreen(
-    uiState: PoseState = PoseState(),
-    onIntent: (PoseIntent) -> Unit = {},
+internal fun PoseDetailScreen(
+    uiState: PoseDetailState = PoseDetailState(),
+    onIntent: (PoseDetailIntent) -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
         BackTitleTopBar(
             title = "포즈 상세",
-            onBack = { onIntent(PoseIntent.ClickBackIcon) },
+            onBack = { onIntent(PoseDetailIntent.ClickBackIcon) },
         )
         AsyncImage(
-            model = uiState.selectedPose.poseImageUrl,
+            model = uiState.pose.poseImageUrl,
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -80,18 +76,21 @@ fun PoseDetailScreen(
             thickness = 1.dp,
             color = NekiTheme.colorScheme.gray75,
         )
-        Icon(
-            imageVector = ImageVector.vectorResource(
-                if (uiState.selectedPose.isScrapped) R.drawable.ic_scrap_selected
-                else R.drawable.icon_scrap_unselected,
-            ),
-            contentDescription = null,
+        NekiIconButton(
             modifier = Modifier
                 .align(Alignment.End)
-                .noRippleClickableSingle { onIntent(PoseIntent.ClickScrapIcon) }
-                .padding(20.dp),
-            tint = NekiTheme.colorScheme.gray500,
-        )
+                .padding(vertical = 1.dp, horizontal = 8.dp),
+            onClick = { onIntent(PoseDetailIntent.ClickScrapIcon) },
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(
+                    if (uiState.pose.isScrapped) R.drawable.ic_scrap_selected
+                    else R.drawable.icon_scrap_unselected,
+                ),
+                contentDescription = null,
+                tint = NekiTheme.colorScheme.gray500,
+            )
+        }
     }
 }
 
@@ -99,6 +98,30 @@ fun PoseDetailScreen(
 @Composable
 private fun PoseDetailScreenPreview() {
     NekiTheme {
-        PoseDetailScreen()
+        PoseDetailScreen(
+            uiState = PoseDetailState(
+                pose = Pose(
+                    id = 1,
+                    poseImageUrl = "https://picsum.photos/400/600",
+                    isScrapped = false,
+                ),
+            ),
+        )
+    }
+}
+
+@DevicePreview
+@Composable
+private fun PoseDetailScreenScrappedPreview() {
+    NekiTheme {
+        PoseDetailScreen(
+            uiState = PoseDetailState(
+                pose = Pose(
+                    id = 1,
+                    poseImageUrl = "https://picsum.photos/400/600",
+                    isScrapped = true,
+                ),
+            ),
+        )
     }
 }
