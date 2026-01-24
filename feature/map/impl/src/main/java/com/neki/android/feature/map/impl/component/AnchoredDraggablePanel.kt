@@ -30,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
@@ -76,28 +74,27 @@ internal fun AnchoredDraggablePanel(
     val configuration = LocalConfiguration.current
 
     val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
-    var collapsedHeightPx by remember { mutableIntStateOf(0) }
     val navigationBarHeightPx = with(density) {
         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx()
     }
-    val bottomOffsetPx = remember(collapsedHeightPx, navigationBarHeightPx) {
-        with(density) {
-            collapsedHeightPx +
-                // currentLocationButton (36.dp + 12.dp)
-                48.dp.toPx() +
-                MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp.toPx() +
-                navigationBarHeightPx
-        }
+    val bottomPanelHeightPx = with(density) {
+        (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
+            MapConst.PANEL_DRAG_LOCATION_HEIGHT +
+            MapConst.PANEL_DRAG_LEVEL_BOTTOM_HEIGHT).dp.toPx() + navigationBarHeightPx
     }
-
+    val centerPanelHeightPx = with(density) {
+        (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
+            MapConst.PANEL_DRAG_LOCATION_HEIGHT +
+            MapConst.PANEL_DRAG_LEVEL_CENTER_HEIGHT).dp.toPx() + navigationBarHeightPx
+    }
     var isProgrammaticTransition by remember { mutableStateOf(false) }
 
-    val state = remember(collapsedHeightPx) {
+    val state = remember {
         val anchors = DraggableAnchors {
-            DragValue.Bottom at screenHeightPx - bottomOffsetPx
-            DragValue.Center at screenHeightPx * 0.3f
-            DragValue.Top at screenHeightPx * 0.05f
-            DragValue.Invisible at screenHeightPx
+            DragLevel.FIRST at screenHeightPx - bottomPanelHeightPx
+            DragLevel.SECOND at screenHeightPx - centerPanelHeightPx
+            DragLevel.THIRD at screenHeightPx * 0.05f
+            DragLevel.INVISIBLE at screenHeightPx
         }
 
         AnchoredDraggableState(
@@ -191,12 +188,7 @@ internal fun AnchoredPanelContent(
             ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned {
-                    val newHeight = it.size.height + additionalHeightPx
-                    onCollapsedHeightMeasured(newHeight)
-                },
+            modifier = Modifier.fillMaxWidth(),
         ) {
             BottomSheetDragHandle()
             Text(
