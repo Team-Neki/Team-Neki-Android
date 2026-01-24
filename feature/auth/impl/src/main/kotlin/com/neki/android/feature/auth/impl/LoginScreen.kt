@@ -18,7 +18,7 @@ import timber.log.Timber
 @Composable
 fun LoginRoute(
     viewModel: LoginViewModel = hiltViewModel(),
-    navigateMain: () -> Unit,
+    navigateToMain: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
@@ -35,7 +35,7 @@ fun LoginRoute(
                 kakaoLoginHelper.loginWithKakao(
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
-                        navigateMain() // 제거 예정
+                        navigateToMain() // 제거 예정
                         viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))
                     },
                     onFailure = { message ->
