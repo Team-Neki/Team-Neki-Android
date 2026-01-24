@@ -34,6 +34,8 @@ import kotlinx.collections.immutable.toImmutableList
 fun <T> DoubleButtonOptionBottomSheet(
     title: String,
     options: ImmutableList<T>,
+    primaryButtonText: String,
+    secondaryButtonText: String,
     selectedOption: T?,
     onDismissRequest: () -> Unit,
     onClickCancel: () -> Unit,
@@ -59,6 +61,8 @@ fun <T> DoubleButtonOptionBottomSheet(
             onClickDoubleButton = onClickActionButton,
             onOptionSelect = onOptionSelect,
             buttonEnabled = buttonEnabled,
+            primaryButtonText = primaryButtonText,
+            secondaryButtonText = secondaryButtonText,
         )
     }
 }
@@ -67,6 +71,8 @@ fun <T> DoubleButtonOptionBottomSheet(
 internal fun <T> DoubleButtonOptionBottomSheetContent(
     title: String,
     options: ImmutableList<T>,
+    primaryButtonText: String,
+    secondaryButtonText: String,
     selectedOption: T?,
     onClickCancel: () -> Unit,
     onClickDoubleButton: () -> Unit,
@@ -105,13 +111,13 @@ internal fun <T> DoubleButtonOptionBottomSheetContent(
         ) {
             CTAButtonGray(
                 modifier = Modifier.weight(93f),
-                text = "취소",
+                text = secondaryButtonText,
                 onClick = onClickCancel,
                 enabled = buttonEnabled,
             )
             CTAButtonPrimary(
                 modifier = Modifier.weight(230f),
-                text = "삭제하기",
+                text = primaryButtonText,
                 onClick = onClickDoubleButton,
                 enabled = buttonEnabled,
             )
@@ -166,6 +172,8 @@ private fun DoubleButtonOptionBottomSheetContentPreview() {
         DoubleButtonOptionBottomSheetContent(
             title = "삭제하시겠어요?",
             options = PreviewOption.entries.toImmutableList(),
+            primaryButtonText = "확인",
+            secondaryButtonText = "취소",
             selectedOption = PreviewOption.OPTION_1,
             onClickCancel = {},
             onClickDoubleButton = {},
@@ -181,10 +189,30 @@ private fun DoubleButtonOptionBottomSheetContentOption2Preview() {
         DoubleButtonOptionBottomSheetContent(
             title = "삭제하시겠어요?",
             options = PreviewOption.entries.toImmutableList(),
+            primaryButtonText = "확인",
+            secondaryButtonText = "취소",
             selectedOption = PreviewOption.OPTION_2,
             onClickCancel = {},
             onClickDoubleButton = {},
             onOptionSelect = {},
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun DoubleButtonOptionBottomSheetContentDisabledPreview() {
+    NekiTheme {
+        DoubleButtonOptionBottomSheetContent(
+            title = "삭제하시겠어요?",
+            options = PreviewOption.entries.toImmutableList(),
+            primaryButtonText = "확인",
+            secondaryButtonText = "취소",
+            selectedOption = null,
+            onClickCancel = {},
+            onClickDoubleButton = {},
+            onOptionSelect = {},
+            buttonEnabled = false,
         )
     }
 }

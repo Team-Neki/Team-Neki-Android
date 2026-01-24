@@ -149,6 +149,8 @@ internal fun AllAlbumScreen(
         DoubleButtonOptionBottomSheet(
             title = "앨범을 삭제하시겠어요?",
             options = AlbumDeleteOption.entries.toImmutableList(),
+            primaryButtonText = "삭제하기",
+            secondaryButtonText = "취소",
             selectedOption = uiState.selectedDeleteOption,
             onDismissRequest = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
             onClickCancel = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },

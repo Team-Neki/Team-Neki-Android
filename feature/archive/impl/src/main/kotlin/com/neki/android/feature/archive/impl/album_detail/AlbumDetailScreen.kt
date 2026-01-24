@@ -163,6 +163,8 @@ internal fun AlbumDetailScreen(
             title = "사진을 삭제하시겠어요?",
             options = PhotoDeleteOption.entries.toImmutableList(),
             selectedOption = uiState.selectedDeleteOption,
+            primaryButtonText = "삭제하기",
+            secondaryButtonText = "취소",
             onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteBottomSheet) },
             onClickCancel = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
             onClickActionButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },

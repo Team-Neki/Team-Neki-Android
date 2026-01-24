@@ -20,6 +20,8 @@ internal fun RandomPosePeopleCountBottomSheet(
         title = "랜덤 포즈 추천을 위해\n촬영 중인 인원수를 선택해주세요",
         options = PeopleCount.entries.toImmutableList(),
         selectedOption = selectedCount,
+        primaryButtonText = "선택하기",
+        secondaryButtonText = "취소",
         onDismissRequest = onDismissRequest,
         onClickCancel = onDismissRequest,
         onClickActionButton = onClickSelectButton,
