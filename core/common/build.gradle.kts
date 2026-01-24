@@ -10,5 +10,6 @@ android {
 dependencies {
     api(libs.timber)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.core.ktx)
 
 }
