@@ -44,7 +44,7 @@ class MapViewModel @Inject constructor() : ViewModel() {
             }
 
             MapIntent.ClickToMapChip -> {
-                reduce { copy(dragState = DragValue.Bottom) }
+                reduce { copy(dragLevel = DragLevel.FIRST) }
             }
 
             is MapIntent.ClickBrand -> {
@@ -64,7 +64,7 @@ class MapViewModel @Inject constructor() : ViewModel() {
             is MapIntent.ClickNearBrand -> {
                 reduce {
                     copy(
-                        dragState = DragValue.Invisible,
+                        dragLevel = DragLevel.INVISIBLE,
                         selectedBrandInfo = intent.brandInfo,
                         focusedMarkerPosition = intent.brandInfo.latitude to intent.brandInfo.longitude,
                     )
@@ -73,7 +73,7 @@ class MapViewModel @Inject constructor() : ViewModel() {
             }
 
             MapIntent.ClickCloseBrandCard -> {
-                reduce { copy(dragState = DragValue.Center, focusedMarkerPosition = Pair(0.0, 0.0), selectedBrandInfo = null) }
+                reduce { copy(dragLevel = DragLevel.SECOND, focusedMarkerPosition = Pair(0.0, 0.0), selectedBrandInfo = null) }
             }
 
             MapIntent.CloseDirectionBottomSheet -> {
@@ -85,15 +85,15 @@ class MapViewModel @Inject constructor() : ViewModel() {
                 postSideEffect(MapEffect.MoveDirectionApp(intent.app))
             }
 
-            is MapIntent.ChangeDragValue -> {
-                reduce { copy(dragState = intent.dragValue) }
+            is MapIntent.ChangeDragLevel -> {
+                reduce { copy(dragLevel = intent.dragLevel) }
             }
 
             is MapIntent.ClickBrandMarker -> {
                 val selectedBrand = state.nearbyBrands.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
                 reduce {
                     copy(
-                        dragState = DragValue.Invisible,
+                        dragLevel = DragLevel.INVISIBLE,
                         focusedMarkerPosition = intent.latitude to intent.longitude,
                         selectedBrandInfo = selectedBrand,
                     )

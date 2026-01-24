@@ -54,7 +54,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.map.impl.DragValue
+import com.neki.android.feature.map.impl.DragLevel
 import com.neki.android.feature.map.impl.const.MapConst
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -64,9 +64,9 @@ import kotlin.math.roundToInt
 internal fun AnchoredDraggablePanel(
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
-    dragValue: DragValue = DragValue.Bottom,
+    dragLevel: DragLevel = DragLevel.FIRST,
     isCurrentLocation: Boolean = false,
-    onDragValueChanged: (DragValue) -> Unit = {},
+    onDragLevelChanged: (DragLevel) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
@@ -101,27 +101,27 @@ internal fun AnchoredDraggablePanel(
         }
 
         AnchoredDraggableState(
-            initialValue = DragValue.Bottom,
+            initialValue = DragLevel.FIRST,
             anchors = anchors,
             positionalThreshold = { distance -> distance * 0.5f },
             velocityThreshold = { with(density) { 100.dp.toPx() } },
             snapAnimationSpec = tween(),
             decayAnimationSpec = splineBasedDecay(density),
             confirmValueChange = { newValue ->
-                newValue != DragValue.Invisible || isProgrammaticTransition
+                newValue != DragLevel.INVISIBLE || isProgrammaticTransition
             },
         )
     }
 
     LaunchedEffect(state.settledValue) {
-        if (state.settledValue != dragValue) {
-            onDragValueChanged(state.settledValue)
+        if (state.settledValue != dragLevel) {
+            onDragLevelChanged(state.settledValue)
         }
     }
 
-    LaunchedEffect(dragValue) {
+    LaunchedEffect(dragLevel) {
         isProgrammaticTransition = true
-        state.animateTo(dragValue)
+        state.animateTo(dragLevel)
         isProgrammaticTransition = false
     }
 
@@ -130,9 +130,9 @@ internal fun AnchoredDraggablePanel(
             .fillMaxSize()
             .offset {
                 val currentOffset = state.requireOffset()
-                val shouldConstrainOffset = state.currentValue == DragValue.Bottom && !isProgrammaticTransition
+                val shouldConstrainOffset = state.currentValue == DragLevel.FIRST && !isProgrammaticTransition
                 val constrainedOffset = if (shouldConstrainOffset) {
-                    currentOffset.coerceAtMost(state.anchors.positionOf(DragValue.Bottom))
+                    currentOffset.coerceAtMost(state.anchors.positionOf(DragLevel.FIRST))
                 } else {
                     currentOffset
                 }
@@ -147,15 +147,14 @@ internal fun AnchoredDraggablePanel(
             CurrentLocationButton(
                 modifier = Modifier
                     .padding(start = 20.dp, bottom = 12.dp)
-                    .alpha(alpha = if (dragValue == DragValue.Top) 0f else 1f),
+                    .alpha(alpha = if (dragLevel == DragLevel.THIRD) 0f else 1f),
                 isActiveCurrentLocation = isCurrentLocation,
                 onClick = onClickCurrentLocation,
             )
             AnchoredPanelContent(
                 brands = brands,
                 nearbyBrands = nearbyBrands,
-                dragValue = dragValue,
-                onCollapsedHeightMeasured = { collapsedHeightPx = it },
+                dragLevel = dragLevel,
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = onClickBrand,
                 onClickNearBrand = onClickNearBrand,
@@ -168,22 +167,17 @@ internal fun AnchoredDraggablePanel(
 internal fun AnchoredPanelContent(
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
-    dragValue: DragValue = DragValue.Bottom,
-    onCollapsedHeightMeasured: (Int) -> Unit = {},
+    dragLevel: DragLevel = DragLevel.FIRST,
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickNearBrand: (BrandInfo) -> Unit = {},
 ) {
-    val density = LocalDensity.current
     val configuration = LocalConfiguration.current
     val screenHeightDp = configuration.screenHeightDp.dp
 
-    /** 패널 외부 상단 현위치 버튼 영역 **/
-    val additionalHeightPx = with(density) { (24.dp + 12.dp).toPx().toInt() }
-
-    val extraBottomPadding = when (dragValue) {
-        DragValue.Center -> screenHeightDp * 0.3f
-        DragValue.Top -> screenHeightDp * 0.05f
+    val extraBottomPadding = when (dragLevel) {
+        DragLevel.SECOND -> screenHeightDp * 0.3f
+        DragLevel.THIRD -> screenHeightDp * 0.05f
         else -> 0.dp
     }
 

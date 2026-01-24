@@ -192,8 +192,8 @@ fun MapScreen(
         AnchoredDraggablePanel(
             brands = uiState.brands,
             nearbyBrands = uiState.nearbyBrands,
-            dragValue = uiState.dragState,
-            onDragValueChanged = { onIntent(MapIntent.ChangeDragValue(it)) },
+            dragLevel = uiState.dragLevel,
+            onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
             isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
             onClickCurrentLocation = {
@@ -203,14 +203,14 @@ fun MapScreen(
             onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) },
         )
 
-        if (uiState.dragState == DragValue.Top) {
+        if (uiState.dragLevel == DragLevel.THIRD) {
             ToMapChip(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 32.dp),
                 onClick = { onIntent(MapIntent.ClickToMapChip) },
             )
-        } else if (uiState.dragState == DragValue.Invisible && uiState.selectedBrandInfo != null) {
+        } else if (uiState.dragLevel == DragLevel.INVISIBLE && uiState.selectedBrandInfo != null) {
             PanelInvisibleContent(
                 brandInfo = uiState.selectedBrandInfo,
                 modifier = Modifier.align(Alignment.BottomCenter),

@@ -8,7 +8,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class MapState(
     val isLoading: Boolean = false,
-    val dragState: DragValue = DragValue.Bottom,
+    val dragLevel: DragLevel = DragLevel.FIRST,
     val currentLocation: Pair<Double, Double> = Pair(0.0, 0.0),
     val brands: ImmutableList<Brand> = persistentListOf(),
     val nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
@@ -42,7 +42,7 @@ sealed interface MapIntent {
     data object ClickCloseBrandCard : MapIntent
     data object CloseDirectionBottomSheet : MapIntent
     data class ClickDirectionItem(val app: DirectionApp) : MapIntent
-    data class ChangeDragValue(val dragValue: DragValue) : MapIntent
+    data class ChangeDragLevel(val dragLevel: DragLevel) : MapIntent
 }
 
 sealed interface MapEffect {
@@ -58,4 +58,4 @@ sealed interface MapEffect {
     ) : MapEffect
 }
 
-enum class DragValue { Bottom, Center, Top, Invisible }
+enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
