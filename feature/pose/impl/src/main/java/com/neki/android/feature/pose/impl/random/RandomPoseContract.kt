@@ -22,9 +22,10 @@ sealed interface RandomPoseIntent {
     data object ClickBackIcon : RandomPoseIntent
     data object ClickCloseIcon : RandomPoseIntent
     data object ClickGoToDetailIcon : RandomPoseIntent
-    data object ClickBookmarkIcon : RandomPoseIntent
+    data object ClickScrapIcon : RandomPoseIntent
 }
 
 sealed interface RandomPoseEffect {
-
+    data object NavigateBack : RandomPoseEffect
+    data class NavigateToDetail(val poseId: Long) : RandomPoseEffect
 }
