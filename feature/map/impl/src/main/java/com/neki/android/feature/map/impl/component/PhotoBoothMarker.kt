@@ -40,7 +40,7 @@ import com.neki.android.feature.map.impl.const.MapConst.MARKER_TRIANGLE_WIDTH
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
-internal fun BrandMarker(
+internal fun PhotoBoothMarker(
     vararg keys: String,
     latitude: Double,
     longitude: Double,
@@ -61,7 +61,7 @@ internal fun BrandMarker(
             true
         },
     ) {
-        BrandMarkerContent(
+        PhotoBoothMarkerContent(
             brandImageRes = brandImageRes,
             isFocused = isFocused,
         )
@@ -69,7 +69,7 @@ internal fun BrandMarker(
 }
 
 @Composable
-internal fun BrandMarkerContent(
+internal fun PhotoBoothMarkerContent(
     modifier: Modifier = Modifier,
     brandImageRes: Int,
     isFocused: Boolean = false,
@@ -186,9 +186,9 @@ internal fun BrandMarkerContent(
 
 @ComponentPreview
 @Composable
-private fun BrandMarkerContentPreview() {
+private fun PhotoBoothMarkerPreview() {
     NekiTheme {
-        BrandMarkerContent(
+        PhotoBoothMarkerContent(
             brandImageRes = R.drawable.icon_life_four_cut,
         )
     }
@@ -196,9 +196,9 @@ private fun BrandMarkerContentPreview() {
 
 @ComponentPreview
 @Composable
-private fun BrandMarkerContentSelectedPreview() {
+private fun PhotoBoothMarkerSelectedPreview() {
     NekiTheme {
-        BrandMarkerContent(
+        PhotoBoothMarkerContent(
             brandImageRes = R.drawable.icon_life_four_cut,
             isFocused = true,
         )

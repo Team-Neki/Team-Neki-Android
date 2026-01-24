@@ -41,18 +41,18 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickBrand -> handleClickBrand(state, intent, reduce)
-            is MapIntent.ClickNearBrand -> handleClickNearBrand(intent, reduce, postSideEffect)
-            MapIntent.ClickCloseBrandCard -> reduce {
+            is MapIntent.ClickNearPhotoBooth -> handleClickNearBrand(intent, reduce, postSideEffect)
+            MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
                     dragLevel = DragLevel.SECOND,
-                    focusedMarkerPosition = Pair(0.0, 0.0),
-                    selectedBrandInfo = null,
+                    focusedMarkerPosition = null,
+                    selectedPhotoBoothInfo = null,
                 )
             }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
-            is MapIntent.ClickBrandMarker -> handleClickBrandMarker(state, intent, reduce, postSideEffect)
+            is MapIntent.ClickPhotoBoothMarker -> handleClickBrandMarker(state, intent, reduce, postSideEffect)
             is MapIntent.ClickDirection -> reduce { copy(isShowDirectionBottomSheet = true) }
             is MapIntent.RequestLocationPermission -> handleRequestLocationPermission(intent, reduce, postSideEffect)
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
@@ -82,14 +82,14 @@ class MapViewModel @Inject constructor(
     }
 
     private fun handleClickNearBrand(
-        intent: MapIntent.ClickNearBrand,
+        intent: MapIntent.ClickNearPhotoBooth,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
         reduce {
             copy(
                 dragLevel = DragLevel.INVISIBLE,
-                selectedBrandInfo = intent.brandInfo,
+                selectedPhotoBoothInfo = intent.brandInfo,
                 focusedMarkerPosition = intent.brandInfo.latitude to intent.brandInfo.longitude,
             )
         }
@@ -122,16 +122,16 @@ class MapViewModel @Inject constructor(
 
     private fun handleClickBrandMarker(
         state: MapState,
-        intent: MapIntent.ClickBrandMarker,
+        intent: MapIntent.ClickPhotoBoothMarker,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        val selectedBrand = state.nearbyBrands.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
+        val selectedBrand = state.nearbyPhotoBooths.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
         reduce {
             copy(
                 dragLevel = DragLevel.INVISIBLE,
                 focusedMarkerPosition = intent.latitude to intent.longitude,
-                selectedBrandInfo = selectedBrand,
+                selectedPhotoBoothInfo = selectedBrand,
             )
         }
         postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
@@ -253,7 +253,7 @@ class MapViewModel @Inject constructor(
                 copy(
                     isLoading = false,
                     brands = brands,
-                    nearbyBrands = nearbyBrands,
+                    nearbyPhotoBooths = nearbyBrands,
                 )
             }
         }

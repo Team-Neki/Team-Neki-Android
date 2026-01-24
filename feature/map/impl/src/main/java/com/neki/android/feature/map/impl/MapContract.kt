@@ -11,10 +11,9 @@ data class MapState(
     val currentLocation: Pair<Double, Double>? = null,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
-    val nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
-    val focusedMarkerPosition: Pair<Double, Double> = Pair(0.0, 0.0),
-    val selectedBrandInfo: BrandInfo? = null,
+    val nearbyPhotoBooths: ImmutableList<BrandInfo> = persistentListOf(),
     val focusedMarkerPosition: Pair<Double, Double>? = null,
+    val selectedPhotoBoothInfo: BrandInfo? = null,
     val isShowInfoDialog: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
@@ -24,16 +23,14 @@ sealed interface MapIntent {
     data object EnterMapScreen : MapIntent
 
     // in 지도
-    data class ClickBrandMarker(
+    data class ClickPhotoBoothMarker(
         val latitude: Double,
         val longitude: Double,
     ) : MapIntent
-
     data class ClickDirection(
         val latitude: Double,
         val longitude: Double,
     ) : MapIntent
-
     data object ClickRefresh : MapIntent
     data class UpdateCurrentLocation(val latitude: Double, val longitude: Double) : MapIntent
 
@@ -43,8 +40,8 @@ sealed interface MapIntent {
     data object ClickCloseInfoIcon : MapIntent
     data object ClickToMapChip : MapIntent
     data class ClickBrand(val brand: Brand) : MapIntent
-    data class ClickNearBrand(val brandInfo: BrandInfo) : MapIntent
-    data object ClickCloseBrandCard : MapIntent
+    data class ClickNearPhotoBooth(val brandInfo: BrandInfo) : MapIntent
+    data object ClickClosePhotoBoothCard : MapIntent
     data object CloseDirectionBottomSheet : MapIntent
     data class ClickDirectionItem(val app: DirectionApp) : MapIntent
     data class ChangeDragLevel(val dragLevel: DragLevel) : MapIntent

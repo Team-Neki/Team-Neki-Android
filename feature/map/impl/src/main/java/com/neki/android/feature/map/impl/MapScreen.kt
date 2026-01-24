@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -38,13 +37,12 @@ import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.WarningDialog
-import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
-import com.neki.android.feature.map.impl.component.BrandMarker
+import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
-import com.neki.android.feature.map.impl.component.PanelInvisibleContent
+import com.neki.android.feature.map.impl.component.PhotoBoothDetailCard
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.core.common.permission.PermissionManager
 import com.neki.android.feature.map.impl.const.DirectionApp
@@ -203,16 +201,16 @@ fun MapScreen(
                 onIntent(MapIntent.UpdateCurrentLocation(location.latitude, location.longitude))
             },
         ) {
-            uiState.nearbyBrands.forEachIndexed { index, brandInfo ->
+            uiState.nearbyPhotoBooths.forEachIndexed { index, brandInfo ->
                 val isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude)
-                BrandMarker(
+                PhotoBoothMarker(
                     keys = arrayOf("$isFocused"),
                     latitude = brandInfo.latitude,
                     longitude = brandInfo.longitude,
                     brandImageRes = brandInfo.brandImageRes,
                     isFocused = isFocused,
                     onClick = {
-                        onIntent(MapIntent.ClickBrandMarker(latitude = brandInfo.latitude, longitude = brandInfo.longitude))
+                        onIntent(MapIntent.ClickPhotoBoothMarker(latitude = brandInfo.latitude, longitude = brandInfo.longitude))
                     },
                 )
             }
@@ -220,7 +218,7 @@ fun MapScreen(
 
         AnchoredDraggablePanel(
             brands = uiState.brands,
-            nearbyBrands = uiState.nearbyBrands,
+            nearbyBrands = uiState.nearbyPhotoBooths,
             dragLevel = uiState.dragLevel,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
@@ -233,7 +231,7 @@ fun MapScreen(
                 }
             },
             onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
-            onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) },
+            onClickNearBrand = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
 
         if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) &&
@@ -255,9 +253,9 @@ fun MapScreen(
                     .padding(bottom = 32.dp),
                 onClick = { onIntent(MapIntent.ClickToMapChip) },
             )
-        } else if (uiState.dragLevel == DragLevel.INVISIBLE && uiState.selectedBrandInfo != null) {
-            PanelInvisibleContent(
-                brandInfo = uiState.selectedBrandInfo,
+        } else if (uiState.dragLevel == DragLevel.INVISIBLE && uiState.selectedPhotoBoothInfo != null) {
+            PhotoBoothDetailCard(
+                brandInfo = uiState.selectedPhotoBoothInfo,
                 modifier = Modifier.align(Alignment.BottomCenter),
                 isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
                 onClickCurrentLocation = {
@@ -267,10 +265,10 @@ fun MapScreen(
                         onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
                     }
                 },
-                onClickCloseCard = { onIntent(MapIntent.ClickCloseBrandCard) },
+                onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                 onClickDirection = {
                     if (PermissionManager.hasLocationPermission(context)) {
-                        onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude))
+                        onIntent(MapIntent.ClickDirection(uiState.selectedPhotoBoothInfo.latitude, uiState.selectedPhotoBoothInfo.longitude))
                     } else {
                         onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
                     }
@@ -303,13 +301,5 @@ fun MapScreen(
             onClick = { onIntent(MapIntent.ConfirmLocationPermissionDialog) },
             properties = DialogProperties(usePlatformDefaultWidth = false),
         )
-    }
-}
-
-@Preview
-@Composable
-private fun MapScreenPreview() {
-    NekiTheme {
-        MapScreen()
     }
 }
