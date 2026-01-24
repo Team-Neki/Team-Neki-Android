@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -36,8 +37,9 @@ fun FavoriteAlbumRowComponent(
 ) {
     Row(
         modifier = modifier
+            .noRippleClickable(onClick = onClick)
             .fillMaxWidth()
-            .noRippleClickable { onClick() },
+            .padding(vertical = 10.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -62,8 +64,9 @@ fun AlbumRowComponent(
 ) {
     Row(
         modifier = modifier
+            .noRippleClickable(onClick = onClick)
             .fillMaxWidth()
-            .noRippleClickable { onClick() },
+            .padding(vertical = 10.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
