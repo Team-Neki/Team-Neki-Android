@@ -64,7 +64,9 @@ sealed interface MapEffect {
         val endLatitude: Double,
         val endLongitude: Double,
     ) : MapEffect
+
     data object NavigateToAppSettings : MapEffect
+    data object RequestLocationPermission : MapEffect
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
