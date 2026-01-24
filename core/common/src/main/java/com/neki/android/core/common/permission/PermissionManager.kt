@@ -27,9 +27,7 @@ object PermissionManager {
     }
 
     fun shouldShowLocationRationale(activity: Activity): Boolean {
-        return activity.shouldShowRequestPermissionRationale(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        )
+        return activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     fun navigateToAppSettings(context: Context) {

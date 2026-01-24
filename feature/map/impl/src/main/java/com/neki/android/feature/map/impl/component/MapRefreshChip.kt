@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -21,7 +20,6 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.buttonShadow
 import com.neki.android.core.designsystem.modifier.clickableSingle
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -36,12 +34,12 @@ internal fun MapRefreshChip(
             .clickableSingle(onClick = onClick)
             .background(
                 shape = CircleShape,
-                color = NekiTheme.colorScheme.white
+                color = NekiTheme.colorScheme.white,
             )
             .border(
                 width = 1.dp,
                 shape = CircleShape,
-                color = NekiTheme.colorScheme.gray100
+                color = NekiTheme.colorScheme.gray100,
             )
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

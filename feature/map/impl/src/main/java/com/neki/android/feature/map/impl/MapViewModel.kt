@@ -33,134 +33,133 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         when (intent) {
-            MapIntent.EnterMapScreen -> {
-                loadBrands(reduce)
+            MapIntent.EnterMapScreen -> loadBrands(reduce)
+            MapIntent.ClickRefresh -> postSideEffect(MapEffect.RefreshPhotoBooth)
+            is MapIntent.UpdateCurrentLocation -> reduce { copy(currentLocation = intent.latitude to intent.longitude) }
+            MapIntent.ClickCurrentLocation -> postSideEffect(MapEffect.RefreshCurrentLocation)
+            MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
+            MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
+            MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
+            is MapIntent.ClickBrand -> handleClickBrand(state, intent, reduce)
+            is MapIntent.ClickNearBrand -> handleClickNearBrand(intent, reduce, postSideEffect)
+            MapIntent.ClickCloseBrandCard -> reduce {
+                copy(
+                    dragLevel = DragLevel.SECOND,
+                    focusedMarkerPosition = Pair(0.0, 0.0),
+                    selectedBrandInfo = null,
+                )
             }
-
-            MapIntent.ClickRefresh -> {
-                postSideEffect(MapEffect.RefreshPhotoBooth)
-            }
-
-            is MapIntent.UpdateCurrentLocation -> {
-                reduce { copy(currentLocation = intent.latitude to intent.longitude) }
-            }
-
-            MapIntent.ClickCurrentLocation -> {
-                postSideEffect(MapEffect.RefreshCurrentLocation)
-            }
-
-            MapIntent.ClickInfoIcon -> {
-                reduce { copy(isShowInfoDialog = true) }
-            }
-
-            MapIntent.ClickCloseInfoIcon -> {
-                reduce { copy(isShowInfoDialog = false) }
-            }
-
-            MapIntent.ClickToMapChip -> {
-                reduce { copy(dragLevel = DragLevel.FIRST) }
-            }
-
-            is MapIntent.ClickBrand -> {
-                reduce {
-                    copy(
-                        brands = state.brands.map { brand ->
-                            if (brand == intent.brand) {
-                                brand.copy(isChecked = !brand.isChecked)
-                            } else {
-                                brand
-                            }
-                        }.toImmutableList(),
-                    )
-                }
-            }
-
-            is MapIntent.ClickNearBrand -> {
-                reduce {
-                    copy(
-                        dragLevel = DragLevel.INVISIBLE,
-                        selectedBrandInfo = intent.brandInfo,
-                        focusedMarkerPosition = intent.brandInfo.latitude to intent.brandInfo.longitude,
-                    )
-                }
-                postSideEffect(MapEffect.MoveCameraToPosition(intent.brandInfo.latitude, intent.brandInfo.longitude))
-            }
-
-            MapIntent.ClickCloseBrandCard -> {
-                reduce { copy(dragLevel = DragLevel.SECOND, focusedMarkerPosition = Pair(0.0, 0.0), selectedBrandInfo = null) }
-            }
-
-            MapIntent.CloseDirectionBottomSheet -> {
-                reduce { copy(isShowDirectionBottomSheet = false) }
-            }
-
-            is MapIntent.ClickDirectionItem -> {
-                reduce { copy(isShowDirectionBottomSheet = false) }
-                state.selectedBrandInfo?.let { brandInfo ->
-                    postSideEffect(
-                        MapEffect.MoveDirectionApp(
-                            app = intent.app,
-                            startLatitude = state.currentLocation.first,
-                            startLongitude = state.currentLocation.second,
-                            endLatitude = brandInfo.latitude,
-                            endLongitude = brandInfo.longitude,
-                        ),
-                    )
-                }
-            }
-
-            is MapIntent.ChangeDragLevel -> {
-                reduce { copy(dragLevel = intent.dragLevel) }
-            }
-
-            is MapIntent.ClickBrandMarker -> {
-                val selectedBrand = state.nearbyBrands.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
-                reduce {
-                    copy(
-                        dragLevel = DragLevel.INVISIBLE,
-                        focusedMarkerPosition = intent.latitude to intent.longitude,
-                        selectedBrandInfo = selectedBrand,
-                    )
-                }
-                postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
-            }
-
-            is MapIntent.ClickDirection -> {
-                reduce { copy(isShowDirectionBottomSheet = true) }
-            }
-
-            is MapIntent.RequestLocationPermission -> {
-                viewModelScope.launch {
-                    val isFirstRequest = dataStoreRepository.getBoolean(DataStoreKey.IS_FIRST_LOCATION_PERMISSION).first().not()
-
-                    when {
-                        isFirstRequest -> {
-                            Timber.d("최초 요청 - 시스템 권한 팝업 표시")
-                            dataStoreRepository.setBoolean(
-                                DataStoreKey.IS_FIRST_LOCATION_PERMISSION,
-                                true,
-                            )
-                            postSideEffect(MapEffect.RequestLocationPermission)
-                        }
-                        intent.shouldShowRationale -> {
-                            Timber.d("1회 거부 상태 - 시스템 권한 팝업 표시")
-                            postSideEffect(MapEffect.RequestLocationPermission)
-                        }
-                        else -> {
-                            Timber.d("2회 이상 거부 (영구 거부) - 설정 이동 다이얼로그 표시")
-                            reduce { copy(isShowLocationPermissionDialog = true) }
-                        }
-                    }
-                }
-            }
-
-            MapIntent.DismissLocationPermissionDialog -> {
-                reduce { copy(isShowLocationPermissionDialog = false) }
-            }
-
+            MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
+            is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent, reduce, postSideEffect)
+            is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
+            is MapIntent.ClickBrandMarker -> handleClickBrandMarker(state, intent, reduce, postSideEffect)
+            is MapIntent.ClickDirection -> reduce { copy(isShowDirectionBottomSheet = true) }
+            is MapIntent.RequestLocationPermission -> handleRequestLocationPermission(intent, reduce, postSideEffect)
+            MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
             MapIntent.ConfirmLocationPermissionDialog -> {
                 reduce { copy(isShowLocationPermissionDialog = false) }
                 postSideEffect(MapEffect.NavigateToAppSettings)
+            }
+        }
+    }
+
+    private fun handleClickBrand(
+        state: MapState,
+        intent: MapIntent.ClickBrand,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        reduce {
+            copy(
+                brands = state.brands.map { brand ->
+                    if (brand == intent.brand) {
+                        brand.copy(isChecked = !brand.isChecked)
+                    } else {
+                        brand
+                    }
+                }.toImmutableList(),
+            )
+        }
+    }
+
+    private fun handleClickNearBrand(
+        intent: MapIntent.ClickNearBrand,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        reduce {
+            copy(
+                dragLevel = DragLevel.INVISIBLE,
+                selectedBrandInfo = intent.brandInfo,
+                focusedMarkerPosition = intent.brandInfo.latitude to intent.brandInfo.longitude,
+            )
+        }
+        postSideEffect(MapEffect.MoveCameraToPosition(intent.brandInfo.latitude, intent.brandInfo.longitude))
+    }
+
+    private fun handleClickDirectionItem(
+        state: MapState,
+        intent: MapIntent.ClickDirectionItem,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        reduce { copy(isShowDirectionBottomSheet = false) }
+        state.selectedBrandInfo?.let { brandInfo ->
+            postSideEffect(
+                MapEffect.MoveDirectionApp(
+                    app = intent.app,
+                    startLatitude = state.currentLocation.first,
+                    startLongitude = state.currentLocation.second,
+                    endLatitude = brandInfo.latitude,
+                    endLongitude = brandInfo.longitude,
+                ),
+            )
+        }
+    }
+
+    private fun handleClickBrandMarker(
+        state: MapState,
+        intent: MapIntent.ClickBrandMarker,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        val selectedBrand = state.nearbyBrands.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
+        reduce {
+            copy(
+                dragLevel = DragLevel.INVISIBLE,
+                focusedMarkerPosition = intent.latitude to intent.longitude,
+                selectedBrandInfo = selectedBrand,
+            )
+        }
+        postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
+    }
+
+    private fun handleRequestLocationPermission(
+        intent: MapIntent.RequestLocationPermission,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val isFirstRequest = dataStoreRepository.getBoolean(DataStoreKey.IS_FIRST_LOCATION_PERMISSION).first().not()
+
+            when {
+                isFirstRequest -> {
+                    Timber.d("최초 요청 - 시스템 권한 팝업 표시")
+                    dataStoreRepository.setBoolean(
+                        DataStoreKey.IS_FIRST_LOCATION_PERMISSION,
+                        true,
+                    )
+                    postSideEffect(MapEffect.RequestLocationPermission)
+                }
+
+                intent.shouldShowRationale -> {
+                    Timber.d("1회 거부 상태 - 시스템 권한 팝업 표시")
+                    postSideEffect(MapEffect.RequestLocationPermission)
+                }
+
+                else -> {
+                    Timber.d("2회 이상 거부 (영구 거부) - 설정 이동 다이얼로그 표시")
+                    reduce { copy(isShowLocationPermissionDialog = true) }
+                }
             }
         }
     }
