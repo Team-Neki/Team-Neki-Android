@@ -33,43 +33,43 @@ private val scrappedDummyList = persistentListOf(
         id = 101,
         poseImageUrl = "https://picsum.photos/seed/scrapA/400/520",
         isScrapped = true,
-        peopleCount = 1
+        peopleCount = 1,
     ),
     Pose(
         id = 102,
         poseImageUrl = "https://picsum.photos/seed/scrapB/400/680",
         isScrapped = true,
-        peopleCount = 2
+        peopleCount = 2,
     ),
     Pose(
         id = 103,
         poseImageUrl = "https://picsum.photos/seed/scrapC/400/450",
         isScrapped = true,
-        peopleCount = 1
+        peopleCount = 1,
     ),
     Pose(
         id = 104,
         poseImageUrl = "https://picsum.photos/seed/scrapD/400/600",
         isScrapped = true,
-        peopleCount = 3
+        peopleCount = 3,
     ),
     Pose(
         id = 105,
         poseImageUrl = "https://picsum.photos/seed/scrapE/400/550",
         isScrapped = true,
-        peopleCount = 2
+        peopleCount = 2,
     ),
     Pose(
         id = 106,
         poseImageUrl = "https://picsum.photos/seed/scrapF/400/720",
         isScrapped = true,
-        peopleCount = 4
+        peopleCount = 4,
     ),
     Pose(
         id = 107,
         poseImageUrl = "https://picsum.photos/seed/scrapG/400/480",
         isScrapped = true,
-        peopleCount = 1
+        peopleCount = 1,
     ),
 )
 
@@ -80,13 +80,11 @@ data class PoseState(
     val isShowScrappedPose: Boolean = false,
     val randomPoseList: ImmutableList<Pose> = dummyPoseList,
     val scrappedPoseList: ImmutableList<Pose> = scrappedDummyList,
-    val selectedPose: Pose = Pose(),
     val isShowPeopleCountBottomSheet: Boolean = false,
     val isShowRandomPosePeopleCountBottomSheet: Boolean = false,
 )
 
 sealed interface PoseIntent {
-    // Pose Main
     data object EnterPoseScreen : PoseIntent
     data object ClickAlarmIcon : PoseIntent
     data object ClickPeopleCountChip : PoseIntent
@@ -97,18 +95,13 @@ sealed interface PoseIntent {
     data class ClickPeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseRecommendation : PoseIntent
     data class ClickRandomPosePeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
-    data object ClickRandomPoseBottomSheetSelectButton: PoseIntent
-
-    // Pose Detail
-    data object ClickBackIcon : PoseIntent
-    data object ClickScrapIcon : PoseIntent
+    data object ClickRandomPoseBottomSheetSelectButton : PoseIntent
 }
 
 sealed interface PoseEffect {
-    data object NavigateBack : PoseEffect
     data object NavigateToNotification : PoseEffect
     data class NavigateToRandomPose(val peopleCount: PeopleCount) : PoseEffect
-    data object NavigateToPoseDetail : PoseEffect
+    data class NavigateToPoseDetail(val pose: Pose) : PoseEffect
     data class ShowToast(val message: String) : PoseEffect
 }
 
@@ -118,4 +111,7 @@ enum class PeopleCount(val displayText: String, val value: Int) {
     THREE("3인", 3),
     FOUR("4인", 4),
     FIVE_OR_MORE("5인 이상", 5),
+    ;
+
+    override fun toString(): String = displayText
 }
