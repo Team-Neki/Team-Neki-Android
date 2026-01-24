@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Figma btn_shadow 스타일
- * DROP_SHADOW: color #00000040, offset (0, 2ㅌㅌ), radius 8, spread 0
+ * DROP_SHADOW: color #00000040, offset (0, 2), radius 8, spread 0
  */
 fun Modifier.buttonShadow(
     shape: Shape = CircleShape,
