@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
                         when (rootNavigationState.currentRootKey) {
                             RootNavKey.Login -> {
                                 LoginRoute(
-                                    navigateMain = { navigator.navigateRoot(RootNavKey.Main) },
+                                    navigateToMain = { navigator.navigateRoot(RootNavKey.Main) },
                                 )
                             }
 
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     onTabSelected = { navigator.navigate(it) },
                                     onBack = { navigator.goBack() },
-                                    navigateLogin = { navigator.navigateRoot(RootNavKey.Login) },
+                                    navigateToLogin = { navigator.navigateRoot(RootNavKey.Login) },
                                 )
                             }
                         }

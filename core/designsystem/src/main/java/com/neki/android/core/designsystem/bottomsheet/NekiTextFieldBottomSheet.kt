@@ -47,8 +47,8 @@ fun NekiTextFieldBottomSheet(
     subtitle: String,
     textFieldState: TextFieldState,
     onDismissRequest: () -> Unit,
-    onCancelClick: () -> Unit,
-    onConfirmClick: () -> Unit,
+    onClickCancel: () -> Unit,
+    onClickConfirm: () -> Unit,
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(),
     placeholder: String = "",
@@ -70,8 +70,8 @@ fun NekiTextFieldBottomSheet(
             title = title,
             subtitle = subtitle,
             textFieldState = textFieldState,
-            onCancelClick = onCancelClick,
-            onConfirmClick = onConfirmClick,
+            onClickCancel = onClickCancel,
+            onClickConfirm = onClickConfirm,
             placeholder = placeholder,
             maxLength = maxLength,
             confirmButtonText = confirmButtonText,
@@ -87,8 +87,8 @@ private fun NekiTextFieldBottomSheetContent(
     title: String,
     subtitle: String,
     textFieldState: TextFieldState,
-    onCancelClick: () -> Unit,
-    onConfirmClick: () -> Unit,
+    onClickCancel: () -> Unit,
+    onClickConfirm: () -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String = "",
     maxLength: Int? = null,
@@ -151,12 +151,12 @@ private fun NekiTextFieldBottomSheetContent(
             CTAButtonGray(
                 modifier = Modifier.weight(93f),
                 text = "취소",
-                onClick = onCancelClick,
+                onClick = onClickCancel,
             )
             CTAButtonPrimary(
                 modifier = Modifier.weight(230f),
                 text = confirmButtonText,
-                onClick = onConfirmClick,
+                onClick = onClickConfirm,
                 enabled = textFieldState.text.isNotEmpty() && !isError,
             )
         }
@@ -240,8 +240,8 @@ private fun NekiTextFieldBottomSheetContentDefaultPreview() {
             title = "텍스트",
             subtitle = "보조 텍스트가 들어가는 자리입니다",
             textFieldState = rememberTextFieldState(),
-            onCancelClick = {},
-            onConfirmClick = {},
+            onClickCancel = {},
+            onClickConfirm = {},
             placeholder = "플레이스 홀더에 들어갈 문구",
         )
     }
@@ -255,8 +255,8 @@ private fun NekiTextFieldBottomSheetContentCompletedPreview() {
             title = "텍스트",
             subtitle = "보조 텍스트가 들어가는 자리입니다",
             textFieldState = rememberTextFieldState(initialText = "입력 완료 입력 완료 입력 완료 입력 완료 입력 완료 입력 완료 "),
-            onCancelClick = {},
-            onConfirmClick = {},
+            onClickCancel = {},
+            onClickConfirm = {},
         )
     }
 }
@@ -269,8 +269,8 @@ private fun NekiTextFieldBottomSheetContentErrorPreview() {
             title = "텍스트",
             subtitle = "보조 텍스트가 들어가는 자리입니다",
             textFieldState = rememberTextFieldState(initialText = "오류인 상태 텍스트입니다"),
-            onCancelClick = {},
-            onConfirmClick = {},
+            onClickCancel = {},
+            onClickConfirm = {},
             maxLength = 16,
             isError = true,
             errorMessage = "에러 메세지 텍스트",

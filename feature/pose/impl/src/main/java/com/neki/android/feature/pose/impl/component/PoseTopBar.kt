@@ -20,7 +20,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 internal fun PoseTopBar(
     modifier: Modifier = Modifier,
-    onIconClick: () -> Unit = {},
+    onClickIcon: () -> Unit = {},
 ) {
     NekiLeftTitleTopBar(
         modifier = modifier
@@ -35,7 +35,7 @@ internal fun PoseTopBar(
         },
         actions = {
             NekiIconButton(
-                onClick = onIconClick,
+                onClick = onClickIcon,
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),

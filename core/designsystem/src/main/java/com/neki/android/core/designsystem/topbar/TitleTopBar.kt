@@ -37,7 +37,7 @@ fun CloseTitleTopBar(
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_close_24),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                     tint = NekiTheme.colorScheme.gray800,
                     contentDescription = null,
                 )
@@ -56,7 +56,7 @@ fun CloseTitleTextButtonTopBar(
     enabledTextColor: Color = NekiTheme.colorScheme.primary500,
     disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     onClose: () -> Unit = {},
-    onTextButtonClick: () -> Unit = {},
+    onClickTextButton: () -> Unit = {},
 ) {
     NekiTitleTopBar(
         modifier = modifier,
@@ -69,7 +69,7 @@ fun CloseTitleTextButtonTopBar(
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_close_24),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                     tint = NekiTheme.colorScheme.gray800,
                     contentDescription = null,
                 )
@@ -80,7 +80,7 @@ fun CloseTitleTextButtonTopBar(
             NekiTextButton(
                 modifier = modifier.fillMaxHeight(),
                 contentPadding = PaddingValues(horizontal = 20.dp),
-                onClick = onTextButtonClick,
+                onClick = onClickTextButton,
                 enabled = enabled,
             ) {
                 Text(
@@ -102,7 +102,7 @@ fun BackTitleTextButtonTopBar(
     enabledTextColor: Color = NekiTheme.colorScheme.primary500,
     disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     onBack: () -> Unit = {},
-    onTextButtonClick: () -> Unit = {},
+    onClickTextButton: () -> Unit = {},
 ) {
     NekiTitleTopBar(
         modifier = modifier,
@@ -126,7 +126,7 @@ fun BackTitleTextButtonTopBar(
             NekiTextButton(
                 modifier = modifier.fillMaxHeight(),
                 contentPadding = PaddingValues(horizontal = 20.dp),
-                onClick = onTextButtonClick,
+                onClick = onClickTextButton,
                 enabled = enabled,
             ) {
                 Text(
@@ -171,7 +171,7 @@ fun BackTitleOptionTopBar(
     title: String,
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
-    onIconClick: () -> Unit = {},
+    onClickIcon: () -> Unit = {},
 ) {
     NekiTitleTopBar(
         modifier = modifier,
@@ -196,11 +196,11 @@ fun BackTitleOptionTopBar(
                 modifier = modifier
                     .padding(end = 8.dp)
                     .size(52.dp),
-                onClick = onIconClick,
+                onClick = onClickIcon,
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_option),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_kebab),
                     tint = NekiTheme.colorScheme.gray800,
                     contentDescription = null,
                 )
@@ -219,8 +219,8 @@ fun BackTitleTextButtonOptionTopBar(
     disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     optionIconRes: Int = R.drawable.icon_option,
     onBack: () -> Unit = {},
-    onTextButtonClick: () -> Unit = {},
-    onIconClick: () -> Unit = {},
+    onClickTextButton: () -> Unit = {},
+    onClickIcon: () -> Unit = {},
 ) {
     NekiTitleTopBar(
         modifier = modifier,
@@ -250,7 +250,7 @@ fun BackTitleTextButtonOptionTopBar(
                         .fillMaxHeight()
                         .padding(vertical = 3.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp),
-                    onClick = onTextButtonClick,
+                    onClick = onClickTextButton,
                     enabled = enabled,
                 ) {
                     Text(
@@ -263,7 +263,7 @@ fun BackTitleTextButtonOptionTopBar(
                     modifier = modifier
                         .padding(end = 8.dp)
                         .size(52.dp),
-                    onClick = onIconClick,
+                    onClick = onClickIcon,
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),

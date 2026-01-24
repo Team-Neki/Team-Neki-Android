@@ -107,17 +107,17 @@ internal fun ArchiveMainScreen(
         ArchiveMainContent(
             uiState = uiState,
             lazyState = lazyState,
-            onPlusIconClick = { onIntent(ArchiveMainIntent.ClickAddIcon) },
-            onNotificationIconClick = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
-            onQRScanClick = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
-            onGalleryClick = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
-            onNewAlbumClick = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
+            onClickPlusIcon = { onIntent(ArchiveMainIntent.ClickAddIcon) },
+            onClickNotificationIcon = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
+            onClickQRScan = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
+            onClickGallery = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
+            onClickNewAlbum = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
             onDismissPopup = { onIntent(ArchiveMainIntent.DismissAddDialog) },
-            onShowAllAlbumClick = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
-            onFavoriteAlbumClick = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
-            onAlbumItemClick = { onIntent(ArchiveMainIntent.ClickAlbumItem(it)) },
-            onShowAllPhotoClick = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
-            onPhotoItemClick = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
+            onClickShowAllAlbum = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
+            onClickFavoriteAlbum = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
+            onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it)) },
+            onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
+            onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
         )
 
         GotoTopButton(
@@ -133,7 +133,7 @@ internal fun ArchiveMainScreen(
         LoadingDialog()
     }
 
-    if (uiState.showAddAlbumBottomSheet) {
+    if (uiState.isShowAddAlbumBottomSheet) {
         val textFieldState = rememberTextFieldState()
         val existingAlbumNames = remember { uiState.albums.map { it.title } }
 
@@ -150,8 +150,8 @@ internal fun ArchiveMainScreen(
         AddAlbumBottomSheet(
             textFieldState = textFieldState,
             onDismissRequest = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
-            onCancelClick = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
-            onConfirmClick = {
+            onClickCancel = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
+            onClickConfirm = {
                 val albumName = textFieldState.text.toString()
                 if (errorMessage == null && albumName.isNotBlank()) {
                     onIntent(ArchiveMainIntent.ClickAddAlbumButton(albumName))
@@ -162,11 +162,11 @@ internal fun ArchiveMainScreen(
         )
     }
 
-    if (uiState.showChooseWithAlbumDialog) {
+    if (uiState.isShowChooseWithAlbumDialog) {
         ChooseWithAlbumDialog(
             onDismissRequest = { onIntent(ArchiveMainIntent.DismissChooseWithAlbumDialog) },
-            onUploadWithOutAlbumClick = { onIntent(ArchiveMainIntent.ClickUploadWithoutAlbumRow) },
-            onUploadWithAlbumClick = { onIntent(ArchiveMainIntent.ClickUploadWithAlbumRow) },
+            onClickUploadWithOutAlbum = { onIntent(ArchiveMainIntent.ClickUploadWithoutAlbumRow) },
+            onClickUploadWithAlbum = { onIntent(ArchiveMainIntent.ClickUploadWithAlbumRow) },
         )
     }
 }
@@ -175,17 +175,17 @@ internal fun ArchiveMainScreen(
 private fun ArchiveMainContent(
     uiState: ArchiveMainState,
     lazyState: LazyStaggeredGridState,
-    onPlusIconClick: () -> Unit,
-    onNotificationIconClick: () -> Unit,
-    onQRScanClick: () -> Unit,
-    onGalleryClick: () -> Unit,
-    onNewAlbumClick: () -> Unit,
+    onClickPlusIcon: () -> Unit,
+    onClickNotificationIcon: () -> Unit,
+    onClickQRScan: () -> Unit,
+    onClickGallery: () -> Unit,
+    onClickNewAlbum: () -> Unit,
     onDismissPopup: () -> Unit,
-    onShowAllAlbumClick: () -> Unit,
-    onFavoriteAlbumClick: () -> Unit,
-    onAlbumItemClick: (Long) -> Unit,
-    onShowAllPhotoClick: () -> Unit,
-    onPhotoItemClick: (Photo) -> Unit,
+    onClickShowAllAlbum: () -> Unit,
+    onClickFavoriteAlbum: () -> Unit,
+    onClickAlbumItem: (Long) -> Unit,
+    onClickShowAllPhoto: () -> Unit,
+    onClickPhotoItem: (Photo) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalStaggeredGrid(
@@ -202,12 +202,12 @@ private fun ArchiveMainContent(
             ArchiveMainTopBar(
                 modifier = Modifier.padding(start = 20.dp, end = 8.dp),
                 showTooltip = uiState.isFirstEntered,
-                showAddPopup = uiState.showAddDialog,
-                onPlusIconClick = onPlusIconClick,
-                onNotificationIconClick = onNotificationIconClick,
-                onQRScanClick = onQRScanClick,
-                onGalleryClick = onGalleryClick,
-                onNewAlbumClick = onNewAlbumClick,
+                showAddPopup = uiState.isShowAddDialog,
+                onClickPlusIcon = onClickPlusIcon,
+                onClickNotificationIcon = onClickNotificationIcon,
+                onClickQRScan = onClickQRScan,
+                onClickGallery = onClickGallery,
+                onClickNewAlbum = onClickNewAlbum,
                 onDismissPopup = onDismissPopup,
             )
         }
@@ -217,7 +217,7 @@ private fun ArchiveMainContent(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = "앨범",
                 textButtonTitle = "전체 보기",
-                onShowAllAlbumClick = onShowAllAlbumClick,
+                onClickShowAllAlbum = onClickShowAllAlbum,
             )
         }
 
@@ -226,8 +226,8 @@ private fun ArchiveMainContent(
 //                modifier = Modifier.requiredWidth(screenWidth),
                 favoriteAlbum = uiState.favoriteAlbum,
                 albumList = uiState.albums,
-                onFavoriteAlbumClick = onFavoriteAlbumClick,
-                onAlbumItemClick = onAlbumItemClick,
+                onClickFavoriteAlbum = onClickFavoriteAlbum,
+                onClickAlbumItem = onClickAlbumItem,
             )
         }
 
@@ -236,7 +236,7 @@ private fun ArchiveMainContent(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = "최근 사진",
                 textButtonTitle = "모든 사진",
-                onShowAllAlbumClick = onShowAllPhotoClick,
+                onClickShowAllAlbum = onClickShowAllPhoto,
             )
         }
 
@@ -247,7 +247,7 @@ private fun ArchiveMainContent(
             ArchiveMainPhotoItem(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 photo = photo,
-                onItemClick = onPhotoItemClick,
+                onClickItem = onClickPhotoItem,
             )
         }
     }

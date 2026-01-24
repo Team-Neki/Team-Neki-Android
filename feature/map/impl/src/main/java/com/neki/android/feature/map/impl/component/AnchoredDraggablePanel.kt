@@ -223,7 +223,7 @@ internal fun AnchoredPanelContent(
                 items(brands) { brand ->
                     VerticalBrandItem(
                         brand = brand,
-                        onItemClick = { onClickBrand(brand) },
+                        onClickItem = { onClickBrand(brand) },
                     )
                 }
             }
@@ -261,7 +261,7 @@ internal fun AnchoredPanelContent(
             items(nearbyBrands) { brandInfo ->
                 HorizontalBrandItem(
                     brandInfo = brandInfo,
-                    onItemClick = { onClickNearBrand(brandInfo) },
+                    onClickItem = { onClickNearBrand(brandInfo) },
                 )
             }
         }

@@ -34,8 +34,8 @@ fun DoubleButtonAlertDialog(
     grayButtonText: String,
     primaryButtonText: String,
     onDismissRequest: () -> Unit,
-    onPrimaryButtonClick: () -> Unit,
-    onGrayButtonClick: () -> Unit,
+    onClickPrimaryButton: () -> Unit,
+    onClickGrayButton: () -> Unit,
     modifier: Modifier = Modifier,
     properties: DialogProperties = DialogProperties(),
 ) {
@@ -85,12 +85,12 @@ fun DoubleButtonAlertDialog(
             ) {
                 CTAButtonGray(
                     text = grayButtonText,
-                    onClick = onGrayButtonClick,
+                    onClick = onClickGrayButton,
                     modifier = Modifier.weight(1f),
                 )
                 CTAButtonPrimary(
                     text = primaryButtonText,
-                    onClick = onPrimaryButtonClick,
+                    onClick = onClickPrimaryButton,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -108,8 +108,8 @@ private fun DoubleButtonAlertDialogPreview() {
             grayButtonText = "텍스트",
             primaryButtonText = "텍스트",
             onDismissRequest = {},
-            onPrimaryButtonClick = {},
-            onGrayButtonClick = {},
+            onClickPrimaryButton = {},
+            onClickGrayButton = {},
         )
     }
 }

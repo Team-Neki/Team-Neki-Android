@@ -91,17 +91,17 @@ internal fun PhotoDetailScreen(
 
         PhotoDetailActionBar(
             isFavorite = uiState.photo.isFavorite,
-            onDownloadClick = { onIntent(PhotoDetailIntent.ClickDownloadIcon) },
-            onFavoriteClick = { onIntent(PhotoDetailIntent.ClickFavoriteIcon) },
-            onDeleteClick = { onIntent(PhotoDetailIntent.ClickDeleteIcon) },
+            onClickDownload = { onIntent(PhotoDetailIntent.ClickDownloadIcon) },
+            onClickFavorite = { onIntent(PhotoDetailIntent.ClickFavoriteIcon) },
+            onClickDelete = { onIntent(PhotoDetailIntent.ClickDeleteIcon) },
         )
     }
 
-    if (uiState.showDeleteDialog) {
+    if (uiState.isShowDeleteDialog) {
         DeletePhotoDialog(
             onDismissRequest = { onIntent(PhotoDetailIntent.DismissDeleteDialog) },
-            onDeleteClick = { onIntent(PhotoDetailIntent.ClickDeleteDialogConfirmButton) },
-            onCancelClick = { onIntent(PhotoDetailIntent.ClickDeleteDialogCancelButton) },
+            onClickDelete = { onIntent(PhotoDetailIntent.ClickDeleteDialogConfirmButton) },
+            onClickCancel = { onIntent(PhotoDetailIntent.ClickDeleteDialogCancelButton) },
         )
     }
 

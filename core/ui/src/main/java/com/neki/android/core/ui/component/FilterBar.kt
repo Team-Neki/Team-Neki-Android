@@ -30,8 +30,8 @@ fun FilterBar(
     defaultChipDisplayText: String,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
-    onDownIconChipClick: () -> Unit = {},
-    onDefaultChipClick: () -> Unit = {},
+    onClickDownIconChip: () -> Unit = {},
+    onClickDefaultChip: () -> Unit = {},
 ) {
     AnimatedVisibility(
         modifier = modifier
@@ -49,12 +49,12 @@ fun FilterBar(
             DownIconFilterChip(
                 isSelected = isDownIconChipSelected,
                 displayText = downIconChipDisplayText,
-                onClick = onDownIconChipClick,
+                onClick = onClickDownIconChip,
             )
             DefaultFilterChip(
                 isSelected = isDefaultChipSelected,
                 displayText = defaultChipDisplayText,
-                onClick = onDefaultChipClick,
+                onClick = onClickDefaultChip,
             )
         }
     }

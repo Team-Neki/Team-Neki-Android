@@ -22,9 +22,9 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 internal fun PhotoDetailActionBar(
     isFavorite: Boolean,
     modifier: Modifier = Modifier,
-    onDownloadClick: () -> Unit = {},
-    onFavoriteClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
+    onClickDownload: () -> Unit = {},
+    onClickFavorite: () -> Unit = {},
+    onClickDelete: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -39,7 +39,7 @@ internal fun PhotoDetailActionBar(
             Icon(
                 modifier = Modifier
                     .size(28.dp)
-                    .noRippleClickable { onDownloadClick() },
+                    .noRippleClickable { onClickDownload() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_download),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.gray500,
@@ -48,11 +48,11 @@ internal fun PhotoDetailActionBar(
             Icon(
                 modifier = Modifier
                     .size(28.dp)
-                    .noRippleClickable { onFavoriteClick() },
+                    .noRippleClickable { onClickFavorite() },
                 imageVector = if (isFavorite) {
-                    ImageVector.vectorResource(R.drawable.icon_heart_primary_28)
+                    ImageVector.vectorResource(R.drawable.icon_heart)
                 } else {
-                    ImageVector.vectorResource(R.drawable.icon_heart_gray_stroke_28)
+                    ImageVector.vectorResource(R.drawable.icon_heart_stroke)
                 },
                 contentDescription = null,
                 tint = Color.Unspecified,
@@ -62,7 +62,7 @@ internal fun PhotoDetailActionBar(
         Icon(
             modifier = Modifier
                 .size(28.dp)
-                .noRippleClickable { onDeleteClick() },
+                .noRippleClickable { onClickDelete() },
             imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
             contentDescription = null,
             tint = NekiTheme.colorScheme.gray600,

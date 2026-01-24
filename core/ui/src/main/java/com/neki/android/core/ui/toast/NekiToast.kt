@@ -61,7 +61,7 @@ class NekiToast(
 
     fun showToast(
         text: String,
-        @DrawableRes iconRes: Int = R.drawable.icon_checkbox_on_24,
+        @DrawableRes iconRes: Int = R.drawable.icon_checkbox_on,
         duration: Int = LENGTH_SHORT,
     ) {
         makeText(

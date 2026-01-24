@@ -11,9 +11,9 @@ import com.neki.android.feature.archive.impl.model.SelectMode
 internal fun AllPhotoTopBar(
     selectMode: SelectMode,
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {},
-    onSelectClick: () -> Unit = {},
-    onCancelClick: () -> Unit = {},
+    onClickBack: () -> Unit = {},
+    onClickSelect: () -> Unit = {},
+    onClickCancel: () -> Unit = {},
 ) {
     BackTitleTextButtonTopBar(
         modifier = modifier,
@@ -26,10 +26,10 @@ internal fun AllPhotoTopBar(
             SelectMode.DEFAULT -> NekiTheme.colorScheme.primary500
             SelectMode.SELECTING -> NekiTheme.colorScheme.gray800
         },
-        onBack = onBackClick,
-        onTextButtonClick = when (selectMode) {
-            SelectMode.DEFAULT -> onSelectClick
-            SelectMode.SELECTING -> onCancelClick
+        onBack = onClickBack,
+        onClickTextButton = when (selectMode) {
+            SelectMode.DEFAULT -> onClickSelect
+            SelectMode.SELECTING -> onClickCancel
         },
     )
 }

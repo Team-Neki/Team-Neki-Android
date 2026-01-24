@@ -6,7 +6,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -21,12 +20,12 @@ import com.neki.android.core.ui.component.PhotoComponent
 internal fun ArchiveMainPhotoItem(
     photo: Photo,
     modifier: Modifier = Modifier,
-    onItemClick: (Photo) -> Unit = {},
+    onClickItem: (Photo) -> Unit = {},
 ) {
     PhotoComponent(
         photo = photo,
         modifier = modifier.photoBackground(),
-        onItemClick = onItemClick,
+        onClickItem = onClickItem,
     ) {
         if (photo.isFavorite) {
             Icon(
@@ -34,9 +33,9 @@ internal fun ArchiveMainPhotoItem(
                     .align(Alignment.TopEnd)
                     .padding(top = 10.dp, end = 10.dp)
                     .size(20.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_heart_white_20),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_heart),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = NekiTheme.colorScheme.white,
             )
         }
     }

@@ -35,8 +35,8 @@ internal fun <T> DeleteOptionBottomSheet(
     options: ImmutableList<T>,
     selectedOption: T,
     onDismissRequest: () -> Unit,
-    onCancelClick: () -> Unit,
-    onDeleteClick: () -> Unit,
+    onClickCancel: () -> Unit,
+    onClickDelete: () -> Unit,
     onOptionSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(),
@@ -53,8 +53,8 @@ internal fun <T> DeleteOptionBottomSheet(
             title = title,
             options = options,
             selectedOption = selectedOption,
-            onCancelClick = onCancelClick,
-            onDeleteClick = onDeleteClick,
+            onClickCancel = onClickCancel,
+            onClickDelete = onClickDelete,
             onOptionSelect = onOptionSelect,
         )
     }
@@ -65,8 +65,8 @@ internal fun <T> DeleteOptionBottomSheetContent(
     title: String,
     options: List<T>,
     selectedOption: T,
-    onCancelClick: () -> Unit,
-    onDeleteClick: () -> Unit,
+    onClickCancel: () -> Unit,
+    onClickDelete: () -> Unit,
     onOptionSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -102,12 +102,12 @@ internal fun <T> DeleteOptionBottomSheetContent(
             CTAButtonGray(
                 modifier = Modifier.weight(93f),
                 text = "취소",
-                onClick = onCancelClick,
+                onClick = onClickCancel,
             )
             CTAButtonPrimary(
                 modifier = Modifier.weight(230f),
                 text = "삭제하기",
-                onClick = onDeleteClick,
+                onClick = onClickDelete,
             )
         }
     }
@@ -131,7 +131,7 @@ private fun DeleteOptionRow(
         if (isSelected) {
             Icon(
                 modifier = Modifier.size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_check_primary),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.primary500,
             )
@@ -161,8 +161,8 @@ private fun DeleteOptionBottomSheetContentPreview() {
             title = "삭제하시겠어요?",
             options = PreviewDeleteOption.entries,
             selectedOption = PreviewDeleteOption.OPTION_1,
-            onCancelClick = {},
-            onDeleteClick = {},
+            onClickCancel = {},
+            onClickDelete = {},
             onOptionSelect = {},
         )
     }
@@ -176,8 +176,8 @@ private fun DeleteOptionBottomSheetContentOption2Preview() {
             title = "삭제하시겠어요?",
             options = PreviewDeleteOption.entries,
             selectedOption = PreviewDeleteOption.OPTION_2,
-            onCancelClick = {},
-            onDeleteClick = {},
+            onClickCancel = {},
+            onClickDelete = {},
             onOptionSelect = {},
         )
     }

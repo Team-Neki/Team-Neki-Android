@@ -65,8 +65,8 @@ internal fun UploadAlbumScreen(
     ) {
         UploadAlbumTopBar(
             count = uiState.count,
-            onBackClick = { onIntent(UploadAlbumIntent.ClickBackIcon) },
-            onUploadClick = { onIntent(UploadAlbumIntent.ClickUploadButton) },
+            onClickBack = { onIntent(UploadAlbumIntent.ClickBackIcon) },
+            onClickUpload = { onIntent(UploadAlbumIntent.ClickUploadButton) },
         )
 
         LazyColumn(

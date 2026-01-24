@@ -35,10 +35,10 @@ internal fun AllPhotoFilterBar(
     isFavoriteSelected: Boolean,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
-    onSortChipClick: () -> Unit = {},
-    onFavoriteChipClick: () -> Unit = {},
+    onClickSortChip: () -> Unit = {},
+    onClickFavoriteChip: () -> Unit = {},
     onDismissPopup: () -> Unit = {},
-    onFilterRowClick: (PhotoFilter) -> Unit = {},
+    onClickFilterRow: (PhotoFilter) -> Unit = {},
 ) {
     Box {
         FilterBar(
@@ -48,14 +48,14 @@ internal fun AllPhotoFilterBar(
             defaultChipDisplayText = "즐겨찾는",
             modifier = modifier,
             visible = visible,
-            onDownIconChipClick = onSortChipClick,
-            onDefaultChipClick = onFavoriteChipClick,
+            onClickDownIconChip = onClickSortChip,
+            onClickDefaultChip = onClickFavoriteChip,
         )
         if (showFilterPopup) {
             PhotoFilterPopup(
                 selectedFilter = selectedFilter,
                 onDismissRequest = onDismissPopup,
-                onFilterRowClick = onFilterRowClick,
+                onClickFilterRow = onClickFilterRow,
             )
         }
     }
@@ -65,7 +65,7 @@ internal fun AllPhotoFilterBar(
 private fun PhotoFilterPopup(
     selectedFilter: PhotoFilter,
     onDismissRequest: () -> Unit,
-    onFilterRowClick: (PhotoFilter) -> Unit,
+    onClickFilterRow: (PhotoFilter) -> Unit,
 ) {
     val density = LocalDensity.current
     val popupOffsetX = with(density) { 20.dp.toPx().toInt() }
@@ -101,7 +101,7 @@ private fun PhotoFilterPopup(
                             color = if (selectedFilter == filter) NekiTheme.colorScheme.gray50
                             else NekiTheme.colorScheme.white,
                         )
-                        .clickableSingle { onFilterRowClick(filter) }
+                        .clickableSingle { onClickFilterRow(filter) }
                         .padding(horizontal = 16.dp, vertical = 5.dp),
                     text = filter.label,
                     style = NekiTheme.typography.body14Medium,
@@ -145,8 +145,8 @@ private fun PhotoFilterPopupPreview() {
             showFilterPopup = showPopup,
             selectedFilter = PhotoFilter.NEWEST,
             isFavoriteSelected = false,
-            onSortChipClick = { showPopup = true },
-            onFilterRowClick = { showPopup = false },
+            onClickSortChip = { showPopup = true },
+            onClickFilterRow = { showPopup = false },
             onDismissPopup = { showPopup = false },
         )
     }

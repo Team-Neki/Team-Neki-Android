@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -114,9 +113,9 @@ private fun FavoriteAlbumThumbnail(
 
         Icon(
             modifier = Modifier.size(20.dp),
-            imageVector = ImageVector.vectorResource(R.drawable.icon_heart_white_20),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_heart),
             contentDescription = null,
-            tint = Color.Unspecified,
+            tint = NekiTheme.colorScheme.white,
         )
     }
 }

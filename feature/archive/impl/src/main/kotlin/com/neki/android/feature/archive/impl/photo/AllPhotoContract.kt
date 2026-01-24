@@ -13,8 +13,8 @@ data class AllPhotoState(
     val selectedPhotoFilter: PhotoFilter = PhotoFilter.NEWEST,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
     val isFavoriteChipSelected: Boolean = false,
-    val showFilterDialog: Boolean = false,
-    val showDeleteDialog: Boolean = false,
+    val isShowFilterDialog: Boolean = false,
+    val isShowDeleteDialog: Boolean = false,
 )
 
 enum class PhotoFilter(val label: String) {

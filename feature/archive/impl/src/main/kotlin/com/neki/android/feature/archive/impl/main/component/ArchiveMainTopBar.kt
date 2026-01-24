@@ -39,11 +39,11 @@ import com.neki.android.feature.archive.impl.R as ArchiveR
 internal fun ArchiveMainTopBar(
     showAddPopup: Boolean,
     modifier: Modifier = Modifier,
-    onPlusIconClick: () -> Unit = {},
-    onNotificationIconClick: () -> Unit = {},
-    onQRScanClick: () -> Unit = {},
-    onGalleryClick: () -> Unit = {},
-    onNewAlbumClick: () -> Unit = {},
+    onClickPlusIcon: () -> Unit = {},
+    onClickNotificationIcon: () -> Unit = {},
+    onClickQRScan: () -> Unit = {},
+    onClickGallery: () -> Unit = {},
+    onClickNewAlbum: () -> Unit = {},
     onDismissPopup: () -> Unit = {},
     showTooltip: Boolean = true,
 ) {
@@ -63,7 +63,7 @@ internal fun ArchiveMainTopBar(
             ) {
                 Box {
                     NekiIconButton(
-                        onClick = onPlusIconClick,
+                        onClick = onClickPlusIcon,
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.icon_plus_primary),
@@ -75,9 +75,9 @@ internal fun ArchiveMainTopBar(
                     if (showAddPopup) {
                         AddPhotoPopup(
                             onDismissRequest = onDismissPopup,
-                            onQRScanClick = onQRScanClick,
-                            onGalleryClick = onGalleryClick,
-                            onNewAlbumClick = onNewAlbumClick,
+                            onClickQRScan = onClickQRScan,
+                            onClickGallery = onClickGallery,
+                            onClickNewAlbum = onClickNewAlbum,
                         )
                     }
                     if (showTooltip) {
@@ -85,7 +85,7 @@ internal fun ArchiveMainTopBar(
                     }
                 }
                 NekiIconButton(
-                    onClick = onNotificationIconClick,
+                    onClick = onClickNotificationIcon,
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
@@ -166,9 +166,9 @@ private fun ToolTip() {
 @Composable
 private fun AddPhotoPopup(
     onDismissRequest: () -> Unit,
-    onQRScanClick: () -> Unit,
-    onGalleryClick: () -> Unit,
-    onNewAlbumClick: () -> Unit,
+    onClickQRScan: () -> Unit,
+    onClickGallery: () -> Unit,
+    onClickNewAlbum: () -> Unit,
 ) {
     val density = LocalDensity.current
     val popupOffsetX = with(density) { (-4).dp.toPx().toInt() }
@@ -198,15 +198,15 @@ private fun AddPhotoPopup(
         ) {
             AddPhotoRow(
                 modifier = Modifier.fillMaxWidth(),
-                iconResource = ArchiveR.drawable.icon_qrcode_scan,
+                iconRes = ArchiveR.drawable.icon_qrcode_scan,
                 label = "QR 인식",
-                onClick = onQRScanClick,
+                onClick = onClickQRScan,
             )
             AddPhotoRow(
                 modifier = Modifier.fillMaxWidth(),
-                iconResource = ArchiveR.drawable.icon_upload_gallery,
+                iconRes = ArchiveR.drawable.icon_upload_gallery,
                 label = "갤러리에서 추가",
-                onClick = onGalleryClick,
+                onClick = onClickGallery,
             )
             HorizontalDivider(
                 modifier = Modifier
@@ -217,9 +217,9 @@ private fun AddPhotoPopup(
             )
             AddPhotoRow(
                 modifier = Modifier.fillMaxWidth(),
-                iconResource = ArchiveR.drawable.icon_add_new_album,
+                iconRes = ArchiveR.drawable.icon_add_new_album,
                 label = "새 앨범 추가",
-                onClick = onNewAlbumClick,
+                onClick = onClickNewAlbum,
             )
         }
     }

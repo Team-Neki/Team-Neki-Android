@@ -25,19 +25,19 @@ internal class PoseViewModel @Inject constructor() : ViewModel() {
             // Pose Main
             PoseIntent.EnterPoseScreen -> fetchInitialData(reduce)
             PoseIntent.ClickAlarmIcon -> postSideEffect(PoseEffect.NavigateToNotification)
-            PoseIntent.ClickNumberOfPeopleChip -> reduce { copy(showNumberOfPeopleBottomSheet = true) }
+            PoseIntent.ClickNumberOfPeopleChip -> reduce { copy(isShowNumberOfPeopleBottomSheet = true) }
             is PoseIntent.ClickNumberOfPeopleSheetItem -> reduce {
                 copy(
-                    showScrappedPose = false,
+                    isShowScrappedPose = false,
                     selectedNumberOfPeople = intent.numberOfPeople,
-                    showNumberOfPeopleBottomSheet = false,
+                    isShowNumberOfPeopleBottomSheet = false,
                 )
             }
 
-            PoseIntent.DismissNumberOfPeopleBottomSheet -> reduce { copy(showNumberOfPeopleBottomSheet = false) }
+            PoseIntent.DismissNumberOfPeopleBottomSheet -> reduce { copy(isShowNumberOfPeopleBottomSheet = false) }
             PoseIntent.ClickScrapChip -> reduce {
                 copy(
-                    showScrappedPose = !showScrappedPose,
+                    isShowScrappedPose = !isShowScrappedPose,
                     selectedNumberOfPeople = NumberOfPeople.UNSELECTED,
                 )
             }

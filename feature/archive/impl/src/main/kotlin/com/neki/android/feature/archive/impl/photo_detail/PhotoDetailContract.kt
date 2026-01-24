@@ -5,7 +5,7 @@ import com.neki.android.core.model.Photo
 data class PhotoDetailState(
     val isLoading: Boolean = false,
     val photo: Photo = Photo(),
-    val showDeleteDialog: Boolean = false,
+    val isShowDeleteDialog: Boolean = false,
 )
 
 sealed interface PhotoDetailIntent {

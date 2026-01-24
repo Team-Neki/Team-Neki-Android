@@ -9,8 +9,8 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 internal fun DeletePhotoDialog(
     onDismissRequest: () -> Unit,
-    onDeleteClick: () -> Unit,
-    onCancelClick: () -> Unit,
+    onClickDelete: () -> Unit,
+    onClickCancel: () -> Unit,
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
 ) {
     DoubleButtonAlertDialog(
@@ -19,8 +19,8 @@ internal fun DeletePhotoDialog(
         grayButtonText = "취소",
         primaryButtonText = "삭제하기",
         onDismissRequest = onDismissRequest,
-        onPrimaryButtonClick = onDeleteClick,
-        onGrayButtonClick = onCancelClick,
+        onClickPrimaryButton = onClickDelete,
+        onClickGrayButton = onClickCancel,
         properties = properties,
     )
 }
@@ -31,8 +31,8 @@ private fun DeletePhotoDialogPreview() {
     NekiTheme {
         DeletePhotoDialog(
             onDismissRequest = {},
-            onDeleteClick = {},
-            onCancelClick = {},
+            onClickDelete = {},
+            onClickCancel = {},
         )
     }
 }

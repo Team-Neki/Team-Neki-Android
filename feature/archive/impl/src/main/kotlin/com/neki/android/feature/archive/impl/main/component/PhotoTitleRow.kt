@@ -24,7 +24,7 @@ internal fun ArchiveMainTitleRow(
     title: String,
     textButtonTitle: String,
     modifier: Modifier = Modifier,
-    onShowAllAlbumClick: () -> Unit = {},
+    onClickShowAllAlbum: () -> Unit = {},
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -38,7 +38,7 @@ internal fun ArchiveMainTitleRow(
         )
         NekiTextButton(
             modifier = Modifier.offset(x = ARCHIVE_ROW_TEXT_BUTTON_PADDING.dp),
-            onClick = onShowAllAlbumClick,
+            onClick = onClickShowAllAlbum,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

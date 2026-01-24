@@ -11,8 +11,8 @@ data class AlbumDetailState(
     val isFavoriteAlbum: Boolean = false,
     val selectMode: SelectMode = SelectMode.DEFAULT,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
-    val showDeleteDialog: Boolean = false,
-    val showDeleteBottomSheet: Boolean = false,
+    val isShowDeleteDialog: Boolean = false,
+    val isShowDeleteBottomSheet: Boolean = false,
     val selectedDeleteOption: PhotoDeleteOption = PhotoDeleteOption.REMOVE_FROM_ALBUM,
 )
 

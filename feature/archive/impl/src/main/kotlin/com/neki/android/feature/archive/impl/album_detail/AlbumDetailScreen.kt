@@ -97,9 +97,9 @@ internal fun AlbumDetailScreen(
             hasNoPhoto = uiState.album.photoList.isEmpty(),
             title = if (uiState.isFavoriteAlbum) "즐겨찾는 사진" else uiState.album.title,
             selectMode = uiState.selectMode,
-            onBackClick = { onIntent(AlbumDetailIntent.ClickBackIcon) },
-            onSelectClick = { onIntent(AlbumDetailIntent.ClickSelectButton) },
-            onCancelClick = { onIntent(AlbumDetailIntent.ClickCancelButton) },
+            onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
+            onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectButton) },
+            onClickCancel = { onIntent(AlbumDetailIntent.ClickCancelButton) },
         )
 
         Box(
@@ -127,8 +127,8 @@ internal fun AlbumDetailScreen(
                         photo = photo,
                         isSelected = isSelected,
                         isSelectMode = uiState.selectMode == SelectMode.SELECTING,
-                        onItemClick = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
-                        onSelectClick = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
+                        onClickItem = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
+                        onClickSelect = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
                     )
                 }
             }
@@ -137,8 +137,8 @@ internal fun AlbumDetailScreen(
         PhotoActionBar(
             visible = uiState.selectMode == SelectMode.SELECTING,
             isEnabled = uiState.selectedPhotos.isNotEmpty(),
-            onDownloadClick = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
-            onDeleteClick = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
+            onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
+            onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
         )
     }
 
@@ -149,23 +149,23 @@ internal fun AlbumDetailScreen(
     }
 
     // Delete Dialog for Favorite Album
-    if (uiState.showDeleteDialog) {
+    if (uiState.isShowDeleteDialog) {
         DeletePhotoDialog(
             onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteDialog) },
-            onDeleteClick = { onIntent(AlbumDetailIntent.ClickDeleteDialogConfirmButton) },
-            onCancelClick = { onIntent(AlbumDetailIntent.ClickDeleteDialogCancelButton) },
+            onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteDialogConfirmButton) },
+            onClickCancel = { onIntent(AlbumDetailIntent.ClickDeleteDialogCancelButton) },
         )
     }
 
     // Delete BottomSheet for Regular Album
-    if (uiState.showDeleteBottomSheet) {
+    if (uiState.isShowDeleteBottomSheet) {
         DeleteOptionBottomSheet(
             title = "사진을 삭제하시겠어요?",
             options = PhotoDeleteOption.entries.toImmutableList(),
             selectedOption = uiState.selectedDeleteOption,
             onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteBottomSheet) },
-            onCancelClick = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
-            onDeleteClick = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },
+            onClickCancel = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
+            onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },
             onOptionSelect = { onIntent(AlbumDetailIntent.SelectDeleteOption(it)) },
         )
     }
@@ -175,9 +175,9 @@ internal fun AlbumDetailScreen(
 private fun AlbumDetailTopBar(
     title: String,
     selectMode: SelectMode,
-    onBackClick: () -> Unit,
-    onSelectClick: () -> Unit,
-    onCancelClick: () -> Unit,
+    onClickBack: () -> Unit,
+    onClickSelect: () -> Unit,
+    onClickCancel: () -> Unit,
     modifier: Modifier = Modifier,
     hasNoPhoto: Boolean = false,
 ) {
@@ -185,7 +185,7 @@ private fun AlbumDetailTopBar(
         BackTitleTopBar(
             modifier = modifier,
             title = title,
-            onBack = onBackClick,
+            onBack = onClickBack,
         )
     } else {
         BackTitleTextButtonTopBar(
@@ -199,10 +199,10 @@ private fun AlbumDetailTopBar(
                 SelectMode.DEFAULT -> NekiTheme.colorScheme.primary500
                 SelectMode.SELECTING -> NekiTheme.colorScheme.gray800
             },
-            onBack = onBackClick,
-            onTextButtonClick = when (selectMode) {
-                SelectMode.DEFAULT -> onSelectClick
-                SelectMode.SELECTING -> onCancelClick
+            onBack = onClickBack,
+            onClickTextButton = when (selectMode) {
+                SelectMode.DEFAULT -> onClickSelect
+                SelectMode.SELECTING -> onClickCancel
             },
         )
     }
