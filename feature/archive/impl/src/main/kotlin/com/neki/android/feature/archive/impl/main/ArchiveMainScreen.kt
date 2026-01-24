@@ -136,7 +136,7 @@ internal fun ArchiveMainScreen(
         LoadingDialog()
     }
 
-    if (uiState.showAddAlbumBottomSheet) {
+    if (uiState.isShowAddAlbumBottomSheet) {
         val textFieldState = rememberTextFieldState()
         val existingAlbumNames = remember { uiState.albums.map { it.title } }
 
@@ -165,7 +165,7 @@ internal fun ArchiveMainScreen(
         )
     }
 
-    if (uiState.showChooseWithAlbumDialog) {
+    if (uiState.isShowChooseWithAlbumDialog) {
         ChooseWithAlbumDialog(
             onDismissRequest = { onIntent(ArchiveMainIntent.DismissChooseWithAlbumDialog) },
             onClickUploadWithOutAlbum = { onIntent(ArchiveMainIntent.ClickUploadWithoutAlbumRow) },
@@ -208,7 +208,7 @@ private fun ArchiveMainContent(
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTopBar(
                 showTooltip = uiState.isFirstEntered,
-                showAddPopup = uiState.showAddDialog,
+                showAddPopup = uiState.isShowAddDialog,
                 onClickPlusIcon = onClickPlusIcon,
                 onClickNotificationIcon = onClickNotificationIcon,
                 onClickQRScan = onClickQRScan,

@@ -79,7 +79,7 @@ internal fun AllAlbumScreen(
     ) {
         AllAlbumTopBar(
             selectMode = uiState.selectMode,
-            showOptionPopup = uiState.showOptionPopup,
+            showOptionPopup = uiState.isShowOptionPopup,
             onClickBack = { onIntent(AllAlbumIntent.ClickBackIcon) },
             onClickCreate = { onIntent(AllAlbumIntent.ClickCreateButton) },
             onClickOption = { onIntent(AllAlbumIntent.ClickOptionIcon) },
@@ -118,7 +118,7 @@ internal fun AllAlbumScreen(
         }
     }
 
-    if (uiState.showAddAlbumBottomSheet) {
+    if (uiState.isShowAddAlbumBottomSheet) {
         val textFieldState = rememberTextFieldState()
         val existingAlbumNames = remember { uiState.albums.map { it.title } }
 
@@ -148,7 +148,7 @@ internal fun AllAlbumScreen(
         )
     }
 
-    if (uiState.showDeleteAlbumBottomSheet) {
+    if (uiState.isShowDeleteAlbumBottomSheet) {
         DeleteOptionBottomSheet(
             title = "앨범을 삭제하시겠어요?",
             options = AlbumDeleteOption.entries.toImmutableList(),

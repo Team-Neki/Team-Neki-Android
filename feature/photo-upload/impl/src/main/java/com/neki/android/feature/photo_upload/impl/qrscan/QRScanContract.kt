@@ -5,7 +5,7 @@ data class QRScanState(
     val viewType: QRScanViewType = QRScanViewType.QR_SCAN,
     val scannedUrl: String? = null,
     val detectedImageUrl: String? = null,
-    val showInfoDialog: Boolean = false,
+    val isShowInfoDialog: Boolean = false,
     val isTorchEnabled: Boolean = false,
 )
 

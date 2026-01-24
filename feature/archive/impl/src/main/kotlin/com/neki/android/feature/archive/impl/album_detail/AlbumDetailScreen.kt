@@ -149,7 +149,7 @@ internal fun AlbumDetailScreen(
     }
 
     // Delete Dialog for Favorite Album
-    if (uiState.showDeleteDialog) {
+    if (uiState.isShowDeleteDialog) {
         DeletePhotoDialog(
             onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteDialog) },
             onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteDialogConfirmButton) },
@@ -158,7 +158,7 @@ internal fun AlbumDetailScreen(
     }
 
     // Delete BottomSheet for Regular Album
-    if (uiState.showDeleteBottomSheet) {
+    if (uiState.isShowDeleteBottomSheet) {
         DeleteOptionBottomSheet(
             title = "사진을 삭제하시겠어요?",
             options = PhotoDeleteOption.entries.toImmutableList(),

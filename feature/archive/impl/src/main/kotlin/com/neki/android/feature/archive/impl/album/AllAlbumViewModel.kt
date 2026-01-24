@@ -33,12 +33,12 @@ class AllAlbumViewModel @Inject constructor() : ViewModel() {
             // TopBar Intent
             AllAlbumIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AllAlbumIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
-            AllAlbumIntent.ClickCreateButton -> reduce { copy(showAddAlbumBottomSheet = true) }
-            AllAlbumIntent.ClickOptionIcon -> reduce { copy(showOptionPopup = true) }
-            AllAlbumIntent.DismissOptionPopup -> reduce { copy(showOptionPopup = false) }
+            AllAlbumIntent.ClickCreateButton -> reduce { copy(isShowAddAlbumBottomSheet = true) }
+            AllAlbumIntent.ClickOptionIcon -> reduce { copy(isShowOptionPopup = true) }
+            AllAlbumIntent.DismissOptionPopup -> reduce { copy(isShowOptionPopup = false) }
             AllAlbumIntent.ClickDeleteOptionRow -> reduce {
                 copy(
-                    showOptionPopup = false,
+                    isShowOptionPopup = false,
                     selectMode = SelectMode.SELECTING,
                 )
             }
@@ -59,11 +59,11 @@ class AllAlbumViewModel @Inject constructor() : ViewModel() {
             is AllAlbumIntent.ClickAlbumItem -> handleAlbumClick(intent.albumId, state, reduce, postSideEffect)
 
             // Add Album BottomSheet Intent
-            AllAlbumIntent.DismissAddAlbumBottomSheet -> reduce { copy(showAddAlbumBottomSheet = false) }
+            AllAlbumIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
             is AllAlbumIntent.ClickAddAlbumButton -> handleAddAlbum(intent.albumName, reduce, postSideEffect)
 
             // Delete Album BottomSheet Intent
-            AllAlbumIntent.DismissDeleteAlbumBottomSheet -> reduce { copy(showDeleteAlbumBottomSheet = false) }
+            AllAlbumIntent.DismissDeleteAlbumBottomSheet -> reduce { copy(isShowDeleteAlbumBottomSheet = false) }
             is AllAlbumIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AllAlbumIntent.ClickDeleteConfirmButton -> handleDeleteConfirm(state, reduce, postSideEffect)
         }
@@ -161,7 +161,7 @@ class AllAlbumViewModel @Inject constructor() : ViewModel() {
             postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 선택해주세요."))
             return
         }
-        reduce { copy(showDeleteAlbumBottomSheet = true) }
+        reduce { copy(isShowDeleteAlbumBottomSheet = true) }
     }
 
     private fun handleAlbumClick(
@@ -199,7 +199,7 @@ class AllAlbumViewModel @Inject constructor() : ViewModel() {
         // TODO: Add album to repository
         reduce {
             copy(
-                showAddAlbumBottomSheet = false,
+                isShowAddAlbumBottomSheet = false,
                 albums = (albums + Album(id = albums.size.toLong(), title = albumName)).toImmutableList(),
             )
         }
@@ -217,7 +217,7 @@ class AllAlbumViewModel @Inject constructor() : ViewModel() {
                 albums = albums.filter { album -> selectedAlbums.none { it.id == album.id } }.toImmutableList(),
                 selectedAlbums = persistentListOf(),
                 selectMode = SelectMode.DEFAULT,
-                showDeleteAlbumBottomSheet = false,
+                isShowDeleteAlbumBottomSheet = false,
             )
         }
         postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))

@@ -97,7 +97,7 @@ internal fun PhotoDetailScreen(
         )
     }
 
-    if (uiState.showDeleteDialog) {
+    if (uiState.isShowDeleteDialog) {
         DeletePhotoDialog(
             onDismissRequest = { onIntent(PhotoDetailIntent.DismissDeleteDialog) },
             onClickDelete = { onIntent(PhotoDetailIntent.ClickDeleteDialogConfirmButton) },

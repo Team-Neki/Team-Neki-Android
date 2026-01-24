@@ -42,11 +42,11 @@ private val scrappedDummyList = persistentListOf(
 data class PoseState(
     val isLoading: Boolean = false,
     val selectedNumberOfPeople: NumberOfPeople = NumberOfPeople.UNSELECTED,
-    val showScrappedPose: Boolean = false,
+    val isShowScrappedPose: Boolean = false,
     val randomPoseList: ImmutableList<Pose> = dummyPoseList,
     val scrappedPoseList: ImmutableList<Pose> = scrappedDummyList,
     val selectedPose: Pose = Pose(),
-    val showNumberOfPeopleBottomSheet: Boolean = false,
+    val isShowNumberOfPeopleBottomSheet: Boolean = false,
 )
 
 sealed interface PoseIntent {

@@ -152,7 +152,7 @@ internal fun AllPhotoScreen(
             }
 
             AllPhotoFilterBar(
-                showFilterPopup = uiState.showFilterDialog,
+                showFilterPopup = uiState.isShowFilterDialog,
                 modifier = Modifier
                     .onSizeChanged { size ->
                         if (filterBarHeightPx != 0) return@onSizeChanged
@@ -176,7 +176,7 @@ internal fun AllPhotoScreen(
         )
     }
 
-    if (uiState.showDeleteDialog) {
+    if (uiState.isShowDeleteDialog) {
         DeletePhotoDialog(
             onDismissRequest = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
             onClickDelete = { onIntent(AllPhotoIntent.ClickDeleteDialogConfirmButton) },

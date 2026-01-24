@@ -43,11 +43,11 @@ class PhotoDetailViewModel @AssistedInject constructor(
             // ActionBar Intent
             PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce, postSideEffect)
-            PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(showDeleteDialog = true) }
+            PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
 
             // Delete Dialog Intent
-            PhotoDetailIntent.DismissDeleteDialog -> reduce { copy(showDeleteDialog = false) }
-            PhotoDetailIntent.ClickDeleteDialogCancelButton -> reduce { copy(showDeleteDialog = false) }
+            PhotoDetailIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
+            PhotoDetailIntent.ClickDeleteDialogCancelButton -> reduce { copy(isShowDeleteDialog = false) }
             PhotoDetailIntent.ClickDeleteDialogConfirmButton -> handleDelete(state, reduce, postSideEffect)
         }
     }
@@ -69,7 +69,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
         reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
         postSideEffect: (PhotoDetailSideEffect) -> Unit,
     ) {
-        reduce { copy(isLoading = true, showDeleteDialog = false) }
+        reduce { copy(isLoading = true, isShowDeleteDialog = false) }
 
         viewModelScope.launch {
             photoRepository.deletePhoto(state.photo.id)

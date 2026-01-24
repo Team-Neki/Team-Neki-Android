@@ -10,10 +10,10 @@ data class AllAlbumState(
     val albums: ImmutableList<Album> = persistentListOf(),
     val selectMode: SelectMode = SelectMode.DEFAULT,
     val selectedAlbums: ImmutableList<Album> = persistentListOf(),
-    val showOptionPopup: Boolean = false,
+    val isShowOptionPopup: Boolean = false,
     val selectedDeleteOption: AlbumDeleteOption = AlbumDeleteOption.DELETE_WITH_PHOTOS,
-    val showAddAlbumBottomSheet: Boolean = false,
-    val showDeleteAlbumBottomSheet: Boolean = false,
+    val isShowAddAlbumBottomSheet: Boolean = false,
+    val isShowDeleteAlbumBottomSheet: Boolean = false,
 )
 
 enum class AlbumDeleteOption(val label: String) {
