@@ -174,7 +174,7 @@ internal fun AnchoredPanelContent(
 
     val extraBottomPadding = when (dragLevel) {
         DragLevel.SECOND -> screenHeightDp * 0.3f
-        DragLevel.THIRD -> screenHeightDp * 0.05f
+        DragLevel.THIRD -> screenHeightDp * 0.1f
         else -> 0.dp
     }
 
