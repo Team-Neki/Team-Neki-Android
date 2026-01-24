@@ -9,6 +9,6 @@ import javax.inject.Inject
 
 @ActivityRetainedScoped
 class RootNavigationState @Inject constructor() {
-    internal val stack: SnapshotStateList<RootNavKey> = mutableStateListOf(RootNavKey.Login)
+    internal val stack: SnapshotStateList<RootNavKey> = mutableStateListOf(RootNavKey.Main)
     val currentRootKey: RootNavKey by derivedStateOf { stack.last() }
 }
