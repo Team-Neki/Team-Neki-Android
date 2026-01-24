@@ -1,4 +1,4 @@
-package com.neki.android.core.designsystem.extension
+package com.neki.android.core.designsystem.modifier
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
