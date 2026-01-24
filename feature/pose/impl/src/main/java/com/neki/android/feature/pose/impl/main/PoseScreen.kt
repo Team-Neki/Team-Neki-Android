@@ -41,7 +41,8 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 internal fun PoseRoute(
     viewModel: PoseViewModel = hiltViewModel(),
-    navigateToPoseDetail: () -> Unit,
+    navigateToPoseDetail: (Pose) -> Unit,
+    navigateToRandomPose: (PeopleCount) -> Unit,
     navigateToNotification: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
@@ -50,9 +51,9 @@ internal fun PoseRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PoseEffect.NavigateToNotification -> navigateToNotification()
-            PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail()
+            is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
+            is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.pose)
             is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
-            else -> {}
         }
     }
 

@@ -47,8 +47,7 @@ internal class PoseViewModel @Inject constructor() : ViewModel() {
             }
 
             is PoseIntent.ClickPoseItem -> {
-                reduce { copy(selectedPose = intent.item) }
-                postSideEffect(PoseEffect.NavigateToPoseDetail)
+                postSideEffect(PoseEffect.NavigateToPoseDetail(intent.item))
             }
 
             PoseIntent.ClickRandomPoseRecommendation -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = true) }
@@ -58,10 +57,6 @@ internal class PoseViewModel @Inject constructor() : ViewModel() {
                 reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
                 postSideEffect(PoseEffect.NavigateToRandomPose(selectedCount))
             }
-
-            // Pose Detail
-            PoseIntent.ClickBackIcon -> postSideEffect(PoseEffect.NavigateBack)
-            PoseIntent.ClickScrapIcon -> reduce { copy(selectedPose = selectedPose.copy(isScrapped = !selectedPose.isScrapped)) }
         }
     }
 
