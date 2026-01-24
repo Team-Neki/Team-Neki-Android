@@ -20,13 +20,13 @@ class PhotoWebViewClient(
 
         when {
             // 포토이즘
-            url.contains(BuildConfig.PHOTOISM_URL) && url.endsWith(BuildConfig.PHOTOISM_IMG_URL_END) -> {
+            url.contains(BuildConfig.PHOTOISM_URL) && url.endsWith(BuildConfig.PHOTOISM_IMG_URL_MIME_TYPE) -> {
                 Timber.d("포토이즘 이미지")
                 onImageUrlDetected(url)
             }
 
             // 인생네컷
-            url.contains(BuildConfig.PHOTOISM_URL) && url.endsWith(BuildConfig.PHOTOISM_IMG_URL_END) -> {
+            url.contains(BuildConfig.LIFE_4_CUT_URL) && url.endsWith(BuildConfig.LIFE_4_CUT_URL_MIME_TYPE) -> {
                 Timber.d("인생네컷 이미지")
                 onImageUrlDetected(url)
             }
