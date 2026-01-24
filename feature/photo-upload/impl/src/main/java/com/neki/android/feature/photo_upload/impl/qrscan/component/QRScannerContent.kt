@@ -2,26 +2,27 @@ package com.neki.android.feature.photo_upload.impl.qrscan.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -29,11 +30,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
 internal fun QRScannerContent(
@@ -43,101 +46,125 @@ internal fun QRScannerContent(
     onClickClose: () -> Unit = {},
     onQRCodeScanned: (String) -> Unit = {},
 ) {
-    val cutoutSize = LocalConfiguration.current.screenWidthDp.dp * 0.82f
+    var frameOffset: Offset? by remember { mutableStateOf(null) }
+    var frameSize: IntSize? by remember { mutableStateOf(null) }
 
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
         QRScanner(
+            modifier = Modifier.fillMaxSize(),
             isTorchEnabled = isTorchEnabled,
             onQRCodeScanned = onQRCodeScanned,
         )
         DimExceptContent(
             modifier = Modifier.fillMaxSize(),
-            cutout = { cutoutModifier ->
-                Box(
-                    cutoutModifier
-                        .fillMaxWidth(0.82f)
-                        .aspectRatio(1f)
-                        .align(Alignment.Center),
-                )
-            },
+            offSet = frameOffset,
+            size = frameSize,
         )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.82f)
-                .padding(bottom = 20.dp)
-                .aspectRatio(1f)
-                .align(Alignment.Center),
+        ConstraintLayout(
+            modifier = Modifier.fillMaxSize(),
         ) {
+            val (topBar, text, scanFrame, torchButton) = createRefs()
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .constrainAs(topBar) {
+                        top.linkTo(parent.top)
+                    },
+            ) {
+                NekiIconButton(
+                    modifier = Modifier.padding(start = 8.dp),
+                    onClick = onClickClose,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_close),
+                        contentDescription = null,
+                        tint = Color.White,
+                    )
+                }
+            }
+
+            QRCodeText(
+                modifier = Modifier.constrainAs(text) {
+                    top.linkTo(topBar.bottom)
+                    bottom.linkTo(scanFrame.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+            )
+
             ScanCornerFrame(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxWidth(0.82f)
+                    .aspectRatio(1f)
+                    .constrainAs(scanFrame) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        verticalBias = 234f / (234f + 274f)
+                    }
+                    .onGloballyPositioned { coordinates ->
+                        frameOffset = coordinates.positionInParent()
+                        frameSize = coordinates.size
+                    },
                 color = Color.White,
             )
-        }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding(),
-        ) {
-            IconButton(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
-                onClick = onClickClose,
+            NekiIconButton(
+                modifier = Modifier
+                    .constrainAs(torchButton) {
+                        top.linkTo(scanFrame.bottom, margin = 37.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isTorchEnabled) Color.White
+                        else Color.White.copy(alpha = 0.1f),
+                    ),
+                onClick = onClickTorch,
             ) {
                 Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_close),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_qr_light),
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = if (isTorchEnabled) Color.Black else Color.White,
                 )
             }
-            VerticalSpacer(32.dp)
-            Text(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFFFF311F),
-                                    Color(0xFFFFDAD6),
-                                ),
-                            ),
-                        ),
-                    ) {
-                        append("QR을 스캔")
-                    }
-                    withStyle(SpanStyle(color = Color.White)) {
-                        append("하면\n보관함에 자동 저장돼요!")
-                    }
-                },
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
-                lineHeight = 36.sp,
-                textAlign = TextAlign.Center,
-            )
-        }
-
-        IconButton(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .offset(y = cutoutSize / 2 + 40.dp)
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isTorchEnabled) Color.White
-                    else Color.White.copy(alpha = 0.1f),
-                ),
-            onClick = onClickTorch,
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_qr_light),
-                contentDescription = null,
-                tint = if (isTorchEnabled) Color.Black else Color.White,
-            )
         }
     }
+}
+
+@Composable
+private fun QRCodeText(modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier,
+        text = buildAnnotatedString {
+            withStyle(
+                SpanStyle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFFFF311F),
+                            Color(0xFFFFDAD6),
+                        ),
+                    ),
+                ),
+            ) {
+                append("QR을 스캔")
+            }
+            withStyle(SpanStyle(color = Color.White)) {
+                append("하면\n보관함에 자동 저장돼요!")
+            }
+        },
+        fontSize = 24.sp,
+        fontWeight = FontWeight.SemiBold,
+        lineHeight = 36.sp,
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Preview(showBackground = true)
