@@ -1,0 +1,65 @@
+package com.neki.android.feature.pose.impl.random
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import com.neki.android.core.model.PeopleCount
+import com.neki.android.core.model.Pose
+import com.neki.android.core.ui.MviIntentStore
+import com.neki.android.core.ui.mviIntentStore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
+import javax.inject.Inject
+
+@HiltViewModel
+internal class RandomPoseViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+
+    private val peopleCount: PeopleCount = savedStateHandle
+        .get<String>("peopleCount")
+        ?.let { PeopleCount.valueOf(it) }
+        ?: PeopleCount.ONE
+
+    private val dummyPoseList = persistentListOf(
+        Pose(id = 1, poseImageUrl = "https://picsum.photos/seed/random1/400/520", peopleCount = peopleCount.value),
+        Pose(id = 2, poseImageUrl = "https://picsum.photos/seed/random2/400/520", peopleCount = peopleCount.value),
+        Pose(id = 3, poseImageUrl = "https://picsum.photos/seed/random3/400/520", peopleCount = peopleCount.value),
+    )
+
+    val store: MviIntentStore<RandomPoseUiState, RandomPoseIntent, RandomPoseEffect> =
+        mviIntentStore(
+            initialState = RandomPoseUiState(
+                randomPoseList = dummyPoseList,
+                currentPose = dummyPoseList.firstOrNull() ?: Pose(),
+            ),
+            onIntent = ::onIntent,
+        )
+
+    private fun onIntent(
+        intent: RandomPoseIntent,
+        state: RandomPoseUiState,
+        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        postSideEffect: (RandomPoseEffect) -> Unit,
+    ) {
+        when (intent) {
+            RandomPoseIntent.EnterRandomPoseScreen -> Unit
+
+            // 튜토리얼
+            RandomPoseIntent.ClickLeftSwipe -> Unit
+            RandomPoseIntent.ClickRightSwipe -> Unit
+            RandomPoseIntent.ClickStartRandomPose -> reduce { copy(isShowTutorial = false) }
+
+            // 기본화면
+            RandomPoseIntent.ClickBackIcon -> postSideEffect(RandomPoseEffect.NavigateBack)
+            RandomPoseIntent.ClickCloseIcon -> postSideEffect(RandomPoseEffect.NavigateBack)
+            RandomPoseIntent.ClickGoToDetailIcon -> {
+                if (state.currentPose.id != 0L) {
+                    postSideEffect(RandomPoseEffect.NavigateToDetail(state.currentPose))
+                }
+            }
+            RandomPoseIntent.ClickScrapIcon -> reduce {
+                copy(currentPose = currentPose.copy(isScrapped = !currentPose.isScrapped))
+            }
+        }
+    }
+}
