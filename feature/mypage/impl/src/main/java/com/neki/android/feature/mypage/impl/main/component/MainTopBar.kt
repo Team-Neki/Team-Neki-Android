@@ -16,41 +16,40 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.extension.clickableSingle
+import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.topbar.NekiLeftTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun MainTopBar(
+internal fun MainTopBar(
+    modifier: Modifier = Modifier,
     onClickIcon: () -> Unit = {},
 ) {
-    Box(
-        modifier = Modifier
+    NekiLeftTitleTopBar(
+        modifier = modifier
             .fillMaxWidth()
             .padding(start = 20.dp, end = 8.dp),
-    ) {
-        NekiLeftTitleTopBar(
-            title = {
-                Box(
-                    modifier = Modifier
-                        .height(28.dp)
-                        .width(56.dp)
-                        .background(color = Color(0xFFB7B9C3)),
-                )
-            },
-            actions = {
+        title = {
+            Box(
+                modifier = Modifier
+                    .height(28.dp)
+                    .width(56.dp)
+                    .background(color = Color(0xFFB7B9C3)),
+            )
+        },
+        actions = {
+            NekiIconButton(
+                onClick = onClickIcon,
+            ) {
                 Icon(
-                    modifier = Modifier
-                        .clickableSingle(onClick = onClickIcon)
-                        .padding(8.dp)
-                        .size(28.dp),
+                    modifier = Modifier.size(28.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
                     contentDescription = null,
-                    tint = NekiTheme.colorScheme.gray400,
+                    tint = Color.Unspecified,
                 )
-            },
-        )
-    }
+            }
+        },
+    )
 }
 
 @ComponentPreview

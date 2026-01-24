@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -23,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,7 +37,6 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
-import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
@@ -191,15 +188,11 @@ private fun ArchiveMainContent(
     onClickPhotoItem: (Photo) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-
     LazyVerticalStaggeredGrid(
         modifier = modifier.fillMaxWidth(),
         columns = StaggeredGridCells.Fixed(2),
         state = lazyState,
         contentPadding = PaddingValues(
-            start = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
-            end = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
             bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
         ),
         verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
@@ -207,6 +200,7 @@ private fun ArchiveMainContent(
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTopBar(
+                modifier = Modifier.padding(start = 20.dp, end = 8.dp),
                 showTooltip = uiState.isFirstEntered,
                 showAddPopup = uiState.isShowAddDialog,
                 onClickPlusIcon = onClickPlusIcon,
@@ -220,6 +214,7 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
+                modifier = Modifier.padding(horizontal = 20.dp),
                 title = "앨범",
                 textButtonTitle = "전체 보기",
                 onClickShowAllAlbum = onClickShowAllAlbum,
@@ -228,7 +223,7 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainAlbumList(
-                modifier = Modifier.requiredWidth(screenWidth),
+//                modifier = Modifier.requiredWidth(screenWidth),
                 favoriteAlbum = uiState.favoriteAlbum,
                 albumList = uiState.albums,
                 onClickFavoriteAlbum = onClickFavoriteAlbum,
@@ -238,6 +233,7 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
+                modifier = Modifier.padding(horizontal = 20.dp),
                 title = "최근 사진",
                 textButtonTitle = "모든 사진",
                 onClickShowAllAlbum = onClickShowAllPhoto,
@@ -249,6 +245,7 @@ private fun ArchiveMainContent(
             key = { photo -> photo.id },
         ) { photo ->
             ArchiveMainPhotoItem(
+                modifier = Modifier.padding(horizontal = 20.dp),
                 photo = photo,
                 onClickItem = onClickPhotoItem,
             )
