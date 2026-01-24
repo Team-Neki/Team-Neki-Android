@@ -22,6 +22,7 @@ import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.AlbumRowComponent
 import com.neki.android.core.ui.component.FavoriteAlbumRowComponent
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.photo_upload.impl.album.component.UploadAlbumTopBar
@@ -93,6 +94,10 @@ internal fun UploadAlbumScreen(
                 )
             }
         }
+    }
+
+    if (uiState.isLoading) {
+        LoadingDialog()
     }
 }
 

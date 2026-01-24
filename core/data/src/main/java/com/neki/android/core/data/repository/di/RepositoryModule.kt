@@ -3,9 +3,13 @@ package com.neki.android.core.data.repository.di
 import com.neki.android.core.data.auth.AuthEventManagerImpl
 import com.neki.android.core.data.repository.impl.AuthRepositoryImpl
 import com.neki.android.core.data.repository.impl.DataStoreRepositoryImpl
+import com.neki.android.core.data.repository.impl.MediaUploadRepositoryImpl
+import com.neki.android.core.data.repository.impl.PhotoRepositoryImpl
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.DataStoreRepository
+import com.neki.android.core.dataapi.repository.MediaUploadRepository
+import com.neki.android.core.dataapi.repository.PhotoRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,4 +37,16 @@ internal interface RepositoryModule {
     fun bindAuthEventManagerImpl(
         authEventManagerImpl: AuthEventManagerImpl,
     ): AuthEventManager
+
+    @Binds
+    @Singleton
+    fun bindMediaUploadRepositoryImpl(
+        mediaUploadRepositoryImpl: MediaUploadRepositoryImpl,
+    ): MediaUploadRepository
+
+    @Binds
+    @Singleton
+    fun bindPhotoRepositoryImpl(
+        photoRepositoryImpl: PhotoRepositoryImpl,
+    ): PhotoRepository
 }

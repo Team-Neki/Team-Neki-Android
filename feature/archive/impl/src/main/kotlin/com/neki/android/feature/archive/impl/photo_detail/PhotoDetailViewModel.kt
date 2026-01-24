@@ -1,6 +1,8 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -8,10 +10,13 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel(assistedFactory = PhotoDetailViewModel.Factory::class)
 class PhotoDetailViewModel @AssistedInject constructor(
     @Assisted private val photo: Photo,
+    private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -43,7 +48,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             // Delete Dialog Intent
             PhotoDetailIntent.DismissDeleteDialog -> reduce { copy(showDeleteDialog = false) }
             PhotoDetailIntent.ClickDeleteDialogCancelButton -> reduce { copy(showDeleteDialog = false) }
-            PhotoDetailIntent.ClickDeleteDialogConfirmButton -> handleDelete(reduce, postSideEffect)
+            PhotoDetailIntent.ClickDeleteDialogConfirmButton -> handleDelete(state, reduce, postSideEffect)
         }
     }
 
@@ -60,12 +65,24 @@ class PhotoDetailViewModel @AssistedInject constructor(
     }
 
     private fun handleDelete(
+        state: PhotoDetailState,
         reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
         postSideEffect: (PhotoDetailSideEffect) -> Unit,
     ) {
-        // TODO: Delete photo from repository
-        reduce { copy(showDeleteDialog = false) }
-        postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
-        postSideEffect(PhotoDetailSideEffect.NavigateBack)
+        reduce { copy(isLoading = true, showDeleteDialog = false) }
+
+        viewModelScope.launch {
+            photoRepository.deletePhoto(state.photo.id)
+                .onSuccess {
+                    reduce { copy(isLoading = false) }
+                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
+                    postSideEffect(PhotoDetailSideEffect.NavigateBack)
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                    reduce { copy(isLoading = false) }
+                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
+                }
+        }
     }
 }

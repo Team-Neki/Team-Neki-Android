@@ -1,8 +1,13 @@
 package com.neki.android.feature.photo_upload.impl.album
 
+import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.common.util.urlToByteArray
+import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.Album
+import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.assisted.Assisted
@@ -12,11 +17,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel(assistedFactory = UploadAlbumViewModel.Factory::class)
 class UploadAlbumViewModel @AssistedInject constructor(
     @Assisted private val imageUrl: String?,
     @Assisted private val uriStrings: List<String>,
+    private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -62,12 +70,12 @@ class UploadAlbumViewModel @AssistedInject constructor(
         // TODO: Fetch albums from repository
         val dummyAlbums = persistentListOf(
             Album(
-                id = 1001,
+                id = 1,
                 title = "Travel",
                 photoList = persistentListOf(),
             ),
             Album(
-                id = 1002,
+                id = 2,
                 title = "Family",
                 photoList = persistentListOf(),
             ),
@@ -87,8 +95,66 @@ class UploadAlbumViewModel @AssistedInject constructor(
         reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
         postSideEffect: (UploadAlbumSideEffect) -> Unit,
     ) {
-        postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
-        // TODO: Upload photos to repository
-        postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(state.selectedAlbumIds.first()))
+        val firstAlbumId = state.selectedAlbumIds.firstOrNull() ?: return
+        val onSuccessAction = {
+            reduce { copy(isLoading = false) }
+            postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
+            postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbumId))
+        }
+        val onFailureAction: (Throwable) -> Unit = { error ->
+            Timber.e(error)
+            reduce { copy(isLoading = false) }
+            postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+        }
+
+        if (state.uploadType == UploadType.QR_SCAN) {
+            uploadSingleImage(
+                imageUrl = state.imageUrl ?: return,
+                albumId = firstAlbumId,
+                reduce = reduce,
+                onSuccessAction = onSuccessAction,
+                onFailureAction = onFailureAction,
+            )
+        } else {
+            uploadMultipleImages(
+                imageUris = state.selectedUris,
+                albumId = firstAlbumId,
+                onSuccessAction = onSuccessAction,
+                onFailureAction = onFailureAction,
+            )
+        }
+    }
+
+    private fun uploadSingleImage(
+        imageUrl: String,
+        albumId: Long,
+        reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
+        onSuccessAction: () -> Unit,
+        onFailureAction: (Throwable) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            val imageBytes = imageUrl.urlToByteArray()
+
+            uploadSinglePhotoUseCase(
+                imageBytes = imageBytes,
+                folderId = albumId,
+            ).onSuccess { data ->
+                Timber.d(data.toString())
+                onSuccessAction()
+            }.onFailure { error ->
+                onFailureAction(error)
+            }
+        }
+    }
+
+    private fun uploadMultipleImages(
+        imageUris: List<Uri>,
+        albumId: Long,
+        onSuccessAction: () -> Unit,
+        onFailureAction: (Throwable) -> Unit,
+    ) {
+        // TODO: 이미지 여러개 업로드
+        onFailureAction(Throwable("Not implemented"))
     }
 }

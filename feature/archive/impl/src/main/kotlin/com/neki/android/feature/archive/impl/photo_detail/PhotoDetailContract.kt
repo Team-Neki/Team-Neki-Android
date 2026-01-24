@@ -3,6 +3,7 @@ package com.neki.android.feature.archive.impl.photo_detail
 import com.neki.android.core.model.Photo
 
 data class PhotoDetailState(
+    val isLoading: Boolean = false,
     val photo: Photo = Photo(),
     val showDeleteDialog: Boolean = false,
 )

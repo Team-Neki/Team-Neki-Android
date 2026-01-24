@@ -6,6 +6,7 @@ import com.neki.android.core.data.remote.api.ApiService
 import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
+import com.neki.android.core.data.remote.qualifier.UploadHttpClient
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.DataStoreRepository
 import dagger.Module
@@ -43,11 +44,19 @@ internal object NetworkModule {
 
     val BASE_URL = BuildConfig.BASE_URL
     const val TIME_OUT = 5000L
+    const val UPLOAD_TIME_OUT = 10_000L
 
     val sendWithoutJwtUrls = listOf(
         "/api/auth/kakao/login",
         "/api/auth/refresh",
     )
+
+    private val json = Json {
+        prettyPrint = true
+        isLenient = true
+        ignoreUnknownKeys = true
+        explicitNulls = false
+    }
 
     @Provides
     @Singleton
@@ -65,16 +74,6 @@ internal object NetworkModule {
             install(DefaultRequest) {
                 url(BASE_URL)
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
-            }
-
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        prettyPrint = true
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                    },
-                )
             }
 
             install(Auth) {
@@ -130,6 +129,10 @@ internal object NetworkModule {
                 }
             }
 
+            install(ContentNegotiation) {
+                json(json)
+            }
+
             install(Logging) {
                 logger = object : Logger {
                     override fun log(message: String) {
@@ -143,6 +146,34 @@ internal object NetworkModule {
             install(HttpTimeout) {
                 connectTimeoutMillis = TIME_OUT
                 requestTimeoutMillis = TIME_OUT
+            }
+
+            expectSuccess = true
+        }
+    }
+
+    @UploadHttpClient
+    @Provides
+    @Singleton
+    fun provideUploadHttpClient(): HttpClient {
+        return HttpClient(Android) {
+            install(ContentNegotiation) {
+                json(json)
+            }
+
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Timber.tag(TAG_REST_API).d(message)
+                    }
+                }
+
+                level = LogLevel.HEADERS
+            }
+
+            install(HttpTimeout) {
+                connectTimeoutMillis = UPLOAD_TIME_OUT
+                requestTimeoutMillis = UPLOAD_TIME_OUT
             }
 
             expectSuccess = true

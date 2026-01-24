@@ -6,6 +6,12 @@ import kotlinx.serialization.Serializable
 data class BasicResponse<T>(
     val resultCode: String,
     val message: String,
-    val success: Boolean,
     val data: T,
+)
+
+@Serializable
+data class BasicNullableResponse<T>(
+    val resultCode: String,
+    val message: String,
+    val data: T?,
 )

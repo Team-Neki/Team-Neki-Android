@@ -1,17 +1,30 @@
 package com.neki.android.feature.archive.impl.main
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.common.util.urlToByteArray
+import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
+private const val DEFAULT_PHOTOS_SIZE = 20
+
 @HiltViewModel
-class ArchiveMainViewModel @Inject constructor() : ViewModel() {
+class ArchiveMainViewModel @Inject constructor(
+    private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
+    private val photoRepository: PhotoRepository,
+) : ViewModel() {
 
     val store: MviIntentStore<ArchiveMainState, ArchiveMainIntent, ArchiveMainSideEffect> =
         mviIntentStore(
@@ -35,7 +48,7 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
                 )
             }
 
-            ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialDate(reduce)
+            ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
@@ -99,7 +112,7 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    private fun fetchInitialDate(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
+    private fun fetchInitialData(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
         val dummyPhotos = listOf(
             Photo(id = 1, imageUrl = "https://picsum.photos/seed/pose1/400/500", isFavorite = true, date = "2025.01.15"),
             Photo(id = 2, imageUrl = "https://picsum.photos/seed/pose2/400/650", isFavorite = false, date = "2025.01.15"),
@@ -154,11 +167,13 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
             photoList = favoritePhotos,
         )
 
+        fetchPhotos(reduce)
+
         reduce {
             copy(
                 favoriteAlbum = favoriteAlbum,
                 albums = dummyAlbums,
-                recentPhotos = dummyPhotos,
+//                recentPhotos = dummyPhotos,
             )
         }
     }
@@ -169,8 +184,74 @@ class ArchiveMainViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
         reduce { copy(showChooseWithAlbumDialog = false) }
-        // TODO: Upload photo without album to repository
-        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
+        val onSuccessSideEffect = {
+            postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
+        }
+        if (state.uploadType == UploadType.QR_SCAN) {
+            uploadSingleImage(
+                imageUrl = state.scannedImageUrl ?: return,
+                reduce = reduce,
+                postSideEffect = postSideEffect,
+                onSuccess = onSuccessSideEffect,
+            )
+        } else {
+            uploadMultipleImages(
+                imageUris = state.selectedUris,
+                reduce = reduce,
+                postSideEffect = postSideEffect,
+                onSuccess = onSuccessSideEffect,
+            )
+        }
+    }
+
+    private fun uploadSingleImage(
+        imageUrl: String,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+        onSuccess: () -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            val imageBytes = imageUrl.urlToByteArray()
+
+            uploadSinglePhotoUseCase(
+                imageBytes = imageBytes,
+            ).onSuccess {
+                fetchPhotos(reduce, 1) // 가장 최신 데이터 가져오기
+                onSuccess()
+            }.onFailure { error ->
+                Timber.e(error)
+                postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+                reduce { copy(isLoading = false) }
+            }
+        }
+    }
+
+    private fun uploadMultipleImages(
+        imageUris: List<Uri>,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+        onSuccess: () -> Unit,
+    ) {
+        // TODO: 이미지 여러개 업로드
+        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+    }
+
+    private fun fetchPhotos(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit, size: Int = DEFAULT_PHOTOS_SIZE) {
+        viewModelScope.launch {
+            photoRepository.getPhotos()
+                .onSuccess { data ->
+                    reduce {
+                        copy(
+                            recentPhotos = data.toImmutableList(),
+                            isLoading = false,
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                }
+        }
     }
 
     private fun handleAddAlbum(

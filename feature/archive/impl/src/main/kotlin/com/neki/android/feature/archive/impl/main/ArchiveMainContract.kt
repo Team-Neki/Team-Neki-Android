@@ -3,10 +3,12 @@ package com.neki.android.feature.archive.impl.main
 import android.net.Uri
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.UploadType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class ArchiveMainState(
+    val isLoading: Boolean = false,
     val isFirstEntered: Boolean = true,
     val favoriteAlbum: Album = Album(),
     val albums: ImmutableList<Album> = persistentListOf(),
@@ -16,7 +18,10 @@ data class ArchiveMainState(
     val showAddDialog: Boolean = false,
     val showChooseWithAlbumDialog: Boolean = false,
     val showAddAlbumBottomSheet: Boolean = false,
-)
+) {
+    val uploadType: UploadType
+        get() = if (scannedImageUrl == null) UploadType.GALLERY else UploadType.QR_SCAN
+}
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent

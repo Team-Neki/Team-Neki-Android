@@ -6,7 +6,7 @@ import kotlin.contracts.contract
 import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalContracts::class)
-internal inline fun <T> runSuspendCatching(block: () -> T): Result<T> {
+inline fun <T> runSuspendCatching(block: () -> T): Result<T> {
     // Kotlin 의 contract(계약) 시스템을 이용해 block 이 정확히 한번만 호출 되어야 함을 나타냄
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
 
