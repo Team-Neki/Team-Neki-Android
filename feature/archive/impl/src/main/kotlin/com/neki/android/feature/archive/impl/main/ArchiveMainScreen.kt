@@ -5,10 +5,12 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -23,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -104,21 +108,28 @@ internal fun ArchiveMainScreen(
             .fillMaxSize()
             .noRippleClickableSingle { onIntent(ArchiveMainIntent.ClickScreen) },
     ) {
-        ArchiveMainContent(
-            uiState = uiState,
-            lazyState = lazyState,
-            onClickPlusIcon = { onIntent(ArchiveMainIntent.ClickAddIcon) },
-            onClickNotificationIcon = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
-            onClickQRScan = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
-            onClickGallery = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
-            onClickNewAlbum = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
-            onDismissPopup = { onIntent(ArchiveMainIntent.DismissAddDialog) },
-            onClickShowAllAlbum = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
-            onClickFavoriteAlbum = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
-            onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it)) },
-            onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
-            onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
-        )
+        Column {
+            ArchiveMainTopBar(
+                modifier = Modifier.padding(start = 20.dp, end = 8.dp),
+                showTooltip = uiState.isFirstEntered,
+                showAddPopup = uiState.isShowAddDialog,
+                onClickPlusIcon = { onIntent(ArchiveMainIntent.ClickAddIcon) },
+                onClickNotificationIcon = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
+                onClickQRScan = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
+                onClickGallery = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
+                onClickNewAlbum = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
+                onDismissPopup = { onIntent(ArchiveMainIntent.DismissAddDialog) },
+            )
+            ArchiveMainContent(
+                uiState = uiState,
+                lazyState = lazyState,
+                onClickShowAllAlbum = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
+                onClickFavoriteAlbum = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
+                onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it)) },
+                onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
+                onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
+            )
+        }
 
         GotoTopButton(
             modifier = Modifier
@@ -175,12 +186,6 @@ internal fun ArchiveMainScreen(
 private fun ArchiveMainContent(
     uiState: ArchiveMainState,
     lazyState: LazyStaggeredGridState,
-    onClickPlusIcon: () -> Unit,
-    onClickNotificationIcon: () -> Unit,
-    onClickQRScan: () -> Unit,
-    onClickGallery: () -> Unit,
-    onClickNewAlbum: () -> Unit,
-    onDismissPopup: () -> Unit,
     onClickShowAllAlbum: () -> Unit,
     onClickFavoriteAlbum: () -> Unit,
     onClickAlbumItem: (Long) -> Unit,
@@ -188,6 +193,9 @@ private fun ArchiveMainContent(
     onClickPhotoItem: (Photo) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val density = LocalDensity.current
+    val screenWidth = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
+
     LazyVerticalStaggeredGrid(
         modifier = modifier.fillMaxWidth(),
         columns = StaggeredGridCells.Fixed(2),
@@ -199,20 +207,6 @@ private fun ArchiveMainContent(
         horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
-            ArchiveMainTopBar(
-                modifier = Modifier.padding(start = 20.dp, end = 8.dp),
-                showTooltip = uiState.isFirstEntered,
-                showAddPopup = uiState.isShowAddDialog,
-                onClickPlusIcon = onClickPlusIcon,
-                onClickNotificationIcon = onClickNotificationIcon,
-                onClickQRScan = onClickQRScan,
-                onClickGallery = onClickGallery,
-                onClickNewAlbum = onClickNewAlbum,
-                onDismissPopup = onDismissPopup,
-            )
-        }
-
-        item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = "앨범",
@@ -223,7 +217,7 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainAlbumList(
-//                modifier = Modifier.requiredWidth(screenWidth),
+                modifier = Modifier.requiredWidth(screenWidth),
                 favoriteAlbum = uiState.favoriteAlbum,
                 albumList = uiState.albums,
                 onClickFavoriteAlbum = onClickFavoriteAlbum,
@@ -245,7 +239,7 @@ private fun ArchiveMainContent(
             key = { photo -> photo.id },
         ) { photo ->
             ArchiveMainPhotoItem(
-                modifier = Modifier.padding(horizontal = 20.dp),
+//                modifier = Modifier.padding(horizontal = 20.dp),
                 photo = photo,
                 onClickItem = onClickPhotoItem,
             )
