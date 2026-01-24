@@ -33,7 +33,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Singleton
@@ -82,8 +81,8 @@ internal object NetworkModule {
                         Timber.d("BearerAuth - loadTokens")
                         if (dataStoreRepository.isSavedJwtTokens().first()) {
                             BearerTokens(
-                                accessToken = dataStoreRepository.getAccessToken().firstOrNull() ?: "",
-                                refreshToken = dataStoreRepository.getRefreshToken().firstOrNull() ?: "",
+                                accessToken = dataStoreRepository.getAccessToken().first(),
+                                refreshToken = dataStoreRepository.getRefreshToken().first(),
                             )
                         } else null
                     }
@@ -95,7 +94,7 @@ internal object NetworkModule {
                                 val response = client.post("/api/auth/refresh") {
                                     setBody(
                                         RefreshTokenRequest(
-                                            refreshToken = dataStoreRepository.getRefreshToken().firstOrNull() ?: "",
+                                            refreshToken = dataStoreRepository.getRefreshToken().first(),
                                         ),
                                     )
                                 }.body<BasicResponse<AuthResponse>>()

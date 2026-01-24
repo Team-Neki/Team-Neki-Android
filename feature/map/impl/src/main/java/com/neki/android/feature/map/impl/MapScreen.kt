@@ -5,6 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.naver.maps.geometry.LatLng
@@ -37,6 +42,7 @@ import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
+import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.WarningDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -57,10 +63,32 @@ fun MapRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = LocalActivity.current!!
     val coroutineScope = rememberCoroutineScope()
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { permissions ->
+        val isGranted = permissions.values.any { it }
+        if (isGranted) {
+            locationTrackingMode = LocationTrackingMode.Follow
+        }
+    }
+
+    fun hasLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PermissionChecker.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PermissionChecker.PERMISSION_GRANTED
+    }
+
+    fun requestLocationPermission() {
+        val shouldShowRationale = activity.shouldShowRequestPermissionRationale(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+        )
+        viewModel.store.onIntent(MapIntent.RequestLocationPermission(shouldShowRationale))
     }
 
     LaunchedEffect(Unit) {
@@ -124,6 +152,22 @@ fun MapRoute(
                     }
                 }
             }
+
+            is MapEffect.NavigateToAppSettings -> {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", context.packageName, null)
+                }
+                context.startActivity(intent)
+            }
+
+            is MapEffect.RequestLocationPermission -> {
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                    ),
+                )
+            }
         }
     }
 
@@ -133,6 +177,8 @@ fun MapRoute(
         locationTrackingMode = locationTrackingMode,
         onLocationTrackingModeChange = { locationTrackingMode = it },
         cameraPositionState = cameraPositionState,
+        onRequestLocationPermission = { requestLocationPermission() },
+        hasLocationPermission = { hasLocationPermission() },
     )
 }
 
@@ -146,6 +192,8 @@ fun MapScreen(
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
         position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
     },
+    onRequestLocationPermission: () -> Unit = {},
+    hasLocationPermission: () -> Boolean = { false },
 ) {
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
@@ -173,6 +221,9 @@ fun MapScreen(
                     onLocationTrackingModeChange(it)
                 }
             },
+            onLocationChange = { location ->
+                onIntent(MapIntent.UpdateCurrentLocation(location.latitude, location.longitude))
+            },
         ) {
             uiState.nearbyBrands.forEachIndexed { index, brandInfo ->
                 val isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude)
@@ -197,7 +248,11 @@ fun MapScreen(
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
             isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
             onClickCurrentLocation = {
-                onLocationTrackingModeChange(LocationTrackingMode.Follow)
+                if (hasLocationPermission()) {
+                    onLocationTrackingModeChange(LocationTrackingMode.Follow)
+                } else {
+                    onRequestLocationPermission()
+                }
             },
             onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
             onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) },
@@ -227,7 +282,13 @@ fun MapScreen(
                 brandInfo = uiState.selectedBrandInfo,
                 modifier = Modifier.align(Alignment.BottomCenter),
                 isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
-                onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
+                onClickCurrentLocation = {
+                    if (hasLocationPermission()) {
+                        onIntent(MapIntent.ClickCurrentLocation)
+                    } else {
+                        onRequestLocationPermission()
+                    }
+                },
                 onClickCloseCard = { onIntent(MapIntent.ClickCloseBrandCard) },
                 onClickDirection = { onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude)) },
             )
@@ -246,6 +307,17 @@ fun MapScreen(
         DirectionBottomSheet(
             onDismissRequest = { onIntent(MapIntent.CloseDirectionBottomSheet) },
             onClickDirectionItem = { onIntent(MapIntent.ClickDirectionItem(it)) },
+        )
+    }
+
+    if (uiState.isShowLocationPermissionDialog) {
+        SingleButtonAlertDialog(
+            title = "위치 권한",
+            content = "설정에서 위치 권한을 허용해주세요.",
+            buttonText = "확인",
+            onDismissRequest = { onIntent(MapIntent.DismissLocationPermissionDialog) },
+            onClick = { onIntent(MapIntent.ConfirmLocationPermissionDialog) },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
         )
     }
 }

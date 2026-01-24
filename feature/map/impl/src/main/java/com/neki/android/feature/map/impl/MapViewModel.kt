@@ -2,6 +2,8 @@ package com.neki.android.feature.map.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.datastore.DataStoreKey
+import com.neki.android.core.dataapi.repository.DataStoreRepository
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.BrandInfo
@@ -10,11 +12,15 @@ import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class MapViewModel @Inject constructor() : ViewModel() {
+class MapViewModel @Inject constructor(
+    private val dataStoreRepository: DataStoreRepository,
+) : ViewModel() {
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
         onIntent = ::onIntent,
@@ -33,6 +39,10 @@ class MapViewModel @Inject constructor() : ViewModel() {
 
             MapIntent.ClickRefresh -> {
                 postSideEffect(MapEffect.RefreshPhotoBooth)
+            }
+
+            is MapIntent.UpdateCurrentLocation -> {
+                reduce { copy(currentLocation = intent.latitude to intent.longitude) }
             }
 
             MapIntent.ClickCurrentLocation -> {
@@ -118,6 +128,40 @@ class MapViewModel @Inject constructor() : ViewModel() {
             is MapIntent.ClickDirection -> {
                 reduce { copy(isShowDirectionBottomSheet = true) }
             }
+
+            is MapIntent.RequestLocationPermission -> {
+                viewModelScope.launch {
+                    val isFirstRequest = dataStoreRepository.getBoolean(DataStoreKey.IS_FIRST_LOCATION_PERMISSION).first().not()
+
+                    when {
+                        isFirstRequest -> {
+                            Timber.d("최초 요청 - 시스템 권한 팝업 표시")
+                            dataStoreRepository.setBoolean(
+                                DataStoreKey.IS_FIRST_LOCATION_PERMISSION,
+                                true,
+                            )
+                            postSideEffect(MapEffect.RequestLocationPermission)
+                        }
+                        intent.shouldShowRationale -> {
+                            Timber.d("1회 거부 상태 - 시스템 권한 팝업 표시")
+                            postSideEffect(MapEffect.RequestLocationPermission)
+                        }
+                        else -> {
+                            Timber.d("2회 이상 거부 (영구 거부) - 설정 이동 다이얼로그 표시")
+                            reduce { copy(isShowLocationPermissionDialog = true) }
+                        }
+                    }
+                }
+            }
+
+            MapIntent.DismissLocationPermissionDialog -> {
+                reduce { copy(isShowLocationPermissionDialog = false) }
+            }
+
+            MapIntent.ConfirmLocationPermissionDialog -> {
+                reduce { copy(isShowLocationPermissionDialog = false) }
+                postSideEffect(MapEffect.NavigateToAppSettings)
+            }
         }
     }
 
@@ -125,7 +169,6 @@ class MapViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            // TODO: 서버 API 연동 시 교체
             val brands = persistentListOf(
                 Brand(isChecked = false, brandName = "인생네컷", brandImageRes = R.drawable.icon_life_four_cut),
                 Brand(isChecked = false, brandName = "포토그레이", brandImageRes = R.drawable.icon_photogray),
@@ -135,7 +178,6 @@ class MapViewModel @Inject constructor() : ViewModel() {
                 Brand(isChecked = false, brandName = "포토시그니처", brandImageRes = R.drawable.icon_photo_signature),
             )
 
-            // TODO: 서버 API 연동 시 교체
             // 중심: 37.5270539, 126.8862648 주변 100m 이내
             val nearbyBrands = persistentListOf(
                 BrandInfo(
@@ -151,7 +193,7 @@ class MapViewModel @Inject constructor() : ViewModel() {
                     brandImageRes = R.drawable.icon_photogray,
                     branchName = "가산역점",
                     distance = "38m",
-                    latitude = 37.5268,
+                    latitude = 37.5248,
                     longitude = 126.8867,
                 ),
                 BrandInfo(
@@ -160,23 +202,23 @@ class MapViewModel @Inject constructor() : ViewModel() {
                     branchName = "마리오점",
                     distance = "52m",
                     latitude = 37.5274,
-                    longitude = 126.8858,
+                    longitude = 126.8828,
                 ),
                 BrandInfo(
                     brandName = "하루필름",
                     brandImageRes = R.drawable.icon_haru_film,
                     branchName = "W몰점",
                     distance = "65m",
-                    latitude = 37.5266,
-                    longitude = 126.8859,
+                    latitude = 37.5166,
+                    longitude = 126.8659,
                 ),
                 BrandInfo(
                     brandName = "플랜비스튜디오",
                     brandImageRes = R.drawable.icon_planb_studio,
                     branchName = "대륭포스트점",
                     distance = "72m",
-                    latitude = 37.5276,
-                    longitude = 126.8869,
+                    latitude = 37.5176,
+                    longitude = 126.8969,
                 ),
                 BrandInfo(
                     brandName = "포토시그니처",

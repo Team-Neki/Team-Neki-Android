@@ -9,7 +9,6 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -47,7 +46,7 @@ class LoginViewModel @Inject constructor(
         if (dataStoreRepository.isSavedJwtTokens().first()) {
             Timber.d("JWT 토큰 O")
             authRepository.updateAccessToken(
-                refreshToken = dataStoreRepository.getRefreshToken().firstOrNull() ?: "",
+                refreshToken = dataStoreRepository.getRefreshToken().first(),
             ).onSuccess {
                 postSideEffect(LoginSideEffect.NavigateToHome)
             }.onFailure {

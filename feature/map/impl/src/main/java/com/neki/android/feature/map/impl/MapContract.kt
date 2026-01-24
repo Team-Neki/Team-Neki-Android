@@ -16,6 +16,7 @@ data class MapState(
     val selectedBrandInfo: BrandInfo? = null,
     val isShowInfoDialog: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
+    val isShowLocationPermissionDialog: Boolean = false,
 )
 
 sealed interface MapIntent {
@@ -46,6 +47,11 @@ sealed interface MapIntent {
     data object CloseDirectionBottomSheet : MapIntent
     data class ClickDirectionItem(val app: DirectionApp) : MapIntent
     data class ChangeDragLevel(val dragLevel: DragLevel) : MapIntent
+
+    // 위치 권한
+    data class RequestLocationPermission(val shouldShowRationale: Boolean) : MapIntent
+    data object DismissLocationPermissionDialog : MapIntent
+    data object ConfirmLocationPermissionDialog : MapIntent
 }
 
 sealed interface MapEffect {
