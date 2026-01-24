@@ -98,7 +98,7 @@ fun Modifier.tabbarShadow(
 }
 
 /**
- * Figma tabbar_shadow 스타일
+ * Figma dropdown_shadow 스타일
  * DROP_SHADOW: color #00000033, offset (0, 0), radius 5, spread 0
  */
 fun Modifier.dropdownShadow(
