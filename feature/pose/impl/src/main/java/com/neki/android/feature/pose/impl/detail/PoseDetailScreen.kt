@@ -25,15 +25,17 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.R
-import com.neki.android.feature.pose.impl.main.PoseEffect
-import com.neki.android.feature.pose.impl.main.PoseIntent
-import com.neki.android.feature.pose.impl.main.PoseState
+import com.neki.android.core.model.PeopleCount
+import com.neki.android.core.model.PoseEffect
+import com.neki.android.core.model.PoseIntent
+import com.neki.android.core.model.PoseState
 import com.neki.android.feature.pose.impl.main.PoseViewModel
 
 @Composable
 internal fun PoseDetailRoute(
     viewModel: PoseViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
+    navigateToRandomPose: (PeopleCount) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -42,6 +44,7 @@ internal fun PoseDetailRoute(
         when (sideEffect) {
             PoseEffect.NavigateBack -> navigateBack()
             is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+            is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
             else -> {}
         }
     }

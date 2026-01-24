@@ -24,7 +24,7 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.pose.impl.main.PeopleCount
+import com.neki.android.core.model.PeopleCount
 
 @Composable
 internal fun FilterBar(

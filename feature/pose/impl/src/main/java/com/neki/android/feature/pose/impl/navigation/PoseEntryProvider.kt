@@ -7,6 +7,7 @@ import com.neki.android.core.navigation.HiltSharedViewModelStoreNavEntryDecorato
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.feature.pose.api.PoseNavKey
 import com.neki.android.feature.pose.api.navigateToPoseDetail
+import com.neki.android.feature.pose.api.navigateToRandomPose
 import com.neki.android.feature.pose.impl.detail.PoseDetailRoute
 import com.neki.android.feature.pose.impl.main.PoseRoute
 import dagger.Module
@@ -43,6 +44,7 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
     ) {
         PoseDetailRoute(
             navigateBack = navigator::goBack,
+            navigateToRandomPose = navigator::navigateToRandomPose,
         )
     }
 }

@@ -21,7 +21,7 @@ import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.pose.impl.main.PeopleCount
+import com.neki.android.core.model.PeopleCount
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

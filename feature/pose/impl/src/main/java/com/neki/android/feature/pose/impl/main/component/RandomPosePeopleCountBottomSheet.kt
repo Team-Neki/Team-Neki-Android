@@ -4,8 +4,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
-import com.neki.android.feature.pose.impl.main.PeopleCount
 import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,6 +24,7 @@ internal fun RandomPosePeopleCountBottomSheet(
         onClickCancel = onDismissRequest,
         onClickActionButton = onClickSelectButton,
         onOptionSelect = onOptionSelected,
+        buttonEnabled = selectedCount != null,
     )
 }
 
