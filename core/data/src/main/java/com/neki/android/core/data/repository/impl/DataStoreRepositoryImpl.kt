@@ -33,15 +33,15 @@ class DataStoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getAccessToken(): Flow<String?> {
+    override fun getAccessToken(): Flow<String> {
         return dataStore.data.map { preferences ->
-            preferences[DataStoreKey.ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) }
+            preferences[DataStoreKey.ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) } ?: ""
         }
     }
 
-    override fun getRefreshToken(): Flow<String?> {
+    override fun getRefreshToken(): Flow<String> {
         return dataStore.data.map { preferences ->
-            preferences[DataStoreKey.REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) }
+            preferences[DataStoreKey.REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) } ?: ""
         }
     }
 

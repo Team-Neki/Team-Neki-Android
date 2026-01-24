@@ -9,8 +9,8 @@ interface DataStoreRepository {
         refreshToken: String,
     )
     fun isSavedJwtTokens(): Flow<Boolean>
-    fun getAccessToken(): Flow<String?>
-    fun getRefreshToken(): Flow<String?>
+    fun getAccessToken(): Flow<String>
+    fun getRefreshToken(): Flow<String>
     suspend fun clearTokens()
 
     suspend fun setBoolean(key: Preferences.Key<Boolean>, value: Boolean)
