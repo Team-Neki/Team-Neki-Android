@@ -20,8 +20,10 @@ android {
     }
 
     defaultConfig {
+        buildConfigField("String", "PHOTOISM_URL", properties["PHOTOISM_URL"].toString())
         buildConfigField("String", "PHOTOISM_IMAGE_URL", properties["PHOTOISM_IMAGE_URL"].toString())
         buildConfigField("String", "PHOTOISM_IMG_URL_MIME_TYPE", properties["PHOTOISM_IMG_URL_MIME_TYPE"].toString())
+        buildConfigField("String", "LIFE_FOUR_CUT_URL", properties["LIFE_FOUR_CUT_URL"].toString())
         buildConfigField("String", "LIFE_FOUR_CUT_IMAGE_URL", properties["LIFE_FOUR_CUT_IMAGE_URL"].toString())
         buildConfigField("String", "LIFE_FOUR_CUT_URL_MIME_TYPE", properties["LIFE_FOUR_CUT_URL_MIME_TYPE"].toString())
     }

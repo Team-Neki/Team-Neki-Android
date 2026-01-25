@@ -9,6 +9,7 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import com.neki.android.feature.photo_upload.impl.BuildConfig
 import timber.log.Timber
 
 class QRImageAnalyzer(
@@ -49,7 +50,9 @@ class QRImageAnalyzer(
 
                             val scanArea = scanAreaRatio()
                             if (scanArea == null || isInScanArea(centerXRatio, centerYRatio, scanArea)) {
-                                onQRCodeScanned(url)
+                                if (isSupportedPhotoBoothUrl(url)) {
+                                    onQRCodeScanned(url)
+                                }
                             }
                         }
                     }
@@ -66,5 +69,10 @@ class QRImageAnalyzer(
             xRatio <= scanArea.right &&
             yRatio >= scanArea.top &&
             yRatio <= scanArea.bottom
+    }
+
+    private fun isSupportedPhotoBoothUrl(url: String): Boolean {
+        return url.startsWith(BuildConfig.PHOTOISM_URL) ||
+            url.startsWith(BuildConfig.LIFE_FOUR_CUT_URL)
     }
 }
