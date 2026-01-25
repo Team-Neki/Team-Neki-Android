@@ -25,7 +25,7 @@ import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.rememberUpdatedMarkerState
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.modifier.dropdownShadow
+import com.neki.android.core.designsystem.modifier.pinShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_BACKGROUND_RADIUS
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_IMAGE_RADIUS
@@ -93,13 +93,10 @@ internal fun PhotoBoothMarkerContent(
         Box(
             modifier = Modifier
                 .size(bodySize.dp)
-                .dropdownShadow(
-                    color = Color.Black.copy(alpha = 0.38f),
+                .pinShadow(
                     shape = RoundedCornerShape(
                         if (isFocused) FOCUSED_MARKER_BACKGROUND_RADIUS.dp else MARKER_BACKGROUND_RADIUS.dp,
                     ),
-                    offsetY = 1.18.dp,
-                    blurRadius = 2.55.dp,
                 ),
         )
 
@@ -112,9 +109,9 @@ internal fun PhotoBoothMarkerContent(
                     height = MARKER_TRIANGLE_HEIGHT.dp,
                 ),
         ) {
-            val shadowColor = Color.Black.copy(alpha = 0.38f)
-            val offsetY = 1.18.dp.toPx()
-            val blurRadius = 2.55.dp.toPx()
+            val shadowColor = Color.Black.copy(alpha = 0.4f)
+            val offsetY = 1.dp.toPx()
+            val blurRadius = 2.5.dp.toPx()
 
             val path = Path().apply {
                 moveTo(0f, 0f)
