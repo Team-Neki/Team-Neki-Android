@@ -80,12 +80,12 @@ internal fun AnchoredDraggablePanel(
     val bottomPanelHeightPx = with(density) {
         (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
             MapConst.PANEL_DRAG_LOCATION_HEIGHT +
-            MapConst.PANEL_DRAG_LEVEL_BOTTOM_HEIGHT).dp.toPx() + navigationBarHeightPx
+            MapConst.PANEL_DRAG_LEVEL_FIRST_HEIGHT).dp.toPx() + navigationBarHeightPx
     }
     val centerPanelHeightPx = with(density) {
         (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
             MapConst.PANEL_DRAG_LOCATION_HEIGHT +
-            MapConst.PANEL_DRAG_LEVEL_CENTER_HEIGHT).dp.toPx() + navigationBarHeightPx
+            MapConst.PANEL_DRAG_LEVEL_SECOND_HEIGHT).dp.toPx() + navigationBarHeightPx
     }
     var isProgrammaticTransition by remember { mutableStateOf(false) }
 
