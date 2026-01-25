@@ -44,7 +44,8 @@ import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailCard
 import com.neki.android.feature.map.impl.component.ToMapChip
-import com.neki.android.core.common.permission.PermissionManager
+import com.neki.android.core.common.permission.LocationPermissionManager
+import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import com.neki.android.feature.map.impl.util.getPlaceName
@@ -74,8 +75,8 @@ fun MapRoute(
     }
 
     LaunchedEffect(Unit) {
-        if (!PermissionManager.hasLocationPermission(context)) {
-            viewModel.store.onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
+        if (!LocationPermissionManager.hasLocationPermission(context)) {
+            viewModel.store.onIntent(MapIntent.RequestLocationPermission(LocationPermissionManager.shouldShowLocationRationale(activity)))
         }
         viewModel.store.onIntent(MapIntent.EnterMapScreen)
     }
@@ -139,11 +140,11 @@ fun MapRoute(
             }
 
             is MapEffect.NavigateToAppSettings -> {
-                PermissionManager.navigateToAppSettings(context)
+                navigateToAppSettings(context)
             }
 
             is MapEffect.RequestLocationPermission -> {
-                locationPermissionLauncher.launch(PermissionManager.LOCATION_PERMISSIONS)
+                locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }
         }
     }
@@ -224,10 +225,10 @@ fun MapScreen(
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
             isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
             onClickCurrentLocation = {
-                if (PermissionManager.hasLocationPermission(context)) {
+                if (LocationPermissionManager.hasLocationPermission(context)) {
                     onLocationTrackingModeChange(LocationTrackingMode.Follow)
                 } else {
-                    onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
+                    onIntent(MapIntent.RequestLocationPermission(LocationPermissionManager.shouldShowLocationRationale(activity)))
                 }
             },
             onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
@@ -259,18 +260,18 @@ fun MapScreen(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
                 onClickCurrentLocation = {
-                    if (PermissionManager.hasLocationPermission(context)) {
+                    if (LocationPermissionManager.hasLocationPermission(context)) {
                         onIntent(MapIntent.ClickCurrentLocation)
                     } else {
-                        onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
+                        onIntent(MapIntent.RequestLocationPermission(LocationPermissionManager.shouldShowLocationRationale(activity)))
                     }
                 },
                 onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                 onClickDirection = {
-                    if (PermissionManager.hasLocationPermission(context)) {
+                    if (LocationPermissionManager.hasLocationPermission(context)) {
                         onIntent(MapIntent.ClickDirection(uiState.selectedPhotoBoothInfo.latitude, uiState.selectedPhotoBoothInfo.longitude))
                     } else {
-                        onIntent(MapIntent.RequestLocationPermission(PermissionManager.shouldShowLocationRationale(activity)))
+                        onIntent(MapIntent.RequestLocationPermission(LocationPermissionManager.shouldShowLocationRationale(activity)))
                     }
                 },
             )
