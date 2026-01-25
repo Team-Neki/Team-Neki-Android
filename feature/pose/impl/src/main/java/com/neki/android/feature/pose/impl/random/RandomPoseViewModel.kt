@@ -48,7 +48,6 @@ internal class RandomPoseViewModel @Inject constructor(
             RandomPoseIntent.ClickStartRandomPose -> reduce { copy(isShowTutorial = false) }
 
             // 기본화면
-            RandomPoseIntent.ClickBackIcon -> postSideEffect(RandomPoseEffect.NavigateBack)
             RandomPoseIntent.ClickCloseIcon -> postSideEffect(RandomPoseEffect.NavigateBack)
             RandomPoseIntent.ClickGoToDetailIcon -> {
                 if (state.currentPose.id != 0L) {

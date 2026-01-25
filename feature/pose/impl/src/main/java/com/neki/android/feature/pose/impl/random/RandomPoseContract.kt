@@ -20,7 +20,6 @@ sealed interface RandomPoseIntent {
     data object ClickStartRandomPose : RandomPoseIntent
 
     // 기본화면
-    data object ClickBackIcon : RandomPoseIntent
     data object ClickCloseIcon : RandomPoseIntent
     data object ClickGoToDetailIcon : RandomPoseIntent
     data object ClickScrapIcon : RandomPoseIntent
