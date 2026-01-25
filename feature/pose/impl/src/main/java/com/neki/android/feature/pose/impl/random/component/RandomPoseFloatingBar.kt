@@ -34,7 +34,7 @@ internal fun RandomPoseFloatingBarContent(
     onClickScrap: () -> Unit = {},
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
@@ -47,7 +47,7 @@ internal fun RandomPoseFloatingBarContent(
             .padding(top = 38.dp, bottom = 34.dp),
     ) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .clip(CircleShape)
                 .background(
                     color = NekiTheme.colorScheme.white.copy(alpha = 0.6f),
