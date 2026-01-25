@@ -65,7 +65,9 @@ fun MapRoute(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
     }
-    val nekiToast = remember { NekiToast(context) }
+
+    // 권한 요청 전 shouldShowRationale 상태 저장
+    var previousShouldShowRationale by remember { mutableStateOf(false) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -113,7 +115,7 @@ fun MapRoute(
                 }
             }
             is MapEffect.ShowToastMessage -> {
-                nekiToast.showToast(sideEffect.message)
+                NekiToast(context).showToast(sideEffect.message)
             }
             is MapEffect.MoveCameraToPosition -> {
                 coroutineScope.launch {
