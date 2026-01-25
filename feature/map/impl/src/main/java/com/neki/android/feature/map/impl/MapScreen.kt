@@ -66,23 +66,20 @@ fun MapRoute(
         position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
     }
 
-    // 권한 요청 전 shouldShowRationale 상태 저장
     var previousShouldShowRationale by remember { mutableStateOf(false) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
         val isGranted = permissions.values.any { it }
-        val shouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
+        val currentShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
 
         if (isGranted) {
             locationTrackingMode = LocationTrackingMode.Follow
         } else {
-            if (!shouldShowRationale) {
-                Timber.d("영구 거부 상태 → 설정 이동 다이얼로그 표시")
+            if (!currentShouldShowRationale && !previousShouldShowRationale) {
+                // 2회 이상 거부
                 viewModel.store.onIntent(MapIntent.ShowLocationPermissionDialog)
-            } else {
-                Timber.d("1회 거부 상태 → 다음에 다시 요청 가능")
             }
         }
     }
@@ -169,6 +166,7 @@ fun MapRoute(
             }
 
             is MapEffect.RequestLocationPermission -> {
+                previousShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }
         }
