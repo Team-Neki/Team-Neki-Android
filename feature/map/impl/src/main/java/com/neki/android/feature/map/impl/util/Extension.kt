@@ -7,6 +7,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Locale
 import kotlin.coroutines.resume
 
+/** 위경도에 대한 지명 조회 **/
 suspend fun Context.getPlaceName(
     latitude: Double,
     longitude: Double,
@@ -36,4 +37,21 @@ suspend fun Context.getPlaceName(
             cont.resume(fallback)
         }
     }
+}
+
+/** 두 위경도 좌표 사이 거리 계산 (Haversine formula) **/
+internal fun calculateDistance(
+    startLatitude: Double,
+    startLongitude: Double,
+    endLatitude: Double,
+    endLongitude: Double,
+): Int {
+    val earthRadius = 6371000.0 // meters
+    val dLat = Math.toRadians(endLatitude - startLatitude)
+    val dLng = Math.toRadians(endLongitude - startLongitude)
+    val a = kotlin.math.sin(dLat / 2) * kotlin.math.sin(dLat / 2) +
+        kotlin.math.cos(Math.toRadians(startLatitude)) * kotlin.math.cos(Math.toRadians(endLatitude)) *
+        kotlin.math.sin(dLng / 2) * kotlin.math.sin(dLng / 2)
+    val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a), kotlin.math.sqrt(1 - a))
+    return (earthRadius * c).toInt()
 }
