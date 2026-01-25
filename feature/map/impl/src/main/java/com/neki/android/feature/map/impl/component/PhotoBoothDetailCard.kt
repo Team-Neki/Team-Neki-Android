@@ -12,12 +12,12 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.BrandInfo
+import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
 internal fun PhotoBoothDetailCard(
-    brandInfo: BrandInfo,
+    photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
     isCurrentLocation: Boolean = false,
     onClickCurrentLocation: () -> Unit = {},
@@ -42,7 +42,7 @@ internal fun PhotoBoothDetailCard(
         }
         VerticalSpacer(12.dp)
         PhotoBoothCard(
-            brand = brandInfo,
+            photoBooth = photoBooth,
             onClickDirection = onClickDirection,
         )
     }
@@ -53,11 +53,10 @@ internal fun PhotoBoothDetailCard(
 private fun PhotoBoothDetailCardPreview() {
     NekiTheme {
         PhotoBoothDetailCard(
-            brandInfo = BrandInfo(
+            photoBooth = PhotoBooth(
                 brandName = "인생네컷",
-                brandImageRes = R.drawable.icon_life_four_cut,
                 branchName = "사당역점",
-                distance = "300m",
+                distance = 300,
             ),
         )
     }

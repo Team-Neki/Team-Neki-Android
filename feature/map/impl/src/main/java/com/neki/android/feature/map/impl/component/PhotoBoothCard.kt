@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -25,13 +26,13 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.modifier.cardShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.BrandInfo
+import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
 internal fun PhotoBoothCard(
-    brand: BrandInfo,
+    photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
     onClickDirection: () -> Unit = {},
 ) {
@@ -50,7 +51,9 @@ internal fun PhotoBoothCard(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .size(64.dp),
-            model = brand.brandImageRes,
+            model = photoBooth.imageUrl,
+            placeholder = painterResource(R.drawable.icon_life_four_cut),
+            error = painterResource(R.drawable.icon_life_four_cut),
             contentDescription = null,
         )
         HorizontalSpacer(16.dp)
@@ -59,20 +62,20 @@ internal fun PhotoBoothCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = brand.brandName,
+                    text = photoBooth.brandName,
                     color = NekiTheme.colorScheme.gray900,
                     style = NekiTheme.typography.title18Bold,
                 )
                 HorizontalSpacer(4.dp)
                 Text(
-                    text = brand.branchName,
+                    text = photoBooth.branchName,
                     color = NekiTheme.colorScheme.gray600,
                     style = NekiTheme.typography.caption12Medium,
                 )
             }
             VerticalSpacer(4.dp)
             Text(
-                text = brand.distance,
+                text = "${photoBooth.distance}m",
                 color = NekiTheme.colorScheme.gray400,
                 style = NekiTheme.typography.caption12Medium,
             )
@@ -103,11 +106,10 @@ internal fun PhotoBoothCard(
 private fun PhotoBoothCardPreview() {
     NekiTheme {
         PhotoBoothCard(
-            brand = BrandInfo(
+            photoBooth = PhotoBooth(
                 brandName = "인생네컷",
-                brandImageRes = R.drawable.icon_life_four_cut,
                 branchName = "사당역점",
-                distance = "300m",
+                distance = 300,
             ),
         )
     }

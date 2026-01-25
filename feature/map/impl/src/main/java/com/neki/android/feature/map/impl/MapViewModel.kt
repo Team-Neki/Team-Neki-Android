@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,8 +28,9 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> loadBrands(reduce)
-            MapIntent.ClickRefresh -> postSideEffect(MapEffect.RefreshPhotoBooth)
-            is MapIntent.UpdateCurrentLocation -> reduce { copy(currentLocation = intent.latitude to intent.longitude) }
+            MapIntent.ClickRefresh -> loadPhotoBoothsByPolygon(state, reduce, postSideEffect)
+            is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce)
+            is MapIntent.UpdateMapBounds -> reduce { copy(mapBounds = intent.mapBounds) }
             MapIntent.ClickCurrentLocation -> postSideEffect(MapEffect.RefreshCurrentLocation)
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
@@ -40,7 +41,7 @@ class MapViewModel @Inject constructor(
                 copy(
                     dragLevel = DragLevel.SECOND,
                     focusedMarkerPosition = null,
-                    selectedPhotoBoothInfo = null,
+                    selectedPhotoBooth = null,
                 )
             }
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
@@ -59,20 +60,46 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    private fun handleUpdateCurrentLocation(
+        state: MapState,
+        intent: MapIntent.UpdateCurrentLocation,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        val isFirstLocation = state.currentLocation == null
+        reduce { copy(currentLocation = intent.latitude to intent.longitude) }
+
+        if (isFirstLocation) {
+            val checkedBrandIds = state.brands.filter { it.isChecked }.map { it.id }
+            loadNearbyPhotoBooths(
+                longitude = intent.longitude,
+                latitude = intent.latitude,
+                brandIds = checkedBrandIds,
+                reduce = reduce,
+            )
+        }
+    }
+
     private fun handleClickBrand(
         state: MapState,
         intent: MapIntent.ClickBrand,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
-        reduce {
-            copy(
-                brands = state.brands.map { brand ->
-                    if (brand == intent.brand) {
-                        brand.copy(isChecked = !brand.isChecked)
-                    } else {
-                        brand
-                    }
-                }.toImmutableList(),
+        val updatedBrands = state.brands.map { brand ->
+            if (brand == intent.brand) {
+                brand.copy(isChecked = !brand.isChecked)
+            } else {
+                brand
+            }
+        }
+        reduce { copy(brands = updatedBrands.toImmutableList()) }
+
+        state.currentLocation?.let { (latitude, longitude) ->
+            val checkedBrandIds = updatedBrands.filter { it.isChecked }.map { it.id }
+            loadNearbyPhotoBooths(
+                longitude = longitude,
+                latitude = latitude,
+                brandIds = checkedBrandIds,
+                reduce = reduce,
             )
         }
     }
@@ -85,11 +112,11 @@ class MapViewModel @Inject constructor(
         reduce {
             copy(
                 dragLevel = DragLevel.INVISIBLE,
-                selectedPhotoBoothInfo = intent.brandInfo,
-                focusedMarkerPosition = intent.brandInfo.latitude to intent.brandInfo.longitude,
+                selectedPhotoBooth = intent.photoBooth,
+                focusedMarkerPosition = intent.photoBooth.latitude to intent.photoBooth.longitude,
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(intent.brandInfo.latitude, intent.brandInfo.longitude))
+        postSideEffect(MapEffect.MoveCameraToPosition(intent.photoBooth.latitude, intent.photoBooth.longitude))
     }
 
     private fun handleClickDirectionItem(
@@ -103,7 +130,7 @@ class MapViewModel @Inject constructor(
             postSideEffect(MapEffect.ShowToastMessage("현재 위치를 가져올 수 없습니다."))
             return
         }
-        state.selectedPhotoBoothInfo?.let { brandInfo ->
+        state.selectedPhotoBooth?.let { brandInfo ->
             postSideEffect(
                 MapEffect.MoveDirectionApp(
                     app = intent.app,
@@ -122,12 +149,18 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        val selectedBrand = state.nearbyPhotoBooths.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
+        val selectedBrand = state.mapMarkers.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
+        val selectedBrandWithDistance = selectedBrand?.let { brand ->
+            state.currentLocation?.let { (currentLat, currentLng) ->
+                val distance = calculateDistance(currentLat, currentLng, brand.latitude, brand.longitude)
+                brand.copy(distance = distance)
+            } ?: brand
+        }
         reduce {
             copy(
                 dragLevel = DragLevel.INVISIBLE,
                 focusedMarkerPosition = intent.latitude to intent.longitude,
-                selectedPhotoBoothInfo = selectedBrand,
+                selectedPhotoBooth = selectedBrandWithDistance,
             )
         }
         postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
@@ -137,7 +170,7 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            photoBoothRepository.getBrands()
+            mapRepository.getBrands()
                 .onSuccess { brands ->
                     reduce {
                         copy(
@@ -149,77 +182,70 @@ class MapViewModel @Inject constructor(
                 .onFailure {
                     reduce { copy(isLoading = false) }
                 }
+        }
+    }
 
-            // TODO: 가까운 포토부스 API 연동 필요
-            val nearbyBrands = persistentListOf(
-                BrandInfo(
-                    brandName = "인생네컷",
-                    brandImageRes = R.drawable.icon_life_four_cut,
-                    branchName = "가산디지털점",
-                    distance = "25m",
-                    latitude = 37.5272,
-                    longitude = 126.8864,
-                ),
-                BrandInfo(
-                    brandName = "포토그레이",
-                    brandImageRes = R.drawable.icon_photogray,
-                    branchName = "가산역점",
-                    distance = "38m",
-                    latitude = 37.5248,
-                    longitude = 126.8867,
-                ),
-                BrandInfo(
-                    brandName = "포토이즘",
-                    brandImageRes = R.drawable.icon_photoism,
-                    branchName = "마리오점",
-                    distance = "52m",
-                    latitude = 37.5274,
-                    longitude = 126.8828,
-                ),
-                BrandInfo(
-                    brandName = "하루필름",
-                    brandImageRes = R.drawable.icon_haru_film,
-                    branchName = "W몰점",
-                    distance = "65m",
-                    latitude = 37.5166,
-                    longitude = 126.8659,
-                ),
-                BrandInfo(
-                    brandName = "플랜비스튜디오",
-                    brandImageRes = R.drawable.icon_planb_studio,
-                    branchName = "대륭포스트점",
-                    distance = "72m",
-                    latitude = 37.5176,
-                    longitude = 126.8969,
-                ),
-                BrandInfo(
-                    brandName = "포토시그니처",
-                    brandImageRes = R.drawable.icon_photo_signature,
-                    branchName = "에이스점",
-                    distance = "80m",
-                    latitude = 37.5264,
-                    longitude = 126.8865,
-                ),
-                BrandInfo(
-                    brandName = "인생네컷",
-                    brandImageRes = R.drawable.icon_life_four_cut,
-                    branchName = "IT캐슬점",
-                    distance = "88m",
-                    latitude = 37.5278,
-                    longitude = 126.8860,
-                ),
-                BrandInfo(
-                    brandName = "포토그레이",
-                    brandImageRes = R.drawable.icon_photogray,
-                    branchName = "벽산점",
-                    distance = "95m",
-                    latitude = 37.5263,
-                    longitude = 126.8856,
-                ),
-            )
+    private fun loadNearbyPhotoBooths(
+        longitude: Double,
+        latitude: Double,
+        radiusInMeters: Int = 1000,
+        brandIds: List<Long> = emptyList(),
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            mapRepository.getPhotoBoothsByPoint(
+                longitude = longitude,
+                latitude = latitude,
+                radiusInMeters = radiusInMeters,
+                brandIds = brandIds,
+            ).onSuccess { photoBooths ->
+                reduce {
+                    val photoBoothsWithImage = photoBooths.map { photoBooth ->
+                        val matchedBrand = brands.find { it.name == photoBooth.brandName }
+                        photoBooth.copy(imageUrl = matchedBrand?.imageUrl.orEmpty())
+                    }
+                    copy(nearbyPhotoBooths = photoBoothsWithImage.toImmutableList())
+                }
+            }
+        }
+    }
 
-            reduce {
-                copy(nearbyPhotoBooths = nearbyBrands)
+    private fun loadPhotoBoothsByPolygon(
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        val mapBounds = state.mapBounds
+        if (mapBounds == null) {
+            postSideEffect(MapEffect.ShowToastMessage("지도 영역을 가져올 수 없습니다."))
+            return
+        }
+
+        val checkedBrandIds = state.brands.filter { it.isChecked }.map { it.id }
+
+        // 좌상단 -> 우상단 -> 우하단 -> 좌하단 -> 좌상단 (닫힌 다각형)
+        val coordinates = listOf(
+            mapBounds.northWest.longitude to mapBounds.northWest.latitude,
+            mapBounds.northEast.longitude to mapBounds.northEast.latitude,
+            mapBounds.southEast.longitude to mapBounds.southEast.latitude,
+            mapBounds.southWest.longitude to mapBounds.southWest.latitude,
+            mapBounds.northWest.longitude to mapBounds.northWest.latitude,
+        )
+
+        viewModelScope.launch {
+            mapRepository.getPhotoBoothsByPolygon(
+                coordinates = coordinates,
+                brandIds = checkedBrandIds,
+            ).onSuccess { photoBooths ->
+                reduce {
+                    val photoBoothsWithImage = photoBooths.map { photoBooth ->
+                        val matchedBrand = brands.find { it.name == photoBooth.brandName }
+                        photoBooth.copy(imageUrl = matchedBrand?.imageUrl.orEmpty())
+                    }
+                    copy(mapMarkers = photoBoothsWithImage.toImmutableList())
+                }
+            }.onFailure {
+                postSideEffect(MapEffect.ShowToastMessage("포토부스 조회에 실패했습니다."))
             }
         }
     }

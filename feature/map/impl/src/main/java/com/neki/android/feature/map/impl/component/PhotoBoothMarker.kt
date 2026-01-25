@@ -16,11 +16,16 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
+import com.neki.android.core.model.PhotoBooth
 import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.rememberUpdatedMarkerState
 import com.neki.android.core.designsystem.ComponentPreview
@@ -41,19 +46,16 @@ import com.neki.android.feature.map.impl.const.MapConst.MARKER_TRIANGLE_WIDTH
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 internal fun PhotoBoothMarker(
-    vararg keys: String,
-    latitude: Double,
-    longitude: Double,
-    brandImageRes: Int,
+    photoBooth: PhotoBooth,
     isFocused: Boolean = false,
     onClick: () -> Unit = {},
 ) {
     MarkerComposable(
-        keys = keys,
+        keys = arrayOf("$isFocused", photoBooth.imageUrl),
         state = rememberUpdatedMarkerState(
-            position = LatLng(latitude, longitude),
+            position = LatLng(photoBooth.latitude, photoBooth.longitude),
         ),
-        captionText = "인생네컷",
+        captionText = photoBooth.brandName,
         captionTextSize = 12.sp,
         captionColor = NekiTheme.colorScheme.gray900,
         onClick = {
@@ -62,7 +64,7 @@ internal fun PhotoBoothMarker(
         },
     ) {
         PhotoBoothMarkerContent(
-            brandImageRes = brandImageRes,
+            imageUrl = photoBooth.imageUrl,
             isFocused = isFocused,
         )
     }
@@ -71,7 +73,7 @@ internal fun PhotoBoothMarker(
 @Composable
 internal fun PhotoBoothMarkerContent(
     modifier: Modifier = Modifier,
-    brandImageRes: Int,
+    imageUrl: String = "",
     isFocused: Boolean = false,
 ) {
     val caretColor = if (isFocused) NekiTheme.colorScheme.gray900 else NekiTheme.colorScheme.white
@@ -174,7 +176,12 @@ internal fun PhotoBoothMarkerContent(
                             if (isFocused) FOCUSED_MARKER_IMAGE_RADIUS.dp else MARKER_IMAGE_RADIUS.dp,
                         ),
                     ),
-                model = brandImageRes,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageUrl)
+                    .allowHardware(false)
+                    .build(),
+                placeholder = painterResource(R.drawable.icon_info_gray_stroke),
+                error = painterResource(R.drawable.icon_info_primary_fill),
                 contentDescription = null,
             )
         }
@@ -185,9 +192,7 @@ internal fun PhotoBoothMarkerContent(
 @Composable
 private fun PhotoBoothMarkerPreview() {
     NekiTheme {
-        PhotoBoothMarkerContent(
-            brandImageRes = R.drawable.icon_life_four_cut,
-        )
+        PhotoBoothMarkerContent()
     }
 }
 
@@ -196,7 +201,6 @@ private fun PhotoBoothMarkerPreview() {
 private fun PhotoBoothMarkerSelectedPreview() {
     NekiTheme {
         PhotoBoothMarkerContent(
-            brandImageRes = R.drawable.icon_life_four_cut,
             isFocused = true,
         )
     }

@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +23,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.naver.maps.geometry.LatLng
+import com.neki.android.feature.map.impl.LatLng as NekiLatLng
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
@@ -48,6 +50,8 @@ import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import com.neki.android.feature.map.impl.util.getPlaceName
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
@@ -92,9 +96,6 @@ fun MapRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            is MapEffect.RefreshPhotoBooth -> {
-                // TODO: 포토부스 새로고침 로직 구현
-            }
             is MapEffect.RefreshCurrentLocation -> {
                 if (LocationPermissionManager.hasLocationPermission(context)) {
                     locationTrackingMode = LocationTrackingMode.Follow
@@ -203,6 +204,26 @@ fun MapScreen(
         )
     }
 
+    LaunchedEffect(cameraPositionState) {
+        snapshotFlow { cameraPositionState.isMoving }
+            .distinctUntilChanged()
+            .filter { isMoving -> !isMoving }
+            .collect {
+                cameraPositionState.contentBounds?.let { bounds ->
+                    onIntent(
+                        MapIntent.UpdateMapBounds(
+                            MapBounds(
+                                southWest = NekiLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                                northWest = NekiLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                                northEast = NekiLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                                southEast = NekiLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
+                            ),
+                        ),
+                    )
+                }
+            }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -221,16 +242,13 @@ fun MapScreen(
                 onIntent(MapIntent.UpdateCurrentLocation(location.latitude, location.longitude))
             },
         ) {
-            uiState.nearbyPhotoBooths.forEach { brandInfo ->
-                val isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude)
+            uiState.mapMarkers.forEach { photoBooth ->
+                val isFocused = uiState.focusedMarkerPosition == (photoBooth.latitude to photoBooth.longitude)
                 PhotoBoothMarker(
-                    keys = arrayOf("$isFocused"),
-                    latitude = brandInfo.latitude,
-                    longitude = brandInfo.longitude,
-                    brandImageRes = brandInfo.brandImageRes,
+                    photoBooth = photoBooth,
                     isFocused = isFocused,
                     onClick = {
-                        onIntent(MapIntent.ClickPhotoBoothMarker(latitude = brandInfo.latitude, longitude = brandInfo.longitude))
+                        onIntent(MapIntent.ClickPhotoBoothMarker(latitude = photoBooth.latitude, longitude = photoBooth.longitude))
                     },
                 )
             }
@@ -267,9 +285,9 @@ fun MapScreen(
                     .padding(bottom = 32.dp),
                 onClick = { onIntent(MapIntent.ClickToMapChip) },
             )
-        } else if (uiState.dragLevel == DragLevel.INVISIBLE && uiState.selectedPhotoBoothInfo != null) {
+        } else if (uiState.dragLevel == DragLevel.INVISIBLE && uiState.selectedPhotoBooth != null) {
             PhotoBoothDetailCard(
-                brandInfo = uiState.selectedPhotoBoothInfo,
+                photoBooth = uiState.selectedPhotoBooth,
                 modifier = Modifier.align(Alignment.BottomCenter),
                 isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
                 onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },

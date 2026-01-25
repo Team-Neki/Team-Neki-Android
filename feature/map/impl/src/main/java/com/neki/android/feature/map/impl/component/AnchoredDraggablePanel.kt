@@ -50,7 +50,7 @@ import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
-import com.neki.android.core.model.BrandInfo
+import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.map.impl.DragLevel
 import com.neki.android.feature.map.impl.const.MapConst
@@ -61,14 +61,14 @@ import kotlin.math.roundToInt
 @Composable
 internal fun AnchoredDraggablePanel(
     brands: ImmutableList<Brand> = persistentListOf(),
-    nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
+    nearbyBrands: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
     isCurrentLocation: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
-    onClickNearBrand: (BrandInfo) -> Unit = {},
+    onClickNearBrand: (PhotoBooth) -> Unit = {},
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -162,10 +162,10 @@ internal fun AnchoredDraggablePanel(
 @Composable
 internal fun AnchoredPanelContent(
     brands: ImmutableList<Brand> = persistentListOf(),
-    nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
+    nearbyBrands: ImmutableList<PhotoBooth> = persistentListOf(),
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
-    onClickNearBrand: (BrandInfo) -> Unit = {},
+    onClickNearBrand: (PhotoBooth) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -229,10 +229,10 @@ internal fun AnchoredPanelContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
         ) {
-            items(nearbyBrands) { brandInfo ->
+            items(nearbyBrands) { photoBooth ->
                 HorizontalBrandItem(
-                    brandInfo = brandInfo,
-                    onClickItem = { onClickNearBrand(brandInfo) },
+                    photoBooth = photoBooth,
+                    onClickItem = { onClickNearBrand(photoBooth) },
                 )
             }
         }
@@ -253,27 +253,24 @@ private fun AnchoredPanelContentPreview() {
                 Brand(isChecked = false, name = "포토시그니처", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOSIGNATURE_LOGO_v1.png"),
             ),
             nearbyBrands = persistentListOf(
-                BrandInfo(
+                PhotoBooth(
                     brandName = "인생네컷",
-                    brandImageRes = R.drawable.icon_life_four_cut,
                     branchName = "가산디지털점",
-                    distance = "25m",
+                    distance = 25,
                     latitude = 37.5272,
                     longitude = 126.8864,
                 ),
-                BrandInfo(
+                PhotoBooth(
                     brandName = "포토그레이",
-                    brandImageRes = R.drawable.icon_photogray,
                     branchName = "가산역점",
-                    distance = "38m",
+                    distance = 38,
                     latitude = 37.5268,
                     longitude = 126.8867,
                 ),
-                BrandInfo(
+                PhotoBooth(
                     brandName = "포토이즘",
-                    brandImageRes = R.drawable.icon_photoism,
                     branchName = "마리오점",
-                    distance = "52m",
+                    distance = 52,
                     latitude = 37.5274,
                     longitude = 126.8858,
                 ),
