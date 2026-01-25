@@ -202,7 +202,7 @@ fun MapScreen(
                 onIntent(MapIntent.UpdateCurrentLocation(location.latitude, location.longitude))
             },
         ) {
-            uiState.nearbyPhotoBooths.forEachIndexed { index, brandInfo ->
+            uiState.nearbyPhotoBooths.forEach { brandInfo ->
                 val isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude)
                 PhotoBoothMarker(
                     keys = arrayOf("$isFocused"),
