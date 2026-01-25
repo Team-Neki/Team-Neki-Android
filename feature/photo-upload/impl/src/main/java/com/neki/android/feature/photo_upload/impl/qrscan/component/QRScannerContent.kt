@@ -107,14 +107,17 @@ internal fun QRScannerContent(
                     }
                 }
 
-                // TopBar 제외한 나머지에서 중앙 정렬
+                // Scanner 상단 영역에서부터 (32-3)만큼 떨어짐
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    contentAlignment = Alignment.Center,
                 ) {
-                    QRCodeText()
+                    QRCodeText(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 29.dp),
+                    )
                 }
             }
 
@@ -135,6 +138,7 @@ internal fun QRScannerContent(
                 modifier = Modifier.weight(274f),
                 contentAlignment = Alignment.TopCenter,
             ) {
+                // Scanner 하단 영역에서부터 (40-3)만큼 떨어짐
                 NekiIconButton(
                     modifier = Modifier
                         .padding(top = 37.dp)
