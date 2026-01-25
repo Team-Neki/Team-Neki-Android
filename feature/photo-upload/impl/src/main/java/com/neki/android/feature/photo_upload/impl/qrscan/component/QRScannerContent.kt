@@ -166,8 +166,8 @@ private fun QRCodeText(modifier: Modifier = Modifier) {
                 SpanStyle(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFFFF311F),
-                            Color(0xFFFFDAD6),
+                            NekiTheme.colorScheme.primary500,
+                            NekiTheme.colorScheme.primary100,
                         ),
                     ),
                 ),
