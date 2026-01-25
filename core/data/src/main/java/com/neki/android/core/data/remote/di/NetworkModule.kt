@@ -8,7 +8,7 @@ import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.qualifier.UploadHttpClient
 import com.neki.android.core.dataapi.auth.AuthEventManager
-import com.neki.android.core.dataapi.repository.DataStoreRepository
+import com.neki.android.core.dataapi.repository.TokenRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,7 +45,7 @@ internal object NetworkModule {
     const val TIME_OUT = 5000L
     const val UPLOAD_TIME_OUT = 10_000L
 
-    val sendWithoutJwtUrls = listOf(
+    val sendWithoutAuthUrls = listOf(
         "/api/auth/kakao/login",
         "/api/auth/refresh",
     )
@@ -66,7 +66,7 @@ internal object NetworkModule {
     @Provides
     @Singleton
     fun provideHttpClient(
-        dataStoreRepository: DataStoreRepository,
+        tokenRepository: TokenRepository,
         authEventManager: AuthEventManager,
     ): HttpClient {
         return HttpClient(Android) {
@@ -79,10 +79,10 @@ internal object NetworkModule {
                 bearer {
                     loadTokens {
                         Timber.d("BearerAuth - loadTokens")
-                        if (dataStoreRepository.isSavedJwtTokens().first()) {
+                        if (tokenRepository.isSavedTokens().first()) {
                             BearerTokens(
-                                accessToken = dataStoreRepository.getAccessToken().first(),
-                                refreshToken = dataStoreRepository.getRefreshToken().first(),
+                                accessToken = tokenRepository.getAccessToken().first(),
+                                refreshToken = tokenRepository.getRefreshToken().first(),
                             )
                         } else null
                     }
@@ -94,12 +94,12 @@ internal object NetworkModule {
                                 val response = client.post("/api/auth/refresh") {
                                     setBody(
                                         RefreshTokenRequest(
-                                            refreshToken = dataStoreRepository.getRefreshToken().first(),
+                                            refreshToken = tokenRepository.getRefreshToken().first(),
                                         ),
                                     )
                                 }.body<BasicResponse<AuthResponse>>()
 
-                                dataStoreRepository.saveJwtTokens(
+                                tokenRepository.saveTokens(
                                     accessToken = response.data.accessToken,
                                     refreshToken = response.data.refreshToken,
                                 )
@@ -110,7 +110,7 @@ internal object NetworkModule {
                                 )
                             } catch (e: Exception) {
                                 Timber.e(e)
-                                dataStoreRepository.clearTokens()
+                                tokenRepository.clearTokens()
                                 authEventManager.emitTokenExpired()
                                 null
                             }
@@ -118,12 +118,12 @@ internal object NetworkModule {
                     }
 
                     sendWithoutRequest { request ->
-                        val shouldNotJwt = sendWithoutJwtUrls.any {
+                        val shouldNotAuth = sendWithoutAuthUrls.any {
                             request.url.encodedPath == it
                         }
 
-                        Timber.d("Bearer 인증 필요 API 여부 : $shouldNotJwt")
-                        !shouldNotJwt
+                        Timber.d("Bearer 인증 필요 API 여부 : $shouldNotAuth")
+                        !shouldNotAuth
                     }
                 }
             }
