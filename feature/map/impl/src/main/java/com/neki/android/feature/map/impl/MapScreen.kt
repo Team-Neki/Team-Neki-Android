@@ -1,6 +1,5 @@
 package com.neki.android.feature.map.impl
 
-import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,20 +33,22 @@ import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
+import com.neki.android.core.common.permission.LocationPermissionManager
+import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.WarningDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
-import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailCard
+import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
-import com.neki.android.core.common.permission.LocationPermissionManager
-import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import com.neki.android.feature.map.impl.util.getPlaceName
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
@@ -64,6 +64,7 @@ fun MapRoute(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
     }
+    val nekiToast = remember { NekiToast(context) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -90,7 +91,7 @@ fun MapRoute(
                 locationTrackingMode = LocationTrackingMode.Follow
             }
             is MapEffect.ShowToastMessage -> {
-                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+                nekiToast.showToast(sideEffect.message)
             }
             is MapEffect.MoveCameraToPosition -> {
                 coroutineScope.launch {
