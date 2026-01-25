@@ -2,6 +2,7 @@ package com.neki.android.core.model
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.Serializable
 
 private val dummyPoseList = persistentListOf(
     Pose(id = 1, poseImageUrl = "https://picsum.photos/seed/poseA/400/520", peopleCount = 1),
@@ -105,6 +106,7 @@ sealed interface PoseEffect {
     data class ShowToast(val message: String) : PoseEffect
 }
 
+@Serializable
 enum class PeopleCount(val displayText: String, val value: Int) {
     ONE("1인", 1),
     TWO("2인", 2),
