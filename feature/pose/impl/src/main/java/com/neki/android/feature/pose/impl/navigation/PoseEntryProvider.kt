@@ -12,6 +12,7 @@ import com.neki.android.feature.pose.impl.detail.PoseDetailRoute
 import com.neki.android.feature.pose.impl.detail.PoseDetailViewModel
 import com.neki.android.feature.pose.impl.main.PoseRoute
 import com.neki.android.feature.pose.impl.random.RandomPoseRoute
+import com.neki.android.feature.pose.impl.random.RandomPoseViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,8 +50,13 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
         )
     }
 
-    entry<PoseNavKey.RandomPose> {
+    entry<PoseNavKey.RandomPose> { key ->
         RandomPoseRoute(
+            viewModel = hiltViewModel<RandomPoseViewModel, RandomPoseViewModel.Factory>(
+                creationCallback = { factory ->
+                    factory.create(key.peopleCount)
+                },
+            ),
             navigateBack = navigator::goBack,
             navigateToPoseDetail = navigator::navigateToPoseDetail,
         )

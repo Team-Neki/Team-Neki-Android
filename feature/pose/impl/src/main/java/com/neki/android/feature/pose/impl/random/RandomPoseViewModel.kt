@@ -1,24 +1,25 @@
 package com.neki.android.feature.pose.impl.random
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
-import javax.inject.Inject
 
-@HiltViewModel
-internal class RandomPoseViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = RandomPoseViewModel.Factory::class)
+internal class RandomPoseViewModel @AssistedInject constructor(
+    @Assisted private val peopleCount: PeopleCount,
 ) : ViewModel() {
 
-    private val peopleCount: PeopleCount = savedStateHandle
-        .get<String>("peopleCount")
-        ?.let { PeopleCount.valueOf(it) }
-        ?: PeopleCount.ONE
+    @AssistedFactory
+    interface Factory {
+        fun create(peopleCount: PeopleCount): RandomPoseViewModel
+    }
 
     private val dummyPoseList = persistentListOf(
         Pose(id = 1, poseImageUrl = "https://picsum.photos/seed/random1/400/520", peopleCount = peopleCount.value),
