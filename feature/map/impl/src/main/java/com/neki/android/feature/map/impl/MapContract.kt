@@ -27,10 +27,7 @@ sealed interface MapIntent {
         val latitude: Double,
         val longitude: Double,
     ) : MapIntent
-    data class ClickDirection(
-        val latitude: Double,
-        val longitude: Double,
-    ) : MapIntent
+    data object ClickDirection : MapIntent
     data object ClickRefresh : MapIntent
     data class UpdateCurrentLocation(val latitude: Double, val longitude: Double) : MapIntent
 
@@ -42,6 +39,7 @@ sealed interface MapIntent {
     data class ClickBrand(val brand: Brand) : MapIntent
     data class ClickNearPhotoBooth(val brandInfo: BrandInfo) : MapIntent
     data object ClickClosePhotoBoothCard : MapIntent
+    data object OpenDirectionBottomSheet : MapIntent
     data object CloseDirectionBottomSheet : MapIntent
     data class ClickDirectionItem(val app: DirectionApp) : MapIntent
     data class ChangeDragLevel(val dragLevel: DragLevel) : MapIntent
@@ -55,6 +53,7 @@ sealed interface MapIntent {
 sealed interface MapEffect {
     data object RefreshPhotoBooth : MapEffect
     data object RefreshCurrentLocation : MapEffect
+    data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
     data class MoveCameraToPosition(val latitude: Double, val longitude: Double) : MapEffect
 

@@ -88,7 +88,27 @@ fun MapRoute(
                 // TODO: 포토부스 새로고침 로직 구현
             }
             is MapEffect.RefreshCurrentLocation -> {
-                locationTrackingMode = LocationTrackingMode.Follow
+                if (LocationPermissionManager.hasLocationPermission(context)) {
+                    locationTrackingMode = LocationTrackingMode.Follow
+                } else {
+                    viewModel.store.onIntent(
+                        MapIntent.RequestLocationPermission(
+                            LocationPermissionManager.shouldShowLocationRationale(activity),
+                        ),
+                    )
+                }
+            }
+
+            is MapEffect.OpenDirectionBottomSheet -> {
+                if (LocationPermissionManager.hasLocationPermission(context)) {
+                    viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
+                } else {
+                    viewModel.store.onIntent(
+                        MapIntent.RequestLocationPermission(
+                            LocationPermissionManager.shouldShowLocationRationale(activity),
+                        ),
+                    )
+                }
             }
             is MapEffect.ShowToastMessage -> {
                 nekiToast.showToast(sideEffect.message)
@@ -170,9 +190,6 @@ fun MapScreen(
         position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
     },
 ) {
-    val context = LocalContext.current
-    val activity = LocalActivity.current!!
-
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
             locationTrackingMode = locationTrackingMode,
@@ -225,13 +242,7 @@ fun MapScreen(
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
             isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
-            onClickCurrentLocation = {
-                if (LocationPermissionManager.hasLocationPermission(context)) {
-                    onLocationTrackingModeChange(LocationTrackingMode.Follow)
-                } else {
-                    onIntent(MapIntent.RequestLocationPermission(LocationPermissionManager.shouldShowLocationRationale(activity)))
-                }
-            },
+            onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
             onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
             onClickNearBrand = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
@@ -260,21 +271,9 @@ fun MapScreen(
                 brandInfo = uiState.selectedPhotoBoothInfo,
                 modifier = Modifier.align(Alignment.BottomCenter),
                 isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
-                onClickCurrentLocation = {
-                    if (LocationPermissionManager.hasLocationPermission(context)) {
-                        onIntent(MapIntent.ClickCurrentLocation)
-                    } else {
-                        onIntent(MapIntent.RequestLocationPermission(LocationPermissionManager.shouldShowLocationRationale(activity)))
-                    }
-                },
+                onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
                 onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
-                onClickDirection = {
-                    if (LocationPermissionManager.hasLocationPermission(context)) {
-                        onIntent(MapIntent.ClickDirection(uiState.selectedPhotoBoothInfo.latitude, uiState.selectedPhotoBoothInfo.longitude))
-                    } else {
-                        onIntent(MapIntent.RequestLocationPermission(LocationPermissionManager.shouldShowLocationRationale(activity)))
-                    }
-                },
+                onClickDirection = { onIntent(MapIntent.ClickDirection) },
             )
         }
     }

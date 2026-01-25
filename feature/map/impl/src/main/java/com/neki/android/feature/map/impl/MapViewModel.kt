@@ -49,11 +49,12 @@ class MapViewModel @Inject constructor(
                     selectedPhotoBoothInfo = null,
                 )
             }
+            MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
             is MapIntent.ClickPhotoBoothMarker -> handleClickBrandMarker(state, intent, reduce, postSideEffect)
-            is MapIntent.ClickDirection -> reduce { copy(isShowDirectionBottomSheet = true) }
+            MapIntent.ClickDirection -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
             is MapIntent.RequestLocationPermission -> handleRequestLocationPermission(intent, reduce, postSideEffect)
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
             MapIntent.ConfirmLocationPermissionDialog -> {
