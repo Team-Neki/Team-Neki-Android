@@ -3,6 +3,7 @@ package com.neki.android.feature.map.impl
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.dataapi.repository.PhotoBoothRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.MviIntentStore
@@ -14,7 +15,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MapViewModel @Inject constructor() : ViewModel() {
+class MapViewModel @Inject constructor(
+    private val photoBoothRepository: PhotoBoothRepository,
+) : ViewModel() {
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
         onIntent = ::onIntent,
@@ -137,16 +140,20 @@ class MapViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            val brands = persistentListOf(
-                Brand(isChecked = false, brandName = "인생네컷", brandImageRes = R.drawable.icon_life_four_cut),
-                Brand(isChecked = false, brandName = "포토그레이", brandImageRes = R.drawable.icon_photogray),
-                Brand(isChecked = false, brandName = "포토이즘", brandImageRes = R.drawable.icon_photoism),
-                Brand(isChecked = false, brandName = "하루필름", brandImageRes = R.drawable.icon_haru_film),
-                Brand(isChecked = false, brandName = "플랜비\n스튜디오", brandImageRes = R.drawable.icon_planb_studio),
-                Brand(isChecked = false, brandName = "포토시그니처", brandImageRes = R.drawable.icon_photo_signature),
-            )
+            photoBoothRepository.getBrands()
+                .onSuccess { brands ->
+                    reduce {
+                        copy(
+                            isLoading = false,
+                            brands = brands.toImmutableList(),
+                        )
+                    }
+                }
+                .onFailure {
+                    reduce { copy(isLoading = false) }
+                }
 
-            // 중심: 37.5270539, 126.8862648 주변 100m 이내
+            // TODO: 가까운 포토부스 API 연동 필요
             val nearbyBrands = persistentListOf(
                 BrandInfo(
                     brandName = "인생네컷",
@@ -215,11 +222,7 @@ class MapViewModel @Inject constructor() : ViewModel() {
             )
 
             reduce {
-                copy(
-                    isLoading = false,
-                    brands = brands,
-                    nearbyPhotoBooths = nearbyBrands,
-                )
+                copy(nearbyPhotoBooths = nearbyBrands)
             }
         }
     }

@@ -245,12 +245,12 @@ private fun AnchoredPanelContentPreview() {
     NekiTheme {
         AnchoredPanelContent(
             brands = persistentListOf(
-                Brand(isChecked = false, brandName = "인생네컷", brandImageRes = R.drawable.icon_life_four_cut),
-                Brand(isChecked = false, brandName = "포토그레이", brandImageRes = R.drawable.icon_photogray),
-                Brand(isChecked = false, brandName = "포토이즘", brandImageRes = R.drawable.icon_photoism),
-                Brand(isChecked = false, brandName = "하루필름", brandImageRes = R.drawable.icon_haru_film),
-                Brand(isChecked = false, brandName = "플랜비\n스튜디오", brandImageRes = R.drawable.icon_planb_studio),
-                Brand(isChecked = false, brandName = "포토시그니처", brandImageRes = R.drawable.icon_photo_signature),
+                Brand(isChecked = false, name = "인생네컷", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/LIFEFOURCUTS_LOGO_v1.png"),
+                Brand(isChecked = false, name = "포토그레이", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOGRAY_LOGO_v1.png"),
+                Brand(isChecked = false, name = "포토이즘", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOISM_LOGO_v1.png"),
+                Brand(isChecked = false, name = "하루필름", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/HARUFILM_LOGO_v1.png"),
+                Brand(isChecked = false, name = "플랜비\n스튜디오", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PLANB_STUDIO_LOGO_v1.png"),
+                Brand(isChecked = false, name = "포토시그니처", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOSIGNATURE_LOGO_v1.png"),
             ),
             nearbyBrands = persistentListOf(
                 BrandInfo(
