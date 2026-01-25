@@ -2,10 +2,7 @@ package com.neki.android.feature.map.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.designsystem.R
-import com.neki.android.core.dataapi.repository.PhotoBoothRepository
-import com.neki.android.core.model.Brand
-import com.neki.android.core.model.BrandInfo
+import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    private val photoBoothRepository: PhotoBoothRepository,
+    private val mapRepository: MapRepository,
 ) : ViewModel() {
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),

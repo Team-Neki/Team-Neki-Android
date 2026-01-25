@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PhotoBoothPointResponse(
+data class PhotoBoothPolygonResponse(
     @SerialName("items") val items: List<Item>,
 ) {
     @Serializable
@@ -16,7 +16,6 @@ data class PhotoBoothPointResponse(
         @SerialName("address") val address: String,
         @SerialName("longitude") val longitude: Double,
         @SerialName("latitude") val latitude: Double,
-        @SerialName("distance") val distance: Int,
     ) {
         internal fun toModel(): PhotoBooth = PhotoBooth(
             id = id,
@@ -25,7 +24,6 @@ data class PhotoBoothPointResponse(
             address = address,
             longitude = longitude,
             latitude = latitude,
-            distance = distance,
         )
     }
 
