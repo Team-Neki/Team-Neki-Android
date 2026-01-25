@@ -31,8 +31,11 @@ class QRImageAnalyzer(
                 imageProxy.imageInfo.rotationDegrees,
             )
 
-            val imageWidth = imageProxy.width.toFloat()
-            val imageHeight = imageProxy.height.toFloat()
+            val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+            val isRotated = rotationDegrees == 90 || rotationDegrees == 270
+
+            val rotatedWidth = if (isRotated) imageProxy.height.toFloat() else imageProxy.width.toFloat()
+            val rotatedHeight = if (isRotated) imageProxy.width.toFloat() else imageProxy.height.toFloat()
 
             scanner.process(inputImage)
                 .addOnSuccessListener { barcodes ->
@@ -41,8 +44,8 @@ class QRImageAnalyzer(
                             val url = barcode.url?.url ?: continue
                             val boundingBox = barcode.boundingBox ?: continue
 
-                            val centerXRatio = boundingBox.centerX() / imageWidth
-                            val centerYRatio = boundingBox.centerY() / imageHeight
+                            val centerXRatio = boundingBox.centerX() / rotatedWidth
+                            val centerYRatio = boundingBox.centerY() / rotatedHeight
 
                             val scanArea = scanAreaRatio()
                             if (scanArea == null || isInScanArea(centerXRatio, centerYRatio, scanArea)) {
