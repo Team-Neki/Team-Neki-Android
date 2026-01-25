@@ -11,7 +11,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import javax.inject.Inject
 
-class PhotoBoothService @Inject constructor(
+class MapService @Inject constructor(
     private val client: HttpClient,
 ) {
     suspend fun getBrands(): BasicResponse<List<BrandResponse>> {
