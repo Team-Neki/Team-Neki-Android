@@ -49,6 +49,7 @@ import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import com.neki.android.feature.map.impl.util.getPlaceName
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
@@ -70,14 +71,23 @@ fun MapRoute(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
         val isGranted = permissions.values.any { it }
+        val shouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
+
         if (isGranted) {
             locationTrackingMode = LocationTrackingMode.Follow
+        } else {
+            if (!shouldShowRationale) {
+                Timber.d("영구 거부 상태 → 설정 이동 다이얼로그 표시")
+                viewModel.store.onIntent(MapIntent.ShowLocationPermissionDialog)
+            } else {
+                Timber.d("1회 거부 상태 → 다음에 다시 요청 가능")
+            }
         }
     }
 
     LaunchedEffect(Unit) {
         if (!LocationPermissionManager.hasLocationPermission(context)) {
-            viewModel.store.onIntent(MapIntent.RequestLocationPermission(LocationPermissionManager.shouldShowLocationRationale(activity)))
+            viewModel.store.onIntent(MapIntent.RequestLocationPermission)
         }
         viewModel.store.onIntent(MapIntent.EnterMapScreen)
     }
@@ -91,11 +101,7 @@ fun MapRoute(
                 if (LocationPermissionManager.hasLocationPermission(context)) {
                     locationTrackingMode = LocationTrackingMode.Follow
                 } else {
-                    viewModel.store.onIntent(
-                        MapIntent.RequestLocationPermission(
-                            LocationPermissionManager.shouldShowLocationRationale(activity),
-                        ),
-                    )
+                    viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
 
@@ -103,11 +109,7 @@ fun MapRoute(
                 if (LocationPermissionManager.hasLocationPermission(context)) {
                     viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
                 } else {
-                    viewModel.store.onIntent(
-                        MapIntent.RequestLocationPermission(
-                            LocationPermissionManager.shouldShowLocationRationale(activity),
-                        ),
-                    )
+                    viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
             is MapEffect.ShowToastMessage -> {

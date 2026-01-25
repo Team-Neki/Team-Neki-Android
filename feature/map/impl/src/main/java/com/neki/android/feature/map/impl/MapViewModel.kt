@@ -2,8 +2,6 @@ package com.neki.android.feature.map.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.dataapi.datastore.DataStoreKey
-import com.neki.android.core.dataapi.repository.DataStoreRepository
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.BrandInfo
@@ -12,15 +10,11 @@ import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class MapViewModel @Inject constructor(
-    private val dataStoreRepository: DataStoreRepository,
-) : ViewModel() {
+class MapViewModel @Inject constructor() : ViewModel() {
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
         onIntent = ::onIntent,
@@ -55,7 +49,8 @@ class MapViewModel @Inject constructor(
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
             is MapIntent.ClickPhotoBoothMarker -> handleClickBrandMarker(state, intent, reduce, postSideEffect)
             MapIntent.ClickDirection -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
-            is MapIntent.RequestLocationPermission -> handleRequestLocationPermission(intent, reduce, postSideEffect)
+            MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.RequestLocationPermission)
+            MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
             MapIntent.ConfirmLocationPermissionDialog -> {
                 reduce { copy(isShowLocationPermissionDialog = false) }
@@ -136,37 +131,6 @@ class MapViewModel @Inject constructor(
             )
         }
         postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
-    }
-
-    private fun handleRequestLocationPermission(
-        intent: MapIntent.RequestLocationPermission,
-        reduce: (MapState.() -> MapState) -> Unit,
-        postSideEffect: (MapEffect) -> Unit,
-    ) {
-        viewModelScope.launch {
-            val isFirstRequest = dataStoreRepository.getBoolean(DataStoreKey.IS_FIRST_LOCATION_PERMISSION).first().not()
-
-            when {
-                isFirstRequest -> {
-                    Timber.d("최초 요청 - 시스템 권한 팝업 표시")
-                    dataStoreRepository.setBoolean(
-                        DataStoreKey.IS_FIRST_LOCATION_PERMISSION,
-                        true,
-                    )
-                    postSideEffect(MapEffect.RequestLocationPermission)
-                }
-
-                intent.shouldShowRationale -> {
-                    Timber.d("1회 거부 상태 - 시스템 권한 팝업 표시")
-                    postSideEffect(MapEffect.RequestLocationPermission)
-                }
-
-                else -> {
-                    Timber.d("2회 이상 거부 (영구 거부) - 설정 이동 다이얼로그 표시")
-                    reduce { copy(isShowLocationPermissionDialog = true) }
-                }
-            }
-        }
     }
 
     private fun loadBrands(reduce: (MapState.() -> MapState) -> Unit) {

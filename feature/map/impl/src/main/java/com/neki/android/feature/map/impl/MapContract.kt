@@ -45,7 +45,8 @@ sealed interface MapIntent {
     data class ChangeDragLevel(val dragLevel: DragLevel) : MapIntent
 
     // 위치 권한
-    data class RequestLocationPermission(val shouldShowRationale: Boolean) : MapIntent
+    data object RequestLocationPermission : MapIntent
+    data object ShowLocationPermissionDialog : MapIntent
     data object DismissLocationPermissionDialog : MapIntent
     data object ConfirmLocationPermissionDialog : MapIntent
 }
