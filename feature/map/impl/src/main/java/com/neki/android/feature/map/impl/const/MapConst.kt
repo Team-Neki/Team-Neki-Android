@@ -1,7 +1,10 @@
 package com.neki.android.feature.map.impl.const
 
 internal object MapConst {
-    internal const val BOTTOM_NAVIGATION_BAR_HEIGHT = 72
+    internal const val BOTTOM_NAVIGATION_BAR_HEIGHT = 52
+    internal const val PANEL_DRAG_LOCATION_HEIGHT = 48
+    internal const val PANEL_DRAG_LEVEL_FIRST_HEIGHT = 96
+    internal const val PANEL_DRAG_LEVEL_SECOND_HEIGHT = 218
 
     // 마커
     internal const val MARKER_BACKGROUND_RADIUS = 20

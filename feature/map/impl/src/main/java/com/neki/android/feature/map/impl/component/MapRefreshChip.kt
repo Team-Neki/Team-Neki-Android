@@ -1,9 +1,11 @@
 package com.neki.android.feature.map.impl.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -11,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -22,7 +23,7 @@ import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-internal fun ToMapChip(
+internal fun MapRefreshChip(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
@@ -33,29 +34,35 @@ internal fun ToMapChip(
             .clickableSingle(onClick = onClick)
             .background(
                 shape = CircleShape,
-                color = NekiTheme.colorScheme.gray800,
+                color = NekiTheme.colorScheme.white,
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .border(
+                width = 1.dp,
+                shape = CircleShape,
+                color = NekiTheme.colorScheme.gray100,
+            )
+            .padding(horizontal = 13.09.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.icon_map_pin),
+            modifier = Modifier.size(16.dp),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_rotation),
             contentDescription = null,
-            tint = Color.Unspecified,
+            tint = NekiTheme.colorScheme.primary400,
         )
         Text(
-            text = "지도로",
-            style = NekiTheme.typography.title18SemiBold,
-            color = NekiTheme.colorScheme.white,
+            text = "현 위치에서 탐색",
+            style = NekiTheme.typography.body14SemiBold,
+            color = NekiTheme.colorScheme.gray800,
         )
     }
 }
 
 @ComponentPreview
 @Composable
-private fun ToMapChipPreview() {
+private fun MapRefreshChipPreview() {
     NekiTheme {
-        ToMapChip()
+        MapRefreshChip()
     }
 }

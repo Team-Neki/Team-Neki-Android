@@ -86,9 +86,9 @@ fun BottomNavigationBarItem(
         color = NekiTheme.colorScheme.white,
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 8.dp),
+            modifier = Modifier.padding(vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(1.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Icon(
                 modifier = Modifier.size(24.dp),
@@ -99,7 +99,7 @@ fun BottomNavigationBarItem(
             Text(
                 text = stringResource(tab.iconStringRes),
                 color = textColor,
-                style = NekiTheme.typography.caption11SemiBold,
+                style = NekiTheme.typography.caption12SemiBold,
             )
         }
     }

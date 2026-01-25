@@ -124,3 +124,31 @@ fun Modifier.dropdownShadow(
         canvas.drawOutline(outline, paint)
     }
 }
+
+/**
+ * Figma pin_shadow 스타일
+ * DROP_SHADOW: color #00000066, offset (0, 1), radius 2.5, spread 0
+ */
+fun Modifier.pinShadow(
+    shape: Shape = RectangleShape,
+    color: Color = Color.Black.copy(alpha = 0.40f),
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = 1.dp,
+    blurRadius: Dp = 2.5.dp,
+): Modifier = this.drawBehind {
+    drawIntoCanvas { canvas ->
+        val paint = Paint().apply {
+            asFrameworkPaint().apply {
+                this.color = Color.Transparent.toArgb()
+                setShadowLayer(
+                    blurRadius.toPx(),
+                    offsetX.toPx(),
+                    offsetY.toPx(),
+                    color.toArgb(),
+                )
+            }
+        }
+        val outline = shape.createOutline(size, layoutDirection, this)
+        canvas.drawOutline(outline, paint)
+    }
+}

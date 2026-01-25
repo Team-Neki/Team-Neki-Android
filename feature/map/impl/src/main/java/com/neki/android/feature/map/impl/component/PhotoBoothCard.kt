@@ -30,7 +30,7 @@ import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
-internal fun BrandCard(
+internal fun PhotoBoothCard(
     brand: BrandInfo,
     modifier: Modifier = Modifier,
     onClickDirection: () -> Unit = {},
@@ -100,9 +100,9 @@ internal fun BrandCard(
 
 @ComponentPreview
 @Composable
-private fun BrandCardPreview() {
+private fun PhotoBoothCardPreview() {
     NekiTheme {
-        BrandCard(
+        PhotoBoothCard(
             brand = BrandInfo(
                 brandName = "인생네컷",
                 brandImageRes = R.drawable.icon_life_four_cut,

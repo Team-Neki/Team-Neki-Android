@@ -4,12 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.AuthRepository
-import com.neki.android.core.dataapi.repository.DataStoreRepository
+import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -17,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authEventManager: AuthEventManager,
-    private val dataStoreRepository: DataStoreRepository,
+    private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
     val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
@@ -44,10 +43,10 @@ class LoginViewModel @Inject constructor(
         reduce: (LoginState.() -> LoginState) -> Unit,
         postSideEffect: (LoginSideEffect) -> Unit,
     ) = viewModelScope.launch {
-        if (dataStoreRepository.isSavedJwtTokens().first()) {
+        if (tokenRepository.isSavedTokens().first()) {
             Timber.d("JWT 토큰 O")
             authRepository.updateAccessToken(
-                refreshToken = dataStoreRepository.getRefreshToken().firstOrNull() ?: "",
+                refreshToken = tokenRepository.getRefreshToken().first(),
             ).onSuccess {
                 postSideEffect(LoginSideEffect.NavigateToHome)
             }.onFailure {
@@ -67,7 +66,7 @@ class LoginViewModel @Inject constructor(
         reduce { copy(isLoading = true) }
         authRepository.loginWithKakao(idToken)
             .onSuccess {
-                dataStoreRepository.saveJwtTokens(
+                tokenRepository.saveTokens(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
                 )

@@ -1,9 +1,12 @@
 package com.neki.android.feature.map.impl
 
-import android.widget.Toast
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -11,11 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -32,17 +33,22 @@ import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
+import com.neki.android.core.common.permission.LocationPermissionManager
+import com.neki.android.core.common.permission.navigateToAppSettings
+import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.WarningDialog
-import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
-import com.neki.android.feature.map.impl.component.BrandMarker
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
-import com.neki.android.feature.map.impl.component.PanelInvisibleContent
+import com.neki.android.feature.map.impl.component.MapRefreshChip
+import com.neki.android.feature.map.impl.component.PhotoBoothDetailCard
+import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import com.neki.android.feature.map.impl.util.getPlaceName
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
@@ -51,23 +57,61 @@ fun MapRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = LocalActivity.current!!
     val coroutineScope = rememberCoroutineScope()
+
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
     }
 
+    var previousShouldShowRationale by remember { mutableStateOf(false) }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { permissions ->
+        val isGranted = permissions.values.any { it }
+        val currentShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
+
+        if (isGranted) {
+            locationTrackingMode = LocationTrackingMode.Follow
+        } else {
+            if (!currentShouldShowRationale && !previousShouldShowRationale) {
+                // 2회 이상 거부
+                viewModel.store.onIntent(MapIntent.ShowLocationPermissionDialog)
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
+        if (!LocationPermissionManager.hasLocationPermission(context)) {
+            viewModel.store.onIntent(MapIntent.RequestLocationPermission)
+        }
         viewModel.store.onIntent(MapIntent.EnterMapScreen)
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
+            is MapEffect.RefreshPhotoBooth -> {
+                // TODO: 포토부스 새로고침 로직 구현
+            }
             is MapEffect.RefreshCurrentLocation -> {
-                locationTrackingMode = LocationTrackingMode.Follow
+                if (LocationPermissionManager.hasLocationPermission(context)) {
+                    locationTrackingMode = LocationTrackingMode.Follow
+                } else {
+                    viewModel.store.onIntent(MapIntent.RequestLocationPermission)
+                }
+            }
+
+            is MapEffect.OpenDirectionBottomSheet -> {
+                if (LocationPermissionManager.hasLocationPermission(context)) {
+                    viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
+                } else {
+                    viewModel.store.onIntent(MapIntent.RequestLocationPermission)
+                }
             }
             is MapEffect.ShowToastMessage -> {
-                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+                NekiToast(context).showToast(sideEffect.message)
             }
             is MapEffect.MoveCameraToPosition -> {
                 coroutineScope.launch {
@@ -82,21 +126,26 @@ fun MapRoute(
                 }
             }
             is MapEffect.MoveDirectionApp -> {
+                val startLatitude = sideEffect.startLatitude
+                val startLongitude = sideEffect.startLongitude
+                val endLatitude = sideEffect.endLatitude
+                val endLongitude = sideEffect.endLongitude
+
                 when (sideEffect.app) {
                     DirectionApp.GOOGLE_MAP -> {
                         DirectionHelper.moveAppOrStore(
                             context = context,
-                            url = "google.navigation:q=37.5256372,126.8862648(${context.getPlaceName(37.5256372, 126.8861924, "도착지")})&mode=w",
+                            url = "google.navigation:q=$endLatitude,$endLongitude&mode=w",
                             packageName = sideEffect.app.packageName,
                         )
                     }
 
                     DirectionApp.NAVER_MAP -> {
-                        val startName = context.getPlaceName(37.5270539, 126.8862648, "출발지")
-                        val destName = context.getPlaceName(37.5256372, 126.8861924, "도착지")
+                        val startName = context.getPlaceName(startLatitude, startLongitude, "출발지")
+                        val destName = context.getPlaceName(endLatitude, endLongitude, "도착지")
                         DirectionHelper.moveAppOrStore(
                             context = context,
-                            url = "nmap://route/walk?slat=37.5270539&slng=126.8862648&sname=$startName&dlat=37.5256372&dlng=126.8861924&dname=$destName",
+                            url = "nmap://route/walk?slat=$startLatitude&slng=$startLongitude&sname=$startName&dlat=$endLatitude&dlng=$endLongitude&dname=$destName",
                             packageName = sideEffect.app.packageName,
                         )
                     }
@@ -104,11 +153,20 @@ fun MapRoute(
                     DirectionApp.KAKAO_MAP -> {
                         DirectionHelper.moveAppOrStore(
                             context = context,
-                            url = "kakaomap://route?sp=37.5270539,126.8862648&ep=37.5256372,126.8861924&by=FOOT",
+                            url = "kakaomap://route?sp=$startLatitude,$startLongitude&ep=$endLatitude,$endLongitude&by=FOOT",
                             packageName = sideEffect.app.packageName,
                         )
                     }
                 }
+            }
+
+            is MapEffect.NavigateToAppSettings -> {
+                navigateToAppSettings(context)
+            }
+
+            is MapEffect.RequestLocationPermission -> {
+                previousShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
+                locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }
         }
     }
@@ -120,21 +178,6 @@ fun MapRoute(
         onLocationTrackingModeChange = { locationTrackingMode = it },
         cameraPositionState = cameraPositionState,
     )
-
-    if (uiState.isShowInfoDialog) {
-        WarningDialog(
-            content = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
-            onDismissRequest = { viewModel.store.onIntent(MapIntent.ClickCloseInfoIcon) },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        )
-    }
-
-    if (uiState.isShowDirectionBottomSheet) {
-        DirectionBottomSheet(
-            onDismissRequest = { viewModel.store.onIntent(MapIntent.CloseDirectionBottomSheet) },
-            onClickDirectionItem = { viewModel.store.onIntent(MapIntent.ClickDirectionItem(it)) },
-        )
-    }
 }
 
 @OptIn(ExperimentalNaverMapApi::class)
@@ -156,6 +199,7 @@ fun MapScreen(
     val mapUiSettings = remember {
         MapUiSettings(
             isLocationButtonEnabled = false,
+            isZoomControlEnabled = false,
         )
     }
 
@@ -173,17 +217,20 @@ fun MapScreen(
                     onLocationTrackingModeChange(it)
                 }
             },
+            onLocationChange = { location ->
+                onIntent(MapIntent.UpdateCurrentLocation(location.latitude, location.longitude))
+            },
         ) {
-            uiState.nearbyBrands.forEachIndexed { index, brandInfo ->
+            uiState.nearbyPhotoBooths.forEach { brandInfo ->
                 val isFocused = uiState.focusedMarkerPosition == (brandInfo.latitude to brandInfo.longitude)
-                BrandMarker(
+                PhotoBoothMarker(
                     keys = arrayOf("$isFocused"),
                     latitude = brandInfo.latitude,
                     longitude = brandInfo.longitude,
                     brandImageRes = brandInfo.brandImageRes,
                     isFocused = isFocused,
                     onClick = {
-                        onIntent(MapIntent.ClickBrandMarker(latitude = brandInfo.latitude, longitude = brandInfo.longitude))
+                        onIntent(MapIntent.ClickPhotoBoothMarker(latitude = brandInfo.latitude, longitude = brandInfo.longitude))
                     },
                 )
             }
@@ -191,42 +238,70 @@ fun MapScreen(
 
         AnchoredDraggablePanel(
             brands = uiState.brands,
-            nearbyBrands = uiState.nearbyBrands,
-            dragValue = uiState.dragState,
-            onDragValueChanged = { onIntent(MapIntent.ChangeDragValue(it)) },
+            nearbyBrands = uiState.nearbyPhotoBooths,
+            dragLevel = uiState.dragLevel,
+            onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
             isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
-            onClickCurrentLocation = {
-                onLocationTrackingModeChange(LocationTrackingMode.Follow)
-            },
+            onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
             onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
-            onClickNearBrand = { onIntent(MapIntent.ClickNearBrand(it)) },
+            onClickNearBrand = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
 
-        if (uiState.dragState == DragValue.Top) {
+        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) &&
+            locationTrackingMode != LocationTrackingMode.Follow
+        ) {
+            MapRefreshChip(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .padding(top = 12.dp),
+                onClick = { onIntent(MapIntent.ClickRefresh) },
+            )
+        }
+
+        if (uiState.dragLevel == DragLevel.THIRD) {
             ToMapChip(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 32.dp),
                 onClick = { onIntent(MapIntent.ClickToMapChip) },
             )
-        } else if (uiState.dragState == DragValue.Invisible && uiState.selectedBrandInfo != null) {
-            PanelInvisibleContent(
-                brandInfo = uiState.selectedBrandInfo,
+        } else if (uiState.dragLevel == DragLevel.INVISIBLE && uiState.selectedPhotoBoothInfo != null) {
+            PhotoBoothDetailCard(
+                brandInfo = uiState.selectedPhotoBoothInfo,
                 modifier = Modifier.align(Alignment.BottomCenter),
                 isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
                 onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
-                onClickCloseCard = { onIntent(MapIntent.ClickCloseBrandCard) },
-                onClickDirection = { onIntent(MapIntent.ClickDirection(uiState.selectedBrandInfo.latitude, uiState.selectedBrandInfo.longitude)) },
+                onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
+                onClickDirection = { onIntent(MapIntent.ClickDirection) },
             )
         }
     }
-}
 
-@Preview
-@Composable
-private fun MapScreenPreview() {
-    NekiTheme {
-        MapScreen()
+    if (uiState.isShowInfoDialog) {
+        WarningDialog(
+            content = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
+            onDismissRequest = { onIntent(MapIntent.ClickCloseInfoIcon) },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        )
+    }
+
+    if (uiState.isShowDirectionBottomSheet) {
+        DirectionBottomSheet(
+            onDismissRequest = { onIntent(MapIntent.CloseDirectionBottomSheet) },
+            onClickDirectionItem = { onIntent(MapIntent.ClickDirectionItem(it)) },
+        )
+    }
+
+    if (uiState.isShowLocationPermissionDialog) {
+        SingleButtonAlertDialog(
+            title = "위치 권한",
+            content = "설정에서 위치 권한을 허용해주세요.",
+            buttonText = "확인",
+            onDismissRequest = { onIntent(MapIntent.DismissLocationPermissionDialog) },
+            onClick = { onIntent(MapIntent.ConfirmLocationPermissionDialog) },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        )
     }
 }

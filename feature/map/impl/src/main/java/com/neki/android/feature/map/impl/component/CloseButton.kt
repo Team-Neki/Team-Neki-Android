@@ -1,61 +1,52 @@
 package com.neki.android.feature.map.impl.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.buttonShadow
-import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-internal fun ToMapChip(
+internal fun CloseButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    Row(
+    Box(
         modifier = modifier
             .buttonShadow()
-            .clip(CircleShape)
-            .clickableSingle(onClick = onClick)
             .background(
                 shape = CircleShape,
-                color = NekiTheme.colorScheme.gray800,
+                color = NekiTheme.colorScheme.white,
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .clickable(onClick = onClick)
+            .padding(8.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.icon_map_pin),
+            modifier = Modifier.size(20.dp),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_close),
             contentDescription = null,
-            tint = Color.Unspecified,
-        )
-        Text(
-            text = "지도로",
-            style = NekiTheme.typography.title18SemiBold,
-            color = NekiTheme.colorScheme.white,
+            tint = NekiTheme.colorScheme.gray800,
         )
     }
 }
 
 @ComponentPreview
 @Composable
-private fun ToMapChipPreview() {
+private fun CloseButtonPreview() {
     NekiTheme {
-        ToMapChip()
+        CloseButton()
     }
 }

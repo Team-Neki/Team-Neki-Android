@@ -30,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
@@ -54,7 +52,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.BrandInfo
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.map.impl.DragValue
+import com.neki.android.feature.map.impl.DragLevel
 import com.neki.android.feature.map.impl.const.MapConst
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -64,9 +62,9 @@ import kotlin.math.roundToInt
 internal fun AnchoredDraggablePanel(
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
-    dragValue: DragValue = DragValue.Bottom,
+    dragLevel: DragLevel = DragLevel.FIRST,
     isCurrentLocation: Boolean = false,
-    onDragValueChanged: (DragValue) -> Unit = {},
+    onDragLevelChanged: (DragLevel) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
@@ -76,52 +74,51 @@ internal fun AnchoredDraggablePanel(
     val configuration = LocalConfiguration.current
 
     val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
-    var collapsedHeightPx by remember { mutableIntStateOf(0) }
     val navigationBarHeightPx = with(density) {
         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx()
     }
-    val bottomOffsetPx = remember(collapsedHeightPx, navigationBarHeightPx) {
-        with(density) {
-            collapsedHeightPx +
-                // currentLocationButton (36.dp + 12.dp)
-                48.dp.toPx() +
-                MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp.toPx() +
-                navigationBarHeightPx
-        }
+    val bottomPanelHeightPx = with(density) {
+        (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
+            MapConst.PANEL_DRAG_LOCATION_HEIGHT +
+            MapConst.PANEL_DRAG_LEVEL_FIRST_HEIGHT).dp.toPx() + navigationBarHeightPx
     }
-
+    val centerPanelHeightPx = with(density) {
+        (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
+            MapConst.PANEL_DRAG_LOCATION_HEIGHT +
+            MapConst.PANEL_DRAG_LEVEL_SECOND_HEIGHT).dp.toPx() + navigationBarHeightPx
+    }
     var isProgrammaticTransition by remember { mutableStateOf(false) }
 
-    val state = remember(collapsedHeightPx) {
+    val state = remember {
         val anchors = DraggableAnchors {
-            DragValue.Bottom at screenHeightPx - bottomOffsetPx
-            DragValue.Center at screenHeightPx * 0.3f
-            DragValue.Top at screenHeightPx * 0.05f
-            DragValue.Invisible at screenHeightPx
+            DragLevel.FIRST at screenHeightPx - bottomPanelHeightPx
+            DragLevel.SECOND at screenHeightPx - centerPanelHeightPx
+            DragLevel.THIRD at screenHeightPx * 0.05f
+            DragLevel.INVISIBLE at screenHeightPx
         }
 
         AnchoredDraggableState(
-            initialValue = DragValue.Bottom,
+            initialValue = DragLevel.FIRST,
             anchors = anchors,
             positionalThreshold = { distance -> distance * 0.5f },
             velocityThreshold = { with(density) { 100.dp.toPx() } },
             snapAnimationSpec = tween(),
             decayAnimationSpec = splineBasedDecay(density),
             confirmValueChange = { newValue ->
-                newValue != DragValue.Invisible || isProgrammaticTransition
+                newValue != DragLevel.INVISIBLE || isProgrammaticTransition
             },
         )
     }
 
     LaunchedEffect(state.settledValue) {
-        if (state.settledValue != dragValue) {
-            onDragValueChanged(state.settledValue)
+        if (state.settledValue != dragLevel) {
+            onDragLevelChanged(state.settledValue)
         }
     }
 
-    LaunchedEffect(dragValue) {
+    LaunchedEffect(dragLevel) {
         isProgrammaticTransition = true
-        state.animateTo(dragValue)
+        state.animateTo(dragLevel)
         isProgrammaticTransition = false
     }
 
@@ -130,9 +127,9 @@ internal fun AnchoredDraggablePanel(
             .fillMaxSize()
             .offset {
                 val currentOffset = state.requireOffset()
-                val shouldConstrainOffset = state.currentValue == DragValue.Bottom && !isProgrammaticTransition
+                val shouldConstrainOffset = state.currentValue == DragLevel.FIRST && !isProgrammaticTransition
                 val constrainedOffset = if (shouldConstrainOffset) {
-                    currentOffset.coerceAtMost(state.anchors.positionOf(DragValue.Bottom))
+                    currentOffset.coerceAtMost(state.anchors.positionOf(DragLevel.FIRST))
                 } else {
                     currentOffset
                 }
@@ -147,15 +144,13 @@ internal fun AnchoredDraggablePanel(
             CurrentLocationButton(
                 modifier = Modifier
                     .padding(start = 20.dp, bottom = 12.dp)
-                    .alpha(alpha = if (dragValue == DragValue.Top) 0f else 1f),
+                    .alpha(alpha = if (dragLevel == DragLevel.THIRD) 0f else 1f),
                 isActiveCurrentLocation = isCurrentLocation,
                 onClick = onClickCurrentLocation,
             )
             AnchoredPanelContent(
                 brands = brands,
                 nearbyBrands = nearbyBrands,
-                dragValue = dragValue,
-                onCollapsedHeightMeasured = { collapsedHeightPx = it },
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = onClickBrand,
                 onClickNearBrand = onClickNearBrand,
@@ -168,25 +163,10 @@ internal fun AnchoredDraggablePanel(
 internal fun AnchoredPanelContent(
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
-    dragValue: DragValue = DragValue.Bottom,
-    onCollapsedHeightMeasured: (Int) -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickNearBrand: (BrandInfo) -> Unit = {},
 ) {
-    val density = LocalDensity.current
-    val configuration = LocalConfiguration.current
-    val screenHeightDp = configuration.screenHeightDp.dp
-
-    /** 패널 외부 상단 현위치 버튼 영역 **/
-    val additionalHeightPx = with(density) { (24.dp + 12.dp).toPx().toInt() }
-
-    val extraBottomPadding = when (dragValue) {
-        DragValue.Center -> screenHeightDp * 0.3f
-        DragValue.Top -> screenHeightDp * 0.05f
-        else -> 0.dp
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -197,12 +177,7 @@ internal fun AnchoredPanelContent(
             ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned {
-                    val newHeight = it.size.height + additionalHeightPx
-                    onCollapsedHeightMeasured(newHeight)
-                },
+            modifier = Modifier.fillMaxWidth(),
         ) {
             BottomSheetDragHandle()
             Text(
@@ -252,7 +227,7 @@ internal fun AnchoredPanelContent(
                 .weight(1f)
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = extraBottomPadding),
+            contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
         ) {
             items(nearbyBrands) { brandInfo ->
                 HorizontalBrandItem(

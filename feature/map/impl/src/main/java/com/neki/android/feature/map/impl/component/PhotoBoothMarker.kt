@@ -25,7 +25,7 @@ import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.rememberUpdatedMarkerState
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.modifier.dropdownShadow
+import com.neki.android.core.designsystem.modifier.pinShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_BACKGROUND_RADIUS
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_IMAGE_RADIUS
@@ -40,7 +40,7 @@ import com.neki.android.feature.map.impl.const.MapConst.MARKER_TRIANGLE_WIDTH
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
-internal fun BrandMarker(
+internal fun PhotoBoothMarker(
     vararg keys: String,
     latitude: Double,
     longitude: Double,
@@ -61,7 +61,7 @@ internal fun BrandMarker(
             true
         },
     ) {
-        BrandMarkerContent(
+        PhotoBoothMarkerContent(
             brandImageRes = brandImageRes,
             isFocused = isFocused,
         )
@@ -69,7 +69,7 @@ internal fun BrandMarker(
 }
 
 @Composable
-internal fun BrandMarkerContent(
+internal fun PhotoBoothMarkerContent(
     modifier: Modifier = Modifier,
     brandImageRes: Int,
     isFocused: Boolean = false,
@@ -93,13 +93,10 @@ internal fun BrandMarkerContent(
         Box(
             modifier = Modifier
                 .size(bodySize.dp)
-                .dropdownShadow(
-                    color = Color.Black.copy(alpha = 0.38f),
+                .pinShadow(
                     shape = RoundedCornerShape(
                         if (isFocused) FOCUSED_MARKER_BACKGROUND_RADIUS.dp else MARKER_BACKGROUND_RADIUS.dp,
                     ),
-                    offsetY = 1.18.dp,
-                    blurRadius = 2.55.dp,
                 ),
         )
 
@@ -112,9 +109,9 @@ internal fun BrandMarkerContent(
                     height = MARKER_TRIANGLE_HEIGHT.dp,
                 ),
         ) {
-            val shadowColor = Color.Black.copy(alpha = 0.38f)
-            val offsetY = 1.18.dp.toPx()
-            val blurRadius = 2.55.dp.toPx()
+            val shadowColor = Color.Black.copy(alpha = 0.4f)
+            val offsetY = 1.dp.toPx()
+            val blurRadius = 2.5.dp.toPx()
 
             val path = Path().apply {
                 moveTo(0f, 0f)
@@ -186,9 +183,9 @@ internal fun BrandMarkerContent(
 
 @ComponentPreview
 @Composable
-private fun BrandMarkerContentPreview() {
+private fun PhotoBoothMarkerPreview() {
     NekiTheme {
-        BrandMarkerContent(
+        PhotoBoothMarkerContent(
             brandImageRes = R.drawable.icon_life_four_cut,
         )
     }
@@ -196,9 +193,9 @@ private fun BrandMarkerContentPreview() {
 
 @ComponentPreview
 @Composable
-private fun BrandMarkerContentSelectedPreview() {
+private fun PhotoBoothMarkerSelectedPreview() {
     NekiTheme {
-        BrandMarkerContent(
+        PhotoBoothMarkerContent(
             brandImageRes = R.drawable.icon_life_four_cut,
             isFocused = true,
         )
