@@ -49,7 +49,6 @@ import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import com.neki.android.feature.map.impl.util.getPlaceName
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
