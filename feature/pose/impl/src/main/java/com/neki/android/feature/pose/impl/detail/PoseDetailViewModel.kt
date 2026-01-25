@@ -36,7 +36,7 @@ class PoseDetailViewModel @AssistedInject constructor(
             PoseDetailIntent.ClickScrapIcon -> {
                 // TODO: API 연동 시 실제 스크랩 토글 구현
                 reduce {
-                    copy(pose = pose.copy(isScrapped = !pose.isScrapped))
+                    copy(pose = state.pose.copy(isScrapped = !state.pose.isScrapped))
                 }
             }
         }
