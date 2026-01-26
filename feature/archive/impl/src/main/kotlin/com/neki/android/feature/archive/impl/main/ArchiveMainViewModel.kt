@@ -13,6 +13,8 @@ import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -120,8 +122,10 @@ class ArchiveMainViewModel @Inject constructor(
 
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
-            fetchFavoriteSummary(reduce)
-            fetchPhotos(reduce)
+            awaitAll(
+                async { fetchFavoriteSummary(reduce) },
+                async { fetchPhotos(reduce) },
+            )
             reduce { copy(isLoading = false) }
         }
     }
