@@ -25,6 +25,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
+    private var originalFavorite = photo.isFavorite
 
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
@@ -37,14 +38,14 @@ class PhotoDetailViewModel @AssistedInject constructor(
             favoriteRequests
                 .debounce(500)
                 .collectLatest { newFavorite ->
-                    // 값이 다를 때만 API 요청
-                    if (newFavorite != store.uiState.value.photo.isFavorite) {
+                    if (originalFavorite != newFavorite) {
                         photoRepository.updateFavorite(photo.id, newFavorite)
                             .onSuccess { Timber.d("updateFavorite success") }
                             .onFailure { error ->
                                 Timber.e(error, "updateFavorite failed")
-                                store.onIntent(PhotoDetailIntent.RevertFavorite(!newFavorite))
+                                store.onIntent(PhotoDetailIntent.RevertFavorite(originalFavorite))
                             }
+                        originalFavorite = newFavorite
                     }
                 }
         }
