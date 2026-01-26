@@ -65,7 +65,7 @@ private fun PeopleCountBottomSheetContent(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            PeopleCount.entries.drop(1).forEach { item ->
+            PeopleCount.entries.forEach { item ->
                 Row(
                     modifier = Modifier.clickableSingle { onClickItem(item) },
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
