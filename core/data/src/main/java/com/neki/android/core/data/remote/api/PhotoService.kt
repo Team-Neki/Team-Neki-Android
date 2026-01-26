@@ -5,6 +5,7 @@ import com.neki.android.core.data.remote.model.request.UpdateFavoriteRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.model.response.FavoritePhotoResponse
+import com.neki.android.core.data.remote.model.response.FavoriteSummaryResponse
 import com.neki.android.core.data.remote.model.response.PhotoResponse
 import com.neki.android.core.data.remote.model.response.RegisterPhotoResponse
 import io.ktor.client.HttpClient
@@ -61,5 +62,10 @@ class PhotoService @Inject constructor(
             parameter("size", size)
             parameter("sortOrder", sortOrder)
         }.body()
+    }
+
+    // 즐겨찾기 요약 조회
+    suspend fun getFavoriteSummary(): BasicResponse<FavoriteSummaryResponse> {
+        return client.get("/api/photos/favorite/summary").body()
     }
 }
