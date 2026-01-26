@@ -40,7 +40,7 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.cardShadow
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.Album
+import com.neki.android.core.model.AlbumPreview
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -49,9 +49,9 @@ private const val VIEWPORT_H = 65f
 
 @Composable
 internal fun ArchiveMainAlbumList(
-    favoriteAlbum: Album,
+    favoriteAlbum: AlbumPreview,
     modifier: Modifier = Modifier,
-    albumList: ImmutableList<Album> = persistentListOf(),
+    albumList: ImmutableList<AlbumPreview> = persistentListOf(),
     onClickFavoriteAlbum: () -> Unit = {},
     onClickAlbumItem: (Long) -> Unit = {},
 ) {
@@ -63,7 +63,7 @@ internal fun ArchiveMainAlbumList(
         item(key = "favorite_album") {
             ArchiveAlbumItem(
                 title = favoriteAlbum.title,
-                photoCount = favoriteAlbum.photoList.size,
+                photoCount = favoriteAlbum.photoCount,
                 thumbnailImage = favoriteAlbum.thumbnailUrl,
                 isFavorite = true,
                 onClick = onClickFavoriteAlbum,
@@ -75,7 +75,7 @@ internal fun ArchiveMainAlbumList(
         ) { album ->
             ArchiveAlbumItem(
                 title = album.title,
-                photoCount = album.photoList.size,
+                photoCount = album.photoCount,
                 thumbnailImage = album.thumbnailUrl,
                 onClick = { onClickAlbumItem(album.id) },
             )
@@ -270,7 +270,7 @@ private fun DefaultAlbumFolderPreview() {
 private fun ArchiveMainAlbumListPreview() {
     NekiTheme {
         ArchiveMainAlbumList(
-            favoriteAlbum = Album(),
+            favoriteAlbum = AlbumPreview(),
         )
     }
 }

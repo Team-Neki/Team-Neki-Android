@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.util.urlToByteArray
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
-import com.neki.android.core.model.Album
-import com.neki.android.core.model.Photo
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -113,69 +112,39 @@ class ArchiveMainViewModel @Inject constructor(
     }
 
     private fun fetchInitialData(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
-        val dummyPhotos = listOf(
-            Photo(id = 1, imageUrl = "https://picsum.photos/seed/pose1/400/500", isFavorite = true, date = "2025.01.15"),
-            Photo(id = 2, imageUrl = "https://picsum.photos/seed/pose2/400/650", isFavorite = false, date = "2025.01.15"),
-            Photo(id = 3, imageUrl = "https://picsum.photos/seed/pose3/400/480", isFavorite = true, date = "2025.01.14"),
-            Photo(id = 4, imageUrl = "https://picsum.photos/seed/pose4/400/720", isFavorite = false, date = "2025.01.14"),
-            Photo(id = 5, imageUrl = "https://picsum.photos/seed/pose5/400/550", isFavorite = false, date = "2025.01.13"),
-            Photo(id = 6, imageUrl = "https://picsum.photos/seed/pose6/400/400", isFavorite = true, date = "2025.01.13"),
-            Photo(id = 7, imageUrl = "https://picsum.photos/seed/pose7/400/600", isFavorite = false, date = "2025.01.12"),
-            Photo(id = 8, imageUrl = "https://picsum.photos/seed/pose8/400/520", isFavorite = false, date = "2025.01.12"),
-            Photo(id = 9, imageUrl = "https://picsum.photos/seed/pose9/400/680", isFavorite = true, date = "2025.01.11"),
-            Photo(id = 10, imageUrl = "https://picsum.photos/seed/pose10/400/450", isFavorite = false, date = "2025.01.11"),
-            Photo(id = 11, imageUrl = "https://picsum.photos/seed/pose11/400/580", isFavorite = false, date = "2025.01.10"),
-            Photo(id = 12, imageUrl = "https://picsum.photos/seed/pose12/400/700", isFavorite = true, date = "2025.01.10"),
-            Photo(id = 13, imageUrl = "https://picsum.photos/seed/pose13/400/460", isFavorite = false, date = "2025.01.09"),
-            Photo(id = 14, imageUrl = "https://picsum.photos/seed/pose14/400/620", isFavorite = false, date = "2025.01.09"),
-            Photo(id = 15, imageUrl = "https://picsum.photos/seed/pose15/400/540", isFavorite = true, date = "2025.01.08"),
-        ).toImmutableList()
-
-        val travelPhotos = persistentListOf(
-            Photo(id = 101, imageUrl = "https://picsum.photos/seed/travel1/400/500", date = "2025.01.10"),
-            Photo(id = 102, imageUrl = "https://picsum.photos/seed/travel2/400/600", date = "2025.01.10"),
-            Photo(id = 103, imageUrl = "https://picsum.photos/seed/travel3/400/480", date = "2025.01.09"),
-            Photo(id = 104, imageUrl = "https://picsum.photos/seed/travel4/400/550", date = "2025.01.09"),
-        )
-
-        val familyPhotos = persistentListOf(
-            Photo(id = 201, imageUrl = "https://picsum.photos/seed/family1/400/520", date = "2025.01.05"),
-            Photo(id = 202, imageUrl = "https://picsum.photos/seed/family2/400/680", date = "2025.01.05"),
-            Photo(id = 203, imageUrl = "https://picsum.photos/seed/family3/400/450", date = "2025.01.04"),
-        )
-
-        val friendPhotos = persistentListOf(
-            Photo(id = 301, imageUrl = "https://picsum.photos/seed/friend1/400/580", date = "2024.12.25"),
-            Photo(id = 302, imageUrl = "https://picsum.photos/seed/friend2/400/620", date = "2024.12.25"),
-            Photo(id = 303, imageUrl = "https://picsum.photos/seed/friend3/400/500", date = "2024.12.24"),
-            Photo(id = 304, imageUrl = "https://picsum.photos/seed/friend4/400/700", date = "2024.12.24"),
-            Photo(id = 305, imageUrl = "https://picsum.photos/seed/friend5/400/460", date = "2024.12.23"),
-        )
-
         val dummyAlbums = persistentListOf(
-            Album(id = 1, title = "제주도 여행 2025", thumbnailUrl = "https://picsum.photos/seed/travel1/400/500", photoList = travelPhotos),
-            Album(id = 2, title = "가족 생일파티", thumbnailUrl = "https://picsum.photos/seed/family1/400/520", photoList = familyPhotos),
-            Album(id = 3, title = "대학 동기 모임", thumbnailUrl = "https://picsum.photos/seed/friend1/400/580", photoList = friendPhotos),
+            AlbumPreview(id = 1, title = "제주도 여행 2025", thumbnailUrl = "https://picsum.photos/seed/travel1/400/500", photoCount = 4),
+            AlbumPreview(id = 2, title = "가족 생일파티", thumbnailUrl = "https://picsum.photos/seed/family1/400/520", photoCount = 3),
+            AlbumPreview(id = 3, title = "대학 동기 모임", thumbnailUrl = "https://picsum.photos/seed/friend1/400/580", photoCount = 5),
         )
 
-        val favoritePhotos = dummyPhotos.filter { it.isFavorite }.toImmutableList()
-
-        val favoriteAlbum = Album(
-            id = 0,
-            title = "즐겨찾는 사진",
-            thumbnailUrl = favoritePhotos.firstOrNull()?.imageUrl,
-            photoList = favoritePhotos,
-        )
-
-        fetchPhotos(reduce)
-
-        reduce {
-            copy(
-                favoriteAlbum = favoriteAlbum,
-                albums = dummyAlbums,
-//                recentPhotos = dummyPhotos,
-            )
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            fetchFavoriteSummary(reduce)
+            fetchPhotos(reduce)
+            reduce { copy(isLoading = false) }
         }
+    }
+
+    private suspend fun fetchFavoriteSummary(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
+        photoRepository.getFavoriteSummary()
+            .onSuccess { data ->
+                reduce { copy(favoriteAlbum = data) }
+            }
+            .onFailure { error ->
+                Timber.e(error)
+            }
+
+    }
+
+    private suspend fun fetchPhotos(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit, size: Int = DEFAULT_PHOTOS_SIZE) {
+        photoRepository.getPhotos()
+            .onSuccess { data ->
+                reduce { copy(recentPhotos = data.toImmutableList()) }
+            }
+            .onFailure { error ->
+                Timber.e(error)
+            }
     }
 
     private fun uploadWithoutAlbum(
@@ -235,23 +204,6 @@ class ArchiveMainViewModel @Inject constructor(
     ) {
         // TODO: 이미지 여러개 업로드
         postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
-    }
-
-    private fun fetchPhotos(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit, size: Int = DEFAULT_PHOTOS_SIZE) {
-        viewModelScope.launch {
-            photoRepository.getPhotos()
-                .onSuccess { data ->
-                    reduce {
-                        copy(
-                            recentPhotos = data.toImmutableList(),
-                            isLoading = false,
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    Timber.e(error)
-                }
-        }
     }
 
     private fun handleAddAlbum(

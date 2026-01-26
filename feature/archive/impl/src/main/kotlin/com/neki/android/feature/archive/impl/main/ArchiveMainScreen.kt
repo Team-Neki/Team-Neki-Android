@@ -33,7 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.Album
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -261,42 +261,17 @@ private fun ArchiveMainScreenPreview() {
         Photo(id = 8, imageUrl = "https://picsum.photos/seed/photo8/200/310"),
     )
 
-    val travelPhotos = persistentListOf(
-        Photo(id = 101, imageUrl = "https://picsum.photos/seed/travel1/200/300"),
-        Photo(id = 102, imageUrl = "https://picsum.photos/seed/travel2/200/280"),
-        Photo(id = 103, imageUrl = "https://picsum.photos/seed/travel3/200/320"),
-        Photo(id = 104, imageUrl = "https://picsum.photos/seed/travel4/200/260"),
-    )
-
-    val familyPhotos = persistentListOf(
-        Photo(id = 201, imageUrl = "https://picsum.photos/seed/family1/200/300"),
-        Photo(id = 202, imageUrl = "https://picsum.photos/seed/family2/200/290"),
-    )
-
-    val friendPhotos = persistentListOf(
-        Photo(id = 301, imageUrl = "https://picsum.photos/seed/friend1/200/300"),
-        Photo(id = 302, imageUrl = "https://picsum.photos/seed/friend2/200/310"),
-        Photo(id = 303, imageUrl = "https://picsum.photos/seed/friend3/200/280"),
-    )
-
     val dummyAlbums = persistentListOf(
-        Album(id = 1, title = "제주도 여행 2024", photoList = travelPhotos),
-        Album(id = 2, title = "가족 생일파티", photoList = familyPhotos),
-        Album(id = 3, title = "대학 동기 모임", photoList = friendPhotos),
+        AlbumPreview(id = 1, title = "제주도 여행 2024", thumbnailUrl = "https://picsum.photos/seed/travel1/200/300", photoCount = 4),
+        AlbumPreview(id = 2, title = "가족 생일파티", thumbnailUrl = "https://picsum.photos/seed/family1/200/300", photoCount = 2),
+        AlbumPreview(id = 3, title = "대학 동기 모임", thumbnailUrl = "https://picsum.photos/seed/friend1/200/300", photoCount = 3),
     )
 
-    val favoritePhotos = persistentListOf(
-        Photo(id = 401, imageUrl = "https://picsum.photos/seed/fav1/200/300"),
-        Photo(id = 402, imageUrl = "https://picsum.photos/seed/fav2/200/280"),
-        Photo(id = 403, imageUrl = "https://picsum.photos/seed/fav3/200/320"),
-        Photo(id = 404, imageUrl = "https://picsum.photos/seed/fav4/200/290"),
-        Photo(id = 405, imageUrl = "https://picsum.photos/seed/fav5/200/310"),
-    )
-
-    val favoriteAlbum = Album(
+    val favoriteAlbum = AlbumPreview(
         id = 0,
         title = "즐겨찾는 사진",
-        photoList = favoritePhotos,
+        thumbnailUrl = "https://picsum.photos/seed/fav1/200/300",
+        photoCount = 5,
     )
 
     NekiTheme {
