@@ -1,6 +1,8 @@
 package com.neki.android.feature.archive.impl.album_detail
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -11,11 +13,14 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel(assistedFactory = AlbumDetailViewModel.Factory::class)
 class AlbumDetailViewModel @AssistedInject constructor(
     @Assisted private val id: Long,
     @Assisted private val isFavoriteAlbum: Boolean,
+    private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -83,6 +88,20 @@ class AlbumDetailViewModel @AssistedInject constructor(
             is AlbumDetailIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AlbumDetailIntent.ClickDeleteBottomSheetCancelButton -> reduce { copy(isShowDeleteBottomSheet = false) }
             AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumDelete(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun fetchFavoriteData(
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            photoRepository.getFavoritePhotos()
+                .onSuccess { data ->
+                    reduce { copy(selectedPhotos = data.toImmutableList()) }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                }
         }
     }
 
