@@ -1,8 +1,9 @@
 package com.neki.android.core.data.remote.api
 
 import com.neki.android.core.data.remote.model.request.RegisterPhotoRequest
-import com.neki.android.core.data.remote.model.response.BasicResponse
+import com.neki.android.core.data.remote.model.request.UpdateFavoriteRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
+import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.model.response.PhotoResponse
 import com.neki.android.core.data.remote.model.response.RegisterPhotoResponse
 import io.ktor.client.HttpClient
@@ -10,6 +11,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import javax.inject.Inject
@@ -38,5 +40,12 @@ class PhotoService @Inject constructor(
     // 사진 삭제
     suspend fun deletePhoto(photoId: Long): BasicNullableResponse<Unit> {
         return client.delete("/api/photos/$photoId").body()
+    }
+
+    // 즐겨찾기 업데이트
+    suspend fun updateFavorite(photoId: Long, favorite: Boolean): BasicNullableResponse<Unit> {
+        return client.patch("/api/photos/$photoId/favorite") {
+            setBody(UpdateFavoriteRequest(favorite))
+        }.body()
     }
 }

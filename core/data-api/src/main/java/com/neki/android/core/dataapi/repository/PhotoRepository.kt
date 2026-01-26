@@ -15,4 +15,6 @@ interface PhotoRepository {
     ): Result<Long>
 
     suspend fun deletePhoto(photoId: Long): Result<Unit>
+
+    suspend fun updateFavorite(photoId: Long, favorite: Boolean): Result<Unit>
 }
