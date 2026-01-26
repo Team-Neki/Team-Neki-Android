@@ -5,6 +5,9 @@ internal object MapConst {
     internal const val DEFAULT_LATITUDE = 37.498095
     internal const val DEFAULT_LONGITUDE = 127.027610
 
+    // 기본 줌 레벨
+    internal const val DEFAULT_ZOOM_LEVEL = 17.0
+
     internal const val BOTTOM_NAVIGATION_BAR_HEIGHT = 52
     internal const val PANEL_DRAG_LOCATION_HEIGHT = 48
     internal const val PANEL_DRAG_LEVEL_FIRST_HEIGHT = 96

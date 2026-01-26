@@ -12,7 +12,7 @@ object LocationPermissionManager {
         Manifest.permission.ACCESS_COARSE_LOCATION,
     )
 
-    fun hasLocationPermission(context: Context): Boolean {
+    fun isGrantedLocationPermission(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION,
