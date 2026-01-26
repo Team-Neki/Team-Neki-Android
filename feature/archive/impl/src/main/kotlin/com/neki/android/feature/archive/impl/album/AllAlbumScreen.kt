@@ -153,8 +153,8 @@ internal fun AllAlbumScreen(
             secondaryButtonText = "취소",
             selectedOption = uiState.selectedDeleteOption,
             onDismissRequest = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
-            onClickCancel = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
-            onClickActionButton = { onIntent(AllAlbumIntent.ClickDeleteConfirmButton) },
+            onClickSecondaryButton = { onIntent(AllAlbumIntent.DismissDeleteAlbumBottomSheet) },
+            onClickPrimaryButton = { onIntent(AllAlbumIntent.ClickDeleteConfirmButton) },
             onOptionSelect = { onIntent(AllAlbumIntent.SelectDeleteOption(it)) },
         )
     }

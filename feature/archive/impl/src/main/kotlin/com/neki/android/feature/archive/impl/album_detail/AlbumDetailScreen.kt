@@ -166,8 +166,8 @@ internal fun AlbumDetailScreen(
             primaryButtonText = "삭제하기",
             secondaryButtonText = "취소",
             onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteBottomSheet) },
-            onClickCancel = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
-            onClickActionButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },
+            onClickSecondaryButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
+            onClickPrimaryButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },
             onOptionSelect = { onIntent(AlbumDetailIntent.SelectDeleteOption(it)) },
         )
     }

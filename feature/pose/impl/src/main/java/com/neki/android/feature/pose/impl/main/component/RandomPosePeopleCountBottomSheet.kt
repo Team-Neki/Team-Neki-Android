@@ -23,8 +23,8 @@ internal fun RandomPosePeopleCountBottomSheet(
         primaryButtonText = "선택하기",
         secondaryButtonText = "취소",
         onDismissRequest = onDismissRequest,
-        onClickCancel = onDismissRequest,
-        onClickActionButton = onClickSelectButton,
+        onClickSecondaryButton = onDismissRequest,
+        onClickPrimaryButton = onClickSelectButton,
         onOptionSelect = onOptionSelected,
         buttonEnabled = selectedCount != null,
     )
