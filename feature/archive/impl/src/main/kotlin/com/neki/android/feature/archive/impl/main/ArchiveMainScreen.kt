@@ -47,6 +47,7 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
 import com.neki.android.feature.archive.impl.main.component.ChooseWithAlbumDialog
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
+import com.neki.android.feature.archive.impl.main.component.NoPhotoContent
 import kotlinx.collections.immutable.persistentListOf
 import timber.log.Timber
 
@@ -234,6 +235,14 @@ private fun ArchiveMainContent(
             )
         }
 
+        if (uiState.recentPhotos.isEmpty()) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                NoPhotoContent(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                )
+            }
+        }
+
         items(
             uiState.recentPhotos,
             key = { photo -> photo.id },
@@ -280,6 +289,23 @@ private fun ArchiveMainScreenPreview() {
                 favoriteAlbum = favoriteAlbum,
                 albums = dummyAlbums,
                 recentPhotos = dummyPhotos,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun ArchiveMainScreenEmptyPreview() {
+    val favoriteAlbum = AlbumPreview(
+        id = 0,
+        title = "즐겨찾는 사진",
+    )
+
+    NekiTheme {
+        ArchiveMainScreen(
+            uiState = ArchiveMainState(
+                favoriteAlbum = favoriteAlbum,
             ),
         )
     }
