@@ -38,7 +38,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
 
         // 3. 사진 등록
         photoRepository.registerPhoto(
-            mediaId = mediaId,
+            mediaIds = listOf(mediaId),
             folderId = folderId,
         ).getOrThrow()
 

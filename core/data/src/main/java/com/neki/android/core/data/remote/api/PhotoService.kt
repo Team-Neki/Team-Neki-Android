@@ -1,5 +1,6 @@
 package com.neki.android.core.data.remote.api
 
+import com.neki.android.core.data.remote.model.request.DeletePhotoRequest
 import com.neki.android.core.data.remote.model.request.RegisterPhotoRequest
 import com.neki.android.core.data.remote.model.request.UpdateFavoriteRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
@@ -35,13 +36,13 @@ class PhotoService @Inject constructor(
     }
 
     // 사진 등록
-    suspend fun registerPhoto(requestBody: RegisterPhotoRequest): BasicResponse<RegisterPhotoResponse> {
+    suspend fun registerPhoto(requestBody: RegisterPhotoRequest): BasicNullableResponse<RegisterPhotoResponse> {
         return client.post("/api/photos") { setBody(requestBody) }.body()
     }
 
     // 사진 삭제
-    suspend fun deletePhoto(photoId: Long): BasicNullableResponse<Unit> {
-        return client.delete("/api/photos/$photoId").body()
+    suspend fun deletePhoto(requestBody: DeletePhotoRequest): BasicNullableResponse<Unit> {
+        return client.delete("/api/photos") { setBody(requestBody) }.body()
     }
 
     // 즐겨찾기 업데이트

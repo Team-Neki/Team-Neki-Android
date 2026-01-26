@@ -12,11 +12,11 @@ interface PhotoRepository {
     ): Result<List<Photo>>
 
     suspend fun registerPhoto(
-        mediaId: Long,
+        mediaIds: List<Long>,
         folderId: Long? = null,
-    ): Result<Long>
+    ): Result<Unit>
 
-    suspend fun deletePhoto(photoId: Long): Result<Unit>
+    suspend fun deletePhoto(photoIds: List<Long>): Result<Unit>
 
     suspend fun updateFavorite(photoId: Long, favorite: Boolean): Result<Unit>
 
