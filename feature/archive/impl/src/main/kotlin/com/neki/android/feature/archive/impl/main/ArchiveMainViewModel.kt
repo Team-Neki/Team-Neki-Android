@@ -121,11 +121,14 @@ class ArchiveMainViewModel @Inject constructor(
 
         fetchJob = viewModelScope.launch {
             reduce { copy(isLoading = true) }
-            awaitAll(
-                async { fetchFavoriteSummary(reduce) },
-                async { fetchPhotos(reduce) },
-            )
-            reduce { copy(isLoading = false) }
+            try {
+                awaitAll(
+                    async { fetchFavoriteSummary(reduce) },
+                    async { fetchPhotos(reduce) },
+                )
+            } finally {
+                reduce { copy(isLoading = false) }
+            }
         }
     }
 
