@@ -40,12 +40,14 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 .collectLatest { newFavorite ->
                     if (originalFavorite != newFavorite) {
                         photoRepository.updateFavorite(photo.id, newFavorite)
-                            .onSuccess { Timber.d("updateFavorite success") }
+                            .onSuccess {
+                                Timber.d("updateFavorite success")
+                                originalFavorite = newFavorite
+                            }
                             .onFailure { error ->
                                 Timber.e(error, "updateFavorite failed")
                                 store.onIntent(PhotoDetailIntent.RevertFavorite(originalFavorite))
                             }
-                        originalFavorite = newFavorite
                     }
                 }
         }
