@@ -39,6 +39,7 @@ class MapViewModel @Inject constructor(
                 }
                 postSideEffect(MapEffect.RefreshCurrentLocation)
             }
+
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
@@ -50,6 +51,7 @@ class MapViewModel @Inject constructor(
                     mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
                 )
             }
+
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent, reduce, postSideEffect)
@@ -108,7 +110,7 @@ class MapViewModel @Inject constructor(
                     } else {
                         brand
                     }
-                }.toImmutableList()
+                }.toImmutableList(),
             )
         }
     }
@@ -189,7 +191,7 @@ class MapViewModel @Inject constructor(
 
     private fun loadBrands(
         state: MapState,
-        reduce: (MapState.() -> MapState) -> Unit
+        reduce: (MapState.() -> MapState) -> Unit,
     ) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }

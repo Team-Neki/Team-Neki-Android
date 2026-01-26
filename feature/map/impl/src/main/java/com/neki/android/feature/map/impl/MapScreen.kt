@@ -15,19 +15,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.request.SuccessResult
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.toBitmap
 import com.naver.maps.geometry.LatLng
@@ -52,10 +52,10 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
-import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailCard
 import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
+import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import kotlinx.coroutines.launch
 
@@ -140,9 +140,11 @@ fun MapRoute(
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
+
             is MapEffect.ShowToastMessage -> {
                 nekiToast.showToast(sideEffect.message)
             }
+
             is MapEffect.MoveCameraToPosition -> {
                 coroutineScope.launch {
                     cameraPositionState.animate(
@@ -155,6 +157,7 @@ fun MapRoute(
                     )
                 }
             }
+
             is MapEffect.MoveDirectionApp -> {
                 DirectionHelper.navigateToUrl(
                     context = context,
@@ -260,12 +263,12 @@ fun MapScreen(
                     PhotoBoothMarker(
                         photoBooth = photoBooth,
                         isFocused = photoBooth.isFocused,
-                    cachedBitmap = cachedBitmap,
-                    onClick = {
-                        onIntent(MapIntent.ClickPhotoBoothMarker(latitude = photoBooth.latitude, longitude = photoBooth.longitude))
-                    },
-                )
-            }
+                        cachedBitmap = cachedBitmap,
+                        onClick = {
+                            onIntent(MapIntent.ClickPhotoBoothMarker(latitude = photoBooth.latitude, longitude = photoBooth.longitude))
+                        },
+                    )
+                }
         }
 
         AnchoredDraggablePanel(
