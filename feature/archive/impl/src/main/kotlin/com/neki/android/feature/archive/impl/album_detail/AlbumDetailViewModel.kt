@@ -97,7 +97,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             photoRepository.getFavoritePhotos()
                 .onSuccess { data ->
-                    reduce { copy(selectedPhotos = data.toImmutableList()) }
+                    reduce { copy(photoList = data.toImmutableList()) }
                 }
                 .onFailure { error ->
                     Timber.e(error)
