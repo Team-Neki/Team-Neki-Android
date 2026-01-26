@@ -130,10 +130,19 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         reduce {
+            val isAlreadyInMarkers = mapMarkers.any {
+                it.latitude == intent.photoBooth.latitude && it.longitude == intent.photoBooth.longitude
+            }
+            val updatedMarkers = if (isAlreadyInMarkers) {
+                mapMarkers
+            } else {
+                (mapMarkers + intent.photoBooth).toImmutableList()
+            }
             copy(
                 dragLevel = DragLevel.INVISIBLE,
                 selectedPhotoBooth = intent.photoBooth,
                 focusedMarkerPosition = Location(intent.photoBooth.latitude, intent.photoBooth.longitude),
+                mapMarkers = updatedMarkers,
             )
         }
         postSideEffect(MapEffect.MoveCameraToPosition(intent.photoBooth.latitude, intent.photoBooth.longitude))
