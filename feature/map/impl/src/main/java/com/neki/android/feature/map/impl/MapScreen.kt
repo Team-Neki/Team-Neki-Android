@@ -153,7 +153,7 @@ fun MapRoute(
                             MapConst.DEFAULT_ZOOM_LEVEL,
                         ),
                         animation = CameraAnimation.Easing,
-                        durationMs = 800,
+                        durationMs = MapConst.DEFAULT_CAMERA_ANIMATION_DURATIONS_MS,
                     )
                 }
             }
@@ -272,14 +272,14 @@ fun MapScreen(
 
         AnchoredDraggablePanel(
             brands = uiState.brands,
-            nearbyBrands = uiState.nearbyPhotoBooths,
+            nearbyPhotoBooths = uiState.nearbyPhotoBooths,
             dragLevel = uiState.dragLevel,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
             isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
             onClickBrand = { onIntent(MapIntent.ClickBrand(it)) },
-            onClickNearBrand = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
+            onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
 
         if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) &&

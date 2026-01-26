@@ -61,14 +61,14 @@ import kotlin.math.roundToInt
 @Composable
 internal fun AnchoredDraggablePanel(
     brands: ImmutableList<Brand> = persistentListOf(),
-    nearbyBrands: ImmutableList<PhotoBooth> = persistentListOf(),
+    nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
     isCurrentLocation: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
-    onClickNearBrand: (PhotoBooth) -> Unit = {},
+    onClickNearPhotoBooth: (PhotoBooth) -> Unit = {},
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -150,10 +150,10 @@ internal fun AnchoredDraggablePanel(
             )
             AnchoredPanelContent(
                 brands = brands,
-                nearbyBrands = nearbyBrands,
+                nearbyPhotoBooths = nearbyPhotoBooths,
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = onClickBrand,
-                onClickNearBrand = onClickNearBrand,
+                onClickPhotoBooth = onClickNearPhotoBooth,
             )
         }
     }
@@ -162,10 +162,10 @@ internal fun AnchoredDraggablePanel(
 @Composable
 internal fun AnchoredPanelContent(
     brands: ImmutableList<Brand> = persistentListOf(),
-    nearbyBrands: ImmutableList<PhotoBooth> = persistentListOf(),
+    nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
-    onClickNearBrand: (PhotoBooth) -> Unit = {},
+    onClickPhotoBooth: (PhotoBooth) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -222,8 +222,8 @@ internal fun AnchoredPanelContent(
             )
         }
         VerticalSpacer(8.dp)
-        val filteredNearbyBrands = nearbyBrands.filter { it.isCheckedBrand }
-        if (filteredNearbyBrands.isEmpty()) {
+        val filteredNearbyPhotoBooths = nearbyPhotoBooths.filter { it.isCheckedBrand }
+        if (filteredNearbyPhotoBooths.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -244,10 +244,10 @@ internal fun AnchoredPanelContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
             ) {
-                items(filteredNearbyBrands) { photoBooth ->
+                items(filteredNearbyPhotoBooths) { photoBooth ->
                     HorizontalBrandItem(
                         photoBooth = photoBooth,
-                        onClickItem = { onClickNearBrand(photoBooth) },
+                        onClickItem = { onClickPhotoBooth(photoBooth) },
                     )
                 }
             }
@@ -268,7 +268,7 @@ private fun AnchoredPanelContentPreview() {
                 Brand(isChecked = false, name = "플랜비\n스튜디오", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PLANB_STUDIO_LOGO_v1.png"),
                 Brand(isChecked = false, name = "포토시그니처", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOSIGNATURE_LOGO_v1.png"),
             ),
-            nearbyBrands = persistentListOf(
+            nearbyPhotoBooths = persistentListOf(
                 PhotoBooth(
                     brandName = "인생네컷",
                     branchName = "가산디지털점",

@@ -32,7 +32,7 @@ class MapViewModel @Inject constructor(
             MapIntent.EnterMapScreen -> loadBrands(state, reduce)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
-            is MapIntent.UpdateCurrentLocation -> handleInitialUpdateCurrentLocation(state, intent, reduce, postSideEffect)
+            is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce, postSideEffect)
             MapIntent.ClickCurrentLocation -> {
                 if (state.dragLevel == DragLevel.INVISIBLE) {
                     reduce {
@@ -61,7 +61,7 @@ class MapViewModel @Inject constructor(
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
-            is MapIntent.ClickPhotoBoothMarker -> handleClickBrandMarker(state, intent, reduce, postSideEffect)
+            is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent, reduce, postSideEffect)
             MapIntent.ClickDirection -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
             MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.RequestLocationPermission)
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
@@ -73,7 +73,7 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleInitialUpdateCurrentLocation(
+    private fun handleUpdateCurrentLocation(
         state: MapState,
         intent: MapIntent.UpdateCurrentLocation,
         reduce: (MapState.() -> MapState) -> Unit,
@@ -181,8 +181,7 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleClickBrandMarker(
-        state: MapState,
+    private fun handleClickPhotoBoothMarker(
         intent: MapIntent.ClickPhotoBoothMarker,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
@@ -223,17 +222,14 @@ class MapViewModel @Inject constructor(
                         )
                     }
 
-//                     brands 로드 완료 후, currentLocation이 있으면 nearbyPhotoBooths 조회
                     state.currentLocation?.let { location ->
-                        if (state.nearbyPhotoBooths.isEmpty()) {
-                            val checkedBrandIds = loadedBrands.filter { it.isChecked }.map { it.id }
-                            loadNearbyPhotoBooths(
-                                longitude = location.longitude,
-                                latitude = location.latitude,
-                                brandIds = checkedBrandIds,
-                                reduce = reduce,
-                            )
-                        }
+                        val checkedBrandIds = loadedBrands.filter { it.isChecked }.map { it.id }
+                        loadNearbyPhotoBooths(
+                            longitude = location.longitude,
+                            latitude = location.latitude,
+                            brandIds = checkedBrandIds,
+                            reduce = reduce,
+                        )
                     }
                 }
                 .onFailure {
