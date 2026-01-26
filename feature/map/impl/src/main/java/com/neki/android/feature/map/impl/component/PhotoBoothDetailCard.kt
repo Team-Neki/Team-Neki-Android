@@ -22,6 +22,7 @@ internal fun PhotoBoothDetailCard(
     isCurrentLocation: Boolean = false,
     onClickCurrentLocation: () -> Unit = {},
     onClickCloseCard: () -> Unit = {},
+    onClickCard: () -> Unit = {},
     onClickDirection: () -> Unit = {},
 ) {
     Column(
@@ -43,6 +44,7 @@ internal fun PhotoBoothDetailCard(
         VerticalSpacer(12.dp)
         PhotoBoothCard(
             photoBooth = photoBooth,
+            onClick = onClickCard,
             onClickDirection = onClickDirection,
         )
     }

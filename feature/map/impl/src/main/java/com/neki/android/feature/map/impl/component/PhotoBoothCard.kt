@@ -34,6 +34,7 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 internal fun PhotoBoothCard(
     photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
     onClickDirection: () -> Unit = {},
 ) {
     Row(
@@ -44,6 +45,7 @@ internal fun PhotoBoothCard(
                 shape = RoundedCornerShape(20.dp),
                 color = NekiTheme.colorScheme.white,
             )
+            .noRippleClickableSingle(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
