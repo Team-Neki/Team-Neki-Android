@@ -239,7 +239,7 @@ private fun ArchiveMainContent(
             key = { photo -> photo.id },
         ) { photo ->
             ArchiveMainPhotoItem(
-//                modifier = Modifier.padding(horizontal = 20.dp),
+                modifier = Modifier.padding(horizontal = 20.dp),
                 photo = photo,
                 onClickItem = onClickPhotoItem,
             )
