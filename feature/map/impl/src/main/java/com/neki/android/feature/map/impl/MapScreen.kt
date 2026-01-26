@@ -218,7 +218,7 @@ fun MapScreen(
     locationTrackingMode: LocationTrackingMode = LocationTrackingMode.None,
     onLocationTrackingModeChange: (LocationTrackingMode) -> Unit = {},
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
-        position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
+        position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), 17.0)
     },
     brandImageCache: Map<String, ImageBitmap> = emptyMap(),
 ) {
