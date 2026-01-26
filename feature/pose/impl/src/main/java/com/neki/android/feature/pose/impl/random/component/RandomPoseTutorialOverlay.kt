@@ -1,5 +1,6 @@
 package com.neki.android.feature.pose.impl.random.component
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -95,7 +96,7 @@ internal fun RandomPoseTutorialOverlay(
 
 @Composable
 private fun TutorialGuideItem(
-    iconRes: Int,
+    @DrawableRes iconRes: Int,
     label: String,
     modifier: Modifier = Modifier,
 ) {
