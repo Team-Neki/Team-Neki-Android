@@ -124,8 +124,7 @@ internal fun QRScannerContent(
             // ScanCornerFrame (고정 크기)
             ScanCornerFrame(
                 modifier = Modifier
-                    .fillMaxWidth(0.82f)
-                    .aspectRatio(1f)
+                    .size(304.dp)
                     .onGloballyPositioned { coordinates ->
                         frameOffset = coordinates.positionInParent()
                         frameSize = coordinates.size
