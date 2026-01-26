@@ -1,4 +1,4 @@
-package com.neki.android.feature.pose.impl.component
+package com.neki.android.feature.pose.impl.main.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

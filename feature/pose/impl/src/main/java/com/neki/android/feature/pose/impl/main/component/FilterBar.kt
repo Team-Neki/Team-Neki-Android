@@ -1,4 +1,4 @@
-package com.neki.android.feature.pose.impl.component
+package com.neki.android.feature.pose.impl.main.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -24,15 +24,15 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.pose.impl.NumberOfPeople
+import com.neki.android.core.model.PeopleCount
 
 @Composable
 internal fun FilterBar(
-    numberOfPeople: NumberOfPeople,
+    peopleCount: PeopleCount?,
     isScrapSelected: Boolean,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
-    onClickNumberOfPeople: () -> Unit = {},
+    onClickPeopleCount: () -> Unit = {},
     onClickScrap: () -> Unit = {},
 ) {
     AnimatedVisibility(
@@ -48,9 +48,9 @@ internal fun FilterBar(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            NumberOfPeopleFilter(
-                numberOfPeople = numberOfPeople,
-                onClick = onClickNumberOfPeople,
+            PeopleCountFilter(
+                peopleCount = peopleCount,
+                onClick = onClickPeopleCount,
             )
             ScrapFilter(
                 isSelected = isScrapSelected,
@@ -61,12 +61,12 @@ internal fun FilterBar(
 }
 
 @Composable
-private fun NumberOfPeopleFilter(
+private fun PeopleCountFilter(
     modifier: Modifier = Modifier,
-    numberOfPeople: NumberOfPeople = NumberOfPeople.UNSELECTED,
+    peopleCount: PeopleCount? = null,
     onClick: () -> Unit = {},
 ) {
-    val isSelected by remember(numberOfPeople) { derivedStateOf { numberOfPeople != NumberOfPeople.UNSELECTED } }
+    val isSelected by remember(peopleCount) { derivedStateOf { peopleCount != null } }
     Row(
         modifier = modifier
             .background(
@@ -80,7 +80,7 @@ private fun NumberOfPeopleFilter(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = numberOfPeople.displayText,
+            text = peopleCount?.displayText ?: "인원수",
             style = NekiTheme.typography.body14Medium,
             color = if (isSelected) NekiTheme.colorScheme.white
             else NekiTheme.colorScheme.gray700,
@@ -120,7 +120,7 @@ private fun ScrapFilter(
 private fun FilterBarPreview() {
     NekiTheme {
         FilterBar(
-            numberOfPeople = NumberOfPeople.UNSELECTED,
+            peopleCount = null,
             isScrapSelected = false,
         )
     }

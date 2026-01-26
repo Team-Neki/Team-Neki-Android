@@ -9,4 +9,6 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    api(libs.haze)
+    api(libs.haze.materials)
 }

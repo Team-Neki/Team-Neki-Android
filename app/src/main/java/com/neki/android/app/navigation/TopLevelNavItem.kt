@@ -25,7 +25,7 @@ enum class TopLevelNavItem(
         selectedIconRes = R.drawable.ic_nav_pose_selected,
         unselectedIconRes = R.drawable.ic_nav_pose_unselected,
         iconStringRes = R.string.top_level_nav_pose,
-        navKey = PoseNavKey.Pose,
+        navKey = PoseNavKey.PoseMain,
     ),
     MAP(
         selectedIconRes = R.drawable.ic_nav_map_selected,

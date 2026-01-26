@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
+import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
 import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -29,12 +30,11 @@ import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album_detail.component.EmptyContent
-import com.neki.android.feature.archive.impl.component.DeleteOptionBottomSheet
+import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
-import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.persistentListOf
@@ -159,13 +159,15 @@ internal fun AlbumDetailScreen(
 
     // Delete BottomSheet for Regular Album
     if (uiState.isShowDeleteBottomSheet) {
-        DeleteOptionBottomSheet(
+        DoubleButtonOptionBottomSheet(
             title = "사진을 삭제하시겠어요?",
             options = PhotoDeleteOption.entries.toImmutableList(),
             selectedOption = uiState.selectedDeleteOption,
+            primaryButtonText = "삭제하기",
+            secondaryButtonText = "취소",
             onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteBottomSheet) },
-            onClickCancel = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
-            onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },
+            onClickSecondaryButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
+            onClickPrimaryButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },
             onOptionSelect = { onIntent(AlbumDetailIntent.SelectDeleteOption(it)) },
         )
     }
