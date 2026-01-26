@@ -11,3 +11,11 @@ data class Album(
     val thumbnailUrl: String? = null,
     val photoList: ImmutableList<Photo> = persistentListOf(),
 )
+
+@Serializable
+data class AlbumPreview(
+    val id: Long = 0L,
+    val title: String = "",
+    val thumbnailUrl: String? = null,
+    val photoCount: Int = 0,
+)

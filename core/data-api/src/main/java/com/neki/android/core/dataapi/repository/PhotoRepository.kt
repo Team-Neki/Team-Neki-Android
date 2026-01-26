@@ -1,6 +1,6 @@
 package com.neki.android.core.dataapi.repository
 
-import com.neki.android.core.model.FavoriteSummary
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
 
@@ -26,5 +26,5 @@ interface PhotoRepository {
         sortOrder: SortOrder = SortOrder.DESC,
     ): Result<List<Photo>>
 
-    suspend fun getFavoriteSummary(): Result<FavoriteSummary>
+    suspend fun getFavoriteSummary(): Result<AlbumPreview>
 }
