@@ -222,18 +222,33 @@ internal fun AnchoredPanelContent(
             )
         }
         VerticalSpacer(8.dp)
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
-        ) {
-            items(nearbyBrands) { photoBooth ->
-                HorizontalBrandItem(
-                    photoBooth = photoBooth,
-                    onClickItem = { onClickNearBrand(photoBooth) },
+        if (nearbyBrands.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 175.5.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "1km 이내에 가까운 네컷 사진관이 없어요!",
+                    color = NekiTheme.colorScheme.gray500,
+                    style = NekiTheme.typography.body16Medium,
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
+            ) {
+                items(nearbyBrands) { photoBooth ->
+                    HorizontalBrandItem(
+                        photoBooth = photoBooth,
+                        onClickItem = { onClickNearBrand(photoBooth) },
+                    )
+                }
             }
         }
     }
