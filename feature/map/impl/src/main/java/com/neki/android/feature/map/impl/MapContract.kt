@@ -34,6 +34,7 @@ sealed interface MapIntent {
     data object EnterMapScreen : MapIntent
 
     // in 지도
+    data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(
         val latitude: Double,
         val longitude: Double,

@@ -76,6 +76,7 @@ fun MapRoute(
 
     var previousShouldShowRationale by remember { mutableStateOf(false) }
     var isNavigatedToSettings by remember { mutableStateOf(false) }
+    var isInitialLocationBoundsLoaded by remember { mutableStateOf(false) }
 
     // 브랜드 이미지 Bitmap 캐시 (imageUrl -> ImageBitmap)
     val brandImageCache = remember { mutableStateMapOf<String, ImageBitmap>() }
@@ -121,6 +122,24 @@ fun MapRoute(
             isNavigatedToSettings = false
         }
         onPauseOrDispose { }
+    }
+
+    LaunchedEffect(uiState.currentLocation) {
+        val location = uiState.currentLocation
+        if (location != null && !isInitialLocationBoundsLoaded) {
+            isInitialLocationBoundsLoaded = true
+            val offset = MapConst.DEFAULT_BOUNDS_OFFSET
+            viewModel.store.onIntent(
+                MapIntent.LoadPhotoBoothsByBounds(
+                    MapBounds(
+                        southWest = Location(location.latitude - offset, location.longitude - offset),
+                        northWest = Location(location.latitude + offset, location.longitude - offset),
+                        northEast = Location(location.latitude + offset, location.longitude + offset),
+                        southEast = Location(location.latitude - offset, location.longitude + offset),
+                    ),
+                ),
+            )
+        }
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
@@ -189,17 +208,18 @@ fun MapRoute(
             val isGrantedPermission = LocationPermissionManager.isGrantedLocationPermission(context)
             if (isGrantedPermission) {
                 locationTrackingMode = LocationTrackingMode.Follow
+                // 권한 있을 때는 LaunchedEffect에서 현위치 기준 bounds API 호출
             } else {
                 viewModel.store.onIntent(MapIntent.RequestLocationPermission)
-            }
-            cameraPositionState.contentBounds?.let { bounds ->
+                // 강남역 기준 bounds API 호출
+                val offset = MapConst.DEFAULT_BOUNDS_OFFSET
                 viewModel.store.onIntent(
-                    MapIntent.ClickRefreshButton(
+                    MapIntent.LoadPhotoBoothsByBounds(
                         MapBounds(
-                            southWest = Location(bounds.southWest.latitude, bounds.southWest.longitude),
-                            northWest = Location(bounds.northWest.latitude, bounds.northWest.longitude),
-                            northEast = Location(bounds.northEast.latitude, bounds.northEast.longitude),
-                            southEast = Location(bounds.southEast.latitude, bounds.southEast.longitude),
+                            southWest = Location(MapConst.DEFAULT_LATITUDE - offset, MapConst.DEFAULT_LONGITUDE - offset),
+                            northWest = Location(MapConst.DEFAULT_LATITUDE + offset, MapConst.DEFAULT_LONGITUDE - offset),
+                            northEast = Location(MapConst.DEFAULT_LATITUDE + offset, MapConst.DEFAULT_LONGITUDE + offset),
+                            southEast = Location(MapConst.DEFAULT_LATITUDE - offset, MapConst.DEFAULT_LONGITUDE + offset),
                         ),
                     ),
                 )
@@ -252,11 +272,14 @@ fun MapScreen(
                 onIntent(MapIntent.UpdateCurrentLocation(location.latitude, location.longitude))
             },
         ) {
-            uiState.mapMarkers.forEach { photoBooth ->
-                val cachedBitmap = brandImageCache[photoBooth.imageUrl]
-                PhotoBoothMarker(
-                    photoBooth = photoBooth,
-                    isFocused = photoBooth.isFocused,
+            val checkedBrandNames = uiState.brands.filter { it.isChecked }.map { it.name }
+            uiState.mapMarkers
+                .filter { checkedBrandNames.isEmpty() || it.brandName in checkedBrandNames }
+                .forEach { photoBooth ->
+                    val cachedBitmap = brandImageCache[photoBooth.imageUrl]
+                    PhotoBoothMarker(
+                        photoBooth = photoBooth,
+                        isFocused = photoBooth.isFocused,
                     cachedBitmap = cachedBitmap,
                     onClick = {
                         onIntent(MapIntent.ClickPhotoBoothMarker(latitude = photoBooth.latitude, longitude = photoBooth.longitude))

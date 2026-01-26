@@ -29,7 +29,8 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         when (intent) {
-            MapIntent.EnterMapScreen -> loadBrands(reduce)
+            MapIntent.EnterMapScreen -> loadBrands(state, reduce)
+            is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce)
             MapIntent.ClickCurrentLocation -> {
@@ -183,7 +184,10 @@ class MapViewModel @Inject constructor(
         postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
     }
 
-    private fun loadBrands(reduce: (MapState.() -> MapState) -> Unit) {
+    private fun loadBrands(
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit
+    ) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
@@ -196,10 +200,10 @@ class MapViewModel @Inject constructor(
                         )
                     }
 
-                    // brands 로드 완료 후, currentLocation이 있으면 nearbyPhotoBooths 조회
-                    val currentState = store.uiState.value
-                    currentState.currentLocation?.let { location ->
-                        if (currentState.nearbyPhotoBooths.isEmpty()) {
+//                     brands 로드 완료 후, currentLocation이 있으면 nearbyPhotoBooths 조회
+//                    val currentState = store.uiState.value
+                    state.currentLocation?.let { location ->
+                        if (state.nearbyPhotoBooths.isEmpty()) {
                             val checkedBrandIds = loadedBrands.filter { it.isChecked }.map { it.id }
                             loadNearbyPhotoBooths(
                                 longitude = location.longitude,
