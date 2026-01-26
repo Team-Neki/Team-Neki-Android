@@ -37,6 +37,12 @@ class PhotoRepositoryImpl @Inject constructor(
         ).data
     }
 
+    override suspend fun deletePhoto(photoId: Long): Result<Unit> = runSuspendCatching {
+        photoService.deletePhoto(
+            requestBody = DeletePhotoRequest(photoIds = listOf(photoId)),
+        ).data
+    }
+
     override suspend fun deletePhoto(photoIds: List<Long>): Result<Unit> = runSuspendCatching {
         photoService.deletePhoto(
             requestBody = DeletePhotoRequest(photoIds = photoIds),

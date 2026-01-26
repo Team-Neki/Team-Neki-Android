@@ -16,6 +16,7 @@ interface PhotoRepository {
         folderId: Long? = null,
     ): Result<Unit>
 
+    suspend fun deletePhoto(photoId: Long): Result<Unit>
     suspend fun deletePhoto(photoIds: List<Long>): Result<Unit>
 
     suspend fun updateFavorite(photoId: Long, favorite: Boolean): Result<Unit>
