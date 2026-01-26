@@ -22,6 +22,7 @@ data class FavoritePhotoResponse(
         internal fun toModel() = Photo(
             id = photoId,
             imageUrl = imageUrl,
+            isFavorite = favorite,
             date = createdAt.toFormattedDate(),
         )
     }
