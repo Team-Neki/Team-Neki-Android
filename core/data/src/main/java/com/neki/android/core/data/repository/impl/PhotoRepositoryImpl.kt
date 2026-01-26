@@ -5,6 +5,7 @@ import com.neki.android.core.data.remote.model.request.RegisterPhotoRequest
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.SortOrder
 import javax.inject.Inject
 
 class PhotoRepositoryImpl @Inject constructor(
@@ -40,5 +41,13 @@ class PhotoRepositoryImpl @Inject constructor(
 
     override suspend fun updateFavorite(photoId: Long, favorite: Boolean): Result<Unit> = runSuspendCatching {
         photoService.updateFavorite(photoId, favorite).data
+    }
+
+    override suspend fun getFavoritePhotos(
+        page: Int,
+        size: Int,
+        sortOrder: SortOrder,
+    ): Result<List<Photo>> = runSuspendCatching {
+        photoService.getFavoritePhotos(page, size, sortOrder.name).data.toModels()
     }
 }
