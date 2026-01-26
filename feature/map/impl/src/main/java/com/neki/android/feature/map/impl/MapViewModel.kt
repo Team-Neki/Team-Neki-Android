@@ -271,6 +271,8 @@ class MapViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+
             mapRepository.getPhotoBoothsByPolygon(
                 coordinates = coordinates,
                 brandIds = checkedBrandIds,
@@ -280,9 +282,13 @@ class MapViewModel @Inject constructor(
                         val matchedBrand = brands.find { it.name == photoBooth.brandName }
                         photoBooth.copy(imageUrl = matchedBrand?.imageUrl.orEmpty())
                     }
-                    copy(mapMarkers = photoBoothsWithImage.toImmutableList())
+                    copy(
+                        isLoading = false,
+                        mapMarkers = photoBoothsWithImage.toImmutableList(),
+                    )
                 }
             }.onFailure {
+                reduce { copy(isLoading = false) }
                 postSideEffect(MapEffect.ShowToastMessage("포토부스 조회에 실패했습니다."))
             }
         }

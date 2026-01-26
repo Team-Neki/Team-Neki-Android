@@ -347,4 +347,14 @@ fun MapScreen(
             properties = DialogProperties(usePlatformDefaultWidth = false),
         )
     }
+
+    val isLoadingLocation = locationTrackingMode == LocationTrackingMode.Follow && uiState.currentLocation == null
+    if (isLoadingLocation || uiState.isLoading) {
+        LoadingDialog(
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            ),
+        )
+    }
 }
