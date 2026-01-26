@@ -114,12 +114,6 @@ class ArchiveMainViewModel @Inject constructor(
     }
 
     private fun fetchInitialData(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
-        val dummyAlbums = persistentListOf(
-            AlbumPreview(id = 1, title = "제주도 여행 2025", thumbnailUrl = "https://picsum.photos/seed/travel1/400/500", photoCount = 4),
-            AlbumPreview(id = 2, title = "가족 생일파티", thumbnailUrl = "https://picsum.photos/seed/family1/400/520", photoCount = 3),
-            AlbumPreview(id = 3, title = "대학 동기 모임", thumbnailUrl = "https://picsum.photos/seed/friend1/400/580", photoCount = 5),
-        )
-
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
             awaitAll(
@@ -138,7 +132,6 @@ class ArchiveMainViewModel @Inject constructor(
             .onFailure { error ->
                 Timber.e(error)
             }
-
     }
 
     private suspend fun fetchPhotos(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit, size: Int = DEFAULT_PHOTOS_SIZE) {

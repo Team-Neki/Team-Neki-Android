@@ -1,7 +1,6 @@
 package com.neki.android.feature.archive.impl.main
 
 import android.net.Uri
-import com.neki.android.core.model.Album
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.UploadType

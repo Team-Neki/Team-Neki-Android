@@ -24,7 +24,6 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
