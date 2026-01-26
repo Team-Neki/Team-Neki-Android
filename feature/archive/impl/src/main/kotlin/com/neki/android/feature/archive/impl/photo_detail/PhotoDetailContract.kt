@@ -15,6 +15,7 @@ sealed interface PhotoDetailIntent {
     // ActionBar Intent
     data object ClickDownloadIcon : PhotoDetailIntent
     data object ClickFavoriteIcon : PhotoDetailIntent
+    data class RevertFavorite(val originalFavorite: Boolean) : PhotoDetailIntent
     data object ClickDeleteIcon : PhotoDetailIntent
 
     // Delete Dialog Intent

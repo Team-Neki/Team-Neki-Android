@@ -10,25 +10,50 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@OptIn(FlowPreview::class)
 @HiltViewModel(assistedFactory = PhotoDetailViewModel.Factory::class)
 class PhotoDetailViewModel @AssistedInject constructor(
     @Assisted private val photo: Photo,
     private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
-    @AssistedFactory
-    interface Factory {
-        fun create(photo: Photo): PhotoDetailViewModel
-    }
+    private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
 
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
             initialState = PhotoDetailState(photo = photo),
             onIntent = ::onIntent,
         )
+
+    init {
+        viewModelScope.launch {
+            favoriteRequests
+                .debounce(500)
+                .collectLatest { newFavorite ->
+                    // 값이 다를 때만 API 요청
+                    if (newFavorite != store.uiState.value.photo.isFavorite) {
+                        photoRepository.updateFavorite(photo.id, newFavorite)
+                            .onSuccess { Timber.d("updateFavorite success") }
+                            .onFailure { error ->
+                                Timber.e(error, "updateFavorite failed")
+                                store.onIntent(PhotoDetailIntent.RevertFavorite(!newFavorite))
+                            }
+                    }
+                }
+        }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(photo: Photo): PhotoDetailViewModel
+    }
 
     private fun onIntent(
         intent: PhotoDetailIntent,
@@ -43,6 +68,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             // ActionBar Intent
             PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce, postSideEffect)
+            is PhotoDetailIntent.RevertFavorite -> reduce { copy(photo = photo.copy(isFavorite = intent.originalFavorite)) }
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
 
             // Delete Dialog Intent
@@ -58,7 +84,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
         postSideEffect: (PhotoDetailSideEffect) -> Unit,
     ) {
         val newFavoriteStatus = !state.photo.isFavorite
-        // TODO: Update favorite status in repository
+        viewModelScope.launch { favoriteRequests.emit(newFavoriteStatus) }
         reduce {
             copy(photo = state.photo.copy(isFavorite = newFavoriteStatus))
         }
