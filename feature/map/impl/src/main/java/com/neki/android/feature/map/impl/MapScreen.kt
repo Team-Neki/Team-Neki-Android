@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.graphics.drawable.toBitmap
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
@@ -74,7 +73,7 @@ fun MapRoute(
 
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), 17.0)
+        position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), MapConst.DEFAULT_ZOOM_LEVEL)
     }
 
     var previousShouldShowRationale by remember { mutableStateOf(false) }
@@ -82,6 +81,7 @@ fun MapRoute(
 
     // 브랜드 이미지 Bitmap 캐시 (imageUrl -> ImageBitmap)
     val brandImageCache = remember { mutableStateMapOf<String, ImageBitmap>() }
+    val nekiToast = remember { NekiToast(context) }
 
     // brands가 로드되면 이미지를 Bitmap으로 미리 로드
     LaunchedEffect(uiState.brands) {
@@ -115,19 +115,9 @@ fun MapRoute(
         }
     }
 
-    LaunchedEffect(Unit) {
-        val hasPermission = LocationPermissionManager.hasLocationPermission(context)
-        if (!hasPermission) {
-            viewModel.store.onIntent(MapIntent.RequestLocationPermission)
-        } else {
-            locationTrackingMode = LocationTrackingMode.Follow
-        }
-        viewModel.store.onIntent(MapIntent.EnterMapScreen(hasLocationPermission = hasPermission))
-    }
-
     LifecycleResumeEffect(Unit) {
         if (isNavigatedToSettings) {
-            if (LocationPermissionManager.hasLocationPermission(context)) {
+            if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                 locationTrackingMode = LocationTrackingMode.Follow
             }
             isNavigatedToSettings = false
@@ -138,7 +128,7 @@ fun MapRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             is MapEffect.RefreshCurrentLocation -> {
-                if (LocationPermissionManager.hasLocationPermission(context)) {
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                     locationTrackingMode = LocationTrackingMode.Follow
                 } else {
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
@@ -146,21 +136,21 @@ fun MapRoute(
             }
 
             is MapEffect.OpenDirectionBottomSheet -> {
-                if (LocationPermissionManager.hasLocationPermission(context)) {
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                     viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
                 } else {
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
             is MapEffect.ShowToastMessage -> {
-                NekiToast(context).showToast(sideEffect.message)
+                nekiToast.showToast(sideEffect.message)
             }
             is MapEffect.MoveCameraToPosition -> {
                 coroutineScope.launch {
                     cameraPositionState.animate(
                         update = CameraUpdate.scrollAndZoomTo(
                             LatLng(sideEffect.latitude, sideEffect.longitude),
-                            17.0,
+                            MapConst.DEFAULT_ZOOM_LEVEL,
                         ),
                         animation = CameraAnimation.Easing,
                         durationMs = 800,
@@ -221,6 +211,26 @@ fun MapRoute(
         onLocationTrackingModeChange = { locationTrackingMode = it },
         cameraPositionState = cameraPositionState,
         brandImageCache = brandImageCache,
+        onMapLoaded = {
+            val isGrantedPermission = LocationPermissionManager.isGrantedLocationPermission(context)
+            if (isGrantedPermission) {
+                locationTrackingMode = LocationTrackingMode.Follow
+            } else {
+                viewModel.store.onIntent(MapIntent.RequestLocationPermission)
+            }
+            cameraPositionState.contentBounds?.let { bounds ->
+                viewModel.store.onIntent(
+                    MapIntent.ClickRefreshButton(
+                        MapBounds(
+                            southWest = Location(bounds.southWest.latitude, bounds.southWest.longitude),
+                            northWest = Location(bounds.northWest.latitude, bounds.northWest.longitude),
+                            northEast = Location(bounds.northEast.latitude, bounds.northEast.longitude),
+                            southEast = Location(bounds.southEast.latitude, bounds.southEast.longitude),
+                        ),
+                    ),
+                )
+            }
+        },
     )
 }
 
@@ -232,9 +242,10 @@ fun MapScreen(
     locationTrackingMode: LocationTrackingMode = LocationTrackingMode.None,
     onLocationTrackingModeChange: (LocationTrackingMode) -> Unit = {},
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
-        position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), 17.0)
+        position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), MapConst.DEFAULT_ZOOM_LEVEL)
     },
     brandImageCache: Map<String, ImageBitmap> = emptyMap(),
+    onMapLoaded: () -> Unit = {},
 ) {
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
@@ -257,6 +268,7 @@ fun MapScreen(
             locationSource = rememberFusedLocationSource(),
             properties = mapProperties,
             uiSettings = mapUiSettings,
+            onMapLoaded = onMapLoaded,
             onOptionChange = {
                 cameraPositionState.locationTrackingMode?.let {
                     onLocationTrackingModeChange(it)

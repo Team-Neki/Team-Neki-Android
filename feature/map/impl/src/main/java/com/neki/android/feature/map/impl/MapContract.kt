@@ -31,7 +31,7 @@ data class Location(
 )
 
 sealed interface MapIntent {
-    data class EnterMapScreen(val hasLocationPermission: Boolean) : MapIntent
+    data object EnterMapScreen : MapIntent
 
     // in 지도
     data class ClickPhotoBoothMarker(
@@ -66,7 +66,10 @@ sealed interface MapEffect {
     data object RefreshCurrentLocation : MapEffect
     data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
-    data class MoveCameraToPosition(val latitude: Double, val longitude: Double) : MapEffect
+    data class MoveCameraToPosition(
+        val latitude: Double,
+        val longitude: Double,
+    ) : MapEffect
 
     data class MoveDirectionApp(
         val app: DirectionApp,

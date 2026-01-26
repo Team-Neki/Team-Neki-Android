@@ -19,6 +19,7 @@ class MapViewModel @Inject constructor(
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
         onIntent = ::onIntent,
+        initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
     )
 
     private fun onIntent(
@@ -28,7 +29,7 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         when (intent) {
-            is MapIntent.EnterMapScreen -> handleEnterMapScreen(intent, state, reduce, postSideEffect)
+            MapIntent.EnterMapScreen -> loadBrands(reduce)
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce)
             MapIntent.ClickCurrentLocation -> {
@@ -41,7 +42,7 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickBrand -> handleClickBrand(state, intent, reduce)
-            is MapIntent.ClickNearPhotoBooth -> handleClickNearBrand(intent, reduce, postSideEffect)
+            is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent, reduce, postSideEffect)
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
                     dragLevel = DragLevel.SECOND,
@@ -64,35 +65,15 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleEnterMapScreen(
-        intent: MapIntent.EnterMapScreen,
-        state: MapState,
-        reduce: (MapState.() -> MapState) -> Unit,
-        postSideEffect: (MapEffect) -> Unit,
-    ) {
-        loadBrands(reduce)
-
-        if (!intent.hasLocationPermission) {
-            // 권한이 없으면 강남역으로 카메라 이동 (카메라 이동 완료 후 MapScreen에서 polygon 조회)
-            postSideEffect(
-                MapEffect.MoveCameraToPosition(
-                    latitude = MapConst.DEFAULT_LATITUDE,
-                    longitude = MapConst.DEFAULT_LONGITUDE,
-                ),
-            )
-        }
-        // 권한이 있으면 onLocationChange -> UpdateCurrentLocation에서 현위치 기반 API 호출
-    }
-
     private fun handleUpdateCurrentLocation(
         state: MapState,
         intent: MapIntent.UpdateCurrentLocation,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
-        val isFirstLocation = state.currentLocation == null
         reduce { copy(currentLocation = Location(intent.latitude, intent.longitude)) }
 
-        if (isFirstLocation) {
+        /** 위치가 이동하더라도 주변 네컷 사진 브랜드는 변경하지 않기 때문에 최초에만 요청 **/
+        if (state.currentLocation == null) {
             val checkedBrandIds = state.brands.filter { it.isChecked }.map { it.id }
             loadNearbyPhotoBooths(
                 longitude = intent.longitude,
@@ -128,7 +109,7 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleClickNearBrand(
+    private fun handleClickNearPhotoBooth(
         intent: MapIntent.ClickNearPhotoBooth,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
