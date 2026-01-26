@@ -83,21 +83,19 @@ class MapViewModel @Inject constructor(
 
         /** 위치가 이동하더라도 주변 네컷 사진 브랜드는 변경하지 않기 때문에 최초에만 요청 **/
         if (state.currentLocation == null) {
-            val checkedBrandIds = state.brands.filter { it.isChecked }.map { it.id }
             loadNearbyPhotoBooths(
                 longitude = intent.longitude,
                 latitude = intent.latitude,
-                brandIds = checkedBrandIds,
+                brandIds = state.brands.filter { it.isChecked }.map { it.id },
                 reduce = reduce,
             )
 
             // 현위치 기준 사각형 포토부스 조회
-            val offset = MapConst.DEFAULT_BOUNDS_OFFSET
             val mapBounds = MapBounds(
-                southWest = Location(intent.latitude - offset, intent.longitude - offset),
-                northWest = Location(intent.latitude + offset, intent.longitude - offset),
-                northEast = Location(intent.latitude + offset, intent.longitude + offset),
-                southEast = Location(intent.latitude - offset, intent.longitude + offset),
+                southWest = Location(intent.latitude - MapConst.DEFAULT_BOUNDS_OFFSET, intent.longitude - MapConst.DEFAULT_BOUNDS_OFFSET),
+                northWest = Location(intent.latitude + MapConst.DEFAULT_BOUNDS_OFFSET, intent.longitude - MapConst.DEFAULT_BOUNDS_OFFSET),
+                northEast = Location(intent.latitude + MapConst.DEFAULT_BOUNDS_OFFSET, intent.longitude + MapConst.DEFAULT_BOUNDS_OFFSET),
+                southEast = Location(intent.latitude - MapConst.DEFAULT_BOUNDS_OFFSET, intent.longitude + MapConst.DEFAULT_BOUNDS_OFFSET),
             )
             loadPhotoBoothsByPolygon(mapBounds, state, reduce, postSideEffect)
         }
@@ -223,11 +221,10 @@ class MapViewModel @Inject constructor(
                     }
 
                     state.currentLocation?.let { location ->
-                        val checkedBrandIds = loadedBrands.filter { it.isChecked }.map { it.id }
                         loadNearbyPhotoBooths(
                             longitude = location.longitude,
                             latitude = location.latitude,
-                            brandIds = checkedBrandIds,
+                            brandIds = loadedBrands.filter { it.isChecked }.map { it.id },
                             reduce = reduce,
                         )
                     }
@@ -253,11 +250,15 @@ class MapViewModel @Inject constructor(
                 brandIds = brandIds,
             ).onSuccess { photoBooths ->
                 reduce {
-                    val photoBoothsWithImage = photoBooths.map { photoBooth ->
-                        val matchedBrand = brands.find { it.name == photoBooth.brandName }
-                        photoBooth.copy(imageUrl = matchedBrand?.imageUrl.orEmpty())
-                    }
-                    copy(nearbyPhotoBooths = photoBoothsWithImage.toImmutableList())
+                    copy(
+                        nearbyPhotoBooths = photoBooths.map { photoBooth ->
+                            photoBooth.copy(
+                                imageUrl = brands.find {
+                                    it.name == photoBooth.brandName
+                                }?.imageUrl.orEmpty()
+                            )
+                        }.toImmutableList()
+                    )
                 }
             }
         }
@@ -288,13 +289,15 @@ class MapViewModel @Inject constructor(
                 brandIds = checkedBrandIds,
             ).onSuccess { photoBooths ->
                 reduce {
-                    val photoBoothsWithImage = photoBooths.map { photoBooth ->
-                        val matchedBrand = brands.find { it.name == photoBooth.brandName }
-                        photoBooth.copy(imageUrl = matchedBrand?.imageUrl.orEmpty())
-                    }
                     copy(
                         isLoading = false,
-                        mapMarkers = photoBoothsWithImage.toImmutableList(),
+                        mapMarkers = photoBooths.map { photoBooth ->
+                            photoBooth.copy(
+                                imageUrl = brands.find {
+                                    it.name == photoBooth.brandName
+                                }?.imageUrl.orEmpty()
+                            )
+                        }.toImmutableList(),
                     )
                 }
             }.onFailure {
