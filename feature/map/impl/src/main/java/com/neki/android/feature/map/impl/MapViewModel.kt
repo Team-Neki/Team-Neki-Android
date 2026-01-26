@@ -40,8 +40,7 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
                     dragLevel = DragLevel.SECOND,
-                    focusedMarkerPosition = null,
-                    selectedPhotoBooth = null,
+                    mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
                 )
             }
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
@@ -134,15 +133,15 @@ class MapViewModel @Inject constructor(
                 it.latitude == intent.photoBooth.latitude && it.longitude == intent.photoBooth.longitude
             }
             val updatedMarkers = if (isAlreadyInMarkers) {
-                mapMarkers
+                mapMarkers.map { marker ->
+                    marker.copy(isFocused = marker.id == intent.photoBooth.id)
+                }
             } else {
-                (mapMarkers + intent.photoBooth).toImmutableList()
+                mapMarkers.map { it.copy(isFocused = false) } + intent.photoBooth.copy(isFocused = true)
             }
             copy(
                 dragLevel = DragLevel.INVISIBLE,
-                selectedPhotoBooth = intent.photoBooth,
-                focusedMarkerPosition = Location(intent.photoBooth.latitude, intent.photoBooth.longitude),
-                mapMarkers = updatedMarkers,
+                mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
         postSideEffect(MapEffect.MoveCameraToPosition(intent.photoBooth.latitude, intent.photoBooth.longitude))
@@ -159,14 +158,14 @@ class MapViewModel @Inject constructor(
             postSideEffect(MapEffect.ShowToastMessage("현재 위치를 가져올 수 없습니다."))
             return
         }
-        state.selectedPhotoBooth?.let { brandInfo ->
+        state.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
             postSideEffect(
                 MapEffect.MoveDirectionApp(
                     app = intent.app,
                     startLatitude = state.currentLocation.latitude,
                     startLongitude = state.currentLocation.longitude,
-                    endLatitude = brandInfo.latitude,
-                    endLongitude = brandInfo.longitude,
+                    endLatitude = focusedPhotoBooth.latitude,
+                    endLongitude = focusedPhotoBooth.longitude,
                 ),
             )
         }
@@ -178,18 +177,21 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        val selectedBrand = state.mapMarkers.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
-        val selectedBrandWithDistance = selectedBrand?.let { brand ->
-            state.currentLocation?.let { currentLocation ->
-                val distance = calculateDistance(currentLocation.latitude, currentLocation.longitude, brand.latitude, brand.longitude)
-                brand.copy(distance = distance)
-            } ?: brand
-        }
         reduce {
+            val updatedMarkers = mapMarkers.map { marker ->
+                val isClicked = marker.latitude == intent.latitude && marker.longitude == intent.longitude
+                if (isClicked) {
+                    val distance = currentLocation?.let { location ->
+                        calculateDistance(location.latitude, location.longitude, marker.latitude, marker.longitude)
+                    } ?: 0
+                    marker.copy(isFocused = true, distance = distance)
+                } else {
+                    marker.copy(isFocused = false)
+                }
+            }
             copy(
                 dragLevel = DragLevel.INVISIBLE,
-                focusedMarkerPosition = Location(intent.latitude, intent.longitude),
-                selectedPhotoBooth = selectedBrandWithDistance,
+                mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
         postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))

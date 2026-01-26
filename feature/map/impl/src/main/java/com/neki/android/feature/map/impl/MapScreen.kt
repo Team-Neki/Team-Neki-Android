@@ -267,11 +267,10 @@ fun MapScreen(
             },
         ) {
             uiState.mapMarkers.forEach { photoBooth ->
-                val isFocused = uiState.focusedMarkerPosition == Location(photoBooth.latitude, photoBooth.longitude)
                 val cachedBitmap = brandImageCache[photoBooth.imageUrl]
                 PhotoBoothMarker(
                     photoBooth = photoBooth,
-                    isFocused = isFocused,
+                    isFocused = photoBooth.isFocused,
                     cachedBitmap = cachedBitmap,
                     onClick = {
                         onIntent(MapIntent.ClickPhotoBoothMarker(latitude = photoBooth.latitude, longitude = photoBooth.longitude))
@@ -324,15 +323,20 @@ fun MapScreen(
                     .padding(bottom = 32.dp),
                 onClick = { onIntent(MapIntent.ClickToMapChip) },
             )
-        } else if (uiState.dragLevel == DragLevel.INVISIBLE && uiState.selectedPhotoBooth != null) {
-            PhotoBoothDetailCard(
-                photoBooth = uiState.selectedPhotoBooth,
-                modifier = Modifier.align(Alignment.BottomCenter),
-                isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
-                onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
-                onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
-                onClickDirection = { onIntent(MapIntent.ClickDirection) },
-            )
+        } else if (uiState.dragLevel == DragLevel.INVISIBLE) {
+            uiState.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
+                PhotoBoothDetailCard(
+                    photoBooth = focusedPhotoBooth,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
+                    onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
+                    onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
+                    onClickCard = {
+                        onIntent(MapIntent.ClickPhotoBoothMarker(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude))
+                    },
+                    onClickDirection = { onIntent(MapIntent.ClickDirection) },
+                )
+            }
         }
     }
 

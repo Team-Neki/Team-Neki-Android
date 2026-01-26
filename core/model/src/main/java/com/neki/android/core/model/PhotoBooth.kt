@@ -1,6 +1,7 @@
 package com.neki.android.core.model
 
 data class PhotoBooth(
+    val isFocused: Boolean = false,
     val id: Long = 0L,
     val brandName: String = "",
     val branchName: String = "",

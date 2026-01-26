@@ -13,8 +13,6 @@ data class MapState(
     val brands: ImmutableList<Brand> = persistentListOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
     val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
-    val focusedMarkerPosition: Location? = null,
-    val selectedPhotoBooth: PhotoBooth? = null,
     val isShowInfoDialog: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
