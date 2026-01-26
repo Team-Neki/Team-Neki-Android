@@ -26,6 +26,7 @@ sealed interface PhotoDetailIntent {
 
 sealed interface PhotoDetailSideEffect {
     data object NavigateBack : PhotoDetailSideEffect
+    data object NotifyArchiveUpdated : PhotoDetailSideEffect
     data class ShowToastMessage(val message: String) : PhotoDetailSideEffect
     data class DownloadImage(val imageUrl: String) : PhotoDetailSideEffect
 }

@@ -43,6 +43,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
                             .onSuccess {
                                 Timber.d("updateFavorite success")
                                 originalFavorite = newFavorite
+                                store.postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
                             }
                             .onFailure { error ->
                                 Timber.e(error, "updateFavorite failed")
@@ -104,6 +105,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             photoRepository.deletePhoto(state.photo.id)
                 .onSuccess {
                     reduce { copy(isLoading = false) }
+                    postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
                     postSideEffect(PhotoDetailSideEffect.NavigateBack)
                 }

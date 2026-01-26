@@ -25,6 +25,7 @@ data class ArchiveMainState(
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent
+    data object RefreshArchiveMainScreen : ArchiveMainIntent
     data class QRCodeScanned(val imageUrl: String) : ArchiveMainIntent
     data object ClickScreen : ArchiveMainIntent
     data object ClickGoToTopButton : ArchiveMainIntent

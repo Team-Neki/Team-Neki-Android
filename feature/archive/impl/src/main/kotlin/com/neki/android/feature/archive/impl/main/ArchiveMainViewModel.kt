@@ -12,6 +12,7 @@ import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -33,6 +34,8 @@ class ArchiveMainViewModel @Inject constructor(
             initialFetchData = { store.onIntent(ArchiveMainIntent.EnterArchiveMainScreen) },
         )
 
+    private var fetchJob: Job? = null
+
     private fun onIntent(
         intent: ArchiveMainIntent,
         state: ArchiveMainState,
@@ -49,6 +52,7 @@ class ArchiveMainViewModel @Inject constructor(
             }
 
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
+            ArchiveMainIntent.RefreshArchiveMainScreen -> fetchInitialData(reduce)
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
@@ -113,7 +117,9 @@ class ArchiveMainViewModel @Inject constructor(
     }
 
     private fun fetchInitialData(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
-        viewModelScope.launch {
+        if (fetchJob?.isActive == true) return
+
+        fetchJob = viewModelScope.launch {
             reduce { copy(isLoading = true) }
             awaitAll(
                 async { fetchFavoriteSummary(reduce) },

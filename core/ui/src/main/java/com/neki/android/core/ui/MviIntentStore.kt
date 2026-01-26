@@ -18,6 +18,7 @@ interface MviIntentStore<STATE, INTENT, EFFECT> {
     val uiState: StateFlow<STATE>
     val sideEffects: Flow<EFFECT>
     fun onIntent(intent: INTENT)
+    fun postSideEffect(effect: EFFECT)
 }
 
 class MviIntentStoreImpl<STATE, INTENT, EFFECT>(
@@ -45,7 +46,7 @@ class MviIntentStoreImpl<STATE, INTENT, EFFECT>(
         _uiState.update(reduce)
     }
 
-    private fun postSideEffect(effect: EFFECT) {
+    override fun postSideEffect(effect: EFFECT) {
         coroutineScope.launch { _sideEffects.send(effect) }
     }
 

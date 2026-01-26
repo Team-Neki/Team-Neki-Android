@@ -47,6 +47,9 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
         ResultEffect<String>(resultBus) { imageUrl ->
             viewModel.store.onIntent(ArchiveMainIntent.QRCodeScanned(imageUrl))
         }
+        ResultEffect<Boolean>(resultBus) { hasUpdated ->
+            if (hasUpdated) viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)
+        }
 
         ArchiveMainRoute(
             viewModel = viewModel,

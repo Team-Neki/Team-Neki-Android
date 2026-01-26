@@ -19,6 +19,7 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
@@ -33,14 +34,13 @@ internal fun PhotoDetailRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
+    val resultEventBus = LocalResultEventBus.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PhotoDetailSideEffect.NavigateBack -> navigateBack()
-            is PhotoDetailSideEffect.ShowToastMessage -> {
-                nekiToast.showToast(text = sideEffect.message)
-            }
-
+            PhotoDetailSideEffect.NotifyArchiveUpdated -> resultEventBus.sendResult(result = true)
+            is PhotoDetailSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
             is PhotoDetailSideEffect.DownloadImage -> {
                 ImageDownloader.downloadImage(context, sideEffect.imageUrl)
                     .onSuccess {
