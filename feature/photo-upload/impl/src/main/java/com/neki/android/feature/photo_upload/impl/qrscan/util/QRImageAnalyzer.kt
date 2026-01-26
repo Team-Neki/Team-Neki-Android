@@ -1,5 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.util
 
+import android.graphics.RectF
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
@@ -8,9 +9,11 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import com.neki.android.feature.photo_upload.impl.BuildConfig
 import timber.log.Timber
 
 class QRImageAnalyzer(
+    private val scanAreaRatio: () -> RectF?,
     private val onQRCodeScanned: (String) -> Unit,
 ) : ImageAnalysis.Analyzer {
 
@@ -29,13 +32,29 @@ class QRImageAnalyzer(
                 imageProxy.imageInfo.rotationDegrees,
             )
 
+            val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+            val isRotated = rotationDegrees == 90 || rotationDegrees == 270
+
+            val rotatedWidth = if (isRotated) imageProxy.height.toFloat() else imageProxy.width.toFloat()
+            val rotatedHeight = if (isRotated) imageProxy.width.toFloat() else imageProxy.height.toFloat()
+
             scanner.process(inputImage)
                 .addOnSuccessListener { barcodes ->
                     for (barcode in barcodes) {
                         if (barcode.valueType == Barcode.TYPE_URL) {
                             val url = barcode.url?.url ?: continue
-                            onQRCodeScanned(url)
-                        } else continue
+                            val boundingBox = barcode.boundingBox ?: continue
+
+                            val centerXRatio = boundingBox.centerX() / rotatedWidth
+                            val centerYRatio = boundingBox.centerY() / rotatedHeight
+
+                            val scanArea = scanAreaRatio()
+                            if (scanArea == null || isInScanArea(centerXRatio, centerYRatio, scanArea)) {
+                                if (isSupportedPhotoBoothUrl(url)) {
+                                    onQRCodeScanned(url)
+                                }
+                            }
+                        }
                     }
                 }
                 .addOnFailureListener { e -> Timber.Forest.e(e, "Barcode scanning failed") }
@@ -43,5 +62,17 @@ class QRImageAnalyzer(
         } else {
             imageProxy.close()
         }
+    }
+
+    private fun isInScanArea(xRatio: Float, yRatio: Float, scanArea: RectF): Boolean {
+        return xRatio >= scanArea.left &&
+            xRatio <= scanArea.right &&
+            yRatio >= scanArea.top &&
+            yRatio <= scanArea.bottom
+    }
+
+    private fun isSupportedPhotoBoothUrl(url: String): Boolean {
+        return url.startsWith(BuildConfig.PHOTOISM_URL) ||
+            url.startsWith(BuildConfig.LIFE_FOUR_CUT_URL)
     }
 }
