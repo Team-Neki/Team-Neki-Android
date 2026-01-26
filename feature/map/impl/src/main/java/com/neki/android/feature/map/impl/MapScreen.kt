@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -46,6 +47,7 @@ import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.WarningDialog
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
@@ -76,6 +78,7 @@ fun MapRoute(
     }
 
     var previousShouldShowRationale by remember { mutableStateOf(false) }
+    var isNavigatedToSettings by remember { mutableStateOf(false) }
 
     // 브랜드 이미지 Bitmap 캐시 (imageUrl -> ImageBitmap)
     val brandImageCache = remember { mutableStateMapOf<String, ImageBitmap>() }
@@ -120,6 +123,16 @@ fun MapRoute(
             locationTrackingMode = LocationTrackingMode.Follow
         }
         viewModel.store.onIntent(MapIntent.EnterMapScreen(hasLocationPermission = hasPermission))
+    }
+
+    LifecycleResumeEffect(Unit) {
+        if (isNavigatedToSettings) {
+            if (LocationPermissionManager.hasLocationPermission(context)) {
+                locationTrackingMode = LocationTrackingMode.Follow
+            }
+            isNavigatedToSettings = false
+        }
+        onPauseOrDispose { }
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
@@ -190,6 +203,7 @@ fun MapRoute(
             }
 
             is MapEffect.NavigateToAppSettings -> {
+                isNavigatedToSettings = true
                 navigateToAppSettings(context)
             }
 
@@ -349,6 +363,7 @@ fun MapScreen(
     }
 
     val isLoadingLocation = locationTrackingMode == LocationTrackingMode.Follow && uiState.currentLocation == null
+
     if (isLoadingLocation || uiState.isLoading) {
         LoadingDialog(
             properties = DialogProperties(
