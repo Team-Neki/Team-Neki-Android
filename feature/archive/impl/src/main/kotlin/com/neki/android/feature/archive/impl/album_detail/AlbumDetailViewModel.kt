@@ -1,7 +1,6 @@
 package com.neki.android.feature.archive.impl.album_detail
 
 import androidx.lifecycle.ViewModel
-import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -52,7 +51,11 @@ class AlbumDetailViewModel @AssistedInject constructor(
     ) {
         when (intent) {
             // TopBar Intent
-            AlbumDetailIntent.EnterAlbumDetailScreen -> fetchInitialData(id, reduce)
+            AlbumDetailIntent.EnterAlbumDetailScreen -> {
+                if (isFavoriteAlbum) fetchFavoriteData(reduce)
+                else fetchAlbumData(id, reduce)
+            }
+
             AlbumDetailIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.ClickSelectButton -> reduce { copy(selectMode = SelectMode.SELECTING) }
@@ -83,16 +86,14 @@ class AlbumDetailViewModel @AssistedInject constructor(
         }
     }
 
-    private fun fetchInitialData(
+    private fun fetchAlbumData(
         id: Long,
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
     ) {
         // TODO: Fetch album from repository
         reduce {
             copy(
-                album = Album(
-                    photoList = dummyPhotos,
-                ),
+                photoList = dummyPhotos,
             )
         }
     }
@@ -175,11 +176,9 @@ class AlbumDetailViewModel @AssistedInject constructor(
         // TODO: Delete photos from favorite album
         reduce {
             copy(
-                album = album.copy(
-                    photoList = album.photoList.filter { photo ->
-                        selectedPhotos.none { it.id == photo.id }
-                    }.toImmutableList(),
-                ),
+                photoList = photoList.filter { photo ->
+                    selectedPhotos.none { it.id == photo.id }
+                }.toImmutableList(),
                 selectedPhotos = persistentListOf(),
                 selectMode = SelectMode.DEFAULT,
                 isShowDeleteDialog = false,
@@ -196,11 +195,9 @@ class AlbumDetailViewModel @AssistedInject constructor(
         // TODO: Delete photos based on selectedDeleteOption
         reduce {
             copy(
-                album = album.copy(
-                    photoList = album.photoList.filter { photo ->
-                        selectedPhotos.none { it.id == photo.id }
-                    }.toImmutableList(),
-                ),
+                photoList = photoList.filter { photo ->
+                    selectedPhotos.none { it.id == photo.id }
+                }.toImmutableList(),
                 selectedPhotos = persistentListOf(),
                 selectMode = SelectMode.DEFAULT,
                 isShowDeleteBottomSheet = false,

@@ -94,8 +94,8 @@ internal fun AlbumDetailScreen(
             .background(NekiTheme.colorScheme.white),
     ) {
         AlbumDetailTopBar(
-            hasNoPhoto = uiState.album.photoList.isEmpty(),
-            title = if (uiState.isFavoriteAlbum) "즐겨찾는 사진" else uiState.album.title,
+            hasNoPhoto = uiState.photoList.isEmpty(),
+            title = if (uiState.isFavoriteAlbum) "즐겨찾는 사진" else uiState.title,
             selectMode = uiState.selectMode,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
             onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectButton) },
@@ -119,7 +119,7 @@ internal fun AlbumDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),
             ) {
                 items(
-                    items = uiState.album.photoList,
+                    items = uiState.photoList,
                     key = { photo -> photo.id },
                 ) { photo ->
                     val isSelected = uiState.selectedPhotos.any { it.id == photo.id }
@@ -142,7 +142,7 @@ internal fun AlbumDetailScreen(
         )
     }
 
-    if (uiState.album.photoList.isEmpty()) {
+    if (uiState.photoList.isEmpty()) {
         EmptyContent(
             isFavorite = uiState.isFavoriteAlbum,
         )
@@ -214,7 +214,7 @@ private fun AlbumDetailScreenFavoriteEmptyPreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 0, title = "즐겨찾는 사진"),
+                title = "즐겨찾는 사진",
                 isFavoriteAlbum = true,
             ),
         )
@@ -227,7 +227,7 @@ private fun AlbumDetailScreenEmptyPreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 0, title = "빈 앨범"),
+                title = "빈 앨범",
                 isFavoriteAlbum = true,
             ),
         )
@@ -246,7 +246,8 @@ private fun AlbumDetailScreenFavoritePreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 0, title = "즐겨찾는 사진", photoList = dummyPhotos),
+                title = "즐겨찾는 사진",
+                photoList = dummyPhotos,
                 isFavoriteAlbum = true,
             ),
         )
@@ -265,7 +266,8 @@ private fun AlbumDetailScreenRegularPreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 1, title = "네키 화이팅", photoList = dummyPhotos),
+                title = "네키 화이팅",
+                photoList = dummyPhotos,
                 isFavoriteAlbum = false,
             ),
         )
@@ -284,7 +286,8 @@ private fun AlbumDetailScreenSelectingPreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 1, title = "네키 화이팅", photoList = dummyPhotos),
+                title = "네키 화이팅",
+                photoList = dummyPhotos,
                 isFavoriteAlbum = false,
                 selectMode = SelectMode.SELECTING,
                 selectedPhotos = persistentListOf(dummyPhotos[1]),
