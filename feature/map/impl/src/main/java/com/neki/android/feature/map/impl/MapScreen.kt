@@ -76,7 +76,6 @@ fun MapRoute(
 
     var previousShouldShowRationale by remember { mutableStateOf(false) }
     var isNavigatedToSettings by remember { mutableStateOf(false) }
-    var isInitialLocationBoundsLoaded by remember { mutableStateOf(false) }
 
     // 브랜드 이미지 Bitmap 캐시 (imageUrl -> ImageBitmap)
     val brandImageCache = remember { mutableStateMapOf<String, ImageBitmap>() }
@@ -122,24 +121,6 @@ fun MapRoute(
             isNavigatedToSettings = false
         }
         onPauseOrDispose { }
-    }
-
-    LaunchedEffect(uiState.currentLocation) {
-        val location = uiState.currentLocation
-        if (location != null && !isInitialLocationBoundsLoaded) {
-            isInitialLocationBoundsLoaded = true
-            val offset = MapConst.DEFAULT_BOUNDS_OFFSET
-            viewModel.store.onIntent(
-                MapIntent.LoadPhotoBoothsByBounds(
-                    MapBounds(
-                        southWest = Location(location.latitude - offset, location.longitude - offset),
-                        northWest = Location(location.latitude + offset, location.longitude - offset),
-                        northEast = Location(location.latitude + offset, location.longitude + offset),
-                        southEast = Location(location.latitude - offset, location.longitude + offset),
-                    ),
-                ),
-            )
-        }
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
@@ -208,7 +189,6 @@ fun MapRoute(
             val isGrantedPermission = LocationPermissionManager.isGrantedLocationPermission(context)
             if (isGrantedPermission) {
                 locationTrackingMode = LocationTrackingMode.Follow
-                // 권한 있을 때는 LaunchedEffect에서 현위치 기준 bounds API 호출
             } else {
                 viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 // 강남역 기준 bounds API 호출

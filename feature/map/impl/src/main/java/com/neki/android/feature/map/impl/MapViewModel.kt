@@ -32,7 +32,7 @@ class MapViewModel @Inject constructor(
             MapIntent.EnterMapScreen -> loadBrands(state, reduce)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
-            is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce)
+            is MapIntent.UpdateCurrentLocation -> handleInitialUpdateCurrentLocation(state, intent, reduce, postSideEffect)
             MapIntent.ClickCurrentLocation -> {
                 if (state.dragLevel == DragLevel.INVISIBLE) {
                     reduce { copy(dragLevel = DragLevel.FIRST) }
@@ -42,7 +42,7 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
-            is MapIntent.ClickBrand -> handleClickBrand(state, intent, reduce)
+            is MapIntent.ClickBrand -> handleClickBrand(intent, reduce)
             is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent, reduce, postSideEffect)
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
@@ -66,10 +66,11 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleUpdateCurrentLocation(
+    private fun handleInitialUpdateCurrentLocation(
         state: MapState,
         intent: MapIntent.UpdateCurrentLocation,
         reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
     ) {
         reduce { copy(currentLocation = Location(intent.latitude, intent.longitude)) }
 
@@ -82,30 +83,32 @@ class MapViewModel @Inject constructor(
                 brandIds = checkedBrandIds,
                 reduce = reduce,
             )
+
+            // 현위치 기준 사각형 포토부스 조회
+            val offset = MapConst.DEFAULT_BOUNDS_OFFSET
+            val mapBounds = MapBounds(
+                southWest = Location(intent.latitude - offset, intent.longitude - offset),
+                northWest = Location(intent.latitude + offset, intent.longitude - offset),
+                northEast = Location(intent.latitude + offset, intent.longitude + offset),
+                southEast = Location(intent.latitude - offset, intent.longitude + offset),
+            )
+            loadPhotoBoothsByPolygon(mapBounds, state, reduce, postSideEffect)
         }
     }
 
     private fun handleClickBrand(
-        state: MapState,
         intent: MapIntent.ClickBrand,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
-        val updatedBrands = state.brands.map { brand ->
-            if (brand == intent.brand) {
-                brand.copy(isChecked = !brand.isChecked)
-            } else {
-                brand
-            }
-        }
-        reduce { copy(brands = updatedBrands.toImmutableList()) }
-
-        state.currentLocation?.let { location ->
-            val checkedBrandIds = updatedBrands.filter { it.isChecked }.map { it.id }
-            loadNearbyPhotoBooths(
-                longitude = location.longitude,
-                latitude = location.latitude,
-                brandIds = checkedBrandIds,
-                reduce = reduce,
+        reduce {
+            copy(
+                brands = brands.map { brand ->
+                    if (brand == intent.brand) {
+                        brand.copy(isChecked = !brand.isChecked)
+                    } else {
+                        brand
+                    }
+                }.toImmutableList()
             )
         }
     }
@@ -201,7 +204,6 @@ class MapViewModel @Inject constructor(
                     }
 
 //                     brands 로드 완료 후, currentLocation이 있으면 nearbyPhotoBooths 조회
-//                    val currentState = store.uiState.value
                     state.currentLocation?.let { location ->
                         if (state.nearbyPhotoBooths.isEmpty()) {
                             val checkedBrandIds = loadedBrands.filter { it.isChecked }.map { it.id }
