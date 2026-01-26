@@ -55,3 +55,18 @@ internal fun calculateDistance(
     val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a), kotlin.math.sqrt(1 - a))
     return (earthRadius * c).toInt()
 }
+
+/** 거리(m)를 단위 포함 문자열로 변환 **/
+internal fun Int.formatDistance(): String {
+    return if (this < 1000) {
+        "${this}m"
+    } else {
+        val km = this / 1000.0
+        val roundedKm = kotlin.math.round(km * 10) / 10.0
+        if (roundedKm == roundedKm.toLong().toDouble()) {
+            "${roundedKm.toLong()}km"
+        } else {
+            "${roundedKm}km"
+        }
+    }
+}

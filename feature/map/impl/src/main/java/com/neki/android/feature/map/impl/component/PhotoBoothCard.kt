@@ -1,6 +1,7 @@
 package com.neki.android.feature.map.impl.component
 
 import androidx.compose.foundation.background
+import com.neki.android.feature.map.impl.util.formatDistance
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -77,7 +78,7 @@ internal fun PhotoBoothCard(
             }
             VerticalSpacer(4.dp)
             Text(
-                text = "${photoBooth.distance}m",
+                text = photoBooth.distance.formatDistance(),
                 color = NekiTheme.colorScheme.gray400,
                 style = NekiTheme.typography.caption12Medium,
             )

@@ -1,6 +1,7 @@
 package com.neki.android.feature.map.impl.component
 
 import androidx.compose.foundation.layout.Column
+import com.neki.android.feature.map.impl.util.formatDistance
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -61,7 +62,7 @@ internal fun HorizontalBrandItem(
             }
             VerticalSpacer(4.dp)
             Text(
-                text = "${photoBooth.distance}m",
+                text = photoBooth.distance.formatDistance(),
                 color = NekiTheme.colorScheme.gray400,
                 style = NekiTheme.typography.caption12Medium,
             )
