@@ -82,8 +82,8 @@ internal fun RandomPoseTutorialOverlay(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFFFF5647).copy(alpha = 0f),
-                            Color(0xFFFF5647),
+                            NekiTheme.colorScheme.primary400.copy(alpha = 0f),
+                            NekiTheme.colorScheme.primary400,
                         ),
                         startY = Float.POSITIVE_INFINITY,
                         endY = 0f,

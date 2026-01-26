@@ -38,8 +38,8 @@ internal fun RandomPoseFloatingBarContent(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFFF5647).copy(alpha = 0f),
-                        Color(0xFFFF5647),
+                        NekiTheme.colorScheme.primary400.copy(alpha = 0f),
+                        NekiTheme.colorScheme.primary400,
                     ),
                 ),
                 alpha = 0.24f,
@@ -69,7 +69,7 @@ internal fun RandomPoseFloatingBarContent(
         ) {
             RandomPoseButton(
                 onClick = onClickClose,
-                backgroundColor = Color(0xFFF9FAFA).copy(alpha = 0.9f),
+                backgroundColor = NekiTheme.colorScheme.gray25.copy(alpha = 0.9f),
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),

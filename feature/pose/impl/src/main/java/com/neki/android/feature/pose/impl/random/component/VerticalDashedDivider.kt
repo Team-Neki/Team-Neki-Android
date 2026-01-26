@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush.Companion.linearGradient
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -25,6 +24,7 @@ internal fun VerticalDashedDivider(
     dashOn: Dp = 5.dp,
     dashOff: Dp = 5.dp,
 ) {
+    val white = NekiTheme.colorScheme.white
     Canvas(modifier = modifier.width(strokeWidth)) {
         val w = strokeWidth.toPx()
 
@@ -35,9 +35,9 @@ internal fun VerticalDashedDivider(
 
         val brush = linearGradient(
             colorStops = arrayOf(
-                0f to Color.White.copy(alpha = 0f),
-                0.5f to Color.White.copy(alpha = 1f),
-                1f to Color.White.copy(alpha = 0f),
+                0f to white.copy(alpha = 0f),
+                0.5f to white.copy(alpha = 1f),
+                1f to white.copy(alpha = 0f),
             ),
             start = Offset(0f, 0f),
             end = Offset(0f, size.height),
@@ -60,7 +60,7 @@ private fun VerticalDashedDividerPreview() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF202227).copy(alpha = 0.9f)),
+                .background(NekiTheme.colorScheme.gray900.copy(alpha = 0.9f)),
             contentAlignment = Alignment.Center,
         ) {
             VerticalDashedDivider(
