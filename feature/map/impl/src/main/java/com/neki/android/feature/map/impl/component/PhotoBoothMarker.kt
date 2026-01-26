@@ -1,6 +1,7 @@
 package com.neki.android.feature.map.impl.component
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -12,17 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.allowHardware
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import com.neki.android.core.model.PhotoBooth
@@ -48,10 +47,11 @@ import com.neki.android.feature.map.impl.const.MapConst.MARKER_TRIANGLE_WIDTH
 internal fun PhotoBoothMarker(
     photoBooth: PhotoBooth,
     isFocused: Boolean = false,
+    cachedBitmap: ImageBitmap? = null,
     onClick: () -> Unit = {},
 ) {
     MarkerComposable(
-        keys = arrayOf("$isFocused", photoBooth.imageUrl),
+        keys = arrayOf("$isFocused", photoBooth.imageUrl, "${cachedBitmap != null}"),
         state = rememberUpdatedMarkerState(
             position = LatLng(photoBooth.latitude, photoBooth.longitude),
         ),
@@ -64,7 +64,7 @@ internal fun PhotoBoothMarker(
         },
     ) {
         PhotoBoothMarkerContent(
-            imageUrl = photoBooth.imageUrl,
+            cachedBitmap = cachedBitmap,
             isFocused = isFocused,
         )
     }
@@ -73,7 +73,7 @@ internal fun PhotoBoothMarker(
 @Composable
 internal fun PhotoBoothMarkerContent(
     modifier: Modifier = Modifier,
-    imageUrl: String = "",
+    cachedBitmap: ImageBitmap? = null,
     isFocused: Boolean = false,
 ) {
     val caretColor = if (isFocused) NekiTheme.colorScheme.gray900 else NekiTheme.colorScheme.white
@@ -168,22 +168,33 @@ internal fun PhotoBoothMarkerContent(
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            AsyncImage(
-                modifier = Modifier
-                    .size(if (isFocused) FOCUSED_MARKER_IMAGE_SIZE.dp else MARKER_IMAGE_SIZE.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            if (isFocused) FOCUSED_MARKER_IMAGE_RADIUS.dp else MARKER_IMAGE_RADIUS.dp,
+            if (cachedBitmap != null) {
+                Image(
+                    modifier = Modifier
+                        .size(if (isFocused) FOCUSED_MARKER_IMAGE_SIZE.dp else MARKER_IMAGE_SIZE.dp)
+                        .clip(
+                            RoundedCornerShape(
+                                if (isFocused) FOCUSED_MARKER_IMAGE_RADIUS.dp else MARKER_IMAGE_RADIUS.dp,
+                            ),
                         ),
-                    ),
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageUrl)
-                    .allowHardware(false)
-                    .build(),
-                placeholder = painterResource(R.drawable.icon_info_gray_stroke),
-                error = painterResource(R.drawable.icon_info_primary_fill),
-                contentDescription = null,
-            )
+                    bitmap = cachedBitmap,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null,
+                )
+            } else {
+                Image(
+                    modifier = Modifier
+                        .size(if (isFocused) FOCUSED_MARKER_IMAGE_SIZE.dp else MARKER_IMAGE_SIZE.dp)
+                        .clip(
+                            RoundedCornerShape(
+                                if (isFocused) FOCUSED_MARKER_IMAGE_RADIUS.dp else MARKER_IMAGE_RADIUS.dp,
+                            ),
+                        ),
+                    painter = painterResource(R.drawable.icon_info_gray_stroke),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null,
+                )
+            }
         }
     }
 }

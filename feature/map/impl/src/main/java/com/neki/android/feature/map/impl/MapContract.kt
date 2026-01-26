@@ -8,13 +8,12 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class MapState(
     val isLoading: Boolean = false,
-    val currentLocation: Pair<Double, Double>? = null,
-    val mapBounds: MapBounds? = null,
+    val currentLocation: Location? = null,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
     val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
-    val focusedMarkerPosition: Pair<Double, Double>? = null,
+    val focusedMarkerPosition: Location? = null,
     val selectedPhotoBooth: PhotoBooth? = null,
     val isShowInfoDialog: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
@@ -22,35 +21,28 @@ data class MapState(
 )
 
 data class MapBounds(
-    val southWest: LatLng,  // 남서 (좌하단)
-    val northWest: LatLng,  // 북서 (좌상단)
-    val northEast: LatLng,  // 북동 (우상단)
-    val southEast: LatLng,  // 남동 (우하단)
-) {
-    val center: LatLng
-        get() = LatLng(
-            latitude = (southWest.latitude + northEast.latitude) / 2,
-            longitude = (southWest.longitude + northEast.longitude) / 2,
-        )
-}
+    val southWest: Location,
+    val northWest: Location,
+    val northEast: Location,
+    val southEast: Location,
+)
 
-data class LatLng(
+data class Location(
     val latitude: Double,
     val longitude: Double,
 )
 
 sealed interface MapIntent {
-    data object EnterMapScreen : MapIntent
+    data class EnterMapScreen(val hasLocationPermission: Boolean) : MapIntent
 
     // in 지도
     data class ClickPhotoBoothMarker(
         val latitude: Double,
         val longitude: Double,
     ) : MapIntent
+    data class ClickRefreshButton(val mapBounds: MapBounds) : MapIntent
     data object ClickDirection : MapIntent
-    data object ClickRefresh : MapIntent
     data class UpdateCurrentLocation(val latitude: Double, val longitude: Double) : MapIntent
-    data class UpdateMapBounds(val mapBounds: MapBounds) : MapIntent
 
     // in 패널
     data object ClickCurrentLocation : MapIntent

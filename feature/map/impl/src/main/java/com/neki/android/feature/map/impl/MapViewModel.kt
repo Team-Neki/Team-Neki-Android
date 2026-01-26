@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -27,10 +28,9 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         when (intent) {
-            MapIntent.EnterMapScreen -> loadBrands(reduce)
-            MapIntent.ClickRefresh -> loadPhotoBoothsByPolygon(state, reduce, postSideEffect)
+            is MapIntent.EnterMapScreen -> handleEnterMapScreen(intent, state, reduce, postSideEffect)
+            is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce)
-            is MapIntent.UpdateMapBounds -> reduce { copy(mapBounds = intent.mapBounds) }
             MapIntent.ClickCurrentLocation -> postSideEffect(MapEffect.RefreshCurrentLocation)
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
@@ -60,13 +60,33 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    private fun handleEnterMapScreen(
+        intent: MapIntent.EnterMapScreen,
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        loadBrands(reduce)
+
+        if (!intent.hasLocationPermission) {
+            // 권한이 없으면 강남역으로 카메라 이동 (카메라 이동 완료 후 MapScreen에서 polygon 조회)
+            postSideEffect(
+                MapEffect.MoveCameraToPosition(
+                    latitude = MapConst.DEFAULT_LATITUDE,
+                    longitude = MapConst.DEFAULT_LONGITUDE,
+                ),
+            )
+        }
+        // 권한이 있으면 onLocationChange -> UpdateCurrentLocation에서 현위치 기반 API 호출
+    }
+
     private fun handleUpdateCurrentLocation(
         state: MapState,
         intent: MapIntent.UpdateCurrentLocation,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         val isFirstLocation = state.currentLocation == null
-        reduce { copy(currentLocation = intent.latitude to intent.longitude) }
+        reduce { copy(currentLocation = Location(intent.latitude, intent.longitude)) }
 
         if (isFirstLocation) {
             val checkedBrandIds = state.brands.filter { it.isChecked }.map { it.id }
@@ -93,11 +113,11 @@ class MapViewModel @Inject constructor(
         }
         reduce { copy(brands = updatedBrands.toImmutableList()) }
 
-        state.currentLocation?.let { (latitude, longitude) ->
+        state.currentLocation?.let { location ->
             val checkedBrandIds = updatedBrands.filter { it.isChecked }.map { it.id }
             loadNearbyPhotoBooths(
-                longitude = longitude,
-                latitude = latitude,
+                longitude = location.longitude,
+                latitude = location.latitude,
                 brandIds = checkedBrandIds,
                 reduce = reduce,
             )
@@ -113,7 +133,7 @@ class MapViewModel @Inject constructor(
             copy(
                 dragLevel = DragLevel.INVISIBLE,
                 selectedPhotoBooth = intent.photoBooth,
-                focusedMarkerPosition = intent.photoBooth.latitude to intent.photoBooth.longitude,
+                focusedMarkerPosition = Location(intent.photoBooth.latitude, intent.photoBooth.longitude),
             )
         }
         postSideEffect(MapEffect.MoveCameraToPosition(intent.photoBooth.latitude, intent.photoBooth.longitude))
@@ -134,8 +154,8 @@ class MapViewModel @Inject constructor(
             postSideEffect(
                 MapEffect.MoveDirectionApp(
                     app = intent.app,
-                    startLatitude = state.currentLocation.first,
-                    startLongitude = state.currentLocation.second,
+                    startLatitude = state.currentLocation.latitude,
+                    startLongitude = state.currentLocation.longitude,
                     endLatitude = brandInfo.latitude,
                     endLongitude = brandInfo.longitude,
                 ),
@@ -151,15 +171,15 @@ class MapViewModel @Inject constructor(
     ) {
         val selectedBrand = state.mapMarkers.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
         val selectedBrandWithDistance = selectedBrand?.let { brand ->
-            state.currentLocation?.let { (currentLat, currentLng) ->
-                val distance = calculateDistance(currentLat, currentLng, brand.latitude, brand.longitude)
+            state.currentLocation?.let { currentLocation ->
+                val distance = calculateDistance(currentLocation.latitude, currentLocation.longitude, brand.latitude, brand.longitude)
                 brand.copy(distance = distance)
             } ?: brand
         }
         reduce {
             copy(
                 dragLevel = DragLevel.INVISIBLE,
-                focusedMarkerPosition = intent.latitude to intent.longitude,
+                focusedMarkerPosition = Location(intent.latitude, intent.longitude),
                 selectedPhotoBooth = selectedBrandWithDistance,
             )
         }
@@ -171,12 +191,26 @@ class MapViewModel @Inject constructor(
             reduce { copy(isLoading = true) }
 
             mapRepository.getBrands()
-                .onSuccess { brands ->
+                .onSuccess { loadedBrands ->
                     reduce {
                         copy(
                             isLoading = false,
-                            brands = brands.toImmutableList(),
+                            brands = loadedBrands.toImmutableList(),
                         )
+                    }
+
+                    // brands 로드 완료 후, currentLocation이 있으면 nearbyPhotoBooths 조회
+                    val currentState = store.uiState.value
+                    currentState.currentLocation?.let { location ->
+                        if (currentState.nearbyPhotoBooths.isEmpty()) {
+                            val checkedBrandIds = loadedBrands.filter { it.isChecked }.map { it.id }
+                            loadNearbyPhotoBooths(
+                                longitude = location.longitude,
+                                latitude = location.latitude,
+                                brandIds = checkedBrandIds,
+                                reduce = reduce,
+                            )
+                        }
                     }
                 }
                 .onFailure {
@@ -186,8 +220,8 @@ class MapViewModel @Inject constructor(
     }
 
     private fun loadNearbyPhotoBooths(
-        longitude: Double,
-        latitude: Double,
+        longitude: Double?,
+        latitude: Double?,
         radiusInMeters: Int = 1000,
         brandIds: List<Long> = emptyList(),
         reduce: (MapState.() -> MapState) -> Unit,
@@ -211,16 +245,11 @@ class MapViewModel @Inject constructor(
     }
 
     private fun loadPhotoBoothsByPolygon(
+        mapBounds: MapBounds,
         state: MapState,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        val mapBounds = state.mapBounds
-        if (mapBounds == null) {
-            postSideEffect(MapEffect.ShowToastMessage("지도 영역을 가져올 수 없습니다."))
-            return
-        }
-
         val checkedBrandIds = state.brands.filter { it.isChecked }.map { it.id }
 
         // 좌상단 -> 우상단 -> 우하단 -> 좌하단 -> 좌상단 (닫힌 다각형)

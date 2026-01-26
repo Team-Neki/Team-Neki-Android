@@ -10,20 +10,27 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.graphics.drawable.toBitmap
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.request.allowHardware
+import coil3.toBitmap
 import com.naver.maps.geometry.LatLng
-import com.neki.android.feature.map.impl.LatLng as NekiLatLng
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
@@ -44,14 +51,13 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
+import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailCard
 import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import com.neki.android.feature.map.impl.util.getPlaceName
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
@@ -66,10 +72,29 @@ fun MapRoute(
 
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
+        position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), 17.0)
     }
 
     var previousShouldShowRationale by remember { mutableStateOf(false) }
+
+    // 브랜드 이미지 Bitmap 캐시 (imageUrl -> ImageBitmap)
+    val brandImageCache = remember { mutableStateMapOf<String, ImageBitmap>() }
+
+    // brands가 로드되면 이미지를 Bitmap으로 미리 로드
+    LaunchedEffect(uiState.brands) {
+        uiState.brands.forEach { brand ->
+            if (brand.imageUrl.isNotEmpty() && !brandImageCache.containsKey(brand.imageUrl)) {
+                val request = ImageRequest.Builder(context)
+                    .data(brand.imageUrl)
+                    .allowHardware(false)
+                    .build()
+                val result = context.imageLoader.execute(request)
+                if (result is SuccessResult) {
+                    brandImageCache[brand.imageUrl] = result.image.toBitmap().asImageBitmap()
+                }
+            }
+        }
+    }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -88,10 +113,13 @@ fun MapRoute(
     }
 
     LaunchedEffect(Unit) {
-        if (!LocationPermissionManager.hasLocationPermission(context)) {
+        val hasPermission = LocationPermissionManager.hasLocationPermission(context)
+        if (!hasPermission) {
             viewModel.store.onIntent(MapIntent.RequestLocationPermission)
+        } else {
+            locationTrackingMode = LocationTrackingMode.Follow
         }
-        viewModel.store.onIntent(MapIntent.EnterMapScreen)
+        viewModel.store.onIntent(MapIntent.EnterMapScreen(hasLocationPermission = hasPermission))
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
@@ -178,6 +206,7 @@ fun MapRoute(
         locationTrackingMode = locationTrackingMode,
         onLocationTrackingModeChange = { locationTrackingMode = it },
         cameraPositionState = cameraPositionState,
+        brandImageCache = brandImageCache,
     )
 }
 
@@ -191,6 +220,7 @@ fun MapScreen(
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
         position = CameraPosition(LatLng(37.5269278, 126.886225), 17.0)
     },
+    brandImageCache: Map<String, ImageBitmap> = emptyMap(),
 ) {
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
@@ -202,26 +232,6 @@ fun MapScreen(
             isLocationButtonEnabled = false,
             isZoomControlEnabled = false,
         )
-    }
-
-    LaunchedEffect(cameraPositionState) {
-        snapshotFlow { cameraPositionState.isMoving }
-            .distinctUntilChanged()
-            .filter { isMoving -> !isMoving }
-            .collect {
-                cameraPositionState.contentBounds?.let { bounds ->
-                    onIntent(
-                        MapIntent.UpdateMapBounds(
-                            MapBounds(
-                                southWest = NekiLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
-                                northWest = NekiLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
-                                northEast = NekiLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
-                                southEast = NekiLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
-                            ),
-                        ),
-                    )
-                }
-            }
     }
 
     Box(
@@ -243,10 +253,12 @@ fun MapScreen(
             },
         ) {
             uiState.mapMarkers.forEach { photoBooth ->
-                val isFocused = uiState.focusedMarkerPosition == (photoBooth.latitude to photoBooth.longitude)
+                val isFocused = uiState.focusedMarkerPosition == Location(photoBooth.latitude, photoBooth.longitude)
+                val cachedBitmap = brandImageCache[photoBooth.imageUrl]
                 PhotoBoothMarker(
                     photoBooth = photoBooth,
                     isFocused = isFocused,
+                    cachedBitmap = cachedBitmap,
                     onClick = {
                         onIntent(MapIntent.ClickPhotoBoothMarker(latitude = photoBooth.latitude, longitude = photoBooth.longitude))
                     },
@@ -274,7 +286,20 @@ fun MapScreen(
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
                     .padding(top = 12.dp),
-                onClick = { onIntent(MapIntent.ClickRefresh) },
+                onClick = {
+                    cameraPositionState.contentBounds?.let { bounds ->
+                        onIntent(
+                            MapIntent.ClickRefreshButton(
+                                MapBounds(
+                                    southWest = Location(bounds.southWest.latitude, bounds.southWest.longitude),
+                                    northWest = Location(bounds.northWest.latitude, bounds.northWest.longitude),
+                                    northEast = Location(bounds.northEast.latitude, bounds.northEast.longitude),
+                                    southEast = Location(bounds.southEast.latitude, bounds.southEast.longitude),
+                                ),
+                            ),
+                        )
+                    }
+                },
             )
         }
 
