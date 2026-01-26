@@ -1,8 +1,6 @@
 package com.neki.android.core.data.remote.model.response
 
-import com.neki.android.core.model.Album
 import com.neki.android.core.model.AlbumPreview
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -14,6 +14,7 @@ data class PhotoResponse(
     data class Item(
         @SerialName("contentType") val contentType: String,
         @SerialName("createdAt") val createdAt: String,
+        @SerialName("favorite") val isFavorite: Boolean,
         @SerialName("folderId") val folderId: Long?,
         @SerialName("imageUrl") val imageUrl: String,
         @SerialName("photoId") val photoId: Long,
@@ -21,6 +22,7 @@ data class PhotoResponse(
         internal fun toModel() = Photo(
             id = photoId,
             imageUrl = imageUrl,
+            isFavorite = isFavorite,
             date = createdAt.toFormattedDate(),
         )
     }
