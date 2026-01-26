@@ -35,7 +35,12 @@ class MapViewModel @Inject constructor(
             is MapIntent.UpdateCurrentLocation -> handleInitialUpdateCurrentLocation(state, intent, reduce, postSideEffect)
             MapIntent.ClickCurrentLocation -> {
                 if (state.dragLevel == DragLevel.INVISIBLE) {
-                    reduce { copy(dragLevel = DragLevel.FIRST) }
+                    reduce {
+                        copy(
+                            dragLevel = DragLevel.FIRST,
+                            mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
+                        )
+                    }
                 }
                 postSideEffect(MapEffect.RefreshCurrentLocation)
             }
@@ -103,13 +108,26 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         reduce {
+            val updatedBrands = brands.map { brand ->
+                if (brand == intent.brand) {
+                    brand.copy(isChecked = !brand.isChecked)
+                } else {
+                    brand
+                }
+            }
+            val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
+
             copy(
-                brands = brands.map { brand ->
-                    if (brand == intent.brand) {
-                        brand.copy(isChecked = !brand.isChecked)
-                    } else {
-                        brand
-                    }
+                brands = updatedBrands.toImmutableList(),
+                mapMarkers = mapMarkers.map { photoBooth ->
+                    photoBooth.copy(
+                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                    )
+                }.toImmutableList(),
+                nearbyPhotoBooths = nearbyPhotoBooths.map { photoBooth ->
+                    photoBooth.copy(
+                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                    )
                 }.toImmutableList(),
             )
         }

@@ -222,7 +222,8 @@ internal fun AnchoredPanelContent(
             )
         }
         VerticalSpacer(8.dp)
-        if (nearbyBrands.isEmpty()) {
+        val filteredNearbyBrands = nearbyBrands.filter { it.isCheckedBrand }
+        if (filteredNearbyBrands.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -243,7 +244,7 @@ internal fun AnchoredPanelContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
             ) {
-                items(nearbyBrands) { photoBooth ->
+                items(filteredNearbyBrands) { photoBooth ->
                     HorizontalBrandItem(
                         photoBooth = photoBooth,
                         onClickItem = { onClickNearBrand(photoBooth) },

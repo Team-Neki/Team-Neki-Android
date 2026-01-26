@@ -255,9 +255,8 @@ fun MapScreen(
                 onIntent(MapIntent.UpdateCurrentLocation(location.latitude, location.longitude))
             },
         ) {
-            val checkedBrandNames = uiState.brands.filter { it.isChecked }.map { it.name }
             uiState.mapMarkers
-                .filter { checkedBrandNames.isEmpty() || it.brandName in checkedBrandNames }
+                .filter { it.isCheckedBrand }
                 .forEach { photoBooth ->
                     val cachedBitmap = brandImageCache[photoBooth.imageUrl]
                     PhotoBoothMarker(
