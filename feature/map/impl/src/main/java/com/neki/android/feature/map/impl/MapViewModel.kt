@@ -31,7 +31,12 @@ class MapViewModel @Inject constructor(
             is MapIntent.EnterMapScreen -> handleEnterMapScreen(intent, state, reduce, postSideEffect)
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce)
-            MapIntent.ClickCurrentLocation -> postSideEffect(MapEffect.RefreshCurrentLocation)
+            MapIntent.ClickCurrentLocation -> {
+                if (state.dragLevel == DragLevel.INVISIBLE) {
+                    reduce { copy(dragLevel = DragLevel.FIRST) }
+                }
+                postSideEffect(MapEffect.RefreshCurrentLocation)
+            }
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
