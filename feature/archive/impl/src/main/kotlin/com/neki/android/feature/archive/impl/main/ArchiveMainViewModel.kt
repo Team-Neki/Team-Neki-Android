@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.util.urlToByteArray
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
-import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
