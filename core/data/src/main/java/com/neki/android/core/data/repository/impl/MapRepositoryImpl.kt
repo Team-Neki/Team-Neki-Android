@@ -19,8 +19,8 @@ class MapRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPhotoBoothsByPoint(
-        longitude: Double,
-        latitude: Double,
+        longitude: Double?,
+        latitude: Double?,
         radiusInMeters: Int,
         brandIds: List<Long>,
     ): Result<List<PhotoBooth>> = runSuspendCatching {

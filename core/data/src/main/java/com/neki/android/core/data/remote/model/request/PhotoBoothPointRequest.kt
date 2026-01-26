@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PhotoBoothPointRequest(
-    @SerialName("longitude") val longitude: Double,
-    @SerialName("latitude") val latitude: Double,
+    @SerialName("longitude") val longitude: Double?,
+    @SerialName("latitude") val latitude: Double?,
     @SerialName("radiusInMeters") val radiusInMeters: Int,
     @SerialName("brandIds") val brandIds: List<Long>,
 )

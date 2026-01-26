@@ -7,8 +7,8 @@ interface MapRepository {
     suspend fun getBrands(): Result<List<Brand>>
 
     suspend fun getPhotoBoothsByPoint(
-        longitude: Double,
-        latitude: Double,
+        longitude: Double?,
+        latitude: Double?,
         radiusInMeters: Int,
         brandIds: List<Long>,
     ): Result<List<PhotoBooth>>
