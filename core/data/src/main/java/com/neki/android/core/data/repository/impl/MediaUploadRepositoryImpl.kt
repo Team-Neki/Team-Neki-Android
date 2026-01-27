@@ -26,7 +26,7 @@ class MediaUploadRepositoryImpl @Inject constructor(
                     )
                 },
             ),
-        ).data.toModel()
+        ).data.toModels()
     }
 
     override suspend fun uploadImage(

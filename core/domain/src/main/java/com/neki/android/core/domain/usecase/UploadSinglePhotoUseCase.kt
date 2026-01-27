@@ -27,7 +27,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
             fileName = fileName,
             contentType = contentType.label,
             mediaType = MediaType.PHOTO_BOOTH.name,
-        ).getOrThrow()
+        ).getOrThrow().first()
 
         // 2. Presigned URL로 이미지 업로드
         mediaUploadRepository.uploadImage(

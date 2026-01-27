@@ -5,15 +5,22 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MediaUploadTicketResponse(
-    @SerialName("contentType") val contentType: String,
-    @SerialName("expiresIn") val expiresIn: String,
-    @SerialName("mediaId") val mediaId: Long,
+data class MediaUploadTicketDataResponse(
     @SerialName("method") val method: String,
-    @SerialName("uploadUrl") val uploadUrl: String,
+    @SerialName("expiresIn") val expiresIn: String,
+    @SerialName("items") val items: List<MediaUploadTicketItemResponse>,
 ) {
-    fun toModel() = MediaUploadTicket(
-        mediaId = this.mediaId,
-        uploadUrl = this.uploadUrl,
-    )
+    fun toModels() = items.map { it.toModel() }
+
+    @Serializable
+    data class MediaUploadTicketItemResponse(
+        @SerialName("mediaId") val mediaId: Long,
+        @SerialName("uploadTicket") val uploadTicket: String,
+        @SerialName("contentType") val contentType: String,
+    ) {
+        fun toModel() = MediaUploadTicket(
+            mediaId = mediaId,
+            uploadUrl = uploadTicket,
+        )
+    }
 }
