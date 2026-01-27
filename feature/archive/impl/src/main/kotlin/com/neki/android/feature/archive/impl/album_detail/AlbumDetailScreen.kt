@@ -25,15 +25,16 @@ import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album_detail.component.EmptyContent
 import com.neki.android.feature.archive.impl.component.DeleteOptionBottomSheet
+import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
-import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.persistentListOf
@@ -139,6 +140,10 @@ internal fun AlbumDetailScreen(
             onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
             onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
         )
+    }
+
+    if (uiState.isLoading) {
+        LoadingDialog()
     }
 
     if (uiState.photoList.isEmpty()) {

@@ -95,6 +95,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
     ) {
         viewModelScope.launch {
+            reduce { copy(isLoading = true) }
             photoRepository.getFavoritePhotos()
                 .onSuccess { data ->
                     reduce { copy(photoList = data.toImmutableList()) }
@@ -102,6 +103,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 .onFailure { error ->
                     Timber.e(error)
                 }
+            reduce { copy(isLoading = false) }
         }
     }
 
@@ -192,18 +194,28 @@ class AlbumDetailViewModel @AssistedInject constructor(
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
-        // TODO: Delete photos from favorite album
-        reduce {
-            copy(
-                photoList = photoList.filter { photo ->
-                    selectedPhotos.none { it.id == photo.id }
-                }.toImmutableList(),
-                selectedPhotos = persistentListOf(),
-                selectMode = SelectMode.DEFAULT,
-                isShowDeleteDialog = false,
-            )
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            val selectedPhotoIds = state.selectedPhotos.map { it.id }
+            photoRepository.deletePhoto(photoIds = selectedPhotoIds)
+                .onSuccess {
+                    Timber.d("삭제 성공2")
+                    fetchFavoriteData(reduce)
+                    reduce {
+                        copy(
+                            selectedPhotos = persistentListOf(),
+                            selectMode = SelectMode.DEFAULT,
+                            isShowDeleteDialog = false,
+                        )
+                    }
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
+                }
+            reduce { copy(isLoading = false) }
         }
-        postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
     }
 
     private fun handleAlbumDelete(
@@ -211,7 +223,6 @@ class AlbumDetailViewModel @AssistedInject constructor(
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
-        // TODO: Delete photos based on selectedDeleteOption
         reduce {
             copy(
                 photoList = photoList.filter { photo ->

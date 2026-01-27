@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class AlbumDetailState(
+    val isLoading: Boolean = false,
     val title: String = "",
     val photoList: ImmutableList<Photo> = persistentListOf(),
     val isFavoriteAlbum: Boolean = false,
