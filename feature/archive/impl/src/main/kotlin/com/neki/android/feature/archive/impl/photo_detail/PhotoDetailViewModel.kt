@@ -29,7 +29,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
     private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
-            initialState = PhotoDetailState(photo = photo),
+            initialState = PhotoDetailState(photo = photo, committedFavorite = photo.isFavorite),
             onIntent = ::onIntent,
         )
 
