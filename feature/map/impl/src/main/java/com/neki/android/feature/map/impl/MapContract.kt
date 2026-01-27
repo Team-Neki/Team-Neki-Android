@@ -20,6 +20,7 @@ data class MapState(
 
 sealed interface MapIntent {
     data object EnterMapScreen : MapIntent
+    data object NaverMapLoaded : MapIntent
 
     // in 지도
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
@@ -51,6 +52,7 @@ sealed interface MapIntent {
 
 sealed interface MapEffect {
     data object TrackingFollowMode : MapEffect
+    data object LoadInitialPhotoBooths : MapEffect
     data class MoveCameraToPosition(val locLatLng: LocLatLng) : MapEffect
     data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect

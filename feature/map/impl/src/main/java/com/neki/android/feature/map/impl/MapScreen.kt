@@ -100,20 +100,6 @@ fun MapRoute(
                     ),
                 )
             }
-        } else if (!cameraPositionState.isMoving && cameraPositionState.cameraUpdateReason == CameraUpdateReason.NO_MOVEMENT_YET) {
-            // 권한 없음 → 강남역 기본 위치
-            cameraPositionState.contentBounds?.let { bounds ->
-                viewModel.store.onIntent(
-                    MapIntent.LoadPhotoBoothsByBounds(
-                        MapBounds(
-                            southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
-                            northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
-                            northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
-                            southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
-                        ),
-                    ),
-                )
-            }
         }
     }
 
@@ -145,6 +131,23 @@ fun MapRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
+            is MapEffect.LoadInitialPhotoBooths -> {
+                cameraPositionState.contentBounds?.let { bounds ->
+                    if (!LocationPermissionManager.isGrantedLocationPermission(context)) {
+                        viewModel.store.onIntent(
+                            MapIntent.LoadPhotoBoothsByBounds(
+                                MapBounds(
+                                    southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                                    northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                                    northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                                    southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
+                                ),
+                            ),
+                        )
+                    }
+                }
+            }
+
             is MapEffect.TrackingFollowMode -> {
                 if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                     setFollowMode()
@@ -207,10 +210,10 @@ fun MapRoute(
         cameraPositionState = cameraPositionState,
         brandImageCache = brandImageCache,
         onMapLoaded = {
-            val isGrantedPermission = LocationPermissionManager.isGrantedLocationPermission(context)
-            if (isGrantedPermission) {
+            if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                 setFollowMode()
             } else {
+                viewModel.store.onIntent(MapIntent.NaverMapLoaded)
                 viewModel.store.onIntent(MapIntent.RequestLocationPermission)
             }
         },
@@ -261,9 +264,7 @@ fun MapScreen(
                 onIntent(MapIntent.UpdateCurrentLocation(LocLatLng(location.latitude, location.longitude)))
             },
         ) {
-            uiState.mapMarkers
-                .filter { it.isCheckedBrand }
-                .forEach { photoBooth ->
+            uiState.mapMarkers.filter { it.isCheckedBrand }.forEach { photoBooth ->
                     val cachedBitmap = brandImageCache[photoBooth.imageUrl]
                     PhotoBoothMarker(
                         photoBooth = photoBooth,
@@ -288,9 +289,7 @@ fun MapScreen(
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
 
-        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) &&
-            locationTrackingMode != LocationTrackingMode.Follow
-        ) {
+        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && locationTrackingMode != LocationTrackingMode.Follow) {
             MapRefreshChip(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
