@@ -8,9 +8,6 @@ internal object MapConst {
     // 기본 줌 레벨
     internal const val DEFAULT_ZOOM_LEVEL = 17.0
 
-    // 줌 레벨 17 기준 대략적인 bounds offset (약 500m)
-    internal const val DEFAULT_BOUNDS_OFFSET = 0.005
-
     internal const val DEFAULT_CAMERA_ANIMATION_DURATIONS_MS = 800
 
     internal const val BOTTOM_NAVIGATION_BAR_HEIGHT = 52
