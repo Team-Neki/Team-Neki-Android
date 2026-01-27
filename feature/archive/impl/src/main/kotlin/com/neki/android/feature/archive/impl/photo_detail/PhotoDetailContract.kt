@@ -8,9 +8,7 @@ data class PhotoDetailState(
     val committedFavorite: Boolean = false,
     val photo: Photo = Photo(),
     val isShowDeleteDialog: Boolean = false,
-) {
-    val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
-}
+)
 
 sealed interface PhotoDetailIntent {
     // TopBar Intent

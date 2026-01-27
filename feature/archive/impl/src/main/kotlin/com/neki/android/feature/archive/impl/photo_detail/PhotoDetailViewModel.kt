@@ -13,6 +13,7 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -25,6 +26,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
+    val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
             initialState = PhotoDetailState(photo = photo),
@@ -33,7 +35,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     init {
         applicationScope.launch {
-            store.uiState.value.favoriteRequests
+            favoriteRequests
                 .debounce(500)
                 .collect { newFavorite ->
                     val committedFavorite = store.uiState.value.committedFavorite
@@ -91,7 +93,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
         postSideEffect: (PhotoDetailSideEffect) -> Unit,
     ) {
         val newFavoriteStatus = !state.photo.isFavorite
-        viewModelScope.launch { state.favoriteRequests.emit(newFavoriteStatus) }
+        viewModelScope.launch { favoriteRequests.emit(newFavoriteStatus) }
         reduce {
             copy(photo = state.photo.copy(isFavorite = newFavoriteStatus))
         }
