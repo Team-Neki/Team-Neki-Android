@@ -202,6 +202,8 @@ private fun ArchiveMainContent(
         columns = StaggeredGridCells.Fixed(2),
         state = lazyState,
         contentPadding = PaddingValues(
+            start = 20.dp,
+            end = 20.dp,
             bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
         ),
         verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
@@ -209,7 +211,6 @@ private fun ArchiveMainContent(
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
-                modifier = Modifier.padding(horizontal = 20.dp),
                 title = "앨범",
                 textButtonTitle = "전체 보기",
                 onClickShowAllAlbum = onClickShowAllAlbum,
@@ -228,7 +229,6 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
-                modifier = Modifier.padding(horizontal = 20.dp),
                 title = "최근 사진",
                 textButtonTitle = "모든 사진",
                 onClickShowAllAlbum = onClickShowAllPhoto,
@@ -237,9 +237,7 @@ private fun ArchiveMainContent(
 
         if (uiState.recentPhotos.isEmpty()) {
             item(span = StaggeredGridItemSpan.FullLine) {
-                NoPhotoContent(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
+                NoPhotoContent()
             }
         }
 
@@ -248,7 +246,6 @@ private fun ArchiveMainContent(
             key = { photo -> photo.id },
         ) { photo ->
             ArchiveMainPhotoItem(
-                modifier = Modifier.padding(horizontal = 20.dp),
                 photo = photo,
                 onClickItem = onClickPhotoItem,
             )
