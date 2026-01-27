@@ -193,7 +193,7 @@ fun MapRoute(
                 navigateToAppSettings(context)
             }
 
-            is MapEffect.RequestLocationPermission -> {
+            is MapEffect.LaunchLocationPermission -> {
                 previousShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }

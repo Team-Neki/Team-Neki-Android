@@ -65,7 +65,7 @@ class MapViewModel @Inject constructor(
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent, reduce, postSideEffect)
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent, postSideEffect)
             MapIntent.ClickDirectionIcon -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
-            MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.RequestLocationPermission)
+            MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.LaunchLocationPermission)
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
             MapIntent.ConfirmLocationPermissionDialog -> {

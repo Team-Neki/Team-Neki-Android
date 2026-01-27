@@ -64,7 +64,7 @@ sealed interface MapEffect {
     ) : MapEffect
 
     data object NavigateToAppSettings : MapEffect
-    data object RequestLocationPermission : MapEffect
+    data object LaunchLocationPermission : MapEffect
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
