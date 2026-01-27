@@ -2,6 +2,7 @@ package com.neki.android.feature.archive.impl.photo_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
@@ -10,9 +11,9 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -22,6 +23,7 @@ import timber.log.Timber
 class PhotoDetailViewModel @AssistedInject constructor(
     @Assisted private val photo: Photo,
     private val photoRepository: PhotoRepository,
+    @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
     private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
@@ -34,10 +36,10 @@ class PhotoDetailViewModel @AssistedInject constructor(
         )
 
     init {
-        viewModelScope.launch {
+        applicationScope.launch {
             favoriteRequests
                 .debounce(500)
-                .collectLatest { newFavorite ->
+                .collect { newFavorite ->
                     if (originalFavorite != newFavorite) {
                         photoRepository.updateFavorite(photo.id, newFavorite)
                             .onSuccess {
