@@ -29,11 +29,11 @@ sealed interface MapIntent {
     data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
 
     // in 패널
-    data object ClickCurrentLocation : MapIntent
+    data object ClickCurrentLocationIcon : MapIntent
     data object ClickInfoIcon : MapIntent
     data object ClickCloseInfoIcon : MapIntent
     data object ClickToMapChip : MapIntent
-    data class ClickBrand(val brand: Brand) : MapIntent
+    data class ClickVerticalBrand(val brand: Brand) : MapIntent
     data class ClickNearPhotoBooth(val photoBooth: PhotoBooth) : MapIntent
     data class ClickPhotoBoothCard(val locLatLng: LocLatLng) : MapIntent
     data object ClickClosePhotoBoothCard : MapIntent

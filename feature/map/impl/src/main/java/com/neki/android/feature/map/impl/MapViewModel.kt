@@ -33,7 +33,7 @@ class MapViewModel @Inject constructor(
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce, postSideEffect)
-            MapIntent.ClickCurrentLocation -> {
+            MapIntent.ClickCurrentLocationIcon -> {
                 if (state.dragLevel == DragLevel.INVISIBLE) {
                     reduce {
                         copy(
@@ -48,7 +48,7 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
-            is MapIntent.ClickBrand -> handleClickBrand(intent, reduce)
+            is MapIntent.ClickVerticalBrand -> handleClickBrand(intent, reduce)
             is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent, reduce, postSideEffect)
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
@@ -94,7 +94,7 @@ class MapViewModel @Inject constructor(
     }
 
     private fun handleClickBrand(
-        intent: MapIntent.ClickBrand,
+        intent: MapIntent.ClickVerticalBrand,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         reduce {
@@ -212,12 +212,7 @@ class MapViewModel @Inject constructor(
 
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
-                    reduce {
-                        copy(
-                            isLoading = false,
-                            brands = loadedBrands.toImmutableList(),
-                        )
-                    }
+                    reduce { copy(isLoading = false, brands = loadedBrands.toImmutableList()) }
 
                     state.currentLocLatLng?.let { location ->
                         loadNearbyPhotoBooths(
