@@ -26,7 +26,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
-    val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
+    private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
             initialState = PhotoDetailState(photo = photo),
@@ -71,7 +71,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
             // ActionBar Intent
             PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
-            PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce, postSideEffect)
+            PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce)
             is PhotoDetailIntent.FavoriteCommitted -> {
                 reduce { copy(committedFavorite = intent.newFavorite) }
                 postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
@@ -90,7 +90,6 @@ class PhotoDetailViewModel @AssistedInject constructor(
     private fun handleFavoriteToggle(
         state: PhotoDetailState,
         reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
-        postSideEffect: (PhotoDetailSideEffect) -> Unit,
     ) {
         val newFavoriteStatus = !state.photo.isFavorite
         viewModelScope.launch { favoriteRequests.emit(newFavoriteStatus) }
