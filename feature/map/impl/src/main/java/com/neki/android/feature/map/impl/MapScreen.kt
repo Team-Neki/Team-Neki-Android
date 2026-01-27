@@ -265,16 +265,16 @@ fun MapScreen(
             },
         ) {
             uiState.mapMarkers.filter { it.isCheckedBrand }.forEach { photoBooth ->
-                    val cachedBitmap = brandImageCache[photoBooth.imageUrl]
-                    PhotoBoothMarker(
-                        photoBooth = photoBooth,
-                        isFocused = photoBooth.isFocused,
-                        cachedBitmap = cachedBitmap,
-                        onClick = {
-                            onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
-                        },
-                    )
-                }
+                val cachedBitmap = brandImageCache[photoBooth.imageUrl]
+                PhotoBoothMarker(
+                    photoBooth = photoBooth,
+                    isFocused = photoBooth.isFocused,
+                    cachedBitmap = cachedBitmap,
+                    onClick = {
+                        onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
+                    },
+                )
+            }
         }
 
         AnchoredDraggablePanel(
