@@ -35,6 +35,7 @@ import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.compose.CameraPositionState
+import com.naver.maps.map.compose.CameraUpdateReason
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import com.naver.maps.map.compose.LocationTrackingMode
 import com.naver.maps.map.compose.MapProperties
@@ -57,7 +58,6 @@ import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.DirectionHelper
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
@@ -68,18 +68,30 @@ fun MapRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = LocalActivity.current!!
+    val scope = rememberCoroutineScope()
+    val nekiToast = remember { NekiToast(context) }
 
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), MapConst.DEFAULT_ZOOM_LEVEL)
+        position = CameraPosition(
+            LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
+            MapConst.DEFAULT_ZOOM_LEVEL,
+        )
     }
 
     var previousShouldShowRationale by remember { mutableStateOf(false) }
     var isNavigatedToSettings by remember { mutableStateOf(false) }
+    var isFirstLocationLoaded by remember { mutableStateOf(false) }
+
+    fun enableFollowMode() {
+        if (locationTrackingMode != LocationTrackingMode.Follow) {
+            cameraPositionState.move(CameraUpdate.zoomTo(MapConst.DEFAULT_ZOOM_LEVEL))
+            locationTrackingMode = LocationTrackingMode.Follow
+        }
+    }
 
     // 브랜드 이미지 Bitmap 캐시 (imageUrl -> ImageBitmap)
     val brandImageCache = remember { mutableStateMapOf<String, ImageBitmap>() }
-    val nekiToast = remember { NekiToast(context) }
 
     // brands가 로드되면 이미지를 Bitmap으로 미리 로드
     LaunchedEffect(uiState.brands) {
@@ -97,6 +109,39 @@ fun MapRoute(
         }
     }
 
+    LaunchedEffect(cameraPositionState.cameraUpdateReason, cameraPositionState.isMoving) {
+        if (!cameraPositionState.isMoving && cameraPositionState.cameraUpdateReason == CameraUpdateReason.LOCATION && !isFirstLocationLoaded) {
+            isFirstLocationLoaded = true
+            // 권한 있고, 최초 요청 시
+            cameraPositionState.contentBounds?.let { bounds ->
+                viewModel.store.onIntent(
+                    MapIntent.LoadPhotoBoothsByBounds(
+                        MapBounds(
+                            southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                            northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                            northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                            southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
+                        ),
+                    ),
+                )
+            }
+        } else if (!cameraPositionState.isMoving && cameraPositionState.cameraUpdateReason == CameraUpdateReason.NO_MOVEMENT_YET) {
+            // 권한 없음 → 강남역 기본 위치
+            cameraPositionState.contentBounds?.let { bounds ->
+                viewModel.store.onIntent(
+                    MapIntent.LoadPhotoBoothsByBounds(
+                        MapBounds(
+                            southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                            northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                            northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                            southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
@@ -104,7 +149,7 @@ fun MapRoute(
         val currentShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
 
         if (isGranted) {
-            locationTrackingMode = LocationTrackingMode.Follow
+            enableFollowMode()
         } else {
             if (!currentShouldShowRationale && !previousShouldShowRationale) {
                 // 2회 이상 거부
@@ -116,7 +161,7 @@ fun MapRoute(
     LifecycleResumeEffect(Unit) {
         if (isNavigatedToSettings) {
             if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                locationTrackingMode = LocationTrackingMode.Follow
+                enableFollowMode()
             }
             isNavigatedToSettings = false
         }
@@ -125,9 +170,9 @@ fun MapRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            is MapEffect.RefreshCurrentLocation -> {
+            is MapEffect.TrackingFollowMode -> {
                 if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                    locationTrackingMode = LocationTrackingMode.Follow
+                    enableFollowMode()
                 } else {
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
@@ -141,23 +186,25 @@ fun MapRoute(
             }
             is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
             is MapEffect.MoveCameraToPosition -> {
-                cameraPositionState.animate(
-                    update = CameraUpdate.scrollAndZoomTo(
-                        LatLng(sideEffect.latitude, sideEffect.longitude),
-                        MapConst.DEFAULT_ZOOM_LEVEL,
-                    ),
-                    animation = CameraAnimation.Easing,
-                    durationMs = MapConst.DEFAULT_CAMERA_ANIMATION_DURATIONS_MS,
-                )
+                scope.launch {
+                    cameraPositionState.animate(
+                        update = CameraUpdate.scrollAndZoomTo(
+                            LatLng(sideEffect.locLatLng.latitude, sideEffect.locLatLng.longitude),
+                            MapConst.DEFAULT_ZOOM_LEVEL,
+                        ),
+                        animation = CameraAnimation.Easing,
+                        durationMs = MapConst.DEFAULT_CAMERA_ANIMATION_DURATIONS_MS,
+                    )
+                }
             }
             is MapEffect.MoveDirectionApp -> {
                 DirectionHelper.navigateToUrl(
                     context = context,
                     app = sideEffect.app,
-                    startLatitude = sideEffect.startLatitude,
-                    startLongitude = sideEffect.startLongitude,
-                    endLatitude = sideEffect.endLatitude,
-                    endLongitude = sideEffect.endLongitude,
+                    startLatitude = sideEffect.startLocLatLng.latitude,
+                    startLongitude = sideEffect.startLocLatLng.longitude,
+                    endLatitude = sideEffect.endLocLatLng.latitude,
+                    endLongitude = sideEffect.endLocLatLng.longitude,
                 )
             }
             is MapEffect.NavigateToAppSettings -> {
@@ -181,21 +228,9 @@ fun MapRoute(
         onMapLoaded = {
             val isGrantedPermission = LocationPermissionManager.isGrantedLocationPermission(context)
             if (isGrantedPermission) {
-                locationTrackingMode = LocationTrackingMode.Follow
+                enableFollowMode()
             } else {
                 viewModel.store.onIntent(MapIntent.RequestLocationPermission)
-                // 강남역 기준 bounds API 호출
-                val offset = MapConst.DEFAULT_BOUNDS_OFFSET
-                viewModel.store.onIntent(
-                    MapIntent.LoadPhotoBoothsByBounds(
-                        MapBounds(
-                            southWest = Location(MapConst.DEFAULT_LATITUDE - offset, MapConst.DEFAULT_LONGITUDE - offset),
-                            northWest = Location(MapConst.DEFAULT_LATITUDE + offset, MapConst.DEFAULT_LONGITUDE - offset),
-                            northEast = Location(MapConst.DEFAULT_LATITUDE + offset, MapConst.DEFAULT_LONGITUDE + offset),
-                            southEast = Location(MapConst.DEFAULT_LATITUDE - offset, MapConst.DEFAULT_LONGITUDE + offset),
-                        ),
-                    ),
-                )
             }
         },
     )
@@ -242,7 +277,7 @@ fun MapScreen(
                 }
             },
             onLocationChange = { location ->
-                onIntent(MapIntent.UpdateCurrentLocation(location.latitude, location.longitude))
+                onIntent(MapIntent.UpdateCurrentLocation(LocLatLng(location.latitude, location.longitude)))
             },
         ) {
             uiState.mapMarkers
@@ -254,7 +289,7 @@ fun MapScreen(
                         isFocused = photoBooth.isFocused,
                         cachedBitmap = cachedBitmap,
                         onClick = {
-                            onIntent(MapIntent.ClickPhotoBoothMarker(latitude = photoBooth.latitude, longitude = photoBooth.longitude))
+                            onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
                         },
                     )
                 }
@@ -285,10 +320,10 @@ fun MapScreen(
                         onIntent(
                             MapIntent.ClickRefreshButton(
                                 MapBounds(
-                                    southWest = Location(bounds.southWest.latitude, bounds.southWest.longitude),
-                                    northWest = Location(bounds.northWest.latitude, bounds.northWest.longitude),
-                                    northEast = Location(bounds.northEast.latitude, bounds.northEast.longitude),
-                                    southEast = Location(bounds.southEast.latitude, bounds.southEast.longitude),
+                                    southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                                    northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                                    northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                                    southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
                                 ),
                             ),
                         )
@@ -313,7 +348,7 @@ fun MapScreen(
                     onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocation) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
-                        onIntent(MapIntent.ClickPhotoBoothMarker(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude))
+                        onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))
                     },
                     onClickDirection = { onIntent(MapIntent.ClickDirection) },
                 )
@@ -347,7 +382,7 @@ fun MapScreen(
         )
     }
 
-    val isLoadingLocation = locationTrackingMode == LocationTrackingMode.Follow && uiState.currentLocation == null
+    val isLoadingLocation = locationTrackingMode == LocationTrackingMode.Follow && uiState.currentLocLatLng == null
 
     if (isLoadingLocation || uiState.isLoading) {
         LoadingDialog(

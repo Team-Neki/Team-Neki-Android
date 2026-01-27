@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +30,10 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> loadBrands(state, reduce)
+            MapIntent.LoadCurrentLocation -> {
+                // TODO
+            }
+            is MapIntent.CameraUpdateCurrentLocation -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce, postSideEffect)
@@ -42,7 +46,7 @@ class MapViewModel @Inject constructor(
                         )
                     }
                 }
-                postSideEffect(MapEffect.RefreshCurrentLocation)
+                postSideEffect(MapEffect.TrackingFollowMode)
             }
 
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
@@ -62,6 +66,7 @@ class MapViewModel @Inject constructor(
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent, reduce, postSideEffect)
+            is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent, postSideEffect)
             MapIntent.ClickDirection -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
             MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.RequestLocationPermission)
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
@@ -79,25 +84,16 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        reduce { copy(currentLocation = Location(intent.latitude, intent.longitude)) }
+        reduce { copy(currentLocLatLng = intent.locLatLng) }
 
         /** 위치가 이동하더라도 주변 네컷 사진 브랜드는 변경하지 않기 때문에 최초에만 요청 **/
-        if (state.currentLocation == null) {
+        if (state.currentLocLatLng == null) {
             loadNearbyPhotoBooths(
-                longitude = intent.longitude,
-                latitude = intent.latitude,
+                longitude = intent.locLatLng.longitude,
+                latitude = intent.locLatLng.latitude,
                 brandIds = state.brands.filter { it.isChecked }.map { it.id },
                 reduce = reduce,
             )
-
-            // 현위치 기준 사각형 포토부스 조회
-            val mapBounds = MapBounds(
-                southWest = Location(intent.latitude - MapConst.DEFAULT_BOUNDS_OFFSET, intent.longitude - MapConst.DEFAULT_BOUNDS_OFFSET),
-                northWest = Location(intent.latitude + MapConst.DEFAULT_BOUNDS_OFFSET, intent.longitude - MapConst.DEFAULT_BOUNDS_OFFSET),
-                northEast = Location(intent.latitude + MapConst.DEFAULT_BOUNDS_OFFSET, intent.longitude + MapConst.DEFAULT_BOUNDS_OFFSET),
-                southEast = Location(intent.latitude - MapConst.DEFAULT_BOUNDS_OFFSET, intent.longitude + MapConst.DEFAULT_BOUNDS_OFFSET),
-            )
-            loadPhotoBoothsByPolygon(mapBounds, state, reduce, postSideEffect)
         }
     }
 
@@ -152,7 +148,7 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(intent.photoBooth.latitude, intent.photoBooth.longitude))
+        postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(intent.photoBooth.latitude, intent.photoBooth.longitude)))
     }
 
     private fun handleClickDirectionItem(
@@ -162,7 +158,7 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         reduce { copy(isShowDirectionBottomSheet = false) }
-        if (state.currentLocation == null) {
+        if (state.currentLocLatLng == null) {
             postSideEffect(MapEffect.ShowToastMessage("현재 위치를 가져올 수 없습니다."))
             return
         }
@@ -170,10 +166,8 @@ class MapViewModel @Inject constructor(
             postSideEffect(
                 MapEffect.MoveDirectionApp(
                     app = intent.app,
-                    startLatitude = state.currentLocation.latitude,
-                    startLongitude = state.currentLocation.longitude,
-                    endLatitude = focusedPhotoBooth.latitude,
-                    endLongitude = focusedPhotoBooth.longitude,
+                    startLocLatLng = state.currentLocLatLng,
+                    endLocLatLng = LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude),
                 ),
             )
         }
@@ -184,11 +178,12 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
+        Timber.d("handleClickPhotoBoothMarker START: ${intent.locLatLng}")
         reduce {
             val updatedMarkers = mapMarkers.map { marker ->
-                val isClicked = marker.latitude == intent.latitude && marker.longitude == intent.longitude
+                val isClicked = marker.latitude == intent.locLatLng.latitude && marker.longitude == intent.locLatLng.longitude
                 if (isClicked) {
-                    val distance = currentLocation?.let { location ->
+                    val distance = currentLocLatLng?.let { location ->
                         calculateDistance(location.latitude, location.longitude, marker.latitude, marker.longitude)
                     } ?: 0
                     marker.copy(isFocused = true, distance = distance)
@@ -201,7 +196,15 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
+        Timber.d("handleClickPhotoBoothMarker postSideEffect: ${intent.locLatLng}")
+        postSideEffect(MapEffect.MoveCameraToPosition(intent.locLatLng))
+    }
+
+    private fun handleClickPhotoBoothCard(
+        intent: MapIntent.ClickPhotoBoothCard,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        postSideEffect(MapEffect.MoveCameraToPosition(intent.locLatLng))
     }
 
     private fun loadBrands(
@@ -220,7 +223,7 @@ class MapViewModel @Inject constructor(
                         )
                     }
 
-                    state.currentLocation?.let { location ->
+                    state.currentLocLatLng?.let { location ->
                         loadNearbyPhotoBooths(
                             longitude = location.longitude,
                             latitude = location.latitude,

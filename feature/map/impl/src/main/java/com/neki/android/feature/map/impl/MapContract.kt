@@ -8,7 +8,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class MapState(
     val isLoading: Boolean = false,
-    val currentLocation: Location? = null,
+    val currentLocLatLng: LocLatLng? = null,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
@@ -18,30 +18,17 @@ data class MapState(
     val isShowLocationPermissionDialog: Boolean = false,
 )
 
-data class MapBounds(
-    val southWest: Location,
-    val northWest: Location,
-    val northEast: Location,
-    val southEast: Location,
-)
-
-data class Location(
-    val latitude: Double,
-    val longitude: Double,
-)
-
 sealed interface MapIntent {
     data object EnterMapScreen : MapIntent
 
     // in 지도
+    data object LoadCurrentLocation : MapIntent
+    data class CameraUpdateCurrentLocation(val mapBounds: MapBounds) : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
-    data class ClickPhotoBoothMarker(
-        val latitude: Double,
-        val longitude: Double,
-    ) : MapIntent
+    data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickRefreshButton(val mapBounds: MapBounds) : MapIntent
     data object ClickDirection : MapIntent
-    data class UpdateCurrentLocation(val latitude: Double, val longitude: Double) : MapIntent
+    data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
 
     // in 패널
     data object ClickCurrentLocation : MapIntent
@@ -50,6 +37,7 @@ sealed interface MapIntent {
     data object ClickToMapChip : MapIntent
     data class ClickBrand(val brand: Brand) : MapIntent
     data class ClickNearPhotoBooth(val photoBooth: PhotoBooth) : MapIntent
+    data class ClickPhotoBoothCard(val locLatLng: LocLatLng) : MapIntent
     data object ClickClosePhotoBoothCard : MapIntent
     data object OpenDirectionBottomSheet : MapIntent
     data object CloseDirectionBottomSheet : MapIntent
@@ -64,20 +52,15 @@ sealed interface MapIntent {
 }
 
 sealed interface MapEffect {
-    data object RefreshCurrentLocation : MapEffect
+    data object TrackingFollowMode : MapEffect
+    data class MoveCameraToPosition(val locLatLng: LocLatLng) : MapEffect
     data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
-    data class MoveCameraToPosition(
-        val latitude: Double,
-        val longitude: Double,
-    ) : MapEffect
 
     data class MoveDirectionApp(
         val app: DirectionApp,
-        val startLatitude: Double,
-        val startLongitude: Double,
-        val endLatitude: Double,
-        val endLongitude: Double,
+        val startLocLatLng: LocLatLng,
+        val endLocLatLng: LocLatLng,
     ) : MapEffect
 
     data object NavigateToAppSettings : MapEffect
@@ -85,3 +68,15 @@ sealed interface MapEffect {
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
+
+data class MapBounds(
+    val southWest: LocLatLng,
+    val northWest: LocLatLng,
+    val northEast: LocLatLng,
+    val southEast: LocLatLng,
+)
+
+data class LocLatLng(
+    val latitude: Double,
+    val longitude: Double,
+)
