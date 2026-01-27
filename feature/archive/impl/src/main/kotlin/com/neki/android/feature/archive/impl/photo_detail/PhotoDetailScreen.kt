@@ -39,7 +39,7 @@ internal fun PhotoDetailRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PhotoDetailSideEffect.NavigateBack -> navigateBack()
-            PhotoDetailSideEffect.NotifyArchiveUpdated -> resultEventBus.sendResult(result = true)
+            PhotoDetailSideEffect.NotifyArchiveUpdated -> resultEventBus.sendResult(result = true, allowDuplicate = false)
             is PhotoDetailSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
             is PhotoDetailSideEffect.DownloadImage -> {
                 ImageDownloader.downloadImage(context, sideEffect.imageUrl)
