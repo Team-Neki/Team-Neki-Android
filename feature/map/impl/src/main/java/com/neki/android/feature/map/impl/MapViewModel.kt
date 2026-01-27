@@ -214,15 +214,6 @@ class MapViewModel @Inject constructor(
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
                     reduce { copy(isLoading = false, brands = loadedBrands.toImmutableList()) }
-
-                    state.currentLocLatLng?.let { location ->
-                        loadNearbyPhotoBooths(
-                            longitude = location.longitude,
-                            latitude = location.latitude,
-                            brandIds = loadedBrands.filter { it.isChecked }.map { it.id },
-                            reduce = reduce,
-                        )
-                    }
                 }
                 .onFailure {
                     reduce { copy(isLoading = false) }
