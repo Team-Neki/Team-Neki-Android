@@ -45,7 +45,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
                             .onSuccess {
                                 Timber.d("updateFavorite success")
                                 originalFavorite = newFavorite
-                                store.postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
+                                store.onIntent(PhotoDetailIntent.FavoriteCommitted)
                             }
                             .onFailure { error ->
                                 Timber.e(error, "updateFavorite failed")
@@ -74,6 +74,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             // ActionBar Intent
             PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce, postSideEffect)
+            PhotoDetailIntent.FavoriteCommitted -> postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
             is PhotoDetailIntent.RevertFavorite -> reduce { copy(photo = photo.copy(isFavorite = intent.originalFavorite)) }
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
 
