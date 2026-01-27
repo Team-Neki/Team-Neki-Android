@@ -13,7 +13,6 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -26,9 +25,6 @@ class PhotoDetailViewModel @AssistedInject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
-    private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
-    private var originalFavorite = photo.isFavorite
-
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
             initialState = PhotoDetailState(photo = photo),
@@ -37,19 +33,19 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     init {
         applicationScope.launch {
-            favoriteRequests
+            store.uiState.value.favoriteRequests
                 .debounce(500)
                 .collect { newFavorite ->
-                    if (originalFavorite != newFavorite) {
+                    val committedFavorite = store.uiState.value.committedFavorite
+                    if (committedFavorite != newFavorite) {
                         photoRepository.updateFavorite(photo.id, newFavorite)
                             .onSuccess {
                                 Timber.d("updateFavorite success")
-                                originalFavorite = newFavorite
-                                store.onIntent(PhotoDetailIntent.FavoriteCommitted)
+                                store.onIntent(PhotoDetailIntent.FavoriteCommitted(newFavorite))
                             }
                             .onFailure { error ->
                                 Timber.e(error, "updateFavorite failed")
-                                store.onIntent(PhotoDetailIntent.RevertFavorite(originalFavorite))
+                                store.onIntent(PhotoDetailIntent.RevertFavorite(committedFavorite))
                             }
                     }
                 }
@@ -74,7 +70,11 @@ class PhotoDetailViewModel @AssistedInject constructor(
             // ActionBar Intent
             PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce, postSideEffect)
-            PhotoDetailIntent.FavoriteCommitted -> postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
+            is PhotoDetailIntent.FavoriteCommitted -> {
+                reduce { copy(committedFavorite = intent.newFavorite) }
+                postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
+            }
+
             is PhotoDetailIntent.RevertFavorite -> reduce { copy(photo = photo.copy(isFavorite = intent.originalFavorite)) }
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
 
@@ -91,7 +91,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
         postSideEffect: (PhotoDetailSideEffect) -> Unit,
     ) {
         val newFavoriteStatus = !state.photo.isFavorite
-        viewModelScope.launch { favoriteRequests.emit(newFavoriteStatus) }
+        viewModelScope.launch { state.favoriteRequests.emit(newFavoriteStatus) }
         reduce {
             copy(photo = state.photo.copy(isFavorite = newFavoriteStatus))
         }

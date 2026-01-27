@@ -1,12 +1,16 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
 import com.neki.android.core.model.Photo
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 data class PhotoDetailState(
     val isLoading: Boolean = false,
+    val committedFavorite: Boolean = false,
     val photo: Photo = Photo(),
     val isShowDeleteDialog: Boolean = false,
-)
+) {
+    val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
+}
 
 sealed interface PhotoDetailIntent {
     // TopBar Intent
@@ -15,7 +19,7 @@ sealed interface PhotoDetailIntent {
     // ActionBar Intent
     data object ClickDownloadIcon : PhotoDetailIntent
     data object ClickFavoriteIcon : PhotoDetailIntent
-    data object FavoriteCommitted : PhotoDetailIntent
+    data class FavoriteCommitted(val newFavorite: Boolean) : PhotoDetailIntent
     data class RevertFavorite(val originalFavorite: Boolean) : PhotoDetailIntent
     data object ClickDeleteIcon : PhotoDetailIntent
 
