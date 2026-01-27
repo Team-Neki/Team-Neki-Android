@@ -22,12 +22,10 @@ sealed interface MapIntent {
     data object EnterMapScreen : MapIntent
 
     // in 지도
-    data object LoadCurrentLocation : MapIntent
-    data class CameraUpdateCurrentLocation(val mapBounds: MapBounds) : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickRefreshButton(val mapBounds: MapBounds) : MapIntent
-    data object ClickDirection : MapIntent
+    data object ClickDirectionIcon : MapIntent
     data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
 
     // in 패널
@@ -57,7 +55,7 @@ sealed interface MapEffect {
     data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
 
-    data class MoveDirectionApp(
+    data class LaunchDirectionApp(
         val app: DirectionApp,
         val startLocLatLng: LocLatLng,
         val endLocLatLng: LocLatLng,

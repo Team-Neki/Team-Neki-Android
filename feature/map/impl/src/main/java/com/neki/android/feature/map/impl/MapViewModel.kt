@@ -30,10 +30,6 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> loadBrands(state, reduce)
-            MapIntent.LoadCurrentLocation -> {
-                // TODO
-            }
-            is MapIntent.CameraUpdateCurrentLocation -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce, postSideEffect)
@@ -67,7 +63,7 @@ class MapViewModel @Inject constructor(
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent, reduce, postSideEffect)
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent, postSideEffect)
-            MapIntent.ClickDirection -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
+            MapIntent.ClickDirectionIcon -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
             MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.RequestLocationPermission)
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
@@ -164,7 +160,7 @@ class MapViewModel @Inject constructor(
         }
         state.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
             postSideEffect(
-                MapEffect.MoveDirectionApp(
+                MapEffect.LaunchDirectionApp(
                     app = intent.app,
                     startLocLatLng = state.currentLocLatLng,
                     endLocLatLng = LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude),

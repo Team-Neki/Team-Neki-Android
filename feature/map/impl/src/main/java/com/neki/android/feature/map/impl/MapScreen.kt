@@ -151,8 +151,8 @@ fun MapRoute(
         if (isGranted) {
             enableFollowMode()
         } else {
+            // 2회 이상 거부
             if (!currentShouldShowRationale && !previousShouldShowRationale) {
-                // 2회 이상 거부
                 viewModel.store.onIntent(MapIntent.ShowLocationPermissionDialog)
             }
         }
@@ -184,7 +184,6 @@ fun MapRoute(
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
-            is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
             is MapEffect.MoveCameraToPosition -> {
                 scope.launch {
                     cameraPositionState.animate(
@@ -197,7 +196,7 @@ fun MapRoute(
                     )
                 }
             }
-            is MapEffect.MoveDirectionApp -> {
+            is MapEffect.LaunchDirectionApp -> {
                 DirectionHelper.navigateToUrl(
                     context = context,
                     app = sideEffect.app,
@@ -215,6 +214,7 @@ fun MapRoute(
                 previousShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }
+            is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
         }
     }
 
@@ -350,7 +350,7 @@ fun MapScreen(
                     onClickCard = {
                         onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))
                     },
-                    onClickDirection = { onIntent(MapIntent.ClickDirection) },
+                    onClickDirection = { onIntent(MapIntent.ClickDirectionIcon) },
                 )
             }
         }

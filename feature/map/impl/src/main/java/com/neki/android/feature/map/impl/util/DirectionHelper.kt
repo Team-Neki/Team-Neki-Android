@@ -24,10 +24,10 @@ internal object DirectionHelper {
             }
             DirectionApp.KAKAO_MAP -> "kakaomap://route?sp=$startLatitude,$startLongitude&ep=$endLatitude,$endLongitude&by=FOOT"
         }
-        moveAppOrStore(context, url, app.packageName)
+        launchAppOrStore(context, url, app.packageName)
     }
 
-    private fun moveAppOrStore(
+    private fun launchAppOrStore(
         context: Context,
         url: String,
         packageName: String,
