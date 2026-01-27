@@ -35,7 +35,6 @@ class ArchiveMainViewModel @Inject constructor(
         )
 
     private var fetchJob: Job? = null
-
     private fun onIntent(
         intent: ArchiveMainIntent,
         state: ArchiveMainState,
@@ -159,6 +158,7 @@ class ArchiveMainViewModel @Inject constructor(
     ) {
         reduce { copy(isShowChooseWithAlbumDialog = false) }
         val onSuccessSideEffect = {
+            reduce { copy(isLoading = false) }
             postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
         }
         if (state.uploadType == UploadType.QR_SCAN) {
