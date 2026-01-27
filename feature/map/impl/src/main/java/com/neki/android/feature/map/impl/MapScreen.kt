@@ -57,6 +57,7 @@ import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.DirectionHelper
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
@@ -67,7 +68,6 @@ fun MapRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = LocalActivity.current!!
-    val coroutineScope = rememberCoroutineScope()
 
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
     val cameraPositionState = rememberCameraPositionState {
@@ -132,7 +132,6 @@ fun MapRoute(
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
-
             is MapEffect.OpenDirectionBottomSheet -> {
                 if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                     viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
@@ -140,24 +139,17 @@ fun MapRoute(
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
-
-            is MapEffect.ShowToastMessage -> {
-                nekiToast.showToast(sideEffect.message)
-            }
-
+            is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
             is MapEffect.MoveCameraToPosition -> {
-                coroutineScope.launch {
-                    cameraPositionState.animate(
-                        update = CameraUpdate.scrollAndZoomTo(
-                            LatLng(sideEffect.latitude, sideEffect.longitude),
-                            MapConst.DEFAULT_ZOOM_LEVEL,
-                        ),
-                        animation = CameraAnimation.Easing,
-                        durationMs = MapConst.DEFAULT_CAMERA_ANIMATION_DURATIONS_MS,
-                    )
-                }
+                cameraPositionState.animate(
+                    update = CameraUpdate.scrollAndZoomTo(
+                        LatLng(sideEffect.latitude, sideEffect.longitude),
+                        MapConst.DEFAULT_ZOOM_LEVEL,
+                    ),
+                    animation = CameraAnimation.Easing,
+                    durationMs = MapConst.DEFAULT_CAMERA_ANIMATION_DURATIONS_MS,
+                )
             }
-
             is MapEffect.MoveDirectionApp -> {
                 DirectionHelper.navigateToUrl(
                     context = context,
@@ -168,12 +160,10 @@ fun MapRoute(
                     endLongitude = sideEffect.endLongitude,
                 )
             }
-
             is MapEffect.NavigateToAppSettings -> {
                 isNavigatedToSettings = true
                 navigateToAppSettings(context)
             }
-
             is MapEffect.RequestLocationPermission -> {
                 previousShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
