@@ -53,7 +53,7 @@ fun BottomNavigationBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 19.5.dp),
+                    .padding(horizontal = 19.5.dp, vertical = 2.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 tabs.forEach { tab ->
