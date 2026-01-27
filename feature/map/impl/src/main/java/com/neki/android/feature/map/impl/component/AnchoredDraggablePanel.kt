@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.modifier.dropdownShadow
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
@@ -265,8 +265,16 @@ private fun AnchoredPanelContentPreview() {
                 Brand(isChecked = false, name = "포토그레이", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOGRAY_LOGO_v1.png"),
                 Brand(isChecked = false, name = "포토이즘", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOISM_LOGO_v1.png"),
                 Brand(isChecked = false, name = "하루필름", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/HARUFILM_LOGO_v1.png"),
-                Brand(isChecked = false, name = "플랜비\n스튜디오", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PLANB_STUDIO_LOGO_v1.png"),
-                Brand(isChecked = false, name = "포토시그니처", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOSIGNATURE_LOGO_v1.png"),
+                Brand(
+                    isChecked = false,
+                    name = "플랜비\n스튜디오",
+                    imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PLANB_STUDIO_LOGO_v1.png",
+                ),
+                Brand(
+                    isChecked = false,
+                    name = "포토시그니처",
+                    imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOSIGNATURE_LOGO_v1.png",
+                ),
             ),
             nearbyPhotoBooths = persistentListOf(
                 PhotoBooth(

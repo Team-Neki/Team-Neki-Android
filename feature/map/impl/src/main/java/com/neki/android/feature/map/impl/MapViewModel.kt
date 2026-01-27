@@ -249,9 +249,9 @@ class MapViewModel @Inject constructor(
                             photoBooth.copy(
                                 imageUrl = brands.find {
                                     it.name == photoBooth.brandName
-                                }?.imageUrl.orEmpty()
+                                }?.imageUrl.orEmpty(),
                             )
-                        }.toImmutableList()
+                        }.toImmutableList(),
                     )
                 }
             }
@@ -289,7 +289,7 @@ class MapViewModel @Inject constructor(
                             photoBooth.copy(
                                 imageUrl = brands.find {
                                     it.name == photoBooth.brandName
-                                }?.imageUrl.orEmpty()
+                                }?.imageUrl.orEmpty(),
                             )
                         }.toImmutableList(),
                     )

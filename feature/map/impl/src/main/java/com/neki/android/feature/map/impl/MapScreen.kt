@@ -152,6 +152,7 @@ fun MapRoute(
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
+
             is MapEffect.OpenDirectionBottomSheet -> {
                 if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                     viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
@@ -159,6 +160,7 @@ fun MapRoute(
                     viewModel.store.onIntent(MapIntent.RequestLocationPermission)
                 }
             }
+
             is MapEffect.MoveCameraToPosition -> {
                 scope.launch {
                     cameraPositionState.animate(
@@ -171,6 +173,7 @@ fun MapRoute(
                     )
                 }
             }
+
             is MapEffect.LaunchDirectionApp -> {
                 DirectionHelper.navigateToUrl(
                     context = context,
@@ -181,14 +184,17 @@ fun MapRoute(
                     endLongitude = sideEffect.endLocLatLng.longitude,
                 )
             }
+
             is MapEffect.NavigateToAppSettings -> {
                 isNavigatedToSettings = true
                 navigateToAppSettings(context)
             }
+
             is MapEffect.RequestLocationPermission -> {
                 previousShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }
+
             is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
         }
     }

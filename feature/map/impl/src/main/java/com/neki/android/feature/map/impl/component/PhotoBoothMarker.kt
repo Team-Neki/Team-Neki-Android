@@ -24,13 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
-import com.neki.android.core.model.PhotoBooth
 import com.naver.maps.map.compose.MarkerComposable
 import com.naver.maps.map.compose.rememberUpdatedMarkerState
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.pinShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.PhotoBooth
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_BACKGROUND_RADIUS
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_IMAGE_RADIUS
 import com.neki.android.feature.map.impl.const.MapConst.FOCUSED_MARKER_IMAGE_SIZE

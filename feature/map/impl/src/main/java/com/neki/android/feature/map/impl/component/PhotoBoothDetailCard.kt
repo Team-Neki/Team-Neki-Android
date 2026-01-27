@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.VerticalSpacer

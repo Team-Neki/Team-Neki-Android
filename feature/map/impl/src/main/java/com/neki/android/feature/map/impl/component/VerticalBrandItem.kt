@@ -106,7 +106,7 @@ private fun NotCheckedVerticalBrandItemPreview() {
             brand = Brand(
                 isChecked = false,
                 name = "인생네컷",
-                imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/LIFEFOURCUTS_LOGO_v1.png"
+                imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/LIFEFOURCUTS_LOGO_v1.png",
             ),
         )
     }
