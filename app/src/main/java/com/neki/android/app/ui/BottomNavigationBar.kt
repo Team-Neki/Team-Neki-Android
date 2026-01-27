@@ -53,7 +53,7 @@ fun BottomNavigationBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 19.5.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 tabs.forEach { tab ->
@@ -86,12 +86,12 @@ fun BottomNavigationBarItem(
         color = NekiTheme.colorScheme.white,
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 4.dp),
+            modifier = Modifier.padding(vertical = 1.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Icon(
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(26.dp),
                 imageVector = ImageVector.vectorResource(icon),
                 contentDescription = stringResource(tab.iconStringRes),
                 tint = iconColor,
