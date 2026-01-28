@@ -31,89 +31,89 @@ import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.core.ui.compose.VerticalSpacer
 
-@Composable
-internal fun PhotoBoothCard(
-    photoBooth: PhotoBooth,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
-    onClickDirection: () -> Unit = {},
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .cardShadow(shape = RoundedCornerShape(20.dp))
-            .background(
-                shape = RoundedCornerShape(20.dp),
-                color = NekiTheme.colorScheme.white,
-            )
-            .noRippleClickableSingle(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .size(64.dp),
-            model = photoBooth.imageUrl,
-            placeholder = painterResource(R.drawable.icon_life_four_cut),
-            error = painterResource(R.drawable.icon_life_four_cut),
-            contentDescription = null,
-        )
-        HorizontalSpacer(16.dp)
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = photoBooth.brandName,
-                    color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold,
-                )
-                HorizontalSpacer(4.dp)
-                Text(
-                    text = photoBooth.branchName,
-                    color = NekiTheme.colorScheme.gray600,
-                    style = NekiTheme.typography.caption12Medium,
-                )
-            }
-            VerticalSpacer(4.dp)
-            Text(
-                text = photoBooth.distance.formatDistance(),
-                color = NekiTheme.colorScheme.gray400,
-                style = NekiTheme.typography.caption12Medium,
-            )
-        }
-        HorizontalSpacer(1f)
-        Box(
-            modifier = Modifier
-                .background(
-                    shape = CircleShape,
-                    color = NekiTheme.colorScheme.gray900,
-                )
-                .noRippleClickableSingle(onClick = onClickDirection)
-                .padding(4.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_find_direction),
-                contentDescription = null,
-                tint = Color.Unspecified,
-            )
-        }
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun PhotoBoothCardPreview() {
-    NekiTheme {
-        PhotoBoothCard(
-            photoBooth = PhotoBooth(
-                brandName = "인생네컷",
-                branchName = "사당역점",
-                distance = 300,
-            ),
-        )
-    }
-}
+//@Composable
+//internal fun PhotoBoothCard(
+//    photoBooth: PhotoBooth,
+//    modifier: Modifier = Modifier,
+//    onClick: () -> Unit = {},
+//    onClickDirection: () -> Unit = {},
+//) {
+//    Row(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .cardShadow(shape = RoundedCornerShape(20.dp))
+//            .background(
+//                shape = RoundedCornerShape(20.dp),
+//                color = NekiTheme.colorScheme.white,
+//            )
+//            .noRippleClickableSingle(onClick = onClick)
+//            .padding(16.dp),
+//        verticalAlignment = Alignment.CenterVertically,
+//    ) {
+//        AsyncImage(
+//            modifier = Modifier
+//                .clip(RoundedCornerShape(8.dp))
+//                .size(64.dp),
+//            model = photoBooth.imageUrl,
+//            placeholder = painterResource(R.drawable.icon_life_four_cut),
+//            error = painterResource(R.drawable.icon_life_four_cut),
+//            contentDescription = null,
+//        )
+//        HorizontalSpacer(16.dp)
+//        Column {
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//            ) {
+//                Text(
+//                    text = photoBooth.brandName,
+//                    color = NekiTheme.colorScheme.gray900,
+//                    style = NekiTheme.typography.title18Bold,
+//                )
+//                HorizontalSpacer(4.dp)
+//                Text(
+//                    text = photoBooth.branchName,
+//                    color = NekiTheme.colorScheme.gray600,
+//                    style = NekiTheme.typography.caption12Medium,
+//                )
+//            }
+//            VerticalSpacer(4.dp)
+//            Text(
+//                text = photoBooth.distance.formatDistance(),
+//                color = NekiTheme.colorScheme.gray400,
+//                style = NekiTheme.typography.caption12Medium,
+//            )
+//        }
+//        HorizontalSpacer(1f)
+//        Box(
+//            modifier = Modifier
+//                .background(
+//                    shape = CircleShape,
+//                    color = NekiTheme.colorScheme.gray900,
+//                )
+//                .noRippleClickableSingle(onClick = onClickDirection)
+//                .padding(4.dp),
+//            contentAlignment = Alignment.Center,
+//        ) {
+//            Icon(
+//                modifier = Modifier.size(24.dp),
+//                imageVector = ImageVector.vectorResource(R.drawable.icon_find_direction),
+//                contentDescription = null,
+//                tint = Color.Unspecified,
+//            )
+//        }
+//    }
+//}
+//
+//@ComponentPreview
+//@Composable
+//private fun PhotoBoothCardPreview() {
+//    NekiTheme {
+//        PhotoBoothCard(
+//            photoBooth = PhotoBooth(
+//                brandName = "인생네컷",
+//                branchName = "사당역점",
+//                distance = 300,
+//            ),
+//        )
+//    }
+//}

@@ -46,7 +46,7 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
-import com.neki.android.feature.map.impl.component.PhotoBoothDetailCard
+import com.neki.android.feature.map.impl.component.PhotoBoothDetailContent
 import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
@@ -321,7 +321,7 @@ fun MapScreen(
             )
         } else if (uiState.dragLevel == DragLevel.INVISIBLE) {
             uiState.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
-                PhotoBoothDetailCard(
+                PhotoBoothDetailContent(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
                     isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
