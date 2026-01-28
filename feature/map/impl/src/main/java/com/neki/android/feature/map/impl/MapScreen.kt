@@ -317,7 +317,6 @@ fun MapScreen(
         )
     }
 
-
     if (uiState.isLoading) {
         LoadingDialog(
             properties = DialogProperties(

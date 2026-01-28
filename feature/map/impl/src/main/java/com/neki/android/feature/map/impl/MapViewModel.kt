@@ -1,6 +1,5 @@
 package com.neki.android.feature.map.impl
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -11,9 +10,6 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.model.Brand
@@ -22,6 +18,7 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -51,7 +48,7 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> loadBrands(state, reduce)
-            is MapIntent.GrantedLocationPermission -> moveCameraAndLoadPhotoBooths(reduce, postSideEffect)
+            is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             MapIntent.ClickCurrentLocationIcon -> {
                 if (LocationPermissionManager.isGrantedLocationPermission(context)) {
@@ -100,35 +97,25 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun moveCameraAndLoadPhotoBooths(
+    private fun getCurrentLocation(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        val cancellationTokenSource = CancellationTokenSource()
-        LocationServices.getFusedLocationProviderClient(context).getCurrentLocation(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            cancellationTokenSource.token,
-        ).addOnSuccessListener { location ->
-            location?.let {
-                reduce { copy(isCameraOnCurrentLocation = true) }
-                postSideEffect(
-                    MapEffect.MoveCameraToPosition(
-                        LocLatLng(it.latitude, it.longitude),
-                        isRequiredLoadPhotoBooths = true,
-                    ),
-                )
-            }
-        }.addOnFailureListener {
-            // 권한이 없어 좌표를 가져올 수 없다면 강남역으로 카메라 이동
-            postSideEffect(
-                MapEffect.MoveCameraToPosition(
-                    LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
-                    isRequiredLoadPhotoBooths = true,
-                ),
-            )
-        }.addOnCompleteListener {
-            cancellationTokenSource.cancel()
+        viewModelScope.launch {
+            LocationHelper.getCurrentLocation(context)
+                .onSuccess { location ->
+                    reduce { copy(isCameraOnCurrentLocation = true) }
+                    postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true))
+                }
+                .onFailure {
+                    // 위치 조회 실패 시 강남역으로 카메라 이동
+                    postSideEffect(
+                        MapEffect.MoveCameraToPosition(
+                            LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
+                            isRequiredLoadPhotoBooths = true,
+                        ),
+                    )
+                }
         }
     }
 

@@ -59,7 +59,7 @@ sealed interface MapIntent {
 sealed interface MapEffect {
     data class MoveCameraToPosition(
         val locLatLng: LocLatLng,
-        val isRequiredLoadPhotoBooths: Boolean = false
+        val isRequiredLoadPhotoBooths: Boolean = false,
     ) : MapEffect
     data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
