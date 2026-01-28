@@ -36,7 +36,17 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                 postSideEffect(QRScanSideEffect.ShowToast("QR코드를 인식하지 못했습니다."))
             }
 
-            is QRScanIntent.DetectImageUrl -> postSideEffect(QRScanSideEffect.NavigateToHome(intent.imageUrl))
+            is QRScanIntent.DetectImageUrl -> postSideEffect(QRScanSideEffect.SetQRScannedResult(intent.imageUrl))
+
+            QRScanIntent.DismissUnSupportedBrandDialog -> reduce { copy(isShowUnSupportedBrandDialog = false) }
+            QRScanIntent.ClickUploadGallery -> {
+                reduce { copy(isShowUnSupportedBrandDialog = false) }
+                postSideEffect(QRScanSideEffect.SetOpenGalleryResult)
+            }
+            QRScanIntent.ClickProposeBrand -> {
+                reduce { copy(isShowUnSupportedBrandDialog = false) }
+                postSideEffect(QRScanSideEffect.OpenBrandProposalUrl)
+            }
         }
     }
 }

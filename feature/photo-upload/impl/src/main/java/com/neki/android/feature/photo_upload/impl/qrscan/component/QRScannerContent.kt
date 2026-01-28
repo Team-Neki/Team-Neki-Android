@@ -37,15 +37,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
+import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlertDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 internal fun QRScannerContent(
     modifier: Modifier = Modifier,
     isTorchEnabled: Boolean = false,
+    isShowUnSupportedBrandDialog: Boolean = false,
     onClickTorch: () -> Unit = {},
     onClickClose: () -> Unit = {},
     onQRCodeScanned: (String) -> Unit = {},
+    onDismissUnSupportedBrandDialog: () -> Unit = {},
+    onClickUploadGallery: () -> Unit = {},
+    onClickProposeBrand: () -> Unit = {},
 ) {
     var frameOffset: Offset? by remember { mutableStateOf(null) }
     var frameSize: IntSize? by remember { mutableStateOf(null) }
@@ -156,6 +161,18 @@ internal fun QRScannerContent(
                 }
             }
         }
+    }
+
+    if (isShowUnSupportedBrandDialog) {
+        SingleButtonWithTextButtonAlertDialog(
+            title = "지원하지 않는 브랜드예요",
+            content = "갤러리에서 사진을 추가해 바로 저장할 수 있어요\n원하는 브랜드가 있다면 제안해주세요!",
+            buttonText = "갤러리에서 추가하기",
+            textButtonText = "브랜드 제안하기",
+            onDismissRequest = onDismissUnSupportedBrandDialog,
+            onButtonClick = onClickUploadGallery,
+            onTextButtonClick = onClickProposeBrand,
+        )
     }
 }
 

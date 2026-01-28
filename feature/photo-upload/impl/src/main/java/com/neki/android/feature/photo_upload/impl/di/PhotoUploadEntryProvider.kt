@@ -7,8 +7,8 @@ import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
-import com.neki.android.feature.archive.api.navigateToArchive
 import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
+import com.neki.android.feature.photo_upload.api.QRScanResult
 import com.neki.android.feature.photo_upload.impl.album.UploadAlbumRoute
 import com.neki.android.feature.photo_upload.impl.album.UploadAlbumViewModel
 import com.neki.android.feature.photo_upload.impl.qrscan.QRScanRoute
@@ -35,10 +35,7 @@ private fun EntryProviderScope<NavKey>.photoUploadEntry(navigator: Navigator) {
 
         QRScanRoute(
             navigateBack = navigator::goBack,
-            navigateToHome = {
-                resultBus.sendResult<String>(result = it)
-                navigator.navigateToArchive()
-            },
+            setQRResult = { resultBus.sendResult<QRScanResult>(result = it) },
         )
     }
     entry<PhotoUploadNavKey.UploadAlbum> { key ->
