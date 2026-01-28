@@ -1,22 +1,31 @@
 package com.neki.android.feature.pose.api
 
 import androidx.navigation3.runtime.NavKey
+import com.neki.android.core.model.PeopleCount
+import com.neki.android.core.model.Pose
 import com.neki.android.core.navigation.Navigator
 import kotlinx.serialization.Serializable
 
 sealed interface PoseNavKey : NavKey {
 
     @Serializable
-    data object Pose : PoseNavKey
+    data object PoseMain : PoseNavKey
 
     @Serializable
-    data object Detail : PoseNavKey
+    data class RandomPose(val peopleCount: PeopleCount) : PoseNavKey
+
+    @Serializable
+    data class PoseDetail(val pose: Pose) : PoseNavKey
 }
 
 fun Navigator.navigateToPose() {
-    navigate(PoseNavKey.Pose)
+    navigate(PoseNavKey.PoseMain)
 }
 
-fun Navigator.navigateToPoseDetail() {
-    navigate(PoseNavKey.Detail)
+fun Navigator.navigateToRandomPose(peopleCount: PeopleCount) {
+    navigate(PoseNavKey.RandomPose(peopleCount))
+}
+
+fun Navigator.navigateToPoseDetail(pose: Pose) {
+    navigate(PoseNavKey.PoseDetail(pose))
 }

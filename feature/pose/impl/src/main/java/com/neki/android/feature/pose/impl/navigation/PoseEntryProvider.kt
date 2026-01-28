@@ -1,14 +1,18 @@
 package com.neki.android.feature.pose.impl.navigation
 
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
-import com.neki.android.core.navigation.HiltSharedViewModelStoreNavEntryDecorator
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.feature.pose.api.PoseNavKey
 import com.neki.android.feature.pose.api.navigateToPoseDetail
-import com.neki.android.feature.pose.impl.PoseDetailRoute
-import com.neki.android.feature.pose.impl.PoseRoute
+import com.neki.android.feature.pose.api.navigateToRandomPose
+import com.neki.android.feature.pose.impl.detail.PoseDetailRoute
+import com.neki.android.feature.pose.impl.detail.PoseDetailViewModel
+import com.neki.android.feature.pose.impl.main.PoseRoute
+import com.neki.android.feature.pose.impl.random.RandomPoseRoute
+import com.neki.android.feature.pose.impl.random.RandomPoseViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,22 +31,34 @@ object PoseEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
-    entry<PoseNavKey.Pose>(
-        clazzContentKey = { key -> key.toString() },
-    ) {
+    entry<PoseNavKey.PoseMain> {
         PoseRoute(
             navigateToPoseDetail = navigator::navigateToPoseDetail,
+            navigateToRandomPose = navigator::navigateToRandomPose,
             navigateToNotification = {},
         )
     }
 
-    entry<PoseNavKey.Detail>(
-        metadata = HiltSharedViewModelStoreNavEntryDecorator.parent(
-            PoseNavKey.Pose.toString(),
-        ),
-    ) {
+    entry<PoseNavKey.PoseDetail> { key ->
         PoseDetailRoute(
+            viewModel = hiltViewModel<PoseDetailViewModel, PoseDetailViewModel.Factory>(
+                creationCallback = { factory ->
+                    factory.create(key.pose)
+                },
+            ),
             navigateBack = navigator::goBack,
+        )
+    }
+
+    entry<PoseNavKey.RandomPose> { key ->
+        RandomPoseRoute(
+            viewModel = hiltViewModel<RandomPoseViewModel, RandomPoseViewModel.Factory>(
+                creationCallback = { factory ->
+                    factory.create(key.peopleCount)
+                },
+            ),
+            navigateBack = navigator::goBack,
+            navigateToPoseDetail = navigator::navigateToPoseDetail,
         )
     }
 }

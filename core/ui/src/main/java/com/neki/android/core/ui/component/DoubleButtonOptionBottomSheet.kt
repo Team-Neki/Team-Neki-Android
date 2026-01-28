@@ -1,4 +1,4 @@
-package com.neki.android.feature.archive.impl.component
+package com.neki.android.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,18 +27,22 @@ import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun <T> DeleteOptionBottomSheet(
+fun <T> DoubleButtonOptionBottomSheet(
     title: String,
     options: ImmutableList<T>,
-    selectedOption: T,
+    primaryButtonText: String,
+    secondaryButtonText: String,
+    selectedOption: T?,
     onDismissRequest: () -> Unit,
-    onClickCancel: () -> Unit,
-    onClickDelete: () -> Unit,
+    onClickSecondaryButton: () -> Unit,
+    onClickPrimaryButton: () -> Unit,
     onOptionSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    buttonEnabled: Boolean = true,
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
     ModalBottomSheet(
@@ -49,26 +53,32 @@ internal fun <T> DeleteOptionBottomSheet(
         containerColor = NekiTheme.colorScheme.white,
         dragHandle = { BottomSheetDragHandle(color = NekiTheme.colorScheme.gray100) },
     ) {
-        DeleteOptionBottomSheetContent(
+        DoubleButtonOptionBottomSheetContent(
             title = title,
             options = options,
             selectedOption = selectedOption,
-            onClickCancel = onClickCancel,
-            onClickDelete = onClickDelete,
+            onClickCancel = onClickSecondaryButton,
+            onClickDoubleButton = onClickPrimaryButton,
             onOptionSelect = onOptionSelect,
+            buttonEnabled = buttonEnabled,
+            primaryButtonText = primaryButtonText,
+            secondaryButtonText = secondaryButtonText,
         )
     }
 }
 
 @Composable
-internal fun <T> DeleteOptionBottomSheetContent(
+internal fun <T> DoubleButtonOptionBottomSheetContent(
     title: String,
-    options: List<T>,
-    selectedOption: T,
+    options: ImmutableList<T>,
+    primaryButtonText: String,
+    secondaryButtonText: String,
+    selectedOption: T?,
     onClickCancel: () -> Unit,
-    onClickDelete: () -> Unit,
+    onClickDoubleButton: () -> Unit,
     onOptionSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    buttonEnabled: Boolean = true,
 ) {
     Column(
         modifier = modifier
@@ -87,7 +97,7 @@ internal fun <T> DeleteOptionBottomSheetContent(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             options.forEach { option ->
-                DeleteOptionRow(
+                OptionRow(
                     label = option.toString(),
                     isSelected = selectedOption == option,
                     onClick = { onOptionSelect(option) },
@@ -101,20 +111,22 @@ internal fun <T> DeleteOptionBottomSheetContent(
         ) {
             CTAButtonGray(
                 modifier = Modifier.weight(93f),
-                text = "취소",
+                text = secondaryButtonText,
                 onClick = onClickCancel,
+                enabled = buttonEnabled,
             )
             CTAButtonPrimary(
                 modifier = Modifier.weight(230f),
-                text = "삭제하기",
-                onClick = onClickDelete,
+                text = primaryButtonText,
+                onClick = onClickDoubleButton,
+                enabled = buttonEnabled,
             )
         }
     }
 }
 
 @Composable
-private fun DeleteOptionRow(
+private fun OptionRow(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
@@ -123,7 +135,7 @@ private fun DeleteOptionRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .noRippleClickable { onClick() }
+            .noRippleClickable(onClick = onClick)
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -145,7 +157,7 @@ private fun DeleteOptionRow(
     }
 }
 
-private enum class PreviewDeleteOption(val label: String) {
+private enum class PreviewOption(val label: String) {
     OPTION_1("옵션 1"),
     OPTION_2("옵션 2"),
     ;
@@ -155,14 +167,16 @@ private enum class PreviewDeleteOption(val label: String) {
 
 @ComponentPreview
 @Composable
-private fun DeleteOptionBottomSheetContentPreview() {
+private fun DoubleButtonOptionBottomSheetContentPreview() {
     NekiTheme {
-        DeleteOptionBottomSheetContent(
+        DoubleButtonOptionBottomSheetContent(
             title = "삭제하시겠어요?",
-            options = PreviewDeleteOption.entries,
-            selectedOption = PreviewDeleteOption.OPTION_1,
+            options = PreviewOption.entries.toImmutableList(),
+            primaryButtonText = "확인",
+            secondaryButtonText = "취소",
+            selectedOption = PreviewOption.OPTION_1,
             onClickCancel = {},
-            onClickDelete = {},
+            onClickDoubleButton = {},
             onOptionSelect = {},
         )
     }
@@ -170,15 +184,35 @@ private fun DeleteOptionBottomSheetContentPreview() {
 
 @ComponentPreview
 @Composable
-private fun DeleteOptionBottomSheetContentOption2Preview() {
+private fun DoubleButtonOptionBottomSheetContentOption2Preview() {
     NekiTheme {
-        DeleteOptionBottomSheetContent(
+        DoubleButtonOptionBottomSheetContent(
             title = "삭제하시겠어요?",
-            options = PreviewDeleteOption.entries,
-            selectedOption = PreviewDeleteOption.OPTION_2,
+            options = PreviewOption.entries.toImmutableList(),
+            primaryButtonText = "확인",
+            secondaryButtonText = "취소",
+            selectedOption = PreviewOption.OPTION_2,
             onClickCancel = {},
-            onClickDelete = {},
+            onClickDoubleButton = {},
             onOptionSelect = {},
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun DoubleButtonOptionBottomSheetContentDisabledPreview() {
+    NekiTheme {
+        DoubleButtonOptionBottomSheetContent(
+            title = "삭제하시겠어요?",
+            options = PreviewOption.entries.toImmutableList(),
+            primaryButtonText = "확인",
+            secondaryButtonText = "취소",
+            selectedOption = null,
+            onClickCancel = {},
+            onClickDoubleButton = {},
+            onOptionSelect = {},
+            buttonEnabled = false,
         )
     }
 }
