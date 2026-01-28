@@ -25,8 +25,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -294,24 +295,26 @@ class MapViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val imageLoader = ImageLoader(context)
-            val cache = mutableMapOf<String, ImageBitmap>()
 
-            brands.forEach { brand ->
-                if (brand.imageUrl.isNotEmpty()) {
-                    val request = ImageRequest.Builder(context)
-                        .data(brand.imageUrl)
-                        .allowHardware(false)
-                        .build()
-
-                    val result = withContext(Dispatchers.IO) {
-                        imageLoader.execute(request)
-                    }
-
-                    if (result is SuccessResult) {
-                        cache[brand.imageUrl] = result.image.toBitmap().asImageBitmap()
+            val cache = brands
+                .filter { it.imageUrl.isNotEmpty() }
+                .map { brand ->
+                    async(Dispatchers.IO) {
+                        val request = ImageRequest.Builder(context)
+                            .data(brand.imageUrl)
+                            .allowHardware(false)
+                            .build()
+                        val result = imageLoader.execute(request)
+                        if (result is SuccessResult) {
+                            brand.imageUrl to result.image.toBitmap().asImageBitmap()
+                        } else {
+                            null
+                        }
                     }
                 }
-            }
+                .awaitAll()
+                .filterNotNull()
+                .toMap()
 
             reduce { copy(brandImageCache = cache.toImmutableMap()) }
         }
