@@ -1,12 +1,18 @@
 package com.neki.android.feature.map.impl
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -33,22 +39,12 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> loadBrands(state, reduce)
-            MapIntent.NaverMapLoaded -> postSideEffect(MapEffect.LoadInitialPhotoBooths)
+            MapIntent.NaverMapLoaded -> fetchCurrentLocationAndMoveCamera(reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+            MapIntent.ClickCurrentLocationIcon -> moveCurrentLocation(state, reduce, postSideEffect)
+            MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false) }
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce, postSideEffect)
-            MapIntent.ClickCurrentLocationIcon -> {
-                if (state.dragLevel == DragLevel.INVISIBLE) {
-                    reduce {
-                        copy(
-                            dragLevel = DragLevel.FIRST,
-                            mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
-                        )
-                    }
-                }
-                postSideEffect(MapEffect.TrackingFollowMode)
-            }
-
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
@@ -67,7 +63,13 @@ class MapViewModel @Inject constructor(
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent, reduce, postSideEffect)
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent, postSideEffect)
-            MapIntent.ClickDirectionIcon -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
+            MapIntent.ClickDirectionIcon -> {
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
+                    postSideEffect(MapEffect.OpenDirectionBottomSheet)
+                } else {
+                    postSideEffect(MapEffect.LaunchLocationPermission)
+                }
+            }
             MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.LaunchLocationPermission)
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
@@ -75,6 +77,38 @@ class MapViewModel @Inject constructor(
                 reduce { copy(isShowLocationPermissionDialog = false) }
                 postSideEffect(MapEffect.NavigateToAppSettings)
             }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun fetchCurrentLocationAndMoveCamera(
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        val cancellationTokenSource = CancellationTokenSource()
+        LocationServices.getFusedLocationProviderClient(context).getCurrentLocation(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            cancellationTokenSource.token,
+        ).addOnSuccessListener { location ->
+            Timber.d("현위치 : $location")
+            location?.let {
+                reduce { copy(isCameraOnCurrentLocation = true) }
+                postSideEffect(
+                    MapEffect.MoveCameraToPosition(
+                        LocLatLng(it.latitude, it.longitude),
+                        isRequiredLoadPhotoBooths = true
+                    )
+                )
+            }
+        }.addOnFailureListener {
+            postSideEffect(
+                MapEffect.MoveCameraToPosition(
+                    LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
+                    isRequiredLoadPhotoBooths = true
+                )
+            )
+        }.addOnCompleteListener {
+            cancellationTokenSource.cancel()
         }
     }
 
@@ -93,6 +127,31 @@ class MapViewModel @Inject constructor(
                 latitude = intent.locLatLng.latitude,
                 brandIds = state.brands.filter { it.isChecked }.map { it.id },
                 reduce = reduce,
+            )
+        }
+    }
+
+    private fun moveCurrentLocation(
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        if (state.dragLevel == DragLevel.INVISIBLE) {
+            reduce {
+                copy(
+                    dragLevel = DragLevel.FIRST,
+                    mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
+                )
+            }
+        }
+
+        if (state.currentLocLatLng != null) {
+            reduce { copy(isCameraOnCurrentLocation = true) }
+            postSideEffect(
+                MapEffect.MoveCameraToPosition(
+                    LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
+                    isRequiredLoadPhotoBooths = true
+                )
             )
         }
     }
@@ -178,7 +237,6 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        Timber.d("handleClickPhotoBoothMarker START: ${intent.locLatLng}")
         reduce {
             val updatedMarkers = mapMarkers.map { marker ->
                 val isClicked = marker.latitude == intent.locLatLng.latitude && marker.longitude == intent.locLatLng.longitude
@@ -196,7 +254,6 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        Timber.d("handleClickPhotoBoothMarker postSideEffect: ${intent.locLatLng}")
         postSideEffect(MapEffect.MoveCameraToPosition(intent.locLatLng))
     }
 

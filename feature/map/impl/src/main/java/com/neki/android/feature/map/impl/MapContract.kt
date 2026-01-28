@@ -9,6 +9,7 @@ import kotlinx.collections.immutable.persistentListOf
 data class MapState(
     val isLoading: Boolean = false,
     val currentLocLatLng: LocLatLng? = null,
+    val isCameraOnCurrentLocation: Boolean = false,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
@@ -20,14 +21,15 @@ data class MapState(
 
 sealed interface MapIntent {
     data object EnterMapScreen : MapIntent
-    data object NaverMapLoaded : MapIntent
 
     // in 지도
+    data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
+    data object NaverMapLoaded : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickRefreshButton(val mapBounds: MapBounds) : MapIntent
     data object ClickDirectionIcon : MapIntent
-    data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
+    data object GestureOnMap : MapIntent
 
     // in 패널
     data object ClickCurrentLocationIcon : MapIntent
@@ -51,9 +53,12 @@ sealed interface MapIntent {
 }
 
 sealed interface MapEffect {
-    data object TrackingFollowMode : MapEffect
-    data object LoadInitialPhotoBooths : MapEffect
-    data class MoveCameraToPosition(val locLatLng: LocLatLng) : MapEffect
+//    data object TrackingFollowMode : MapEffect
+//    data object LoadInitialPhotoBooths : MapEffect
+    data class MoveCameraToPosition(
+        val locLatLng: LocLatLng,
+        val isRequiredLoadPhotoBooths: Boolean = false
+    ) : MapEffect
     data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
 
