@@ -24,7 +24,7 @@ sealed interface MapIntent {
 
     // in 지도
     data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
-    data object NaverMapLoaded : MapIntent
+    data object GrantedLocationPermission : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickRefreshButton(val mapBounds: MapBounds) : MapIntent
@@ -53,8 +53,6 @@ sealed interface MapIntent {
 }
 
 sealed interface MapEffect {
-//    data object TrackingFollowMode : MapEffect
-//    data object LoadInitialPhotoBooths : MapEffect
     data class MoveCameraToPosition(
         val locLatLng: LocLatLng,
         val isRequiredLoadPhotoBooths: Boolean = false

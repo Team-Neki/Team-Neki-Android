@@ -82,12 +82,31 @@ fun MapRoute(
 
         if (isGranted) {
             locationTrackingMode = LocationTrackingMode.NoFollow
-            viewModel.store.onIntent(MapIntent.NaverMapLoaded)
+            viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
         } else {
-            // 2회 이상 거부
+            cameraPositionState.contentBounds?.let { bounds ->
+                viewModel.store.onIntent(
+                    MapIntent.LoadPhotoBoothsByBounds(
+                        MapBounds(
+                            southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                            northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                            northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                            southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
+                        ),
+                    ),
+                )
+            }
+
+            // 영구 거부
             if (!LocationPermissionManager.shouldShowLocationRationale(activity)) {
                 viewModel.store.onIntent(MapIntent.ShowLocationPermissionDialog)
             }
+        }
+    }
+
+    LaunchedEffect(cameraPositionState.cameraUpdateReason) {
+        if (cameraPositionState.cameraUpdateReason == CameraUpdateReason.GESTURE) {
+            viewModel.store.onIntent(MapIntent.GestureOnMap)
         }
     }
 
@@ -95,7 +114,7 @@ fun MapRoute(
         if (isNavigatedToSettings) {
             if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                 locationTrackingMode = LocationTrackingMode.NoFollow
-                viewModel.store.onIntent(MapIntent.NaverMapLoaded)
+                viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
             }
             isNavigatedToSettings = false
         }
@@ -167,9 +186,6 @@ fun MapRoute(
         locationTrackingMode = locationTrackingMode,
         cameraPositionState = cameraPositionState,
         brandImageCache = brandImageCache,
-        onMapLoaded = {
-            viewModel.store.onIntent(MapIntent.NaverMapLoaded)
-        },
     )
 }
 
@@ -183,7 +199,6 @@ fun MapScreen(
         position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), MapConst.DEFAULT_ZOOM_LEVEL)
     },
     brandImageCache: Map<String, ImageBitmap> = emptyMap(),
-    onMapLoaded: () -> Unit = {},
 ) {
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
@@ -197,12 +212,6 @@ fun MapScreen(
         )
     }
 
-    LaunchedEffect(cameraPositionState.cameraUpdateReason) {
-        if (cameraPositionState.cameraUpdateReason == CameraUpdateReason.GESTURE) {
-            onIntent(MapIntent.GestureOnMap)
-        }
-    }
-
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -212,7 +221,7 @@ fun MapScreen(
             locationSource = rememberFusedLocationSource(),
             properties = mapProperties,
             uiSettings = mapUiSettings,
-            onMapLoaded = onMapLoaded,
+            onMapLoaded = { onIntent(MapIntent.RequestLocationPermission) },
             onLocationChange = { location ->
                 onIntent(MapIntent.UpdateCurrentLocation(LocLatLng(location.latitude, location.longitude)))
             },

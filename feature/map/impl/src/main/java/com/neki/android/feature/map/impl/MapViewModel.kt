@@ -11,16 +11,15 @@ import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
-import com.neki.android.feature.map.impl.const.DirectionApp
-import dagger.hilt.android.qualifiers.ApplicationContext
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,9 +41,16 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> loadBrands(state, reduce)
-            MapIntent.NaverMapLoaded -> fetchCurrentLocationAndMoveCamera(reduce, postSideEffect)
+            is MapIntent.GrantedLocationPermission -> moveCameraAndLoadPhotoBooths(reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
-            MapIntent.ClickCurrentLocationIcon -> moveCurrentLocation(state, reduce, postSideEffect)
+            MapIntent.ClickCurrentLocationIcon -> {
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
+                    moveCurrentLocation(state, reduce, postSideEffect)
+                } else {
+                    postSideEffect(MapEffect.LaunchLocationPermission)
+                }
+            }
+
             MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false) }
             is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
@@ -59,6 +65,7 @@ class MapViewModel @Inject constructor(
                     mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
                 )
             }
+
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
@@ -72,6 +79,7 @@ class MapViewModel @Inject constructor(
                     postSideEffect(MapEffect.LaunchLocationPermission)
                 }
             }
+
             MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.LaunchLocationPermission)
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
@@ -83,7 +91,7 @@ class MapViewModel @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun fetchCurrentLocationAndMoveCamera(
+    private fun moveCameraAndLoadPhotoBooths(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
@@ -92,22 +100,22 @@ class MapViewModel @Inject constructor(
             Priority.PRIORITY_HIGH_ACCURACY,
             cancellationTokenSource.token,
         ).addOnSuccessListener { location ->
-            Timber.d("현위치 : $location")
             location?.let {
                 reduce { copy(isCameraOnCurrentLocation = true) }
                 postSideEffect(
                     MapEffect.MoveCameraToPosition(
                         LocLatLng(it.latitude, it.longitude),
-                        isRequiredLoadPhotoBooths = true
-                    )
+                        isRequiredLoadPhotoBooths = true,
+                    ),
                 )
             }
         }.addOnFailureListener {
+            // 권한이 없어 좌표를 가져올 수 없다면 강남역으로 카메라 이동
             postSideEffect(
                 MapEffect.MoveCameraToPosition(
                     LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
-                    isRequiredLoadPhotoBooths = true
-                )
+                    isRequiredLoadPhotoBooths = true,
+                ),
             )
         }.addOnCompleteListener {
             cancellationTokenSource.cancel()
@@ -151,8 +159,8 @@ class MapViewModel @Inject constructor(
             postSideEffect(
                 MapEffect.MoveCameraToPosition(
                     LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
-                    isRequiredLoadPhotoBooths = true
-                )
+                    isRequiredLoadPhotoBooths = true,
+                ),
             )
         }
     }
