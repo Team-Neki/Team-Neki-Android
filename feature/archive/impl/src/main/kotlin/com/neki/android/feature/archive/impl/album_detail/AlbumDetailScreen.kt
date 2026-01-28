@@ -147,7 +147,7 @@ internal fun AlbumDetailScreen(
         LoadingDialog()
     }
 
-    if (uiState.photoList.isEmpty()) {
+    if (!uiState.isLoading && uiState.photoList.isEmpty()) {
         EmptyContent(
             isFavorite = uiState.isFavoriteAlbum,
         )
@@ -235,7 +235,7 @@ private fun AlbumDetailScreenEmptyPreview() {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
                 title = "빈 앨범",
-                isFavoriteAlbum = true,
+                isFavoriteAlbum = false,
             ),
         )
     }
