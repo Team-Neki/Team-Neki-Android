@@ -73,7 +73,6 @@ fun MapRoute(
         )
     }
     val brandImageCache = rememberCachedBrandImage(uiState.brands)
-    var previousShouldShowRationale by remember { mutableStateOf(false) }
     var isNavigatedToSettings by remember { mutableStateOf(false) }
     var isFirstLocationLoaded by remember { mutableStateOf(false) }
 
@@ -107,13 +106,12 @@ fun MapRoute(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
         val isGranted = permissions.values.any { it }
-        val currentShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
 
         if (isGranted) {
             setFollowMode()
         } else {
             // 2회 이상 거부
-            if (!currentShouldShowRationale && !previousShouldShowRationale) {
+            if (!LocationPermissionManager.shouldShowLocationRationale(activity)) {
                 viewModel.store.onIntent(MapIntent.ShowLocationPermissionDialog)
             }
         }
@@ -194,7 +192,6 @@ fun MapRoute(
             }
 
             is MapEffect.LaunchLocationPermission -> {
-                previousShouldShowRationale = LocationPermissionManager.shouldShowLocationRationale(activity)
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }
 
