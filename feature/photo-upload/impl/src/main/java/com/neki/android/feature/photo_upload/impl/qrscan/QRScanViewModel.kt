@@ -3,6 +3,7 @@ package com.neki.android.feature.photo_upload.impl.qrscan
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.photo_upload.impl.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -24,11 +25,28 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
         when (intent) {
             QRScanIntent.ToggleTorch -> reduce { copy(isTorchEnabled = !this.isTorchEnabled) }
             QRScanIntent.ClickCloseQRScan -> postSideEffect(QRScanSideEffect.NavigateBack)
-            is QRScanIntent.ScanQRCode -> reduce {
-                copy(
-                    scannedUrl = intent.scannedUrl,
-                    viewType = QRScanViewType.WEB_VIEW,
-                )
+            is QRScanIntent.ScanQRCode -> {
+                val scannedUrl = intent.scannedUrl
+
+                if (isSupportedBrand(scannedUrl)) {
+                    if (isShouldFirstDownloadBrand(scannedUrl)) {
+                        reduce {
+                            copy(
+                                scannedUrl = intent.scannedUrl,
+                                isShowShouldDownloadDialog = true,
+                            )
+                        }
+                    } else {
+                        reduce {
+                            copy(
+                                scannedUrl = intent.scannedUrl,
+                                viewType = QRScanViewType.WEB_VIEW,
+                            )
+                        }
+                    }
+                } else {
+                    reduce { copy(isShowUnSupportedBrandDialog = true) }
+                }
             }
 
             is QRScanIntent.SetViewType -> {
@@ -38,15 +56,20 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
 
             is QRScanIntent.DetectImageUrl -> postSideEffect(QRScanSideEffect.SetQRScannedResult(intent.imageUrl))
 
+            QRScanIntent.DismissShouldDownloadDialog -> reduce { copy(isShowShouldDownloadDialog = false) }
+            QRScanIntent.ClickGoDownload -> reduce { copy(viewType = QRScanViewType.WEB_VIEW) }
             QRScanIntent.DismissUnSupportedBrandDialog -> reduce { copy(isShowUnSupportedBrandDialog = false) }
-            QRScanIntent.ClickUploadGallery -> {
-                reduce { copy(isShowUnSupportedBrandDialog = false) }
-                postSideEffect(QRScanSideEffect.SetOpenGalleryResult)
-            }
-            QRScanIntent.ClickProposeBrand -> {
-                reduce { copy(isShowUnSupportedBrandDialog = false) }
-                postSideEffect(QRScanSideEffect.OpenBrandProposalUrl)
-            }
+            QRScanIntent.ClickUploadGallery -> postSideEffect(QRScanSideEffect.SetOpenGalleryResult)
+            QRScanIntent.ClickProposeBrand -> postSideEffect(QRScanSideEffect.OpenBrandProposalUrl)
         }
+    }
+
+    private fun isSupportedBrand(url: String): Boolean {
+        return url.startsWith(BuildConfig.PHOTOISM_URL) ||
+            url.startsWith(BuildConfig.LIFE_FOUR_CUT_URL)
+    }
+
+    private fun isShouldFirstDownloadBrand(url: String): Boolean {
+        return false
     }
 }
