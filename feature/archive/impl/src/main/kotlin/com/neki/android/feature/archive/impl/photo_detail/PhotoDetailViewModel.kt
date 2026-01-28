@@ -120,4 +120,17 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        val currentFavorite = store.uiState.value.photo.isFavorite
+        val committedFavorite = store.uiState.value.committedFavorite
+
+        if (currentFavorite != committedFavorite) {
+            applicationScope.launch {
+                photoRepository.updateFavorite(photo.id, currentFavorite)
+            }
+        }
+    }
 }
