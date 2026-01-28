@@ -37,7 +37,9 @@ fun DoubleButtonAlertDialog(
     onClickPrimaryButton: () -> Unit,
     onClickGrayButton: () -> Unit,
     modifier: Modifier = Modifier,
-    properties: DialogProperties = DialogProperties(),
+    properties: DialogProperties = DialogProperties(
+        usePlatformDefaultWidth = false,
+    ),
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,

@@ -34,6 +34,7 @@ fun SingleButtonAlertDialog(
     onClick: () -> Unit,
     enabled: Boolean = true,
     properties: DialogProperties = DialogProperties(
+        usePlatformDefaultWidth = false,
         dismissOnBackPress = false,
         dismissOnClickOutside = false,
     ),
