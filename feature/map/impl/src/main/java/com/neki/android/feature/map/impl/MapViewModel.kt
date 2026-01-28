@@ -164,15 +164,15 @@ class MapViewModel @Inject constructor(
     }
 
     private fun handleClickBrand(
-        brand: Brand,
+        clickedBrand: Brand,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         reduce {
-            val updatedBrands = brands.map { b ->
-                if (b == brand) {
-                    b.copy(isChecked = !b.isChecked)
+            val updatedBrands = brands.map { brand ->
+                if (brand == clickedBrand) {
+                    brand.copy(isChecked = !brand.isChecked)
                 } else {
-                    b
+                    brand
                 }
             }
             val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
