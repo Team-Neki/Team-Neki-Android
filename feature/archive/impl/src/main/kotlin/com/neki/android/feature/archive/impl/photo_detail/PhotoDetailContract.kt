@@ -1,7 +1,6 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
 import com.neki.android.core.model.Photo
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 data class PhotoDetailState(
     val isLoading: Boolean = false,
