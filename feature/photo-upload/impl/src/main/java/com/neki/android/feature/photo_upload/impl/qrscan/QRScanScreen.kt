@@ -1,7 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.qrscan
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
@@ -41,7 +41,7 @@ internal fun QRScanRoute(
             }
             is QRScanSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             QRScanSideEffect.OpenBrandProposalUrl -> {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.BRAND_PROPOSAL_URL))
+                val intent = Intent(Intent.ACTION_VIEW, BuildConfig.BRAND_PROPOSAL_URL.toUri())
                 context.startActivity(intent)
             }
 
