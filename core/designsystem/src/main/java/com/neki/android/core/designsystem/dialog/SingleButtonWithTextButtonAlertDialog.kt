@@ -96,7 +96,10 @@ fun SingleButtonWithTextButtonAlertDialog(
                 )
                 Text(
                     modifier = Modifier
-                        .padding(bottom = 8.dp)
+                        .padding(
+                            vertical = 4.dp,
+                            horizontal = 56.dp,
+                        )
                         .clickableSingle(onClick = onTextButtonClick),
                     text = textButtonText,
                     style = NekiTheme.typography.body14Regular,
