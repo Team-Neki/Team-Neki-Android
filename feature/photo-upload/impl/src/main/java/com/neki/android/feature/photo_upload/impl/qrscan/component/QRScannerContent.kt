@@ -51,7 +51,6 @@ internal fun QRScannerContent(
     var frameSize: IntSize? by remember { mutableStateOf(null) }
     var containerSize: IntSize? by remember { mutableStateOf(null) }
 
-    onQRCodeScanned("")
     Box(
         modifier = modifier
             .fillMaxSize()
