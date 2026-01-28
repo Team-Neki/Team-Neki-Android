@@ -105,11 +105,7 @@ fun MapRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             is MapEffect.OpenDirectionBottomSheet -> {
-                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                    viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
-                } else {
-                    viewModel.store.onIntent(MapIntent.RequestLocationPermission)
-                }
+                viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
             }
 
             is MapEffect.MoveCameraToPosition -> {
