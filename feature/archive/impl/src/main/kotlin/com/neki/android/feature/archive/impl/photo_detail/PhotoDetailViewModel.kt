@@ -34,7 +34,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
         )
 
     init {
-        applicationScope.launch {
+        viewModelScope.launch {
             favoriteRequests
                 .debounce(500)
                 .collect { newFavorite ->
