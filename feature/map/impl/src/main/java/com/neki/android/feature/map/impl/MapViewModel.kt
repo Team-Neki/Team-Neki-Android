@@ -2,8 +2,15 @@ package com.neki.android.feature.map.impl
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil3.ImageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.toBitmap
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -19,7 +26,10 @@ import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -283,10 +293,40 @@ class MapViewModel @Inject constructor(
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
                     reduce { copy(isLoading = false, brands = loadedBrands.toImmutableList()) }
+                    cacheBrandImages(loadedBrands, reduce)
                 }
                 .onFailure {
                     reduce { copy(isLoading = false) }
                 }
+        }
+    }
+
+    private fun cacheBrandImages(
+        brands: List<Brand>,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val imageLoader = ImageLoader(context)
+            val cache = mutableMapOf<String, ImageBitmap>()
+
+            brands.forEach { brand ->
+                if (brand.imageUrl.isNotEmpty()) {
+                    val request = ImageRequest.Builder(context)
+                        .data(brand.imageUrl)
+                        .allowHardware(false)
+                        .build()
+
+                    val result = withContext(Dispatchers.IO) {
+                        imageLoader.execute(request)
+                    }
+
+                    if (result is SuccessResult) {
+                        cache[brand.imageUrl] = result.image.toBitmap().asImageBitmap()
+                    }
+                }
+            }
+
+            reduce { copy(brandImageCache = cache.toImmutableMap()) }
         }
     }
 

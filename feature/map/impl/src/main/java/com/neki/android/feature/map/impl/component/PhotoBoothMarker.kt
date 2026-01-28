@@ -46,12 +46,11 @@ import com.neki.android.feature.map.impl.const.MapConst.MARKER_TRIANGLE_WIDTH
 @Composable
 internal fun PhotoBoothMarker(
     photoBooth: PhotoBooth,
-    isFocused: Boolean = false,
     cachedBitmap: ImageBitmap? = null,
     onClick: () -> Unit = {},
 ) {
     MarkerComposable(
-        keys = arrayOf("$isFocused", photoBooth.imageUrl, "${cachedBitmap != null}"),
+        keys = arrayOf("${photoBooth.id}", "${photoBooth.isFocused}", "$cachedBitmap"),
         state = rememberUpdatedMarkerState(
             position = LatLng(photoBooth.latitude, photoBooth.longitude),
         ),
@@ -65,7 +64,7 @@ internal fun PhotoBoothMarker(
     ) {
         PhotoBoothMarkerContent(
             cachedBitmap = cachedBitmap,
-            isFocused = isFocused,
+            isFocused = photoBooth.isFocused,
         )
     }
 }

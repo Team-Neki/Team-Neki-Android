@@ -16,7 +16,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -51,7 +50,6 @@ import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.DirectionHelper
-import com.neki.android.feature.map.impl.util.rememberCachedBrandImage
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
@@ -72,7 +70,6 @@ fun MapRoute(
             MapConst.DEFAULT_ZOOM_LEVEL,
         )
     }
-    val brandImageCache = rememberCachedBrandImage(uiState.brands)
     var isNavigatedToSettings by remember { mutableStateOf(false) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -185,7 +182,6 @@ fun MapRoute(
         onIntent = viewModel.store::onIntent,
         locationTrackingMode = locationTrackingMode,
         cameraPositionState = cameraPositionState,
-        brandImageCache = brandImageCache,
     )
 }
 
@@ -198,7 +194,6 @@ fun MapScreen(
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
         position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), MapConst.DEFAULT_ZOOM_LEVEL)
     },
-    brandImageCache: Map<String, ImageBitmap> = emptyMap(),
 ) {
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
@@ -227,11 +222,9 @@ fun MapScreen(
             },
         ) {
             uiState.mapMarkers.filter { it.isCheckedBrand }.forEach { photoBooth ->
-                val cachedBitmap = brandImageCache[photoBooth.imageUrl]
                 PhotoBoothMarker(
                     photoBooth = photoBooth,
-                    isFocused = photoBooth.isFocused,
-                    cachedBitmap = cachedBitmap,
+                    cachedBitmap = uiState.brandImageCache[photoBooth.imageUrl],
                     onClick = {
                         onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
                     },

@@ -1,10 +1,13 @@
 package com.neki.android.feature.map.impl
 
+import androidx.compose.ui.graphics.ImageBitmap
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.feature.map.impl.const.DirectionApp
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 
 data class MapState(
     val isLoading: Boolean = false,
@@ -12,6 +15,7 @@ data class MapState(
     val isCameraOnCurrentLocation: Boolean = false,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
+    val brandImageCache: ImmutableMap<String, ImageBitmap> = persistentMapOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
     val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val isShowInfoDialog: Boolean = false,
