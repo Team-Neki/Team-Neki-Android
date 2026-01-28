@@ -12,7 +12,7 @@ internal suspend fun Context.getPlaceName(
     latitude: Double,
     longitude: Double,
     fallback: String,
-): String = suspendCancellableCoroutine { cont ->
+): String = suspendCancellableCoroutine { coroutine ->
     val geocoder = Geocoder(this, Locale.KOREAN)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -21,7 +21,7 @@ internal suspend fun Context.getPlaceName(
                 ?.getAddressLine(0)
                 ?.removePrefix("대한민국 ")
                 ?: fallback
-            cont.resume(address)
+            coroutine.resume(address)
         }
     } else {
         try {
@@ -31,10 +31,10 @@ internal suspend fun Context.getPlaceName(
                 ?.getAddressLine(0)
                 ?.removePrefix("대한민국 ")
                 ?: fallback
-            cont.resume(address)
+            coroutine.resume(address)
         } catch (e: Exception) {
             e.printStackTrace()
-            cont.resume(fallback)
+            coroutine.resume(fallback)
         }
     }
 }

@@ -12,20 +12,20 @@ import kotlin.coroutines.resume
 object LocationHelper {
     @SuppressLint("MissingPermission")
     suspend fun getCurrentLocation(context: Context): Result<LocLatLng> =
-        suspendCancellableCoroutine { cont ->
+        suspendCancellableCoroutine { coroutine ->
             val cancellationTokenSource = CancellationTokenSource()
 
-            cont.invokeOnCancellation { cancellationTokenSource.cancel() }
+            coroutine.invokeOnCancellation { cancellationTokenSource.cancel() }
 
             LocationServices.getFusedLocationProviderClient(context)
                 .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token)
                 .addOnSuccessListener { location ->
                     location?.let {
-                        cont.resume(Result.success(LocLatLng(it.latitude, it.longitude)))
-                    } ?: cont.resume(Result.failure(Exception("Location is null")))
+                        coroutine.resume(Result.success(LocLatLng(it.latitude, it.longitude)))
+                    } ?: coroutine.resume(Result.failure(Exception("Location is null")))
                 }
                 .addOnFailureListener { e ->
-                    cont.resume(Result.failure(e))
+                    coroutine.resume(Result.failure(e))
                 }
         }
 }
