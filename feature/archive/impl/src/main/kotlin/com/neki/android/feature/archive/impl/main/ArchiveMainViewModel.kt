@@ -242,6 +242,17 @@ class ArchiveMainViewModel @Inject constructor(
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
         // TODO: Add album to repository
+        viewModelScope.launch {
+            folderRepository.createFolder(name = albumName)
+                .onSuccess { folderId ->
+                    fetchFolders(reduce)
+                    Timber.d("folderId: $folderId")
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                }
+        }
+
         reduce { copy(isShowAddAlbumBottomSheet = false) }
         postSideEffect(ArchiveMainSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
     }
