@@ -9,35 +9,32 @@ data class RandomPoseUiState(
     val isShowTutorial: Boolean = true,
     val currentIndex: Int = 0,
     val poseList: ImmutableList<Pose> = persistentListOf(),
+    val committedScraps: Map<Long, Boolean> = emptyMap(),
 ) {
     val currentPose: Pose?
         get() = poseList.getOrNull(currentIndex)
 
     val hasPrevious: Boolean
         get() = currentIndex > 0
-
-    val hasNext: Boolean
-        get() = poseList.isNotEmpty() // 랜덤 포즈는 항상 다음으로 이동 가능
 }
 
 sealed interface RandomPoseIntent {
     data object EnterRandomPoseScreen : RandomPoseIntent
 
     // 튜토리얼
-    data object ClickLeftSwipe : RandomPoseIntent
-    data object ClickRightSwipe : RandomPoseIntent
     data object ClickStartRandomPose : RandomPoseIntent
 
     // 기본화면
     data object ClickCloseIcon : RandomPoseIntent
     data object ClickGoToDetailIcon : RandomPoseIntent
     data object ClickScrapIcon : RandomPoseIntent
-    data object SwipeLeft : RandomPoseIntent
-    data object SwipeRight : RandomPoseIntent
+    data object ClickLeftSwipe : RandomPoseIntent
+    data object ClickRightSwipe : RandomPoseIntent
 }
 
 sealed interface RandomPoseEffect {
     data object NavigateBack : RandomPoseEffect
     data class NavigateToDetail(val poseId: Long) : RandomPoseEffect
     data class ShowToast(val message: String) : RandomPoseEffect
+    data class RequestImageBuilder(val imageUrl: String) : RandomPoseEffect
 }

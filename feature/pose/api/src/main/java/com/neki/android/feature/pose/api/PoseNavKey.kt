@@ -2,7 +2,6 @@ package com.neki.android.feature.pose.api
 
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.model.PeopleCount
-import com.neki.android.core.model.Pose
 import com.neki.android.core.navigation.Navigator
 import kotlinx.serialization.Serializable
 
