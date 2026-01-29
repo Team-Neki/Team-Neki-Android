@@ -1,15 +1,16 @@
 package com.neki.android.feature.archive.impl.album
 
-import com.neki.android.core.model.Album
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class AllAlbumState(
-    val favoriteAlbum: Album = Album(),
-    val albums: ImmutableList<Album> = persistentListOf(),
+    val isLoading: Boolean = false,
+    val favoriteAlbum: AlbumPreview = AlbumPreview(),
+    val albums: ImmutableList<AlbumPreview> = persistentListOf(),
     val selectMode: SelectMode = SelectMode.DEFAULT,
-    val selectedAlbums: ImmutableList<Album> = persistentListOf(),
+    val selectedAlbums: ImmutableList<AlbumPreview> = persistentListOf(),
     val isShowOptionPopup: Boolean = false,
     val selectedDeleteOption: AlbumDeleteOption = AlbumDeleteOption.DELETE_WITH_PHOTOS,
     val isShowAddAlbumBottomSheet: Boolean = false,
