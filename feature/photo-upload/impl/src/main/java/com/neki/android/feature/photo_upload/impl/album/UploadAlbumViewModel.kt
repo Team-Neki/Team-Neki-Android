@@ -4,9 +4,10 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.repository.FolderRepository
+import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
-import com.neki.android.core.model.Album
 import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -14,9 +15,10 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -26,6 +28,8 @@ class UploadAlbumViewModel @AssistedInject constructor(
     @Assisted private val uriStrings: List<String>,
     private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
     private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
+    private val photoRepository: PhotoRepository,
+    private val folderRepository: FolderRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -68,27 +72,37 @@ class UploadAlbumViewModel @AssistedInject constructor(
     }
 
     private fun fetchInitialData(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
-        // TODO: Fetch albums from repository
-        val dummyAlbums = persistentListOf(
-            Album(
-                id = 1,
-                title = "Travel",
-                photoList = persistentListOf(),
-            ),
-            Album(
-                id = 2,
-                title = "Family",
-                photoList = persistentListOf(),
-            ),
-        )
-
-        reduce {
-            copy(
-                albums = dummyAlbums,
-                imageUrl = imageUrl,
-                selectedUris = uriStrings.map { it.toUri() }.toImmutableList(),
-            )
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            try {
+                awaitAll(
+                    async { fetchFavoriteSummary(reduce) },
+                    async { fetchFolders(reduce) },
+                )
+            } finally {
+                reduce { copy(isLoading = false) }
+            }
         }
+    }
+
+    private suspend fun fetchFavoriteSummary(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
+        photoRepository.getFavoriteSummary()
+            .onSuccess { data ->
+                reduce { copy(favoriteAlbum = data) }
+            }
+            .onFailure { error ->
+                Timber.e(error)
+            }
+    }
+
+    private suspend fun fetchFolders(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
+        folderRepository.getFolders()
+            .onSuccess { data ->
+                reduce { copy(albums = data.toImmutableList()) }
+            }
+            .onFailure { error ->
+                Timber.e(error)
+            }
     }
 
     private fun handleUploadButtonClick(

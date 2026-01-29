@@ -1,7 +1,7 @@
 package com.neki.android.feature.photo_upload.impl.album
 
 import android.net.Uri
-import com.neki.android.core.model.Album
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.UploadType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
@@ -11,8 +11,8 @@ data class UploadAlbumState(
     val isLoading: Boolean = false,
     val imageUrl: String? = null,
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
-    val favoriteAlbum: Album = Album(),
-    val albums: ImmutableList<Album> = persistentListOf(),
+    val favoriteAlbum: AlbumPreview = AlbumPreview(),
+    val albums: ImmutableList<AlbumPreview> = persistentListOf(),
     val selectedAlbumIds: PersistentList<Long> = persistentListOf(),
 ) {
     val count: Int
