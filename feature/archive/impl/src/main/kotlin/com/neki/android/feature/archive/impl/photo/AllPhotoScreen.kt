@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -50,7 +51,10 @@ import com.neki.android.feature.archive.impl.photo.component.AllPhotoFilterBar
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoTopBar
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
+import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 internal fun AllPhotoRoute(
@@ -60,6 +64,7 @@ internal fun AllPhotoRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
+    Timber.d(pagingItems.toString())
     val context = LocalContext.current
     val lazyState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
@@ -68,7 +73,13 @@ internal fun AllPhotoRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             AllPhotoSideEffect.NavigateBack -> navigateBack()
-            AllPhotoSideEffect.ScrollToTop -> coroutineScope.launch { lazyState.animateScrollToItem(0) }
+            AllPhotoSideEffect.ScrollToTop -> coroutineScope.launch {
+                snapshotFlow { pagingItems.loadState.refresh }
+                    .dropWhile { it is LoadState.NotLoading }  // 해당 이벤트 도착이, 새로운 pagingItems 조회보다 빠름.
+                    .first { it is LoadState.NotLoading }
+                lazyState.scrollToItem(0)
+            }
+
             is AllPhotoSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             is AllPhotoSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)
@@ -112,7 +123,7 @@ internal fun AllPhotoScreen(
         }
     }
 
-    val isRefreshing = pagingItems.loadState.refresh is LoadState.Loading
+    val isRefreshing by remember { derivedStateOf { pagingItems.loadState.refresh is LoadState.Loading } }
 
     BackHandler(enabled = true) {
         onIntent(AllPhotoIntent.OnBackPressed)
