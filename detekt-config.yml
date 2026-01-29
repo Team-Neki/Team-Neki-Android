@@ -54,6 +54,8 @@ exceptions:
         active: false
 
 style:
+    FunctionOnlyReturningConstant:
+        active: false
     UnusedParameter:
         active: false
     MagicNumber:

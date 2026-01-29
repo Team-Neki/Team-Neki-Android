@@ -21,6 +21,7 @@ import com.neki.android.feature.archive.impl.main.ArchiveMainViewModel
 import com.neki.android.feature.archive.impl.photo.AllPhotoRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
+import com.neki.android.feature.photo_upload.api.QRScanResult
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import com.neki.android.feature.photo_upload.api.navigateToUploadAlbum
 import dagger.Module
@@ -44,8 +45,16 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.Archive> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<ArchiveMainViewModel>()
-        ResultEffect<String>(resultBus) { imageUrl ->
-            viewModel.store.onIntent(ArchiveMainIntent.QRCodeScanned(imageUrl))
+        ResultEffect<QRScanResult>(resultBus) { result ->
+            when (result) {
+                is QRScanResult.QRCodeScanned -> {
+                    viewModel.store.onIntent(ArchiveMainIntent.QRCodeScanned(result.imageUrl))
+                }
+
+                QRScanResult.OpenGallery -> {
+                    viewModel.store.onIntent(ArchiveMainIntent.ClickGalleryUploadRow)
+                }
+            }
         }
         ResultEffect<Boolean>(resultBus) { hasUpdated ->
             if (hasUpdated) viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)

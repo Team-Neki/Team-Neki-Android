@@ -20,6 +20,7 @@ android {
     }
 
     defaultConfig {
+        buildConfigField("String", "BRAND_PROPOSAL_URL", properties["BRAND_PROPOSAL_URL"].toString())
         buildConfigField("String", "PHOTOISM_URL", properties["PHOTOISM_URL"].toString())
         buildConfigField("String", "PHOTOISM_IMAGE_URL", properties["PHOTOISM_IMAGE_URL"].toString())
         buildConfigField("String", "PHOTOISM_IMG_URL_MIME_TYPE", properties["PHOTOISM_IMG_URL_MIME_TYPE"].toString())

@@ -17,21 +17,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
+import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun SingleButtonAlertDialog(
+fun SingleButtonWithTextButtonAlertDialog(
     title: String,
     content: String,
     buttonText: String,
+    textButtonText: String,
     onDismissRequest: () -> Unit,
-    onClick: () -> Unit,
+    onButtonClick: () -> Unit,
+    onTextButtonClick: () -> Unit,
     enabled: Boolean = true,
     properties: DialogProperties = DialogProperties(
         usePlatformDefaultWidth = false,
@@ -77,28 +81,48 @@ fun SingleButtonAlertDialog(
                     textAlign = TextAlign.Center,
                 )
             }
-            CTAButtonPrimary(
-                text = buttonText,
-                onClick = onClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                enabled = enabled,
-            )
+            Column(
+                modifier = Modifier.padding(vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                CTAButtonPrimary(
+                    text = buttonText,
+                    onClick = onButtonClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    enabled = enabled,
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(
+                            vertical = 4.dp,
+                            horizontal = 56.dp,
+                        )
+                        .clickableSingle(onClick = onTextButtonClick),
+                    text = textButtonText,
+                    style = NekiTheme.typography.body14Regular,
+                    color = NekiTheme.colorScheme.primary600,
+                    textDecoration = TextDecoration.Underline,
+                )
+            }
         }
     }
 }
 
 @ComponentPreview
 @Composable
-private fun SingleButtonAlertDialogPreview() {
+private fun SingleButtonWithTextButtonAlertDialogPreview() {
     NekiTheme {
-        SingleButtonAlertDialog(
+        SingleButtonWithTextButtonAlertDialog(
             title = "메인 텍스트가 들어가는 곳",
             content = "보조 설명 텍스트가 들어가는 공간입니다",
             buttonText = "텍스트",
+            textButtonText = "텍스트 공간",
             onDismissRequest = {},
-            onClick = {},
+            onButtonClick = {},
+            onTextButtonClick = {},
         )
     }
 }
