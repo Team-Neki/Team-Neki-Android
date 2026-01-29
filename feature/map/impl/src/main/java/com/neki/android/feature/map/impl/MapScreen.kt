@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -101,10 +102,13 @@ fun MapRoute(
         }
     }
 
-    LaunchedEffect(cameraPositionState.cameraUpdateReason) {
-        if (cameraPositionState.cameraUpdateReason == CameraUpdateReason.GESTURE) {
-            viewModel.store.onIntent(MapIntent.GestureOnMap)
-        }
+    LaunchedEffect(Unit) {
+        snapshotFlow { cameraPositionState.isMoving to cameraPositionState.cameraUpdateReason }
+            .collect { (isMoving, reason) ->
+                if (isMoving && reason == CameraUpdateReason.GESTURE) {
+                    viewModel.store.onIntent(MapIntent.GestureOnMap)
+                }
+            }
     }
 
     LifecycleResumeEffect(Unit) {
@@ -244,7 +248,7 @@ fun MapScreen(
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
 
-        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && !uiState.isCameraOnCurrentLocation) {
+        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && uiState.isVisibleRefreshButton) {
             MapRefreshChip(
                 modifier = Modifier
                     .align(Alignment.TopCenter)

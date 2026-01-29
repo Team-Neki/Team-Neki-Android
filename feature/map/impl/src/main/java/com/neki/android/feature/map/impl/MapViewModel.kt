@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -59,8 +60,11 @@ class MapViewModel @Inject constructor(
                 }
             }
 
-            MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false) }
-            is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+            MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false, isVisibleRefreshButton = true) }
+            is MapIntent.ClickRefreshButton -> {
+                reduce { copy(isVisibleRefreshButton = false) }
+                loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+            }
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
@@ -105,7 +109,7 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             LocationHelper.getCurrentLocation(context)
                 .onSuccess { location ->
-                    reduce { copy(isCameraOnCurrentLocation = true) }
+                    reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
                     postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true))
                 }
                 .onFailure {
@@ -153,7 +157,7 @@ class MapViewModel @Inject constructor(
         }
 
         if (state.currentLocLatLng != null) {
-            reduce { copy(isCameraOnCurrentLocation = true) }
+            reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
             postSideEffect(
                 MapEffect.MoveCameraToPosition(
                     LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),

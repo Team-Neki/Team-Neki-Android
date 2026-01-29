@@ -13,6 +13,7 @@ data class MapState(
     val isLoading: Boolean = false,
     val currentLocLatLng: LocLatLng? = null,
     val isCameraOnCurrentLocation: Boolean = false,
+    val isVisibleRefreshButton: Boolean = false,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val brandImageCache: ImmutableMap<String, ImageBitmap> = persistentMapOf(),
