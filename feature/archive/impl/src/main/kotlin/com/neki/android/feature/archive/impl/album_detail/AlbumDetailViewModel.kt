@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import androidx.paging.map
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
@@ -37,6 +38,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     }
 
     private val deletedPhotoIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val updatedFavorites = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
 
     private val originalPagingData: Flow<PagingData<Photo>> =
         if (isFavoriteAlbum) {
@@ -48,8 +50,15 @@ class AlbumDetailViewModel @AssistedInject constructor(
     val photoPagingData: Flow<PagingData<Photo>> = combine(
         originalPagingData,
         deletedPhotoIds,
-    ) { pagingData, deletedIds ->
-        pagingData.filter { photo -> photo.id !in deletedIds }
+        updatedFavorites,
+    ) { pagingData, deletedIds, favorites ->
+        pagingData
+            .filter { photo -> photo.id !in deletedIds }
+            .map { photo ->
+                favorites[photo.id]?.let { isFavorite ->
+                    photo.copy(isFavorite = isFavorite)
+                } ?: photo
+            }
     }
 
     val store: MviIntentStore<AlbumDetailState, AlbumDetailIntent, AlbumDetailSideEffect> =
@@ -95,6 +104,14 @@ class AlbumDetailViewModel @AssistedInject constructor(
             is AlbumDetailIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AlbumDetailIntent.ClickDeleteBottomSheetCancelButton -> reduce { copy(isShowDeleteBottomSheet = false) }
             AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumPhotoDelete(state, reduce, postSideEffect)
+
+            // Result Intent
+            is AlbumDetailIntent.PhotoDeleted -> {
+                deletedPhotoIds.update { it + intent.photoIds.toSet() }
+            }
+            is AlbumDetailIntent.FavoriteChanged -> {
+                updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
+            }
         }
     }
 

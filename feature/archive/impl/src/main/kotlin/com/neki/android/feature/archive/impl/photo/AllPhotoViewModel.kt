@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import androidx.paging.map
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
@@ -30,6 +31,7 @@ class AllPhotoViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val deletedPhotoIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val updatedFavorites = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
     private val _photoFilter = MutableStateFlow(PhotoFilter.NEWEST)
     private val _isFavoriteOnly = MutableStateFlow(false)
 
@@ -54,8 +56,15 @@ class AllPhotoViewModel @Inject constructor(
     val photoPagingData: Flow<PagingData<Photo>> = combine(
         originalPagingData,
         deletedPhotoIds,
-    ) { pagingData, deletedIds ->
-        pagingData.filter { photo -> photo.id !in deletedIds }
+        updatedFavorites,
+    ) { pagingData, deletedIds, favorites ->
+        pagingData
+            .filter { photo -> photo.id !in deletedIds }
+            .map { photo ->
+                favorites[photo.id]?.let { isFavorite ->
+                    photo.copy(isFavorite = isFavorite)
+                } ?: photo
+            }
     }
 
     val store: MviIntentStore<AllPhotoState, AllPhotoIntent, AllPhotoSideEffect> =
@@ -96,6 +105,14 @@ class AllPhotoViewModel @Inject constructor(
             AllPhotoIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
             AllPhotoIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
             AllPhotoIntent.ClickDeleteDialogConfirmButton -> deleteSelectedPhotos(state, reduce, postSideEffect)
+
+            // Result Intent
+            is AllPhotoIntent.PhotoDeleted -> {
+                deletedPhotoIds.update { it + intent.photoIds.toSet() }
+            }
+            is AllPhotoIntent.FavoriteChanged -> {
+                updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
+            }
         }
     }
 

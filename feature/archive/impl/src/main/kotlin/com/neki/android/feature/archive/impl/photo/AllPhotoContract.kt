@@ -42,6 +42,10 @@ sealed interface AllPhotoIntent {
     data object ClickDeleteIcon : AllPhotoIntent
     data object DismissDeleteDialog : AllPhotoIntent
     data object ClickDeleteDialogConfirmButton : AllPhotoIntent
+
+    // Result Intent
+    data class PhotoDeleted(val photoIds: List<Long>) : AllPhotoIntent
+    data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : AllPhotoIntent
 }
 
 sealed interface AllPhotoSideEffect {

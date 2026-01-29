@@ -54,7 +54,6 @@ import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @Composable
 internal fun AllPhotoRoute(
@@ -64,7 +63,6 @@ internal fun AllPhotoRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
-    Timber.d(pagingItems.toString())
     val context = LocalContext.current
     val lazyState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()

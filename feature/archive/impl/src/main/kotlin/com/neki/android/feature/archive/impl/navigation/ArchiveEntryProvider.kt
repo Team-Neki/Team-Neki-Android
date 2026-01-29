@@ -14,11 +14,13 @@ import com.neki.android.feature.archive.api.navigateToAllAlbum
 import com.neki.android.feature.archive.api.navigateToAllPhoto
 import com.neki.android.feature.archive.api.navigateToPhotoDetail
 import com.neki.android.feature.archive.impl.album.AllAlbumRoute
+import com.neki.android.feature.archive.impl.album_detail.AlbumDetailIntent
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailRoute
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailViewModel
 import com.neki.android.feature.archive.impl.main.ArchiveMainIntent
 import com.neki.android.feature.archive.impl.main.ArchiveMainRoute
 import com.neki.android.feature.archive.impl.main.ArchiveMainViewModel
+import com.neki.android.feature.archive.impl.photo.AllPhotoIntent
 import com.neki.android.feature.archive.impl.photo.AllPhotoRoute
 import com.neki.android.feature.archive.impl.photo.AllPhotoViewModel
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
@@ -92,8 +94,12 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
 
         ResultEffect<ArchiveResult>(resultBus) { result ->
             when (result) {
-                is ArchiveResult.FavoriteChanged -> TODO(변화된 애만 수정)
-                is ArchiveResult.PhotoDeleted -> TODO(지워진 데이터만 지우기)
+                is ArchiveResult.FavoriteChanged -> {
+                    viewModel.store.onIntent(AllPhotoIntent.FavoriteChanged(result.photoId, result.isFavorite))
+                }
+                is ArchiveResult.PhotoDeleted -> {
+                    viewModel.store.onIntent(AllPhotoIntent.PhotoDeleted(result.photoId))
+                }
             }
         }
 
@@ -131,8 +137,12 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
 
             ResultEffect<ArchiveResult>(resultBus) { result ->
                 when (result) {
-                    is ArchiveResult.FavoriteChanged -> TODO(변화된 애만 수정)
-                    is ArchiveResult.PhotoDeleted -> TODO(지워진 데이터만 지우기)
+                    is ArchiveResult.FavoriteChanged -> {
+                        viewModel.store.onIntent(AlbumDetailIntent.FavoriteChanged(result.photoId, result.isFavorite))
+                    }
+                    is ArchiveResult.PhotoDeleted -> {
+                        viewModel.store.onIntent(AlbumDetailIntent.PhotoDeleted(result.photoId))
+                    }
                 }
             }
 
