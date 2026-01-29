@@ -38,7 +38,9 @@ import com.neki.android.feature.archive.impl.album_detail.component.EmptyContent
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
-import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_TOP_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
@@ -122,8 +124,10 @@ internal fun AlbumDetailScreen(
                 columns = StaggeredGridCells.Fixed(2),
                 state = lazyState,
                 contentPadding = PaddingValues(
-                    horizontal = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
-                    vertical = 8.dp,
+                    top = PHOTO_GRID_LAYOUT_TOP_PADDING.dp,
+                    start = PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING.dp,
+                    end = PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING.dp,
+                    bottom = PHOTO_GRAY_LAYOUT_BOTTOM_PADDING.dp,
                 ),
                 verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
                 horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),

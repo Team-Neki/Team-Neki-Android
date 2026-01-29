@@ -42,8 +42,9 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
-import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
-import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_TOP_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoFilterBar
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoTopBar
@@ -139,10 +140,10 @@ internal fun AllPhotoScreen(
                 columns = StaggeredGridCells.Fixed(2),
                 state = lazyState,
                 contentPadding = PaddingValues(
-                    top = if (uiState.selectMode == SelectMode.SELECTING) ARCHIVE_GRID_ITEM_SPACING.dp else topPadding + ARCHIVE_GRID_ITEM_SPACING.dp,
-                    start = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
-                    end = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
-                    bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
+                    top = if (uiState.selectMode == SelectMode.SELECTING) PHOTO_GRID_LAYOUT_TOP_PADDING.dp else topPadding + PHOTO_GRID_LAYOUT_TOP_PADDING.dp,
+                    start = PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING.dp,
+                    end = PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING.dp,
+                    bottom = PHOTO_GRAY_LAYOUT_BOTTOM_PADDING.dp,
                 ),
                 verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
                 horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),

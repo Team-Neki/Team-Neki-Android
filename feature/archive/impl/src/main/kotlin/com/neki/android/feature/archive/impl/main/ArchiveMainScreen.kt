@@ -40,7 +40,7 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
-import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
@@ -204,7 +204,7 @@ private fun ArchiveMainContent(
         contentPadding = PaddingValues(
             start = 20.dp,
             end = 20.dp,
-            bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
+            bottom = PHOTO_GRAY_LAYOUT_BOTTOM_PADDING.dp,
         ),
         verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
         horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),
