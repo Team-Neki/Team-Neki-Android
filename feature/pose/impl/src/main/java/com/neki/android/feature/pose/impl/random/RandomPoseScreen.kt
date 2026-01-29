@@ -44,7 +44,7 @@ internal fun RandomPoseRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
-    val imageLoader = ImageLoader(context)
+    val imageLoader = remember { ImageLoader(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
