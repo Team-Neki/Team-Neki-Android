@@ -26,6 +26,7 @@ sealed interface MyPageIntent {
     data object ClickProfileCard : MyPageIntent
     data object ClickPermission : MyPageIntent
     data class ClickServiceInfoMenu(val menu: ServiceInfoMenu) : MyPageIntent
+    data object ClickOpenSourceLicense : MyPageIntent
 
     // Profile
     data object ClickBackIcon : MyPageIntent
@@ -58,6 +59,7 @@ sealed interface MyPageEffect {
     data object NavigateToLogin : MyPageEffect
     data class MoveAppSettings(val permission: NekiPermission) : MyPageEffect
     data class RequestPermission(val permission: NekiPermission) : MyPageEffect
+    data object OpenOssLicenses : MyPageEffect
 }
 
 enum class ProfileMode { SETTING, EDIT }

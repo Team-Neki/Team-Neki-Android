@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -37,14 +38,17 @@ internal fun MyPageRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
         when (effect) {
+            MyPageEffect.NavigateBack -> {}
+            MyPageEffect.NavigateToLogin -> {}
             MyPageEffect.NavigateToNotification -> {}
             MyPageEffect.NavigateToProfile -> navigateToProfile()
             MyPageEffect.NavigateToPermission -> navigateToPermission()
             is MyPageEffect.OpenExternalLink -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(effect.url)))
-            MyPageEffect.NavigateBack -> {}
-            MyPageEffect.NavigateToLogin -> {}
-            is MyPageEffect.MoveAppSettings -> {}
-            is MyPageEffect.RequestPermission -> {}
+            MyPageEffect.OpenOssLicenses -> {
+                OssLicensesMenuActivity.setActivityTitle("오픈소스 라이선스 목록")
+                context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+            }
+            else -> {}
         }
     }
 
@@ -89,12 +93,16 @@ fun MyPageScreen(
         }
         Column {
             SectionTitleText(text = "서비스 정보 및 지원")
-            ServiceInfoMenu.entries.forEach { link ->
+            ServiceInfoMenu.entries.forEach { menu ->
                 SectionArrowItem(
-                    text = link.text,
-                    onClick = { onIntent(MyPageIntent.ClickServiceInfoMenu(link)) },
+                    text = menu.text,
+                    onClick = { onIntent(MyPageIntent.ClickServiceInfoMenu(menu)) },
                 )
             }
+            SectionArrowItem(
+                text = "오픈소스 라이선스",
+                onClick = { onIntent(MyPageIntent.ClickOpenSourceLicense) },
+            )
             SectionVersionItem(appVersion)
         }
     }

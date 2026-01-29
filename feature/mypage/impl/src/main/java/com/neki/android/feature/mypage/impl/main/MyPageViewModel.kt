@@ -28,6 +28,7 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
             MyPageIntent.ClickProfileCard -> postSideEffect(MyPageEffect.NavigateToProfile)
             MyPageIntent.ClickPermission -> postSideEffect(MyPageEffect.NavigateToPermission)
             is MyPageIntent.ClickServiceInfoMenu -> postSideEffect(MyPageEffect.OpenExternalLink(intent.menu.url))
+            MyPageIntent.ClickOpenSourceLicense -> postSideEffect(MyPageEffect.OpenOssLicenses)
 
             // Profile
             MyPageIntent.ClickBackIcon -> {
