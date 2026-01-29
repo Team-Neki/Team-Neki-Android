@@ -18,7 +18,7 @@ data class UploadAlbumState(
     val count: Int
         get() = if (imageUrl == null) selectedUris.size else 1
     val uploadType: UploadType
-        get() = if (imageUrl == null) UploadType.MULTIPLE else UploadType.SINGLE
+        get() = if (imageUrl == null) UploadType.GALLERY else UploadType.QR_CODE
 }
 
 sealed interface UploadAlbumIntent {

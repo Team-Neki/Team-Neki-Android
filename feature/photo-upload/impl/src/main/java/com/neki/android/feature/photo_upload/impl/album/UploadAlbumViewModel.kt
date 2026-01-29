@@ -122,7 +122,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
             postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
         }
 
-        if (state.uploadType == UploadType.SINGLE) {
+        if (state.uploadType == UploadType.QR_CODE) {
             uploadSingleImage(
                 imageUrl = state.imageUrl ?: return,
                 albumId = firstAlbum.id,
