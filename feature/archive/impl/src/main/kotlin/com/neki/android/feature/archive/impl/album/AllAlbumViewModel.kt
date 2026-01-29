@@ -191,11 +191,11 @@ class AllAlbumViewModel @Inject constructor(
         reduce: (AllAlbumState.() -> AllAlbumState) -> Unit,
         postSideEffect: (AllAlbumSideEffect) -> Unit,
     ) {
-        // TODO: 삭제 타입에 따라 핸들링
         viewModelScope.launch {
             val selectedAlbumIds = state.selectedAlbums.map { it.id }
+            val deletePhotos = state.selectedDeleteOption == AlbumDeleteOption.DELETE_WITH_PHOTOS
 
-            folderRepository.deleteFolder(selectedAlbumIds)
+            folderRepository.deleteFolder(selectedAlbumIds, deletePhotos)
                 .onSuccess {
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))

@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
+import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
@@ -30,6 +31,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     @Assisted private val title: String,
     @Assisted private val isFavoriteAlbum: Boolean,
     private val photoRepository: PhotoRepository,
+    private val folderRepository: FolderRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -232,7 +234,12 @@ class AlbumDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            photoRepository.deletePhoto(photoIds = selectedPhotoIds)
+            val result = when (state.selectedDeleteOption) {
+                PhotoDeleteOption.REMOVE_FROM_ALBUM -> folderRepository.removePhotosFromFolder(id, selectedPhotoIds)
+                PhotoDeleteOption.REMOVE_FROM_ALL -> photoRepository.deletePhoto(photoIds = selectedPhotoIds)
+            }
+
+            result
                 .onSuccess {
                     Timber.d("삭제 성공")
                     deletedPhotoIds.update { it + selectedPhotoIds.toSet() }

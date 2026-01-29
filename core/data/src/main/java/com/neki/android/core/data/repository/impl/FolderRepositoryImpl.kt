@@ -3,6 +3,7 @@ package com.neki.android.core.data.repository.impl
 import com.neki.android.core.data.remote.api.FolderService
 import com.neki.android.core.data.remote.model.request.CreateFolderRequest
 import com.neki.android.core.data.remote.model.request.DeleteFolderRequest
+import com.neki.android.core.data.remote.model.request.DeletePhotoRequest
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.model.AlbumPreview
@@ -21,9 +22,17 @@ class FolderRepositoryImpl @Inject constructor(
         ).data
     }
 
-    override suspend fun deleteFolder(id: List<Long>): Result<Unit> = runSuspendCatching {
+    override suspend fun deleteFolder(id: List<Long>, deletePhotos: Boolean): Result<Unit> = runSuspendCatching {
         folderService.deleteFolder(
             requestBody = DeleteFolderRequest(folderIds = id),
+            deletePhotos = deletePhotos,
+        ).data
+    }
+
+    override suspend fun removePhotosFromFolder(folderId: Long, photoIds: List<Long>): Result<Unit> = runSuspendCatching {
+        folderService.removePhotosFromFolder(
+            folderId = folderId,
+            requestBody = DeletePhotoRequest(photoIds = photoIds),
         ).data
     }
 }
