@@ -7,9 +7,18 @@ import kotlinx.collections.immutable.persistentListOf
 data class RandomPoseUiState(
     val isLoading: Boolean = false,
     val isShowTutorial: Boolean = true,
-    val currentPose: Pose = Pose(),
-    val randomPoseList: ImmutableList<Pose> = persistentListOf(),
-)
+    val currentIndex: Int = 0,
+    val poseList: ImmutableList<Pose> = persistentListOf(),
+) {
+    val currentPose: Pose?
+        get() = poseList.getOrNull(currentIndex)
+
+    val hasPrevious: Boolean
+        get() = currentIndex > 0
+
+    val hasNext: Boolean
+        get() = currentIndex < poseList.lastIndex
+}
 
 sealed interface RandomPoseIntent {
     data object EnterRandomPoseScreen : RandomPoseIntent
@@ -23,9 +32,12 @@ sealed interface RandomPoseIntent {
     data object ClickCloseIcon : RandomPoseIntent
     data object ClickGoToDetailIcon : RandomPoseIntent
     data object ClickScrapIcon : RandomPoseIntent
+    data object SwipeLeft : RandomPoseIntent
+    data object SwipeRight : RandomPoseIntent
 }
 
 sealed interface RandomPoseEffect {
     data object NavigateBack : RandomPoseEffect
     data class NavigateToDetail(val pose: Pose) : RandomPoseEffect
+    data class ShowToast(val message: String) : RandomPoseEffect
 }

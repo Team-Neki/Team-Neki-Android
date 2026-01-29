@@ -39,6 +39,7 @@ internal fun RandomPoseRoute(
         when (sideEffect) {
             RandomPoseEffect.NavigateBack -> navigateBack()
             is RandomPoseEffect.NavigateToDetail -> navigateToPoseDetail(sideEffect.pose)
+            is RandomPoseEffect.ShowToast -> Unit // TODO: Toast 처리
         }
     }
 
@@ -70,21 +71,23 @@ internal fun RandomPoseScreen(
                 onClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
             )
             VerticalSpacer(42.dp)
-            RandomPoseImage(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                pose = uiState.currentPose,
-            )
-            RandomPoseFloatingBarContent(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                isScrapped = uiState.currentPose.isScrapped,
-                onClickClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
-                onClickGoToDetail = { onIntent(RandomPoseIntent.ClickGoToDetailIcon) },
-                onClickScrap = { onIntent(RandomPoseIntent.ClickScrapIcon) },
-            )
+            uiState.currentPose?.let { pose ->
+                RandomPoseImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    pose = pose,
+                )
+                RandomPoseFloatingBarContent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    isScrapped = pose.isScrapped,
+                    onClickClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
+                    onClickGoToDetail = { onIntent(RandomPoseIntent.ClickGoToDetailIcon) },
+                    onClickScrap = { onIntent(RandomPoseIntent.ClickScrapIcon) },
+                )
+            }
         }
 
         if (uiState.isShowTutorial) {
