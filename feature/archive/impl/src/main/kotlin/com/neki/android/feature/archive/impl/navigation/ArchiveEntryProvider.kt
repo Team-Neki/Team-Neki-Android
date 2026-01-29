@@ -41,11 +41,15 @@ object ArchiveEntryProviderModule {
     @IntoSet
     @Provides
     fun provideArchiveEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
-        archiveEntry(navigator)
+        archiveMainEntry(navigator)
+        allPhotoEntry(navigator)
+        allAlbumEntry(navigator)
+        albumDetailEntry(navigator)
+        photoDetailEntry(navigator)
     }
 }
 
-private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
+private fun EntryProviderScope<NavKey>.archiveMainEntry(navigator: Navigator) {
     entry<ArchiveNavKey.Archive> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<ArchiveMainViewModel>()
@@ -54,7 +58,6 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
                 is QRScanResult.QRCodeScanned -> {
                     viewModel.store.onIntent(ArchiveMainIntent.QRCodeScanned(result.imageUrl))
                 }
-
                 QRScanResult.OpenGallery -> {
                     viewModel.store.onIntent(ArchiveMainIntent.ClickGalleryUploadRow)
                 }
@@ -71,23 +74,18 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
             navigateToUploadAlbumWithQRScan = navigator::navigateToUploadAlbum,
             navigateToAllAlbum = navigator::navigateToAllAlbum,
             navigateToFavoriteAlbum = { id ->
-                navigator.navigateToAlbumDetail(
-                    id = id,
-                    isFavorite = true,
-                )
+                navigator.navigateToAlbumDetail(id = id, isFavorite = true)
             },
             navigateToAlbumDetail = { id, title ->
-                navigator.navigateToAlbumDetail(
-                    id = id,
-                    title = title,
-                    isFavorite = false,
-                )
+                navigator.navigateToAlbumDetail(id = id, title = title, isFavorite = false)
             },
             navigateToAllPhoto = navigator::navigateToAllPhoto,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
+}
 
+private fun EntryProviderScope<NavKey>.allPhotoEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AllPhoto> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<AllPhotoViewModel>()
@@ -109,32 +107,27 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
+}
 
+private fun EntryProviderScope<NavKey>.allAlbumEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AllAlbum> {
         AllAlbumRoute(
             navigateBack = navigator::goBack,
             navigateToFavoriteAlbum = { id ->
-                navigator.navigateToAlbumDetail(
-                    id = id,
-                    isFavorite = true,
-                )
+                navigator.navigateToAlbumDetail(id = id, isFavorite = true)
             },
             navigateToAlbumDetail = { id, title ->
-                navigator.navigateToAlbumDetail(
-                    id = id,
-                    title = title,
-                    isFavorite = false,
-                )
+                navigator.navigateToAlbumDetail(id = id, title = title, isFavorite = false)
             },
         )
     }
+}
 
+private fun EntryProviderScope<NavKey>.albumDetailEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AlbumDetail> { key ->
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
-            creationCallback = { factory ->
-                factory.create(key.albumId, key.title, key.isFavorite)
-            },
+            creationCallback = { factory -> factory.create(key.albumId, key.title, key.isFavorite) },
         )
 
         ResultEffect<ArchiveResult>(resultBus) { result ->
@@ -154,13 +147,13 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
+}
 
+private fun EntryProviderScope<NavKey>.photoDetailEntry(navigator: Navigator) {
     entry<ArchiveNavKey.PhotoDetail> { key ->
         PhotoDetailRoute(
             viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
-                creationCallback = { factory ->
-                    factory.create(key.photo)
-                },
+                creationCallback = { factory -> factory.create(key.photo) },
             ),
             navigateBack = navigator::goBack,
         )

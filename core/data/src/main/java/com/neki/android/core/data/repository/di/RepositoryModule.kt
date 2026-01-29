@@ -67,7 +67,9 @@ internal interface RepositoryModule {
     fun bindFolderRepositoryImpl(
         folderRepositoryImpl: FolderRepositoryImpl,
     ): FolderRepository
-  
+
+    @Binds
+    @Singleton
     fun bindMapRepositoryImpl(
         mapRepositoryImpl: MapRepositoryImpl,
     ): MapRepository
