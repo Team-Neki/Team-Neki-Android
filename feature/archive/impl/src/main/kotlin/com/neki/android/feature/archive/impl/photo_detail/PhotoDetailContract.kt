@@ -4,6 +4,7 @@ import com.neki.android.core.model.Photo
 
 data class PhotoDetailState(
     val isLoading: Boolean = false,
+    val committedFavorite: Boolean = false,
     val photo: Photo = Photo(),
     val isShowDeleteDialog: Boolean = false,
 )
@@ -15,6 +16,8 @@ sealed interface PhotoDetailIntent {
     // ActionBar Intent
     data object ClickDownloadIcon : PhotoDetailIntent
     data object ClickFavoriteIcon : PhotoDetailIntent
+    data class FavoriteCommitted(val newFavorite: Boolean) : PhotoDetailIntent
+    data class RevertFavorite(val originalFavorite: Boolean) : PhotoDetailIntent
     data object ClickDeleteIcon : PhotoDetailIntent
 
     // Delete Dialog Intent
@@ -25,6 +28,7 @@ sealed interface PhotoDetailIntent {
 
 sealed interface PhotoDetailSideEffect {
     data object NavigateBack : PhotoDetailSideEffect
+    data object NotifyArchiveUpdated : PhotoDetailSideEffect
     data class ShowToastMessage(val message: String) : PhotoDetailSideEffect
     data class DownloadImage(val imageUrl: String) : PhotoDetailSideEffect
 }

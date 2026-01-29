@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.neki.android.library)
     alias(libs.plugins.neki.android.library.compose)
+    alias(libs.plugins.neki.hilt)
 }
 
 android {

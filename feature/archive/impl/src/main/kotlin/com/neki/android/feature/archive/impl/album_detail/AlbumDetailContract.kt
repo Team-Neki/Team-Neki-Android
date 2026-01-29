@@ -1,13 +1,14 @@
 package com.neki.android.feature.archive.impl.album_detail
 
-import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class AlbumDetailState(
-    val album: Album = Album(),
+    val isLoading: Boolean = false,
+    val title: String = "",
+    val photoList: ImmutableList<Photo> = persistentListOf(),
     val isFavoriteAlbum: Boolean = false,
     val selectMode: SelectMode = SelectMode.DEFAULT,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),

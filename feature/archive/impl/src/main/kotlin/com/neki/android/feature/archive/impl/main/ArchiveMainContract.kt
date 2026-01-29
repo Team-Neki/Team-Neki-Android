@@ -1,7 +1,7 @@
 package com.neki.android.feature.archive.impl.main
 
 import android.net.Uri
-import com.neki.android.core.model.Album
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.UploadType
 import kotlinx.collections.immutable.ImmutableList
@@ -10,8 +10,8 @@ import kotlinx.collections.immutable.persistentListOf
 data class ArchiveMainState(
     val isLoading: Boolean = false,
     val isFirstEntered: Boolean = true,
-    val favoriteAlbum: Album = Album(),
-    val albums: ImmutableList<Album> = persistentListOf(),
+    val favoriteAlbum: AlbumPreview = AlbumPreview(title = "즐겨찾는사진"),
+    val albums: ImmutableList<AlbumPreview> = persistentListOf(),
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
     val scannedImageUrl: String? = null,
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
@@ -25,6 +25,7 @@ data class ArchiveMainState(
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent
+    data object RefreshArchiveMainScreen : ArchiveMainIntent
     data class QRCodeScanned(val imageUrl: String) : ArchiveMainIntent
     data object ClickScreen : ArchiveMainIntent
     data object ClickGoToTopButton : ArchiveMainIntent

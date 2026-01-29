@@ -33,7 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.Album
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -47,6 +47,7 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
 import com.neki.android.feature.archive.impl.main.component.ChooseWithAlbumDialog
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
+import com.neki.android.feature.archive.impl.main.component.NoPhotoContent
 import kotlinx.collections.immutable.persistentListOf
 import timber.log.Timber
 
@@ -201,6 +202,8 @@ private fun ArchiveMainContent(
         columns = StaggeredGridCells.Fixed(2),
         state = lazyState,
         contentPadding = PaddingValues(
+            start = 20.dp,
+            end = 20.dp,
             bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
         ),
         verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
@@ -208,7 +211,6 @@ private fun ArchiveMainContent(
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
-                modifier = Modifier.padding(horizontal = 20.dp),
                 title = "앨범",
                 textButtonTitle = "전체 보기",
                 onClickShowAllAlbum = onClickShowAllAlbum,
@@ -227,11 +229,16 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
-                modifier = Modifier.padding(horizontal = 20.dp),
                 title = "최근 사진",
                 textButtonTitle = "모든 사진",
                 onClickShowAllAlbum = onClickShowAllPhoto,
             )
+        }
+
+        if (uiState.recentPhotos.isEmpty()) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                NoPhotoContent()
+            }
         }
 
         items(
@@ -239,7 +246,6 @@ private fun ArchiveMainContent(
             key = { photo -> photo.id },
         ) { photo ->
             ArchiveMainPhotoItem(
-//                modifier = Modifier.padding(horizontal = 20.dp),
                 photo = photo,
                 onClickItem = onClickPhotoItem,
             )
@@ -261,42 +267,17 @@ private fun ArchiveMainScreenPreview() {
         Photo(id = 8, imageUrl = "https://picsum.photos/seed/photo8/200/310"),
     )
 
-    val travelPhotos = persistentListOf(
-        Photo(id = 101, imageUrl = "https://picsum.photos/seed/travel1/200/300"),
-        Photo(id = 102, imageUrl = "https://picsum.photos/seed/travel2/200/280"),
-        Photo(id = 103, imageUrl = "https://picsum.photos/seed/travel3/200/320"),
-        Photo(id = 104, imageUrl = "https://picsum.photos/seed/travel4/200/260"),
-    )
-
-    val familyPhotos = persistentListOf(
-        Photo(id = 201, imageUrl = "https://picsum.photos/seed/family1/200/300"),
-        Photo(id = 202, imageUrl = "https://picsum.photos/seed/family2/200/290"),
-    )
-
-    val friendPhotos = persistentListOf(
-        Photo(id = 301, imageUrl = "https://picsum.photos/seed/friend1/200/300"),
-        Photo(id = 302, imageUrl = "https://picsum.photos/seed/friend2/200/310"),
-        Photo(id = 303, imageUrl = "https://picsum.photos/seed/friend3/200/280"),
-    )
-
     val dummyAlbums = persistentListOf(
-        Album(id = 1, title = "제주도 여행 2024", photoList = travelPhotos),
-        Album(id = 2, title = "가족 생일파티", photoList = familyPhotos),
-        Album(id = 3, title = "대학 동기 모임", photoList = friendPhotos),
+        AlbumPreview(id = 1, title = "제주도 여행 2024", thumbnailUrl = "https://picsum.photos/seed/travel1/200/300", photoCount = 4),
+        AlbumPreview(id = 2, title = "가족 생일파티", thumbnailUrl = "https://picsum.photos/seed/family1/200/300", photoCount = 2),
+        AlbumPreview(id = 3, title = "대학 동기 모임", thumbnailUrl = "https://picsum.photos/seed/friend1/200/300", photoCount = 3),
     )
 
-    val favoritePhotos = persistentListOf(
-        Photo(id = 401, imageUrl = "https://picsum.photos/seed/fav1/200/300"),
-        Photo(id = 402, imageUrl = "https://picsum.photos/seed/fav2/200/280"),
-        Photo(id = 403, imageUrl = "https://picsum.photos/seed/fav3/200/320"),
-        Photo(id = 404, imageUrl = "https://picsum.photos/seed/fav4/200/290"),
-        Photo(id = 405, imageUrl = "https://picsum.photos/seed/fav5/200/310"),
-    )
-
-    val favoriteAlbum = Album(
+    val favoriteAlbum = AlbumPreview(
         id = 0,
         title = "즐겨찾는 사진",
-        photoList = favoritePhotos,
+        thumbnailUrl = "https://picsum.photos/seed/fav1/200/300",
+        photoCount = 5,
     )
 
     NekiTheme {
@@ -305,6 +286,23 @@ private fun ArchiveMainScreenPreview() {
                 favoriteAlbum = favoriteAlbum,
                 albums = dummyAlbums,
                 recentPhotos = dummyPhotos,
+            ),
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun ArchiveMainScreenEmptyPreview() {
+    val favoriteAlbum = AlbumPreview(
+        id = 0,
+        title = "즐겨찾는 사진",
+    )
+
+    NekiTheme {
+        ArchiveMainScreen(
+            uiState = ArchiveMainState(
+                favoriteAlbum = favoriteAlbum,
             ),
         )
     }

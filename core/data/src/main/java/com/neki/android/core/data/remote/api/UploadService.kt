@@ -2,7 +2,7 @@ package com.neki.android.core.data.remote.api
 
 import com.neki.android.core.data.remote.model.request.MediaUploadTicketRequest
 import com.neki.android.core.data.remote.model.response.BasicResponse
-import com.neki.android.core.data.remote.model.response.MediaUploadTicketResponse
+import com.neki.android.core.data.remote.model.response.MediaUploadTicketDataResponse
 import com.neki.android.core.data.remote.qualifier.UploadHttpClient
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -18,7 +18,7 @@ class UploadService @Inject constructor(
     @UploadHttpClient private val uploadClient: HttpClient,
 ) {
     // Media Upload Ticket 받기
-    suspend fun getUploadTicket(requestBody: MediaUploadTicketRequest): BasicResponse<MediaUploadTicketResponse> {
+    suspend fun getUploadTicket(requestBody: MediaUploadTicketRequest): BasicResponse<MediaUploadTicketDataResponse> {
         return client.post("/api/media/upload") { setBody(requestBody) }.body()
     }
 

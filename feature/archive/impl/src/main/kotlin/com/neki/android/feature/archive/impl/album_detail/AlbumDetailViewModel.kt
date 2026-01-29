@@ -1,7 +1,8 @@
 package com.neki.android.feature.archive.impl.album_detail
 
 import androidx.lifecycle.ViewModel
-import com.neki.android.core.model.Album
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -12,11 +13,14 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel(assistedFactory = AlbumDetailViewModel.Factory::class)
 class AlbumDetailViewModel @AssistedInject constructor(
     @Assisted private val id: Long,
     @Assisted private val isFavoriteAlbum: Boolean,
+    private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -52,7 +56,11 @@ class AlbumDetailViewModel @AssistedInject constructor(
     ) {
         when (intent) {
             // TopBar Intent
-            AlbumDetailIntent.EnterAlbumDetailScreen -> fetchInitialData(id, reduce)
+            AlbumDetailIntent.EnterAlbumDetailScreen -> {
+                if (isFavoriteAlbum) fetchFavoriteData(reduce)
+                else fetchAlbumData(id, reduce)
+            }
+
             AlbumDetailIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.ClickSelectButton -> reduce { copy(selectMode = SelectMode.SELECTING) }
@@ -83,16 +91,30 @@ class AlbumDetailViewModel @AssistedInject constructor(
         }
     }
 
-    private fun fetchInitialData(
+    private fun fetchFavoriteData(
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            photoRepository.getFavoritePhotos()
+                .onSuccess { data ->
+                    reduce { copy(photoList = data.toImmutableList()) }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                }
+            reduce { copy(isLoading = false) }
+        }
+    }
+
+    private fun fetchAlbumData(
         id: Long,
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
     ) {
         // TODO: Fetch album from repository
         reduce {
             copy(
-                album = Album(
-                    photoList = dummyPhotos,
-                ),
+                photoList = dummyPhotos,
             )
         }
     }
@@ -172,20 +194,28 @@ class AlbumDetailViewModel @AssistedInject constructor(
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
-        // TODO: Delete photos from favorite album
-        reduce {
-            copy(
-                album = album.copy(
-                    photoList = album.photoList.filter { photo ->
-                        selectedPhotos.none { it.id == photo.id }
-                    }.toImmutableList(),
-                ),
-                selectedPhotos = persistentListOf(),
-                selectMode = SelectMode.DEFAULT,
-                isShowDeleteDialog = false,
-            )
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            val selectedPhotoIds = state.selectedPhotos.map { it.id }
+            photoRepository.deletePhoto(photoIds = selectedPhotoIds)
+                .onSuccess {
+                    Timber.d("삭제 성공2")
+                    fetchFavoriteData(reduce)
+                    reduce {
+                        copy(
+                            selectedPhotos = persistentListOf(),
+                            selectMode = SelectMode.DEFAULT,
+                            isShowDeleteDialog = false,
+                        )
+                    }
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
+                }
+            reduce { copy(isLoading = false) }
         }
-        postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
     }
 
     private fun handleAlbumDelete(
@@ -193,14 +223,11 @@ class AlbumDetailViewModel @AssistedInject constructor(
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
-        // TODO: Delete photos based on selectedDeleteOption
         reduce {
             copy(
-                album = album.copy(
-                    photoList = album.photoList.filter { photo ->
-                        selectedPhotos.none { it.id == photo.id }
-                    }.toImmutableList(),
-                ),
+                photoList = photoList.filter { photo ->
+                    selectedPhotos.none { it.id == photo.id }
+                }.toImmutableList(),
                 selectedPhotos = persistentListOf(),
                 selectMode = SelectMode.DEFAULT,
                 isShowDeleteBottomSheet = false,

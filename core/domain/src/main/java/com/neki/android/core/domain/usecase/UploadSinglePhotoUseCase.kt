@@ -27,7 +27,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
             fileName = fileName,
             contentType = contentType.label,
             mediaType = MediaType.PHOTO_BOOTH.name,
-        ).getOrThrow()
+        ).getOrThrow().first()
 
         // 2. Presigned URL로 이미지 업로드
         mediaUploadRepository.uploadImage(
@@ -38,7 +38,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
 
         // 3. 사진 등록
         photoRepository.registerPhoto(
-            mediaId = mediaId,
+            mediaIds = listOf(mediaId),
             folderId = folderId,
         ).getOrThrow()
 

@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PhotoResponse(
+data class FavoritePhotoResponse(
     @SerialName("hasNext") val hasNext: Boolean,
     @SerialName("items") val items: List<Item>,
 ) {
@@ -14,7 +14,7 @@ data class PhotoResponse(
     data class Item(
         @SerialName("contentType") val contentType: String,
         @SerialName("createdAt") val createdAt: String,
-        @SerialName("favorite") val isFavorite: Boolean,
+        @SerialName("favorite") val favorite: Boolean,
         @SerialName("folderId") val folderId: Long?,
         @SerialName("imageUrl") val imageUrl: String,
         @SerialName("photoId") val photoId: Long,
@@ -22,7 +22,7 @@ data class PhotoResponse(
         internal fun toModel() = Photo(
             id = photoId,
             imageUrl = imageUrl,
-            isFavorite = isFavorite,
+            isFavorite = favorite,
             date = createdAt.toFormattedDate(),
         )
     }

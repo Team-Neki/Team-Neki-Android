@@ -5,10 +5,11 @@ import com.neki.android.core.model.MediaUploadTicket
 
 interface MediaUploadRepository {
     suspend fun getUploadTicket(
+        uploadCount: Int = 1,
         fileName: String,
         contentType: String,
         mediaType: String,
-    ): Result<MediaUploadTicket>
+    ): Result<List<MediaUploadTicket>>
 
     suspend fun uploadImage(
         uploadUrl: String,

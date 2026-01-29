@@ -21,12 +21,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
-import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
 import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.Album
 import com.neki.android.core.model.Photo
+import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album_detail.component.EmptyContent
@@ -94,8 +94,8 @@ internal fun AlbumDetailScreen(
             .background(NekiTheme.colorScheme.white),
     ) {
         AlbumDetailTopBar(
-            hasNoPhoto = uiState.album.photoList.isEmpty(),
-            title = if (uiState.isFavoriteAlbum) "즐겨찾는 사진" else uiState.album.title,
+            hasNoPhoto = uiState.photoList.isEmpty(),
+            title = if (uiState.isFavoriteAlbum) "즐겨찾는 사진" else uiState.title,
             selectMode = uiState.selectMode,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
             onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectButton) },
@@ -119,7 +119,7 @@ internal fun AlbumDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),
             ) {
                 items(
-                    items = uiState.album.photoList,
+                    items = uiState.photoList,
                     key = { photo -> photo.id },
                 ) { photo ->
                     val isSelected = uiState.selectedPhotos.any { it.id == photo.id }
@@ -142,7 +142,11 @@ internal fun AlbumDetailScreen(
         )
     }
 
-    if (uiState.album.photoList.isEmpty()) {
+    if (uiState.isLoading) {
+        LoadingDialog()
+    }
+
+    if (!uiState.isLoading && uiState.photoList.isEmpty()) {
         EmptyContent(
             isFavorite = uiState.isFavoriteAlbum,
         )
@@ -216,7 +220,7 @@ private fun AlbumDetailScreenFavoriteEmptyPreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 0, title = "즐겨찾는 사진"),
+                title = "즐겨찾는 사진",
                 isFavoriteAlbum = true,
             ),
         )
@@ -229,8 +233,8 @@ private fun AlbumDetailScreenEmptyPreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 0, title = "빈 앨범"),
-                isFavoriteAlbum = true,
+                title = "빈 앨범",
+                isFavoriteAlbum = false,
             ),
         )
     }
@@ -248,7 +252,8 @@ private fun AlbumDetailScreenFavoritePreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 0, title = "즐겨찾는 사진", photoList = dummyPhotos),
+                title = "즐겨찾는 사진",
+                photoList = dummyPhotos,
                 isFavoriteAlbum = true,
             ),
         )
@@ -267,7 +272,8 @@ private fun AlbumDetailScreenRegularPreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 1, title = "네키 화이팅", photoList = dummyPhotos),
+                title = "네키 화이팅",
+                photoList = dummyPhotos,
                 isFavoriteAlbum = false,
             ),
         )
@@ -286,7 +292,8 @@ private fun AlbumDetailScreenSelectingPreview() {
     NekiTheme {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
-                album = Album(id = 1, title = "네키 화이팅", photoList = dummyPhotos),
+                title = "네키 화이팅",
+                photoList = dummyPhotos,
                 isFavoriteAlbum = false,
                 selectMode = SelectMode.SELECTING,
                 selectedPhotos = persistentListOf(dummyPhotos[1]),

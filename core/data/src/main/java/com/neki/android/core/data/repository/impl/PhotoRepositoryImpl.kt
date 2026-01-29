@@ -1,10 +1,13 @@
 package com.neki.android.core.data.repository.impl
 
 import com.neki.android.core.data.remote.api.PhotoService
+import com.neki.android.core.data.remote.model.request.DeletePhotoRequest
 import com.neki.android.core.data.remote.model.request.RegisterPhotoRequest
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.SortOrder
 import javax.inject.Inject
 
 class PhotoRepositoryImpl @Inject constructor(
@@ -23,18 +26,42 @@ class PhotoRepositoryImpl @Inject constructor(
     }
 
     override suspend fun registerPhoto(
-        mediaId: Long,
+        mediaIds: List<Long>,
         folderId: Long?,
-    ): Result<Long> = runSuspendCatching {
+    ): Result<Unit> = runSuspendCatching {
         photoService.registerPhoto(
             requestBody = RegisterPhotoRequest(
-                mediaId = mediaId,
                 folderId = folderId,
+                uploads = mediaIds.map { RegisterPhotoRequest.Upload(mediaId = it) },
             ),
-        ).data.photoId
+        ).data
     }
 
     override suspend fun deletePhoto(photoId: Long): Result<Unit> = runSuspendCatching {
-        photoService.deletePhoto(photoId).data
+        photoService.deletePhoto(
+            requestBody = DeletePhotoRequest(photoIds = listOf(photoId)),
+        ).data
+    }
+
+    override suspend fun deletePhoto(photoIds: List<Long>): Result<Unit> = runSuspendCatching {
+        photoService.deletePhoto(
+            requestBody = DeletePhotoRequest(photoIds = photoIds),
+        ).data
+    }
+
+    override suspend fun updateFavorite(photoId: Long, favorite: Boolean): Result<Unit> = runSuspendCatching {
+        photoService.updateFavorite(photoId, favorite).data
+    }
+
+    override suspend fun getFavoritePhotos(
+        page: Int,
+        size: Int,
+        sortOrder: SortOrder,
+    ): Result<List<Photo>> = runSuspendCatching {
+        photoService.getFavoritePhotos(page, size, sortOrder.name).data.toModels()
+    }
+
+    override suspend fun getFavoriteSummary(): Result<AlbumPreview> = runSuspendCatching {
+        photoService.getFavoriteSummary().data.toModel()
     }
 }

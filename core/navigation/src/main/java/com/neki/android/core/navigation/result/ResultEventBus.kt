@@ -39,9 +39,17 @@ class ResultEventBus {
     inline fun <reified T> getResultFlow(resultKey: String = T::class.toString()) =
         channelMap[resultKey]?.receiveAsFlow()
 
-    inline fun <reified T> sendResult(resultKey: String = T::class.toString(), result: T) {
+    inline fun <reified T> sendResult(
+        resultKey: String = T::class.toString(),
+        result: T,
+        allowDuplicate: Boolean = true,
+    ) {
         if (!channelMap.contains(resultKey)) {
-            channelMap[resultKey] = Channel(capacity = BUFFERED, onBufferOverflow = BufferOverflow.SUSPEND)
+            channelMap[resultKey] = if (allowDuplicate) {
+                Channel(capacity = BUFFERED, onBufferOverflow = BufferOverflow.SUSPEND)
+            } else {
+                Channel(capacity = Channel.CONFLATED)
+            }
         }
         channelMap[resultKey]?.trySend(result)
     }
