@@ -1,23 +1,43 @@
 package com.neki.android.feature.map.impl
 
+import android.content.Context
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.designsystem.R
+import coil3.ImageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.toBitmap
+import com.neki.android.core.common.permission.LocationPermissionManager
+import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.model.Brand
-import com.neki.android.core.model.BrandInfo
+import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.map.impl.const.DirectionApp
+import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.feature.map.impl.util.LocationHelper
+import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.persistentListOf
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MapViewModel @Inject constructor() : ViewModel() {
+class MapViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val mapRepository: MapRepository,
+) : ViewModel() {
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
         onIntent = ::onIntent,
+        initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
     )
 
     private fun onIntent(
@@ -27,29 +47,50 @@ class MapViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (MapEffect) -> Unit,
     ) {
         when (intent) {
-            MapIntent.EnterMapScreen -> loadBrands(reduce)
-            MapIntent.ClickRefresh -> postSideEffect(MapEffect.RefreshPhotoBooth)
-            is MapIntent.UpdateCurrentLocation -> reduce { copy(currentLocation = intent.latitude to intent.longitude) }
-            MapIntent.ClickCurrentLocation -> postSideEffect(MapEffect.RefreshCurrentLocation)
+            MapIntent.EnterMapScreen -> loadBrands(state, reduce)
+            is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
+            is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+            MapIntent.ClickCurrentLocationIcon -> {
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
+                    moveCurrentLocation(state, reduce, postSideEffect)
+                } else {
+                    postSideEffect(MapEffect.LaunchLocationPermission)
+                }
+            }
+
+            MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false, isVisibleRefreshButton = true) }
+            is MapIntent.ClickRefreshButton -> {
+                reduce { copy(isVisibleRefreshButton = false) }
+                loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+            }
+            is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
-            is MapIntent.ClickBrand -> handleClickBrand(state, intent, reduce)
-            is MapIntent.ClickNearPhotoBooth -> handleClickNearBrand(intent, reduce, postSideEffect)
+            is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, reduce)
+            is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent.photoBooth, reduce, postSideEffect)
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
                     dragLevel = DragLevel.SECOND,
-                    focusedMarkerPosition = null,
-                    selectedPhotoBoothInfo = null,
+                    mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
                 )
             }
+
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
-            is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent, reduce, postSideEffect)
+            is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
-            is MapIntent.ClickPhotoBoothMarker -> handleClickBrandMarker(state, intent, reduce, postSideEffect)
-            MapIntent.ClickDirection -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
-            MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.RequestLocationPermission)
+            is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
+            is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
+            MapIntent.ClickDirectionIcon -> {
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
+                    postSideEffect(MapEffect.OpenDirectionBottomSheet)
+                } else {
+                    postSideEffect(MapEffect.LaunchLocationPermission)
+                }
+            }
+
+            MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.LaunchLocationPermission)
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
             MapIntent.ConfirmLocationPermissionDialog -> {
@@ -59,167 +100,296 @@ class MapViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    private fun handleClickBrand(
+    private fun getCurrentLocation(
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            LocationHelper.getCurrentLocation(context)
+                .onSuccess { location ->
+                    reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
+                    postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true))
+                }
+                .onFailure {
+                    // 위치 조회 실패 시 강남역으로 카메라 이동
+                    postSideEffect(
+                        MapEffect.MoveCameraToPosition(
+                            LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
+                            isRequiredLoadPhotoBooths = true,
+                        ),
+                    )
+                }
+        }
+    }
+
+    private fun handleUpdateCurrentLocation(
         state: MapState,
-        intent: MapIntent.ClickBrand,
+        locLatLng: LocLatLng,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        reduce { copy(currentLocLatLng = locLatLng) }
+
+        /** 위치가 이동하더라도 주변 네컷 사진 브랜드는 변경하지 않기 때문에 최초에만 요청 **/
+        if (state.currentLocLatLng == null) {
+            loadNearbyPhotoBooths(
+                longitude = locLatLng.longitude,
+                latitude = locLatLng.latitude,
+                brandIds = state.brands.filter { it.isChecked }.map { it.id },
+                reduce = reduce,
+            )
+        }
+    }
+
+    private fun moveCurrentLocation(
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        if (state.dragLevel == DragLevel.INVISIBLE) {
+            reduce {
+                copy(
+                    dragLevel = DragLevel.FIRST,
+                    mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
+                )
+            }
+        }
+
+        if (state.currentLocLatLng != null) {
+            reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
+            postSideEffect(
+                MapEffect.MoveCameraToPosition(
+                    LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
+                    isRequiredLoadPhotoBooths = true,
+                ),
+            )
+        }
+    }
+
+    private fun handleClickBrand(
+        clickedBrand: Brand,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         reduce {
+            val updatedBrands = brands.map { brand ->
+                if (brand == clickedBrand) {
+                    brand.copy(isChecked = !brand.isChecked)
+                } else {
+                    brand
+                }
+            }
+            val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
+
             copy(
-                brands = state.brands.map { brand ->
-                    if (brand == intent.brand) {
-                        brand.copy(isChecked = !brand.isChecked)
-                    } else {
-                        brand
-                    }
+                brands = updatedBrands.toImmutableList(),
+                mapMarkers = mapMarkers.map { photoBooth ->
+                    photoBooth.copy(
+                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                    )
+                }.toImmutableList(),
+                nearbyPhotoBooths = nearbyPhotoBooths.map { photoBooth ->
+                    photoBooth.copy(
+                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                    )
                 }.toImmutableList(),
             )
         }
     }
 
-    private fun handleClickNearBrand(
-        intent: MapIntent.ClickNearPhotoBooth,
+    private fun handleClickNearPhotoBooth(
+        photoBooth: PhotoBooth,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
         reduce {
+            val isAlreadyInMarkers = mapMarkers.any {
+                it.latitude == photoBooth.latitude && it.longitude == photoBooth.longitude
+            }
+            val updatedMarkers = if (isAlreadyInMarkers) {
+                mapMarkers.map { marker ->
+                    marker.copy(isFocused = marker.id == photoBooth.id)
+                }
+            } else {
+                mapMarkers.map { it.copy(isFocused = false) } + photoBooth.copy(isFocused = true)
+            }
             copy(
                 dragLevel = DragLevel.INVISIBLE,
-                selectedPhotoBoothInfo = intent.brandInfo,
-                focusedMarkerPosition = intent.brandInfo.latitude to intent.brandInfo.longitude,
+                mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(intent.brandInfo.latitude, intent.brandInfo.longitude))
+        postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
     }
 
     private fun handleClickDirectionItem(
         state: MapState,
-        intent: MapIntent.ClickDirectionItem,
+        app: DirectionApp,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
         reduce { copy(isShowDirectionBottomSheet = false) }
-        if (state.currentLocation == null) {
+        if (state.currentLocLatLng == null) {
             postSideEffect(MapEffect.ShowToastMessage("현재 위치를 가져올 수 없습니다."))
             return
         }
-        state.selectedPhotoBoothInfo?.let { brandInfo ->
+        state.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
             postSideEffect(
-                MapEffect.MoveDirectionApp(
-                    app = intent.app,
-                    startLatitude = state.currentLocation.first,
-                    startLongitude = state.currentLocation.second,
-                    endLatitude = brandInfo.latitude,
-                    endLongitude = brandInfo.longitude,
+                MapEffect.LaunchDirectionApp(
+                    app = app,
+                    startLocLatLng = state.currentLocLatLng,
+                    endLocLatLng = LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude),
                 ),
             )
         }
     }
 
-    private fun handleClickBrandMarker(
-        state: MapState,
-        intent: MapIntent.ClickPhotoBoothMarker,
+    private fun handleClickPhotoBoothMarker(
+        locLatLng: LocLatLng,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        val selectedBrand = state.nearbyPhotoBooths.find { it.latitude == intent.latitude && it.longitude == intent.longitude }
         reduce {
+            val updatedMarkers = mapMarkers.map { marker ->
+                val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
+                if (isClicked) {
+                    val distance = currentLocLatLng?.let { location ->
+                        calculateDistance(location.latitude, location.longitude, marker.latitude, marker.longitude)
+                    } ?: 0
+                    marker.copy(isFocused = true, distance = distance)
+                } else {
+                    marker.copy(isFocused = false)
+                }
+            }
             copy(
                 dragLevel = DragLevel.INVISIBLE,
-                focusedMarkerPosition = intent.latitude to intent.longitude,
-                selectedPhotoBoothInfo = selectedBrand,
+                mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(intent.latitude, intent.longitude))
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng))
     }
 
-    private fun loadBrands(reduce: (MapState.() -> MapState) -> Unit) {
+    private fun handleClickPhotoBoothCard(
+        locLatLng: LocLatLng,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng))
+    }
+
+    private fun loadBrands(
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            val brands = persistentListOf(
-                Brand(isChecked = false, brandName = "인생네컷", brandImageRes = R.drawable.icon_life_four_cut),
-                Brand(isChecked = false, brandName = "포토그레이", brandImageRes = R.drawable.icon_photogray),
-                Brand(isChecked = false, brandName = "포토이즘", brandImageRes = R.drawable.icon_photoism),
-                Brand(isChecked = false, brandName = "하루필름", brandImageRes = R.drawable.icon_haru_film),
-                Brand(isChecked = false, brandName = "플랜비\n스튜디오", brandImageRes = R.drawable.icon_planb_studio),
-                Brand(isChecked = false, brandName = "포토시그니처", brandImageRes = R.drawable.icon_photo_signature),
-            )
+            mapRepository.getBrands()
+                .onSuccess { loadedBrands ->
+                    reduce { copy(isLoading = false, brands = loadedBrands.toImmutableList()) }
+                    cacheBrandImages(loadedBrands, reduce)
+                }
+                .onFailure {
+                    reduce { copy(isLoading = false) }
+                }
+        }
+    }
 
-            // 중심: 37.5270539, 126.8862648 주변 100m 이내
-            val nearbyBrands = persistentListOf(
-                BrandInfo(
-                    brandName = "인생네컷",
-                    brandImageRes = R.drawable.icon_life_four_cut,
-                    branchName = "가산디지털점",
-                    distance = "25m",
-                    latitude = 37.5272,
-                    longitude = 126.8864,
-                ),
-                BrandInfo(
-                    brandName = "포토그레이",
-                    brandImageRes = R.drawable.icon_photogray,
-                    branchName = "가산역점",
-                    distance = "38m",
-                    latitude = 37.5248,
-                    longitude = 126.8867,
-                ),
-                BrandInfo(
-                    brandName = "포토이즘",
-                    brandImageRes = R.drawable.icon_photoism,
-                    branchName = "마리오점",
-                    distance = "52m",
-                    latitude = 37.5274,
-                    longitude = 126.8828,
-                ),
-                BrandInfo(
-                    brandName = "하루필름",
-                    brandImageRes = R.drawable.icon_haru_film,
-                    branchName = "W몰점",
-                    distance = "65m",
-                    latitude = 37.5166,
-                    longitude = 126.8659,
-                ),
-                BrandInfo(
-                    brandName = "플랜비스튜디오",
-                    brandImageRes = R.drawable.icon_planb_studio,
-                    branchName = "대륭포스트점",
-                    distance = "72m",
-                    latitude = 37.5176,
-                    longitude = 126.8969,
-                ),
-                BrandInfo(
-                    brandName = "포토시그니처",
-                    brandImageRes = R.drawable.icon_photo_signature,
-                    branchName = "에이스점",
-                    distance = "80m",
-                    latitude = 37.5264,
-                    longitude = 126.8865,
-                ),
-                BrandInfo(
-                    brandName = "인생네컷",
-                    brandImageRes = R.drawable.icon_life_four_cut,
-                    branchName = "IT캐슬점",
-                    distance = "88m",
-                    latitude = 37.5278,
-                    longitude = 126.8860,
-                ),
-                BrandInfo(
-                    brandName = "포토그레이",
-                    brandImageRes = R.drawable.icon_photogray,
-                    branchName = "벽산점",
-                    distance = "95m",
-                    latitude = 37.5263,
-                    longitude = 126.8856,
-                ),
-            )
+    private fun cacheBrandImages(
+        brands: List<Brand>,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val imageLoader = ImageLoader(context)
 
-            reduce {
-                copy(
-                    isLoading = false,
-                    brands = brands,
-                    nearbyPhotoBooths = nearbyBrands,
-                )
+            val cache = brands
+                .filter { it.imageUrl.isNotEmpty() }
+                .map { brand ->
+                    async(Dispatchers.IO) {
+                        val request = ImageRequest.Builder(context)
+                            .data(brand.imageUrl)
+                            .allowHardware(false)
+                            .build()
+                        val result = imageLoader.execute(request)
+                        if (result is SuccessResult) {
+                            brand.imageUrl to result.image.toBitmap().asImageBitmap()
+                        } else {
+                            null
+                        }
+                    }
+                }
+                .awaitAll()
+                .filterNotNull()
+                .toMap()
+
+            reduce { copy(brandImageCache = cache.toImmutableMap()) }
+        }
+    }
+
+    private fun loadNearbyPhotoBooths(
+        longitude: Double?,
+        latitude: Double?,
+        radiusInMeters: Int = 1000,
+        brandIds: List<Long> = emptyList(),
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            mapRepository.getPhotoBoothsByPoint(
+                longitude = longitude,
+                latitude = latitude,
+                radiusInMeters = radiusInMeters,
+                brandIds = brandIds,
+            ).onSuccess { photoBooths ->
+                reduce {
+                    copy(
+                        nearbyPhotoBooths = photoBooths.map { photoBooth ->
+                            photoBooth.copy(
+                                imageUrl = brands.find {
+                                    it.name == photoBooth.brandName
+                                }?.imageUrl.orEmpty(),
+                            )
+                        }.toImmutableList(),
+                    )
+                }
+            }
+        }
+    }
+
+    private fun loadPhotoBoothsByPolygon(
+        mapBounds: MapBounds,
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        val checkedBrandIds = state.brands.filter { it.isChecked }.map { it.id }
+
+        // 좌상단 -> 우상단 -> 우하단 -> 좌하단 -> 좌상단 (닫힌 다각형)
+        val coordinates = listOf(
+            mapBounds.northWest.longitude to mapBounds.northWest.latitude,
+            mapBounds.northEast.longitude to mapBounds.northEast.latitude,
+            mapBounds.southEast.longitude to mapBounds.southEast.latitude,
+            mapBounds.southWest.longitude to mapBounds.southWest.latitude,
+            mapBounds.northWest.longitude to mapBounds.northWest.latitude,
+        )
+
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+
+            mapRepository.getPhotoBoothsByPolygon(
+                coordinates = coordinates,
+                brandIds = checkedBrandIds,
+            ).onSuccess { photoBooths ->
+                reduce {
+                    copy(
+                        isLoading = false,
+                        mapMarkers = photoBooths.map { photoBooth ->
+                            photoBooth.copy(
+                                imageUrl = brands.find {
+                                    it.name == photoBooth.brandName
+                                }?.imageUrl.orEmpty(),
+                            )
+                        }.toImmutableList(),
+                    )
+                }
+            }.onFailure {
+                reduce { copy(isLoading = false) }
+                postSideEffect(MapEffect.ShowToastMessage("포토부스 조회에 실패했습니다."))
             }
         }
     }

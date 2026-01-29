@@ -4,8 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,17 +36,23 @@ internal fun VerticalBrandItem(
 ) {
     Column(
         modifier = modifier
-            .width(66.dp)
+            .widthIn(max = 66.dp)
             .noRippleClickable { onClickItem() },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier.size(56.dp),
+            modifier = Modifier
+                .padding(horizontal = 5.dp)
+                .size(56.dp),
             contentAlignment = Alignment.Center,
         ) {
             AsyncImage(
-                modifier = Modifier.clip(CircleShape),
-                model = brand.brandImageRes,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape),
+                model = brand.imageUrl,
+                placeholder = painterResource(R.drawable.icon_life_four_cut),
+                error = painterResource(R.drawable.icon_life_four_cut),
                 contentDescription = null,
             )
 
@@ -69,7 +77,7 @@ internal fun VerticalBrandItem(
         }
         VerticalSpacer(8.dp)
         Text(
-            text = brand.brandName,
+            text = brand.name,
             color = if (brand.isChecked) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray900,
             style = NekiTheme.typography.body14Medium,
             textAlign = TextAlign.Center,
@@ -84,8 +92,7 @@ private fun CheckedVerticalBrandItemPreview() {
         VerticalBrandItem(
             brand = Brand(
                 isChecked = true,
-                brandName = "인생네컷",
-                brandImageRes = R.drawable.icon_life_four_cut,
+                name = "인생네컷",
             ),
         )
     }
@@ -98,8 +105,8 @@ private fun NotCheckedVerticalBrandItemPreview() {
         VerticalBrandItem(
             brand = Brand(
                 isChecked = false,
-                brandName = "인생네컷",
-                brandImageRes = R.drawable.icon_life_four_cut,
+                name = "인생네컷",
+                imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/LIFEFOURCUTS_LOGO_v1.png",
             ),
         )
     }

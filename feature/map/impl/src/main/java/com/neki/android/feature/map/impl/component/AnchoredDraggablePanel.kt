@@ -46,11 +46,11 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.modifier.dropdownShadow
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
-import com.neki.android.core.model.BrandInfo
+import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.map.impl.DragLevel
 import com.neki.android.feature.map.impl.const.MapConst
@@ -61,14 +61,14 @@ import kotlin.math.roundToInt
 @Composable
 internal fun AnchoredDraggablePanel(
     brands: ImmutableList<Brand> = persistentListOf(),
-    nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
+    nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
     isCurrentLocation: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
-    onClickNearBrand: (BrandInfo) -> Unit = {},
+    onClickNearPhotoBooth: (PhotoBooth) -> Unit = {},
 ) {
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
@@ -150,10 +150,10 @@ internal fun AnchoredDraggablePanel(
             )
             AnchoredPanelContent(
                 brands = brands,
-                nearbyBrands = nearbyBrands,
+                nearbyPhotoBooths = nearbyPhotoBooths,
                 onClickInfoIcon = onClickInfoIcon,
                 onClickBrand = onClickBrand,
-                onClickNearBrand = onClickNearBrand,
+                onClickPhotoBooth = onClickNearPhotoBooth,
             )
         }
     }
@@ -162,10 +162,10 @@ internal fun AnchoredDraggablePanel(
 @Composable
 internal fun AnchoredPanelContent(
     brands: ImmutableList<Brand> = persistentListOf(),
-    nearbyBrands: ImmutableList<BrandInfo> = persistentListOf(),
+    nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     onClickInfoIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
-    onClickNearBrand: (BrandInfo) -> Unit = {},
+    onClickPhotoBooth: (PhotoBooth) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -222,18 +222,34 @@ internal fun AnchoredPanelContent(
             )
         }
         VerticalSpacer(8.dp)
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
-        ) {
-            items(nearbyBrands) { brandInfo ->
-                HorizontalBrandItem(
-                    brandInfo = brandInfo,
-                    onClickItem = { onClickNearBrand(brandInfo) },
+        val filteredNearbyPhotoBooths = nearbyPhotoBooths.filter { it.isCheckedBrand }
+        if (filteredNearbyPhotoBooths.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 175.5.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "1km 이내에 가까운 네컷 사진관이 없어요!",
+                    color = NekiTheme.colorScheme.gray500,
+                    style = NekiTheme.typography.body16Medium,
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
+            ) {
+                items(filteredNearbyPhotoBooths) { photoBooth ->
+                    HorizontalBrandItem(
+                        photoBooth = photoBooth,
+                        onClickItem = { onClickPhotoBooth(photoBooth) },
+                    )
+                }
             }
         }
     }
@@ -245,35 +261,40 @@ private fun AnchoredPanelContentPreview() {
     NekiTheme {
         AnchoredPanelContent(
             brands = persistentListOf(
-                Brand(isChecked = false, brandName = "인생네컷", brandImageRes = R.drawable.icon_life_four_cut),
-                Brand(isChecked = false, brandName = "포토그레이", brandImageRes = R.drawable.icon_photogray),
-                Brand(isChecked = false, brandName = "포토이즘", brandImageRes = R.drawable.icon_photoism),
-                Brand(isChecked = false, brandName = "하루필름", brandImageRes = R.drawable.icon_haru_film),
-                Brand(isChecked = false, brandName = "플랜비\n스튜디오", brandImageRes = R.drawable.icon_planb_studio),
-                Brand(isChecked = false, brandName = "포토시그니처", brandImageRes = R.drawable.icon_photo_signature),
+                Brand(isChecked = false, name = "인생네컷", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/LIFEFOURCUTS_LOGO_v1.png"),
+                Brand(isChecked = false, name = "포토그레이", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOGRAY_LOGO_v1.png"),
+                Brand(isChecked = false, name = "포토이즘", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOISM_LOGO_v1.png"),
+                Brand(isChecked = false, name = "하루필름", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/HARUFILM_LOGO_v1.png"),
+                Brand(
+                    isChecked = false,
+                    name = "플랜비\n스튜디오",
+                    imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PLANB_STUDIO_LOGO_v1.png",
+                ),
+                Brand(
+                    isChecked = false,
+                    name = "포토시그니처",
+                    imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOSIGNATURE_LOGO_v1.png",
+                ),
             ),
-            nearbyBrands = persistentListOf(
-                BrandInfo(
+            nearbyPhotoBooths = persistentListOf(
+                PhotoBooth(
                     brandName = "인생네컷",
-                    brandImageRes = R.drawable.icon_life_four_cut,
                     branchName = "가산디지털점",
-                    distance = "25m",
+                    distance = 25,
                     latitude = 37.5272,
                     longitude = 126.8864,
                 ),
-                BrandInfo(
+                PhotoBooth(
                     brandName = "포토그레이",
-                    brandImageRes = R.drawable.icon_photogray,
                     branchName = "가산역점",
-                    distance = "38m",
+                    distance = 38,
                     latitude = 37.5268,
                     longitude = 126.8867,
                 ),
-                BrandInfo(
+                PhotoBooth(
                     brandName = "포토이즘",
-                    brandImageRes = R.drawable.icon_photoism,
                     branchName = "마리오점",
-                    distance = "52m",
+                    distance = 52,
                     latitude = 37.5274,
                     longitude = 126.8858,
                 ),
