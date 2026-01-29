@@ -31,14 +31,14 @@ import dev.chrisbanes.haze.rememberHazeState
 internal fun RandomPoseRoute(
     viewModel: RandomPoseViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToPoseDetail: (Pose) -> Unit,
+    navigateToPoseDetail: (Long) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             RandomPoseEffect.NavigateBack -> navigateBack()
-            is RandomPoseEffect.NavigateToDetail -> navigateToPoseDetail(sideEffect.pose)
+            is RandomPoseEffect.NavigateToDetail -> navigateToPoseDetail(sideEffect.poseId)
             is RandomPoseEffect.ShowToast -> Unit // TODO: Toast 처리
         }
     }

@@ -62,4 +62,8 @@ class PoseRepositoryImpl @Inject constructor(
     override suspend fun getRandomPose(): Result<Pose> = runSuspendCatching {
         poseService.getRandomPose().data.toModel()
     }
+
+    override suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit> = runSuspendCatching {
+        poseService.updateScrap(poseId, scrap).data
+    }
 }

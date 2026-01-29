@@ -17,7 +17,7 @@ data class RandomPoseUiState(
         get() = currentIndex > 0
 
     val hasNext: Boolean
-        get() = currentIndex < poseList.lastIndex
+        get() = poseList.isNotEmpty() // 랜덤 포즈는 항상 다음으로 이동 가능
 }
 
 sealed interface RandomPoseIntent {
@@ -38,6 +38,6 @@ sealed interface RandomPoseIntent {
 
 sealed interface RandomPoseEffect {
     data object NavigateBack : RandomPoseEffect
-    data class NavigateToDetail(val pose: Pose) : RandomPoseEffect
+    data class NavigateToDetail(val poseId: Long) : RandomPoseEffect
     data class ShowToast(val message: String) : RandomPoseEffect
 }
