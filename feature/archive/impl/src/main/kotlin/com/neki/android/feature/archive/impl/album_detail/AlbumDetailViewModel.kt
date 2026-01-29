@@ -28,17 +28,6 @@ class AlbumDetailViewModel @AssistedInject constructor(
         fun create(id: Long, isFavoriteAlbum: Boolean): AlbumDetailViewModel
     }
 
-    private val dummyPhotos = persistentListOf(
-        Photo(id = 1001, imageUrl = "https://picsum.photos/seed/detail1/400/520", isFavorite = false, date = "2025.01.15"),
-        Photo(id = 1002, imageUrl = "https://picsum.photos/seed/detail2/400/680", isFavorite = true, date = "2025.01.14"),
-        Photo(id = 1003, imageUrl = "https://picsum.photos/seed/detail3/400/450", isFavorite = false, date = "2025.01.13"),
-        Photo(id = 1004, imageUrl = "https://picsum.photos/seed/detail4/400/600", isFavorite = true, date = "2025.01.12"),
-        Photo(id = 1005, imageUrl = "https://picsum.photos/seed/detail5/400/550", isFavorite = false, date = "2025.01.11"),
-        Photo(id = 1006, imageUrl = "https://picsum.photos/seed/detail6/400/720", isFavorite = false, date = "2025.01.10"),
-        Photo(id = 1007, imageUrl = "https://picsum.photos/seed/detail7/400/480", isFavorite = true, date = "2025.01.09"),
-        Photo(id = 1008, imageUrl = "https://picsum.photos/seed/detail8/400/650", isFavorite = false, date = "2025.01.08"),
-    )
-
     val store: MviIntentStore<AlbumDetailState, AlbumDetailIntent, AlbumDetailSideEffect> =
         mviIntentStore(
             initialState = AlbumDetailState(
@@ -112,10 +101,14 @@ class AlbumDetailViewModel @AssistedInject constructor(
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
     ) {
         // TODO: Fetch album from repository
-        reduce {
-            copy(
-                photoList = dummyPhotos,
-            )
+        viewModelScope.launch {
+            photoRepository.getPhotos(folderId = id)
+                .onSuccess { data ->
+                    reduce { copy(photoList = data.toImmutableList()) }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                }
         }
     }
 
