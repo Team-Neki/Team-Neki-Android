@@ -59,7 +59,7 @@ internal fun ArchiveMainRoute(
     navigateToUploadAlbumWithQRScan: (String) -> Unit,
     navigateToAllAlbum: () -> Unit,
     navigateToFavoriteAlbum: (Long) -> Unit,
-    navigateToAlbumDetail: (Long) -> Unit,
+    navigateToAlbumDetail: (Long, String) -> Unit,
     navigateToAllPhoto: () -> Unit,
     navigateToPhotoDetail: (Photo) -> Unit,
 ) {
@@ -82,7 +82,7 @@ internal fun ArchiveMainRoute(
             is ArchiveMainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
-            is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
+            is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
@@ -126,7 +126,7 @@ internal fun ArchiveMainScreen(
                 lazyState = lazyState,
                 onClickShowAllAlbum = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
                 onClickFavoriteAlbum = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
-                onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it)) },
+                onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it.id, it.title)) },
                 onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
                 onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
             )
@@ -189,7 +189,7 @@ private fun ArchiveMainContent(
     lazyState: LazyStaggeredGridState,
     onClickShowAllAlbum: () -> Unit,
     onClickFavoriteAlbum: () -> Unit,
-    onClickAlbumItem: (Long) -> Unit,
+    onClickAlbumItem: (AlbumPreview) -> Unit,
     onClickShowAllPhoto: () -> Unit,
     onClickPhotoItem: (Photo) -> Unit,
     modifier: Modifier = Modifier,

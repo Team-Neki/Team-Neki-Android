@@ -66,8 +66,19 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
             navigateToUploadAlbumWithGallery = navigator::navigateToUploadAlbum,
             navigateToUploadAlbumWithQRScan = navigator::navigateToUploadAlbum,
             navigateToAllAlbum = navigator::navigateToAllAlbum,
-            navigateToFavoriteAlbum = { id -> navigator.navigateToAlbumDetail(isFavorite = true, id = id) },
-            navigateToAlbumDetail = { id -> navigator.navigateToAlbumDetail(isFavorite = false, id = id) },
+            navigateToFavoriteAlbum = { id ->
+                navigator.navigateToAlbumDetail(
+                    id = id,
+                    isFavorite = true,
+                )
+            },
+            navigateToAlbumDetail = { id, title ->
+                navigator.navigateToAlbumDetail(
+                    id = id,
+                    title = title,
+                    isFavorite = false,
+                )
+            },
             navigateToAllPhoto = navigator::navigateToAllPhoto,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
@@ -83,15 +94,26 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AllAlbum> {
         AllAlbumRoute(
             navigateBack = navigator::goBack,
-            navigateToFavoriteAlbum = { id -> navigator.navigateToAlbumDetail(isFavorite = true, id = id) },
-            navigateToAlbumDetail = { id -> navigator.navigateToAlbumDetail(isFavorite = false, id = id) },
+            navigateToFavoriteAlbum = { id ->
+                navigator.navigateToAlbumDetail(
+                    id = id,
+                    isFavorite = true,
+                )
+            },
+            navigateToAlbumDetail = { id, title ->
+                navigator.navigateToAlbumDetail(
+                    id = id,
+                    title = title,
+                    isFavorite = false,
+                )
+            },
         )
     }
     entry<ArchiveNavKey.AlbumDetail> { key ->
         AlbumDetailRoute(
             viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
                 creationCallback = { factory ->
-                    factory.create(key.albumId, key.isFavorite)
+                    factory.create(key.albumId, key.title, key.isFavorite)
                 },
             ),
             navigateBack = navigator::goBack,

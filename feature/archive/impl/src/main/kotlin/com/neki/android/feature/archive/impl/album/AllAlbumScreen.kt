@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
-import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.ui.component.AlbumRowComponent
+import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
 import com.neki.android.core.ui.component.FavoriteAlbumRowComponent
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -38,7 +38,7 @@ internal fun AllAlbumRoute(
     viewModel: AllAlbumViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
     navigateToFavoriteAlbum: (Long) -> Unit,
-    navigateToAlbumDetail: (Long) -> Unit,
+    navigateToAlbumDetail: (Long, String) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -48,7 +48,7 @@ internal fun AllAlbumRoute(
         when (sideEffect) {
             AllAlbumSideEffect.NavigateBack -> navigateBack()
             is AllAlbumSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
-            is AllAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
+            is AllAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
             is AllAlbumSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)
             }
@@ -108,7 +108,7 @@ internal fun AllAlbumScreen(
                     album = album,
                     isSelectable = uiState.selectMode == SelectMode.SELECTING,
                     isSelected = isSelected,
-                    onClick = { onIntent(AllAlbumIntent.ClickAlbumItem(album.id)) },
+                    onClick = { onIntent(AllAlbumIntent.ClickAlbumItem(album)) },
                 )
             }
         }

@@ -13,7 +13,7 @@ data class UploadAlbumState(
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
     val favoriteAlbum: AlbumPreview = AlbumPreview(),
     val albums: ImmutableList<AlbumPreview> = persistentListOf(),
-    val selectedAlbumIds: PersistentList<Long> = persistentListOf(),
+    val selectedAlbums: PersistentList<AlbumPreview> = persistentListOf(),
 ) {
     val count: Int
         get() = if (imageUrl == null) selectedUris.size else 1
@@ -29,11 +29,11 @@ sealed interface UploadAlbumIntent {
     data object ClickUploadButton : UploadAlbumIntent
 
     // Album Intent
-    data class ClickAlbumItem(val albumId: Long) : UploadAlbumIntent
+    data class ClickAlbumItem(val album: AlbumPreview) : UploadAlbumIntent
 }
 
 sealed interface UploadAlbumSideEffect {
     data object NavigateBack : UploadAlbumSideEffect
-    data class NavigateToAlbumDetail(val albumId: Long) : UploadAlbumSideEffect
+    data class NavigateToAlbumDetail(val albumId: Long, val title: String) : UploadAlbumSideEffect
     data class ShowToastMessage(val message: String) : UploadAlbumSideEffect
 }

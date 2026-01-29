@@ -41,7 +41,7 @@ sealed interface AllAlbumIntent {
 
     // Album Intent
     data object ClickFavoriteAlbum : AllAlbumIntent
-    data class ClickAlbumItem(val albumId: Long) : AllAlbumIntent
+    data class ClickAlbumItem(val album: AlbumPreview) : AllAlbumIntent
 
     // Add Album BottomSheet Intent
     data object DismissAddAlbumBottomSheet : AllAlbumIntent
@@ -56,6 +56,6 @@ sealed interface AllAlbumIntent {
 sealed interface AllAlbumSideEffect {
     data object NavigateBack : AllAlbumSideEffect
     data class NavigateToFavoriteAlbum(val albumId: Long) : AllAlbumSideEffect
-    data class NavigateToAlbumDetail(val albumId: Long) : AllAlbumSideEffect
+    data class NavigateToAlbumDetail(val albumId: Long, val title: String) : AllAlbumSideEffect
     data class ShowToastMessage(val message: String) : AllAlbumSideEffect
 }

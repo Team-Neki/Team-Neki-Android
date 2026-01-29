@@ -31,7 +31,7 @@ import kotlinx.collections.immutable.persistentListOf
 internal fun UploadAlbumRoute(
     viewModel: UploadAlbumViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToAlbumDetail: (Long) -> Unit,
+    navigateToAlbumDetail: (Long, String) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -40,7 +40,7 @@ internal fun UploadAlbumRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             UploadAlbumSideEffect.NavigateBack -> navigateBack()
-            is UploadAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
+            is UploadAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
             is UploadAlbumSideEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
         }
     }
@@ -81,12 +81,12 @@ internal fun UploadAlbumScreen(
                 items = uiState.albums,
                 key = { album -> album.id },
             ) { album ->
-                val isSelected = uiState.selectedAlbumIds.any { it == album.id }
+                val isSelected = uiState.selectedAlbums.any { it.id == album.id }
                 AlbumRowComponent(
                     album = album,
                     isSelectable = true,
                     isSelected = isSelected,
-                    onClick = { onIntent(UploadAlbumIntent.ClickAlbumItem(album.id)) },
+                    onClick = { onIntent(UploadAlbumIntent.ClickAlbumItem(album)) },
                 )
             }
         }
@@ -127,7 +127,10 @@ private fun UploadAlbumScreenSelectingPreview() {
                     AlbumPreview(id = 2, title = "가족 생일파티", photoCount = 2),
                     AlbumPreview(id = 3, title = "대학 동기 모임", photoCount = 3),
                 ),
-                selectedAlbumIds = persistentListOf(1L, 3L),
+                selectedAlbums = persistentListOf(
+                    AlbumPreview(id = 1, title = "제주도 여행 2024", photoCount = 4),
+                    AlbumPreview(id = 2, title = "가족 생일파티", photoCount = 2),
+                ),
             ),
         )
     }

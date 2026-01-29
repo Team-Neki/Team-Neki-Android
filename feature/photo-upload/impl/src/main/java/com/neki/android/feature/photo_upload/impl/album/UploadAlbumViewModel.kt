@@ -60,10 +60,10 @@ class UploadAlbumViewModel @AssistedInject constructor(
             is UploadAlbumIntent.ClickAlbumItem -> {
                 reduce {
                     copy(
-                        selectedAlbumIds = if (state.selectedAlbumIds.any { it == intent.albumId }) {
-                            selectedAlbumIds.remove(intent.albumId)
+                        selectedAlbums = if (state.selectedAlbums.any { it.id == intent.album.id }) {
+                            selectedAlbums.remove(intent.album)
                         } else {
-                            selectedAlbumIds.add(intent.albumId)
+                            selectedAlbums.add(intent.album)
                         }.toPersistentList(),
                     )
                 }
@@ -110,11 +110,11 @@ class UploadAlbumViewModel @AssistedInject constructor(
         reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
         postSideEffect: (UploadAlbumSideEffect) -> Unit,
     ) {
-        val firstAlbumId = state.selectedAlbumIds.firstOrNull() ?: return
+        val firstAlbum = state.selectedAlbums.firstOrNull() ?: return
         val onSuccessAction = {
             reduce { copy(isLoading = false) }
             postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
-            postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbumId))
+            postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbum.id, firstAlbum.title))
         }
         val onFailureAction: (Throwable) -> Unit = { error ->
             Timber.e(error)
@@ -125,7 +125,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
         if (state.uploadType == UploadType.SINGLE) {
             uploadSingleImage(
                 imageUrl = state.imageUrl ?: return,
-                albumId = firstAlbumId,
+                albumId = firstAlbum.id,
                 reduce = reduce,
                 onSuccessAction = onSuccessAction,
                 onFailureAction = onFailureAction,
@@ -133,7 +133,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
         } else {
             uploadMultipleImages(
                 imageUris = state.selectedUris,
-                albumId = firstAlbumId,
+                albumId = firstAlbum.id,
                 reduce = reduce,
                 onSuccessAction = onSuccessAction,
                 onFailureAction = onFailureAction,

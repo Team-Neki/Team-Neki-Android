@@ -26,13 +26,14 @@ import timber.log.Timber
 @HiltViewModel(assistedFactory = AlbumDetailViewModel.Factory::class)
 class AlbumDetailViewModel @AssistedInject constructor(
     @Assisted private val id: Long,
+    @Assisted private val title: String,
     @Assisted private val isFavoriteAlbum: Boolean,
     private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(id: Long, isFavoriteAlbum: Boolean): AlbumDetailViewModel
+        fun create(id: Long, title: String, isFavoriteAlbum: Boolean): AlbumDetailViewModel
     }
 
     private val deletedPhotoIds = MutableStateFlow<Set<Long>>(emptySet())
@@ -54,6 +55,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     val store: MviIntentStore<AlbumDetailState, AlbumDetailIntent, AlbumDetailSideEffect> =
         mviIntentStore(
             initialState = AlbumDetailState(
+                title = title,
                 isFavoriteAlbum = isFavoriteAlbum,
             ),
             onIntent = ::onIntent,
