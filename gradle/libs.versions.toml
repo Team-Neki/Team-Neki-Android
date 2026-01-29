@@ -23,6 +23,7 @@ kotlinxCollectionsImmutable = "0.4.0"
 kotlinxDatetime = "0.7.1"
 mapSdk = "3.23.0"
 naverMapCompose = "1.9.0"
+playServicesLocation = "21.3.0"
 securityCrypto = "1.1.0"
 timber = "5.0.1"
 androidxNavigation3 = "1.0.0"
@@ -83,6 +84,7 @@ androidx-security-crypto = { module = "androidx.security:security-crypto", versi
 
 map-sdk = { module = "com.naver.maps:map-sdk", version.ref = "mapSdk" }
 naver-map-compose = { module = "io.github.fornewid:naver-map-compose", version.ref = "naverMapCompose" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
