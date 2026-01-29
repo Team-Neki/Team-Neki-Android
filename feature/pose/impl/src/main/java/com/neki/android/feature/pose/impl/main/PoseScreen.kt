@@ -74,7 +74,7 @@ fun PoseScreen(
         PoseContent(
             selectedPeopleCount = uiState.selectedPeopleCount,
             isScrapSelected = uiState.isShowScrappedPose,
-            poseList = if (uiState.isShowScrappedPose) uiState.scrappedPoseList else uiState.randomPoseList,
+            poseList = if (uiState.isShowScrappedPose) uiState.scrappedPoseList else uiState.poseList,
             onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickScrap = { onIntent(PoseIntent.ClickScrapChip) },
