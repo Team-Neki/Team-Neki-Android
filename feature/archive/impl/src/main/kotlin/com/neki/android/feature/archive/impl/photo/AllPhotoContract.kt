@@ -6,9 +6,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class AllPhotoState(
-    val photos: ImmutableList<Photo> = persistentListOf(),
-    val sortedDescendingPhotos: ImmutableList<Photo> = persistentListOf(),
-    val showingPhotos: ImmutableList<Photo> = persistentListOf(),
+    val isLoading: Boolean = false,
     val selectMode: SelectMode = SelectMode.DEFAULT,
     val selectedPhotoFilter: PhotoFilter = PhotoFilter.NEWEST,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
