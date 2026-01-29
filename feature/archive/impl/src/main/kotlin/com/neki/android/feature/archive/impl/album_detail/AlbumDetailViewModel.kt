@@ -194,7 +194,12 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 }
                 .onFailure { error ->
                     Timber.e(error)
-                    reduce { copy(isLoading = false) }
+                    reduce {
+                        copy(
+                            isShowDeleteDialog = false,
+                            isLoading = false,
+                        )
+                    }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
                 }
         }
@@ -218,7 +223,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                         copy(
                             selectedPhotos = persistentListOf(),
                             selectMode = SelectMode.DEFAULT,
-                            isShowDeleteDialog = false,
+                            isShowDeleteBottomSheet = false,
                             isLoading = false,
                         )
                     }
@@ -226,7 +231,12 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 }
                 .onFailure { error ->
                     Timber.e(error)
-                    reduce { copy(isLoading = false) }
+                    reduce {
+                        copy(
+                            isShowDeleteBottomSheet = false,
+                            isLoading = false,
+                        )
+                    }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
                 }
         }
