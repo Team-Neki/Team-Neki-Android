@@ -20,7 +20,7 @@ data class ArchiveMainState(
     val isShowAddAlbumBottomSheet: Boolean = false,
 ) {
     val uploadType: UploadType
-        get() = if (scannedImageUrl == null) UploadType.GALLERY else UploadType.QR_SCAN
+        get() = if (scannedImageUrl != null || selectedUris.isNotEmpty()) UploadType.SINGLE else UploadType.MULTIPLE
 }
 
 sealed interface ArchiveMainIntent {

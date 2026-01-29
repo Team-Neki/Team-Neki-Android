@@ -3,8 +3,8 @@ package com.neki.android.feature.archive.impl.main
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.common.util.urlToByteArray
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
@@ -24,6 +24,7 @@ private const val DEFAULT_PHOTOS_SIZE = 20
 @HiltViewModel
 class ArchiveMainViewModel @Inject constructor(
     private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
+    private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
     private val photoRepository: PhotoRepository,
 ) : ViewModel() {
 
@@ -161,7 +162,7 @@ class ArchiveMainViewModel @Inject constructor(
             reduce { copy(isLoading = false) }
             postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
         }
-        if (state.uploadType == UploadType.QR_SCAN) {
+        if (state.uploadType == UploadType.SINGLE) {
             uploadSingleImage(
                 imageUrl = state.scannedImageUrl ?: return,
                 reduce = reduce,
@@ -186,10 +187,9 @@ class ArchiveMainViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
-            val imageBytes = imageUrl.urlToByteArray()
 
             uploadSinglePhotoUseCase(
-                imageBytes = imageBytes,
+                imageUrl = imageUrl,
             ).onSuccess {
                 fetchPhotos(reduce, 1) // 가장 최신 데이터 가져오기
                 onSuccess()
@@ -207,8 +207,20 @@ class ArchiveMainViewModel @Inject constructor(
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
         onSuccess: () -> Unit,
     ) {
-        // TODO: 이미지 여러개 업로드
-        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+
+            uploadMultiplePhotoUseCase(
+                imageUris = imageUris,
+            ).onSuccess {
+                fetchPhotos(reduce)
+                onSuccess()
+            }.onFailure { error ->
+                Timber.e(error)
+                postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+                reduce { copy(isLoading = false) }
+            }
+        }
     }
 
     private fun handleAddAlbum(

@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.common.util.urlToByteArray
+import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.Album
 import com.neki.android.core.model.UploadType
@@ -25,6 +25,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
     @Assisted private val imageUrl: String?,
     @Assisted private val uriStrings: List<String>,
     private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
+    private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -107,7 +108,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
             postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
         }
 
-        if (state.uploadType == UploadType.QR_SCAN) {
+        if (state.uploadType == UploadType.SINGLE) {
             uploadSingleImage(
                 imageUrl = state.imageUrl ?: return,
                 albumId = firstAlbumId,
@@ -119,6 +120,7 @@ class UploadAlbumViewModel @AssistedInject constructor(
             uploadMultipleImages(
                 imageUris = state.selectedUris,
                 albumId = firstAlbumId,
+                reduce = reduce,
                 onSuccessAction = onSuccessAction,
                 onFailureAction = onFailureAction,
             )
@@ -134,10 +136,9 @@ class UploadAlbumViewModel @AssistedInject constructor(
     ) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
-            val imageBytes = imageUrl.urlToByteArray()
 
             uploadSinglePhotoUseCase(
-                imageBytes = imageBytes,
+                imageUrl = imageUrl,
                 folderId = albumId,
             ).onSuccess { data ->
                 Timber.d(data.toString())
@@ -151,10 +152,21 @@ class UploadAlbumViewModel @AssistedInject constructor(
     private fun uploadMultipleImages(
         imageUris: List<Uri>,
         albumId: Long,
+        reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
         onSuccessAction: () -> Unit,
         onFailureAction: (Throwable) -> Unit,
     ) {
-        // TODO: 이미지 여러개 업로드
-        onFailureAction(Throwable("Not implemented"))
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+
+            uploadMultiplePhotoUseCase(
+                imageUris = imageUris,
+                folderId = albumId,
+            ).onSuccess {
+                onSuccessAction()
+            }.onFailure { error ->
+                onFailureAction(error)
+            }
+        }
     }
 }
