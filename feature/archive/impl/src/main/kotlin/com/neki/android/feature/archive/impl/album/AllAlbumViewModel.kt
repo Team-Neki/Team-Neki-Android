@@ -172,14 +172,23 @@ class AllAlbumViewModel @Inject constructor(
         reduce: (AllAlbumState.() -> AllAlbumState) -> Unit,
         postSideEffect: (AllAlbumSideEffect) -> Unit,
     ) {
-        // TODO: Add album to repository
-        reduce {
-            copy(
-                isShowAddAlbumBottomSheet = false,
-                albums = (albums + AlbumPreview(id = albums.size.toLong(), title = albumName)).toImmutableList(),
-            )
+        viewModelScope.launch {
+            folderRepository.createFolder(name = albumName)
+                .onSuccess { folderId ->
+                    val newAlbum = AlbumPreview(id = folderId, title = albumName)
+
+                    reduce { copy(albums = (albums + newAlbum).toImmutableList()) }
+                    postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
+                    Timber.d("folderId: $folderId")
+                }
+                .onFailure { error ->
+                    postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
+                    Timber.e(error)
+
+                }
+            reduce { copy(isShowAddAlbumBottomSheet = false) }
         }
-        postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
+
     }
 
     private fun handleDeleteConfirm(
