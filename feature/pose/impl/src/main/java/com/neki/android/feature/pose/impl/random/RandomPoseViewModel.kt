@@ -128,7 +128,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     ) {
         if (state.hasPrevious) {
             reduce { copy(currentIndex = currentIndex - 1) }
-        }else {
+        } else {
             postSideEffect(RandomPoseEffect.ShowToast("첫번째 포즈입니다."))
         }
     }
