@@ -173,8 +173,9 @@ class AlbumDetailViewModel @AssistedInject constructor(
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
+        val selectedPhotoIds = state.selectedPhotos.map { it.id }
+
         viewModelScope.launch {
-            val selectedPhotoIds = state.selectedPhotos.map { it.id }
             reduce { copy(isLoading = true) }
 
             photoRepository.deletePhoto(photoIds = selectedPhotoIds)
@@ -206,21 +207,28 @@ class AlbumDetailViewModel @AssistedInject constructor(
     ) {
         val selectedPhotoIds = state.selectedPhotos.map { it.id }
 
-        // UI에서 즉시 필터링
-        deletedPhotoIds.update { it + selectedPhotoIds.toSet() }
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
 
-        reduce {
-            copy(
-                selectedPhotos = persistentListOf(),
-                selectMode = SelectMode.DEFAULT,
-                isShowDeleteBottomSheet = false,
-            )
+            photoRepository.deletePhoto(photoIds = selectedPhotoIds)
+                .onSuccess {
+                    Timber.d("삭제 성공")
+                    deletedPhotoIds.update { it + selectedPhotoIds.toSet() }
+                    reduce {
+                        copy(
+                            selectedPhotos = persistentListOf(),
+                            selectMode = SelectMode.DEFAULT,
+                            isShowDeleteDialog = false,
+                            isLoading = false,
+                        )
+                    }
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                    reduce { copy(isLoading = false) }
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
+                }
         }
-
-        val message = when (state.selectedDeleteOption) {
-            PhotoDeleteOption.REMOVE_FROM_ALBUM -> "앨범에서 사진을 제거했어요"
-            PhotoDeleteOption.REMOVE_FROM_ALL -> "사진을 삭제했어요"
-        }
-        postSideEffect(AlbumDetailSideEffect.ShowToastMessage(message))
     }
 }
