@@ -41,15 +41,11 @@ object ArchiveEntryProviderModule {
     @IntoSet
     @Provides
     fun provideArchiveEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
-        archiveMainEntry(navigator)
-        allPhotoEntry(navigator)
-        allAlbumEntry(navigator)
-        albumDetailEntry(navigator)
-        photoDetailEntry(navigator)
+        archiveEntry(navigator)
     }
 }
 
-private fun EntryProviderScope<NavKey>.archiveMainEntry(navigator: Navigator) {
+private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.Archive> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<ArchiveMainViewModel>()
@@ -58,6 +54,7 @@ private fun EntryProviderScope<NavKey>.archiveMainEntry(navigator: Navigator) {
                 is QRScanResult.QRCodeScanned -> {
                     viewModel.store.onIntent(ArchiveMainIntent.QRCodeScanned(result.imageUrl))
                 }
+
                 QRScanResult.OpenGallery -> {
                     viewModel.store.onIntent(ArchiveMainIntent.ClickGalleryUploadRow)
                 }
@@ -83,9 +80,7 @@ private fun EntryProviderScope<NavKey>.archiveMainEntry(navigator: Navigator) {
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
-}
 
-private fun EntryProviderScope<NavKey>.allPhotoEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AllPhoto> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<AllPhotoViewModel>()
@@ -95,6 +90,7 @@ private fun EntryProviderScope<NavKey>.allPhotoEntry(navigator: Navigator) {
                 is ArchiveResult.FavoriteChanged -> {
                     viewModel.store.onIntent(AllPhotoIntent.FavoriteChanged(result.photoId, result.isFavorite))
                 }
+
                 is ArchiveResult.PhotoDeleted -> {
                     viewModel.store.onIntent(AllPhotoIntent.PhotoDeleted(result.photoId))
                 }
@@ -107,9 +103,7 @@ private fun EntryProviderScope<NavKey>.allPhotoEntry(navigator: Navigator) {
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
-}
 
-private fun EntryProviderScope<NavKey>.allAlbumEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AllAlbum> {
         AllAlbumRoute(
             navigateBack = navigator::goBack,
@@ -121,9 +115,7 @@ private fun EntryProviderScope<NavKey>.allAlbumEntry(navigator: Navigator) {
             },
         )
     }
-}
 
-private fun EntryProviderScope<NavKey>.albumDetailEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AlbumDetail> { key ->
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
@@ -135,6 +127,7 @@ private fun EntryProviderScope<NavKey>.albumDetailEntry(navigator: Navigator) {
                 is ArchiveResult.FavoriteChanged -> {
                     viewModel.store.onIntent(AlbumDetailIntent.FavoriteChanged(result.photoId, result.isFavorite))
                 }
+
                 is ArchiveResult.PhotoDeleted -> {
                     viewModel.store.onIntent(AlbumDetailIntent.PhotoDeleted(result.photoId))
                 }
@@ -147,9 +140,7 @@ private fun EntryProviderScope<NavKey>.albumDetailEntry(navigator: Navigator) {
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
-}
 
-private fun EntryProviderScope<NavKey>.photoDetailEntry(navigator: Navigator) {
     entry<ArchiveNavKey.PhotoDetail> { key ->
         PhotoDetailRoute(
             viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
