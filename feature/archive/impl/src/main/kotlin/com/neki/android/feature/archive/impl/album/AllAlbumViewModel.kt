@@ -181,11 +181,9 @@ class AllAlbumViewModel @Inject constructor(
                 .onFailure { error ->
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
                     Timber.e(error)
-
                 }
             reduce { copy(isShowAddAlbumBottomSheet = false) }
         }
-
     }
 
     private fun handleDeleteConfirm(
@@ -214,6 +212,5 @@ class AllAlbumViewModel @Inject constructor(
                 )
             }
         }
-
     }
 }

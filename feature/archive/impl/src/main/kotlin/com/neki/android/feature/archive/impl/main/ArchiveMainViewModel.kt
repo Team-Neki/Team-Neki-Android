@@ -250,7 +250,6 @@ class ArchiveMainViewModel @Inject constructor(
                 .onFailure { error ->
                     postSideEffect(ArchiveMainSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
                     Timber.e(error)
-
                 }
             reduce { copy(isShowAddAlbumBottomSheet = false) }
         }

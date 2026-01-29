@@ -75,7 +75,7 @@ internal fun AllPhotoRoute(
             AllPhotoSideEffect.NavigateBack -> navigateBack()
             AllPhotoSideEffect.ScrollToTop -> coroutineScope.launch {
                 snapshotFlow { pagingItems.loadState.refresh }
-                    .dropWhile { it is LoadState.NotLoading }  // 해당 이벤트 도착이, 새로운 pagingItems 조회보다 빠름.
+                    .dropWhile { it is LoadState.NotLoading } // 해당 이벤트 도착이, 새로운 pagingItems 조회보다 빠름.
                     .first { it is LoadState.NotLoading }
                 lazyState.scrollToItem(0)
             }
