@@ -92,31 +92,31 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             scrapJobs[poseId] = viewModelScope.launch {
                 delay(500)
                 val committedScrap = store.uiState.value.committedScraps[poseId]
-                if (committedScrap != newScrapStatus) {
-                    poseRepository.updateScrap(poseId, newScrapStatus)
-                        .onSuccess {
-                            Timber.d("updateScrap success for poseId: $poseId")
+                if (committedScrap != newScrapStatus) return@launch
+
+                poseRepository.updateScrap(poseId, newScrapStatus)
+                    .onSuccess {
+                        Timber.d("updateScrap success for poseId: $poseId")
+                        reduce {
+                            copy(committedScraps = committedScraps + (poseId to newScrapStatus))
+                        }
+                    }
+                    .onFailure { error ->
+                        Timber.e(error, "updateScrap failed for poseId: $poseId")
+                        committedScrap?.let { originalScrap ->
                             reduce {
-                                copy(committedScraps = committedScraps + (poseId to newScrapStatus))
+                                copy(
+                                    poseList = poseList.map { pose ->
+                                        if (pose.id == poseId) {
+                                            pose.copy(isScrapped = originalScrap)
+                                        } else {
+                                            pose
+                                        }
+                                    }.toImmutableList(),
+                                )
                             }
                         }
-                        .onFailure { error ->
-                            Timber.e(error, "updateScrap failed for poseId: $poseId")
-                            committedScrap?.let { originalScrap ->
-                                reduce {
-                                    copy(
-                                        poseList = poseList.map { pose ->
-                                            if (pose.id == poseId) {
-                                                pose.copy(isScrapped = originalScrap)
-                                            } else {
-                                                pose
-                                            }
-                                        }.toImmutableList(),
-                                    )
-                                }
-                            }
-                        }
-                }
+                    }
             }
         }
     }
@@ -138,13 +138,13 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
-        // 뒤에서 2번째라면은 데이터를 가져오기
-        val shouldFetchNextPost = state.currentIndex == state.poseList.lastIndex - 1
+        if (state.currentIndex >= state.poseList.lastIndex) return
 
-        if (shouldFetchNextPost) {
+        reduce { copy(currentIndex = currentIndex + 1) }
+
+        // 뒤에서 2번째였으면 다음 포즈 미리 캐싱
+        if (state.currentIndex == state.poseList.lastIndex - 1) {
             fetchNextPose(reduce, postSideEffect)
-        } else {
-            reduce { copy(currentIndex = currentIndex + 1) }
         }
     }
 
