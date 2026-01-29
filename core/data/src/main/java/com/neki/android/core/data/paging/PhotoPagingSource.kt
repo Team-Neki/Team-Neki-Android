@@ -8,6 +8,7 @@ import com.neki.android.core.model.Photo
 class PhotoPagingSource(
     private val photoService: PhotoService,
     private val folderId: Long?,
+    private val sortOrder: String,
 ) : PagingSource<Int, Photo>() {
 
     override fun getRefreshKey(state: PagingState<Int, Photo>): Int? {
@@ -24,6 +25,7 @@ class PhotoPagingSource(
                 folderId = folderId,
                 page = page,
                 size = params.loadSize,
+                sortOrder = sortOrder,
             )
             val photos = response.data.toModels()
             val hasNext = response.data.hasNext

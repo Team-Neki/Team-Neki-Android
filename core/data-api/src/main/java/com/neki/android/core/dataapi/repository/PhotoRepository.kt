@@ -31,7 +31,10 @@ interface PhotoRepository {
 
     suspend fun getFavoriteSummary(): Result<AlbumPreview>
 
-    fun getPhotosFlow(folderId: Long?): Flow<PagingData<Photo>>
+    fun getPhotosFlow(
+        folderId: Long? = null,
+        sortOrder: SortOrder = SortOrder.DESC,
+    ): Flow<PagingData<Photo>>
 
     fun getFavoritePhotosFlow(
         sortOrder: SortOrder = SortOrder.DESC,

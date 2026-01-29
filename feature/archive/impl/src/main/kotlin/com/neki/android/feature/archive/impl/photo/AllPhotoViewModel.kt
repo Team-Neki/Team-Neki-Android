@@ -7,15 +7,18 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -27,10 +30,26 @@ class AllPhotoViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val deletedPhotoIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val _photoFilter = MutableStateFlow(PhotoFilter.NEWEST)
+    private val _isFavoriteOnly = MutableStateFlow(false)
 
-    private val originalPagingData: Flow<PagingData<Photo>> =
-        photoRepository.getPhotosFlow(folderId = null)
-            .cachedIn(viewModelScope)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val originalPagingData: Flow<PagingData<Photo>> = combine(
+        _photoFilter,
+        _isFavoriteOnly,
+    ) { filter, isFavoriteOnly ->
+        filter to isFavoriteOnly
+    }.flatMapLatest { (filter, isFavoriteOnly) ->
+        val sortOrder = when (filter) {
+            PhotoFilter.NEWEST -> SortOrder.DESC
+            PhotoFilter.OLDEST -> SortOrder.ASC
+        }
+        if (isFavoriteOnly) {
+            photoRepository.getFavoritePhotosFlow(sortOrder)
+        } else {
+            photoRepository.getPhotosFlow(sortOrder = sortOrder)
+        }
+    }.cachedIn(viewModelScope)
 
     val photoPagingData: Flow<PagingData<Photo>> = combine(
         originalPagingData,
@@ -68,7 +87,7 @@ class AllPhotoViewModel @Inject constructor(
             // Filter Intent
             AllPhotoIntent.ClickFilterChip -> reduce { copy(isShowFilterDialog = true) }
             AllPhotoIntent.DismissFilterPopup -> reduce { copy(isShowFilterDialog = false) }
-            AllPhotoIntent.ClickFavoriteFilterChip -> handleFavoriteFilter(state, reduce)
+            AllPhotoIntent.ClickFavoriteFilterChip -> handleFavoriteFilter(state, reduce, postSideEffect)
             is AllPhotoIntent.ClickFilterPopupRow -> handleFilterRow(intent.filter, reduce, postSideEffect)
 
             // Photo Intent
@@ -99,10 +118,12 @@ class AllPhotoViewModel @Inject constructor(
     private fun handleFavoriteFilter(
         state: AllPhotoState,
         reduce: (AllPhotoState.() -> AllPhotoState) -> Unit,
+        postSideEffect: (AllPhotoSideEffect) -> Unit,
     ) {
-        reduce {
-            copy(isFavoriteChipSelected = !isFavoriteChipSelected)
-        }
+        val newValue = !state.isFavoriteChipSelected
+        _isFavoriteOnly.value = newValue
+        reduce { copy(isFavoriteChipSelected = newValue) }
+        postSideEffect(AllPhotoSideEffect.ScrollToTop)
     }
 
     private fun handleFilterRow(
@@ -110,6 +131,7 @@ class AllPhotoViewModel @Inject constructor(
         reduce: (AllPhotoState.() -> AllPhotoState) -> Unit,
         postSideEffect: (AllPhotoSideEffect) -> Unit,
     ) {
+        _photoFilter.value = filter
         reduce {
             copy(
                 isShowFilterDialog = false,
