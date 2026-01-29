@@ -174,12 +174,9 @@ class AllAlbumViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             folderRepository.createFolder(name = albumName)
-                .onSuccess { folderId ->
-                    val newAlbum = AlbumPreview(id = folderId, title = albumName)
-
-                    reduce { copy(albums = (albums + newAlbum).toImmutableList()) }
+                .onSuccess {
+                    fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
-                    Timber.d("folderId: $folderId")
                 }
                 .onFailure { error ->
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))

@@ -241,19 +241,18 @@ class ArchiveMainViewModel @Inject constructor(
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
-        // TODO: Add album to repository
         viewModelScope.launch {
             folderRepository.createFolder(name = albumName)
-                .onSuccess { folderId ->
+                .onSuccess {
                     fetchFolders(reduce)
-                    Timber.d("folderId: $folderId")
+                    postSideEffect(ArchiveMainSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
                 }
                 .onFailure { error ->
+                    postSideEffect(ArchiveMainSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
                     Timber.e(error)
-                }
-        }
 
-        reduce { copy(isShowAddAlbumBottomSheet = false) }
-        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
+                }
+            reduce { copy(isShowAddAlbumBottomSheet = false) }
+        }
     }
 }
