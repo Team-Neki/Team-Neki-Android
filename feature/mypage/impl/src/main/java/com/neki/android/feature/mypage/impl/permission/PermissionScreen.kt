@@ -58,30 +58,18 @@ fun PermissionScreen(
             onBack = { onIntent(MyPageIntent.ClickBackIcon) },
         )
         SectionTitleText(text = "권한 설정")
-        PermissionSectionItem(
-            title = NekiPermission.CAMERA.title,
-            subTitle = NekiPermission.CAMERA.subTitle,
-            isGranted = uiState.isCameraGranted,
-            onClick = { onIntent(MyPageIntent.ClickPermissionItem(NekiPermission.CAMERA)) },
-        )
-        PermissionSectionItem(
-            title = NekiPermission.LOCATION.title,
-            subTitle = NekiPermission.LOCATION.subTitle,
-            isGranted = uiState.isLocationGranted,
-            onClick = { onIntent(MyPageIntent.ClickPermissionItem(NekiPermission.LOCATION)) },
-        )
-        PermissionSectionItem(
-            title = NekiPermission.STORAGE.title,
-            subTitle = NekiPermission.STORAGE.subTitle,
-            isGranted = uiState.isStorageGranted,
-            onClick = { onIntent(MyPageIntent.ClickPermissionItem(NekiPermission.STORAGE)) },
-        )
-        PermissionSectionItem(
-            title = NekiPermission.NOTIFICATION.title,
-            subTitle = NekiPermission.NOTIFICATION.subTitle,
-            isGranted = uiState.isNotificationGranted,
-            onClick = { onIntent(MyPageIntent.ClickPermissionItem(NekiPermission.NOTIFICATION)) },
-        )
+        NekiPermission.entries.forEach { permission ->
+            PermissionSectionItem(
+                title = permission.title,
+                subTitle = permission.subTitle,
+                isGranted = when (permission) {
+                    NekiPermission.CAMERA -> uiState.isGrantedCamera
+                    NekiPermission.LOCATION -> uiState.isGrantedLocation
+                    NekiPermission.NOTIFICATION -> uiState.isGrantedNotification
+                },
+                onClick = { onIntent(MyPageIntent.ClickPermissionItem(permission)) },
+            )
+        }
     }
 
     if (uiState.isShowPermissionDialog && uiState.selectedPermission != null) {

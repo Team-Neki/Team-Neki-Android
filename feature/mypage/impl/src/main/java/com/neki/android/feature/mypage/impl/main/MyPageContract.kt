@@ -13,10 +13,9 @@ data class MyPageState(
     val isShowImageChooseDialog: Boolean = false,
     val profileMode: ProfileMode = ProfileMode.SETTING,
     // Permission
-    val isCameraGranted: Boolean = false,
-    val isLocationGranted: Boolean = false,
-    val isStorageGranted: Boolean = false,
-    val isNotificationGranted: Boolean = false,
+    val isGrantedCamera: Boolean = false,
+    val isGrantedLocation: Boolean = false,
+    val isGrantedNotification: Boolean = false,
     val isShowPermissionDialog: Boolean = false,
     val selectedPermission: NekiPermission? = null,
 )
