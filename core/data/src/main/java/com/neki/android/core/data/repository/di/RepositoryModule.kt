@@ -6,6 +6,7 @@ import com.neki.android.core.data.repository.impl.DataStoreRepositoryImpl
 import com.neki.android.core.data.repository.impl.MediaUploadRepositoryImpl
 import com.neki.android.core.data.repository.impl.MapRepositoryImpl
 import com.neki.android.core.data.repository.impl.PhotoRepositoryImpl
+import com.neki.android.core.data.repository.impl.PoseRepositoryImpl
 import com.neki.android.core.data.repository.impl.TokenRepositoryImpl
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.AuthRepository
@@ -13,6 +14,7 @@ import com.neki.android.core.dataapi.repository.DataStoreRepository
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import dagger.Binds
 import dagger.Module
@@ -65,4 +67,10 @@ internal interface RepositoryModule {
     fun bindMapRepositoryImpl(
         mapRepositoryImpl: MapRepositoryImpl,
     ): MapRepository
+
+    @Binds
+    @Singleton
+    fun bindPoseRepositoryImpl(
+        poseRepositoryImpl: PoseRepositoryImpl,
+    ): PoseRepository
 }
