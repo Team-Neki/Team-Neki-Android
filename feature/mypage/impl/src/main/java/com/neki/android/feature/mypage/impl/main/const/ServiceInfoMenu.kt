@@ -14,7 +14,7 @@ enum class ServiceInfoMenu(
     ),
     PRIVACY_POLICY(
         text = "개인정보 처리방침",
-        url = "https://www.naver.com",
+        url = "https://lydian-tip-26b.notion.site/2ee0d9441db0807cb850f78145db6dd3?pvs=74",
     ),
     OPEN_SOURCE_LICENSE(
         text = "오픈소스 라이선스",
