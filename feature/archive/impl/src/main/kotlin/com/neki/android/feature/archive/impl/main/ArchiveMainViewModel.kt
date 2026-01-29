@@ -3,6 +3,7 @@ package com.neki.android.feature.archive.impl.main
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
@@ -26,6 +27,7 @@ class ArchiveMainViewModel @Inject constructor(
     private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
     private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
     private val photoRepository: PhotoRepository,
+    private val folderRepository: FolderRepository,
 ) : ViewModel() {
 
     val store: MviIntentStore<ArchiveMainState, ArchiveMainIntent, ArchiveMainSideEffect> =
@@ -125,6 +127,7 @@ class ArchiveMainViewModel @Inject constructor(
                 awaitAll(
                     async { fetchFavoriteSummary(reduce) },
                     async { fetchPhotos(reduce) },
+                    async { fetchFolders(reduce) },
                 )
             } finally {
                 reduce { copy(isLoading = false) }
@@ -146,6 +149,16 @@ class ArchiveMainViewModel @Inject constructor(
         photoRepository.getPhotos()
             .onSuccess { data ->
                 reduce { copy(recentPhotos = data.toImmutableList()) }
+            }
+            .onFailure { error ->
+                Timber.e(error)
+            }
+    }
+
+    private suspend fun fetchFolders(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
+        folderRepository.getFolders()
+            .onSuccess { data ->
+                reduce { copy(albums = data.toImmutableList()) }
             }
             .onFailure { error ->
                 Timber.e(error)
