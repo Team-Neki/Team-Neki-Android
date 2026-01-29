@@ -31,7 +31,7 @@ sealed interface PoseIntent {
 sealed interface PoseEffect {
     data object NavigateToNotification : PoseEffect
     data class NavigateToRandomPose(val peopleCount: PeopleCount) : PoseEffect
-    data class NavigateToPoseDetail(val pose: Pose) : PoseEffect
+    data class NavigateToPoseDetail(val poseId: Long) : PoseEffect
     data class ShowToast(val message: String) : PoseEffect
 }
 

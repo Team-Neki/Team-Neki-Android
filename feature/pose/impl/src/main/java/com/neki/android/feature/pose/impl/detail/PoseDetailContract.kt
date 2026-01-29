@@ -8,6 +8,7 @@ data class PoseDetailState(
 )
 
 sealed interface PoseDetailIntent {
+    data object EnterPoseDetailScreen : PoseDetailIntent
     data object ClickBackIcon : PoseDetailIntent
     data object ClickScrapIcon : PoseDetailIntent
 }

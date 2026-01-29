@@ -40,7 +40,7 @@ import com.neki.android.feature.pose.impl.main.component.RecommendationChip
 @Composable
 internal fun PoseRoute(
     viewModel: PoseViewModel = hiltViewModel(),
-    navigateToPoseDetail: (Pose) -> Unit,
+    navigateToPoseDetail: (Long) -> Unit,
     navigateToRandomPose: (PeopleCount) -> Unit,
     navigateToNotification: () -> Unit,
 ) {
@@ -52,7 +52,7 @@ internal fun PoseRoute(
         when (sideEffect) {
             PoseEffect.NavigateToNotification -> navigateToNotification()
             is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
-            is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.pose)
+            is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.poseId)
             is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
         }
     }

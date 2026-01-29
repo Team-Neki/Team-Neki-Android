@@ -15,7 +15,7 @@ sealed interface PoseNavKey : NavKey {
     data class RandomPose(val peopleCount: PeopleCount) : PoseNavKey
 
     @Serializable
-    data class PoseDetail(val pose: Pose) : PoseNavKey
+    data class PoseDetail(val poseId: Long) : PoseNavKey
 }
 
 fun Navigator.navigateToPose() {
@@ -26,6 +26,6 @@ fun Navigator.navigateToRandomPose(peopleCount: PeopleCount) {
     navigate(PoseNavKey.RandomPose(peopleCount))
 }
 
-fun Navigator.navigateToPoseDetail(pose: Pose) {
-    navigate(PoseNavKey.PoseDetail(pose))
+fun Navigator.navigateToPoseDetail(poseId: Long) {
+    navigate(PoseNavKey.PoseDetail(poseId))
 }

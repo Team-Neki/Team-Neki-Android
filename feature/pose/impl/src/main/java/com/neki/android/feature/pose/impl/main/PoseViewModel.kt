@@ -78,7 +78,7 @@ internal class PoseViewModel @Inject constructor(
             }
 
             is PoseIntent.ClickPoseItem -> {
-                postSideEffect(PoseEffect.NavigateToPoseDetail(intent.item))
+                postSideEffect(PoseEffect.NavigateToPoseDetail(intent.item.id))
             }
 
             PoseIntent.ClickRandomPoseRecommendation -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = true) }
