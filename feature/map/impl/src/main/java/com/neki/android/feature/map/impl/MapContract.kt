@@ -1,16 +1,22 @@
 package com.neki.android.feature.map.impl
 
+import androidx.compose.ui.graphics.ImageBitmap
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.feature.map.impl.const.DirectionApp
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 
 data class MapState(
     val isLoading: Boolean = false,
     val currentLocLatLng: LocLatLng? = null,
+    val isCameraOnCurrentLocation: Boolean = false,
+    val isVisibleRefreshButton: Boolean = false,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val brands: ImmutableList<Brand> = persistentListOf(),
+    val brandImageCache: ImmutableMap<String, ImageBitmap> = persistentMapOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
     val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val isShowInfoDialog: Boolean = false,
@@ -20,14 +26,15 @@ data class MapState(
 
 sealed interface MapIntent {
     data object EnterMapScreen : MapIntent
-    data object NaverMapLoaded : MapIntent
 
     // in 지도
+    data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
+    data object GrantedLocationPermission : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickRefreshButton(val mapBounds: MapBounds) : MapIntent
     data object ClickDirectionIcon : MapIntent
-    data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
+    data object GestureOnMap : MapIntent
 
     // in 패널
     data object ClickCurrentLocationIcon : MapIntent
@@ -51,9 +58,10 @@ sealed interface MapIntent {
 }
 
 sealed interface MapEffect {
-    data object TrackingFollowMode : MapEffect
-    data object LoadInitialPhotoBooths : MapEffect
-    data class MoveCameraToPosition(val locLatLng: LocLatLng) : MapEffect
+    data class MoveCameraToPosition(
+        val locLatLng: LocLatLng,
+        val isRequiredLoadPhotoBooths: Boolean = false,
+    ) : MapEffect
     data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect
 

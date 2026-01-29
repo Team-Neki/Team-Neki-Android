@@ -1,19 +1,37 @@
 package com.neki.android.feature.map.impl
 
+import android.content.Context
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil3.ImageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.allowHardware
+import coil3.toBitmap
+import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
+import com.neki.android.core.model.Brand
+import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.map.impl.const.DirectionApp
+import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val mapRepository: MapRepository,
 ) : ViewModel() {
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
@@ -30,27 +48,27 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> loadBrands(state, reduce)
-            MapIntent.NaverMapLoaded -> postSideEffect(MapEffect.LoadInitialPhotoBooths)
+            is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
-            is MapIntent.ClickRefreshButton -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
-            is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent, reduce, postSideEffect)
             MapIntent.ClickCurrentLocationIcon -> {
-                if (state.dragLevel == DragLevel.INVISIBLE) {
-                    reduce {
-                        copy(
-                            dragLevel = DragLevel.FIRST,
-                            mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
-                        )
-                    }
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
+                    moveCurrentLocation(state, reduce, postSideEffect)
+                } else {
+                    postSideEffect(MapEffect.LaunchLocationPermission)
                 }
-                postSideEffect(MapEffect.TrackingFollowMode)
             }
 
+            MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false, isVisibleRefreshButton = true) }
+            is MapIntent.ClickRefreshButton -> {
+                reduce { copy(isVisibleRefreshButton = false) }
+                loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+            }
+            is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
-            is MapIntent.ClickVerticalBrand -> handleClickBrand(intent, reduce)
-            is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent, reduce, postSideEffect)
+            is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, reduce)
+            is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent.photoBooth, reduce, postSideEffect)
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
                     dragLevel = DragLevel.SECOND,
@@ -60,11 +78,18 @@ class MapViewModel @Inject constructor(
 
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
-            is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent, reduce, postSideEffect)
+            is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
-            is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent, reduce, postSideEffect)
-            is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent, postSideEffect)
-            MapIntent.ClickDirectionIcon -> postSideEffect(MapEffect.OpenDirectionBottomSheet)
+            is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
+            is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
+            MapIntent.ClickDirectionIcon -> {
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
+                    postSideEffect(MapEffect.OpenDirectionBottomSheet)
+                } else {
+                    postSideEffect(MapEffect.LaunchLocationPermission)
+                }
+            }
+
             MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.LaunchLocationPermission)
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
@@ -75,32 +100,78 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleUpdateCurrentLocation(
-        state: MapState,
-        intent: MapIntent.UpdateCurrentLocation,
+    private fun getCurrentLocation(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        reduce { copy(currentLocLatLng = intent.locLatLng) }
+        viewModelScope.launch {
+            LocationHelper.getCurrentLocation(context)
+                .onSuccess { location ->
+                    reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
+                    postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true))
+                }
+                .onFailure {
+                    // 위치 조회 실패 시 강남역으로 카메라 이동
+                    postSideEffect(
+                        MapEffect.MoveCameraToPosition(
+                            LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
+                            isRequiredLoadPhotoBooths = true,
+                        ),
+                    )
+                }
+        }
+    }
+
+    private fun handleUpdateCurrentLocation(
+        state: MapState,
+        locLatLng: LocLatLng,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        reduce { copy(currentLocLatLng = locLatLng) }
 
         /** 위치가 이동하더라도 주변 네컷 사진 브랜드는 변경하지 않기 때문에 최초에만 요청 **/
         if (state.currentLocLatLng == null) {
             loadNearbyPhotoBooths(
-                longitude = intent.locLatLng.longitude,
-                latitude = intent.locLatLng.latitude,
+                longitude = locLatLng.longitude,
+                latitude = locLatLng.latitude,
                 brandIds = state.brands.filter { it.isChecked }.map { it.id },
                 reduce = reduce,
             )
         }
     }
 
+    private fun moveCurrentLocation(
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        if (state.dragLevel == DragLevel.INVISIBLE) {
+            reduce {
+                copy(
+                    dragLevel = DragLevel.FIRST,
+                    mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
+                )
+            }
+        }
+
+        if (state.currentLocLatLng != null) {
+            reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
+            postSideEffect(
+                MapEffect.MoveCameraToPosition(
+                    LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
+                    isRequiredLoadPhotoBooths = true,
+                ),
+            )
+        }
+    }
+
     private fun handleClickBrand(
-        intent: MapIntent.ClickVerticalBrand,
+        clickedBrand: Brand,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         reduce {
             val updatedBrands = brands.map { brand ->
-                if (brand == intent.brand) {
+                if (brand == clickedBrand) {
                     brand.copy(isChecked = !brand.isChecked)
                 } else {
                     brand
@@ -125,32 +196,32 @@ class MapViewModel @Inject constructor(
     }
 
     private fun handleClickNearPhotoBooth(
-        intent: MapIntent.ClickNearPhotoBooth,
+        photoBooth: PhotoBooth,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
         reduce {
             val isAlreadyInMarkers = mapMarkers.any {
-                it.latitude == intent.photoBooth.latitude && it.longitude == intent.photoBooth.longitude
+                it.latitude == photoBooth.latitude && it.longitude == photoBooth.longitude
             }
             val updatedMarkers = if (isAlreadyInMarkers) {
                 mapMarkers.map { marker ->
-                    marker.copy(isFocused = marker.id == intent.photoBooth.id)
+                    marker.copy(isFocused = marker.id == photoBooth.id)
                 }
             } else {
-                mapMarkers.map { it.copy(isFocused = false) } + intent.photoBooth.copy(isFocused = true)
+                mapMarkers.map { it.copy(isFocused = false) } + photoBooth.copy(isFocused = true)
             }
             copy(
                 dragLevel = DragLevel.INVISIBLE,
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(intent.photoBooth.latitude, intent.photoBooth.longitude)))
+        postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
     }
 
     private fun handleClickDirectionItem(
         state: MapState,
-        intent: MapIntent.ClickDirectionItem,
+        app: DirectionApp,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
@@ -162,7 +233,7 @@ class MapViewModel @Inject constructor(
         state.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
             postSideEffect(
                 MapEffect.LaunchDirectionApp(
-                    app = intent.app,
+                    app = app,
                     startLocLatLng = state.currentLocLatLng,
                     endLocLatLng = LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude),
                 ),
@@ -171,14 +242,13 @@ class MapViewModel @Inject constructor(
     }
 
     private fun handleClickPhotoBoothMarker(
-        intent: MapIntent.ClickPhotoBoothMarker,
+        locLatLng: LocLatLng,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        Timber.d("handleClickPhotoBoothMarker START: ${intent.locLatLng}")
         reduce {
             val updatedMarkers = mapMarkers.map { marker ->
-                val isClicked = marker.latitude == intent.locLatLng.latitude && marker.longitude == intent.locLatLng.longitude
+                val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
                 if (isClicked) {
                     val distance = currentLocLatLng?.let { location ->
                         calculateDistance(location.latitude, location.longitude, marker.latitude, marker.longitude)
@@ -193,15 +263,14 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        Timber.d("handleClickPhotoBoothMarker postSideEffect: ${intent.locLatLng}")
-        postSideEffect(MapEffect.MoveCameraToPosition(intent.locLatLng))
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng))
     }
 
     private fun handleClickPhotoBoothCard(
-        intent: MapIntent.ClickPhotoBoothCard,
+        locLatLng: LocLatLng,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        postSideEffect(MapEffect.MoveCameraToPosition(intent.locLatLng))
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng))
     }
 
     private fun loadBrands(
@@ -214,10 +283,42 @@ class MapViewModel @Inject constructor(
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
                     reduce { copy(isLoading = false, brands = loadedBrands.toImmutableList()) }
+                    cacheBrandImages(loadedBrands, reduce)
                 }
                 .onFailure {
                     reduce { copy(isLoading = false) }
                 }
+        }
+    }
+
+    private fun cacheBrandImages(
+        brands: List<Brand>,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val imageLoader = ImageLoader(context)
+
+            val cache = brands
+                .filter { it.imageUrl.isNotEmpty() }
+                .map { brand ->
+                    async(Dispatchers.IO) {
+                        val request = ImageRequest.Builder(context)
+                            .data(brand.imageUrl)
+                            .allowHardware(false)
+                            .build()
+                        val result = imageLoader.execute(request)
+                        if (result is SuccessResult) {
+                            brand.imageUrl to result.image.toBitmap().asImageBitmap()
+                        } else {
+                            null
+                        }
+                    }
+                }
+                .awaitAll()
+                .filterNotNull()
+                .toMap()
+
+            reduce { copy(brandImageCache = cache.toImmutableMap()) }
         }
     }
 

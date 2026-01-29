@@ -14,9 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -51,7 +51,6 @@ import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.DirectionHelper
-import com.neki.android.feature.map.impl.util.rememberCachedBrandImage
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
@@ -72,21 +71,17 @@ fun MapRoute(
             MapConst.DEFAULT_ZOOM_LEVEL,
         )
     }
-    val brandImageCache = rememberCachedBrandImage(uiState.brands)
     var isNavigatedToSettings by remember { mutableStateOf(false) }
-    var isFirstLocationLoaded by remember { mutableStateOf(false) }
 
-    fun setFollowMode() {
-        if (locationTrackingMode != LocationTrackingMode.Follow) {
-            cameraPositionState.move(CameraUpdate.zoomTo(MapConst.DEFAULT_ZOOM_LEVEL))
-            locationTrackingMode = LocationTrackingMode.Follow
-        }
-    }
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { permissions ->
+        val isGranted = permissions.values.any { it }
 
-    LaunchedEffect(cameraPositionState.cameraUpdateReason, cameraPositionState.isMoving) {
-        if (!cameraPositionState.isMoving && cameraPositionState.cameraUpdateReason == CameraUpdateReason.LOCATION && !isFirstLocationLoaded) {
-            isFirstLocationLoaded = true
-            // 권한 있고, 최초 요청 시
+        if (isGranted) {
+            locationTrackingMode = LocationTrackingMode.NoFollow
+            viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
+        } else {
             cameraPositionState.contentBounds?.let { bounds ->
                 viewModel.store.onIntent(
                     MapIntent.LoadPhotoBoothsByBounds(
@@ -99,28 +94,28 @@ fun MapRoute(
                     ),
                 )
             }
-        }
-    }
 
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-    ) { permissions ->
-        val isGranted = permissions.values.any { it }
-
-        if (isGranted) {
-            setFollowMode()
-        } else {
-            // 2회 이상 거부
+            // 영구 거부
             if (!LocationPermissionManager.shouldShowLocationRationale(activity)) {
                 viewModel.store.onIntent(MapIntent.ShowLocationPermissionDialog)
             }
         }
     }
 
+    LaunchedEffect(Unit) {
+        snapshotFlow { cameraPositionState.isMoving to cameraPositionState.cameraUpdateReason }
+            .collect { (isMoving, reason) ->
+                if (isMoving && reason == CameraUpdateReason.GESTURE) {
+                    viewModel.store.onIntent(MapIntent.GestureOnMap)
+                }
+            }
+    }
+
     LifecycleResumeEffect(Unit) {
         if (isNavigatedToSettings) {
             if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                setFollowMode()
+                locationTrackingMode = LocationTrackingMode.NoFollow
+                viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
             }
             isNavigatedToSettings = false
         }
@@ -129,37 +124,8 @@ fun MapRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            is MapEffect.LoadInitialPhotoBooths -> {
-                cameraPositionState.contentBounds?.let { bounds ->
-                    if (!LocationPermissionManager.isGrantedLocationPermission(context)) {
-                        viewModel.store.onIntent(
-                            MapIntent.LoadPhotoBoothsByBounds(
-                                MapBounds(
-                                    southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
-                                    northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
-                                    northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
-                                    southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
-                                ),
-                            ),
-                        )
-                    }
-                }
-            }
-
-            is MapEffect.TrackingFollowMode -> {
-                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                    setFollowMode()
-                } else {
-                    viewModel.store.onIntent(MapIntent.RequestLocationPermission)
-                }
-            }
-
             is MapEffect.OpenDirectionBottomSheet -> {
-                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                    viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
-                } else {
-                    viewModel.store.onIntent(MapIntent.RequestLocationPermission)
-                }
+                viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
             }
 
             is MapEffect.MoveCameraToPosition -> {
@@ -172,6 +138,22 @@ fun MapRoute(
                         animation = CameraAnimation.Easing,
                         durationMs = MapConst.DEFAULT_CAMERA_ANIMATION_DURATIONS_MS,
                     )
+
+                    if (sideEffect.isRequiredLoadPhotoBooths) {
+                        locationTrackingMode = LocationTrackingMode.NoFollow
+                        cameraPositionState.contentBounds?.let { bounds ->
+                            viewModel.store.onIntent(
+                                MapIntent.LoadPhotoBoothsByBounds(
+                                    MapBounds(
+                                        southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                                        northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                                        northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                                        southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
+                                    ),
+                                ),
+                            )
+                        }
+                    }
                 }
             }
 
@@ -203,17 +185,7 @@ fun MapRoute(
         uiState = uiState,
         onIntent = viewModel.store::onIntent,
         locationTrackingMode = locationTrackingMode,
-        onLocationTrackingModeChange = { locationTrackingMode = it },
         cameraPositionState = cameraPositionState,
-        brandImageCache = brandImageCache,
-        onMapLoaded = {
-            if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                setFollowMode()
-            } else {
-                viewModel.store.onIntent(MapIntent.NaverMapLoaded)
-                viewModel.store.onIntent(MapIntent.RequestLocationPermission)
-            }
-        },
     )
 }
 
@@ -223,12 +195,9 @@ fun MapScreen(
     uiState: MapState = MapState(),
     onIntent: (MapIntent) -> Unit = {},
     locationTrackingMode: LocationTrackingMode = LocationTrackingMode.None,
-    onLocationTrackingModeChange: (LocationTrackingMode) -> Unit = {},
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
         position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), MapConst.DEFAULT_ZOOM_LEVEL)
     },
-    brandImageCache: Map<String, ImageBitmap> = emptyMap(),
-    onMapLoaded: () -> Unit = {},
 ) {
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
@@ -251,22 +220,15 @@ fun MapScreen(
             locationSource = rememberFusedLocationSource(),
             properties = mapProperties,
             uiSettings = mapUiSettings,
-            onMapLoaded = onMapLoaded,
-            onOptionChange = {
-                cameraPositionState.locationTrackingMode?.let {
-                    onLocationTrackingModeChange(it)
-                }
-            },
+            onMapLoaded = { onIntent(MapIntent.RequestLocationPermission) },
             onLocationChange = { location ->
                 onIntent(MapIntent.UpdateCurrentLocation(LocLatLng(location.latitude, location.longitude)))
             },
         ) {
             uiState.mapMarkers.filter { it.isCheckedBrand }.forEach { photoBooth ->
-                val cachedBitmap = brandImageCache[photoBooth.imageUrl]
                 PhotoBoothMarker(
                     photoBooth = photoBooth,
-                    isFocused = photoBooth.isFocused,
-                    cachedBitmap = cachedBitmap,
+                    cachedBitmap = uiState.brandImageCache[photoBooth.imageUrl],
                     onClick = {
                         onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
                     },
@@ -279,14 +241,14 @@ fun MapScreen(
             nearbyPhotoBooths = uiState.nearbyPhotoBooths,
             dragLevel = uiState.dragLevel,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
+            isCurrentLocation = uiState.isCameraOnCurrentLocation,
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
-            isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
 
-        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && locationTrackingMode != LocationTrackingMode.Follow) {
+        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && uiState.isVisibleRefreshButton) {
             MapRefreshChip(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -321,7 +283,7 @@ fun MapScreen(
                 PhotoBoothDetailContent(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    isCurrentLocation = locationTrackingMode == LocationTrackingMode.Follow,
+                    isCurrentLocation = uiState.isCameraOnCurrentLocation,
                     onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
@@ -359,9 +321,7 @@ fun MapScreen(
         )
     }
 
-    val isLoadingLocation = locationTrackingMode == LocationTrackingMode.Follow && uiState.currentLocLatLng == null
-
-    if (isLoadingLocation || uiState.isLoading) {
+    if (uiState.isLoading) {
         LoadingDialog(
             properties = DialogProperties(
                 dismissOnBackPress = false,
