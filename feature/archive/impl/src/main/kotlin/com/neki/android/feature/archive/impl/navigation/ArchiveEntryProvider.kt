@@ -108,60 +108,61 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
             navigateBack = navigator::goBack,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
+    }
 
-        entry<ArchiveNavKey.AllAlbum> {
-            AllAlbumRoute(
-                navigateBack = navigator::goBack,
-                navigateToFavoriteAlbum = { id ->
-                    navigator.navigateToAlbumDetail(
-                        id = id,
-                        isFavorite = true,
-                    )
-                },
-                navigateToAlbumDetail = { id, title ->
-                    navigator.navigateToAlbumDetail(
-                        id = id,
-                        title = title,
-                        isFavorite = false,
-                    )
-                },
-            )
-        }
-        entry<ArchiveNavKey.AlbumDetail> { key ->
-            val resultBus = LocalResultEventBus.current
-            val viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
-                creationCallback = { factory ->
-                    factory.create(key.albumId, key.title, key.isFavorite)
-                },
-            )
+    entry<ArchiveNavKey.AllAlbum> {
+        AllAlbumRoute(
+            navigateBack = navigator::goBack,
+            navigateToFavoriteAlbum = { id ->
+                navigator.navigateToAlbumDetail(
+                    id = id,
+                    isFavorite = true,
+                )
+            },
+            navigateToAlbumDetail = { id, title ->
+                navigator.navigateToAlbumDetail(
+                    id = id,
+                    title = title,
+                    isFavorite = false,
+                )
+            },
+        )
+    }
 
-            ResultEffect<ArchiveResult>(resultBus) { result ->
-                when (result) {
-                    is ArchiveResult.FavoriteChanged -> {
-                        viewModel.store.onIntent(AlbumDetailIntent.FavoriteChanged(result.photoId, result.isFavorite))
-                    }
-                    is ArchiveResult.PhotoDeleted -> {
-                        viewModel.store.onIntent(AlbumDetailIntent.PhotoDeleted(result.photoId))
-                    }
+    entry<ArchiveNavKey.AlbumDetail> { key ->
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
+            creationCallback = { factory ->
+                factory.create(key.albumId, key.title, key.isFavorite)
+            },
+        )
+
+        ResultEffect<ArchiveResult>(resultBus) { result ->
+            when (result) {
+                is ArchiveResult.FavoriteChanged -> {
+                    viewModel.store.onIntent(AlbumDetailIntent.FavoriteChanged(result.photoId, result.isFavorite))
+                }
+                is ArchiveResult.PhotoDeleted -> {
+                    viewModel.store.onIntent(AlbumDetailIntent.PhotoDeleted(result.photoId))
                 }
             }
-
-            AlbumDetailRoute(
-                viewModel = viewModel,
-                navigateBack = navigator::goBack,
-                navigateToPhotoDetail = navigator::navigateToPhotoDetail,
-            )
         }
 
-        entry<ArchiveNavKey.PhotoDetail> { key ->
-            PhotoDetailRoute(
-                viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
-                    creationCallback = { factory ->
-                        factory.create(key.photo)
-                    },
-                ),
-                navigateBack = navigator::goBack,
-            )
-        }
+        AlbumDetailRoute(
+            viewModel = viewModel,
+            navigateBack = navigator::goBack,
+            navigateToPhotoDetail = navigator::navigateToPhotoDetail,
+        )
+    }
+
+    entry<ArchiveNavKey.PhotoDetail> { key ->
+        PhotoDetailRoute(
+            viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
+                creationCallback = { factory ->
+                    factory.create(key.photo)
+                },
+            ),
+            navigateBack = navigator::goBack,
+        )
     }
 }
