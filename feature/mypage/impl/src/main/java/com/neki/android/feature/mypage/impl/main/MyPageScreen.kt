@@ -44,6 +44,7 @@ internal fun MyPageRoute(
             MyPageEffect.NavigateBack -> {}
             MyPageEffect.NavigateToLogin -> {}
             is MyPageEffect.MoveAppSettings -> {}
+            is MyPageEffect.RequestPermission -> {}
         }
     }
 

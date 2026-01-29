@@ -3,6 +3,7 @@ package com.neki.android.feature.mypage.impl.main
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -60,17 +61,27 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
 
             // Permission
             is MyPageIntent.ClickPermissionItem -> {
-                reduce { copy(isShowPermissionDialog = true, selectedPermission = intent.permission) }
+                postSideEffect(MyPageEffect.RequestPermission(intent.permission))
             }
             MyPageIntent.DismissPermissionDialog -> {
-                reduce { copy(isShowPermissionDialog = false, selectedPermission = null) }
+                reduce { copy(isShowPermissionDialog = false, clickedPermission = null) }
             }
             MyPageIntent.ConfirmPermissionDialog -> {
-                val permission = state.selectedPermission
-                reduce { copy(isShowPermissionDialog = false, selectedPermission = null) }
+                val permission = state.clickedPermission
+                reduce { copy(isShowPermissionDialog = false, clickedPermission = null) }
                 if (permission != null) {
                     postSideEffect(MyPageEffect.MoveAppSettings(permission))
                 }
+            }
+            is MyPageIntent.GrantedPermission -> {
+                when (intent.permission) {
+                    NekiPermission.CAMERA -> reduce { copy(isGrantedCamera = true) }
+                    NekiPermission.LOCATION -> reduce { copy(isGrantedLocation = true) }
+                    NekiPermission.NOTIFICATION -> reduce { copy(isGrantedNotification = true) }
+                }
+            }
+            is MyPageIntent.DeniedPermission -> {
+                reduce { copy(isShowPermissionDialog = true, clickedPermission = intent.permission) }
             }
         }
     }

@@ -17,7 +17,7 @@ data class MyPageState(
     val isGrantedLocation: Boolean = false,
     val isGrantedNotification: Boolean = false,
     val isShowPermissionDialog: Boolean = false,
-    val selectedPermission: NekiPermission? = null,
+    val clickedPermission: NekiPermission? = null,
 )
 
 sealed interface MyPageIntent {
@@ -45,6 +45,8 @@ sealed interface MyPageIntent {
     data class ClickPermissionItem(val permission: NekiPermission) : MyPageIntent
     data object DismissPermissionDialog : MyPageIntent
     data object ConfirmPermissionDialog : MyPageIntent
+    data class GrantedPermission(val permission: NekiPermission) : MyPageIntent
+    data class DeniedPermission(val permission: NekiPermission) : MyPageIntent
 }
 
 sealed interface MyPageEffect {
@@ -55,6 +57,7 @@ sealed interface MyPageEffect {
     data object NavigateBack : MyPageEffect
     data object NavigateToLogin : MyPageEffect
     data class MoveAppSettings(val permission: NekiPermission) : MyPageEffect
+    data class RequestPermission(val permission: NekiPermission) : MyPageEffect
 }
 
 enum class ProfileMode { SETTING, EDIT }
