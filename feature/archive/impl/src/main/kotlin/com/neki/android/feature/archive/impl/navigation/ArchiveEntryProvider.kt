@@ -8,6 +8,7 @@ import com.neki.android.core.navigation.Navigator
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.feature.archive.api.ArchiveNavKey
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.archive.api.navigateToAllAlbum
 import com.neki.android.feature.archive.api.navigateToAllPhoto
@@ -19,6 +20,7 @@ import com.neki.android.feature.archive.impl.main.ArchiveMainIntent
 import com.neki.android.feature.archive.impl.main.ArchiveMainRoute
 import com.neki.android.feature.archive.impl.main.ArchiveMainViewModel
 import com.neki.android.feature.archive.impl.photo.AllPhotoRoute
+import com.neki.android.feature.archive.impl.photo.AllPhotoViewModel
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
 import com.neki.android.feature.photo_upload.api.QRScanResult
@@ -56,8 +58,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
                 }
             }
         }
-        ResultEffect<Boolean>(resultBus) { hasUpdated ->
-            if (hasUpdated) viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)
+        ResultEffect<ArchiveResult>(resultBus) {
+            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)
         }
 
         ArchiveMainRoute(
@@ -85,50 +87,71 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     }
 
     entry<ArchiveNavKey.AllPhoto> {
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<AllPhotoViewModel>()
+
+        ResultEffect<ArchiveResult>(resultBus) { result ->
+            when (result) {
+                is ArchiveResult.FavoriteChanged -> TODO(변화된 애만 수정)
+                is ArchiveResult.PhotoDeleted -> TODO(지워진 데이터만 지우기)
+            }
+        }
+
         AllPhotoRoute(
+            viewModel = viewModel,
             navigateBack = navigator::goBack,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
-    }
 
-    entry<ArchiveNavKey.AllAlbum> {
-        AllAlbumRoute(
-            navigateBack = navigator::goBack,
-            navigateToFavoriteAlbum = { id ->
-                navigator.navigateToAlbumDetail(
-                    id = id,
-                    isFavorite = true,
-                )
-            },
-            navigateToAlbumDetail = { id, title ->
-                navigator.navigateToAlbumDetail(
-                    id = id,
-                    title = title,
-                    isFavorite = false,
-                )
-            },
-        )
-    }
-    entry<ArchiveNavKey.AlbumDetail> { key ->
-        AlbumDetailRoute(
-            viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
+        entry<ArchiveNavKey.AllAlbum> {
+            AllAlbumRoute(
+                navigateBack = navigator::goBack,
+                navigateToFavoriteAlbum = { id ->
+                    navigator.navigateToAlbumDetail(
+                        id = id,
+                        isFavorite = true,
+                    )
+                },
+                navigateToAlbumDetail = { id, title ->
+                    navigator.navigateToAlbumDetail(
+                        id = id,
+                        title = title,
+                        isFavorite = false,
+                    )
+                },
+            )
+        }
+        entry<ArchiveNavKey.AlbumDetail> { key ->
+            val resultBus = LocalResultEventBus.current
+            val viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
                 creationCallback = { factory ->
                     factory.create(key.albumId, key.title, key.isFavorite)
                 },
-            ),
-            navigateBack = navigator::goBack,
-            navigateToPhotoDetail = navigator::navigateToPhotoDetail,
-        )
-    }
+            )
 
-    entry<ArchiveNavKey.PhotoDetail> { key ->
-        PhotoDetailRoute(
-            viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
-                creationCallback = { factory ->
-                    factory.create(key.photo)
-                },
-            ),
-            navigateBack = navigator::goBack,
-        )
+            ResultEffect<ArchiveResult>(resultBus) { result ->
+                when (result) {
+                    is ArchiveResult.FavoriteChanged -> TODO(변화된 애만 수정)
+                    is ArchiveResult.PhotoDeleted -> TODO(지워진 데이터만 지우기)
+                }
+            }
+
+            AlbumDetailRoute(
+                viewModel = viewModel,
+                navigateBack = navigator::goBack,
+                navigateToPhotoDetail = navigator::navigateToPhotoDetail,
+            )
+        }
+
+        entry<ArchiveNavKey.PhotoDetail> { key ->
+            PhotoDetailRoute(
+                viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(key.photo)
+                    },
+                ),
+                navigateBack = navigator::goBack,
+            )
+        }
     }
 }
