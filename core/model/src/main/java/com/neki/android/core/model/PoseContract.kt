@@ -9,7 +9,6 @@ data class PoseState(
     val selectedPeopleCount: PeopleCount? = null,
     val selectedRandomPosePeopleCount: PeopleCount? = null,
     val isShowScrappedPose: Boolean = false,
-    val poseList: ImmutableList<Pose> = persistentListOf(),
     val scrappedPoseList: ImmutableList<Pose> = persistentListOf(),
     val isShowPeopleCountBottomSheet: Boolean = false,
     val isShowRandomPosePeopleCountBottomSheet: Boolean = false,
