@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 private const val PAGE_SIZE = 20
-private const val PREFETCH_DISTANCE = 5
+private const val PREFETCH_DISTANCE = 10
 
 class PhotoRepositoryImpl @Inject constructor(
     private val photoService: PhotoService,
@@ -74,7 +74,7 @@ class PhotoRepositoryImpl @Inject constructor(
         photoService.getFavoriteSummary().data.toModel()
     }
 
-    override fun getPhotosFlow(folderId: Long?): Flow<PagingData<Photo>> {
+    override fun getPhotosFlow(folderId: Long?, sortOrder: SortOrder): Flow<PagingData<Photo>> {
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
@@ -82,7 +82,7 @@ class PhotoRepositoryImpl @Inject constructor(
                 prefetchDistance = PREFETCH_DISTANCE,
                 enablePlaceholders = false,
             ),
-            pagingSourceFactory = { PhotoPagingSource(photoService, folderId) },
+            pagingSourceFactory = { PhotoPagingSource(photoService, folderId, sortOrder.name) },
         ).flow
     }
 
