@@ -7,12 +7,6 @@ import com.neki.android.core.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 
 interface PoseRepository {
-    suspend fun getPoses(
-        page: Int = 0,
-        size: Int = 20,
-        headCount: PeopleCount? = null,
-        sortOrder: SortOrder = SortOrder.DESC,
-    ): Result<List<Pose>>
 
     fun getPosesFlow(
         headCount: PeopleCount? = null,

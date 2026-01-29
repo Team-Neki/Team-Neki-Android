@@ -20,20 +20,6 @@ class PoseRepositoryImpl @Inject constructor(
     private val poseService: PoseService,
 ) : PoseRepository {
 
-    override suspend fun getPoses(
-        page: Int,
-        size: Int,
-        headCount: PeopleCount?,
-        sortOrder: SortOrder,
-    ): Result<List<Pose>> = runSuspendCatching {
-        poseService.getPoses(
-            page = page,
-            size = size,
-            headCount = headCount?.name,
-            sortOrder = sortOrder.name,
-        ).data.toModels()
-    }
-
     override fun getPosesFlow(
         headCount: PeopleCount?,
         sortOrder: SortOrder,
