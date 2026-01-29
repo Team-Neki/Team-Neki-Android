@@ -25,4 +25,9 @@ class FolderService @Inject constructor(
     suspend fun createFolder(requestBody: CreateFolderRequest): BasicNullableResponse<CreateFolderResponse> {
         return client.post("/api/folders") { setBody(requestBody) }.body()
     }
+
+    // 폴더 삭제
+    suspend fun deleteFolder(requestBody: DeleteFolderRequest): BasicNullableResponse<Unit> {
+        return client.post("/api/folders") { setBody(requestBody) }.body()
+    }
 }

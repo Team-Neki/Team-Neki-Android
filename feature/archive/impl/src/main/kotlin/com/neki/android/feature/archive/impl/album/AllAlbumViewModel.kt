@@ -193,15 +193,27 @@ class AllAlbumViewModel @Inject constructor(
         reduce: (AllAlbumState.() -> AllAlbumState) -> Unit,
         postSideEffect: (AllAlbumSideEffect) -> Unit,
     ) {
-        // TODO: Delete albums from repository based on selectedDeleteOption
-        reduce {
-            copy(
-                albums = albums.filter { album -> selectedAlbums.none { it.id == album.id } }.toImmutableList(),
-                selectedAlbums = persistentListOf(),
-                selectMode = SelectMode.DEFAULT,
-                isShowDeleteAlbumBottomSheet = false,
-            )
+        // TODO: 삭제 타입에 따라 핸들링
+        viewModelScope.launch {
+            val selectedAlbumIds = state.selectedAlbums.map { it.id }
+
+            folderRepository.deleteFolder(selectedAlbumIds)
+                .onSuccess {
+                    fetchFolders(reduce)
+                    postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))
+                }
+                .onFailure { error ->
+                    Timber.e(error, "사진 삭제 실패")
+                    postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 삭제에 실패했어요"))
+                }
+            reduce {
+                copy(
+                    selectedAlbums = persistentListOf(),
+                    selectMode = SelectMode.DEFAULT,
+                    isShowDeleteAlbumBottomSheet = false,
+                )
+            }
         }
-        postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))
+
     }
 }

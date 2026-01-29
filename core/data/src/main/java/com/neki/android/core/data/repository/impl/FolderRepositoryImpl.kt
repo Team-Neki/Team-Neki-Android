@@ -18,6 +18,12 @@ class FolderRepositoryImpl @Inject constructor(
     override suspend fun createFolder(name: String): Result<Unit> = runSuspendCatching {
         folderService.createFolder(
             requestBody = CreateFolderRequest(name = name),
-        ).data.folderId
+        ).data
+    }
+
+    override suspend fun deleteFolder(id: List<Long>): Result<Unit> = runSuspendCatching {
+        folderService.deleteFolder(
+            requestBody = DeleteFolderRequest(folderIds = id),
+        ).data
     }
 }
