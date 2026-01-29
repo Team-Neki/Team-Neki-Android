@@ -7,6 +7,9 @@ import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.Media
 import com.neki.android.core.model.MediaType
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,13 +37,17 @@ class UploadMultiplePhotoUseCase @Inject constructor(
         ).getOrThrow()
 
         // 2. 각 이미지를 Presigned URL로 업로드
-        imageUris.forEachIndexed { index, uri ->
-            val ticket = tickets[index]
-            mediaUploadRepository.uploadImageFromUri(
-                uploadUrl = ticket.uploadUrl,
-                uri = uri,
-                contentType = contentType,
-            ).getOrThrow()
+        coroutineScope {
+            imageUris.mapIndexed { index, uri ->
+                async {
+                    val ticket = tickets[index]
+                    mediaUploadRepository.uploadImageFromUri(
+                        uploadUrl = ticket.uploadUrl,
+                        uri = uri,
+                        contentType = contentType,
+                    ).getOrThrow()
+                }
+            }.awaitAll()
         }
 
         // 3. 사진 등록 (모든 mediaId를 한번에)

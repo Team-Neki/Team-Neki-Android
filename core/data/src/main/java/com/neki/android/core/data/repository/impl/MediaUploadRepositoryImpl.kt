@@ -11,6 +11,8 @@ import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
 import com.neki.android.core.model.ContentType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class MediaUploadRepositoryImpl @Inject constructor(
@@ -71,10 +73,12 @@ class MediaUploadRepositoryImpl @Inject constructor(
         uri: Uri,
         contentType: ContentType,
     ) = runSuspendCatching {
-        val imageBytes = uri.toByteArray(
-            context = context,
-            format = contentType.toCompressFormat(),
-        ) ?: error("Failed to convert uri to byte array")
+        val imageBytes = withContext(Dispatchers.Default) {
+            uri.toByteArray(
+                context = context,
+                format = contentType.toCompressFormat(),
+            ) ?: error("Failed to convert uri to byte array")
+        }
 
         uploadService.uploadImage(
             presignedUrl = uploadUrl,
