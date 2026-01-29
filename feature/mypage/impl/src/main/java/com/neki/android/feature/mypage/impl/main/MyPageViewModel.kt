@@ -26,10 +26,7 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
             MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.NavigateToNotification)
             MyPageIntent.ClickProfileCard -> postSideEffect(MyPageEffect.NavigateToProfile)
             MyPageIntent.ClickPermission -> postSideEffect(MyPageEffect.NavigateToPermission)
-            MyPageIntent.ClickInquiry -> postSideEffect(MyPageEffect.NavigateToInquiry)
-            MyPageIntent.ClickTermsOfService -> postSideEffect(MyPageEffect.NavigateToTermsOfService)
-            MyPageIntent.ClickPrivacyPolicy -> postSideEffect(MyPageEffect.NavigateToPrivacyPolicy)
-            MyPageIntent.ClickOpenSourceLicense -> postSideEffect(MyPageEffect.NavigateToOpenSourceLicense)
+            is MyPageIntent.ClickServiceInfoMenu -> postSideEffect(MyPageEffect.OpenExternalLink(intent.menu.url))
 
             // Profile
             MyPageIntent.ClickBackIcon -> {

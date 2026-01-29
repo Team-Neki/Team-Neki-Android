@@ -1,5 +1,7 @@
 package com.neki.android.feature.mypage.impl.main
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -18,6 +22,7 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
+import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 import com.neki.android.feature.mypage.impl.main.component.MainTopBar
 import com.neki.android.feature.mypage.impl.main.component.ProfileCard
 
@@ -27,6 +32,7 @@ internal fun MyPageRoute(
     navigateToPermission: () -> Unit,
     navigateToProfile: () -> Unit,
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
@@ -34,10 +40,7 @@ internal fun MyPageRoute(
             MyPageEffect.NavigateToNotification -> {}
             MyPageEffect.NavigateToProfile -> navigateToProfile()
             MyPageEffect.NavigateToPermission -> navigateToPermission()
-            MyPageEffect.NavigateToInquiry -> {}
-            MyPageEffect.NavigateToTermsOfService -> {}
-            MyPageEffect.NavigateToPrivacyPolicy -> {}
-            MyPageEffect.NavigateToOpenSourceLicense -> {}
+            is MyPageEffect.OpenExternalLink -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(effect.url)))
             MyPageEffect.NavigateBack -> {}
             MyPageEffect.NavigateToLogin -> {}
             is MyPageEffect.MoveAppSettings -> {}
@@ -55,9 +58,13 @@ fun MyPageScreen(
     uiState: MyPageState,
     onIntent: (MyPageIntent) -> Unit,
 ) {
+    val context = LocalContext.current
+    val appVersion = remember {
+        "v${context.packageManager.getPackageInfo(context.packageName, 0).versionName}"
+    }
+
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
     ) {
         MainTopBar(
             onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
@@ -81,23 +88,13 @@ fun MyPageScreen(
         }
         Column {
             SectionTitleText(text = "서비스 정보 및 지원")
-            SectionArrowItem(
-                text = "Neki에 문의하기",
-                onClick = { onIntent(MyPageIntent.ClickInquiry) },
-            )
-            SectionArrowItem(
-                text = "이용약관",
-                onClick = { onIntent(MyPageIntent.ClickTermsOfService) },
-            )
-            SectionArrowItem(
-                text = "개인정보 처리방침",
-                onClick = { onIntent(MyPageIntent.ClickPrivacyPolicy) },
-            )
-            SectionArrowItem(
-                text = "오픈소스 라이선스",
-                onClick = { onIntent(MyPageIntent.ClickOpenSourceLicense) },
-            )
-            SectionVersionItem(uiState.appVersion)
+            ServiceInfoMenu.entries.forEach { link ->
+                SectionArrowItem(
+                    text = link.text,
+                    onClick = { onIntent(MyPageIntent.ClickServiceInfoMenu(link)) },
+                )
+            }
+            SectionVersionItem(appVersion)
         }
     }
 }
