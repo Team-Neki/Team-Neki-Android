@@ -1,6 +1,8 @@
 package com.neki.android.core.data.remote.api
 
 import com.neki.android.core.data.remote.model.request.CreateFolderRequest
+import com.neki.android.core.data.remote.model.request.DeleteFolderRequest
+import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.model.response.CreateFolderResponse
 import com.neki.android.core.data.remote.model.response.FolderResponse
@@ -20,7 +22,7 @@ class FolderService @Inject constructor(
     }
 
     // 폴더 생성
-    suspend fun createFolder(requestBody: CreateFolderRequest): BasicResponse<CreateFolderResponse> {
+    suspend fun createFolder(requestBody: CreateFolderRequest): BasicNullableResponse<CreateFolderResponse> {
         return client.post("/api/folders") { setBody(requestBody) }.body()
     }
 }

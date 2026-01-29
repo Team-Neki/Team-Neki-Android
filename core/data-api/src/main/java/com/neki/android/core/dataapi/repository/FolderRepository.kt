@@ -4,5 +4,5 @@ import com.neki.android.core.model.AlbumPreview
 
 interface FolderRepository {
     suspend fun getFolders(): Result<List<AlbumPreview>>
-    suspend fun createFolder(name: String): Result<Long>
+    suspend fun createFolder(name: String): Result<Unit>
 }
