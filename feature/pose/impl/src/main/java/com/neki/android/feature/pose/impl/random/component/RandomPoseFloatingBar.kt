@@ -44,11 +44,13 @@ internal fun RandomPoseFloatingBarContent(
                 ),
                 alpha = 0.24f,
             )
+            .padding(horizontal = 20.dp)
             .padding(top = 38.dp, bottom = 34.dp),
     ) {
         Row(
             modifier = Modifier
                 .clip(CircleShape)
+                .fillMaxWidth()
                 .background(
                     color = NekiTheme.colorScheme.white.copy(alpha = 0.6f),
                     shape = CircleShape,
@@ -150,8 +152,7 @@ private fun RandomPoseFloatingBarContentScrappedPreview() {
     NekiTheme {
         RandomPoseFloatingBarContent(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+                .fillMaxWidth(),
             isScrapped = true,
         )
     }

@@ -79,9 +79,7 @@ internal fun RandomPoseScreen(
                     pose = pose,
                 )
                 RandomPoseFloatingBarContent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     isScrapped = pose.isScrapped,
                     onClickClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
                     onClickGoToDetail = { onIntent(RandomPoseIntent.ClickGoToDetailIcon) },
