@@ -50,6 +50,6 @@ class PoseRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit> = runSuspendCatching {
-        poseService.updateScrap(poseId, scrap).data
+        poseService.updateScrap(poseId, scrap)
     }
 }
