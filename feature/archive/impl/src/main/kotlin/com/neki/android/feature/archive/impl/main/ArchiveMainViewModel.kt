@@ -175,7 +175,7 @@ class ArchiveMainViewModel @Inject constructor(
             reduce { copy(isLoading = false) }
             postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
         }
-        if (state.uploadType == UploadType.SINGLE) {
+        if (state.uploadType == UploadType.QR_CODE) {
             uploadSingleImage(
                 imageUrl = state.scannedImageUrl ?: return,
                 reduce = reduce,
