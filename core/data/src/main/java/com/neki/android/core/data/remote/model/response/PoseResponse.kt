@@ -18,14 +18,12 @@ data class PoseItemResponse(
     @SerialName("poseId") val poseId: Long,
     @SerialName("headCount") val headCount: String,
     @SerialName("imageUrl") val imageUrl: String,
-    @SerialName("scrap") val scrap: Boolean,
     @SerialName("contentType") val contentType: String,
     @SerialName("createdAt") val createdAt: String,
 ) {
     internal fun toModel() = Pose(
         id = poseId,
         poseImageUrl = imageUrl,
-        isScrapped = scrap,
         peopleCount = PeopleCount.entries.find { it.name == headCount }?.value ?: 1,
     )
 }
