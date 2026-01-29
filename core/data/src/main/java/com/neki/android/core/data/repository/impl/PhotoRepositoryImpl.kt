@@ -78,10 +78,11 @@ class PhotoRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
+                initialLoadSize = PAGE_SIZE,
                 prefetchDistance = PREFETCH_DISTANCE,
                 enablePlaceholders = false,
             ),
-            pagingSourceFactory = { PhotoPagingSource(photoService, folderId) }
+            pagingSourceFactory = { PhotoPagingSource(photoService, folderId) },
         ).flow
     }
 
@@ -89,10 +90,11 @@ class PhotoRepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
+                initialLoadSize = PAGE_SIZE,
                 prefetchDistance = PREFETCH_DISTANCE,
                 enablePlaceholders = false,
             ),
-            pagingSourceFactory = { FavoritePhotoPagingSource(photoService, sortOrder) }
+            pagingSourceFactory = { FavoritePhotoPagingSource(photoService, sortOrder) },
         ).flow
     }
 }
