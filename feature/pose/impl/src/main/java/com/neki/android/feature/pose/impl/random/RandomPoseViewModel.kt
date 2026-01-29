@@ -17,7 +17,7 @@ import timber.log.Timber
 
 @HiltViewModel(assistedFactory = RandomPoseViewModel.Factory::class)
 internal class RandomPoseViewModel @AssistedInject constructor(
-    @Assisted private val peopleCount: PeopleCount,
+    @Suppress("UnusedPrivateProperty") @Assisted private val peopleCount: PeopleCount,
     private val poseRepository: PoseRepository,
 ) : ViewModel() {
 
@@ -65,7 +65,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                                 } else {
                                     pose
                                 }
-                            }.toImmutableList()
+                            }.toImmutableList(),
                         )
                     }
                 }
