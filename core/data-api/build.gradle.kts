@@ -1,5 +1,9 @@
 plugins {
-    alias(libs.plugins.neki.kotlin.library)
+    alias(libs.plugins.neki.android.library)
+}
+
+android {
+    namespace = "com.neki.android.core.dataapi"
 }
 
 dependencies {
