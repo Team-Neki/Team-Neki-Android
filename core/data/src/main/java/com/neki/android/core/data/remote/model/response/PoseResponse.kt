@@ -8,22 +8,22 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PoseResponse(
     @SerialName("hasNext") val hasNext: Boolean,
-    @SerialName("items") val items: List<PoseItemResponse>,
+    @SerialName("items") val items: List<Item>,
 ) {
-    fun toModels() = items.map { it.toModel() }
-}
+    @Serializable
+    data class Item(
+        @SerialName("poseId") val poseId: Long,
+        @SerialName("headCount") val headCount: String,
+        @SerialName("imageUrl") val imageUrl: String,
+        @SerialName("contentType") val contentType: String,
+        @SerialName("createdAt") val createdAt: String,
+    ) {
+        internal fun toModel() = Pose(
+            id = poseId,
+            poseImageUrl = imageUrl,
+            peopleCount = PeopleCount.entries.find { it.name == headCount }?.value ?: 1,
+        )
+    }
 
-@Serializable
-data class PoseItemResponse(
-    @SerialName("poseId") val poseId: Long,
-    @SerialName("headCount") val headCount: String,
-    @SerialName("imageUrl") val imageUrl: String,
-    @SerialName("contentType") val contentType: String,
-    @SerialName("createdAt") val createdAt: String,
-) {
-    internal fun toModel() = Pose(
-        id = poseId,
-        poseImageUrl = imageUrl,
-        peopleCount = PeopleCount.entries.find { it.name == headCount }?.value ?: 1,
-    )
+    fun toModels() = items.map { it.toModel() }
 }

@@ -3,7 +3,7 @@ package com.neki.android.core.data.remote.api
 import com.neki.android.core.data.remote.model.request.UpdateScrapRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
-import com.neki.android.core.data.remote.model.response.PoseItemResponse
+import com.neki.android.core.data.remote.model.response.PoseDetailResponse
 import com.neki.android.core.data.remote.model.response.PoseResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -32,12 +32,12 @@ class PoseService @Inject constructor(
     }
 
     // 포즈 상세 조회
-    suspend fun getPose(poseId: Long): BasicResponse<PoseItemResponse> {
+    suspend fun getPose(poseId: Long): BasicResponse<PoseDetailResponse> {
         return client.get("/api/poses/$poseId").body()
     }
 
     // 랜덤 포즈 조회
-    suspend fun getRandomPose(): BasicResponse<PoseItemResponse> {
+    suspend fun getRandomPose(): BasicResponse<PoseDetailResponse> {
         return client.get("/api/poses/random").body()
     }
 
