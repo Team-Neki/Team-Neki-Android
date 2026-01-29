@@ -73,9 +73,9 @@ fun MyPageScreen(
                 .background(color = NekiTheme.colorScheme.gray25),
         )
         Column {
-            SectionTitleText(text = "권한 설정")
+            SectionTitleText(text = "권한")
             SectionArrowItem(
-                text = "기기 권한",
+                text = "권한 설정하기",
                 onClick = { onIntent(MyPageIntent.ClickPermission) },
             )
         }
