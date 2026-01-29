@@ -10,4 +10,6 @@ dependencies {
     implementation(projects.feature.mypage.api)
 
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.oss.licenses)
 }

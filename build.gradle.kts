@@ -13,6 +13,16 @@ plugins {
     alias(libs.plugins.detekt) apply false
 }
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.google.android.gms:oss-licenses-plugin:0.10.6")
+    }
+}
+
 subprojects {
     apply {
         plugin(rootProject.libs.plugins.detekt.get().pluginId)
