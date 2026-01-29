@@ -116,7 +116,7 @@ internal fun AllAlbumScreen(
 
     if (uiState.isShowAddAlbumBottomSheet) {
         val textFieldState = rememberTextFieldState()
-        val existingAlbumNames = remember { uiState.albums.map { it.title } }
+        val existingAlbumNames = remember(uiState.albums) { uiState.albums.map { it.title } }
 
         val errorMessage by remember(textFieldState.text) {
             derivedStateOf {
