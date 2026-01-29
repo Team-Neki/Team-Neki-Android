@@ -2,6 +2,9 @@ package com.neki.android.feature.archive.impl.album_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.filter
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
@@ -13,6 +16,10 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -28,13 +35,28 @@ class AlbumDetailViewModel @AssistedInject constructor(
         fun create(id: Long, isFavoriteAlbum: Boolean): AlbumDetailViewModel
     }
 
+    private val deletedPhotoIds = MutableStateFlow<Set<Long>>(emptySet())
+
+    private val originalPagingData: Flow<PagingData<Photo>> =
+        if (isFavoriteAlbum) {
+            photoRepository.getFavoritePhotosFlow()
+        } else {
+            photoRepository.getPhotosFlow(id)
+        }.cachedIn(viewModelScope)
+
+    val photoPagingData: Flow<PagingData<Photo>> = combine(
+        originalPagingData,
+        deletedPhotoIds,
+    ) { pagingData, deletedIds ->
+        pagingData.filter { photo -> photo.id !in deletedIds }
+    }
+
     val store: MviIntentStore<AlbumDetailState, AlbumDetailIntent, AlbumDetailSideEffect> =
         mviIntentStore(
             initialState = AlbumDetailState(
                 isFavoriteAlbum = isFavoriteAlbum,
             ),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(AlbumDetailIntent.EnterAlbumDetailScreen) },
         )
 
     private fun onIntent(
@@ -44,10 +66,8 @@ class AlbumDetailViewModel @AssistedInject constructor(
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
         when (intent) {
-            // TopBar Intent
             AlbumDetailIntent.EnterAlbumDetailScreen -> {
-                if (isFavoriteAlbum) fetchFavoriteData(reduce)
-                else fetchAlbumData(id, reduce)
+                // Paging이 자동으로 처리
             }
 
             AlbumDetailIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
@@ -60,55 +80,19 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 )
             }
 
-            // Photo Intent
             is AlbumDetailIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, state, reduce, postSideEffect)
 
-            // ActionBar Intent
             AlbumDetailIntent.ClickDownloadIcon -> handleDownload(state, postSideEffect)
             AlbumDetailIntent.ClickDeleteIcon -> handleDeleteIconClick(state, reduce, postSideEffect)
 
-            // Delete Dialog Intent (for Favorite Album)
             AlbumDetailIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
             AlbumDetailIntent.ClickDeleteDialogCancelButton -> reduce { copy(isShowDeleteDialog = false) }
             AlbumDetailIntent.ClickDeleteDialogConfirmButton -> handleFavoriteDelete(state, reduce, postSideEffect)
 
-            // Delete BottomSheet Intent (for Regular Album)
             AlbumDetailIntent.DismissDeleteBottomSheet -> reduce { copy(isShowDeleteBottomSheet = false) }
             is AlbumDetailIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AlbumDetailIntent.ClickDeleteBottomSheetCancelButton -> reduce { copy(isShowDeleteBottomSheet = false) }
-            AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumDelete(state, reduce, postSideEffect)
-        }
-    }
-
-    private fun fetchFavoriteData(
-        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
-    ) {
-        viewModelScope.launch {
-            reduce { copy(isLoading = true) }
-            photoRepository.getFavoritePhotos()
-                .onSuccess { data ->
-                    reduce { copy(photoList = data.toImmutableList()) }
-                }
-                .onFailure { error ->
-                    Timber.e(error)
-                }
-            reduce { copy(isLoading = false) }
-        }
-    }
-
-    private fun fetchAlbumData(
-        id: Long,
-        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
-    ) {
-        // TODO: Fetch album from repository
-        viewModelScope.launch {
-            photoRepository.getPhotos(folderId = id)
-                .onSuccess { data ->
-                    reduce { copy(photoList = data.toImmutableList()) }
-                }
-                .onFailure { error ->
-                    Timber.e(error)
-                }
+            AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumPhotoDelete(state, reduce, postSideEffect)
         }
     }
 
@@ -188,39 +172,43 @@ class AlbumDetailViewModel @AssistedInject constructor(
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
         viewModelScope.launch {
-            reduce { copy(isLoading = true) }
             val selectedPhotoIds = state.selectedPhotos.map { it.id }
+            reduce { copy(isLoading = true) }
+
             photoRepository.deletePhoto(photoIds = selectedPhotoIds)
                 .onSuccess {
-                    Timber.d("삭제 성공2")
-                    fetchFavoriteData(reduce)
+                    Timber.d("삭제 성공")
+                    deletedPhotoIds.update { it + selectedPhotoIds.toSet() }
                     reduce {
                         copy(
                             selectedPhotos = persistentListOf(),
                             selectMode = SelectMode.DEFAULT,
                             isShowDeleteDialog = false,
+                            isLoading = false,
                         )
                     }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
                 }
                 .onFailure { error ->
                     Timber.e(error)
+                    reduce { copy(isLoading = false) }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
                 }
-            reduce { copy(isLoading = false) }
         }
     }
 
-    private fun handleAlbumDelete(
+    private fun handleAlbumPhotoDelete(
         state: AlbumDetailState,
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
+        val selectedPhotoIds = state.selectedPhotos.map { it.id }
+
+        // UI에서 즉시 필터링
+        deletedPhotoIds.update { it + selectedPhotoIds.toSet() }
+
         reduce {
             copy(
-                photoList = photoList.filter { photo ->
-                    selectedPhotos.none { it.id == photo.id }
-                }.toImmutableList(),
                 selectedPhotos = persistentListOf(),
                 selectMode = SelectMode.DEFAULT,
                 isShowDeleteBottomSheet = false,

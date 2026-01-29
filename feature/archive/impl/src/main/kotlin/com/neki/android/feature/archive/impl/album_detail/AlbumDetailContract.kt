@@ -8,10 +8,10 @@ import kotlinx.collections.immutable.persistentListOf
 data class AlbumDetailState(
     val isLoading: Boolean = false,
     val title: String = "",
-    val photoList: ImmutableList<Photo> = persistentListOf(),
     val isFavoriteAlbum: Boolean = false,
     val selectMode: SelectMode = SelectMode.DEFAULT,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
+    val deletedPhotoIds: Set<Long> = emptySet(),
     val isShowDeleteDialog: Boolean = false,
     val isShowDeleteBottomSheet: Boolean = false,
     val selectedDeleteOption: PhotoDeleteOption = PhotoDeleteOption.REMOVE_FROM_ALBUM,

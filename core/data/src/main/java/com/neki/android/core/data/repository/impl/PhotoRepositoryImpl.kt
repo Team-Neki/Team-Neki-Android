@@ -1,5 +1,10 @@
 package com.neki.android.core.data.repository.impl
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.neki.android.core.data.paging.FavoritePhotoPagingSource
+import com.neki.android.core.data.paging.PhotoPagingSource
 import com.neki.android.core.data.remote.api.PhotoService
 import com.neki.android.core.data.remote.model.request.DeletePhotoRequest
 import com.neki.android.core.data.remote.model.request.RegisterPhotoRequest
@@ -8,7 +13,11 @@ import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+
+private const val PAGE_SIZE = 20
+private const val PREFETCH_DISTANCE = 5
 
 class PhotoRepositoryImpl @Inject constructor(
     private val photoService: PhotoService,
@@ -63,5 +72,27 @@ class PhotoRepositoryImpl @Inject constructor(
 
     override suspend fun getFavoriteSummary(): Result<AlbumPreview> = runSuspendCatching {
         photoService.getFavoriteSummary().data.toModel()
+    }
+
+    override fun getPhotosFlow(folderId: Long?): Flow<PagingData<Photo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                prefetchDistance = PREFETCH_DISTANCE,
+                enablePlaceholders = false,
+            ),
+            pagingSourceFactory = { PhotoPagingSource(photoService, folderId) }
+        ).flow
+    }
+
+    override fun getFavoritePhotosFlow(sortOrder: SortOrder): Flow<PagingData<Photo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                prefetchDistance = PREFETCH_DISTANCE,
+                enablePlaceholders = false,
+            ),
+            pagingSourceFactory = { FavoritePhotoPagingSource(photoService, sortOrder) }
+        ).flow
     }
 }
