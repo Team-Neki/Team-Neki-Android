@@ -19,6 +19,7 @@ import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -78,6 +79,9 @@ internal object NetworkModule {
             install(Auth) {
                 bearer {
                     loadTokens {
+                        // Ktor에 캐싱된 BearerTokens을 지우고 매번 새로운 토큰을 조회하기 위함
+                        // 토큰 만료 주기가 길어지면 제거
+                        this@install.providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
                         if (tokenRepository.isSavedTokens().first()) {
                             BearerTokens(
                                 accessToken = tokenRepository.getAccessToken().first(),
