@@ -46,7 +46,7 @@ internal object NetworkModule {
     const val UPLOAD_TIME_OUT = 10_000L
 
     val sendWithoutAuthUrls = listOf(
-        "/api/auth/kakao/login",
+        "/api/auth/KAKAO/login",
         "/api/auth/refresh",
     )
 
