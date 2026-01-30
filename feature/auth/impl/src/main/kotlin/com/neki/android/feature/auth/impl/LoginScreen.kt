@@ -45,10 +45,6 @@ fun LoginRoute(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.store.onIntent(LoginIntent.EnterLoginScreen)
-    }
-
     LoginScreen(
         uiState = uiState,
         onIntent = viewModel.store::onIntent,

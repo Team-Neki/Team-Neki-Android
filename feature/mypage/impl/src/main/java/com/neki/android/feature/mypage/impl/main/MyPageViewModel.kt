@@ -118,6 +118,40 @@ internal class MyPageViewModel @Inject constructor(
                 }
         }
     }
+
+    private fun updateProfile(
+        nickname: String,
+        imageBytes: ByteArray?,
+        reduce: (MyPageState.() -> MyPageState) -> Unit,
+        postSideEffect: (MyPageEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+
+            if (imageBytes != null) {
+                // 이미지가 있으면 이미지 업로드 후 프로필 업데이트
+                uploadProfileImageUseCase(imageBytes = imageBytes, nickname = nickname)
+                    .onSuccess {
+                        reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING, profileImageUri = null) }
+                        store.onIntent(MyPageIntent.LoadUserInfo)
+                    }
+                    .onFailure {
+                        reduce { copy(isLoading = false) }
+                    }
+            } else {
+                // 이미지가 없으면 닉네임만 업데이트
+                userRepository.updateUserInfo(mediaId = null, nickname = nickname)
+                    .onSuccess {
+                        reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING) }
+                        store.onIntent(MyPageIntent.LoadUserInfo)
+                    }
+                    .onFailure {
+                        reduce { copy(isLoading = false) }
+                    }
+            }
+        }
+    }
+
     private fun logout(postSideEffect: (MyPageEffect) -> Unit) {
         viewModelScope.launch {
             tokenRepository.clearTokens()
