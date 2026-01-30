@@ -27,15 +27,11 @@ fun LoginRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToHome -> {
-                Timber.d("홈 화면으로 이동하거나 API를 호출하거나")
-            }
-
+            LoginSideEffect.NavigateToHome -> navigateToMain()
             LoginSideEffect.NavigateToKakaoRedirectingUri -> {
                 kakaoLoginHelper.loginWithKakao(
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
-                        navigateToMain() // 제거 예정
                         viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))
                     },
                     onFailure = { message ->
@@ -43,7 +39,6 @@ fun LoginRoute(
                     },
                 )
             }
-
             is LoginSideEffect.ShowToastMessage -> {
                 Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             }
