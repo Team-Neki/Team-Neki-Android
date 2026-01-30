@@ -16,6 +16,9 @@ import javax.inject.Inject
 internal class MyPageViewModel @Inject constructor(
     private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
     private val userRepository: UserRepository,
+    private val authRepository: AuthRepository,
+    private val tokenRepository: TokenRepository,
+    private val uploadProfileImageUseCase: UploadProfileImageUseCase,
 ) : ViewModel() {
 
     val store: MviIntentStore<MyPageState, MyPageIntent, MyPageEffect> =
@@ -59,15 +62,13 @@ internal class MyPageViewModel @Inject constructor(
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
             MyPageIntent.ConfirmLogout -> {
                 reduce { copy(isShowLogoutDialog = false) }
-                // TODO: 실제 로그아웃 처리
-                postSideEffect(MyPageEffect.NavigateToLogin)
+                logout(postSideEffect)
             }
             MyPageIntent.ClickSignOut -> reduce { copy(isShowSignOutDialog = true) }
             MyPageIntent.DismissSignOutDialog -> reduce { copy(isShowSignOutDialog = false) }
             MyPageIntent.ConfirmSignOut -> {
                 reduce { copy(isShowSignOutDialog = false) }
-                // TODO: 실제 탈퇴 처리
-                postSideEffect(MyPageEffect.NavigateToLogin)
+                signOut(reduce, postSideEffect)
             }
 
             // Permission
@@ -113,6 +114,30 @@ internal class MyPageViewModel @Inject constructor(
                     }
                 }
                 .onFailure {
+                    reduce { copy(isLoading = false) }
+                }
+        }
+    }
+    private fun logout(postSideEffect: (MyPageEffect) -> Unit) {
+        viewModelScope.launch {
+            tokenRepository.clearTokens()
+            postSideEffect(MyPageEffect.NavigateToLogin)
+        }
+    }
+
+    private fun signOut(
+        reduce: (MyPageState.() -> MyPageState) -> Unit,
+        postSideEffect: (MyPageEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            authRepository.signOut()
+                .onSuccess {
+                    tokenRepository.clearTokens()
+                    postSideEffect(MyPageEffect.NavigateToLogin)
+                }
+                .onFailure {
+                    Timber.e(it)
                     reduce { copy(isLoading = false) }
                 }
         }

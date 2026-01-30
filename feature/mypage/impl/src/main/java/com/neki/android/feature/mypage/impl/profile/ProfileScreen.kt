@@ -60,16 +60,14 @@ import timber.log.Timber
 internal fun ProfileRoute(
     viewModel: MyPageViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
+    navigateToLogin: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             MyPageEffect.NavigateBack -> navigateBack()
-            MyPageEffect.NavigateToLogin -> {
-                // TODO: 로그인 화면으로 이동
-            }
-
+            MyPageEffect.NavigateToLogin -> navigateToLogin()
             else -> {}
         }
     }
@@ -140,6 +138,10 @@ fun ProfileScreen(
             onClickGrayButton = { onIntent(MyPageIntent.DismissSignOutDialog) },
             onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmSignOut) },
         )
+    }
+
+    if (uiState.isLoading) {
+        LoadingDialog()
     }
 }
 

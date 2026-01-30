@@ -26,4 +26,8 @@ class AuthRepositoryImpl @Inject constructor(
             ),
         ).data.toModel()
     }
+
+    override suspend fun signOut(): Result<Unit> = runSuspendCatching {
+        authService.signOut()
+    }
 }
