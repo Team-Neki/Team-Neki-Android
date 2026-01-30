@@ -10,13 +10,10 @@ object CameraPermissionManager {
     const val CAMERA_PERMISSION = Manifest.permission.CAMERA
 
     fun isGrantedCameraPermission(context: Context): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.CAMERA,
-        ) == PermissionChecker.PERMISSION_GRANTED
+        return ContextCompat.checkSelfPermission(context, CAMERA_PERMISSION) == PermissionChecker.PERMISSION_GRANTED
     }
 
     fun shouldShowCameraRationale(activity: Activity): Boolean {
-        return activity.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
+        return activity.shouldShowRequestPermissionRationale(CAMERA_PERMISSION)
     }
 }

@@ -74,14 +74,14 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
                     postSideEffect(MyPageEffect.MoveAppSettings(permission))
                 }
             }
-            is MyPageIntent.GrantedPermission -> {
+            is MyPageIntent.UpdatePermissionState -> {
                 when (intent.permission) {
-                    NekiPermission.CAMERA -> reduce { copy(isGrantedCamera = true) }
-                    NekiPermission.LOCATION -> reduce { copy(isGrantedLocation = true) }
-                    NekiPermission.NOTIFICATION -> reduce { copy(isGrantedNotification = true) }
+                    NekiPermission.CAMERA -> reduce { copy(isGrantedCamera = intent.isGranted) }
+                    NekiPermission.LOCATION -> reduce { copy(isGrantedLocation = intent.isGranted) }
+                    NekiPermission.NOTIFICATION -> reduce { copy(isGrantedNotification = intent.isGranted) }
                 }
             }
-            is MyPageIntent.DeniedPermission -> {
+            is MyPageIntent.ShowPermissionDeniedDialog -> {
                 reduce { copy(isShowPermissionDialog = true, clickedPermission = intent.permission) }
             }
         }

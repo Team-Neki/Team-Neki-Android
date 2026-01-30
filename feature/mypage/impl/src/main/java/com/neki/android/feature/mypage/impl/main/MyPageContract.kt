@@ -46,8 +46,8 @@ sealed interface MyPageIntent {
     data class ClickPermissionItem(val permission: NekiPermission) : MyPageIntent
     data object DismissPermissionDialog : MyPageIntent
     data object ConfirmPermissionDialog : MyPageIntent
-    data class GrantedPermission(val permission: NekiPermission) : MyPageIntent
-    data class DeniedPermission(val permission: NekiPermission) : MyPageIntent
+    data class UpdatePermissionState(val permission: NekiPermission, val isGranted: Boolean) : MyPageIntent
+    data class ShowPermissionDeniedDialog(val permission: NekiPermission) : MyPageIntent
 }
 
 sealed interface MyPageEffect {

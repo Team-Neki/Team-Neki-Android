@@ -15,12 +15,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.window.DialogProperties
-import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.permission.CameraPermissionManager
 import com.neki.android.core.common.permission.LocationPermissionManager
+import com.neki.android.core.common.permission.NotificationPermissionManager
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
@@ -33,7 +32,6 @@ import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
-import timber.log.Timber
 
 @Composable
 internal fun PermissionRoute(
@@ -45,51 +43,50 @@ internal fun PermissionRoute(
     val context = LocalContext.current
 
     LifecycleResumeEffect(Unit) {
-        val isCameraGranted = CameraPermissionManager.isGrantedCameraPermission(context)
-        val isLocationGranted = LocationPermissionManager.isGrantedLocationPermission(context)
-        val isNotificationGranted = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        viewModel.store.onIntent(
+            MyPageIntent.UpdatePermissionState(
+                NekiPermission.CAMERA,
+                CameraPermissionManager.isGrantedCameraPermission(context)
+            )
+        )
+        viewModel.store.onIntent(
+            MyPageIntent.UpdatePermissionState(
+                NekiPermission.LOCATION,
+                LocationPermissionManager.isGrantedLocationPermission(context)
+            )
+        )
+        viewModel.store.onIntent(
+            MyPageIntent.UpdatePermissionState(
+                NekiPermission.NOTIFICATION,
+                NotificationPermissionManager.isGrantedNotificationPermission(context)
+            )
+        )
 
-        if (isCameraGranted) {
-            viewModel.store.onIntent(MyPageIntent.GrantedPermission(NekiPermission.CAMERA))
-        }
-        if (isLocationGranted) {
-            viewModel.store.onIntent(MyPageIntent.GrantedPermission(NekiPermission.LOCATION))
-        }
-        if (isNotificationGranted) {
-            viewModel.store.onIntent(MyPageIntent.GrantedPermission(NekiPermission.NOTIFICATION))
-        }
-
-        onPauseOrDispose { }
+        onPauseOrDispose {}
     }
 
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-        if (isGranted) {
-            viewModel.store.onIntent(MyPageIntent.GrantedPermission(NekiPermission.CAMERA))
-        } else if (!CameraPermissionManager.shouldShowCameraRationale(activity)) {
-            viewModel.store.onIntent(MyPageIntent.DeniedPermission(NekiPermission.CAMERA))
-        }
-    }
-
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
+    val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
-        val isGranted = permissions.values.any { it }
-        if (isGranted) {
-            viewModel.store.onIntent(MyPageIntent.GrantedPermission(NekiPermission.LOCATION))
-        } else if (!LocationPermissionManager.shouldShowLocationRationale(activity)) {
-            viewModel.store.onIntent(MyPageIntent.DeniedPermission(NekiPermission.LOCATION))
+        val permission = when {
+            permissions.containsKey(CameraPermissionManager.CAMERA_PERMISSION) -> NekiPermission.CAMERA
+            permissions.containsKey(Manifest.permission.ACCESS_FINE_LOCATION)
+                || permissions.containsKey(Manifest.permission.ACCESS_COARSE_LOCATION) -> NekiPermission.LOCATION
+            permissions.containsKey(NotificationPermissionManager.NOTIFICATION_PERMISSION) -> NekiPermission.NOTIFICATION
+            else -> return@rememberLauncherForActivityResult
         }
-    }
+        val isGranted = permissions.values.any { it }
+        viewModel.store.onIntent(MyPageIntent.UpdatePermissionState(permission, isGranted))
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-        if (isGranted) {
-            viewModel.store.onIntent(MyPageIntent.GrantedPermission(NekiPermission.NOTIFICATION))
-        } else if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-            viewModel.store.onIntent(MyPageIntent.DeniedPermission(NekiPermission.LOCATION))
+        if (!isGranted) {
+            val shouldShowRationale = when (permission) {
+                NekiPermission.CAMERA -> CameraPermissionManager.shouldShowCameraRationale(activity)
+                NekiPermission.LOCATION -> LocationPermissionManager.shouldShowLocationRationale(activity)
+                NekiPermission.NOTIFICATION -> NotificationPermissionManager.shouldShowNotificationRationale(activity)
+            }
+            if (!shouldShowRationale) {
+                viewModel.store.onIntent(MyPageIntent.ShowPermissionDeniedDialog(permission))
+            }
         }
     }
 
@@ -98,14 +95,14 @@ internal fun PermissionRoute(
             MyPageEffect.NavigateBack -> navigateBack()
             is MyPageEffect.RequestPermission -> {
                 when (sideEffect.permission) {
-                    NekiPermission.CAMERA -> cameraPermissionLauncher.launch(CameraPermissionManager.CAMERA_PERMISSION)
-                    NekiPermission.LOCATION -> locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
+                    NekiPermission.CAMERA -> permissionLauncher.launch(arrayOf(CameraPermissionManager.CAMERA_PERMISSION))
+                    NekiPermission.LOCATION -> permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
                     NekiPermission.NOTIFICATION -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            permissionLauncher.launch(arrayOf(NotificationPermissionManager.NOTIFICATION_PERMISSION))
                         } else {
-                            if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
-                                viewModel.store.onIntent(MyPageIntent.DeniedPermission(NekiPermission.NOTIFICATION))
+                            if (!NotificationPermissionManager.isGrantedNotificationPermission(context)) {
+                                viewModel.store.onIntent(MyPageIntent.ShowPermissionDeniedDialog(NekiPermission.NOTIFICATION))
                             }
                         }
                     }
