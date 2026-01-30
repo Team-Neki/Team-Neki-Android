@@ -8,9 +8,9 @@ data class MyPageState(
     val isLoading: Boolean = false,
     val id: Long = 0,
     val nickname: String = "",
-    val profileImageUrl: String = "",
     val loginType: String = "",
-    val profileImageUri: Uri? = null,
+    val profileImageUrl: String = "",
+    val selectedImageUri: Uri? = null,
     val isShowLogoutDialog: Boolean = false,
     val isShowSignOutDialog: Boolean = false,
     val isShowImageChooseDialog: Boolean = false,
@@ -40,7 +40,7 @@ sealed interface MyPageIntent {
     data object ClickCameraIcon : MyPageIntent
     data object DismissImageChooseDialog : MyPageIntent
     data class SelectProfileImage(val uri: Uri?) : MyPageIntent
-    data class ClickEditComplete(val nickname: String) : MyPageIntent
+    data class ClickEditComplete(val nickname: String, val imageBytes: ByteArray?) : MyPageIntent
     data object ClickLogout : MyPageIntent
     data object DismissLogoutDialog : MyPageIntent
     data object ConfirmLogout : MyPageIntent

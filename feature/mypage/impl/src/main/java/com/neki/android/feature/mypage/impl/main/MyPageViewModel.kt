@@ -2,23 +2,24 @@ package com.neki.android.feature.mypage.impl.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.dataapi.repository.MediaUploadRepository
+import com.neki.android.core.dataapi.repository.AuthRepository
+import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
-import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
+import com.neki.android.core.domain.usecase.UploadProfileImageUseCase
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 internal class MyPageViewModel @Inject constructor(
-    private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
+    private val uploadProfileImageUseCase: UploadProfileImageUseCase,
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
     private val tokenRepository: TokenRepository,
-    private val uploadProfileImageUseCase: UploadProfileImageUseCase,
 ) : ViewModel() {
 
     val store: MviIntentStore<MyPageState, MyPageIntent, MyPageEffect> =
@@ -54,9 +55,9 @@ internal class MyPageViewModel @Inject constructor(
             MyPageIntent.ClickEditIcon -> reduce { copy(profileMode = ProfileMode.EDIT) }
             MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageChooseDialog = true) }
             MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
-            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageUri = intent.uri, isShowImageChooseDialog = false) }
+            is MyPageIntent.SelectProfileImage -> reduce { copy(selectedImageUri = intent.uri, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
-                reduce { copy(nickname = intent.nickname, profileMode = ProfileMode.SETTING) }
+                updateProfile(intent.nickname, intent.imageBytes, reduce, postSideEffect)
             }
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
@@ -132,7 +133,7 @@ internal class MyPageViewModel @Inject constructor(
                 // 이미지가 있으면 이미지 업로드 후 프로필 업데이트
                 uploadProfileImageUseCase(imageBytes = imageBytes, nickname = nickname)
                     .onSuccess {
-                        reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING, profileImageUri = null) }
+                        reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING, selectedImageUri = null) }
                         store.onIntent(MyPageIntent.LoadUserInfo)
                     }
                     .onFailure {

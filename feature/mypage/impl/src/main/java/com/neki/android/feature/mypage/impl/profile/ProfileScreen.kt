@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,17 +32,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.neki.android.core.common.util.toByteArray
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.mypage.impl.component.SectionItem
@@ -83,34 +88,35 @@ fun ProfileScreen(
     uiState: MyPageState = MyPageState(),
     onIntent: (MyPageIntent) -> Unit = {},
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        when (uiState.profileMode) {
-            ProfileMode.SETTING -> {
-                ProfileSettingContent(
-                    userName = uiState.nickname,
-                    profileImageUrl = uiState.profileImageUrl,
-                    onBack = { onIntent(MyPageIntent.ClickBackIcon) },
-                    onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
-                    onClickLogout = { onIntent(MyPageIntent.ClickLogout) },
-                    onClickSignOut = { onIntent(MyPageIntent.ClickSignOut) },
-                )
-            }
+    val context = LocalContext.current
 
-            ProfileMode.EDIT -> {
-                ProfileEditContent(
-                    initialNickname = uiState.nickname,
-                    profileImageUrl = uiState.profileImageUrl,
-                    profileImageUri = uiState.profileImageUri,
-                    isShowImageChooseDialog = uiState.isShowImageChooseDialog,
-                    onBack = { onIntent(MyPageIntent.ClickBackIcon) },
-                    onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
-                    onDismissImageChooseDialog = { onIntent(MyPageIntent.DismissImageChooseDialog) },
-                    onSelectImage = { uri -> onIntent(MyPageIntent.SelectProfileImage(uri)) },
-                    onComplete = { nickname -> onIntent(MyPageIntent.ClickEditComplete(nickname)) },
-                )
-            }
+    when (uiState.profileMode) {
+        ProfileMode.SETTING -> {
+            ProfileSettingContent(
+                nickname = uiState.nickname,
+                profileImageUrl = uiState.profileImageUrl,
+                onBack = { onIntent(MyPageIntent.ClickBackIcon) },
+                onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
+                onClickLogout = { onIntent(MyPageIntent.ClickLogout) },
+                onClickSignOut = { onIntent(MyPageIntent.ClickSignOut) },
+            )
+        }
+
+        ProfileMode.EDIT -> {
+            ProfileEditContent(
+                initialNickname = uiState.nickname,
+                profileImageUrl = uiState.profileImageUrl,
+                profileImageUri = uiState.selectedImageUri,
+                isShowImageChooseDialog = uiState.isShowImageChooseDialog,
+                onBack = { onIntent(MyPageIntent.ClickBackIcon) },
+                onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
+                onDismissImageChooseDialog = { onIntent(MyPageIntent.DismissImageChooseDialog) },
+                onSelectImage = { uri -> onIntent(MyPageIntent.SelectProfileImage(uri)) },
+                onComplete = { nickname ->
+                    val imageBytes = uiState.selectedImageUri?.toByteArray(context)
+                    onIntent(MyPageIntent.ClickEditComplete(nickname, imageBytes))
+                },
+            )
         }
     }
 
@@ -147,57 +153,62 @@ fun ProfileScreen(
 
 @Composable
 private fun ProfileSettingContent(
-    userName: String,
-    profileImageUrl: String,
-    onBack: () -> Unit,
-    onClickEdit: () -> Unit,
-    onClickLogout: () -> Unit,
-    onClickSignOut: () -> Unit,
+    nickname: String,
+    profileImageUrl: String = "",
+    @DrawableRes defaultProfileResId: Int = R.drawable.image_empty_profile_image,
+    onBack: () -> Unit = {},
+    onClickEdit: () -> Unit = {},
+    onClickLogout: () -> Unit = {},
+    onClickSignOut: () -> Unit = {},
 ) {
-    ProfileSettingTopBar(
-        onBack = onBack,
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp, bottom = 16.dp),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        AsyncImage(
+        ProfileSettingTopBar(
+            onBack = onBack,
+        )
+        Box(
             modifier = Modifier
-                .size(142.dp)
-                .clip(CircleShape),
-            model = profileImageUrl.ifEmpty { R.drawable.icon_life_four_cut },
-            contentDescription = null,
+                .fillMaxWidth()
+                .padding(top = 20.dp, bottom = 16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .size(142.dp)
+                    .clip(CircleShape),
+                model = profileImageUrl.ifEmpty { defaultProfileResId },
+                contentDescription = null,
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = nickname,
+                style = NekiTheme.typography.title20Medium,
+                color = NekiTheme.colorScheme.gray900,
+            )
+            Icon(
+                modifier = Modifier.noRippleClickableSingle { onClickEdit() },
+                imageVector = ImageVector.vectorResource(R.drawable.icon_edit),
+                contentDescription = null,
+                tint = Color.Unspecified,
+            )
+        }
+        VerticalSpacer(27.dp)
+        SectionTitleText(text = "서비스 정보 및 지원")
+        SectionItem(
+            text = "로그아웃",
+            onClick = onClickLogout,
+        )
+        SectionItem(
+            text = "탈퇴하기",
+            onClick = onClickSignOut,
         )
     }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = userName,
-            style = NekiTheme.typography.title20Medium,
-            color = NekiTheme.colorScheme.gray900,
-        )
-        Icon(
-            modifier = Modifier.noRippleClickableSingle { onClickEdit() },
-            imageVector = ImageVector.vectorResource(R.drawable.icon_edit),
-            contentDescription = null,
-            tint = Color.Unspecified,
-        )
-    }
-    VerticalSpacer(27.dp)
-    SectionTitleText(text = "서비스 정보 및 지원")
-    SectionItem(
-        text = "로그아웃",
-        onClick = onClickLogout,
-    )
-    SectionItem(
-        text = "탈퇴하기",
-        onClick = onClickSignOut,
-    )
 }
 
 @Composable
@@ -206,11 +217,12 @@ private fun ProfileEditContent(
     profileImageUrl: String,
     profileImageUri: Uri?,
     isShowImageChooseDialog: Boolean,
-    onBack: () -> Unit,
-    onClickCameraIcon: () -> Unit,
-    onDismissImageChooseDialog: () -> Unit,
-    onSelectImage: (Uri?) -> Unit,
-    onComplete: (String) -> Unit,
+    onBack: () -> Unit = {},
+    onClickCameraIcon: () -> Unit = {},
+    onDismissImageChooseDialog: () -> Unit = {},
+    onSelectImage: (Uri?) -> Unit = {},
+    onComplete: (String) -> Unit = {},
+    @DrawableRes defaultProfileResId: Int = R.drawable.image_empty_profile_image,
 ) {
     val textFieldState = rememberTextFieldState(initialNickname)
 
@@ -222,44 +234,105 @@ private fun ProfileEditContent(
         }
     }
 
-    ProfileEditTopBar(
-        enabled = textFieldState.text.isNotEmpty(),
-        onBack = onBack,
-        onClickComplete = { onComplete(textFieldState.text.toString()) },
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp, bottom = 16.dp),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(142.dp)
-                .clip(CircleShape),
-            model = profileImageUri ?: profileImageUrl.ifEmpty { R.drawable.icon_life_four_cut },
-            contentDescription = null,
+        ProfileEditTopBar(
+            enabled = textFieldState.text.isNotEmpty(),
+            onBack = onBack,
+            onClickComplete = { onComplete(textFieldState.text.toString()) },
         )
         Box(
             modifier = Modifier
-                .padding(start = 102.dp, top = 102.dp)
-                .border(
-                    width = 1.dp,
-                    shape = CircleShape,
-                    color = NekiTheme.colorScheme.primary400,
-                )
-                .background(
-                    color = NekiTheme.colorScheme.white,
-                    shape = CircleShape,
-                )
-                .padding(8.dp)
-                .noRippleClickableSingle(onClick = onClickCameraIcon),
+                .fillMaxWidth()
+                .padding(top = 20.dp, bottom = 16.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_camera),
+            AsyncImage(
+                modifier = Modifier
+                    .size(142.dp)
+                    .clip(CircleShape),
+                model = profileImageUri ?: profileImageUrl.ifEmpty { defaultProfileResId },
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.primary400,
+                contentScale = ContentScale.Crop,
+            )
+            Box(
+                modifier = Modifier
+                    .padding(start = 102.dp, top = 102.dp)
+                    .border(
+                        width = 1.dp,
+                        shape = CircleShape,
+                        color = NekiTheme.colorScheme.primary400,
+                    )
+                    .background(
+                        color = NekiTheme.colorScheme.white,
+                        shape = CircleShape,
+                    )
+                    .padding(8.dp)
+                    .noRippleClickableSingle(onClick = onClickCameraIcon),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_camera),
+                    contentDescription = null,
+                    tint = NekiTheme.colorScheme.primary400,
+                )
+            }
+        }
+        VerticalSpacer(28.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = "닉네임",
+                style = NekiTheme.typography.body14Medium,
+                color = NekiTheme.colorScheme.gray700,
+            )
+            BasicTextField(
+                state = textFieldState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = NekiTheme.colorScheme.white,
+                        shape = RoundedCornerShape(8.dp),
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (textFieldState.text.isEmpty()) NekiTheme.colorScheme.gray75 else NekiTheme.colorScheme.gray700,
+                        shape = RoundedCornerShape(8.dp),
+                    )
+                    .padding(horizontal = 16.dp, vertical = 13.dp),
+                textStyle = NekiTheme.typography.body16Medium.copy(
+                    color = NekiTheme.colorScheme.gray900,
+                ),
+                inputTransformation = InputTransformation.maxLength(10),
+                cursorBrush = SolidColor(NekiTheme.colorScheme.gray800),
+                lineLimits = TextFieldLineLimits.SingleLine,
+                decorator = { innerTextField ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            if (textFieldState.text.isEmpty()) {
+                                Text(
+                                    text = "닉네임을 입력해주세요.",
+                                    style = NekiTheme.typography.body16Regular,
+                                    color = NekiTheme.colorScheme.gray300,
+                                )
+                            }
+                            innerTextField()
+                        }
+                        Text(
+                            text = "${textFieldState.text.length}/10",
+                            style = NekiTheme.typography.caption12Regular,
+                            color = NekiTheme.colorScheme.gray300,
+                        )
+                    }
+                },
             )
         }
     }
@@ -276,60 +349,14 @@ private fun ProfileEditContent(
             },
         )
     }
-    VerticalSpacer(28.dp)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Text(
-            text = "닉네임",
-            style = NekiTheme.typography.body14Medium,
-            color = NekiTheme.colorScheme.gray700,
-        )
-        BasicTextField(
-            state = textFieldState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = NekiTheme.colorScheme.white,
-                    shape = RoundedCornerShape(8.dp),
-                )
-                .border(
-                    width = 1.dp,
-                    color = if (textFieldState.text.isEmpty()) NekiTheme.colorScheme.gray75 else NekiTheme.colorScheme.gray700,
-                    shape = RoundedCornerShape(8.dp),
-                )
-                .padding(horizontal = 16.dp, vertical = 13.dp),
-            textStyle = NekiTheme.typography.body16Medium.copy(
-                color = NekiTheme.colorScheme.gray900,
-            ),
-            inputTransformation = InputTransformation.maxLength(10),
-            cursorBrush = SolidColor(NekiTheme.colorScheme.gray800),
-            lineLimits = TextFieldLineLimits.SingleLine,
-            decorator = { innerTextField ->
-                Box {
-                    if (textFieldState.text.isEmpty()) {
-                        Text(
-                            text = "닉네임을 입력해주세요.",
-                            style = NekiTheme.typography.body16Regular,
-                            color = NekiTheme.colorScheme.gray300,
-                        )
-                    }
-                    innerTextField()
-                }
-            },
-        )
-    }
 }
 
 @ComponentPreview
 @Composable
 private fun ProfileScreenSettingPreview() {
     NekiTheme {
-        ProfileScreen(
-            uiState = MyPageState(profileMode = ProfileMode.SETTING),
+        ProfileSettingContent(
+            nickname = "오종석"
         )
     }
 }
@@ -338,8 +365,11 @@ private fun ProfileScreenSettingPreview() {
 @Composable
 private fun ProfileScreenEditPreview() {
     NekiTheme {
-        ProfileScreen(
-            uiState = MyPageState(profileMode = ProfileMode.EDIT),
+        ProfileEditContent(
+            initialNickname = "Joanne Ellis",
+            profileImageUrl = "http://www.bing.com/search?q=malesuada",
+            profileImageUri = null,
+            isShowImageChooseDialog = false,
         )
     }
 }
