@@ -6,7 +6,10 @@ import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 
 data class MyPageState(
     val isLoading: Boolean = false,
-    val userName: String = "오종석",
+    val id: Long = 0,
+    val nickname: String = "",
+    val profileImageUrl: String = "",
+    val loginType: String = "",
     val profileImageUri: Uri? = null,
     val isShowLogoutDialog: Boolean = false,
     val isShowSignOutDialog: Boolean = false,
@@ -21,6 +24,9 @@ data class MyPageState(
 )
 
 sealed interface MyPageIntent {
+    // Init
+    data object LoadUserInfo : MyPageIntent
+
     // MyPage Main
     data object ClickNotificationIcon : MyPageIntent
     data object ClickProfileCard : MyPageIntent

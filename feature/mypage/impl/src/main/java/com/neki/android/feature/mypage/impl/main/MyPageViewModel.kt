@@ -1,19 +1,28 @@
 package com.neki.android.feature.mypage.impl.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.repository.MediaUploadRepository
+import com.neki.android.core.dataapi.repository.UserRepository
+import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class MyPageViewModel @Inject constructor() : ViewModel() {
+internal class MyPageViewModel @Inject constructor(
+    private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
+    private val userRepository: UserRepository,
+) : ViewModel() {
 
     val store: MviIntentStore<MyPageState, MyPageIntent, MyPageEffect> =
         mviIntentStore(
             initialState = MyPageState(),
             onIntent = ::onIntent,
+            initialFetchData = { store.onIntent(MyPageIntent.LoadUserInfo) }
         )
 
     private fun onIntent(
@@ -23,6 +32,7 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (MyPageEffect) -> Unit,
     ) {
         when (intent) {
+            MyPageIntent.LoadUserInfo -> loadUserInfo(reduce)
             // MyPage Main
             MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.NavigateToNotification)
             MyPageIntent.ClickProfileCard -> postSideEffect(MyPageEffect.NavigateToProfile)
@@ -43,7 +53,7 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
             MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
             is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageUri = intent.uri, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
-                reduce { copy(userName = intent.nickname, profileMode = ProfileMode.SETTING) }
+                reduce { copy(nickname = intent.nickname, profileMode = ProfileMode.SETTING) }
             }
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
@@ -84,6 +94,27 @@ internal class MyPageViewModel @Inject constructor() : ViewModel() {
             is MyPageIntent.ShowPermissionDeniedDialog -> {
                 reduce { copy(isShowPermissionDialog = true, clickedPermission = intent.permission) }
             }
+        }
+    }
+
+    private fun loadUserInfo(reduce: (MyPageState.() -> MyPageState) -> Unit) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            userRepository.getUserInfo()
+                .onSuccess { user ->
+                    reduce {
+                        copy(
+                            isLoading = false,
+                            id = user.id,
+                            nickname = user.nickname,
+                            profileImageUrl = user.profileImageUrl,
+                            loginType = user.loginType,
+                        )
+                    }
+                }
+                .onFailure {
+                    reduce { copy(isLoading = false) }
+                }
         }
     }
 }

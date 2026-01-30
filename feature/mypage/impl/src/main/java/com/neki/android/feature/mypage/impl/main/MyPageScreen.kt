@@ -19,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
@@ -76,7 +77,9 @@ fun MyPageScreen(
             onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
         )
         ProfileCard(
-            name = "오종석",
+            profileImageUrl = uiState.profileImageUrl,
+            name = uiState.nickname,
+            loginType = uiState.loginType,
             onClickCard = { onIntent(MyPageIntent.ClickProfileCard) },
         )
         Box(
@@ -106,6 +109,10 @@ fun MyPageScreen(
             )
             SectionVersionItem(appVersion)
         }
+    }
+
+    if (uiState.isLoading) {
+        LoadingDialog()
     }
 }
 
