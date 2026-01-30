@@ -91,7 +91,8 @@ fun ProfileScreen(
         when (uiState.profileMode) {
             ProfileMode.SETTING -> {
                 ProfileSettingContent(
-                    userName = uiState.userName,
+                    userName = uiState.nickname,
+                    profileImageUrl = uiState.profileImageUrl,
                     onBack = { onIntent(MyPageIntent.ClickBackIcon) },
                     onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
                     onClickLogout = { onIntent(MyPageIntent.ClickLogout) },
@@ -101,7 +102,8 @@ fun ProfileScreen(
 
             ProfileMode.EDIT -> {
                 ProfileEditContent(
-                    initialNickname = uiState.userName,
+                    initialNickname = uiState.nickname,
+                    profileImageUrl = uiState.profileImageUrl,
                     profileImageUri = uiState.profileImageUri,
                     isShowImageChooseDialog = uiState.isShowImageChooseDialog,
                     onBack = { onIntent(MyPageIntent.ClickBackIcon) },
@@ -144,6 +146,7 @@ fun ProfileScreen(
 @Composable
 private fun ProfileSettingContent(
     userName: String,
+    profileImageUrl: String,
     onBack: () -> Unit,
     onClickEdit: () -> Unit,
     onClickLogout: () -> Unit,
@@ -162,7 +165,7 @@ private fun ProfileSettingContent(
             modifier = Modifier
                 .size(142.dp)
                 .clip(CircleShape),
-            model = R.drawable.icon_life_four_cut,
+            model = profileImageUrl.ifEmpty { R.drawable.icon_life_four_cut },
             contentDescription = null,
         )
     }
@@ -198,6 +201,7 @@ private fun ProfileSettingContent(
 @Composable
 private fun ProfileEditContent(
     initialNickname: String,
+    profileImageUrl: String,
     profileImageUri: Uri?,
     isShowImageChooseDialog: Boolean,
     onBack: () -> Unit,
@@ -231,7 +235,7 @@ private fun ProfileEditContent(
             modifier = Modifier
                 .size(142.dp)
                 .clip(CircleShape),
-            model = profileImageUri ?: R.drawable.icon_life_four_cut,
+            model = profileImageUri ?: profileImageUrl.ifEmpty { R.drawable.icon_life_four_cut },
             contentDescription = null,
         )
         Box(
