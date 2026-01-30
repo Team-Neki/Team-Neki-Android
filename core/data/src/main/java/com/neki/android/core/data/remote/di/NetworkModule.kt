@@ -2,7 +2,7 @@ package com.neki.android.core.data.remote.di
 
 import com.neki.android.core.common.const.Const.TAG_REST_API
 import com.neki.android.core.data.BuildConfig
-import com.neki.android.core.data.remote.api.ApiService
+import com.neki.android.core.data.remote.api.AuthService
 import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
@@ -59,9 +59,9 @@ internal object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideApiService(
+    fun provideAuthService(
         client: HttpClient,
-    ): ApiService = ApiService(client)
+    ): AuthService = AuthService(client)
 
     @Provides
     @Singleton
