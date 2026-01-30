@@ -78,7 +78,6 @@ internal object NetworkModule {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        Timber.d("BearerAuth - loadTokens")
                         if (tokenRepository.isSavedTokens().first()) {
                             BearerTokens(
                                 accessToken = tokenRepository.getAccessToken().first(),
@@ -88,7 +87,6 @@ internal object NetworkModule {
                     }
 
                     refreshTokens {
-                        Timber.d("BearerAuth - AccessToken 갱신 시도")
                         if (oldTokens != null) {
                             return@refreshTokens try {
                                 val response = client.post("/api/auth/refresh") {
@@ -122,7 +120,6 @@ internal object NetworkModule {
                             request.url.encodedPath == it
                         }
 
-                        Timber.d("Bearer 인증 필요 API 여부 : $shouldNotAuth")
                         !shouldNotAuth
                     }
                 }
