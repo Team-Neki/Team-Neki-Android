@@ -63,13 +63,13 @@ fun SectionArrowItem(
 
 @Composable
 fun SectionVersionItem(
-    version: String,
+    appVersion: String,
 ) {
     SectionItem(
         text = "앱 버전 정보",
         trailingContent = {
             Text(
-                text = version,
+                text = "v$appVersion",
                 color = NekiTheme.colorScheme.gray500,
                 style = NekiTheme.typography.body14Medium,
             )
@@ -100,7 +100,7 @@ private fun SectionArrowItemPreview() {
 private fun SectionVersionItemPreview() {
     NekiTheme {
         SectionVersionItem(
-            version = "v1.3.1",
+            appVersion = "1.3.1",
         )
     }
 }

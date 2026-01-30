@@ -36,6 +36,10 @@ internal fun MyPageRoute(
     val context = LocalContext.current
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
+    val appVersion = remember {
+        "${context.packageManager.getPackageInfo(context.packageName, 0).versionName}"
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
         when (effect) {
             MyPageEffect.NavigateBack -> {}
@@ -54,6 +58,7 @@ internal fun MyPageRoute(
 
     MyPageScreen(
         uiState = uiState,
+        appVersion = appVersion,
         onIntent = viewModel.store::onIntent,
     )
 }
@@ -61,13 +66,9 @@ internal fun MyPageRoute(
 @Composable
 fun MyPageScreen(
     uiState: MyPageState,
+    appVersion: String= "",
     onIntent: (MyPageIntent) -> Unit,
 ) {
-    val context = LocalContext.current
-    val appVersion = remember {
-        "v${context.packageManager.getPackageInfo(context.packageName, 0).versionName}"
-    }
-
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -114,6 +115,7 @@ private fun MyPageScreenPreview() {
     NekiTheme {
         MyPageScreen(
             uiState = MyPageState(),
+            appVersion = "1.1.0",
             onIntent = {},
         )
     }
