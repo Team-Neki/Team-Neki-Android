@@ -1,10 +1,6 @@
 package com.neki.android.feature.mypage.impl.permission
 
-import android.Manifest
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.permission.CameraPermissionManager
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.common.permission.NotificationPermissionManager
+import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
@@ -70,8 +67,7 @@ internal fun PermissionRoute(
     ) { permissions ->
         val permission = when {
             permissions.containsKey(CameraPermissionManager.CAMERA_PERMISSION) -> NekiPermission.CAMERA
-            permissions.containsKey(Manifest.permission.ACCESS_FINE_LOCATION)
-                || permissions.containsKey(Manifest.permission.ACCESS_COARSE_LOCATION) -> NekiPermission.LOCATION
+            LocationPermissionManager.LOCATION_PERMISSIONS.any { permissions.containsKey(it) } -> NekiPermission.LOCATION
             permissions.containsKey(NotificationPermissionManager.NOTIFICATION_PERMISSION) -> NekiPermission.NOTIFICATION
             else -> return@rememberLauncherForActivityResult
         }
@@ -96,7 +92,7 @@ internal fun PermissionRoute(
             is MyPageEffect.RequestPermission -> {
                 when (sideEffect.permission) {
                     NekiPermission.CAMERA -> permissionLauncher.launch(arrayOf(CameraPermissionManager.CAMERA_PERMISSION))
-                    NekiPermission.LOCATION -> permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+                    NekiPermission.LOCATION -> permissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
                     NekiPermission.NOTIFICATION -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             permissionLauncher.launch(arrayOf(NotificationPermissionManager.NOTIFICATION_PERMISSION))
@@ -108,12 +104,7 @@ internal fun PermissionRoute(
                     }
                 }
             }
-            is MyPageEffect.MoveAppSettings -> {
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", context.packageName, null)
-                }
-                context.startActivity(intent)
-            }
+            is MyPageEffect.MoveAppSettings -> navigateToAppSettings(context)
             else -> {}
         }
     }
