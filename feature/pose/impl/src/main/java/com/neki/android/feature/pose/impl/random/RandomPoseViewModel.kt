@@ -103,18 +103,16 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     }
                     .onFailure { error ->
                         Timber.e(error, "updateScrap failed for poseId: $poseId")
-                        committedScrap?.let { originalScrap ->
-                            reduce {
-                                copy(
-                                    poseList = poseList.map { pose ->
-                                        if (pose.id == poseId) {
-                                            pose.copy(isScrapped = originalScrap)
-                                        } else {
-                                            pose
-                                        }
-                                    }.toImmutableList(),
-                                )
-                            }
+                        reduce {
+                            copy(
+                                poseList = poseList.map { pose ->
+                                    if (pose.id == poseId) {
+                                        pose.copy(isScrapped = committedScrap)
+                                    } else {
+                                        pose
+                                    }
+                                }.toImmutableList(),
+                            )
                         }
                     }
             }
