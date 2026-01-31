@@ -91,6 +91,7 @@ internal object NetworkModule {
                     }
 
                     refreshTokens {
+                        this@install.providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
                         if (oldTokens != null) {
                             return@refreshTokens try {
                                 val response = client.post("/api/auth/refresh") {
