@@ -21,7 +21,7 @@ import timber.log.Timber
 
 @HiltViewModel(assistedFactory = RandomPoseViewModel.Factory::class)
 internal class RandomPoseViewModel @AssistedInject constructor(
-    @Suppress("UnusedPrivateProperty") @Assisted private val peopleCount: PeopleCount,
+    @Assisted private val peopleCount: PeopleCount,
     private val poseRepository: PoseRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
@@ -153,7 +153,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         viewModelScope.launch {
-            poseRepository.getRandomPose()
+            poseRepository.getRandomPose(headCount = peopleCount)
                 .onSuccess { pose ->
                     reduce {
                         copy(
@@ -180,7 +180,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
             // 초기에 3개 로드
             repeat(3) {
-                poseRepository.getRandomPose()
+                poseRepository.getRandomPose(headCount = peopleCount)
                     .onSuccess { pose -> poses.add(pose) }
                     .onFailure { error -> Timber.e(error) }
             }

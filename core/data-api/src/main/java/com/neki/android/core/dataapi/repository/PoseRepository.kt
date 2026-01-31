@@ -15,7 +15,7 @@ interface PoseRepository {
 
     suspend fun getPose(poseId: Long): Result<Pose>
 
-    suspend fun getRandomPose(): Result<Pose>
+    suspend fun getRandomPose(headCount: PeopleCount): Result<Pose>
 
     suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit>
 }
