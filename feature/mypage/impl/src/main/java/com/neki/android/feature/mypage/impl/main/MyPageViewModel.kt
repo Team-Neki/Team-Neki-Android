@@ -57,8 +57,8 @@ internal class MyPageViewModel @Inject constructor(
             MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
             is MyPageIntent.SelectProfileImage -> reduce { copy(selectedImageUri = intent.uri, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
-                updateProfile(intent.nickname, intent.imageBytes, reduce, postSideEffect)
                 updateUserInfo(intent.nickname, reduce, postSideEffect)
+//                updateProfile(intent.nickname, intent.imageBytes, reduce, postSideEffect)
             }
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }

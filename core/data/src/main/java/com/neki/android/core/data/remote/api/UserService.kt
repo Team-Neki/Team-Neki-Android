@@ -1,5 +1,6 @@
 package com.neki.android.core.data.remote.api
 
+import com.neki.android.core.data.remote.model.request.UpdateProfileImageRequest
 import com.neki.android.core.data.remote.model.request.UpdateUserInfoRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
@@ -23,4 +24,10 @@ class UserService @Inject constructor(
     suspend fun updateUserInfo(request: UpdateUserInfoRequest): BasicNullableResponse<Unit> {
         return client.patch("/api/users/me") { setBody(request) }.body()
     }
+
+    // 사용자 프로필 이미지 변경
+    suspend fun updateProfileImage(request: UpdateProfileImageRequest): BasicNullableResponse<Unit> {
+        return client.patch("/api/users/me/profile-image") { setBody(request) }.body()
+    }
+
 }
