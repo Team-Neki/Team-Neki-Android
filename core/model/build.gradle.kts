@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    compileOnly(libs.compose.stable.marker)
     api(libs.kotlinx.collections.immutable)
     implementation(libs.kotlinx.serialization.json)
 }
