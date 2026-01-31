@@ -16,7 +16,7 @@ class AuthService(
 ) {
     // 카카오 로그인
     suspend fun loginWithKakao(requestBody: KakaoLoginRequest): BasicResponse<AuthResponse> {
-        return client.post("/api/auth/KAKAO/login") { setBody(requestBody) }.body()
+        return client.post("/api/auth/kakao/login") { setBody(requestBody) }.body()
     }
 
     // AccessToken 갱신
