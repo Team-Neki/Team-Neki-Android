@@ -5,6 +5,7 @@ import kotlin.time.ExperimentalTime
 
 @Serializable
 data class Photo @OptIn(ExperimentalTime::class) constructor(
+data class Photo(
     val id: Long = 0L,
     val imageUrl: String = "",
     val isFavorite: Boolean = false,
