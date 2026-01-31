@@ -16,29 +16,31 @@ class UploadProfileImageUseCase @Inject constructor(
     private val userRepository: UserRepository,
 ) {
     suspend operator fun invoke(
-        imageBytes: ByteArray,
-        nickname: String,
+        imageBytes: ByteArray?,
         contentType: ContentType = ContentType.JPEG,
-    ): Result<Long> = runSuspendCatching {
-        val fileName = ContentTypeUtil.generateFileName(contentType)
+    ): Result<Unit> = runSuspendCatching {
+        if (imageBytes == null) {
+            // null 이면 1, 2 과정 없이 바로 기본 프로필 이미지로 변경 요청
+            userRepository.updateProfileImage(null).getOrThrow()
+        } else {
+            val fileName = ContentTypeUtil.generateFileName(contentType)
 
-        // 1. 업로드 티켓 발급 (mediaId, presignedUrl)
-        val (mediaId, presignedUrl) = mediaUploadRepository.getUploadTicket(
-            fileName = fileName,
-            contentType = contentType.label,
-            mediaType = MediaType.USER_PROFILE.name,
-        ).getOrThrow().first()
+            // 1. 업로드 티켓 발급 (mediaId, presignedUrl)
+            val (mediaId, presignedUrl) = mediaUploadRepository.getUploadTicket(
+                fileName = fileName,
+                contentType = contentType.label,
+                mediaType = MediaType.USER_PROFILE.name,
+            ).getOrThrow().first()
 
-        // 2. Presigned URL로 이미지 업로드
-        mediaUploadRepository.uploadImage(
-            uploadUrl = presignedUrl,
-            imageBytes = imageBytes,
-            contentType = contentType,
-        ).getOrThrow()
+            // 2. Presigned URL로 이미지 업로드
+            mediaUploadRepository.uploadImage(
+                uploadUrl = presignedUrl,
+                imageBytes = imageBytes,
+                contentType = contentType,
+            ).getOrThrow()
 
-        // 3. 프로필 이미지 갱신
-        userRepository.updateUserInfo(mediaId, nickname).getOrThrow()
-
-        return@runSuspendCatching mediaId
+            // 3. 프로필 이미지 갱신
+            userRepository.updateProfileImage(mediaId).getOrThrow()
+        }
     }
 }
