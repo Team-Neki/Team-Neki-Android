@@ -19,8 +19,12 @@ import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.PointerInputModifierNode
+import androidx.compose.ui.node.SemanticsModifierNode
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -59,10 +63,14 @@ fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = this.clickable(
  */
 fun Modifier.noRippleClickableSingle(
     enabled: Boolean = true,
+    onClickLabel: String? = null,
+    role: Role? = null,
     onClick: () -> Unit,
 ): Modifier = this.then(
     ClickableSingleElement(
         enabled = enabled,
+        onClickLabel = onClickLabel,
+        role = role,
         onClick = onClick,
         indicationNodeFactory = null,
     ),
@@ -101,10 +109,14 @@ fun Modifier.clickableSingleComposed(
  */
 fun Modifier.clickableSingle(
     enabled: Boolean = true,
+    onClickLabel: String? = null,
+    role: Role? = null,
     onClick: () -> Unit,
 ): Modifier = this.then(
     ClickableSingleElement(
         enabled = enabled,
+        onClickLabel = onClickLabel,
+        role = role,
         onClick = onClick,
         indicationNodeFactory = ripple(),
     ),
@@ -112,6 +124,8 @@ fun Modifier.clickableSingle(
 
 private data class ClickableSingleElement(
     private val enabled: Boolean,
+    private val onClickLabel: String?,
+    private val role: Role?,
     private val onClick: () -> Unit,
     private val indicationNodeFactory: IndicationNodeFactory?,
 ) : ModifierNodeElement<ClickableSingleNode>() {
@@ -121,6 +135,8 @@ private data class ClickableSingleElement(
         Log.d(TAG, "✅ Node: CREATE #${ClickableTestCounter.nodeCreateCount} - Element 객체ID = ${System.identityHashCode(this)}")
         return ClickableSingleNode(
             enabled = enabled,
+            onClickLabel = onClickLabel,
+            role = role,
             onClick = onClick,
             indicationNodeFactory = indicationNodeFactory,
         )
@@ -131,6 +147,8 @@ private data class ClickableSingleElement(
         Log.d(TAG, "🔄 Node: UPDATE #${ClickableTestCounter.nodeUpdateCount} - Element 객체ID = ${System.identityHashCode(this)}, Node 객체ID = ${System.identityHashCode(node)}")
         node.update(
             enabled = enabled,
+            onClickLabel = onClickLabel,
+            role = role,
             onClick = onClick,
             indicationNodeFactory = indicationNodeFactory,
         )
@@ -139,9 +157,11 @@ private data class ClickableSingleElement(
 
 private class ClickableSingleNode(
     private var enabled: Boolean,
+    private var onClickLabel: String?,
+    private var role: Role?,
     private var onClick: () -> Unit,
     private var indicationNodeFactory: IndicationNodeFactory?,
-) : DelegatingNode(), PointerInputModifierNode {
+) : DelegatingNode(), PointerInputModifierNode, SemanticsModifierNode {
 
     private val multipleEventsCutter = MultipleEventsCutter.get()
     private var interactionSource: MutableInteractionSource? = null
@@ -208,13 +228,22 @@ private class ClickableSingleNode(
         pointerInputNode.onCancelPointerInput()
     }
 
+    override fun SemanticsPropertyReceiver.applySemantics() {
+        this@ClickableSingleNode.role?.let { this.role = it }
+        onClick(label = onClickLabel, action = { processClick(); true })
+    }
+
     fun update(
         enabled: Boolean,
+        onClickLabel: String?,
+        role: Role?,
         onClick: () -> Unit,
         indicationNodeFactory: IndicationNodeFactory?,
     ) {
         val indicationChanged = this.indicationNodeFactory != indicationNodeFactory
         this.enabled = enabled
+        this.onClickLabel = onClickLabel
+        this.role = role
         this.onClick = onClick
 
         if (indicationChanged) {
