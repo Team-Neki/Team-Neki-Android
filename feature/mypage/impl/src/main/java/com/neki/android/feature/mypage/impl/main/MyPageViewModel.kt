@@ -168,28 +168,24 @@ internal class MyPageViewModel @Inject constructor(
         }
     }
 
-    private fun logout(postSideEffect: (MyPageEffect) -> Unit) {
-        viewModelScope.launch {
-            tokenRepository.clearTokens()
-            postSideEffect(MyPageEffect.NavigateToLogin)
-        }
+    private fun logout(postSideEffect: (MyPageEffect) -> Unit) = viewModelScope.launch {
+        tokenRepository.clearTokens()
+        postSideEffect(MyPageEffect.NavigateToLogin)
     }
 
     private fun signOut(
         reduce: (MyPageState.() -> MyPageState) -> Unit,
         postSideEffect: (MyPageEffect) -> Unit,
-    ) {
-        viewModelScope.launch {
-            reduce { copy(isLoading = true) }
-            authRepository.signOut()
-                .onSuccess {
-                    tokenRepository.clearTokens()
-                    postSideEffect(MyPageEffect.NavigateToLogin)
-                }
-                .onFailure {
-                    Timber.e(it)
-                    reduce { copy(isLoading = false) }
-                }
-        }
+    ) = viewModelScope.launch {
+        reduce { copy(isLoading = true) }
+        authRepository.signOut()
+            .onSuccess {
+                tokenRepository.clearTokens()
+                postSideEffect(MyPageEffect.NavigateToLogin)
+            }
+            .onFailure {
+                Timber.e(it)
+                reduce { copy(isLoading = false) }
+            }
     }
 }
