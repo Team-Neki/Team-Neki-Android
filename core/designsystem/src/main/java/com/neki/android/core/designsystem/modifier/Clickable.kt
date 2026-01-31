@@ -143,7 +143,7 @@ private class ClickableSingleNode(
     private var indicationNodeFactory: IndicationNodeFactory?,
 ) : DelegatingNode(), PointerInputModifierNode {
 
-    private var lastClickTime = 0L
+    private val multipleEventsCutter = MultipleEventsCutter.get()
     private var interactionSource: MutableInteractionSource? = null
     private var indicationNode: DelegatableNode? = null
 
@@ -193,11 +193,7 @@ private class ClickableSingleNode(
     }
 
     private fun processClick() {
-        val now = System.currentTimeMillis()
-        if (now - lastClickTime >= DEBOUNCE_TIME_MS) {
-            lastClickTime = now
-            onClick()
-        }
+        multipleEventsCutter.processEvent { onClick() }
     }
 
     override fun onPointerEvent(
@@ -228,10 +224,6 @@ private class ClickableSingleNode(
             this.indicationNodeFactory = indicationNodeFactory
             initializeIndicationIfNeeded()
         }
-    }
-
-    companion object {
-        private const val DEBOUNCE_TIME_MS = 500L
     }
 }
 
