@@ -58,6 +58,7 @@ internal class MyPageViewModel @Inject constructor(
             is MyPageIntent.SelectProfileImage -> reduce { copy(selectedImageUri = intent.uri, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
                 updateProfile(intent.nickname, intent.imageBytes, reduce, postSideEffect)
+                updateUserInfo(intent.nickname, reduce, postSideEffect)
             }
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
@@ -99,25 +100,39 @@ internal class MyPageViewModel @Inject constructor(
         }
     }
 
-    private fun loadUserInfo(reduce: (MyPageState.() -> MyPageState) -> Unit) {
-        viewModelScope.launch {
-            reduce { copy(isLoading = true) }
-            userRepository.getUserInfo()
-                .onSuccess { user ->
-                    reduce {
-                        copy(
-                            isLoading = false,
-                            id = user.id,
-                            nickname = user.nickname,
-                            profileImageUrl = user.profileImageUrl,
-                            loginType = user.loginType,
-                        )
-                    }
+    private fun loadUserInfo(reduce: (MyPageState.() -> MyPageState) -> Unit) = viewModelScope.launch {
+        reduce { copy(isLoading = true) }
+        userRepository.getUserInfo()
+            .onSuccess { user ->
+                reduce {
+                    copy(
+                        isLoading = false,
+                        id = user.id,
+                        nickname = user.nickname,
+                        profileImageUrl = user.profileImageUrl,
+                        loginType = user.loginType,
+                    )
                 }
-                .onFailure {
-                    reduce { copy(isLoading = false) }
-                }
-        }
+            }
+            .onFailure {
+                reduce { copy(isLoading = false) }
+            }
+    }
+
+    private fun updateUserInfo(
+        nickname: String,
+        reduce: (MyPageState.() -> MyPageState) -> Unit,
+        postSideEffect: (MyPageEffect) -> Unit,
+    ) = viewModelScope.launch {
+        reduce { copy(isLoading = true) }
+        userRepository.updateUserInfo(nickname)
+            .onSuccess {
+                reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING) }
+                loadUserInfo(reduce)
+            }
+            .onFailure {
+                reduce { copy(isLoading = false) }
+            }
     }
 
     private fun updateProfile(

@@ -5,6 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UpdateUserInfoRequest(
-    @SerialName("mediaId") val mediaId: Long?,
-    @SerialName("name") val name: String,
+    @SerialName("name") val nickname: String,
 )

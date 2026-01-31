@@ -4,5 +4,6 @@ import com.neki.android.core.model.User
 
 interface UserRepository {
     suspend fun getUserInfo(): Result<User>
-    suspend fun updateUserInfo(mediaId: Long?, nickname: String): Result<Unit>
+    suspend fun updateUserInfo(nickname: String): Result<Unit>
+    suspend fun updateProfileImage(mediaId: Long?): Result<Unit>
 }

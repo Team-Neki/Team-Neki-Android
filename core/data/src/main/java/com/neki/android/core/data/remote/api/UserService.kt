@@ -14,10 +14,12 @@ import javax.inject.Inject
 class UserService @Inject constructor(
     private val client: HttpClient,
 ) {
+    // 사용자 정보 조회
     suspend fun getUserInfo(): BasicResponse<UserInfoResponse> {
         return client.get("/api/users/info").body()
     }
 
+    // 사용자 프로필 정보 변경(닉네임)
     suspend fun updateUserInfo(request: UpdateUserInfoRequest): BasicNullableResponse<Unit> {
         return client.patch("/api/users/me") { setBody(request) }.body()
     }

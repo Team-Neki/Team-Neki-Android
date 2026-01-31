@@ -18,5 +18,9 @@ class UserRepositoryImpl @Inject constructor(
         userService.updateUserInfo(
             UpdateUserInfoRequest(mediaId,nickname)
         )
+    override suspend fun updateUserInfo(nickname: String): Result<Unit> = runSuspendCatching {
+        userService.updateUserInfo(UpdateUserInfoRequest(nickname))
+    }
+
     }
 }
