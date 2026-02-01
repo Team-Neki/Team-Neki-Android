@@ -1,24 +1,19 @@
 package com.neki.android.feature.mypage.impl.profile
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.maxLength
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -27,22 +22,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.neki.android.core.common.util.toByteArray
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -53,6 +42,7 @@ import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
 import com.neki.android.feature.mypage.impl.main.ProfileMode
+import com.neki.android.feature.mypage.impl.main.SelectedProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileEditTopBar
 import com.neki.android.feature.mypage.impl.profile.component.ProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileImageChooseDialog
@@ -88,6 +78,11 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
 
+    val displayProfileImage: Any? = when (uiState.selectedProfileImage) {
+        SelectedProfileImage.Default -> uiState.userInfo.profileImageUrl
+        is SelectedProfileImage.Selected -> uiState.selectedProfileImage.uri
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -95,6 +90,7 @@ fun ProfileScreen(
             ProfileMode.SETTING -> {
                 ProfileSettingContent(
                     nickname = uiState.userInfo.nickname,
+                    profileImageUri = displayProfileImage,
                     onBack = { onIntent(MyPageIntent.ClickBackIcon) },
                     onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
                     onClickLogout = { onIntent(MyPageIntent.ClickLogout) },
@@ -105,13 +101,14 @@ fun ProfileScreen(
             ProfileMode.EDIT -> {
                 ProfileEditContent(
                     initialNickname = uiState.userInfo.nickname,
+                    profileImageUri = displayProfileImage,
                     isShowImageChooseDialog = uiState.isShowImageChooseDialog,
                     onBack = { onIntent(MyPageIntent.ClickBackIcon) },
                     onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
                     onDismissImageChooseDialog = { onIntent(MyPageIntent.DismissImageChooseDialog) },
-                    onSelectImage = { uri -> onIntent(MyPageIntent.SelectProfileImage(uri)) },
+                    onSelectImage = { image -> onIntent(MyPageIntent.SelectProfileImage(image)) },
                     onComplete = { nickname ->
-                        val imageBytes = uiState.selectedImageUri?.toByteArray(context)
+                        val imageBytes = (uiState.selectedProfileImage as? SelectedProfileImage.Selected)?.uri?.toByteArray(context)
                         onIntent(MyPageIntent.ClickEditComplete(nickname, imageBytes))
                     },
                 )
@@ -144,11 +141,16 @@ fun ProfileScreen(
             onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmSignOut) },
         )
     }
+
+    if (uiState.isLoading) {
+        LoadingDialog()
+    }
 }
 
 @Composable
 private fun ProfileSettingContent(
     nickname: String,
+    profileImageUri: Any?,
     onBack: () -> Unit,
     onClickEdit: () -> Unit,
     onClickLogout: () -> Unit,
@@ -164,6 +166,7 @@ private fun ProfileSettingContent(
         ProfileImage(
             isEdit = false,
             nickname = nickname,
+            profileImageUri = profileImageUri,
             onClickEdit = onClickEdit,
         )
         VerticalSpacer(27.dp)
@@ -182,18 +185,19 @@ private fun ProfileSettingContent(
 @Composable
 private fun ProfileEditContent(
     initialNickname: String,
+    profileImageUri: Any?,
     isShowImageChooseDialog: Boolean,
     onBack: () -> Unit,
     onClickCameraIcon: () -> Unit,
     onDismissImageChooseDialog: () -> Unit,
-    onSelectImage: (Uri?) -> Unit,
+    onSelectImage: (SelectedProfileImage) -> Unit,
     onComplete: (String) -> Unit,
 ) {
     val textFieldState = rememberTextFieldState(initialNickname)
 
     val photoPicker = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
-            onSelectImage(uri)
+            onSelectImage(SelectedProfileImage.Selected(uri))
         } else {
             Timber.d("No media selected")
         }
@@ -211,6 +215,7 @@ private fun ProfileEditContent(
         ProfileImage(
             isEdit = true,
             nickname = initialNickname,
+            profileImageUri = profileImageUri,
             onClickCameraIcon = onClickCameraIcon,
         )
         Column(
@@ -263,7 +268,7 @@ private fun ProfileEditContent(
     if (isShowImageChooseDialog) {
         ProfileImageChooseDialog(
             onDismissRequest = onDismissImageChooseDialog,
-            onClickDefaultProfile = { onSelectImage(null) },
+            onClickDefaultProfile = { onSelectImage(SelectedProfileImage.Selected(null)) },
             onClickSelectPhoto = {
                 onDismissImageChooseDialog()
                 photoPicker.launch(

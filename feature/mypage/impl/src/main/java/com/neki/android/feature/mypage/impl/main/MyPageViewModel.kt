@@ -10,6 +10,8 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -47,7 +49,7 @@ internal class MyPageViewModel @Inject constructor(
             // Profile
             MyPageIntent.ClickBackIcon -> {
                 if (state.profileMode == ProfileMode.EDIT) {
-                    reduce { copy(profileMode = ProfileMode.SETTING) }
+                    reduce { copy(profileMode = ProfileMode.SETTING, selectedProfileImage = SelectedProfileImage.Default) }
                 } else {
                     postSideEffect(MyPageEffect.NavigateBack)
                 }
@@ -55,10 +57,11 @@ internal class MyPageViewModel @Inject constructor(
             MyPageIntent.ClickEditIcon -> reduce { copy(profileMode = ProfileMode.EDIT) }
             MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageChooseDialog = true) }
             MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
-            is MyPageIntent.SelectProfileImage -> reduce { copy(selectedImageUri = intent.uri, isShowImageChooseDialog = false) }
+            is MyPageIntent.SelectProfileImage -> reduce { copy(selectedProfileImage = intent.image, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
-                updateUserInfo(intent.nickname, reduce, postSideEffect)
-                updateProfileImage(intent.imageBytes, reduce, postSideEffect)
+                val isNicknameChanged = state.userInfo.nickname != intent.nickname
+                val isProfileImageChanged = state.selectedProfileImage != SelectedProfileImage.Default
+                updateProfile(intent.nickname, intent.imageBytes, isNicknameChanged, isProfileImageChanged, reduce)
             }
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
@@ -116,37 +119,43 @@ internal class MyPageViewModel @Inject constructor(
             }
     }
 
-    private fun updateUserInfo(
+    private fun updateProfile(
         nickname: String,
-        reduce: (MyPageState.() -> MyPageState) -> Unit,
-        postSideEffect: (MyPageEffect) -> Unit,
-    ) = viewModelScope.launch {
-        reduce { copy(isLoading = true) }
-        userRepository.updateUserInfo(nickname = nickname)
-            .onSuccess {
-                reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING) }
-                store.onIntent(MyPageIntent.LoadUserInfo)
-            }
-            .onFailure {
-                reduce { copy(isLoading = false) }
-            }
-    }
-
-    private fun updateProfileImage(
         imageBytes: ByteArray?,
+        isNicknameChanged: Boolean,
+        isProfileImageChanged: Boolean,
         reduce: (MyPageState.() -> MyPageState) -> Unit,
-        postSideEffect: (MyPageEffect) -> Unit,
     ) = viewModelScope.launch {
+        if (!isNicknameChanged && !isProfileImageChanged) {
+            reduce { copy(profileMode = ProfileMode.SETTING) }
+            return@launch
+        }
+
         reduce { copy(isLoading = true) }
 
-        uploadProfileImageUseCase(imageBytes = imageBytes)
-            .onSuccess {
-                reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING, selectedImageUri = null) }
-                store.onIntent(MyPageIntent.LoadUserInfo)
-            }
-            .onFailure {
-                reduce { copy(isLoading = false) }
-            }
+        val isSuccess = buildList {
+            if (isNicknameChanged) add(async { userRepository.updateUserInfo(nickname = nickname) })
+            if (isProfileImageChanged) add(async { uploadProfileImageUseCase(imageBytes = imageBytes) })
+        }.awaitAll().all { it.isSuccess }
+
+        if (isSuccess) {
+            userRepository.getUserInfo()
+                .onSuccess { user ->
+                    reduce {
+                        copy(
+                            isLoading = false,
+                            profileMode = ProfileMode.SETTING,
+                            selectedProfileImage = SelectedProfileImage.Default,
+                            userInfo = user,
+                        )
+                    }
+                }
+                .onFailure {
+                    reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING, selectedProfileImage = SelectedProfileImage.Default) }
+                }
+        } else {
+            reduce { copy(isLoading = false) }
+        }
     }
 
     private fun logout(postSideEffect: (MyPageEffect) -> Unit) = viewModelScope.launch {

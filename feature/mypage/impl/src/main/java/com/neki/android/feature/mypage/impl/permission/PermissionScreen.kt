@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -39,26 +40,27 @@ internal fun PermissionRoute(
     val activity = LocalActivity.current!!
     val context = LocalContext.current
 
-    LifecycleResumeEffect(Unit) {
-        viewModel.store.onIntent(
-            MyPageIntent.UpdatePermissionState(
-                NekiPermission.CAMERA,
-                CameraPermissionManager.isGrantedCameraPermission(context)
+    fun checkPermissions() {
+        NekiPermission.entries.forEach { permission ->
+            viewModel.store.onIntent(
+                MyPageIntent.UpdatePermissionState(
+                    permission = permission,
+                    isGranted = when (permission) {
+                        NekiPermission.CAMERA -> CameraPermissionManager.isGrantedCameraPermission(context)
+                        NekiPermission.LOCATION -> LocationPermissionManager.isGrantedLocationPermission(context)
+                        NekiPermission.NOTIFICATION -> NotificationPermissionManager.isGrantedNotificationPermission(context)
+                    }
+                )
             )
-        )
-        viewModel.store.onIntent(
-            MyPageIntent.UpdatePermissionState(
-                NekiPermission.LOCATION,
-                LocationPermissionManager.isGrantedLocationPermission(context)
-            )
-        )
-        viewModel.store.onIntent(
-            MyPageIntent.UpdatePermissionState(
-                NekiPermission.NOTIFICATION,
-                NotificationPermissionManager.isGrantedNotificationPermission(context)
-            )
-        )
+        }
+    }
 
+    LaunchedEffect(Unit) {
+        checkPermissions()
+    }
+
+    LifecycleResumeEffect(Unit) {
+        checkPermissions()
         onPauseOrDispose {}
     }
 

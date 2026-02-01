@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
@@ -46,6 +47,7 @@ fun ProfileImage(
                     .clip(CircleShape),
                 model = profileImageUri ?: R.drawable.image_empty_profile_image,
                 contentDescription = null,
+                contentScale = ContentScale.Crop,
             )
             if (isEdit) {
                 Box(

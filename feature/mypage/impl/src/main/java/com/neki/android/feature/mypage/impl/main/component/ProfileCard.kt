@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ fun ProfileCard(
                 .clip(CircleShape),
             model = profileImageUrl.ifEmpty { R.drawable.image_empty_profile_image },
             contentDescription = null,
+            contentScale = ContentScale.Crop,
         )
         HorizontalSpacer(16.dp)
         Column(

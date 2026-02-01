@@ -8,8 +8,7 @@ import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 data class MyPageState(
     val isLoading: Boolean = false,
     val userInfo: UserInfo = UserInfo(),
-    val isEditProfileImage: Boolean = false,
-    val selectedImageUri: Uri? = null,
+    val selectedProfileImage: SelectedProfileImage = SelectedProfileImage.Default,
     val isShowLogoutDialog: Boolean = false,
     val isShowSignOutDialog: Boolean = false,
     val isShowImageChooseDialog: Boolean = false,
@@ -38,8 +37,11 @@ sealed interface MyPageIntent {
     data object ClickEditIcon : MyPageIntent
     data object ClickCameraIcon : MyPageIntent
     data object DismissImageChooseDialog : MyPageIntent
-    data class SelectProfileImage(val uri: Uri?) : MyPageIntent
-    data class ClickEditComplete(val nickname: String, val imageBytes: ByteArray?) : MyPageIntent
+    data class SelectProfileImage(val image: SelectedProfileImage) : MyPageIntent
+    data class ClickEditComplete(
+        val nickname: String,
+        val imageBytes: ByteArray?
+    ) : MyPageIntent
     data object ClickLogout : MyPageIntent
     data object DismissLogoutDialog : MyPageIntent
     data object ConfirmLogout : MyPageIntent
@@ -68,3 +70,8 @@ sealed interface MyPageEffect {
 }
 
 enum class ProfileMode { SETTING, EDIT }
+
+sealed interface SelectedProfileImage {
+    data object Default : SelectedProfileImage
+    data class Selected(val uri: Uri?) : SelectedProfileImage
+}
