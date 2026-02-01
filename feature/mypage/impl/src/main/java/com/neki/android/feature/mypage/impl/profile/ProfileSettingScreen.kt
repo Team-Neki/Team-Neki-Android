@@ -63,7 +63,7 @@ fun ProfileSettingScreen(
         )
         ProfileImage(
             nickname = uiState.userInfo.nickname,
-            profileImageUri = uiState.userInfo.profileImageUrl,
+            profileImage = uiState.userInfo.profileImageUrl,
             onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
         )
         VerticalSpacer(27.dp)

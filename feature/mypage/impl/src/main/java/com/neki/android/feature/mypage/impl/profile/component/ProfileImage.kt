@@ -32,7 +32,7 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 fun ProfileImage(
     nickname: String = "",
     isEdit: Boolean = false,
-    profileImageUri: Any? = null,
+    profileImage: Any? = null,
     imageSize: Dp = 142.dp,
     onClickCameraIcon: () -> Unit = {},
     onClickEdit: () -> Unit = {},
@@ -45,7 +45,7 @@ fun ProfileImage(
                 modifier = Modifier
                     .size(imageSize)
                     .clip(CircleShape),
-                model = profileImageUri ?: R.drawable.image_empty_profile_image,
+                model = profileImage ?: R.drawable.image_empty_profile_image,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
             )

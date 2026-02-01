@@ -48,20 +48,17 @@ internal class MyPageViewModel @Inject constructor(
 
             // Profile
             MyPageIntent.ClickBackIcon -> {
-                if (state.profileMode == ProfileMode.EDIT) {
-                    reduce { copy(profileMode = ProfileMode.SETTING, selectedProfileImage = SelectedProfileImage.Default) }
-                } else {
-                    postSideEffect(MyPageEffect.NavigateBack)
-                }
+                reduce { copy(selectedProfileImage = SelectedProfileImage.Default) }
+                postSideEffect(MyPageEffect.NavigateBack)
             }
-            MyPageIntent.ClickEditIcon -> reduce { copy(profileMode = ProfileMode.EDIT) }
+            MyPageIntent.ClickEditIcon -> postSideEffect(MyPageEffect.NavigateToEditProfile)
             MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageChooseDialog = true) }
             MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
             is MyPageIntent.SelectProfileImage -> reduce { copy(selectedProfileImage = intent.image, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
                 val isNicknameChanged = state.userInfo.nickname != intent.nickname
                 val isProfileImageChanged = state.selectedProfileImage != SelectedProfileImage.Default
-                updateProfile(intent.nickname, intent.imageBytes, isNicknameChanged, isProfileImageChanged, reduce)
+                updateProfile(intent.nickname, intent.imageBytes, isNicknameChanged, isProfileImageChanged, reduce, postSideEffect)
             }
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
@@ -125,9 +122,11 @@ internal class MyPageViewModel @Inject constructor(
         isNicknameChanged: Boolean,
         isProfileImageChanged: Boolean,
         reduce: (MyPageState.() -> MyPageState) -> Unit,
+        postSideEffect: (MyPageEffect) -> Unit,
     ) = viewModelScope.launch {
         if (!isNicknameChanged && !isProfileImageChanged) {
-            reduce { copy(profileMode = ProfileMode.SETTING) }
+            reduce { copy(selectedProfileImage = SelectedProfileImage.Default) }
+            postSideEffect(MyPageEffect.NavigateBack)
             return@launch
         }
 
@@ -144,14 +143,15 @@ internal class MyPageViewModel @Inject constructor(
                     reduce {
                         copy(
                             isLoading = false,
-                            profileMode = ProfileMode.SETTING,
                             selectedProfileImage = SelectedProfileImage.Default,
                             userInfo = user,
                         )
                     }
+                    postSideEffect(MyPageEffect.NavigateBack)
                 }
                 .onFailure {
-                    reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING, selectedProfileImage = SelectedProfileImage.Default) }
+                    reduce { copy(isLoading = false, selectedProfileImage = SelectedProfileImage.Default) }
+                    postSideEffect(MyPageEffect.NavigateBack)
                 }
         } else {
             reduce { copy(isLoading = false) }

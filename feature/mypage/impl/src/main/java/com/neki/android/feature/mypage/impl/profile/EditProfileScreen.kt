@@ -99,7 +99,7 @@ fun EditProfileScreen(
         ProfileImage(
             isEdit = true,
             nickname = uiState.userInfo.nickname,
-            profileImageUri = displayProfileImage,
+            profileImage = displayProfileImage,
             onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
         )
         Column(

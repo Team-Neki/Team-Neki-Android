@@ -12,7 +12,6 @@ data class MyPageState(
     val isShowLogoutDialog: Boolean = false,
     val isShowSignOutDialog: Boolean = false,
     val isShowImageChooseDialog: Boolean = false,
-    val profileMode: ProfileMode = ProfileMode.SETTING,
     // Permission
     val isGrantedCamera: Boolean = false,
     val isGrantedLocation: Boolean = false,
@@ -69,8 +68,6 @@ sealed interface MyPageEffect {
     data class RequestPermission(val permission: NekiPermission) : MyPageEffect
     data object OpenOssLicenses : MyPageEffect
 }
-
-enum class ProfileMode { SETTING, EDIT }
 
 sealed interface SelectedProfileImage {
     data object Default : SelectedProfileImage
