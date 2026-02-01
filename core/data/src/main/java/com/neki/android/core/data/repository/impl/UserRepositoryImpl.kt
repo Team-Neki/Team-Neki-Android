@@ -5,13 +5,13 @@ import com.neki.android.core.data.remote.model.request.UpdateProfileImageRequest
 import com.neki.android.core.data.remote.model.request.UpdateUserInfoRequest
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.UserRepository
-import com.neki.android.core.model.User
+import com.neki.android.core.model.UserInfo
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
     private val userService: UserService,
 ) : UserRepository {
-    override suspend fun getUserInfo(): Result<User> = runSuspendCatching {
+    override suspend fun getUserInfo(): Result<UserInfo> = runSuspendCatching {
         userService.getUserInfo().data.toModel()
     }
 

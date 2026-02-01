@@ -1,6 +1,6 @@
 package com.neki.android.core.data.remote.model.response
 
-import com.neki.android.core.model.User
+import com.neki.android.core.model.UserInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -12,7 +12,7 @@ data class UserInfoResponse(
     @SerialName("profileImageUrl") val profileImageUrl: String,
     @SerialName("providerType") val providerType: String,
 ) {
-    fun toModel() = User(
+    fun toModel() = UserInfo(
         id = userId,
         nickname = name,
         profileImageUrl = profileImageUrl,

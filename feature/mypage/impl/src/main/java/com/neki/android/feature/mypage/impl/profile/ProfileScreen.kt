@@ -93,8 +93,8 @@ fun ProfileScreen(
     when (uiState.profileMode) {
         ProfileMode.SETTING -> {
             ProfileSettingContent(
-                nickname = uiState.nickname,
-                profileImageUrl = uiState.profileImageUrl,
+                nickname = uiState.userInfo.nickname,
+                profileImageUrl = uiState.userInfo.profileImageUrl,
                 onBack = { onIntent(MyPageIntent.ClickBackIcon) },
                 onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
                 onClickLogout = { onIntent(MyPageIntent.ClickLogout) },
@@ -104,8 +104,8 @@ fun ProfileScreen(
 
         ProfileMode.EDIT -> {
             ProfileEditContent(
-                initialNickname = uiState.nickname,
-                profileImageUrl = uiState.profileImageUrl,
+                initialNickname = uiState.userInfo.nickname,
+                profileImageUrl = uiState.userInfo.profileImageUrl,
                 profileImageUri = uiState.selectedImageUri,
                 isShowImageChooseDialog = uiState.isShowImageChooseDialog,
                 onBack = { onIntent(MyPageIntent.ClickBackIcon) },

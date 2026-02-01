@@ -77,9 +77,9 @@ fun MyPageScreen(
             onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
         )
         ProfileCard(
-            profileImageUrl = uiState.profileImageUrl,
-            name = uiState.nickname,
-            loginType = uiState.loginType,
+            profileImageUrl = uiState.userInfo.profileImageUrl,
+            name = uiState.userInfo.nickname,
+            loginType = uiState.userInfo.loginType,
             onClickCard = { onIntent(MyPageIntent.ClickProfileCard) },
         )
         Box(

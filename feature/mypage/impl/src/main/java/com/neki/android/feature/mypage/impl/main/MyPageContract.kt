@@ -1,15 +1,14 @@
 package com.neki.android.feature.mypage.impl.main
 
 import android.net.Uri
+import com.neki.android.core.model.UserInfo
 import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 
 data class MyPageState(
     val isLoading: Boolean = false,
-    val id: Long = 0,
-    val nickname: String = "",
-    val loginType: String = "",
-    val profileImageUrl: String = "",
+    val userInfo: UserInfo = UserInfo(),
+    val isEditProfileImage: Boolean = false,
     val selectedImageUri: Uri? = null,
     val isShowLogoutDialog: Boolean = false,
     val isShowSignOutDialog: Boolean = false,

@@ -58,7 +58,7 @@ internal class MyPageViewModel @Inject constructor(
             is MyPageIntent.SelectProfileImage -> reduce { copy(selectedImageUri = intent.uri, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
                 updateUserInfo(intent.nickname, reduce, postSideEffect)
-//                updateProfile(intent.nickname, intent.imageBytes, reduce, postSideEffect)
+                updateProfileImage(intent.imageBytes, reduce, postSideEffect)
             }
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
@@ -107,10 +107,7 @@ internal class MyPageViewModel @Inject constructor(
                 reduce {
                     copy(
                         isLoading = false,
-                        id = user.id,
-                        nickname = user.nickname,
-                        profileImageUrl = user.profileImageUrl,
-                        loginType = user.loginType,
+                        userInfo = user,
                     )
                 }
             }
@@ -125,47 +122,31 @@ internal class MyPageViewModel @Inject constructor(
         postSideEffect: (MyPageEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
-        userRepository.updateUserInfo(nickname)
+        userRepository.updateUserInfo(nickname = nickname)
             .onSuccess {
                 reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING) }
-                loadUserInfo(reduce)
+                store.onIntent(MyPageIntent.LoadUserInfo)
             }
             .onFailure {
                 reduce { copy(isLoading = false) }
             }
     }
 
-    private fun updateProfile(
-        nickname: String,
+    private fun updateProfileImage(
         imageBytes: ByteArray?,
         reduce: (MyPageState.() -> MyPageState) -> Unit,
         postSideEffect: (MyPageEffect) -> Unit,
-    ) {
-        viewModelScope.launch {
-            reduce { copy(isLoading = true) }
+    ) = viewModelScope.launch {
+        reduce { copy(isLoading = true) }
 
-            if (imageBytes != null) {
-                // 이미지가 있으면 이미지 업로드 후 프로필 업데이트
-                uploadProfileImageUseCase(imageBytes = imageBytes, nickname = nickname)
-                    .onSuccess {
-                        reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING, selectedImageUri = null) }
-                        store.onIntent(MyPageIntent.LoadUserInfo)
-                    }
-                    .onFailure {
-                        reduce { copy(isLoading = false) }
-                    }
-            } else {
-                // 이미지가 없으면 닉네임만 업데이트
-                userRepository.updateUserInfo(mediaId = null, nickname = nickname)
-                    .onSuccess {
-                        reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING) }
-                        store.onIntent(MyPageIntent.LoadUserInfo)
-                    }
-                    .onFailure {
-                        reduce { copy(isLoading = false) }
-                    }
+        uploadProfileImageUseCase(imageBytes = imageBytes)
+            .onSuccess {
+                reduce { copy(isLoading = false, profileMode = ProfileMode.SETTING, selectedImageUri = null) }
+                store.onIntent(MyPageIntent.LoadUserInfo)
             }
-        }
+            .onFailure {
+                reduce { copy(isLoading = false) }
+            }
     }
 
     private fun logout(postSideEffect: (MyPageEffect) -> Unit) = viewModelScope.launch {

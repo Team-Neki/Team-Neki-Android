@@ -1,6 +1,6 @@
 package com.neki.android.core.model
 
-data class User(
+data class UserInfo(
     val id: Long = 0L,
     val nickname: String = "",
     val profileImageUrl: String = "",
