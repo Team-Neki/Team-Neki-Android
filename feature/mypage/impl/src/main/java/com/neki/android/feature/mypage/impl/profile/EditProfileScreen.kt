@@ -25,54 +25,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.util.toByteArray
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
-import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.ui.compose.VerticalSpacer
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.mypage.impl.component.SectionItem
-import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.main.MyPageEffect
 import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
-import com.neki.android.feature.mypage.impl.main.ProfileMode
 import com.neki.android.feature.mypage.impl.main.SelectedProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileEditTopBar
 import com.neki.android.feature.mypage.impl.profile.component.ProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileImageChooseDialog
-import com.neki.android.feature.mypage.impl.profile.component.ProfileSettingTopBar
 import timber.log.Timber
 
 @Composable
-internal fun ProfileRoute(
+internal fun EditProfileRoute(
     viewModel: MyPageViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToLogin: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             MyPageEffect.NavigateBack -> navigateBack()
-            MyPageEffect.NavigateToLogin -> navigateToLogin()
             else -> {}
         }
     }
 
-    ProfileScreen(
+    EditProfileScreen(
         uiState = uiState,
         onIntent = viewModel.store::onIntent,
     )
 }
 
 @Composable
-fun ProfileScreen(
+fun EditProfileScreen(
     uiState: MyPageState = MyPageState(),
     onIntent: (MyPageIntent) -> Unit = {},
 ) {
@@ -83,121 +74,11 @@ fun ProfileScreen(
         is SelectedProfileImage.Selected -> uiState.selectedProfileImage.uri
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        when (uiState.profileMode) {
-            ProfileMode.SETTING -> {
-                ProfileSettingContent(
-                    nickname = uiState.userInfo.nickname,
-                    profileImageUri = displayProfileImage,
-                    onBack = { onIntent(MyPageIntent.ClickBackIcon) },
-                    onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
-                    onClickLogout = { onIntent(MyPageIntent.ClickLogout) },
-                    onClickSignOut = { onIntent(MyPageIntent.ClickSignOut) },
-                )
-            }
-
-            ProfileMode.EDIT -> {
-                ProfileEditContent(
-                    initialNickname = uiState.userInfo.nickname,
-                    profileImageUri = displayProfileImage,
-                    isShowImageChooseDialog = uiState.isShowImageChooseDialog,
-                    onBack = { onIntent(MyPageIntent.ClickBackIcon) },
-                    onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
-                    onDismissImageChooseDialog = { onIntent(MyPageIntent.DismissImageChooseDialog) },
-                    onSelectImage = { image -> onIntent(MyPageIntent.SelectProfileImage(image)) },
-                    onComplete = { nickname ->
-                        val imageBytes = (uiState.selectedProfileImage as? SelectedProfileImage.Selected)?.uri?.toByteArray(context)
-                        onIntent(MyPageIntent.ClickEditComplete(nickname, imageBytes))
-                    },
-                )
-            }
-        }
-    }
-
-    if (uiState.isShowLogoutDialog) {
-        DoubleButtonAlertDialog(
-            title = "로그아웃을 하시겠습니까?",
-            content = "다시 로그인해야 서비스를 이용할 수 있어요.",
-            grayButtonText = "취소",
-            primaryButtonText = "확인",
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            onDismissRequest = { onIntent(MyPageIntent.DismissLogoutDialog) },
-            onClickGrayButton = { onIntent(MyPageIntent.DismissLogoutDialog) },
-            onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmLogout) },
-        )
-    }
-
-    if (uiState.isShowSignOutDialog) {
-        DoubleButtonAlertDialog(
-            title = "정말 탈퇴하시겠어요?",
-            content = "계정을 탈퇴하면 사진과 정보가 모두 삭제되며,\n삭제된 데이터는 복구할 수 없어요.",
-            grayButtonText = "취소",
-            primaryButtonText = "탈퇴 확정",
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            onDismissRequest = { onIntent(MyPageIntent.DismissSignOutDialog) },
-            onClickGrayButton = { onIntent(MyPageIntent.DismissSignOutDialog) },
-            onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmSignOut) },
-        )
-    }
-
-    if (uiState.isLoading) {
-        LoadingDialog()
-    }
-}
-
-@Composable
-private fun ProfileSettingContent(
-    nickname: String,
-    profileImageUri: Any?,
-    onBack: () -> Unit,
-    onClickEdit: () -> Unit,
-    onClickLogout: () -> Unit,
-    onClickSignOut: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        ProfileSettingTopBar(
-            onBack = onBack,
-        )
-        ProfileImage(
-            isEdit = false,
-            nickname = nickname,
-            profileImageUri = profileImageUri,
-            onClickEdit = onClickEdit,
-        )
-        VerticalSpacer(27.dp)
-        SectionTitleText(text = "서비스 정보 및 지원")
-        SectionItem(
-            text = "로그아웃",
-            onClick = onClickLogout,
-        )
-        SectionItem(
-            text = "탈퇴하기",
-            onClick = onClickSignOut,
-        )
-    }
-}
-
-@Composable
-private fun ProfileEditContent(
-    initialNickname: String,
-    profileImageUri: Any?,
-    isShowImageChooseDialog: Boolean,
-    onBack: () -> Unit,
-    onClickCameraIcon: () -> Unit,
-    onDismissImageChooseDialog: () -> Unit,
-    onSelectImage: (SelectedProfileImage) -> Unit,
-    onComplete: (String) -> Unit,
-) {
-    val textFieldState = rememberTextFieldState(initialNickname)
+    val textFieldState = rememberTextFieldState(uiState.userInfo.nickname)
 
     val photoPicker = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
-            onSelectImage(SelectedProfileImage.Selected(uri))
+            onIntent(MyPageIntent.SelectProfileImage(SelectedProfileImage.Selected(uri)))
         } else {
             Timber.d("No media selected")
         }
@@ -209,14 +90,17 @@ private fun ProfileEditContent(
     ) {
         ProfileEditTopBar(
             enabled = textFieldState.text.isNotEmpty(),
-            onBack = onBack,
-            onClickComplete = { onComplete(textFieldState.text.toString()) },
+            onBack = { onIntent(MyPageIntent.ClickBackIcon) },
+            onClickComplete = {
+                val imageBytes = (uiState.selectedProfileImage as? SelectedProfileImage.Selected)?.uri?.toByteArray(context)
+                onIntent(MyPageIntent.ClickEditComplete(textFieldState.text.toString(), imageBytes))
+            },
         )
         ProfileImage(
             isEdit = true,
-            nickname = initialNickname,
-            profileImageUri = profileImageUri,
-            onClickCameraIcon = onClickCameraIcon,
+            nickname = uiState.userInfo.nickname,
+            profileImageUri = displayProfileImage,
+            onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
         )
         Column(
             modifier = Modifier
@@ -265,37 +149,28 @@ private fun ProfileEditContent(
         }
     }
 
-    if (isShowImageChooseDialog) {
+    if (uiState.isShowImageChooseDialog) {
         ProfileImageChooseDialog(
-            onDismissRequest = onDismissImageChooseDialog,
-            onClickDefaultProfile = { onSelectImage(SelectedProfileImage.Selected(null)) },
+            onDismissRequest = { onIntent(MyPageIntent.DismissImageChooseDialog) },
+            onClickDefaultProfile = { onIntent(MyPageIntent.SelectProfileImage(SelectedProfileImage.Selected(null))) },
             onClickSelectPhoto = {
-                onDismissImageChooseDialog()
+                onIntent(MyPageIntent.DismissImageChooseDialog)
                 photoPicker.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                 )
             },
         )
     }
-}
 
-
-@ComponentPreview
-@Composable
-private fun ProfileScreenSettingPreview() {
-    NekiTheme {
-        ProfileScreen(
-            uiState = MyPageState(profileMode = ProfileMode.SETTING),
-        )
+    if (uiState.isLoading) {
+        LoadingDialog()
     }
 }
 
 @ComponentPreview
 @Composable
-private fun ProfileScreenEditPreview() {
+private fun EditProfileScreenPreview() {
     NekiTheme {
-        ProfileScreen(
-            uiState = MyPageState(profileMode = ProfileMode.EDIT),
-        )
+        EditProfileScreen()
     }
 }

@@ -7,11 +7,13 @@ import com.neki.android.core.navigation.HiltSharedViewModelStoreNavEntryDecorato
 import com.neki.android.core.navigation.Navigator
 import com.neki.android.core.navigation.root.RootNavKey
 import com.neki.android.feature.mypage.api.MyPageNavKey
+import com.neki.android.feature.mypage.api.navigateToEditProfile
 import com.neki.android.feature.mypage.api.navigateToPermission
 import com.neki.android.feature.mypage.api.navigateToProfile
 import com.neki.android.feature.mypage.impl.main.MyPageRoute
 import com.neki.android.feature.mypage.impl.permission.PermissionRoute
-import com.neki.android.feature.mypage.impl.profile.ProfileRoute
+import com.neki.android.feature.mypage.impl.profile.EditProfileRoute
+import com.neki.android.feature.mypage.impl.profile.ProfileSettingRoute
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,9 +56,20 @@ private fun EntryProviderScope<NavKey>.myPageEntry(navigator: Navigator) {
             MyPageNavKey.MyPage.toString(),
         ),
     ) {
-        ProfileRoute(
+        ProfileSettingRoute(
             navigateBack = navigator::goBack,
+            navigateToEditProfile = navigator::navigateToEditProfile,
             navigateToLogin = { navigator.navigateRoot(RootNavKey.Login) },
+        )
+    }
+
+    entry<MyPageNavKey.EditProfile>(
+        metadata = HiltSharedViewModelStoreNavEntryDecorator.parent(
+            MyPageNavKey.MyPage.toString(),
+        ),
+    ) {
+        EditProfileRoute(
+            navigateBack = navigator::goBack,
         )
     }
 }

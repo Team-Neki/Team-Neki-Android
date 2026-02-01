@@ -60,6 +60,7 @@ sealed interface MyPageIntent {
 sealed interface MyPageEffect {
     data object NavigateToNotification : MyPageEffect
     data object NavigateToProfile : MyPageEffect
+    data object NavigateToEditProfile : MyPageEffect
     data object NavigateToPermission : MyPageEffect
     data class OpenExternalLink(val url: String) : MyPageEffect
     data object NavigateBack : MyPageEffect
