@@ -7,6 +7,7 @@ import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.qualifier.UploadHttpClient
+import com.neki.android.core.dataapi.auth.AuthCacheManager
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.TokenRepository
 import dagger.Module
@@ -17,6 +18,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.plugin
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
@@ -66,6 +68,19 @@ internal object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideAuthCacheManager(
+        httpClient: HttpClient,
+    ): AuthCacheManager = object : AuthCacheManager {
+        override fun invalidateTokenCache() {
+            httpClient.plugin(Auth).providers
+                .filterIsInstance<BearerAuthProvider>()
+                .firstOrNull()
+                ?.clearToken()
+        }
+    }
+
+    @Provides
+    @Singleton
     fun provideHttpClient(
         tokenRepository: TokenRepository,
         authEventManager: AuthEventManager,
@@ -79,9 +94,6 @@ internal object NetworkModule {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        // Ktor에 캐싱된 BearerTokens을 지우고 매번 새로운 토큰을 조회하기 위함
-                        // 토큰 만료 주기가 길어지면 제거
-                        this@install.providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
                         if (tokenRepository.isSavedTokens().first()) {
                             BearerTokens(
                                 accessToken = tokenRepository.getAccessToken().first(),
@@ -91,7 +103,6 @@ internal object NetworkModule {
                     }
 
                     refreshTokens {
-                        this@install.providers.filterIsInstance<BearerAuthProvider>().firstOrNull()?.clearToken()
                         if (oldTokens != null) {
                             return@refreshTokens try {
                                 val response = client.post("/api/auth/refresh") {
@@ -124,7 +135,6 @@ internal object NetworkModule {
                         val shouldNotAuth = sendWithoutAuthUrls.any {
                             request.url.encodedPath == it
                         }
-
                         !shouldNotAuth
                     }
                 }
