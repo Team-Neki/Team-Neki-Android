@@ -36,7 +36,7 @@ import com.neki.android.feature.mypage.impl.main.MyPageEffect
 import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
-import com.neki.android.feature.mypage.impl.main.SelectedProfileImage
+import com.neki.android.feature.mypage.impl.profile.model.SelectedProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.EditProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileEditTopBar
 import com.neki.android.feature.mypage.impl.profile.component.ProfileImageChooseDialog
@@ -70,7 +70,7 @@ fun EditProfileScreen(
     val context = LocalContext.current
 
     val displayProfileImage: Any? = when (uiState.selectedProfileImage) {
-        SelectedProfileImage.Default -> uiState.userInfo.profileImageUrl
+        SelectedProfileImage.NoChange -> uiState.userInfo.profileImageUrl
         is SelectedProfileImage.Selected -> uiState.selectedProfileImage.uri
     }
 

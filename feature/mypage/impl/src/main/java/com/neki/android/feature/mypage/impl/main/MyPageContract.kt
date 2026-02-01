@@ -1,14 +1,14 @@
 package com.neki.android.feature.mypage.impl.main
 
-import android.net.Uri
 import com.neki.android.core.model.UserInfo
 import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
+import com.neki.android.feature.mypage.impl.profile.model.SelectedProfileImage
 
 data class MyPageState(
     val isLoading: Boolean = false,
     val userInfo: UserInfo = UserInfo(),
-    val selectedProfileImage: SelectedProfileImage = SelectedProfileImage.Default,
+    val selectedProfileImage: SelectedProfileImage = SelectedProfileImage.NoChange,
     val isShowLogoutDialog: Boolean = false,
     val isShowSignOutDialog: Boolean = false,
     val isShowImageChooseDialog: Boolean = false,
@@ -67,9 +67,4 @@ sealed interface MyPageEffect {
     data class MoveAppSettings(val permission: NekiPermission) : MyPageEffect
     data class RequestPermission(val permission: NekiPermission) : MyPageEffect
     data object OpenOssLicenses : MyPageEffect
-}
-
-sealed interface SelectedProfileImage {
-    data object Default : SelectedProfileImage
-    data class Selected(val uri: Uri?) : SelectedProfileImage
 }
