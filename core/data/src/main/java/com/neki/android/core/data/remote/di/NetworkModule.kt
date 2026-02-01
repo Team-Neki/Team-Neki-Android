@@ -105,7 +105,7 @@ internal object NetworkModule {
                                 tokenRepository.saveTokens(
                                     accessToken = response.data.accessToken,
                                     refreshToken = response.data.refreshToken,
-                                ).getOrThrow()
+                                )
 
                                 BearerTokens(
                                     accessToken = response.data.accessToken,

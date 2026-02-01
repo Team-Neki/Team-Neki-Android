@@ -45,14 +45,8 @@ class LoginViewModel @Inject constructor(
             authRepository.updateAccessToken(
                 refreshToken = tokenRepository.getRefreshToken().first(),
             ).onSuccess {
-                tokenRepository.saveTokens(
-                    it.accessToken,
-                    it.refreshToken
-                ).onSuccess {
-                    postSideEffect(LoginSideEffect.NavigateToHome)
-                }.onFailure { exception ->
-                    Timber.e(exception)
-                }
+                tokenRepository.saveTokens(it.accessToken, it.refreshToken)
+                postSideEffect(LoginSideEffect.NavigateToHome)
             }.onFailure { exception ->
                 Timber.e(exception)
                 authEventManager.emitTokenExpired()
@@ -73,10 +67,9 @@ class LoginViewModel @Inject constructor(
                 tokenRepository.saveTokens(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
-                ).onSuccess {
+                )
+                tokenRepository.isSavedTokens().first { isSaved -> isSaved }.also {
                     postSideEffect(LoginSideEffect.NavigateToHome)
-                }.onFailure { exception ->
-                    Timber.e(exception)
                 }
             }
             .onFailure { exception ->
