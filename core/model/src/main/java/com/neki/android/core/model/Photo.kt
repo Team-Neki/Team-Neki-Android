@@ -2,7 +2,6 @@ package com.neki.android.core.model
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
-import kotlin.time.ExperimentalTime
 
 @Serializable
 @Immutable

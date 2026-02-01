@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
 @Serializable
-//@Immutable
+@Immutable
 data class Pose(
     val id: Long = 0L,
     val poseImageUrl: String = "",
