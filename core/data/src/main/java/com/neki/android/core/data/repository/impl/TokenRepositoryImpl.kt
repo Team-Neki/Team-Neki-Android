@@ -9,6 +9,7 @@ import com.neki.android.core.dataapi.repository.TokenRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import com.neki.android.core.data.local.di.TokenDataStore
+import com.neki.android.core.data.util.runSuspendCatching
 import javax.inject.Inject
 
 class TokenRepositoryImpl @Inject constructor(
@@ -17,7 +18,7 @@ class TokenRepositoryImpl @Inject constructor(
     override suspend fun saveTokens(
         accessToken: String,
         refreshToken: String,
-    ) {
+    ): Result<Unit> = runSuspendCatching {
         dataStore.edit { preferences ->
             preferences[DataStoreKey.ACCESS_TOKEN] = CryptoManager.encrypt(accessToken)
             preferences[DataStoreKey.REFRESH_TOKEN] = CryptoManager.encrypt(refreshToken)
