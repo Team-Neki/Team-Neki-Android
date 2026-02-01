@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -53,6 +54,7 @@ import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
 import com.neki.android.feature.mypage.impl.main.ProfileMode
 import com.neki.android.feature.mypage.impl.profile.component.ProfileEditTopBar
+import com.neki.android.feature.mypage.impl.profile.component.ProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileImageChooseDialog
 import com.neki.android.feature.mypage.impl.profile.component.ProfileSettingTopBar
 import timber.log.Timber
@@ -84,13 +86,15 @@ fun ProfileScreen(
     uiState: MyPageState = MyPageState(),
     onIntent: (MyPageIntent) -> Unit = {},
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
         when (uiState.profileMode) {
             ProfileMode.SETTING -> {
                 ProfileSettingContent(
-                    nickname = uiState.userName,
+                    nickname = uiState.userInfo.nickname,
                     onBack = { onIntent(MyPageIntent.ClickBackIcon) },
                     onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
                     onClickLogout = { onIntent(MyPageIntent.ClickLogout) },
@@ -100,7 +104,7 @@ fun ProfileScreen(
 
             ProfileMode.EDIT -> {
                 ProfileEditContent(
-                    initialNickname = uiState.userName,
+                    initialNickname = uiState.userInfo.nickname,
                     isShowImageChooseDialog = uiState.isShowImageChooseDialog,
                     onBack = { onIntent(MyPageIntent.ClickBackIcon) },
                     onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
@@ -206,7 +210,7 @@ private fun ProfileEditContent(
         )
         ProfileImage(
             isEdit = true,
-            nickname = ni,
+            nickname = initialNickname,
             onClickCameraIcon = onClickCameraIcon,
         )
         Column(
@@ -216,7 +220,7 @@ private fun ProfileEditContent(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
-                text = initialNickname,
+                text = "닉네임",
                 style = NekiTheme.typography.body14Medium,
                 color = NekiTheme.colorScheme.gray700,
             )
