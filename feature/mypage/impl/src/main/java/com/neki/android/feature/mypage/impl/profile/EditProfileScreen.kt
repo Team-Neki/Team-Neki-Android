@@ -37,8 +37,8 @@ import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
 import com.neki.android.feature.mypage.impl.main.SelectedProfileImage
+import com.neki.android.feature.mypage.impl.profile.component.EditProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileEditTopBar
-import com.neki.android.feature.mypage.impl.profile.component.ProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileImageChooseDialog
 import timber.log.Timber
 
@@ -96,9 +96,7 @@ fun EditProfileScreen(
                 onIntent(MyPageIntent.ClickEditComplete(textFieldState.text.toString(), imageBytes))
             },
         )
-        ProfileImage(
-            isEdit = true,
-            nickname = uiState.userInfo.nickname,
+        EditProfileImage(
             profileImage = displayProfileImage,
             onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
         )

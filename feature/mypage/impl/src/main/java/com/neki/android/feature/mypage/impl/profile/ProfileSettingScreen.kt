@@ -22,7 +22,7 @@ import com.neki.android.feature.mypage.impl.main.MyPageEffect
 import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
-import com.neki.android.feature.mypage.impl.profile.component.ProfileImage
+import com.neki.android.feature.mypage.impl.profile.component.SettingProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileSettingTopBar
 
 @Composable
@@ -61,12 +61,11 @@ fun ProfileSettingScreen(
         ProfileSettingTopBar(
             onBack = { onIntent(MyPageIntent.ClickBackIcon) },
         )
-        ProfileImage(
+        SettingProfileImage(
             nickname = uiState.userInfo.nickname,
             profileImage = uiState.userInfo.profileImageUrl,
             onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
         )
-        VerticalSpacer(27.dp)
         SectionTitleText(text = "서비스 정보 및 지원")
         SectionItem(
             text = "로그아웃",
