@@ -40,7 +40,7 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
-import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
@@ -59,7 +59,7 @@ internal fun ArchiveMainRoute(
     navigateToUploadAlbumWithQRScan: (String) -> Unit,
     navigateToAllAlbum: () -> Unit,
     navigateToFavoriteAlbum: (Long) -> Unit,
-    navigateToAlbumDetail: (Long) -> Unit,
+    navigateToAlbumDetail: (Long, String) -> Unit,
     navigateToAllPhoto: () -> Unit,
     navigateToPhotoDetail: (Photo) -> Unit,
 ) {
@@ -82,7 +82,7 @@ internal fun ArchiveMainRoute(
             is ArchiveMainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
-            is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId)
+            is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
@@ -126,7 +126,7 @@ internal fun ArchiveMainScreen(
                 lazyState = lazyState,
                 onClickShowAllAlbum = { onIntent(ArchiveMainIntent.ClickAllAlbumText) },
                 onClickFavoriteAlbum = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
-                onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it)) },
+                onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it.id, it.title)) },
                 onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
                 onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
             )
@@ -147,7 +147,7 @@ internal fun ArchiveMainScreen(
 
     if (uiState.isShowAddAlbumBottomSheet) {
         val textFieldState = rememberTextFieldState()
-        val existingAlbumNames = remember { uiState.albums.map { it.title } }
+        val existingAlbumNames = remember(uiState.albums) { uiState.albums.map { it.title } }
 
         val errorMessage by remember(textFieldState.text) {
             derivedStateOf {
@@ -189,7 +189,7 @@ private fun ArchiveMainContent(
     lazyState: LazyStaggeredGridState,
     onClickShowAllAlbum: () -> Unit,
     onClickFavoriteAlbum: () -> Unit,
-    onClickAlbumItem: (Long) -> Unit,
+    onClickAlbumItem: (AlbumPreview) -> Unit,
     onClickShowAllPhoto: () -> Unit,
     onClickPhotoItem: (Photo) -> Unit,
     modifier: Modifier = Modifier,
@@ -204,7 +204,7 @@ private fun ArchiveMainContent(
         contentPadding = PaddingValues(
             start = 20.dp,
             end = 20.dp,
-            bottom = ARCHIVE_LAYOUT_BOTTOM_PADDING.dp,
+            bottom = PHOTO_GRAY_LAYOUT_BOTTOM_PADDING.dp,
         ),
         verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
         horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),

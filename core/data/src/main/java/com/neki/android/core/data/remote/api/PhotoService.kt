@@ -27,11 +27,13 @@ class PhotoService @Inject constructor(
         folderId: Long? = null,
         page: Int = 0,
         size: Int = 20,
+        sortOrder: String = "DESC",
     ): BasicResponse<PhotoResponse> {
         return client.get("/api/photos") {
             parameter("folderId", folderId)
             parameter("page", page)
             parameter("size", size)
+            parameter("sortOrder", sortOrder)
         }.body()
     }
 

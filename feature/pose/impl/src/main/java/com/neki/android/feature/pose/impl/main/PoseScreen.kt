@@ -21,8 +21,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.neki.android.core.designsystem.DevicePreview
-import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.PoseEffect
@@ -36,29 +36,30 @@ import com.neki.android.feature.pose.impl.main.component.PoseListContent
 import com.neki.android.feature.pose.impl.main.component.PoseTopBar
 import com.neki.android.feature.pose.impl.main.component.RandomPosePeopleCountBottomSheet
 import com.neki.android.feature.pose.impl.main.component.RecommendationChip
-import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 internal fun PoseRoute(
     viewModel: PoseViewModel = hiltViewModel(),
-    navigateToPoseDetail: (Pose) -> Unit,
+    navigateToPoseDetail: (Long) -> Unit,
     navigateToRandomPose: (PeopleCount) -> Unit,
     navigateToNotification: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
+    val posePagingItems = viewModel.posePagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PoseEffect.NavigateToNotification -> navigateToNotification()
             is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
-            is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.pose)
+            is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.poseId)
             is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
         }
     }
 
     PoseScreen(
         uiState = uiState,
+        posePagingItems = posePagingItems,
         onIntent = viewModel.store::onIntent,
     )
 }
@@ -66,6 +67,7 @@ internal fun PoseRoute(
 @Composable
 fun PoseScreen(
     uiState: PoseState = PoseState(),
+    posePagingItems: LazyPagingItems<Pose>,
     onIntent: (PoseIntent) -> Unit = {},
 ) {
     Box(
@@ -74,7 +76,7 @@ fun PoseScreen(
         PoseContent(
             selectedPeopleCount = uiState.selectedPeopleCount,
             isScrapSelected = uiState.isShowScrappedPose,
-            poseList = if (uiState.isShowScrappedPose) uiState.scrappedPoseList else uiState.randomPoseList,
+            posePagingItems = posePagingItems,
             onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickScrap = { onIntent(PoseIntent.ClickScrapChip) },
@@ -112,7 +114,7 @@ fun PoseContent(
     modifier: Modifier = Modifier,
     selectedPeopleCount: PeopleCount?,
     isScrapSelected: Boolean,
-    poseList: ImmutableList<Pose>,
+    posePagingItems: LazyPagingItems<Pose>,
     onClickAlarmIcon: () -> Unit = {},
     onClickPeopleCount: () -> Unit = {},
     onClickScrap: () -> Unit = {},
@@ -142,7 +144,7 @@ fun PoseContent(
         ) {
             PoseListContent(
                 topPadding = topPadding + POSE_LAYOUT_DEFAULT_TOP_PADDING.dp,
-                poseList = poseList,
+                posePagingItems = posePagingItems,
                 state = lazyState,
                 onClickItem = onClickPoseItem,
             )
@@ -162,10 +164,4 @@ fun PoseContent(
     }
 }
 
-@DevicePreview
-@Composable
-private fun PoseScreenPreview() {
-    NekiTheme {
-        PoseScreen()
-    }
-}
+// Preview is not available for PagingItems component

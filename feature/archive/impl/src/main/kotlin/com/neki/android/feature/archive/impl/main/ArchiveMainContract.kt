@@ -20,7 +20,7 @@ data class ArchiveMainState(
     val isShowAddAlbumBottomSheet: Boolean = false,
 ) {
     val uploadType: UploadType
-        get() = if (scannedImageUrl == null) UploadType.GALLERY else UploadType.QR_SCAN
+        get() = if (scannedImageUrl != null) UploadType.QR_CODE else UploadType.GALLERY
 }
 
 sealed interface ArchiveMainIntent {
@@ -47,7 +47,7 @@ sealed interface ArchiveMainIntent {
     // Album Intent
     data object ClickAllAlbumText : ArchiveMainIntent
     data object ClickFavoriteAlbum : ArchiveMainIntent
-    data class ClickAlbumItem(val albumId: Long) : ArchiveMainIntent
+    data class ClickAlbumItem(val albumId: Long, val albumTitle: String) : ArchiveMainIntent
 
     // Photo Intent
     data object ClickAllPhotoText : ArchiveMainIntent
@@ -64,7 +64,7 @@ sealed interface ArchiveMainSideEffect {
     data class NavigateToUploadAlbumWithQRScan(val imageUrl: String) : ArchiveMainSideEffect
     data object NavigateToAllAlbum : ArchiveMainSideEffect
     data class NavigateToFavoriteAlbum(val albumId: Long) : ArchiveMainSideEffect
-    data class NavigateToAlbumDetail(val albumId: Long) : ArchiveMainSideEffect
+    data class NavigateToAlbumDetail(val albumId: Long, val title: String) : ArchiveMainSideEffect
     data object NavigateToAllPhoto : ArchiveMainSideEffect
     data class NavigateToPhotoDetail(val photo: Photo) : ArchiveMainSideEffect
 

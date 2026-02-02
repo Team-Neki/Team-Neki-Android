@@ -17,23 +17,23 @@ class UploadSinglePhotoUseCase @Inject constructor(
     private val photoRepository: PhotoRepository,
 ) {
     suspend operator fun invoke(
-        imageBytes: ByteArray,
+        imageUrl: String,
         contentType: ContentType = ContentType.JPEG,
         folderId: Long? = null,
     ): Result<Media> = runSuspendCatching {
         val fileName = ContentTypeUtil.generateFileName(contentType)
 
         // 1. 업로드 티켓 발급 (mediaId, presignedUrl)
-        val (mediaId, presignedUrl) = mediaUploadRepository.getUploadTicket(
+        val (mediaId, presignedUrl) = mediaUploadRepository.getSingleUploadTicket(
             fileName = fileName,
             contentType = contentType.label,
             mediaType = MediaType.PHOTO_BOOTH.name,
-        ).getOrThrow().first()
+        ).getOrThrow()
 
         // 2. Presigned URL로 이미지 업로드
-        mediaUploadRepository.uploadImage(
+        mediaUploadRepository.uploadImageFromUrl(
             uploadUrl = presignedUrl,
-            imageBytes = imageBytes,
+            imageUrl = imageUrl,
             contentType = contentType,
         ).getOrThrow()
 

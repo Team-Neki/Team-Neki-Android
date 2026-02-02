@@ -17,7 +17,11 @@ sealed interface ArchiveNavKey : NavKey {
     data object AllAlbum : ArchiveNavKey
 
     @Serializable
-    data class AlbumDetail(val isFavorite: Boolean, val albumId: Long) : ArchiveNavKey
+    data class AlbumDetail(
+        val isFavorite: Boolean,
+        val title: String,
+        val albumId: Long,
+    ) : ArchiveNavKey
 
     @Serializable
     data class PhotoDetail(val photo: Photo) : ArchiveNavKey
@@ -35,8 +39,8 @@ fun Navigator.navigateToAllAlbum() {
     navigate(ArchiveNavKey.AllAlbum)
 }
 
-fun Navigator.navigateToAlbumDetail(id: Long, isFavorite: Boolean = false) {
-    navigate(ArchiveNavKey.AlbumDetail(isFavorite, id))
+fun Navigator.navigateToAlbumDetail(id: Long, title: String = "", isFavorite: Boolean = false) {
+    navigate(ArchiveNavKey.AlbumDetail(isFavorite, title, id))
 }
 
 fun Navigator.navigateToPhotoDetail(photo: Photo) {

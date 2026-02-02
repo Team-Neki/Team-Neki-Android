@@ -3,8 +3,9 @@ package com.neki.android.feature.archive.impl.const
 internal object ArchiveConst {
     // Layout
     internal const val ARCHIVE_ROW_TEXT_BUTTON_PADDING = 12
-    internal const val ARCHIVE_LAYOUT_HORIZONTAL_PADDING = 20
-    internal const val ARCHIVE_LAYOUT_BOTTOM_PADDING = 76
+    internal const val PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING = 20
+    internal const val PHOTO_GRID_LAYOUT_TOP_PADDING = 8
+    internal const val PHOTO_GRAY_LAYOUT_BOTTOM_PADDING = 76
     internal const val ARCHIVE_GRID_ITEM_SPACING = 12
 
     // Corner Radius

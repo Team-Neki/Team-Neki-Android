@@ -11,4 +11,5 @@ dependencies {
     implementation(projects.feature.photoUpload.api)
 
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.paging.compose)
 }
