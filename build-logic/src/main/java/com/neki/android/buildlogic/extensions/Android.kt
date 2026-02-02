@@ -26,16 +26,6 @@ internal fun Project.configureAndroid(
             jvmTarget = BuildConst.JDK_VERSION.toString()
         }
 
-        buildTypes {
-            getByName("release") {
-                isMinifyEnabled = true
-                proguardFiles(
-                    getDefaultProguardFile("proguard-android.txt"),
-                    "proguard-rules.pro",
-                )
-            }
-        }
-
         dependencies {
             add("detektPlugins", libs.findLibrary("detekt.formatting").get())
         }
