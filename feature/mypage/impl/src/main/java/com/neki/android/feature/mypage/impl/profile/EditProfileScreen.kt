@@ -23,11 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.neki.android.core.common.util.toByteArray
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.LoadingDialog
@@ -67,8 +65,6 @@ fun EditProfileScreen(
     uiState: MyPageState = MyPageState(),
     onIntent: (MyPageIntent) -> Unit = {},
 ) {
-    val context = LocalContext.current
-
     val displayProfileImage: Any? = when (uiState.selectedProfileImage) {
         SelectedProfileImage.NoChange -> uiState.userInfo.profileImageUrl
         is SelectedProfileImage.Selected -> uiState.selectedProfileImage.uri
@@ -92,8 +88,12 @@ fun EditProfileScreen(
             enabled = textFieldState.text.isNotEmpty(),
             onBack = { onIntent(MyPageIntent.ClickBackIcon) },
             onClickComplete = {
-                val imageBytes = (uiState.selectedProfileImage as? SelectedProfileImage.Selected)?.uri?.toByteArray(context)
-                onIntent(MyPageIntent.ClickEditComplete(textFieldState.text.toString(), imageBytes))
+                onIntent(
+                    MyPageIntent.ClickEditComplete(
+                        nickname = textFieldState.text.toString(),
+                        uri = (uiState.selectedProfileImage as SelectedProfileImage.Selected).uri,
+                    ),
+                )
             },
         )
         EditProfileImage(

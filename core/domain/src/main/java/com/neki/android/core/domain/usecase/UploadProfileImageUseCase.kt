@@ -1,12 +1,12 @@
 package com.neki.android.core.domain.usecase
 
+import android.net.Uri
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.domain.extension.ContentTypeUtil
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.MediaType
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,10 +16,10 @@ class UploadProfileImageUseCase @Inject constructor(
     private val userRepository: UserRepository,
 ) {
     suspend operator fun invoke(
-        imageBytes: ByteArray?,
+        uri: Uri?,
         contentType: ContentType = ContentType.JPEG,
     ): Result<Unit> = runSuspendCatching {
-        if (imageBytes == null) {
+        if (uri == null) {
             // null 이면 1, 2 과정 없이 바로 기본 프로필 이미지로 변경 요청
             userRepository.updateProfileImage(null).getOrThrow()
         } else {
@@ -33,9 +33,9 @@ class UploadProfileImageUseCase @Inject constructor(
             ).getOrThrow()
 
             // 2. Presigned URL로 이미지 업로드
-            mediaUploadRepository.uploadImage(
+            mediaUploadRepository.uploadImageFromUri(
                 uploadUrl = presignedUrl,
-                imageBytes = imageBytes,
+                uri = uri,
                 contentType = contentType,
             ).getOrThrow()
 

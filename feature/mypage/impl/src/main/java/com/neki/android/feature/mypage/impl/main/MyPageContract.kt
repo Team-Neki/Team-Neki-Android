@@ -1,5 +1,6 @@
 package com.neki.android.feature.mypage.impl.main
 
+import android.net.Uri
 import com.neki.android.core.model.UserInfo
 import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
@@ -39,7 +40,7 @@ sealed interface MyPageIntent {
     data class SelectProfileImage(val image: SelectedProfileImage) : MyPageIntent
     data class ClickEditComplete(
         val nickname: String,
-        val imageBytes: ByteArray?
+        val uri: Uri?,
     ) : MyPageIntent
     data object ClickLogout : MyPageIntent
     data object DismissLogoutDialog : MyPageIntent

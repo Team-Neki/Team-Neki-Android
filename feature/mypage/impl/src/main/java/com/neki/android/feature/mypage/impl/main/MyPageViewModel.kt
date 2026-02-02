@@ -59,7 +59,7 @@ internal class MyPageViewModel @Inject constructor(
             is MyPageIntent.ClickEditComplete -> {
                 val isNicknameChanged = state.userInfo.nickname != intent.nickname
                 val isProfileImageChanged = state.selectedProfileImage != SelectedProfileImage.NoChange
-                updateProfile(intent.nickname, intent.imageBytes, isNicknameChanged, isProfileImageChanged, reduce, postSideEffect)
+                updateProfile(intent.nickname, intent.uri, isNicknameChanged, isProfileImageChanged, reduce, postSideEffect)
             }
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
@@ -119,7 +119,7 @@ internal class MyPageViewModel @Inject constructor(
 
     private fun updateProfile(
         nickname: String,
-        imageBytes: ByteArray?,
+        uri: android.net.Uri?,
         isNicknameChanged: Boolean,
         isProfileImageChanged: Boolean,
         reduce: (MyPageState.() -> MyPageState) -> Unit,
@@ -135,7 +135,7 @@ internal class MyPageViewModel @Inject constructor(
 
         buildList {
             if (isNicknameChanged) add(async { userRepository.updateUserInfo(nickname = nickname) })
-            if (isProfileImageChanged) add(async { uploadProfileImageUseCase(imageBytes = imageBytes) })
+            if (isProfileImageChanged) add(async { uploadProfileImageUseCase(uri = uri) })
         }.awaitAll()
 
         userRepository.getUserInfo()
