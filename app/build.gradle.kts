@@ -4,6 +4,7 @@ import kotlin.apply
 plugins {
     alias(libs.plugins.neki.android.application)
     alias(libs.plugins.neki.android.application.compose)
+    alias(libs.plugins.oss.licenses)
 }
 
 val localPropertiesFile = project.rootProject.file("local.properties")
