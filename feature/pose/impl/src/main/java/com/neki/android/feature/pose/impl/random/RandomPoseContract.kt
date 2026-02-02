@@ -7,25 +7,34 @@ import kotlinx.collections.immutable.persistentListOf
 data class RandomPoseUiState(
     val isLoading: Boolean = false,
     val isShowTutorial: Boolean = true,
-    val currentPose: Pose = Pose(),
-    val randomPoseList: ImmutableList<Pose> = persistentListOf(),
-)
+    val currentIndex: Int = 0,
+    val poseList: ImmutableList<Pose> = persistentListOf(),
+    val committedScraps: Map<Long, Boolean> = emptyMap(),
+) {
+    val currentPose: Pose?
+        get() = poseList.getOrNull(currentIndex)
+
+    val hasPrevious: Boolean
+        get() = currentIndex > 0
+}
 
 sealed interface RandomPoseIntent {
     data object EnterRandomPoseScreen : RandomPoseIntent
 
     // 튜토리얼
-    data object ClickLeftSwipe : RandomPoseIntent
-    data object ClickRightSwipe : RandomPoseIntent
     data object ClickStartRandomPose : RandomPoseIntent
 
     // 기본화면
     data object ClickCloseIcon : RandomPoseIntent
     data object ClickGoToDetailIcon : RandomPoseIntent
     data object ClickScrapIcon : RandomPoseIntent
+    data object ClickLeftSwipe : RandomPoseIntent
+    data object ClickRightSwipe : RandomPoseIntent
 }
 
 sealed interface RandomPoseEffect {
     data object NavigateBack : RandomPoseEffect
-    data class NavigateToDetail(val pose: Pose) : RandomPoseEffect
+    data class NavigateToDetail(val poseId: Long) : RandomPoseEffect
+    data class ShowToast(val message: String) : RandomPoseEffect
+    data class RequestImageBuilder(val imageUrl: String) : RandomPoseEffect
 }

@@ -43,7 +43,7 @@ fun <T> DoubleButtonOptionBottomSheet(
     onOptionSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
     buttonEnabled: Boolean = true,
-    sheetState: SheetState = rememberModalBottomSheetState(),
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     ModalBottomSheet(
         modifier = modifier,
