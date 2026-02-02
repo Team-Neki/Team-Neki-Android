@@ -1,8 +1,10 @@
 package com.neki.android.core.dataapi.repository
 
+import androidx.paging.PagingData
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
+import kotlinx.coroutines.flow.Flow
 
 interface PhotoRepository {
     suspend fun getPhotos(
@@ -28,4 +30,13 @@ interface PhotoRepository {
     ): Result<List<Photo>>
 
     suspend fun getFavoriteSummary(): Result<AlbumPreview>
+
+    fun getPhotosFlow(
+        folderId: Long? = null,
+        sortOrder: SortOrder = SortOrder.DESC,
+    ): Flow<PagingData<Photo>>
+
+    fun getFavoritePhotosFlow(
+        sortOrder: SortOrder = SortOrder.DESC,
+    ): Flow<PagingData<Photo>>
 }

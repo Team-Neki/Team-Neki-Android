@@ -7,6 +7,7 @@ import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.archive.api.ArchiveResult
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -74,7 +75,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce)
             is PhotoDetailIntent.FavoriteCommitted -> {
                 reduce { copy(committedFavorite = intent.newFavorite) }
-                postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
+                postSideEffect(PhotoDetailSideEffect.NotifyPhotoUpdated(ArchiveResult.FavoriteChanged(photo.id, intent.newFavorite)))
             }
 
             is PhotoDetailIntent.RevertFavorite -> reduce { copy(photo = photo.copy(isFavorite = intent.originalFavorite)) }
@@ -109,7 +110,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             photoRepository.deletePhoto(state.photo.id)
                 .onSuccess {
                     reduce { copy(isLoading = false) }
-                    postSideEffect(PhotoDetailSideEffect.NotifyArchiveUpdated)
+                    postSideEffect(PhotoDetailSideEffect.NotifyPhotoUpdated(ArchiveResult.PhotoDeleted(photo.id)))
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
                     postSideEffect(PhotoDetailSideEffect.NavigateBack)
                 }
