@@ -26,11 +26,11 @@ class UploadProfileImageUseCase @Inject constructor(
             val fileName = ContentTypeUtil.generateFileName(contentType)
 
             // 1. 업로드 티켓 발급 (mediaId, presignedUrl)
-            val (mediaId, presignedUrl) = mediaUploadRepository.getUploadTicket(
+            val (mediaId, presignedUrl) = mediaUploadRepository.getSingleUploadTicket(
                 fileName = fileName,
                 contentType = contentType.label,
                 mediaType = MediaType.USER_PROFILE.name,
-            ).getOrThrow().first()
+            ).getOrThrow()
 
             // 2. Presigned URL로 이미지 업로드
             mediaUploadRepository.uploadImage(
