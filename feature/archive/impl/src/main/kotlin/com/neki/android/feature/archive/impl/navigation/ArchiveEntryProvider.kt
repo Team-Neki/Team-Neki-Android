@@ -8,17 +8,21 @@ import com.neki.android.core.navigation.Navigator
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.feature.archive.api.ArchiveNavKey
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.archive.api.navigateToAllAlbum
 import com.neki.android.feature.archive.api.navigateToAllPhoto
 import com.neki.android.feature.archive.api.navigateToPhotoDetail
 import com.neki.android.feature.archive.impl.album.AllAlbumRoute
+import com.neki.android.feature.archive.impl.album_detail.AlbumDetailIntent
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailRoute
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailViewModel
 import com.neki.android.feature.archive.impl.main.ArchiveMainIntent
 import com.neki.android.feature.archive.impl.main.ArchiveMainRoute
 import com.neki.android.feature.archive.impl.main.ArchiveMainViewModel
+import com.neki.android.feature.archive.impl.photo.AllPhotoIntent
 import com.neki.android.feature.archive.impl.photo.AllPhotoRoute
+import com.neki.android.feature.archive.impl.photo.AllPhotoViewModel
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
 import com.neki.android.feature.photo_upload.api.QRScanResult
@@ -56,8 +60,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
                 }
             }
         }
-        ResultEffect<Boolean>(resultBus) { hasUpdated ->
-            if (hasUpdated) viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)
+        ResultEffect<ArchiveResult>(resultBus) {
+            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)
         }
 
         ArchiveMainRoute(
@@ -66,15 +70,35 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
             navigateToUploadAlbumWithGallery = navigator::navigateToUploadAlbum,
             navigateToUploadAlbumWithQRScan = navigator::navigateToUploadAlbum,
             navigateToAllAlbum = navigator::navigateToAllAlbum,
-            navigateToFavoriteAlbum = { id -> navigator.navigateToAlbumDetail(isFavorite = true, id = id) },
-            navigateToAlbumDetail = { id -> navigator.navigateToAlbumDetail(isFavorite = false, id = id) },
+            navigateToFavoriteAlbum = { id ->
+                navigator.navigateToAlbumDetail(id = id, isFavorite = true)
+            },
+            navigateToAlbumDetail = { id, title ->
+                navigator.navigateToAlbumDetail(id = id, title = title, isFavorite = false)
+            },
             navigateToAllPhoto = navigator::navigateToAllPhoto,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
 
     entry<ArchiveNavKey.AllPhoto> {
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<AllPhotoViewModel>()
+
+        ResultEffect<ArchiveResult>(resultBus) { result ->
+            when (result) {
+                is ArchiveResult.FavoriteChanged -> {
+                    viewModel.store.onIntent(AllPhotoIntent.FavoriteChanged(result.photoId, result.isFavorite))
+                }
+
+                is ArchiveResult.PhotoDeleted -> {
+                    viewModel.store.onIntent(AllPhotoIntent.PhotoDeleted(result.photoId))
+                }
+            }
+        }
+
         AllPhotoRoute(
+            viewModel = viewModel,
             navigateBack = navigator::goBack,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
@@ -83,17 +107,35 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.AllAlbum> {
         AllAlbumRoute(
             navigateBack = navigator::goBack,
-            navigateToFavoriteAlbum = { id -> navigator.navigateToAlbumDetail(isFavorite = true, id = id) },
-            navigateToAlbumDetail = { id -> navigator.navigateToAlbumDetail(isFavorite = false, id = id) },
+            navigateToFavoriteAlbum = { id ->
+                navigator.navigateToAlbumDetail(id = id, isFavorite = true)
+            },
+            navigateToAlbumDetail = { id, title ->
+                navigator.navigateToAlbumDetail(id = id, title = title, isFavorite = false)
+            },
         )
     }
+
     entry<ArchiveNavKey.AlbumDetail> { key ->
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
+            creationCallback = { factory -> factory.create(key.albumId, key.title, key.isFavorite) },
+        )
+
+        ResultEffect<ArchiveResult>(resultBus) { result ->
+            when (result) {
+                is ArchiveResult.FavoriteChanged -> {
+                    viewModel.store.onIntent(AlbumDetailIntent.FavoriteChanged(result.photoId, result.isFavorite))
+                }
+
+                is ArchiveResult.PhotoDeleted -> {
+                    viewModel.store.onIntent(AlbumDetailIntent.PhotoDeleted(result.photoId))
+                }
+            }
+        }
+
         AlbumDetailRoute(
-            viewModel = hiltViewModel<AlbumDetailViewModel, AlbumDetailViewModel.Factory>(
-                creationCallback = { factory ->
-                    factory.create(key.albumId, key.isFavorite)
-                },
-            ),
+            viewModel = viewModel,
             navigateBack = navigator::goBack,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
@@ -102,9 +144,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
     entry<ArchiveNavKey.PhotoDetail> { key ->
         PhotoDetailRoute(
             viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
-                creationCallback = { factory ->
-                    factory.create(key.photo)
-                },
+                creationCallback = { factory -> factory.create(key.photo) },
             ),
             navigateBack = navigator::goBack,
         )

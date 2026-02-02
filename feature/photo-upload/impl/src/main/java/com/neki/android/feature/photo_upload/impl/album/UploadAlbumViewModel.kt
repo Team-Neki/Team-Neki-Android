@@ -4,9 +4,10 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.common.util.urlToByteArray
+import com.neki.android.core.dataapi.repository.FolderRepository
+import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
-import com.neki.android.core.model.Album
 import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -14,9 +15,10 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -25,6 +27,9 @@ class UploadAlbumViewModel @AssistedInject constructor(
     @Assisted private val imageUrl: String?,
     @Assisted private val uriStrings: List<String>,
     private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
+    private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
+    private val photoRepository: PhotoRepository,
+    private val folderRepository: FolderRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -55,10 +60,10 @@ class UploadAlbumViewModel @AssistedInject constructor(
             is UploadAlbumIntent.ClickAlbumItem -> {
                 reduce {
                     copy(
-                        selectedAlbumIds = if (state.selectedAlbumIds.any { it == intent.albumId }) {
-                            selectedAlbumIds.remove(intent.albumId)
+                        selectedAlbums = if (state.selectedAlbums.any { it.id == intent.album.id }) {
+                            selectedAlbums.remove(intent.album)
                         } else {
-                            selectedAlbumIds.add(intent.albumId)
+                            selectedAlbums.add(intent.album)
                         }.toPersistentList(),
                     )
                 }
@@ -67,27 +72,37 @@ class UploadAlbumViewModel @AssistedInject constructor(
     }
 
     private fun fetchInitialData(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
-        // TODO: Fetch albums from repository
-        val dummyAlbums = persistentListOf(
-            Album(
-                id = 1,
-                title = "Travel",
-                photoList = persistentListOf(),
-            ),
-            Album(
-                id = 2,
-                title = "Family",
-                photoList = persistentListOf(),
-            ),
-        )
-
-        reduce {
-            copy(
-                albums = dummyAlbums,
-                imageUrl = imageUrl,
-                selectedUris = uriStrings.map { it.toUri() }.toImmutableList(),
-            )
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            try {
+                awaitAll(
+                    async { fetchFavoriteSummary(reduce) },
+                    async { fetchFolders(reduce) },
+                )
+            } finally {
+                reduce { copy(isLoading = false) }
+            }
         }
+    }
+
+    private suspend fun fetchFavoriteSummary(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
+        photoRepository.getFavoriteSummary()
+            .onSuccess { data ->
+                reduce { copy(favoriteAlbum = data) }
+            }
+            .onFailure { error ->
+                Timber.e(error)
+            }
+    }
+
+    private suspend fun fetchFolders(reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit) {
+        folderRepository.getFolders()
+            .onSuccess { data ->
+                reduce { copy(albums = data.toImmutableList()) }
+            }
+            .onFailure { error ->
+                Timber.e(error)
+            }
     }
 
     private fun handleUploadButtonClick(
@@ -95,11 +110,11 @@ class UploadAlbumViewModel @AssistedInject constructor(
         reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
         postSideEffect: (UploadAlbumSideEffect) -> Unit,
     ) {
-        val firstAlbumId = state.selectedAlbumIds.firstOrNull() ?: return
+        val firstAlbum = state.selectedAlbums.firstOrNull() ?: return
         val onSuccessAction = {
             reduce { copy(isLoading = false) }
             postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
-            postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbumId))
+            postSideEffect(UploadAlbumSideEffect.NavigateToAlbumDetail(firstAlbum.id, firstAlbum.title))
         }
         val onFailureAction: (Throwable) -> Unit = { error ->
             Timber.e(error)
@@ -107,10 +122,10 @@ class UploadAlbumViewModel @AssistedInject constructor(
             postSideEffect(UploadAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
         }
 
-        if (state.uploadType == UploadType.QR_SCAN) {
+        if (state.uploadType == UploadType.QR_CODE) {
             uploadSingleImage(
                 imageUrl = state.imageUrl ?: return,
-                albumId = firstAlbumId,
+                albumId = firstAlbum.id,
                 reduce = reduce,
                 onSuccessAction = onSuccessAction,
                 onFailureAction = onFailureAction,
@@ -118,7 +133,8 @@ class UploadAlbumViewModel @AssistedInject constructor(
         } else {
             uploadMultipleImages(
                 imageUris = state.selectedUris,
-                albumId = firstAlbumId,
+                albumId = firstAlbum.id,
+                reduce = reduce,
                 onSuccessAction = onSuccessAction,
                 onFailureAction = onFailureAction,
             )
@@ -134,10 +150,9 @@ class UploadAlbumViewModel @AssistedInject constructor(
     ) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
-            val imageBytes = imageUrl.urlToByteArray()
 
             uploadSinglePhotoUseCase(
-                imageBytes = imageBytes,
+                imageUrl = imageUrl,
                 folderId = albumId,
             ).onSuccess { data ->
                 Timber.d(data.toString())
@@ -151,10 +166,21 @@ class UploadAlbumViewModel @AssistedInject constructor(
     private fun uploadMultipleImages(
         imageUris: List<Uri>,
         albumId: Long,
+        reduce: (UploadAlbumState.() -> UploadAlbumState) -> Unit,
         onSuccessAction: () -> Unit,
         onFailureAction: (Throwable) -> Unit,
     ) {
-        // TODO: 이미지 여러개 업로드
-        onFailureAction(Throwable("Not implemented"))
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+
+            uploadMultiplePhotoUseCase(
+                imageUris = imageUris,
+                folderId = albumId,
+            ).onSuccess {
+                onSuccessAction()
+            }.onFailure { error ->
+                onFailureAction(error)
+            }
+        }
     }
 }

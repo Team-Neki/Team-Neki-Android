@@ -4,10 +4,12 @@ import com.neki.android.core.data.auth.AuthEventManagerImpl
 import com.neki.android.core.data.repository.impl.AuthRepositoryImpl
 import com.neki.android.core.data.repository.impl.DataStoreRepositoryImpl
 import com.neki.android.core.data.repository.impl.MediaUploadRepositoryImpl
+import com.neki.android.core.data.repository.impl.FolderRepositoryImpl
 import com.neki.android.core.data.repository.impl.MapRepositoryImpl
 import com.neki.android.core.data.repository.impl.PhotoRepositoryImpl
 import com.neki.android.core.data.repository.impl.TokenRepositoryImpl
 import com.neki.android.core.dataapi.auth.AuthEventManager
+import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.DataStoreRepository
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
@@ -59,6 +61,12 @@ internal interface RepositoryModule {
     fun bindPhotoRepositoryImpl(
         photoRepositoryImpl: PhotoRepositoryImpl,
     ): PhotoRepository
+
+    @Binds
+    @Singleton
+    fun bindFolderRepositoryImpl(
+        folderRepositoryImpl: FolderRepositoryImpl,
+    ): FolderRepository
 
     @Binds
     @Singleton

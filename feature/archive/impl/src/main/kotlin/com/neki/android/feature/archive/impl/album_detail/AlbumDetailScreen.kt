@@ -8,19 +8,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.neki.android.core.designsystem.DevicePreview
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -33,11 +38,12 @@ import com.neki.android.feature.archive.impl.album_detail.component.EmptyContent
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
-import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_LAYOUT_HORIZONTAL_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING
+import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_TOP_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
@@ -47,6 +53,7 @@ internal fun AlbumDetailRoute(
     navigateToPhotoDetail: (Photo) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
+    val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
 
@@ -72,6 +79,7 @@ internal fun AlbumDetailRoute(
 
     AlbumDetailScreen(
         uiState = uiState,
+        pagingItems = pagingItems,
         onIntent = viewModel.store::onIntent,
     )
 }
@@ -79,10 +87,14 @@ internal fun AlbumDetailRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AlbumDetailScreen(
-    uiState: AlbumDetailState = AlbumDetailState(),
+    uiState: AlbumDetailState,
+    pagingItems: LazyPagingItems<Photo>,
     onIntent: (AlbumDetailIntent) -> Unit = {},
 ) {
     val lazyState = rememberLazyStaggeredGridState()
+
+    val isRefreshing = pagingItems.loadState.refresh is LoadState.Loading
+    val isEmpty = pagingItems.itemCount == 0 && pagingItems.loadState.refresh is LoadState.NotLoading
 
     BackHandler(enabled = true) {
         onIntent(AlbumDetailIntent.OnBackPressed)
@@ -94,7 +106,7 @@ internal fun AlbumDetailScreen(
             .background(NekiTheme.colorScheme.white),
     ) {
         AlbumDetailTopBar(
-            hasNoPhoto = uiState.photoList.isEmpty(),
+            hasNoPhoto = isEmpty,
             title = if (uiState.isFavoriteAlbum) "즐겨찾는 사진" else uiState.title,
             selectMode = uiState.selectMode,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
@@ -112,24 +124,44 @@ internal fun AlbumDetailScreen(
                 columns = StaggeredGridCells.Fixed(2),
                 state = lazyState,
                 contentPadding = PaddingValues(
-                    horizontal = ARCHIVE_LAYOUT_HORIZONTAL_PADDING.dp,
-                    vertical = 8.dp,
+                    top = PHOTO_GRID_LAYOUT_TOP_PADDING.dp,
+                    start = PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING.dp,
+                    end = PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING.dp,
+                    bottom = PHOTO_GRAY_LAYOUT_BOTTOM_PADDING.dp,
                 ),
                 verticalItemSpacing = ARCHIVE_GRID_ITEM_SPACING.dp,
                 horizontalArrangement = Arrangement.spacedBy(ARCHIVE_GRID_ITEM_SPACING.dp),
             ) {
                 items(
-                    items = uiState.photoList,
-                    key = { photo -> photo.id },
-                ) { photo ->
-                    val isSelected = uiState.selectedPhotos.any { it.id == photo.id }
-                    SelectablePhotoItem(
-                        photo = photo,
-                        isSelected = isSelected,
-                        isSelectMode = uiState.selectMode == SelectMode.SELECTING,
-                        onClickItem = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
-                        onClickSelect = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
-                    )
+                    count = pagingItems.itemCount,
+                    key = pagingItems.itemKey { it.id },
+                ) { index ->
+                    val photo = pagingItems[index]
+                    if (photo != null) {
+                        val isSelected = uiState.selectedPhotos.any { it.id == photo.id }
+                        SelectablePhotoItem(
+                            photo = photo,
+                            isSelected = isSelected,
+                            isSelectMode = uiState.selectMode == SelectMode.SELECTING,
+                            onClickItem = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
+                            onClickSelect = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
+                        )
+                    }
+                }
+
+                if (pagingItems.loadState.append is LoadState.Loading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator(
+                                color = NekiTheme.colorScheme.primary500,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -142,17 +174,16 @@ internal fun AlbumDetailScreen(
         )
     }
 
-    if (uiState.isLoading) {
+    if (isRefreshing || uiState.isLoading) {
         LoadingDialog()
     }
 
-    if (!uiState.isLoading && uiState.photoList.isEmpty()) {
+    if (isEmpty) {
         EmptyContent(
             isFavorite = uiState.isFavoriteAlbum,
         )
     }
 
-    // Delete Dialog for Favorite Album
     if (uiState.isShowDeleteDialog) {
         DeletePhotoDialog(
             onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteDialog) },
@@ -161,7 +192,6 @@ internal fun AlbumDetailScreen(
         )
     }
 
-    // Delete BottomSheet for Regular Album
     if (uiState.isShowDeleteBottomSheet) {
         DoubleButtonOptionBottomSheet(
             title = "사진을 삭제하시겠어요?",
@@ -210,94 +240,6 @@ private fun AlbumDetailTopBar(
                 SelectMode.DEFAULT -> onClickSelect
                 SelectMode.SELECTING -> onClickCancel
             },
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun AlbumDetailScreenFavoriteEmptyPreview() {
-    NekiTheme {
-        AlbumDetailScreen(
-            uiState = AlbumDetailState(
-                title = "즐겨찾는 사진",
-                isFavoriteAlbum = true,
-            ),
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun AlbumDetailScreenEmptyPreview() {
-    NekiTheme {
-        AlbumDetailScreen(
-            uiState = AlbumDetailState(
-                title = "빈 앨범",
-                isFavoriteAlbum = false,
-            ),
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun AlbumDetailScreenFavoritePreview() {
-    val dummyPhotos = persistentListOf(
-        Photo(id = 1, imageUrl = "https://picsum.photos/200/300", isFavorite = true),
-        Photo(id = 2, imageUrl = "https://picsum.photos/200/250", isFavorite = true),
-        Photo(id = 3, imageUrl = "https://picsum.photos/200/350", isFavorite = true),
-    )
-
-    NekiTheme {
-        AlbumDetailScreen(
-            uiState = AlbumDetailState(
-                title = "즐겨찾는 사진",
-                photoList = dummyPhotos,
-                isFavoriteAlbum = true,
-            ),
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun AlbumDetailScreenRegularPreview() {
-    val dummyPhotos = persistentListOf(
-        Photo(id = 1, imageUrl = "https://picsum.photos/200/300"),
-        Photo(id = 2, imageUrl = "https://picsum.photos/200/250"),
-        Photo(id = 3, imageUrl = "https://picsum.photos/200/350"),
-    )
-
-    NekiTheme {
-        AlbumDetailScreen(
-            uiState = AlbumDetailState(
-                title = "네키 화이팅",
-                photoList = dummyPhotos,
-                isFavoriteAlbum = false,
-            ),
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun AlbumDetailScreenSelectingPreview() {
-    val dummyPhotos = persistentListOf(
-        Photo(id = 1, imageUrl = "https://picsum.photos/200/300"),
-        Photo(id = 2, imageUrl = "https://picsum.photos/200/250"),
-        Photo(id = 3, imageUrl = "https://picsum.photos/200/350"),
-    )
-
-    NekiTheme {
-        AlbumDetailScreen(
-            uiState = AlbumDetailState(
-                title = "네키 화이팅",
-                photoList = dummyPhotos,
-                isFavoriteAlbum = false,
-                selectMode = SelectMode.SELECTING,
-                selectedPhotos = persistentListOf(dummyPhotos[1]),
-            ),
         )
     }
 }

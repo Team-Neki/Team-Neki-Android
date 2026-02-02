@@ -53,7 +53,7 @@ internal fun ArchiveMainAlbumList(
     modifier: Modifier = Modifier,
     albumList: ImmutableList<AlbumPreview> = persistentListOf(),
     onClickFavoriteAlbum: () -> Unit = {},
-    onClickAlbumItem: (Long) -> Unit = {},
+    onClickAlbumItem: (AlbumPreview) -> Unit = {},
 ) {
     LazyRow(
         modifier = modifier,
@@ -77,7 +77,7 @@ internal fun ArchiveMainAlbumList(
                 title = album.title,
                 photoCount = album.photoCount,
                 thumbnailImage = album.thumbnailUrl,
-                onClick = { onClickAlbumItem(album.id) },
+                onClick = { onClickAlbumItem(album) },
             )
         }
     }

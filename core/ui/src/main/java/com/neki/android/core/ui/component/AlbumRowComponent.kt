@@ -24,13 +24,11 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.Album
-import com.neki.android.core.model.Photo
-import kotlinx.collections.immutable.persistentListOf
+import com.neki.android.core.model.AlbumPreview
 
 @Composable
 fun FavoriteAlbumRowComponent(
-    album: Album,
+    album: AlbumPreview,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
@@ -43,19 +41,19 @@ fun FavoriteAlbumRowComponent(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         FavoriteAlbumThumbnail(
-            thumbnailUrl = album.photoList.firstOrNull()?.imageUrl,
+            thumbnailUrl = album.thumbnailUrl,
         )
 
         AlbumInfo(
             title = "즐겨찾는 사진",
-            photoCount = album.photoList.size,
+            photoCount = album.photoCount,
         )
     }
 }
 
 @Composable
 fun AlbumRowComponent(
-    album: Album,
+    album: AlbumPreview,
     modifier: Modifier = Modifier,
     isSelectable: Boolean = false,
     isSelected: Boolean = false,
@@ -76,7 +74,7 @@ fun AlbumRowComponent(
         AlbumInfo(
             modifier = Modifier.weight(1f),
             title = album.title,
-            photoCount = album.photoList.size,
+            photoCount = album.photoCount,
         )
 
         if (isSelectable) {
@@ -168,7 +166,7 @@ private fun AlbumInfo(
 private fun FavoriteAlbumRowComponentPreview() {
     NekiTheme {
         FavoriteAlbumRowComponent(
-            album = Album(
+            album = AlbumPreview(
                 id = 0,
                 title = "즐겨찾는 사진",
             ),
@@ -181,7 +179,7 @@ private fun FavoriteAlbumRowComponentPreview() {
 private fun AlbumRowComponentPreview() {
     NekiTheme {
         AlbumRowComponent(
-            album = Album(
+            album = AlbumPreview(
                 id = 1,
                 title = "일반앨범제목",
             ),
@@ -195,20 +193,16 @@ private fun AlbumRowComponentSelectablePreview() {
     NekiTheme {
         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
             AlbumRowComponent(
-                album = Album(
+                album = AlbumPreview(
                     id = 1,
                     title = "선택되지 않은 앨범",
-                    photoList = persistentListOf(
-                        Photo(),
-                        Photo(),
-                    ),
                 ),
                 isSelectable = true,
                 isSelected = false,
             )
 
             AlbumRowComponent(
-                album = Album(
+                album = AlbumPreview(
                     id = 2,
                     title = "선택된 앨범",
                 ),
