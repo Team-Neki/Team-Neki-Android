@@ -1,5 +1,8 @@
 package com.neki.android.core.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class PhotoBooth(
     val isFocused: Boolean = false,
     val isCheckedBrand: Boolean = true,
