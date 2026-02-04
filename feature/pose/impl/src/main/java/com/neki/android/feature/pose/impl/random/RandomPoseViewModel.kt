@@ -231,9 +231,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
         while (tryCount < maxFallbackCount) {
             tryCount++
-            val result = poseRepository.getRandomPose(headCount = peopleCount)
-
-            result
+            poseRepository.getRandomPose(headCount = peopleCount)
                 .onSuccess { pose ->
                     if (poseList.none { it.id == pose.id }) {
                         return FetchPoseResult.Success(tryCount, pose)
