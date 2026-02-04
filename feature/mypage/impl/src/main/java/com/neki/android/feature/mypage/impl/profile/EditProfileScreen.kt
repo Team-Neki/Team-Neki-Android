@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -128,19 +129,28 @@ fun EditProfileScreen(
                 textStyle = NekiTheme.typography.body16Medium.copy(
                     color = NekiTheme.colorScheme.gray900,
                 ),
-                inputTransformation = InputTransformation.maxLength(10),
+                inputTransformation = InputTransformation.maxLength(12),
                 cursorBrush = SolidColor(NekiTheme.colorScheme.gray800),
                 lineLimits = TextFieldLineLimits.SingleLine,
                 decorator = { innerTextField ->
-                    Box {
-                        if (textFieldState.text.isEmpty()) {
-                            Text(
-                                text = "닉네임을 입력해주세요.",
-                                style = NekiTheme.typography.body16Regular,
-                                color = NekiTheme.colorScheme.gray300,
-                            )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            if (textFieldState.text.isEmpty()) {
+                                Text(
+                                    text = "닉네임을 입력해주세요.",
+                                    style = NekiTheme.typography.body16Regular,
+                                    color = NekiTheme.colorScheme.gray300,
+                                )
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
+                        Text(
+                            text = "${textFieldState.text.length}/12",
+                            style = NekiTheme.typography.caption12Regular,
+                            color = NekiTheme.colorScheme.gray300,
+                        )
                     }
                 },
             )
