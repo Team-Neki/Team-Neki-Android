@@ -92,7 +92,7 @@ fun EditProfileScreen(
                 onIntent(
                     MyPageIntent.ClickEditComplete(
                         nickname = textFieldState.text.toString(),
-                        uri = (uiState.selectedProfileImage as SelectedProfileImage.Selected).uri,
+                        uri = (uiState.selectedProfileImage as? SelectedProfileImage.Selected)?.uri,
                     ),
                 )
             },
