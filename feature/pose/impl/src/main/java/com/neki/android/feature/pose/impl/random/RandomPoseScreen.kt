@@ -1,5 +1,6 @@
 package com.neki.android.feature.pose.impl.random
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,7 +46,10 @@ internal fun RandomPoseRoute(
         when (sideEffect) {
             RandomPoseEffect.NavigateBack -> navigateBack()
             is RandomPoseEffect.NavigateToDetail -> navigateToPoseDetail(sideEffect.poseId)
-            is RandomPoseEffect.SwipePoseImage -> pagerState.animateScrollToPage(sideEffect.index)
+            is RandomPoseEffect.SwipePoseImage -> pagerState.animateScrollToPage(
+                page = sideEffect.index,
+                animationSpec = tween(durationMillis = 500),
+            )
             is RandomPoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             is RandomPoseEffect.RequestImageBuilder -> {
                 val request = ImageRequest.Builder(context)
