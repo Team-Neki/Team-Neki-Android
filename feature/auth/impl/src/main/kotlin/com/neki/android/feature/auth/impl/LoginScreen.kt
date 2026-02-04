@@ -2,7 +2,6 @@ package com.neki.android.feature.auth.impl
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -39,6 +38,7 @@ fun LoginRoute(
                     },
                 )
             }
+
             is LoginSideEffect.ShowToastMessage -> {
                 Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             }

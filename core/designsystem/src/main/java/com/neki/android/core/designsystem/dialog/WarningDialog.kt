@@ -31,7 +31,7 @@ fun WarningDialog(
     content: String,
     onDismissRequest: () -> Unit,
     properties: DialogProperties = DialogProperties(
-        usePlatformDefaultWidth = false
+        usePlatformDefaultWidth = false,
     ),
 ) {
     Dialog(

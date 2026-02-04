@@ -7,7 +7,6 @@ import com.neki.android.core.domain.extension.ContentTypeUtil
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.Media
 import com.neki.android.core.model.MediaType
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 

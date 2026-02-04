@@ -24,9 +24,9 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
-import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 import com.neki.android.feature.mypage.impl.main.component.MainTopBar
 import com.neki.android.feature.mypage.impl.main.component.ProfileCard
+import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 
 @Composable
 internal fun MyPageRoute(
@@ -53,6 +53,7 @@ internal fun MyPageRoute(
                 OssLicensesMenuActivity.setActivityTitle("오픈소스 라이선스 목록")
                 context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
             }
+
             else -> {}
         }
     }
@@ -67,7 +68,7 @@ internal fun MyPageRoute(
 @Composable
 fun MyPageScreen(
     uiState: MyPageState,
-    appVersion: String= "",
+    appVersion: String = "",
     onIntent: (MyPageIntent) -> Unit,
 ) {
     Column(

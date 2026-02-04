@@ -29,5 +29,4 @@ class UserService @Inject constructor(
     suspend fun updateProfileImage(request: UpdateProfileImageRequest): BasicNullableResponse<Unit> {
         return client.patch("/api/users/me/profile-image") { setBody(request) }.body()
     }
-
 }

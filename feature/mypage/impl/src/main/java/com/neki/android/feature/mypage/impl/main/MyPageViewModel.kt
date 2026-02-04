@@ -34,7 +34,7 @@ internal class MyPageViewModel @Inject constructor(
         mviIntentStore(
             initialState = MyPageState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(MyPageIntent.LoadUserInfo) }
+            initialFetchData = { store.onIntent(MyPageIntent.LoadUserInfo) },
         )
 
     private fun onIntent(
@@ -57,6 +57,7 @@ internal class MyPageViewModel @Inject constructor(
                 reduce { copy(selectedProfileImage = SelectedProfileImage.NoChange) }
                 postSideEffect(MyPageEffect.NavigateBack)
             }
+
             MyPageIntent.ClickEditIcon -> postSideEffect(MyPageEffect.NavigateToEditProfile)
             MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageChooseDialog = true) }
             MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
@@ -66,12 +67,14 @@ internal class MyPageViewModel @Inject constructor(
                 val isProfileImageChanged = state.selectedProfileImage != SelectedProfileImage.NoChange
                 updateProfile(intent.nickname, intent.uri, isNicknameChanged, isProfileImageChanged, reduce, postSideEffect)
             }
+
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
             MyPageIntent.ConfirmLogout -> {
                 reduce { copy(isShowLogoutDialog = false) }
                 logout(postSideEffect)
             }
+
             MyPageIntent.ClickSignOut -> reduce { copy(isShowSignOutDialog = true) }
             MyPageIntent.DismissSignOutDialog -> reduce { copy(isShowSignOutDialog = false) }
             MyPageIntent.ConfirmSignOut -> {
@@ -83,9 +86,11 @@ internal class MyPageViewModel @Inject constructor(
             is MyPageIntent.ClickPermissionItem -> {
                 postSideEffect(MyPageEffect.RequestPermission(intent.permission))
             }
+
             MyPageIntent.DismissPermissionDialog -> {
                 reduce { copy(isShowPermissionDialog = false, clickedPermission = null) }
             }
+
             MyPageIntent.ConfirmPermissionDialog -> {
                 val permission = state.clickedPermission
                 reduce { copy(isShowPermissionDialog = false, clickedPermission = null) }
@@ -93,6 +98,7 @@ internal class MyPageViewModel @Inject constructor(
                     postSideEffect(MyPageEffect.MoveAppSettings(permission))
                 }
             }
+
             is MyPageIntent.UpdatePermissionState -> {
                 when (intent.permission) {
                     NekiPermission.CAMERA -> reduce { copy(isGrantedCamera = intent.isGranted) }
@@ -100,6 +106,7 @@ internal class MyPageViewModel @Inject constructor(
                     NekiPermission.NOTIFICATION -> reduce { copy(isGrantedNotification = intent.isGranted) }
                 }
             }
+
             is MyPageIntent.ShowPermissionDeniedDialog -> {
                 reduce { copy(isShowPermissionDialog = true, clickedPermission = intent.permission) }
             }

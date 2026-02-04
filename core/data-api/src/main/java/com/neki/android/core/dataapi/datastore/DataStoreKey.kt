@@ -1,6 +1,5 @@
 package com.neki.android.core.dataapi.datastore
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object DataStoreKey {

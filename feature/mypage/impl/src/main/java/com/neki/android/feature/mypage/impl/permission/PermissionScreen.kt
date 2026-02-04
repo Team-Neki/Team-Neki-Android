@@ -10,9 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.permission.CameraPermissionManager
 import com.neki.android.core.common.permission.LocationPermissionManager
@@ -49,8 +49,8 @@ internal fun PermissionRoute(
                         NekiPermission.CAMERA -> CameraPermissionManager.isGrantedCameraPermission(context)
                         NekiPermission.LOCATION -> LocationPermissionManager.isGrantedLocationPermission(context)
                         NekiPermission.NOTIFICATION -> NotificationPermissionManager.isGrantedNotificationPermission(context)
-                    }
-                )
+                    },
+                ),
             )
         }
     }
@@ -106,6 +106,7 @@ internal fun PermissionRoute(
                     }
                 }
             }
+
             is MyPageEffect.MoveAppSettings -> navigateToAppSettings(context)
             else -> {}
         }

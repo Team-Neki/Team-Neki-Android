@@ -25,7 +25,7 @@ class LoginViewModel @Inject constructor(
         mviIntentStore(
             initialState = LoginState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(LoginIntent.CheckLoginState) }
+            initialFetchData = { store.onIntent(LoginIntent.CheckLoginState) },
         )
 
     private fun onIntent(

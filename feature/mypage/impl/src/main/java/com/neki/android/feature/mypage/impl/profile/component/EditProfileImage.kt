@@ -29,7 +29,7 @@ internal fun EditProfileImage(
     onClickCameraIcon: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.padding(top = 20.dp, bottom = 28.dp)
+        modifier = Modifier.padding(top = 20.dp, bottom = 28.dp),
     ) {
         AsyncImage(
             modifier = Modifier
