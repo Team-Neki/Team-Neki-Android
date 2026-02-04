@@ -139,23 +139,33 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
-        if (state.currentIndex >= state.poseList.lastIndex) return
+        // 마지막 인덱스에 도달
+        if (state.currentIndex >= state.poseList.lastIndex) {
+            postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
+            return
+        }
 
         val nextIndex = state.currentIndex + 1
         reduce { copy(currentIndex = nextIndex) }
         postSideEffect(RandomPoseEffect.SwipePoseImage(nextIndex))
 
         // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
-        if (state.poseList.size - state.currentIndex <= PoseConst.POSE_PREFETCH_THRESHOLD) {
+        if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD) {
             viewModelScope.launch {
-                val (_, newPose) = fetchRandomPose(state.poseList)
-
-                newPose?.let { pose ->
-                    reduce {
+                when (val result = fetchRandomPose(poseList = state.poseList)) {
+                    is FetchPoseResult.Success -> reduce {
                         copy(
-                            poseList = (poseList + pose).toImmutableList(),
-                            committedScraps = committedScraps + (pose.id to pose.isScrapped),
+                            poseList = (poseList + result.pose).toImmutableList(),
+                            committedScraps = committedScraps + (result.pose.id to result.pose.isScrapped),
                         )
+                    }
+
+                    is FetchPoseResult.Duplicated ->
+                        Timber.d("프리페치 생략: ${result.tryCount}회 시도 후 중복 포즈")
+
+                    is FetchPoseResult.Failure -> {
+                        Timber.e(result.throwable)
+                        postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
                     }
                 }
             }
@@ -177,14 +187,24 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 poses.size < PoseConst.INITIAL_POSE_LOAD_COUNT &&
                 totalFallbackCount < PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT
             ) {
-                val (fallbackCount, newPose) = fetchRandomPose(
+                val result = fetchRandomPose(
                     poseList = poses,
                     maxFallbackCount = PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT - totalFallbackCount,
                 )
 
-                totalFallbackCount += fallbackCount
+                totalFallbackCount += result.tryCount
 
-                newPose?.let { pose -> poses.add(pose) }
+                when (result) {
+                    is FetchPoseResult.Success -> poses.add(result.pose)
+                    is FetchPoseResult.Failure -> {
+                        Timber.e(result.throwable)
+                        postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
+                        break
+                    }
+
+                    is FetchPoseResult.Duplicated ->
+                        Timber.d("초기 로드: ${result.tryCount}회 시도 후 중복 포즈")
+                }
             }
 
             if (poses.isNotEmpty()) {
@@ -206,26 +226,26 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     private suspend fun fetchRandomPose(
         poseList: List<Pose>,
         maxFallbackCount: Int = PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT,
-    ): Pair<Int, Pose?> {
-        var fallbackCount = 0
-        var newPose: Pose? = null
+    ): FetchPoseResult {
+        var tryCount = 0
 
-        while (fallbackCount < maxFallbackCount) {
+        while (tryCount < maxFallbackCount) {
+            tryCount++
             val result = poseRepository.getRandomPose(headCount = peopleCount)
+
+            result
                 .onSuccess { pose ->
                     if (poseList.none { it.id == pose.id }) {
-                        newPose = pose
+                        return FetchPoseResult.Success(tryCount, pose)
                     }
                 }
                 .onFailure { error ->
                     Timber.e(error)
+                    return FetchPoseResult.Failure(tryCount, error)
                 }
-
-            if (result.isSuccess) break
-            else fallbackCount++
         }
 
-        return fallbackCount to newPose
+        return FetchPoseResult.Duplicated(tryCount)
     }
 
     override fun onCleared() {
