@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -18,6 +19,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.button.NekiIconButton
@@ -34,6 +36,28 @@ internal fun RandomPoseFloatingBarContent(
     onClickScrap: () -> Unit = {},
 ) {
     Box(
+        modifier = modifier,
+    ) {
+        RandomPoseFloatingBarBackground(
+            modifier = Modifier.matchParentSize(),
+        )
+        RandomPoseFloatingBar(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .padding(top = 38.dp, bottom = 34.dp),
+            isScrapped = isScrapped,
+            onClickClose = onClickClose,
+            onClickGoToDetail = onClickGoToDetail,
+            onClickScrap = onClickScrap,
+        )
+    }
+}
+
+@Composable
+private fun RandomPoseFloatingBarBackground(
+    modifier: Modifier = Modifier,
+) {
+    Box(
         modifier = modifier
             .background(
                 brush = Brush.verticalGradient(
@@ -43,74 +67,81 @@ internal fun RandomPoseFloatingBarContent(
                     ),
                 ),
                 alpha = 0.24f,
+            ),
+    )
+}
+
+@Composable
+private fun RandomPoseFloatingBar(
+    modifier: Modifier = Modifier,
+    isScrapped: Boolean = false,
+    onClickClose: () -> Unit = {},
+    onClickGoToDetail: () -> Unit = {},
+    onClickScrap: () -> Unit = {},
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(CircleShape)
+            .background(
+                color = NekiTheme.colorScheme.white.copy(alpha = 0.6f),
+                shape = CircleShape,
             )
-            .padding(horizontal = 20.dp)
-            .padding(top = 38.dp, bottom = 34.dp),
-    ) {
-        Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                .fillMaxWidth()
-                .background(
-                    color = NekiTheme.colorScheme.white.copy(alpha = 0.6f),
-                    shape = CircleShape,
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            NekiTheme.colorScheme.white.copy(alpha = 0.2f),
-                            NekiTheme.colorScheme.white,
-                        ),
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        NekiTheme.colorScheme.white,
+                        NekiTheme.colorScheme.white.copy(alpha = 0f),
                     ),
-                    shape = CircleShape,
-                )
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                ),
+                shape = CircleShape,
+            )
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RandomPoseButton(
+            onClick = onClickClose,
+            backgroundColor = NekiTheme.colorScheme.gray25.copy(alpha = 0.9f),
+        ) {
+            Icon(
+                modifier = Modifier.size(28.dp),
+                imageVector = ImageVector.vectorResource(DesignR.drawable.icon_close),
+                contentDescription = "닫기",
+                tint = NekiTheme.colorScheme.gray800,
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             RandomPoseButton(
-                onClick = onClickClose,
-                backgroundColor = NekiTheme.colorScheme.gray25.copy(alpha = 0.9f),
+                onClick = onClickGoToDetail,
+                backgroundColor = NekiTheme.colorScheme.primary400,
             ) {
                 Icon(
-                    modifier = Modifier.size(28.dp),
-                    imageVector = ImageVector.vectorResource(DesignR.drawable.icon_close),
-                    contentDescription = "닫기",
-                    tint = NekiTheme.colorScheme.gray800,
+                    modifier = Modifier.size(24.dp),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_top_right),
+                    contentDescription = "상세 보기",
+                    tint = NekiTheme.colorScheme.white,
                 )
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            RandomPoseButton(
+                onClick = onClickScrap,
+                backgroundColor = NekiTheme.colorScheme.primary400,
             ) {
-                RandomPoseButton(
-                    onClick = onClickGoToDetail,
-                    backgroundColor = NekiTheme.colorScheme.primary400,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_top_right),
-                        contentDescription = "상세 보기",
-                        tint = NekiTheme.colorScheme.white,
-                    )
-                }
-
-                RandomPoseButton(
-                    onClick = onClickScrap,
-                    backgroundColor = NekiTheme.colorScheme.primary400,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = ImageVector.vectorResource(
-                            if (isScrapped) R.drawable.ic_scrap_selected
-                            else R.drawable.icon_scrap_unselected,
-                        ),
-                        contentDescription = "스크랩",
-                        tint = NekiTheme.colorScheme.white,
-                    )
-                }
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    imageVector = ImageVector.vectorResource(
+                        if (isScrapped) R.drawable.ic_scrap_selected
+                        else R.drawable.icon_scrap_unselected,
+                    ),
+                    contentDescription = "스크랩",
+                    tint = NekiTheme.colorScheme.white,
+                )
             }
         }
     }
@@ -131,6 +162,34 @@ private fun RandomPoseButton(
         onClick = onClick,
     ) {
         content()
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun RandomPoseFloatingBarBackgroundPreview() {
+    NekiTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+        ) {
+            RandomPoseFloatingBarBackground(
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun RandomPoseFloatingBarPreview() {
+    NekiTheme {
+        RandomPoseFloatingBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+        )
     }
 }
 
