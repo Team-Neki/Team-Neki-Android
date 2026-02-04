@@ -74,18 +74,7 @@ internal class PoseViewModel @Inject constructor(
             PoseIntent.EnterPoseScreen -> Unit
             PoseIntent.ClickAlarmIcon -> postSideEffect(PoseEffect.NavigateToNotification)
             PoseIntent.ClickPeopleCountChip -> reduce { copy(isShowPeopleCountBottomSheet = true) }
-            is PoseIntent.ClickPeopleCountSheetItem -> {
-                _headCountFilter.value = intent.peopleCount
-                _isScrapOnly.value = false
-                reduce {
-                    copy(
-                        isShowScrappedPose = false,
-                        selectedPeopleCount = intent.peopleCount,
-                        isShowPeopleCountBottomSheet = false,
-                    )
-                }
-            }
-
+            is PoseIntent.ClickPeopleCountSheetItem -> handlePeopleCountSheetItem(intent, state, reduce)
             PoseIntent.DismissPeopleCountBottomSheet -> reduce { copy(isShowPeopleCountBottomSheet = false) }
             PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
             PoseIntent.ClickScrapChip -> {
@@ -114,6 +103,33 @@ internal class PoseViewModel @Inject constructor(
 
             is PoseIntent.ScrapChanged -> {
                 updatedScraps.update { it + (intent.poseId to intent.isScrapped) }
+            }
+        }
+    }
+
+    private fun handlePeopleCountSheetItem(
+        intent: PoseIntent.ClickPeopleCountSheetItem,
+        state: PoseState,
+        reduce: (PoseState.() -> PoseState) -> Unit,
+    ) {
+        _isScrapOnly.value = false
+        if (intent.peopleCount == state.selectedPeopleCount) {
+            _headCountFilter.value = null
+            reduce {
+                copy(
+                    isShowScrappedPose = false,
+                    isShowPeopleCountBottomSheet = false,
+                    selectedPeopleCount = null,
+                )
+            }
+        } else {
+            _headCountFilter.value = intent.peopleCount
+            reduce {
+                copy(
+                    isShowScrappedPose = false,
+                    selectedPeopleCount = intent.peopleCount.takeIf { it != state.selectedPeopleCount },
+                    isShowPeopleCountBottomSheet = false,
+                )
             }
         }
     }
