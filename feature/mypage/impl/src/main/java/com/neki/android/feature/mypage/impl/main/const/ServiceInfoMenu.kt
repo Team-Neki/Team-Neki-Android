@@ -6,7 +6,7 @@ enum class ServiceInfoMenu(
 ) {
     INQUIRY(
         text = "Neki에 문의하기",
-        url = "https://www.naver.com",
+        url = "https://tally.so/r/obGpRX",
     ),
     TERMS_OF_SERVICE(
         text = "이용약관",
