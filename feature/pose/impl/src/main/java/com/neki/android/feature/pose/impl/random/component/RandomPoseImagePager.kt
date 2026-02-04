@@ -1,5 +1,6 @@
 package com.neki.android.feature.pose.impl.random.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -10,6 +11,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -17,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
+import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
 import com.neki.android.feature.pose.impl.const.PoseConst
 import kotlinx.collections.immutable.ImmutableList
@@ -59,8 +62,10 @@ private fun RandomPoseImage(
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(20.dp)),
+                .clip(RoundedCornerShape(20.dp))
+                .background(NekiTheme.colorScheme.white),
             contentScale = ContentScale.FillWidth,
+            alignment = Alignment.Center,
         )
         Row(
             modifier = Modifier.matchParentSize(),
