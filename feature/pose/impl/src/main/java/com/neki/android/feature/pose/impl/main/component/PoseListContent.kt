@@ -1,6 +1,7 @@
 package com.neki.android.feature.pose.impl.main.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,7 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
+import androidx.compose.ui.graphics.RectangleShape
 import com.neki.android.core.designsystem.modifier.noRippleClickable
+import com.neki.android.core.designsystem.modifier.poseBackground
 import com.neki.android.core.model.Pose
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_VERTICAL_SPACING
@@ -61,14 +64,21 @@ private fun PoseItem(
     modifier: Modifier = Modifier,
     onClickItem: (Pose) -> Unit = {},
 ) {
-    AsyncImage(
+    Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .noRippleClickable { onClickItem(pose) },
-        model = pose.poseImageUrl,
-        contentDescription = null,
-        contentScale = ContentScale.FillWidth,
-    )
+    ) {
+        AsyncImage(
+            modifier = Modifier.fillMaxWidth(),
+            model = pose.poseImageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .poseBackground(shape = RectangleShape),
+        )
+    }
 }
-
-// Preview is not available for PagingItems component
