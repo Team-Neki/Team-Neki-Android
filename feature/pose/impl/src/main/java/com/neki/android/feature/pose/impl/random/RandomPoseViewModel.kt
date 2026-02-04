@@ -8,11 +8,11 @@ import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.pose.impl.const.PoseConst
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.neki.android.feature.pose.impl.const.PoseConst
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -126,7 +126,9 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         if (state.hasPrevious) {
-            reduce { copy(currentIndex = currentIndex - 1) }
+            val previousIndex = state.currentIndex - 1
+            reduce { copy(currentIndex = previousIndex) }
+            postSideEffect(RandomPoseEffect.SwipePoseImage(previousIndex))
         } else {
             postSideEffect(RandomPoseEffect.ShowToast("첫번째 포즈입니다."))
         }
@@ -139,32 +141,24 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     ) {
         if (state.currentIndex >= state.poseList.lastIndex) return
 
-        reduce { copy(currentIndex = currentIndex + 1) }
+        val nextIndex = state.currentIndex + 1
+        reduce { copy(currentIndex = nextIndex) }
+        postSideEffect(RandomPoseEffect.SwipePoseImage(nextIndex))
 
         // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
         if (state.poseList.size - state.currentIndex <= PoseConst.POSE_PREFETCH_THRESHOLD) {
-            fetchNextPose(reduce, postSideEffect)
-        }
-    }
+            viewModelScope.launch {
+                val (_, newPose) = fetchRandomPose(state.poseList)
 
-    private fun fetchNextPose(
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
-        postSideEffect: (RandomPoseEffect) -> Unit,
-    ) {
-        viewModelScope.launch {
-            poseRepository.getRandomPose(headCount = peopleCount)
-                .onSuccess { pose ->
+                newPose?.let { pose ->
                     reduce {
                         copy(
                             poseList = (poseList + pose).toImmutableList(),
                             committedScraps = committedScraps + (pose.id to pose.isScrapped),
                         )
                     }
-                    postSideEffect(RandomPoseEffect.RequestImageBuilder(pose.poseImageUrl))
                 }
-                .onFailure { error ->
-                    Timber.e(error)
-                }
+            }
         }
     }
 
@@ -176,12 +170,24 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             reduce { copy(isLoading = true) }
 
             val poses = mutableListOf<Pose>()
+            var totalFallbackCount = 0
 
             // 초기에 INITIAL_POSE_LOAD_COUNT개 로드
-            repeat(PoseConst.INITIAL_POSE_LOAD_COUNT) {
-                poseRepository.getRandomPose(headCount = peopleCount)
-                    .onSuccess { pose -> poses.add(pose) }
-                    .onFailure { error -> Timber.e(error) }
+            while (
+                poses.size < PoseConst.INITIAL_POSE_LOAD_COUNT &&
+                totalFallbackCount < PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT
+            ) {
+                val (fallbackCount, newPose) = fetchRandomPose(
+                    poseList = poses,
+                    maxFallbackCount = PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT - totalFallbackCount,
+                )
+
+                totalFallbackCount += fallbackCount
+
+                newPose?.let { pose ->
+                    poses.add(pose)
+                    postSideEffect(RandomPoseEffect.RequestImageBuilder(pose.poseImageUrl))
+                }
             }
 
             if (poses.isNotEmpty()) {
@@ -198,6 +204,31 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
             }
         }
+    }
+
+    private suspend fun fetchRandomPose(
+        poseList: List<Pose>,
+        maxFallbackCount: Int = PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT,
+    ): Pair<Int, Pose?> {
+        var fallbackCount = 0
+        var newPose: Pose? = null
+
+        while (fallbackCount < maxFallbackCount) {
+            val result = poseRepository.getRandomPose(headCount = peopleCount)
+                .onSuccess { pose ->
+                    if (poseList.none { it.id == pose.id }) {
+                        newPose = pose
+                    }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                }
+
+            if (result.isSuccess) break
+            else fallbackCount++
+        }
+
+        return fallbackCount to newPose
     }
 
     override fun onCleared() {
