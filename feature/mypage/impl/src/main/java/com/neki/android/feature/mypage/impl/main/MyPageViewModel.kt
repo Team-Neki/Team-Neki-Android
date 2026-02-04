@@ -1,7 +1,10 @@
 package com.neki.android.feature.mypage.impl.main
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil3.imageLoader
+import coil3.request.ImageRequest
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -11,6 +14,7 @@ import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
 import com.neki.android.feature.mypage.impl.profile.model.SelectedProfileImage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -19,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class MyPageViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val uploadProfileImageUseCase: UploadProfileImageUseCase,
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
@@ -140,6 +145,13 @@ internal class MyPageViewModel @Inject constructor(
 
         userRepository.getUserInfo()
             .onSuccess { user ->
+                if (isProfileImageChanged) {
+                    val request = ImageRequest.Builder(context)
+                        .data(user.profileImageUrl)
+                        .build()
+                    context.imageLoader.execute(request)
+                }
+
                 reduce {
                     copy(
                         isLoading = false,
