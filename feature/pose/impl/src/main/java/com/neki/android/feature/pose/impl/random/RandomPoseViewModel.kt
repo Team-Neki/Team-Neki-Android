@@ -92,7 +92,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             scrapJobs[poseId] = viewModelScope.launch {
                 delay(500)
                 val committedScrap = store.uiState.value.committedScraps[poseId]
-                if (committedScrap != newScrapStatus) return@launch
+                if (committedScrap == newScrapStatus || committedScrap == null) return@launch
 
                 poseRepository.updateScrap(poseId, newScrapStatus)
                     .onSuccess {
