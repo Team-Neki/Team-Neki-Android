@@ -97,7 +97,12 @@ internal class PoseViewModel @Inject constructor(
             is PoseIntent.ClickRandomPosePeopleCountSheetItem -> reduce { copy(selectedRandomPosePeopleCount = intent.peopleCount) }
             PoseIntent.ClickRandomPoseBottomSheetSelectButton -> {
                 val selectedCount = state.selectedRandomPosePeopleCount ?: return
-                reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
+                reduce {
+                    copy(
+                        selectedRandomPosePeopleCount = null,
+                        isShowRandomPosePeopleCountBottomSheet = false,
+                    )
+                }
                 postSideEffect(PoseEffect.NavigateToRandomPose(selectedCount))
             }
 
