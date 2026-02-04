@@ -56,18 +56,6 @@ class MediaUploadRepositoryImpl @Inject constructor(
         ).data.toModels()
     }
 
-    override suspend fun uploadImage(
-        uploadUrl: String,
-        imageBytes: ByteArray,
-        contentType: ContentType,
-    ) = runSuspendCatching {
-        uploadService.uploadImage(
-            presignedUrl = uploadUrl,
-            imageBytes = imageBytes,
-            contentType = contentType.label,
-        )
-    }
-
     override suspend fun uploadImageFromUri(
         uploadUrl: String,
         uri: Uri,

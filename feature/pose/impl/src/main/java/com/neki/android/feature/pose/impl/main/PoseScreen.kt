@@ -25,9 +25,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
-import com.neki.android.core.model.PoseEffect
-import com.neki.android.core.model.PoseIntent
-import com.neki.android.core.model.PoseState
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
 import com.neki.android.feature.pose.impl.main.component.FilterBar

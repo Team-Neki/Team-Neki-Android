@@ -18,12 +18,6 @@ interface MediaUploadRepository {
         mediaType: String,
     ): Result<List<MediaUploadTicket>>
 
-    suspend fun uploadImage(
-        uploadUrl: String,
-        imageBytes: ByteArray,
-        contentType: ContentType,
-    ): Result<Unit>
-
     suspend fun uploadImageFromUri(
         uploadUrl: String,
         uri: Uri,

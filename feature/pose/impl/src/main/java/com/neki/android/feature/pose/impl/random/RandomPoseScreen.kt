@@ -130,7 +130,7 @@ private fun RandomPoseImage(
         AsyncImage(
             model = pose.poseImageUrl,
             contentDescription = null,
-            modifier = modifier
+            modifier = Modifier
                 .matchParentSize()
                 .clip(RoundedCornerShape(20.dp)),
             contentScale = ContentScale.FillWidth,

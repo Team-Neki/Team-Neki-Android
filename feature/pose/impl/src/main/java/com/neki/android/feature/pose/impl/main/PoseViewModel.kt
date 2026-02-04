@@ -7,9 +7,6 @@ import androidx.paging.cachedIn
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
-import com.neki.android.core.model.PoseEffect
-import com.neki.android.core.model.PoseIntent
-import com.neki.android.core.model.PoseState
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
