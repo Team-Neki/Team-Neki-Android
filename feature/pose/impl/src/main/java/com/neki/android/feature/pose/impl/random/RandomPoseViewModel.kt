@@ -12,6 +12,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.neki.android.feature.pose.impl.const.PoseConst
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -140,8 +141,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
         reduce { copy(currentIndex = currentIndex + 1) }
 
-        // 뒤에서 2번째였으면 다음 포즈 미리 캐싱
-        if (state.currentIndex == state.poseList.lastIndex - 1) {
+        // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
+        if (state.poseList.size - state.currentIndex <= PoseConst.POSE_PREFETCH_THRESHOLD) {
             fetchNextPose(reduce, postSideEffect)
         }
     }
@@ -176,8 +177,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
             val poses = mutableListOf<Pose>()
 
-            // 초기에 3개 로드
-            repeat(3) {
+            // 초기에 INITIAL_POSE_LOAD_COUNT개 로드
+            repeat(PoseConst.INITIAL_POSE_LOAD_COUNT) {
                 poseRepository.getRandomPose(headCount = peopleCount)
                     .onSuccess { pose -> poses.add(pose) }
                     .onFailure { error -> Timber.e(error) }
