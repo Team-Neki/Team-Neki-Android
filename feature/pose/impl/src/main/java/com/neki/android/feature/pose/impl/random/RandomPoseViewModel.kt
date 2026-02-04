@@ -184,10 +184,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
                 totalFallbackCount += fallbackCount
 
-                newPose?.let { pose ->
-                    poses.add(pose)
-                    postSideEffect(RandomPoseEffect.RequestImageBuilder(pose.poseImageUrl))
-                }
+                newPose?.let { pose -> poses.add(pose) }
             }
 
             if (poses.isNotEmpty()) {

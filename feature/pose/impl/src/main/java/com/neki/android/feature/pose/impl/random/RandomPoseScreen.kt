@@ -16,8 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.ImageLoader
-import coil3.request.ImageRequest
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.CloseTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -39,7 +37,6 @@ internal fun RandomPoseRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
-    val imageLoader = remember { ImageLoader(context) }
     val pagerState = rememberPagerState { uiState.poseList.size }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
@@ -50,13 +47,8 @@ internal fun RandomPoseRoute(
                 page = sideEffect.index,
                 animationSpec = tween(durationMillis = 500),
             )
+
             is RandomPoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
-            is RandomPoseEffect.RequestImageBuilder -> {
-                val request = ImageRequest.Builder(context)
-                    .data(sideEffect.imageUrl)
-                    .build()
-                imageLoader.execute(request)
-            }
         }
     }
 

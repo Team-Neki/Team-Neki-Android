@@ -37,5 +37,4 @@ sealed interface RandomPoseEffect {
     data class NavigateToDetail(val poseId: Long) : RandomPoseEffect
     data class SwipePoseImage(val index: Int) : RandomPoseEffect
     data class ShowToast(val message: String) : RandomPoseEffect
-    data class RequestImageBuilder(val imageUrl: String) : RandomPoseEffect
 }
