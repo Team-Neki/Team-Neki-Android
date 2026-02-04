@@ -185,7 +185,7 @@ private class ClickableSingleNode(
         this@ClickableSingleNode.role?.let { this.role = it }
         onClick(
             label = onClickLabel,
-            action = { processClick(); true }
+            action = { processClick(); true },
         )
         if (!enabled) { disabled() }
     }
