@@ -23,7 +23,7 @@ import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun EditProfileImage(
+internal fun EditProfileImage(
     profileImage: Any? = null,
     imageSize: Dp = 142.dp,
     onClickCameraIcon: () -> Unit,

@@ -26,7 +26,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.HorizontalSpacer
 
 @Composable
-fun ProfileCard(
+internal fun ProfileCard(
     profileImageUrl: String = "",
     name: String,
     loginType: String,

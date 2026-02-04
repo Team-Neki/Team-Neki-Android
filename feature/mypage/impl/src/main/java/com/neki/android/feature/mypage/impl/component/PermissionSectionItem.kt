@@ -20,7 +20,7 @@ import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun PermissionSectionItem(
+internal fun PermissionSectionItem(
     title: String,
     subTitle: String,
     isGranted: Boolean,

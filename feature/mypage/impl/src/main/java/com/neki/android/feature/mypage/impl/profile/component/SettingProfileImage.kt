@@ -26,7 +26,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
-fun SettingProfileImage(
+internal fun SettingProfileImage(
     nickname: String,
     profileImage: Any? = null,
     imageSize: Dp = 142.dp,

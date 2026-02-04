@@ -19,7 +19,7 @@ import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun SectionItem(
+internal fun SectionItem(
     text: String,
     onClick: () -> Unit = {},
     trailingContent: @Composable (() -> Unit)? = null,
