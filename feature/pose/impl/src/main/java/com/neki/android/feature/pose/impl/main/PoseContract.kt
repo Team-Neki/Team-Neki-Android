@@ -1,8 +1,9 @@
-package com.neki.android.core.model
+package com.neki.android.feature.pose.impl.main
 
+import com.neki.android.core.model.PeopleCount
+import com.neki.android.core.model.Pose
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.serialization.Serializable
 
 data class PoseState(
     val isLoading: Boolean = false,
@@ -33,16 +34,4 @@ sealed interface PoseEffect {
     data class NavigateToRandomPose(val peopleCount: PeopleCount) : PoseEffect
     data class NavigateToPoseDetail(val poseId: Long) : PoseEffect
     data class ShowToast(val message: String) : PoseEffect
-}
-
-@Serializable
-enum class PeopleCount(val displayText: String, val value: Int) {
-    ONE("1인", 1),
-    TWO("2인", 2),
-    THREE("3인", 3),
-    FOUR("4인", 4),
-    FIVE_OR_MORE("5인 이상", 5),
-    ;
-
-    override fun toString(): String = displayText
 }
