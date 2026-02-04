@@ -23,6 +23,7 @@ import androidx.compose.ui.node.SemanticsModifierNode
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.IntSize
@@ -230,7 +231,11 @@ private class ClickableSingleNode(
 
     override fun SemanticsPropertyReceiver.applySemantics() {
         this@ClickableSingleNode.role?.let { this.role = it }
-        onClick(label = onClickLabel, action = { processClick(); true })
+        onClick(
+            label = onClickLabel,
+            action = { processClick(); true }
+        )
+        if (!enabled) { disabled() }
     }
 
     fun update(
