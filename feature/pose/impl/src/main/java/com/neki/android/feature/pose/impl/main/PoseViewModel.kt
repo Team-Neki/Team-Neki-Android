@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
@@ -14,7 +15,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,16 +26,36 @@ internal class PoseViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _headCountFilter = MutableStateFlow<PeopleCount?>(null)
+    private val _isScrapOnly = MutableStateFlow(false)
+    private val updatedScraps = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val posePagingData: Flow<PagingData<Pose>> = _headCountFilter
-        .flatMapLatest { headCount ->
+    private val originalPagingData: Flow<PagingData<Pose>> = combine(
+        _headCountFilter,
+        _isScrapOnly,
+    ) { headCount, isScrapOnly ->
+        headCount to isScrapOnly
+    }.flatMapLatest { (headCount, isScrapOnly) ->
+        if (isScrapOnly) {
+            poseRepository.getScrappedPosesFlow(sortOrder = SortOrder.DESC)
+        } else {
             poseRepository.getPosesFlow(
                 headCount = headCount,
                 sortOrder = SortOrder.DESC,
             )
         }
-        .cachedIn(viewModelScope)
+    }.cachedIn(viewModelScope)
+
+    val posePagingData: Flow<PagingData<Pose>> = combine(
+        originalPagingData,
+        updatedScraps,
+    ) { pagingData, scraps ->
+        pagingData.map { pose ->
+            scraps[pose.id]?.let { isScrapped ->
+                pose.copy(isScrapped = isScrapped)
+            } ?: pose
+        }
+    }
 
     val store: MviIntentStore<PoseState, PoseIntent, PoseEffect> =
         mviIntentStore(
@@ -53,6 +76,7 @@ internal class PoseViewModel @Inject constructor(
             PoseIntent.ClickPeopleCountChip -> reduce { copy(isShowPeopleCountBottomSheet = true) }
             is PoseIntent.ClickPeopleCountSheetItem -> {
                 _headCountFilter.value = intent.peopleCount
+                _isScrapOnly.value = false
                 reduce {
                     copy(
                         isShowScrappedPose = false,
@@ -65,10 +89,12 @@ internal class PoseViewModel @Inject constructor(
             PoseIntent.DismissPeopleCountBottomSheet -> reduce { copy(isShowPeopleCountBottomSheet = false) }
             PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
             PoseIntent.ClickScrapChip -> {
+                val newValue = !state.isShowScrappedPose
+                _isScrapOnly.value = newValue
                 _headCountFilter.value = null
                 reduce {
                     copy(
-                        isShowScrappedPose = !isShowScrappedPose,
+                        isShowScrappedPose = newValue,
                         selectedPeopleCount = null,
                     )
                 }
@@ -84,6 +110,10 @@ internal class PoseViewModel @Inject constructor(
                 val selectedCount = state.selectedRandomPosePeopleCount ?: return
                 reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
                 postSideEffect(PoseEffect.NavigateToRandomPose(selectedCount))
+            }
+
+            is PoseIntent.ScrapChanged -> {
+                updatedScraps.update { it + (intent.poseId to intent.isScrapped) }
             }
         }
     }
