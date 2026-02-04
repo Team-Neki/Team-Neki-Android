@@ -1,6 +1,5 @@
 package com.neki.android.core.designsystem.modifier
 
-import android.util.Log
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.PressGestureScope
@@ -8,9 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.ripple
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -20,7 +17,6 @@ import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.SemanticsModifierNode
-import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.disabled
@@ -29,26 +25,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-
-private const val TAG = "ClickableRecomposition"
-
-// TODO: 테스트 후 삭제 - 객체 생성 카운터
-object ClickableTestCounter {
-    var composedBlockExecutionCount = 0
-    var nodeCreateCount = 0
-    var nodeUpdateCount = 0
-
-    fun reset() {
-        composedBlockExecutionCount = 0
-        nodeCreateCount = 0
-        nodeUpdateCount = 0
-    }
-
-    fun logStatus() {
-        Log.d(TAG, "📊 [composed] 블록 실행: $composedBlockExecutionCount 회")
-        Log.d(TAG, "📊 [Node] CREATE: $nodeCreateCount 회, UPDATE: $nodeUpdateCount 회")
-    }
-}
 
 /**
  * 클릭의 리플 효과를 없애주는 [Modifier]
@@ -75,34 +51,6 @@ fun Modifier.noRippleClickableSingle(
         onClick = onClick,
     ),
 )
-
-// TODO: 테스트 후 삭제 - composed 버전
-fun Modifier.clickableSingleComposed(
-    enabled: Boolean = true,
-    onClickLabel: String? = null,
-    role: Role? = null,
-    onClick: () -> Unit,
-) = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "clickableSingle"
-        properties["enabled"] = enabled
-        properties["onClickLabel"] = onClickLabel
-        properties["role"] = role
-        properties["onClick"] = onClick
-    },
-) {
-    ClickableTestCounter.composedBlockExecutionCount++
-    val modifier = Modifier.clickable(
-        enabled = enabled,
-        onClickLabel = onClickLabel,
-        onClick = { onClick() },
-        role = role,
-        indication = ripple(),
-        interactionSource = remember { MutableInteractionSource() },
-    )
-    Log.d(TAG, "🔴 composed: 블록 실행 #${ClickableTestCounter.composedBlockExecutionCount}, 객체ID = ${System.identityHashCode(modifier)}")
-    modifier
-}
 
 /**
  * 500ms 내의 중복 클릭을 막아주는 [Modifier]
@@ -133,31 +81,23 @@ private data class ClickableSingleElement(
     private val onClick: () -> Unit,
 ) : ModifierNodeElement<ClickableSingleNode>() {
 
-    override fun create(): ClickableSingleNode {
-        ClickableTestCounter.nodeCreateCount++
-        Log.d(TAG, "✅ Node: CREATE #${ClickableTestCounter.nodeCreateCount} - Element 객체ID = ${System.identityHashCode(this)}")
-        return ClickableSingleNode(
-            enabled = enabled,
-            onClickLabel = onClickLabel,
-            role = role,
-            onClick = onClick,
-            indicationNodeFactory = indicationNodeFactory,
-            interactionSource = interactionSource,
-        )
-    }
+    override fun create(): ClickableSingleNode = ClickableSingleNode(
+        enabled = enabled,
+        onClickLabel = onClickLabel,
+        role = role,
+        onClick = onClick,
+        indicationNodeFactory = indicationNodeFactory,
+        interactionSource = interactionSource,
+    )
 
-    override fun update(node: ClickableSingleNode) {
-        ClickableTestCounter.nodeUpdateCount++
-        Log.d(TAG, "🔄 Node: UPDATE #${ClickableTestCounter.nodeUpdateCount} - Element 객체ID = ${System.identityHashCode(this)}, Node 객체ID = ${System.identityHashCode(node)}")
-        node.update(
-            enabled = enabled,
-            onClickLabel = onClickLabel,
-            role = role,
-            onClick = onClick,
-            indicationNodeFactory = indicationNodeFactory,
-            interactionSource = interactionSource,
-        )
-    }
+    override fun update(node: ClickableSingleNode) = node.update(
+        enabled = enabled,
+        onClickLabel = onClickLabel,
+        role = role,
+        onClick = onClick,
+        indicationNodeFactory = indicationNodeFactory,
+        interactionSource = interactionSource,
+    )
 }
 
 private class ClickableSingleNode(
