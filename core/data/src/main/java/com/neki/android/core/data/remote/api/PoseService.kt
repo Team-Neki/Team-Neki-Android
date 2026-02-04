@@ -43,6 +43,19 @@ class PoseService @Inject constructor(
         }.body()
     }
 
+    // 스크랩된 포즈 목록 조회
+    suspend fun getScrappedPoses(
+        page: Int = 0,
+        size: Int = 20,
+        sortOrder: String = "DESC",
+    ): BasicResponse<PoseResponse> {
+        return client.get("/api/poses/scrap") {
+            parameter("page", page)
+            parameter("size", size)
+            parameter("sortOrder", sortOrder)
+        }.body()
+    }
+
     // 스크랩 업데이트
     suspend fun updateScrap(poseId: Long, scrap: Boolean): BasicNullableResponse<Unit> {
         return client.patch("/api/poses/$poseId/scrap") {

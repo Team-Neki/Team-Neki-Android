@@ -13,6 +13,10 @@ interface PoseRepository {
         sortOrder: SortOrder = SortOrder.DESC,
     ): Flow<PagingData<Pose>>
 
+    fun getScrappedPosesFlow(
+        sortOrder: SortOrder = SortOrder.DESC,
+    ): Flow<PagingData<Pose>>
+
     suspend fun getPose(poseId: Long): Result<Pose>
 
     suspend fun getRandomPose(headCount: PeopleCount): Result<Pose>
