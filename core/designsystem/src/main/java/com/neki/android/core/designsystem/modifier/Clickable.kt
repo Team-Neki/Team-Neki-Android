@@ -73,7 +73,6 @@ fun Modifier.noRippleClickableSingle(
         onClickLabel = onClickLabel,
         role = role,
         onClick = onClick,
-        indicationNodeFactory = null,
     ),
 )
 
@@ -112,6 +111,7 @@ fun Modifier.clickableSingle(
     enabled: Boolean = true,
     onClickLabel: String? = null,
     role: Role? = null,
+    interactionSource: MutableInteractionSource? = null,
     onClick: () -> Unit,
 ): Modifier = this.then(
     ClickableSingleElement(
@@ -120,6 +120,7 @@ fun Modifier.clickableSingle(
         role = role,
         onClick = onClick,
         indicationNodeFactory = ripple(),
+        interactionSource = interactionSource,
     ),
 )
 
@@ -127,8 +128,9 @@ private data class ClickableSingleElement(
     private val enabled: Boolean,
     private val onClickLabel: String?,
     private val role: Role?,
+    private val indicationNodeFactory: IndicationNodeFactory? = null,
+    private val interactionSource: MutableInteractionSource? = null,
     private val onClick: () -> Unit,
-    private val indicationNodeFactory: IndicationNodeFactory?,
 ) : ModifierNodeElement<ClickableSingleNode>() {
 
     override fun create(): ClickableSingleNode {
@@ -140,6 +142,7 @@ private data class ClickableSingleElement(
             role = role,
             onClick = onClick,
             indicationNodeFactory = indicationNodeFactory,
+            interactionSource = interactionSource,
         )
     }
 
@@ -152,6 +155,7 @@ private data class ClickableSingleElement(
             role = role,
             onClick = onClick,
             indicationNodeFactory = indicationNodeFactory,
+            interactionSource = interactionSource,
         )
     }
 }
@@ -160,13 +164,18 @@ private class ClickableSingleNode(
     private var enabled: Boolean,
     private var onClickLabel: String?,
     private var role: Role?,
-    private var onClick: () -> Unit,
     private var indicationNodeFactory: IndicationNodeFactory?,
+    private var interactionSource: MutableInteractionSource?,
+    private var onClick: () -> Unit,
 ) : DelegatingNode(), PointerInputModifierNode, SemanticsModifierNode {
 
     private val multipleEventsCutter = MultipleEventsCutter.get()
-    private var interactionSource: MutableInteractionSource? = null
+    private var internalInteractionSource: MutableInteractionSource? = null
     private var indicationNode: DelegatableNode? = null
+    private var currentPressInteraction: PressInteraction.Press? = null
+
+    private val activeInteractionSource: MutableInteractionSource?
+        get() = interactionSource ?: internalInteractionSource
 
     override val shouldAutoInvalidate: Boolean = false
 
@@ -186,10 +195,11 @@ private class ClickableSingleNode(
     private fun initializeIndicationIfNeeded() {
         if (indicationNode != null) return
         indicationNodeFactory?.let { factory ->
-            if (interactionSource == null) {
-                interactionSource = MutableInteractionSource()
+            if (interactionSource == null && internalInteractionSource == null) {
+                internalInteractionSource = MutableInteractionSource()
             }
-            val node = factory.create(interactionSource!!)
+            val source = activeInteractionSource ?: return@let
+            val node = factory.create(source)
             delegate(node)
             indicationNode = node
         }
@@ -197,12 +207,14 @@ private class ClickableSingleNode(
 
     private suspend fun PressGestureScope.handlePressInteraction(offset: Offset) {
         initializeIndicationIfNeeded()
-        interactionSource?.let { source ->
+        activeInteractionSource?.let { source ->
             coroutineScope {
                 val press = PressInteraction.Press(offset)
+                currentPressInteraction = press
                 launch { source.emit(press) }
 
                 val success = tryAwaitRelease()
+                currentPressInteraction = null
                 val endInteraction = if (success) {
                     PressInteraction.Release(press)
                 } else {
@@ -242,22 +254,38 @@ private class ClickableSingleNode(
         enabled: Boolean,
         onClickLabel: String?,
         role: Role?,
-        onClick: () -> Unit,
         indicationNodeFactory: IndicationNodeFactory?,
+        interactionSource: MutableInteractionSource?,
+        onClick: () -> Unit,
     ) {
+        val interactionSourceChanged = this.interactionSource != interactionSource
         val indicationChanged = this.indicationNodeFactory != indicationNodeFactory
+
         this.enabled = enabled
         this.onClickLabel = onClickLabel
         this.role = role
         this.onClick = onClick
 
-        if (indicationChanged) {
+        if (interactionSourceChanged) {
+            this.interactionSource = interactionSource
+        }
+
+        if (indicationChanged || interactionSourceChanged) {
             indicationNode?.let { undelegate(it) }
             indicationNode = null
-            interactionSource = null
+            if (interactionSource == null) {
+                internalInteractionSource = null
+            }
             this.indicationNodeFactory = indicationNodeFactory
             initializeIndicationIfNeeded()
         }
+    }
+
+    override fun onDetach() {
+        currentPressInteraction?.let { press ->
+            activeInteractionSource?.tryEmit(PressInteraction.Cancel(press))
+        }
+        currentPressInteraction = null
     }
 }
 
