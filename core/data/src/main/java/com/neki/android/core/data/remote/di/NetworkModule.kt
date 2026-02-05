@@ -62,12 +62,6 @@ internal object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthService(
-        client: HttpClient,
-    ): AuthService = AuthService(client)
-
-    @Provides
-    @Singleton
     fun provideAuthCacheManager(
         httpClient: HttpClient,
     ): AuthCacheManager = object : AuthCacheManager {

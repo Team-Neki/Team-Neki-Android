@@ -10,8 +10,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import javax.inject.Inject
 
-class AuthService(
+class AuthService @Inject constructor(
     private val client: HttpClient,
 ) {
     // 카카오 로그인
