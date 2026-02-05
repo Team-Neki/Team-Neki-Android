@@ -40,7 +40,7 @@ internal fun RecommendationChip(
             tint = Color.Unspecified,
         )
         Text(
-            text = "랜덤포즈 추천",
+            text = "랜덤 포즈 추천",
             style = NekiTheme.typography.title18SemiBold,
             color = NekiTheme.colorScheme.white,
         )
