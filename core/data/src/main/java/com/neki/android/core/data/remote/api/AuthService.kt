@@ -26,7 +26,7 @@ class AuthService @Inject constructor(
     }
 
     // 회원 탈퇴
-    suspend fun signOut(): BasicNullableResponse<Unit> {
+    suspend fun withdrawAccount(): BasicNullableResponse<Unit> {
         return client.delete("/api/users/me").body()
     }
 }

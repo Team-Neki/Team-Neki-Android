@@ -75,11 +75,11 @@ internal class MyPageViewModel @Inject constructor(
                 logout(postSideEffect)
             }
 
-            MyPageIntent.ClickSignOut -> reduce { copy(isShowSignOutDialog = true) }
-            MyPageIntent.DismissSignOutDialog -> reduce { copy(isShowSignOutDialog = false) }
-            MyPageIntent.ConfirmSignOut -> {
-                reduce { copy(isShowSignOutDialog = false) }
-                signOut(reduce, postSideEffect)
+            MyPageIntent.ClickWithdraw -> reduce { copy(isShowWithdrawDialog = true) }
+            MyPageIntent.DismissWithdrawDialog -> reduce { copy(isShowWithdrawDialog = false) }
+            MyPageIntent.ConfirmWithdraw -> {
+                reduce { copy(isShowWithdrawDialog = false) }
+                withdrawAccount(reduce, postSideEffect)
             }
 
             // Permission
@@ -179,12 +179,12 @@ internal class MyPageViewModel @Inject constructor(
         postSideEffect(MyPageEffect.NavigateToLogin)
     }
 
-    private fun signOut(
+    private fun withdrawAccount(
         reduce: (MyPageState.() -> MyPageState) -> Unit,
         postSideEffect: (MyPageEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
-        authRepository.signOut()
+        authRepository.withdrawAccount()
             .onSuccess {
                 tokenRepository.clearTokens()
                 postSideEffect(MyPageEffect.NavigateToLogin)

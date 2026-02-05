@@ -11,7 +11,7 @@ data class MyPageState(
     val userInfo: UserInfo = UserInfo(),
     val selectedProfileImage: SelectedProfileImage = SelectedProfileImage.NoChange,
     val isShowLogoutDialog: Boolean = false,
-    val isShowSignOutDialog: Boolean = false,
+    val isShowWithdrawDialog: Boolean = false,
     val isShowImageChooseDialog: Boolean = false,
     // Permission
     val isGrantedCamera: Boolean = false,
@@ -45,9 +45,9 @@ sealed interface MyPageIntent {
     data object ClickLogout : MyPageIntent
     data object DismissLogoutDialog : MyPageIntent
     data object ConfirmLogout : MyPageIntent
-    data object ClickSignOut : MyPageIntent
-    data object DismissSignOutDialog : MyPageIntent
-    data object ConfirmSignOut : MyPageIntent
+    data object ClickWithdraw : MyPageIntent
+    data object DismissWithdrawDialog : MyPageIntent
+    data object ConfirmWithdraw : MyPageIntent
 
     // Permission
     data class ClickPermissionItem(val permission: NekiPermission) : MyPageIntent

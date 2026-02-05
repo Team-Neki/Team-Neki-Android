@@ -71,7 +71,7 @@ fun ProfileSettingScreen(
         )
         SectionItem(
             text = "탈퇴하기",
-            onClick = { onIntent(MyPageIntent.ClickSignOut) },
+            onClick = { onIntent(MyPageIntent.ClickWithdraw) },
         )
     }
 
@@ -88,16 +88,16 @@ fun ProfileSettingScreen(
         )
     }
 
-    if (uiState.isShowSignOutDialog) {
+    if (uiState.isShowWithdrawDialog) {
         DoubleButtonAlertDialog(
             title = "정말 탈퇴하시겠어요?",
             content = "계정을 탈퇴하면 사진과 정보가 모두 삭제되며,\n삭제된 데이터는 복구할 수 없어요.",
             grayButtonText = "취소",
             primaryButtonText = "탈퇴 확정",
             properties = DialogProperties(usePlatformDefaultWidth = false),
-            onDismissRequest = { onIntent(MyPageIntent.DismissSignOutDialog) },
-            onClickGrayButton = { onIntent(MyPageIntent.DismissSignOutDialog) },
-            onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmSignOut) },
+            onDismissRequest = { onIntent(MyPageIntent.DismissWithdrawDialog) },
+            onClickGrayButton = { onIntent(MyPageIntent.DismissWithdrawDialog) },
+            onClickPrimaryButton = { onIntent(MyPageIntent.ConfirmWithdraw) },
         )
     }
 
