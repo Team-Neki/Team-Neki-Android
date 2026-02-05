@@ -4,6 +4,7 @@ import android.net.Uri
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.extension.ContentTypeUtil.generateFileName
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.Media
 import com.neki.android.core.model.MediaType
@@ -65,13 +66,5 @@ class UploadMultiplePhotoUseCase @Inject constructor(
                 contentType = contentType,
             )
         }
-    }
-
-    private fun generateFileName(contentType: ContentType): String {
-        val extension = when (contentType) {
-            ContentType.JPEG -> "jpeg"
-            ContentType.PNG -> "png"
-        }
-        return "${UUID.randomUUID()}.$extension"
     }
 }
