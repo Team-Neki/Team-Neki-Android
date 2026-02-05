@@ -24,7 +24,7 @@ data class MyPageState(
 
 sealed interface MyPageIntent {
     // Init
-    data object LoadUserInfo : MyPageIntent
+    data object EnterMypageScreen : MyPageIntent
     data class SetAppVersion(val appVersion: String) : MyPageIntent
 
     // MyPage Main

@@ -5,7 +5,7 @@ data class LoginState(
 )
 
 sealed interface LoginIntent {
-    data object CheckLoginState : LoginIntent
+    data object EnterLoginScreen : LoginIntent
     data object ClickKakaoLogin : LoginIntent
     data class SuccessLogin(val idToken: String) : LoginIntent
     data object FailLogin : LoginIntent

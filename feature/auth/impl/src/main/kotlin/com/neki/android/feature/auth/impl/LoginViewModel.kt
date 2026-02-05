@@ -25,7 +25,7 @@ class LoginViewModel @Inject constructor(
         mviIntentStore(
             initialState = LoginState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(LoginIntent.CheckLoginState) },
+            initialFetchData = { store.onIntent(LoginIntent.EnterLoginScreen) },
         )
 
     private fun onIntent(
@@ -35,14 +35,14 @@ class LoginViewModel @Inject constructor(
         postSideEffect: (LoginSideEffect) -> Unit,
     ) {
         when (intent) {
-            LoginIntent.CheckLoginState -> checkLoginState(postSideEffect)
+            LoginIntent.EnterLoginScreen -> fetchInitialData(postSideEffect)
             LoginIntent.ClickKakaoLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
             is LoginIntent.SuccessLogin -> loginFromKakao(intent.idToken, reduce, postSideEffect)
             LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
         }
     }
 
-    private fun checkLoginState(postSideEffect: (LoginSideEffect) -> Unit) = viewModelScope.launch {
+    private fun fetchInitialData(postSideEffect: (LoginSideEffect) -> Unit) = viewModelScope.launch {
         if (tokenRepository.isSavedTokens().first()) {
             authRepository.updateAccessToken(
                 refreshToken = tokenRepository.getRefreshToken().first(),

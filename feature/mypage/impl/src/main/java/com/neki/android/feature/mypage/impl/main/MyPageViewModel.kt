@@ -34,7 +34,7 @@ internal class MyPageViewModel @Inject constructor(
         mviIntentStore(
             initialState = MyPageState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(MyPageIntent.LoadUserInfo) },
+            initialFetchData = { store.onIntent(MyPageIntent.EnterMypageScreen) },
         )
 
     private fun onIntent(
@@ -44,7 +44,7 @@ internal class MyPageViewModel @Inject constructor(
         postSideEffect: (MyPageEffect) -> Unit,
     ) {
         when (intent) {
-            MyPageIntent.LoadUserInfo -> loadUserInfo(reduce)
+            MyPageIntent.EnterMypageScreen -> fetchInitialData(reduce)
             is MyPageIntent.SetAppVersion -> reduce { copy(appVersion = intent.appVersion) }
             // MyPage Main
             MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.NavigateToNotification)
@@ -114,7 +114,7 @@ internal class MyPageViewModel @Inject constructor(
         }
     }
 
-    private fun loadUserInfo(reduce: (MyPageState.() -> MyPageState) -> Unit) = viewModelScope.launch {
+    private fun fetchInitialData(reduce: (MyPageState.() -> MyPageState) -> Unit) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
         userRepository.getUserInfo()
             .onSuccess { user ->
