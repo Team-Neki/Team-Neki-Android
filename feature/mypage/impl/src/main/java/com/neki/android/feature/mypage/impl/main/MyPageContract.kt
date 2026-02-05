@@ -9,6 +9,7 @@ import com.neki.android.feature.mypage.impl.profile.model.SelectedProfileImage
 data class MyPageState(
     val isLoading: Boolean = false,
     val userInfo: UserInfo = UserInfo(),
+    val appVersion: String = "",
     val selectedProfileImage: SelectedProfileImage = SelectedProfileImage.NoChange,
     val isShowLogoutDialog: Boolean = false,
     val isShowWithdrawDialog: Boolean = false,
@@ -24,6 +25,7 @@ data class MyPageState(
 sealed interface MyPageIntent {
     // Init
     data object LoadUserInfo : MyPageIntent
+    data class SetAppVersion(val appVersion: String) : MyPageIntent
 
     // MyPage Main
     data object ClickNotificationIcon : MyPageIntent

@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -37,8 +37,9 @@ internal fun MyPageRoute(
     val context = LocalContext.current
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
-    val appVersion = remember {
-        "${context.packageManager.getPackageInfo(context.packageName, 0).versionName}"
+    LaunchedEffect(Unit) {
+        val appVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: ""
+        viewModel.store.onIntent(MyPageIntent.SetAppVersion(appVersion))
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
@@ -60,7 +61,6 @@ internal fun MyPageRoute(
 
     MyPageScreen(
         uiState = uiState,
-        appVersion = appVersion,
         onIntent = viewModel.store::onIntent,
     )
 }
@@ -68,7 +68,6 @@ internal fun MyPageRoute(
 @Composable
 fun MyPageScreen(
     uiState: MyPageState,
-    appVersion: String = "",
     onIntent: (MyPageIntent) -> Unit,
 ) {
     Column(
@@ -108,7 +107,7 @@ fun MyPageScreen(
                 text = "오픈소스 라이선스",
                 onClick = { onIntent(MyPageIntent.ClickOpenSourceLicense) },
             )
-            SectionVersionItem(appVersion)
+            SectionVersionItem(uiState.appVersion)
         }
     }
 
@@ -122,8 +121,7 @@ fun MyPageScreen(
 private fun MyPageScreenPreview() {
     NekiTheme {
         MyPageScreen(
-            uiState = MyPageState(),
-            appVersion = "1.1.0",
+            uiState = MyPageState(appVersion = "1.1.0"),
             onIntent = {},
         )
     }

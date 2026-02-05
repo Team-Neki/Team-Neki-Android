@@ -45,6 +45,7 @@ internal class MyPageViewModel @Inject constructor(
     ) {
         when (intent) {
             MyPageIntent.LoadUserInfo -> loadUserInfo(reduce)
+            is MyPageIntent.SetAppVersion -> reduce { copy(appVersion = intent.appVersion) }
             // MyPage Main
             MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.NavigateToNotification)
             MyPageIntent.ClickProfileCard -> postSideEffect(MyPageEffect.NavigateToProfile)
