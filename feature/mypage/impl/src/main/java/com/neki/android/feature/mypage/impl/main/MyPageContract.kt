@@ -68,5 +68,5 @@ sealed interface MyPageEffect {
     data object OpenOssLicenses : MyPageEffect
     data object LogoutWithKakao : MyPageEffect
     data object UnlinkWithKakao : MyPageEffect
-    data class PreloadProfileImage(val url: String) : MyPageEffect
+    data class PreloadImageAndNavigateBack(val url: String) : MyPageEffect
 }

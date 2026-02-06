@@ -60,7 +60,7 @@ internal fun EditProfileRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             MyPageEffect.NavigateBack -> navigateBack()
-            is MyPageEffect.PreloadProfileImage -> {
+            is MyPageEffect.PreloadImageAndNavigateBack -> {
                 val request = ImageRequest.Builder(context)
                     .data(sideEffect.url)
                     .build()

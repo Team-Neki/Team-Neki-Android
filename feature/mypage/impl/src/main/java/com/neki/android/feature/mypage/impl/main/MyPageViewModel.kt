@@ -152,7 +152,7 @@ internal class MyPageViewModel @Inject constructor(
         userRepository.getUserInfo()
             .onSuccess { user ->
                 if (isProfileImageChanged) {
-                    postSideEffect(MyPageEffect.PreloadProfileImage(user.profileImageUrl))
+                    postSideEffect(MyPageEffect.PreloadImageAndNavigateBack(user.profileImageUrl))
                 }
                 reduce {
                     copy(
