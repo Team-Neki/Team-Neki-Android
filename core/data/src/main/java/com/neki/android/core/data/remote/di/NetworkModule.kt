@@ -35,6 +35,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.first
+import dagger.Lazy
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Singleton
@@ -62,10 +63,10 @@ internal object NetworkModule {
     @Provides
     @Singleton
     fun provideAuthCacheManager(
-        httpClient: HttpClient,
+        httpClient: Lazy<HttpClient>,
     ): AuthCacheManager = object : AuthCacheManager {
         override fun invalidateTokenCache() {
-            httpClient.plugin(Auth).providers
+            httpClient.get().plugin(Auth).providers
                 .filterIsInstance<BearerAuthProvider>()
                 .firstOrNull()
                 ?.clearToken()
