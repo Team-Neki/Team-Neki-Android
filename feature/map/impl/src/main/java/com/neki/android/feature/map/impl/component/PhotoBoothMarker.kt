@@ -54,7 +54,7 @@ internal fun PhotoBoothMarker(
         state = rememberUpdatedMarkerState(
             position = LatLng(photoBooth.latitude, photoBooth.longitude),
         ),
-        captionText = photoBooth.brandName,
+        captionText = "${photoBooth.brandName}\n${photoBooth.branchName}",
         captionTextSize = 12.sp,
         captionColor = NekiTheme.colorScheme.gray900,
         onClick = {
