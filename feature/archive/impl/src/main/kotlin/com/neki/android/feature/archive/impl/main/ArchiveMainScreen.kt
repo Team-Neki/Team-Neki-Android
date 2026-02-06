@@ -119,7 +119,8 @@ internal fun ArchiveMainScreen(
                 onClickQRScan = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
                 onClickGallery = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
                 onClickNewAlbum = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
-                onDismissPopup = { onIntent(ArchiveMainIntent.DismissAddDialog) },
+                onDismissAddPopup = { onIntent(ArchiveMainIntent.DismissAddPopup) },
+                onDismissToolTipPopup = { onIntent(ArchiveMainIntent.DismissToolTipPopup) },
             )
             ArchiveMainContent(
                 uiState = uiState,

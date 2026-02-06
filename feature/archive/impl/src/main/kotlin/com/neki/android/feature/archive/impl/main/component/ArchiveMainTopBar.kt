@@ -42,7 +42,8 @@ internal fun ArchiveMainTopBar(
     onClickQRScan: () -> Unit = {},
     onClickGallery: () -> Unit = {},
     onClickNewAlbum: () -> Unit = {},
-    onDismissPopup: () -> Unit = {},
+    onDismissAddPopup: () -> Unit = {},
+    onDismissToolTipPopup: () -> Unit = {},
     showTooltip: Boolean = true,
 ) {
     NekiLeftTitleTopBar(
@@ -67,14 +68,16 @@ internal fun ArchiveMainTopBar(
 
                     if (showAddPopup) {
                         AddPhotoPopup(
-                            onDismissRequest = onDismissPopup,
+                            onDismissRequest = onDismissAddPopup,
                             onClickQRScan = onClickQRScan,
                             onClickGallery = onClickGallery,
                             onClickNewAlbum = onClickNewAlbum,
                         )
                     }
                     if (showTooltip) {
-                        ArchiveToolTip()
+                        ArchiveToolTip(
+                            onDismissRequest = onDismissToolTipPopup,
+                        )
                     }
                 }
                 NekiIconButton(
@@ -92,7 +95,9 @@ internal fun ArchiveMainTopBar(
 }
 
 @Composable
-private fun ArchiveToolTip() {
+private fun ArchiveToolTip(
+    onDismissRequest: () -> Unit = {},
+) {
     val density = LocalDensity.current
     val popupOffsetX = with(density) { 1.dp.toPx().toInt() }
     val popupOffsetY = with(density) { 47.dp.toPx().toInt() }
@@ -103,6 +108,7 @@ private fun ArchiveToolTip() {
         color = NekiTheme.colorScheme.gray800,
         offset = offset,
         alignment = Alignment.TopEnd,
+        onDismissRequest = onDismissRequest,
     )
 }
 

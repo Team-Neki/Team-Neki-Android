@@ -60,7 +60,8 @@ class ArchiveMainViewModel @Inject constructor(
 
             // TopBar Intent
             ArchiveMainIntent.ClickAddIcon -> reduce { copy(isShowAddDialog = true) }
-            ArchiveMainIntent.DismissAddDialog -> reduce { copy(isShowAddDialog = false) }
+            ArchiveMainIntent.DismissAddPopup -> reduce { copy(isShowAddDialog = false) }
+            ArchiveMainIntent.DismissToolTipPopup -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickQRScanRow -> {
                 reduce { copy(isShowAddDialog = false) }
                 postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)

@@ -28,10 +28,12 @@ fun ToolTipPopup(
     color: Color,
     offset: IntOffset,
     alignment: Alignment,
+    onDismissRequest: () -> Unit,
 ) {
     Popup(
         alignment = alignment,
         offset = offset,
+        onDismissRequest = onDismissRequest,
     ) {
         ToolTipContent(
             tooltipText = tooltipText,
