@@ -33,7 +33,7 @@ internal fun ArchiveMainTitleRow(
     ) {
         Text(
             text = title,
-            style = NekiTheme.typography.title20SemiBold,
+            style = NekiTheme.typography.title20Bold,
             color = NekiTheme.colorScheme.gray900,
         )
         NekiTextButton(

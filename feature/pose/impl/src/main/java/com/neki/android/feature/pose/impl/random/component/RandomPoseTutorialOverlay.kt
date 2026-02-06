@@ -23,7 +23,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.modifier.backgroundHazeBlur
-import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.core.ui.compose.VerticalSpacer
@@ -35,15 +34,20 @@ import dev.chrisbanes.haze.rememberHazeState
 @Composable
 internal fun RandomPoseTutorialOverlay(
     onClickStart: () -> Unit,
-    hazeState: HazeState = rememberHazeState(),
     modifier: Modifier = Modifier,
+    hazeState: HazeState = rememberHazeState(),
 ) {
     Box(
-        modifier = modifier.noRippleClickable {}, // 터치 이벤트 소비용
+        modifier = modifier,
     ) {
         Column(
             modifier = Modifier
-                .backgroundHazeBlur(hazeState)
+                .backgroundHazeBlur(
+                    hazeState = hazeState,
+                    color = Color(0xFF202227),
+                    blurRadius = 12.dp,
+                    alpha = 0.9f,
+                )
                 .fillMaxSize()
                 .padding(top = 60.dp, bottom = 34.dp),
         ) {
