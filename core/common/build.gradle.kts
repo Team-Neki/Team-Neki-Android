@@ -10,7 +10,7 @@ android {
 
 dependencies {
     api(libs.timber)
+    api(libs.kakao.user)
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.core.ktx)
-
 }

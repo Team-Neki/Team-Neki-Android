@@ -70,4 +70,6 @@ sealed interface MyPageEffect {
     data class MoveAppSettings(val permission: NekiPermission) : MyPageEffect
     data class RequestPermission(val permission: NekiPermission) : MyPageEffect
     data object OpenOssLicenses : MyPageEffect
+    data object LogoutWithKakao : MyPageEffect
+    data object UnlinkWithKakao : MyPageEffect
 }

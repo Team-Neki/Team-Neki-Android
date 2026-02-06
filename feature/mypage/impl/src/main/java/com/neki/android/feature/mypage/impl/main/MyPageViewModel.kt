@@ -177,7 +177,7 @@ internal class MyPageViewModel @Inject constructor(
 
     private fun logout(postSideEffect: (MyPageEffect) -> Unit) = viewModelScope.launch {
         tokenRepository.clearTokens()
-        postSideEffect(MyPageEffect.NavigateToLogin)
+        postSideEffect(MyPageEffect.LogoutWithKakao)
     }
 
     private fun withdrawAccount(
@@ -188,7 +188,8 @@ internal class MyPageViewModel @Inject constructor(
         authRepository.withdrawAccount()
             .onSuccess {
                 tokenRepository.clearTokens()
-                postSideEffect(MyPageEffect.NavigateToLogin)
+                reduce { copy(isLoading = false) }
+                postSideEffect(MyPageEffect.UnlinkWithKakao)
             }
             .onFailure {
                 Timber.e(it)
