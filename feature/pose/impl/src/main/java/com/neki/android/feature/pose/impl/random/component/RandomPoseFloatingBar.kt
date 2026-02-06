@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.pose.impl.R
 import com.neki.android.core.designsystem.R as DesignR
 
 @Composable
@@ -123,7 +122,7 @@ private fun RandomPoseFloatingBar(
             ) {
                 Icon(
                     modifier = Modifier.size(24.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_top_right),
+                    imageVector = ImageVector.vectorResource(DesignR.drawable.icon_arrow_top_right),
                     contentDescription = "상세 보기",
                     tint = NekiTheme.colorScheme.white,
                 )
@@ -136,8 +135,8 @@ private fun RandomPoseFloatingBar(
                 Icon(
                     modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(
-                        if (isScrapped) R.drawable.icon_scrap
-                        else R.drawable.icon_scrap_unselected,
+                        if (isScrapped) DesignR.drawable.icon_scrap
+                        else DesignR.drawable.icon_scrap_unselected,
                     ),
                     contentDescription = "스크랩",
                     tint = NekiTheme.colorScheme.white,

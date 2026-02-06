@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.pose.impl.R
+import com.neki.android.core.designsystem.R as DesignR
 
 @Composable
 internal fun RecommendationChip(
@@ -35,7 +35,7 @@ internal fun RecommendationChip(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.icon_repeat_recommendation),
+            imageVector = ImageVector.vectorResource(DesignR.drawable.icon_repeat_recommendation),
             contentDescription = null,
             tint = Color.Unspecified,
         )

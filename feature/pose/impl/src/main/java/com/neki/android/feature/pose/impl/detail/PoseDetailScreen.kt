@@ -27,7 +27,7 @@ import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.pose.api.PoseResult
-import com.neki.android.feature.pose.impl.R
+import com.neki.android.core.designsystem.R as DesignR
 
 @Composable
 internal fun PoseDetailRoute(
@@ -94,8 +94,8 @@ internal fun PoseDetailScreen(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(
-                    if (uiState.pose.isScrapped) R.drawable.icon_scrap
-                    else R.drawable.icon_scrap_unselected,
+                    if (uiState.pose.isScrapped) DesignR.drawable.icon_scrap
+                    else DesignR.drawable.icon_scrap_unselected,
                 ),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.gray500,
