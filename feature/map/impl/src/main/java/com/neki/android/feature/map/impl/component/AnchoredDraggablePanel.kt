@@ -41,6 +41,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
@@ -208,7 +211,12 @@ internal fun AnchoredPanelContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "가까운 네컷 사진 브랜드 \uD83D\uDCCC",
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(color = NekiTheme.colorScheme.primary400)) {
+                        append("가까운")
+                    }
+                    append(" 네컷 사진 브랜드 📌")
+                },
                 color = NekiTheme.colorScheme.gray900,
                 style = NekiTheme.typography.title18Bold,
             )
