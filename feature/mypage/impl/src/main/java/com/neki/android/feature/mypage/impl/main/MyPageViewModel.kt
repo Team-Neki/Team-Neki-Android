@@ -126,6 +126,7 @@ internal class MyPageViewModel @Inject constructor(
                 }
             }
             .onFailure {
+                Timber.e(it)
                 reduce { copy(isLoading = false) }
             }
     }
