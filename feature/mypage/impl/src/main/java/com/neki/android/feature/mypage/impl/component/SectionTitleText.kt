@@ -28,7 +28,7 @@ internal fun SectionTitleText(
                 bottom = paddingBottom,
             ),
         text = text,
-        style = NekiTheme.typography.caption12Medium,
+        style = NekiTheme.typography.body14Medium,
         color = NekiTheme.colorScheme.gray400,
     )
 }

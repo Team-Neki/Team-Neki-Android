@@ -40,12 +40,12 @@ internal fun PermissionSectionItem(
             Text(
                 text = title,
                 color = NekiTheme.colorScheme.gray900,
-                style = NekiTheme.typography.body16Medium,
+                style = NekiTheme.typography.title18Medium,
             )
             Text(
                 text = subTitle,
                 color = NekiTheme.colorScheme.gray400,
-                style = NekiTheme.typography.caption12Medium,
+                style = NekiTheme.typography.body14Medium,
             )
         }
         Row(

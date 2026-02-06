@@ -35,7 +35,7 @@ internal fun SectionItem(
         Text(
             text = text,
             color = NekiTheme.colorScheme.gray900,
-            style = NekiTheme.typography.body16Medium,
+            style = NekiTheme.typography.title18Medium,
         )
 
         trailingContent?.invoke()

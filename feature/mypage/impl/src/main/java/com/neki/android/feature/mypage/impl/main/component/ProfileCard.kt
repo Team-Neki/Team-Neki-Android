@@ -59,7 +59,7 @@ internal fun ProfileCard(
             )
             Text(
                 text = "$loginType 로그인",
-                style = NekiTheme.typography.caption12Regular,
+                style = NekiTheme.typography.body14Regular,
                 color = NekiTheme.colorScheme.gray600,
             )
         }
