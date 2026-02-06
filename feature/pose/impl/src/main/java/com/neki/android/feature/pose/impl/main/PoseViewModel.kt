@@ -37,7 +37,7 @@ internal class PoseViewModel @Inject constructor(
         headCount to isScrapOnly
     }.flatMapLatest { (headCount, isScrapOnly) ->
         if (isScrapOnly) {
-            poseRepository.getScrappedPosesFlow(sortOrder = SortOrder.DESC)
+            poseRepository.getScrappedPosesFlow()
         } else {
             poseRepository.getPosesFlow(
                 headCount = headCount,
