@@ -275,7 +275,7 @@ private fun ArchiveMainScreenPreview() {
 
     val favoriteAlbum = AlbumPreview(
         id = 0,
-        title = "즐겨찾는 사진",
+        title = "즐겨찾기",
         thumbnailUrl = "https://picsum.photos/seed/fav1/200/300",
         photoCount = 5,
     )
@@ -296,7 +296,7 @@ private fun ArchiveMainScreenPreview() {
 private fun ArchiveMainScreenEmptyPreview() {
     val favoriteAlbum = AlbumPreview(
         id = 0,
-        title = "즐겨찾는 사진",
+        title = "즐겨찾기",
     )
 
     NekiTheme {

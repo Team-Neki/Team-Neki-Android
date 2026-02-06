@@ -247,7 +247,7 @@ private fun FavoriteAlbumFolderPreview() {
     NekiTheme {
         AlbumFolder(
             isFavorite = true,
-            title = "즐겨찾는 사진",
+            title = "즐겨찾기",
             photoCount = 12,
         )
     }

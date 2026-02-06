@@ -107,7 +107,7 @@ internal fun AlbumDetailScreen(
     ) {
         AlbumDetailTopBar(
             hasNoPhoto = isEmpty,
-            title = if (uiState.isFavoriteAlbum) "즐겨찾는 사진" else uiState.title,
+            title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
             selectMode = uiState.selectMode,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
             onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectButton) },

@@ -54,7 +54,7 @@ class PhotoService @Inject constructor(
         }.body()
     }
 
-    // 즐겨찾기 사진 조회
+    // 즐겨찾는 앨범 조회
     suspend fun getFavoritePhotos(
         page: Int = 0,
         size: Int = 20,
