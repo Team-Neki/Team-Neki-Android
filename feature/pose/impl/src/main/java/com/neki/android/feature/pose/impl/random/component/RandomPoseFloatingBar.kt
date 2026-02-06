@@ -136,7 +136,7 @@ private fun RandomPoseFloatingBar(
                 Icon(
                     modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(
-                        if (isScrapped) R.drawable.ic_scrap_selected
+                        if (isScrapped) R.drawable.icon_scrap
                         else R.drawable.icon_scrap_unselected,
                     ),
                     contentDescription = "스크랩",

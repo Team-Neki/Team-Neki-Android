@@ -172,5 +172,3 @@ fun PoseContent(
         }
     }
 }
-
-// Preview is not available for PagingItems component

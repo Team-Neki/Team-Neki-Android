@@ -94,7 +94,7 @@ internal fun PoseDetailScreen(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(
-                    if (uiState.pose.isScrapped) R.drawable.ic_scrap_selected
+                    if (uiState.pose.isScrapped) R.drawable.icon_scrap
                     else R.drawable.icon_scrap_unselected,
                 ),
                 contentDescription = null,
