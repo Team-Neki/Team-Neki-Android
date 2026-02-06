@@ -45,7 +45,7 @@ fun Modifier.poseBackground(
 ): Modifier = this.background(
     brush = Brush.verticalGradient(
         colorStops = arrayOf(
-            0f to Color.Black.copy(alpha = 0.4f),
+            0f to Color.Black.copy(alpha = 0.2f),
             134f / 242f to Color.Black.copy(alpha = 0f),
         ),
     ),
