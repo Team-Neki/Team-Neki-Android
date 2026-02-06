@@ -38,6 +38,7 @@ kakao = "2.23.1"
 coil = "3.3.0"
 haze = "1.7.1"
 lottie = "6.7.1"
+exifinterface = "1.4.2"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
@@ -115,6 +116,7 @@ kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-p
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 [plugins]
 # Plugins defined by this project
