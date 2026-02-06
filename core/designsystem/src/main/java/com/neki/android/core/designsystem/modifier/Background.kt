@@ -19,15 +19,20 @@ import dev.chrisbanes.haze.hazeEffect
  */
 fun Modifier.photoGridBackground(
     shape: Shape = RoundedCornerShape(8.dp),
-): Modifier = this.background(
-    brush = Brush.verticalGradient(
-        colorStops = arrayOf(
-            0f to Color.Black.copy(alpha = 0.2f),
-            134f / 242f to Color.Black.copy(alpha = 0f),
+): Modifier = this
+    .background(
+        color = Color.Black.copy(alpha = 0.04f),
+        shape = shape,
+    )
+    .background(
+        brush = Brush.verticalGradient(
+            colorStops = arrayOf(
+                0f to Color.Black.copy(alpha = 0.2f),
+                134f / 242f to Color.Black.copy(alpha = 0f),
+            ),
         ),
-    ),
-    shape = shape,
-)
+        shape = shape,
+    )
 
 /**
  * 블러 효과가 적용된 배경을 설정하는 Modifier 확장 함수
