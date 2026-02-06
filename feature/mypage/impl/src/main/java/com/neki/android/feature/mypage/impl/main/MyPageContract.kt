@@ -1,16 +1,15 @@
 package com.neki.android.feature.mypage.impl.main
 
-import android.net.Uri
 import com.neki.android.core.model.UserInfo
 import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
-import com.neki.android.feature.mypage.impl.profile.model.SelectedProfileImage
+import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 
 data class MyPageState(
     val isLoading: Boolean = false,
     val userInfo: UserInfo = UserInfo(),
     val appVersion: String = "",
-    val selectedProfileImage: SelectedProfileImage = SelectedProfileImage.NoChange,
+    val profileImageState: EditProfileImageType = EditProfileImageType.OriginalImageUrl(""),
     val isShowLogoutDialog: Boolean = false,
     val isShowWithdrawDialog: Boolean = false,
     val isShowImageChooseDialog: Boolean = false,
@@ -39,11 +38,8 @@ sealed interface MyPageIntent {
     data object ClickEditIcon : MyPageIntent
     data object ClickCameraIcon : MyPageIntent
     data object DismissImageChooseDialog : MyPageIntent
-    data class SelectProfileImage(val image: SelectedProfileImage) : MyPageIntent
-    data class ClickEditComplete(
-        val nickname: String,
-        val uri: Uri?,
-    ) : MyPageIntent
+    data class SelectProfileImage(val image: EditProfileImageType) : MyPageIntent
+    data class ClickEditComplete(val nickname: String) : MyPageIntent
     data object ClickLogout : MyPageIntent
     data object DismissLogoutDialog : MyPageIntent
     data object ConfirmLogout : MyPageIntent
@@ -72,4 +68,5 @@ sealed interface MyPageEffect {
     data object OpenOssLicenses : MyPageEffect
     data object LogoutWithKakao : MyPageEffect
     data object UnlinkWithKakao : MyPageEffect
+    data class PreloadProfileImage(val url: String) : MyPageEffect
 }

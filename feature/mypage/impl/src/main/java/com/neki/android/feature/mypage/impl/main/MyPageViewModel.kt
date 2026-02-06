@@ -1,10 +1,7 @@
 package com.neki.android.feature.mypage.impl.main
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil3.imageLoader
-import coil3.request.ImageRequest
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -12,9 +9,8 @@ import com.neki.android.core.domain.usecase.UploadProfileImageUseCase
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
-import com.neki.android.feature.mypage.impl.profile.model.SelectedProfileImage
+import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -23,7 +19,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class MyPageViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val uploadProfileImageUseCase: UploadProfileImageUseCase,
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
@@ -55,18 +50,18 @@ internal class MyPageViewModel @Inject constructor(
 
             // Profile
             MyPageIntent.ClickBackIcon -> {
-                reduce { copy(selectedProfileImage = SelectedProfileImage.NoChange) }
+                reduce { copy(profileImageState = EditProfileImageType.OriginalImageUrl(state.userInfo.profileImageUrl)) }
                 postSideEffect(MyPageEffect.NavigateBack)
             }
 
             MyPageIntent.ClickEditIcon -> postSideEffect(MyPageEffect.NavigateToEditProfile)
             MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageChooseDialog = true) }
             MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
-            is MyPageIntent.SelectProfileImage -> reduce { copy(selectedProfileImage = intent.image, isShowImageChooseDialog = false) }
+            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageState = intent.image, isShowImageChooseDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
                 val isNicknameChanged = state.userInfo.nickname != intent.nickname
-                val isProfileImageChanged = state.selectedProfileImage != SelectedProfileImage.NoChange
-                updateProfile(intent.nickname, intent.uri, isNicknameChanged, isProfileImageChanged, reduce, postSideEffect)
+                val isProfileImageChanged = state.profileImageState !is EditProfileImageType.OriginalImageUrl
+                updateProfile(state, intent.nickname, isNicknameChanged, isProfileImageChanged, reduce, postSideEffect)
             }
 
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
@@ -132,15 +127,14 @@ internal class MyPageViewModel @Inject constructor(
     }
 
     private fun updateProfile(
+        state: MyPageState,
         nickname: String,
-        uri: android.net.Uri?,
         isNicknameChanged: Boolean,
         isProfileImageChanged: Boolean,
         reduce: (MyPageState.() -> MyPageState) -> Unit,
         postSideEffect: (MyPageEffect) -> Unit,
     ) = viewModelScope.launch {
         if (!isNicknameChanged && !isProfileImageChanged) {
-            reduce { copy(selectedProfileImage = SelectedProfileImage.NoChange) }
             postSideEffect(MyPageEffect.NavigateBack)
             return@launch
         }
@@ -149,29 +143,33 @@ internal class MyPageViewModel @Inject constructor(
 
         buildList {
             if (isNicknameChanged) add(async { userRepository.updateUserInfo(nickname = nickname) })
-            if (isProfileImageChanged) add(async { uploadProfileImageUseCase(uri = uri) })
+            if (isProfileImageChanged) {
+                val uri = (state.profileImageState as? EditProfileImageType.ImageUri)?.uri
+                add(async { uploadProfileImageUseCase(uri = uri) })
+            }
         }.awaitAll()
 
         userRepository.getUserInfo()
             .onSuccess { user ->
                 if (isProfileImageChanged) {
-                    val request = ImageRequest.Builder(context)
-                        .data(user.profileImageUrl)
-                        .build()
-                    context.imageLoader.execute(request)
+                    postSideEffect(MyPageEffect.PreloadProfileImage(user.profileImageUrl))
                 }
-
                 reduce {
                     copy(
                         isLoading = false,
-                        selectedProfileImage = SelectedProfileImage.NoChange,
+                        profileImageState = EditProfileImageType.OriginalImageUrl(user.profileImageUrl),
                         userInfo = user,
                     )
                 }
-                postSideEffect(MyPageEffect.NavigateBack)
             }
             .onFailure {
-                reduce { copy(isLoading = false, selectedProfileImage = SelectedProfileImage.NoChange) }
+                Timber.e(it)
+                reduce {
+                    copy(
+                        isLoading = false,
+                        profileImageState = EditProfileImageType.OriginalImageUrl(state.userInfo.profileImageUrl),
+                    )
+                }
                 postSideEffect(MyPageEffect.NavigateBack)
             }
     }
