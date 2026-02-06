@@ -150,7 +150,7 @@ internal fun AlbumDetailScreen(
 }
 
 @Composable
-fun AlbumDetailContent(
+internal fun AlbumDetailContent(
     uiState: AlbumDetailState,
     pagingItems: LazyPagingItems<Photo>,
     lazyState: LazyStaggeredGridState,
