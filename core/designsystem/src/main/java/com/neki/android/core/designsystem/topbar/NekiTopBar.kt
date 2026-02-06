@@ -27,7 +27,7 @@ fun NekiTitleTopBar(
             Text(
                 modifier = modifier,
                 text = title,
-                style = NekiTheme.typography.title18SemiBold,
+                style = NekiTheme.typography.title20SemiBold,
                 color = NekiTheme.colorScheme.gray900,
             )
         },

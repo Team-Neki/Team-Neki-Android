@@ -29,7 +29,7 @@ internal fun PoseTopBar(
         title = {
             Text(
                 text = "포즈",
-                style = NekiTheme.typography.title18SemiBold,
+                style = NekiTheme.typography.title20SemiBold,
                 color = NekiTheme.colorScheme.gray900,
             )
         },
