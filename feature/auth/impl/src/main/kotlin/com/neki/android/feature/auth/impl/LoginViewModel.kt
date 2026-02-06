@@ -2,7 +2,6 @@ package com.neki.android.feature.auth.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.dataapi.auth.AuthCacheManager
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
@@ -19,7 +18,6 @@ class LoginViewModel @Inject constructor(
     private val authEventManager: AuthEventManager,
     private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
-    private val authCacheManager: AuthCacheManager,
 ) : ViewModel() {
     val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
         mviIntentStore(
@@ -48,7 +46,6 @@ class LoginViewModel @Inject constructor(
                 refreshToken = tokenRepository.getRefreshToken().first(),
             ).onSuccess {
                 tokenRepository.saveTokens(it.accessToken, it.refreshToken)
-                authCacheManager.invalidateTokenCache()
                 postSideEffect(LoginSideEffect.NavigateToHome)
             }.onFailure { exception ->
                 Timber.e(exception)
@@ -71,7 +68,6 @@ class LoginViewModel @Inject constructor(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
                 )
-                authCacheManager.invalidateTokenCache()
                 postSideEffect(LoginSideEffect.NavigateToHome)
             }
             .onFailure { exception ->

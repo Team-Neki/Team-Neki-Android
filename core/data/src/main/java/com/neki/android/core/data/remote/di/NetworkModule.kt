@@ -2,7 +2,6 @@ package com.neki.android.core.data.remote.di
 
 import com.neki.android.core.common.const.Const.TAG_REST_API
 import com.neki.android.core.data.BuildConfig
-import com.neki.android.core.data.remote.api.AuthService
 import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
@@ -18,7 +17,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.plugin
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
@@ -28,6 +26,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.plugin
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody

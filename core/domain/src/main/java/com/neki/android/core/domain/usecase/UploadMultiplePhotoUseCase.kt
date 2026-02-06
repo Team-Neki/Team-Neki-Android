@@ -11,7 +11,6 @@ import com.neki.android.core.model.MediaType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
