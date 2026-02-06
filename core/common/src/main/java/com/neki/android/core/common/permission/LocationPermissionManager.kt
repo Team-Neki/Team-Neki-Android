@@ -13,17 +13,14 @@ object LocationPermissionManager {
     )
 
     fun isGrantedLocationPermission(context: Context): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        ) == PermissionChecker.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-            ) == PermissionChecker.PERMISSION_GRANTED
+        return LOCATION_PERMISSIONS.any { permission ->
+            ContextCompat.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED
+        }
     }
 
     fun shouldShowLocationRationale(activity: Activity): Boolean {
-        return activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
+        return LOCATION_PERMISSIONS.any { permission ->
+            activity.shouldShowRequestPermissionRationale(permission)
+        }
     }
 }

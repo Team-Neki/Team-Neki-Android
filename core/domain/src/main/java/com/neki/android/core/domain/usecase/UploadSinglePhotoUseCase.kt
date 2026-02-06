@@ -3,10 +3,10 @@ package com.neki.android.core.domain.usecase
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.extension.ContentTypeUtil
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.Media
 import com.neki.android.core.model.MediaType
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +20,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
         contentType: ContentType = ContentType.JPEG,
         folderId: Long? = null,
     ): Result<Media> = runSuspendCatching {
-        val fileName = generateFileName(contentType)
+        val fileName = ContentTypeUtil.generateFileName(contentType)
 
         // 1. 업로드 티켓 발급 (mediaId, presignedUrl)
         val (mediaId, presignedUrl) = mediaUploadRepository.getSingleUploadTicket(
@@ -48,13 +48,5 @@ class UploadSinglePhotoUseCase @Inject constructor(
             fileName = fileName,
             contentType = contentType,
         )
-    }
-
-    private fun generateFileName(contentType: ContentType): String {
-        val extension = when (contentType) {
-            ContentType.JPEG -> "jpeg"
-            ContentType.PNG -> "png"
-        }
-        return "${UUID.randomUUID()}.$extension"
     }
 }

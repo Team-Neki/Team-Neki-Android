@@ -12,8 +12,18 @@ class NavigatorImpl @Inject constructor(
     val state: NavigationState,
 ) : Navigator {
     override fun navigateRoot(rootNavKey: RootNavKey) {
+        clearRootSubStack()
         rootState.stack.clear()
         rootState.stack.add(rootNavKey)
+    }
+
+    private fun clearRootSubStack() {
+        state.topLevelStack.clear()
+        state.topLevelStack.add(state.startKey)
+        state.subStacks.forEach { (key, stack) ->
+            stack.clear()
+            stack.add(key)
+        }
     }
 
     override fun navigate(key: NavKey) {

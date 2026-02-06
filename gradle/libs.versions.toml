@@ -37,6 +37,8 @@ barcodeScanning = "17.3.0"
 kakao = "2.23.1"
 coil = "3.3.0"
 haze = "1.7.1"
+ossLicensesLib = "17.2.1"
+ossLicensesPlugin = "0.10.7"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
@@ -107,6 +109,8 @@ haze-materials = { group = "dev.chrisbanes.haze", name = "haze-materials", versi
 
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 
+oss-licenses = { group = "com.google.android.gms", name = "play-services-oss-licenses", version.ref = "ossLicensesLib" }
+
 # Dependencies of the included build-logic
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -133,3 +137,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+oss-licenses = { id = "com.google.android.gms.oss-licenses-plugin", version.ref = "ossLicensesPlugin" }

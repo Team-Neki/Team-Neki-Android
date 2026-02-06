@@ -4,6 +4,7 @@ import kotlin.apply
 plugins {
     alias(libs.plugins.neki.android.application)
     alias(libs.plugins.neki.android.application.compose)
+    alias(libs.plugins.oss.licenses)
 }
 
 val localPropertiesFile = project.rootProject.file("local.properties")
@@ -28,6 +29,26 @@ android {
             properties["KAKAO_NATIVE_APP_KEY"].toString()
         )
     }
+
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file("neki_key_store.jks")
+            storePassword = properties["STORE_PASSWORD"].toString()
+            keyAlias = properties["KEY_ALIAS"].toString()
+            keyPassword = properties["KEY_PASSWORD"].toString()
+        }
+    }
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
+
 }
 
 dependencies {

@@ -11,7 +11,7 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun SectionTitleText(
+internal fun SectionTitleText(
     text: String,
     paddingTop: Dp = 12.dp,
     paddingBottom: Dp = 4.dp,

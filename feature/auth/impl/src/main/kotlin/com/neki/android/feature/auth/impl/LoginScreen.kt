@@ -2,7 +2,6 @@ package com.neki.android.feature.auth.impl
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -11,8 +10,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.common.kakao.KakaoAuthHelper
 import com.neki.android.feature.auth.impl.component.LoginContent
-import com.neki.android.feature.auth.impl.util.KakaoLoginHelper
 import timber.log.Timber
 
 @Composable
@@ -23,19 +22,15 @@ fun LoginRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-    val kakaoLoginHelper = remember { KakaoLoginHelper(context) }
+    val kakaoAuthHelper = remember { KakaoAuthHelper(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToHome -> {
-                Timber.d("홈 화면으로 이동하거나 API를 호출하거나")
-            }
-
+            LoginSideEffect.NavigateToHome -> navigateToMain()
             LoginSideEffect.NavigateToKakaoRedirectingUri -> {
-                kakaoLoginHelper.loginWithKakao(
+                kakaoAuthHelper.login(
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
-                        navigateToMain() // 제거 예정
                         viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))
                     },
                     onFailure = { message ->
@@ -48,10 +43,6 @@ fun LoginRoute(
                 Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.store.onIntent(LoginIntent.EnterLoginScreen)
     }
 
     LoginScreen(
