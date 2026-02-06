@@ -30,6 +30,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
+import com.neki.android.core.designsystem.logo.PrimaryNekiTypoLogo
 import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.topbar.NekiLeftTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -50,12 +51,7 @@ internal fun ArchiveMainTopBar(
     NekiLeftTitleTopBar(
         modifier = modifier,
         title = {
-            Box(
-                modifier = Modifier
-                    .height(28.dp)
-                    .width(56.dp)
-                    .background(color = Color(0xFFB7B9C3)),
-            )
+            PrimaryNekiTypoLogo()
         },
         actions = {
             Row(
