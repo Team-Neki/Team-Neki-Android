@@ -12,4 +12,5 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.oss.licenses)
+    implementation(libs.kakao.user)
 }
