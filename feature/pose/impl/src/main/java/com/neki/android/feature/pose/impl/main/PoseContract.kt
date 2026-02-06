@@ -27,6 +27,7 @@ sealed interface PoseIntent {
     data object ClickRandomPoseRecommendation : PoseIntent
     data class ClickRandomPosePeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseBottomSheetSelectButton : PoseIntent
+    data class ScrapChanged(val poseId: Long, val isScrapped: Boolean) : PoseIntent
 }
 
 sealed interface PoseEffect {

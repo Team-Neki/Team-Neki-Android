@@ -4,6 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.neki.android.core.data.paging.PosePagingSource
+import com.neki.android.core.data.paging.ScrapPosePagingSource
 import com.neki.android.core.data.remote.api.PoseService
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.PoseRepository
@@ -35,6 +36,25 @@ class PoseRepositoryImpl @Inject constructor(
                 PosePagingSource(
                     poseService = poseService,
                     headCount = headCount,
+                    sortOrder = sortOrder,
+                )
+            },
+        ).flow
+    }
+
+    override fun getScrappedPosesFlow(
+        sortOrder: SortOrder,
+    ): Flow<PagingData<Pose>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                initialLoadSize = PAGE_SIZE,
+                prefetchDistance = PREFETCH_DISTANCE,
+                enablePlaceholders = false,
+            ),
+            pagingSourceFactory = {
+                ScrapPosePagingSource(
+                    poseService = poseService,
                     sortOrder = sortOrder,
                 )
             },

@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.neki.android.core.model.PeopleCount
@@ -29,6 +30,7 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
 import com.neki.android.feature.pose.impl.main.component.FilterBar
 import com.neki.android.feature.pose.impl.main.component.PeopleCountBottomSheet
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.feature.pose.impl.main.component.PoseListContent
 import com.neki.android.feature.pose.impl.main.component.PoseTopBar
 import com.neki.android.feature.pose.impl.main.component.RandomPosePeopleCountBottomSheet
@@ -67,6 +69,12 @@ fun PoseScreen(
     posePagingItems: LazyPagingItems<Pose>,
     onIntent: (PoseIntent) -> Unit = {},
 ) {
+    val isRefreshing by remember {
+        derivedStateOf {
+            posePagingItems.loadState.refresh is LoadState.Loading && posePagingItems.itemCount == 0
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -86,6 +94,10 @@ fun PoseScreen(
                 .padding(bottom = 24.dp),
             onClick = { onIntent(PoseIntent.ClickRandomPoseRecommendation) },
         )
+    }
+
+    if (isRefreshing) {
+        LoadingDialog()
     }
 
     if (uiState.isShowPeopleCountBottomSheet) {
@@ -160,5 +172,3 @@ fun PoseContent(
         }
     }
 }
-
-// Preview is not available for PagingItems component

@@ -121,7 +121,11 @@ internal fun AllPhotoScreen(
         }
     }
 
-    val isRefreshing by remember { derivedStateOf { pagingItems.loadState.refresh is LoadState.Loading } }
+    val isRefreshing by remember {
+        derivedStateOf {
+            pagingItems.loadState.refresh is LoadState.Loading && pagingItems.itemCount == 0
+        }
+    }
 
     BackHandler(enabled = true) {
         onIntent(AllPhotoIntent.OnBackPressed)

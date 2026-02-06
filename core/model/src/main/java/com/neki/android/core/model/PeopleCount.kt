@@ -8,7 +8,6 @@ enum class PeopleCount(val displayText: String, val value: Int) {
     TWO("2인", 2),
     THREE("3인", 3),
     FOUR("4인", 4),
-    FIVE_OR_MORE("5인 이상", 5),
     ;
 
     override fun toString(): String = displayText

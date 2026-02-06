@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,22 @@ fun Modifier.photoBackground(
         ),
         start = Offset(0f, Float.POSITIVE_INFINITY),
         end = Offset(Float.POSITIVE_INFINITY, 0f),
+    ),
+    shape = shape,
+)
+
+/**
+ * 포즈 컴포넌트에 적용되는 그라데이션 배경
+ * 상단에서 134/242 지점까지 어두워지는 효과
+ */
+fun Modifier.poseBackground(
+    shape: Shape = RoundedCornerShape(12.dp),
+): Modifier = this.background(
+    brush = Brush.verticalGradient(
+        colorStops = arrayOf(
+            0f to Color.Black.copy(alpha = 0.2f),
+            134f / 242f to Color.Black.copy(alpha = 0f),
+        ),
     ),
     shape = shape,
 )
