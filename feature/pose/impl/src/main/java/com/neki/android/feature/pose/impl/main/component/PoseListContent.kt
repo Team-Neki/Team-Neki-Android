@@ -30,7 +30,7 @@ import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.modifier.poseBackground
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
-import com.neki.android.core.designsystem.R as DesignR
+import com.neki.android.core.designsystem.R
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_VERTICAL_SPACING
 
@@ -94,7 +94,7 @@ private fun PoseItem(
                     .align(Alignment.TopEnd)
                     .padding(top = 10.dp, end = 10.dp)
                     .size(20.dp),
-                imageVector = ImageVector.vectorResource(DesignR.drawable.icon_scrap),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_scrap),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.white,
             )
