@@ -31,7 +31,7 @@ internal fun OnboardingRoute(
 }
 
 @Composable
-internal fun OnboardingScreen(
+private fun OnboardingScreen(
     onClickLoginButton: () -> Unit = {},
 ) {
     val pages = OnboardingPage.entries

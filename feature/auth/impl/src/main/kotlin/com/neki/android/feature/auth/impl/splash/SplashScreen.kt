@@ -34,7 +34,7 @@ internal fun SplashRoute(
 }
 
 @Composable
-internal fun SplashScreen() {
+private fun SplashScreen() {
     SplashBackground(
         modifier = Modifier.fillMaxSize()
     )
@@ -42,7 +42,7 @@ internal fun SplashScreen() {
 
 @ComponentPreview
 @Composable
-internal fun SplashScreenPreview() {
+private fun SplashScreenPreview() {
     NekiTheme {
         SplashScreen()
     }
