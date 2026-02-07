@@ -1,7 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.album
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,7 +70,6 @@ internal fun UploadAlbumScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item {
                 FavoriteAlbumRowComponent(album = uiState.favoriteAlbum)
@@ -103,7 +101,7 @@ private fun UploadAlbumScreenPreview() {
     NekiTheme {
         UploadAlbumScreen(
             uiState = UploadAlbumState(
-                favoriteAlbum = AlbumPreview(id = 0, title = "즐겨찾는 사진", photoCount = 3),
+                favoriteAlbum = AlbumPreview(id = 0, title = "즐겨찾기", photoCount = 3),
                 albums = persistentListOf(
                     AlbumPreview(id = 1, title = "제주도 여행 2024", photoCount = 4),
                     AlbumPreview(id = 2, title = "가족 생일파티", photoCount = 2),
@@ -121,7 +119,7 @@ private fun UploadAlbumScreenSelectingPreview() {
     NekiTheme {
         UploadAlbumScreen(
             uiState = UploadAlbumState(
-                favoriteAlbum = AlbumPreview(id = 0, title = "즐겨찾는 사진", photoCount = 3),
+                favoriteAlbum = AlbumPreview(id = 0, title = "즐겨찾기", photoCount = 3),
                 albums = persistentListOf(
                     AlbumPreview(id = 1, title = "제주도 여행 2024", photoCount = 4),
                     AlbumPreview(id = 2, title = "가족 생일파티", photoCount = 2),

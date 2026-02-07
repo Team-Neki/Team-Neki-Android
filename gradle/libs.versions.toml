@@ -37,6 +37,8 @@ barcodeScanning = "17.3.0"
 kakao = "2.23.1"
 coil = "3.3.0"
 haze = "1.7.1"
+lottie = "6.7.1"
+exifinterface = "1.4.2"
 ossLicensesLib = "17.2.1"
 ossLicensesPlugin = "0.10.7"
 
@@ -107,6 +109,8 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haze" }
 haze-materials = { group = "dev.chrisbanes.haze", name = "haze-materials", version.ref = "haze" }
 
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 
 oss-licenses = { group = "com.google.android.gms", name = "play-services-oss-licenses", version.ref = "ossLicensesLib" }
@@ -116,6 +120,7 @@ kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-p
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 [plugins]
 # Plugins defined by this project

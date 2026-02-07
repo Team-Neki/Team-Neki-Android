@@ -18,6 +18,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.collections.immutable)
 
+    implementation(libs.lottie.compose)
+
     api(libs.coil.compose)
     api(libs.coil.network.okhttp)
 }

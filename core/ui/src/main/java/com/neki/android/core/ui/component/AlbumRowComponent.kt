@@ -45,7 +45,7 @@ fun FavoriteAlbumRowComponent(
         )
 
         AlbumInfo(
-            title = "즐겨찾는 사진",
+            title = "즐겨찾기",
             photoCount = album.photoCount,
         )
     }
@@ -168,7 +168,7 @@ private fun FavoriteAlbumRowComponentPreview() {
         FavoriteAlbumRowComponent(
             album = AlbumPreview(
                 id = 0,
-                title = "즐겨찾는 사진",
+                title = "즐겨찾기",
             ),
         )
     }

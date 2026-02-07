@@ -32,7 +32,8 @@ sealed interface ArchiveMainIntent {
 
     // TopBar Intent
     data object ClickAddIcon : ArchiveMainIntent
-    data object DismissAddDialog : ArchiveMainIntent
+    data object DismissAddPopup : ArchiveMainIntent
+    data object DismissToolTipPopup : ArchiveMainIntent
     data object ClickQRScanRow : ArchiveMainIntent
 
     data object ClickGalleryUploadRow : ArchiveMainIntent

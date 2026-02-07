@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.main.component
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,17 +8,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
@@ -30,7 +26,9 @@ import androidx.compose.ui.window.PopupProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
+import com.neki.android.core.designsystem.logo.PrimaryNekiTypoLogo
 import com.neki.android.core.designsystem.modifier.dropdownShadow
+import com.neki.android.core.designsystem.popup.ToolTipPopup
 import com.neki.android.core.designsystem.topbar.NekiLeftTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.archive.impl.R as ArchiveR
@@ -44,18 +42,14 @@ internal fun ArchiveMainTopBar(
     onClickQRScan: () -> Unit = {},
     onClickGallery: () -> Unit = {},
     onClickNewAlbum: () -> Unit = {},
-    onDismissPopup: () -> Unit = {},
+    onDismissAddPopup: () -> Unit = {},
+    onDismissToolTipPopup: () -> Unit = {},
     showTooltip: Boolean = true,
 ) {
     NekiLeftTitleTopBar(
         modifier = modifier,
         title = {
-            Box(
-                modifier = Modifier
-                    .height(28.dp)
-                    .width(56.dp)
-                    .background(color = Color(0xFFB7B9C3)),
-            )
+            PrimaryNekiTypoLogo()
         },
         actions = {
             Row(
@@ -74,14 +68,16 @@ internal fun ArchiveMainTopBar(
 
                     if (showAddPopup) {
                         AddPhotoPopup(
-                            onDismissRequest = onDismissPopup,
+                            onDismissRequest = onDismissAddPopup,
                             onClickQRScan = onClickQRScan,
                             onClickGallery = onClickGallery,
                             onClickNewAlbum = onClickNewAlbum,
                         )
                     }
                     if (showTooltip) {
-                        ToolTip()
+                        ArchiveToolTip(
+                            onDismissRequest = onDismissToolTipPopup,
+                        )
                     }
                 }
                 NekiIconButton(
@@ -99,68 +95,21 @@ internal fun ArchiveMainTopBar(
 }
 
 @Composable
-private fun ToolTip() {
-    val caretColor = NekiTheme.colorScheme.gray800
+private fun ArchiveToolTip(
+    onDismissRequest: () -> Unit = {},
+) {
     val density = LocalDensity.current
-
     val popupOffsetX = with(density) { 1.dp.toPx().toInt() }
     val popupOffsetY = with(density) { 47.dp.toPx().toInt() }
+    val offset = IntOffset(popupOffsetX, popupOffsetY)
 
-    Popup(
+    ToolTipPopup(
+        tooltipText = "버튼을 눌러 네컷을 추가할 수 있어요",
+        color = NekiTheme.colorScheme.gray800,
+        offset = offset,
         alignment = Alignment.TopEnd,
-        offset = IntOffset(popupOffsetX, popupOffsetY),
-    ) {
-        Column(
-            modifier = Modifier.width(IntrinsicSize.Max),
-        ) {
-            // 꼬리 (오른쪽 정렬, 오른쪽에서 16dp)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 16.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Canvas(modifier = Modifier.size(width = 10.dp, height = 8.dp)) {
-                    val cornerRadius = 2.dp.toPx()
-                    val path = Path().apply {
-                        // 왼쪽 하단에서 시작
-                        moveTo(0f, size.height)
-                        // 왼쪽 하단 -> 꼭대기 (둥근 모서리)
-                        lineTo(
-                            size.width / 2 - cornerRadius,
-                            cornerRadius,
-                        )
-                        quadraticTo(
-                            size.width / 2,
-                            0f,
-                            size.width / 2 + cornerRadius,
-                            cornerRadius,
-                        )
-                        // 꼭대기 -> 오른쪽 하단
-                        lineTo(size.width, size.height)
-                        close()
-                    }
-                    drawPath(path, caretColor)
-                }
-            }
-
-            // 몸통
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = NekiTheme.colorScheme.gray800,
-                        shape = RoundedCornerShape(8.dp),
-                    )
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-            ) {
-                Text(
-                    text = "버튼을 눌러 네컷을 추가할 수 있어요",
-                    style = NekiTheme.typography.body14Medium,
-                    color = NekiTheme.colorScheme.white,
-                )
-            }
-        }
-    }
+        onDismissRequest = onDismissRequest,
+    )
 }
 
 @Composable
