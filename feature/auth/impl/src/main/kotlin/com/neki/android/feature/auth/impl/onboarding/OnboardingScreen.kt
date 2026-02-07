@@ -14,10 +14,11 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.auth.impl.onboarding.component.OnboardingPage
+import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.auth.impl.onboarding.component.OnboardingPageContent
 import com.neki.android.feature.auth.impl.onboarding.component.TextSection
 import com.neki.android.feature.auth.impl.onboarding.component.PagerIndicator
+import com.neki.android.feature.auth.impl.onboarding.model.OnboardingPage
 
 @Composable
 internal fun OnboardingRoute(
