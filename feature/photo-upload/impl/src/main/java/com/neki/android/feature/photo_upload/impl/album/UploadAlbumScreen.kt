@@ -71,7 +71,6 @@ internal fun UploadAlbumScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item {
                 FavoriteAlbumRowComponent(album = uiState.favoriteAlbum)
