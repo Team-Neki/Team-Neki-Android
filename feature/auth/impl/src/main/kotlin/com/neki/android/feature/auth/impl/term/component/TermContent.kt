@@ -20,13 +20,21 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.auth.impl.term.model.TermAgreement
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentSetOf
 
 @Composable
 fun TermContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    agreedTerms: ImmutableSet<TermAgreement> = persistentSetOf(),
+    isAllRequiredAgreed: Boolean = false,
+    onClickAgreeAll: () -> Unit = {},
+    onClickAgreeTerm: (TermAgreement) -> Unit = {},
+    onClickTermDetail: (TermAgreement) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -45,9 +53,10 @@ fun TermContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .noRippleClickable(onClick = onClickAgreeAll)
                 .border(
                     width = 1.dp,
-                    color = NekiTheme.colorScheme.gray100,
+                    color = if (isAllRequiredAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray100,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .background(
@@ -62,7 +71,7 @@ fun TermContent(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.gray200
+                tint = if (isAllRequiredAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200
             )
             Text(
                 text = "약관 전체 동의",
@@ -72,7 +81,12 @@ fun TermContent(
         }
         VerticalSpacer(12.dp)
         TermAgreement.entries.forEach { agreement ->
-            AgreementSection(agreement = agreement)
+            AgreementSection(
+                agreement = agreement,
+                isAgreed = agreement in agreedTerms,
+                onClickAgree = { onClickAgreeTerm(agreement) },
+                onClickNavigateUrl = { onClickTermDetail(agreement) },
+            )
         }
     }
 }

@@ -1,38 +1,64 @@
 package com.neki.android.feature.auth.impl.term
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.feature.auth.impl.AuthIntent
+import com.neki.android.feature.auth.impl.AuthSideEffect
+import com.neki.android.feature.auth.impl.AuthState
+import com.neki.android.feature.auth.impl.AuthViewModel
 import com.neki.android.feature.auth.impl.term.component.TermContent
 import com.neki.android.feature.auth.impl.term.component.TermTopBar
 
 @Composable
 internal fun TermRoute(
+    viewModel: AuthViewModel = hiltViewModel(),
     navigateToMain: () -> Unit,
+    navigateBack: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
+
+    viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
+        when (sideEffect) {
+            AuthSideEffect.NavigateToMain -> navigateToMain()
+            AuthSideEffect.NavigateBack -> navigateBack()
+            is AuthSideEffect.NavigateUrl -> {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.url))
+                context.startActivity(intent)
+            }
+            else -> {}
+        }
+    }
+
     TermScreen(
-        onClickAgree = navigateToMain,
+        uiState = uiState,
+        onIntent = viewModel.store::onIntent,
     )
 }
 
 @Composable
-internal fun TermScreen(
-    onClickAgree: () -> Unit = {},
+private fun TermScreen(
+    uiState: AuthState = AuthState(),
+    onIntent: (AuthIntent) -> Unit = {},
 ) {
     Column {
         TermTopBar(
-            onClickBack = {}
+            onClickBack = { onIntent(AuthIntent.ClickBack) }
         )
         Column(
             modifier = Modifier
@@ -40,13 +66,18 @@ internal fun TermScreen(
                 .padding(top = 12.dp, start = 20.dp, end = 20.dp, bottom = 34.dp)
         ) {
             TermContent(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                agreedTerms = uiState.agreedTerms,
+                isAllRequiredAgreed = uiState.isAllRequiredAgreed,
+                onClickAgreeAll = { onIntent(AuthIntent.ClickAgreeAll) },
+                onClickAgreeTerm = { onIntent(AuthIntent.ClickAgreeTerm(it)) },
+                onClickTermDetail = { onIntent(AuthIntent.ClickTermNavigateUrl(it)) },
             )
             CTAButtonPrimary(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 text = "다음으로",
-                onClick = onClickAgree,
+                onClick = { onIntent(AuthIntent.ClickNext) },
+                enabled = uiState.isAllRequiredAgreed,
             )
         }
     }

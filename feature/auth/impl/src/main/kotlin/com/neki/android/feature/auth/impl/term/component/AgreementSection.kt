@@ -23,6 +23,7 @@ import com.neki.android.feature.auth.impl.term.model.TermAgreement
 @Composable
 fun AgreementSection(
     agreement: TermAgreement,
+    isAgreed: Boolean = false,
     onClickAgree: () -> Unit = {},
     onClickNavigateUrl: () -> Unit = {},
 ) {
@@ -45,7 +46,7 @@ fun AgreementSection(
                     .size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.gray200
+                tint = if (isAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200
             )
             Text(
                 modifier = Modifier.padding(end = 2.dp),

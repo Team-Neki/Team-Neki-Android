@@ -56,6 +56,7 @@ private fun EntryProviderScope<NavKey>.authEntry(authNavigator: AuthNavigator) {
     ) {
         TermRoute(
             navigateToMain = { authNavigator.navigateRoot(RootNavKey.Main) },
+            navigateBack = authNavigator::goBack,
         )
     }
 }

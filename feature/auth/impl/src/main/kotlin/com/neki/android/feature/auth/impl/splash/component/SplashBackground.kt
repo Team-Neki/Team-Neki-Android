@@ -17,7 +17,6 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.auth.impl.component.GradientBackground
-import com.neki.android.feature.auth.impl.splash.SplashScreen
 
 @Composable
 internal fun SplashBackground(

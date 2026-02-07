@@ -7,7 +7,10 @@ import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.auth.impl.term.model.TermAgreement
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -37,6 +40,38 @@ class AuthViewModel @Inject constructor(
             AuthIntent.ClickKakaoLogin -> postSideEffect(AuthSideEffect.NavigateToKakaoRedirectingUri)
             is AuthIntent.SuccessLogin -> loginWithKakao(intent.idToken, reduce, postSideEffect)
             AuthIntent.FailLogin -> postSideEffect(AuthSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
+
+            // Term
+            AuthIntent.ClickAgreeAll -> {
+                if (state.isAllRequiredAgreed) {
+                    reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
+                } else {
+                    val allRequiredTerms = TermAgreement.entries.filter { it.isRequired }.toPersistentSet()
+                    reduce { copy(agreedTerms = allRequiredTerms, isAllRequiredAgreed = true) }
+                }
+            }
+            is AuthIntent.ClickAgreeTerm -> {
+                val newAgreedTerms = if (intent.term in state.agreedTerms) {
+                    (state.agreedTerms - intent.term).toPersistentSet()
+                } else {
+                    (state.agreedTerms + intent.term).toPersistentSet()
+                }
+                val isAllRequiredAgreed = TermAgreement.entries
+                    .filter { it.isRequired }
+                    .all { it in newAgreedTerms }
+                reduce { copy(agreedTerms = newAgreedTerms, isAllRequiredAgreed = isAllRequiredAgreed) }
+            }
+            is AuthIntent.ClickTermNavigateUrl -> {
+                postSideEffect(AuthSideEffect.NavigateUrl(intent.term.url))
+            }
+            AuthIntent.ClickNext -> {
+                if (state.isAllRequiredAgreed) {
+                    postSideEffect(AuthSideEffect.NavigateToMain)
+                }
+            }
+            AuthIntent.ClickBack -> {
+                postSideEffect(AuthSideEffect.NavigateBack)
+            }
         }
     }
 
