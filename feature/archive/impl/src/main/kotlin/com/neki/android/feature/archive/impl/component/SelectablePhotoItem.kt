@@ -42,9 +42,8 @@ internal fun SelectablePhotoItem(
                     Modifier.border(
                         width = 2.dp,
                         color = NekiTheme.colorScheme.primary400,
-                        shape = RoundedCornerShape(12.dp),
-                    ) else
-                    Modifier.clip(RoundedCornerShape(12.dp)),
+                        shape = RoundedCornerShape(8.dp),
+                    ) else Modifier.clip(RoundedCornerShape(8.dp)),
             ),
             onClickItem = onClickItem,
         )
