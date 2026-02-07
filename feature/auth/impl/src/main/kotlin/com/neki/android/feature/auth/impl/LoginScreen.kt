@@ -1,17 +1,24 @@
 package com.neki.android.feature.auth.impl
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.common.kakao.KakaoAuthHelper
-import com.neki.android.feature.auth.impl.component.LoginContent
+import com.neki.android.feature.auth.impl.component.KakaoLoginButton
+import com.neki.android.feature.auth.impl.component.LoginBackground
+import com.neki.android.feature.auth.impl.component.LoginBottomContent
 import timber.log.Timber
 
 @Composable
@@ -56,12 +63,16 @@ fun LoginScreen(
     uiState: LoginState = LoginState(),
     onIntent: (LoginIntent) -> Unit = {},
 ) {
-    LoginContent(
-        onClickKakaoLogin = { onIntent(LoginIntent.ClickKakaoLogin) },
-    )
+    Box {
+        LoginBackground()
+        LoginBottomContent(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            onClick = { onIntent(LoginIntent.ClickKakaoLogin) },
+        )
+    }
 }
 
-@Preview(showBackground = true)
+@ComponentPreview
 @Composable
 private fun LoginScreenPreview() {
     NekiTheme {
