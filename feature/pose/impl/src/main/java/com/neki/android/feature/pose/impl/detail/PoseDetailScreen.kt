@@ -23,9 +23,11 @@ import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
+import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import com.neki.android.feature.pose.impl.R
+import com.neki.android.feature.pose.api.PoseResult
+import com.neki.android.core.designsystem.R
 
 @Composable
 internal fun PoseDetailRoute(
@@ -35,12 +37,19 @@ internal fun PoseDetailRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
+    val resultEventBus = LocalResultEventBus.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PoseDetailSideEffect.NavigateBack -> navigateBack()
             is PoseDetailSideEffect.ShowToast -> {
                 nekiToast.showToast(sideEffect.message)
+            }
+            is PoseDetailSideEffect.NotifyScrapChanged -> {
+                resultEventBus.sendResult(
+                    result = PoseResult.ScrapChanged(sideEffect.poseId, sideEffect.isScrapped),
+                    allowDuplicate = false,
+                )
             }
         }
     }
@@ -85,7 +94,7 @@ internal fun PoseDetailScreen(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(
-                    if (uiState.pose.isScrapped) R.drawable.ic_scrap_selected
+                    if (uiState.pose.isScrapped) R.drawable.icon_scrap
                     else R.drawable.icon_scrap_unselected,
                 ),
                 contentDescription = null,

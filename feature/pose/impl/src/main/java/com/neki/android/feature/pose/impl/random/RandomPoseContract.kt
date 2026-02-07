@@ -18,6 +18,12 @@ data class RandomPoseUiState(
         get() = currentIndex > 0
 }
 
+internal sealed class FetchPoseResult(val tryCount: Int) {
+    class Success(tryCount: Int, val pose: Pose) : FetchPoseResult(tryCount)
+    class Duplicated(tryCount: Int) : FetchPoseResult(tryCount)
+    class Failure(tryCount: Int, val throwable: Throwable) : FetchPoseResult(tryCount)
+}
+
 sealed interface RandomPoseIntent {
     data object EnterRandomPoseScreen : RandomPoseIntent
 
@@ -35,6 +41,6 @@ sealed interface RandomPoseIntent {
 sealed interface RandomPoseEffect {
     data object NavigateBack : RandomPoseEffect
     data class NavigateToDetail(val poseId: Long) : RandomPoseEffect
+    data class SwipePoseImage(val index: Int) : RandomPoseEffect
     data class ShowToast(val message: String) : RandomPoseEffect
-    data class RequestImageBuilder(val imageUrl: String) : RandomPoseEffect
 }

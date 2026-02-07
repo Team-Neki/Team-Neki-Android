@@ -1,13 +1,10 @@
 package com.neki.android.feature.mypage.impl.main.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,11 +27,10 @@ internal fun MainTopBar(
             .fillMaxWidth()
             .padding(start = 20.dp, end = 8.dp),
         title = {
-            Box(
-                modifier = Modifier
-                    .height(28.dp)
-                    .width(56.dp)
-                    .background(color = Color(0xFFB7B9C3)),
+            Text(
+                text = "마이페이지",
+                style = NekiTheme.typography.title20SemiBold,
+                color = NekiTheme.colorScheme.gray900,
             )
         },
         actions = {

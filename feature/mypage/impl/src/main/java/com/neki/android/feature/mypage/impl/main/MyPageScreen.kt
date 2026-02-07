@@ -1,5 +1,7 @@
 package com.neki.android.feature.mypage.impl.main
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,19 +9,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
 import com.neki.android.feature.mypage.impl.main.component.MainTopBar
 import com.neki.android.feature.mypage.impl.main.component.ProfileCard
+import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 
 @Composable
 internal fun MyPageRoute(
@@ -27,20 +34,28 @@ internal fun MyPageRoute(
     navigateToPermission: () -> Unit,
     navigateToProfile: () -> Unit,
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        val appVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: ""
+        viewModel.store.onIntent(MyPageIntent.SetAppVersion(appVersion))
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
         when (effect) {
+            MyPageEffect.NavigateBack -> {}
+            MyPageEffect.NavigateToLogin -> {}
             MyPageEffect.NavigateToNotification -> {}
             MyPageEffect.NavigateToProfile -> navigateToProfile()
             MyPageEffect.NavigateToPermission -> navigateToPermission()
-            MyPageEffect.NavigateToInquiry -> {}
-            MyPageEffect.NavigateToTermsOfService -> {}
-            MyPageEffect.NavigateToPrivacyPolicy -> {}
-            MyPageEffect.NavigateToOpenSourceLicense -> {}
-            MyPageEffect.NavigateBack -> {}
-            MyPageEffect.NavigateToLogin -> {}
-            is MyPageEffect.MoveAppSettings -> {}
+            is MyPageEffect.OpenExternalLink -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(effect.url)))
+            MyPageEffect.OpenOssLicenses -> {
+                OssLicensesMenuActivity.setActivityTitle("오픈소스 라이선스 목록")
+                context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+            }
+
+            else -> {}
         }
     }
 
@@ -56,14 +71,15 @@ fun MyPageScreen(
     onIntent: (MyPageIntent) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
     ) {
         MainTopBar(
             onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
         )
         ProfileCard(
-            name = "오종석",
+            profileImageUrl = uiState.userInfo.profileImageUrl,
+            name = uiState.userInfo.nickname,
+            loginType = uiState.userInfo.loginType,
             onClickCard = { onIntent(MyPageIntent.ClickProfileCard) },
         )
         Box(
@@ -73,32 +89,30 @@ fun MyPageScreen(
                 .background(color = NekiTheme.colorScheme.gray25),
         )
         Column {
-            SectionTitleText(text = "권한 설정")
+            SectionTitleText(text = "권한")
             SectionArrowItem(
-                text = "기기 권한",
+                text = "권한 설정하기",
                 onClick = { onIntent(MyPageIntent.ClickPermission) },
             )
         }
         Column {
             SectionTitleText(text = "서비스 정보 및 지원")
-            SectionArrowItem(
-                text = "Neki에 문의하기",
-                onClick = { onIntent(MyPageIntent.ClickInquiry) },
-            )
-            SectionArrowItem(
-                text = "이용약관",
-                onClick = { onIntent(MyPageIntent.ClickTermsOfService) },
-            )
-            SectionArrowItem(
-                text = "개인정보 처리방침",
-                onClick = { onIntent(MyPageIntent.ClickPrivacyPolicy) },
-            )
+            ServiceInfoMenu.entries.forEach { menu ->
+                SectionArrowItem(
+                    text = menu.text,
+                    onClick = { onIntent(MyPageIntent.ClickServiceInfoMenu(menu)) },
+                )
+            }
             SectionArrowItem(
                 text = "오픈소스 라이선스",
                 onClick = { onIntent(MyPageIntent.ClickOpenSourceLicense) },
             )
             SectionVersionItem(uiState.appVersion)
         }
+    }
+
+    if (uiState.isLoading) {
+        LoadingDialog()
     }
 }
 
@@ -107,7 +121,7 @@ fun MyPageScreen(
 private fun MyPageScreenPreview() {
     NekiTheme {
         MyPageScreen(
-            uiState = MyPageState(),
+            uiState = MyPageState(appVersion = "1.1.0"),
             onIntent = {},
         )
     }

@@ -47,7 +47,7 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         when (intent) {
-            MapIntent.EnterMapScreen -> loadBrands(state, reduce)
+            MapIntent.EnterMapScreen -> fetchInitialData(reduce)
             is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             MapIntent.ClickCurrentLocationIcon -> {
@@ -273,10 +273,7 @@ class MapViewModel @Inject constructor(
         postSideEffect(MapEffect.MoveCameraToPosition(locLatLng))
     }
 
-    private fun loadBrands(
-        state: MapState,
-        reduce: (MapState.() -> MapState) -> Unit,
-    ) {
+    private fun fetchInitialData(reduce: (MapState.() -> MapState) -> Unit) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 

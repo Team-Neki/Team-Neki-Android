@@ -10,6 +10,41 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 
 /**
+ * 사진 컴포넌트에 적용되는 그라데이션 배경
+ * 좌하단에서 우상단으로 갈수록 어두워지는 효과
+ */
+fun Modifier.photoBackground(
+    shape: Shape = RoundedCornerShape(12.dp),
+): Modifier = this.background(
+    brush = Brush.linearGradient(
+        colorStops = arrayOf(
+            0f to Color.Black.copy(alpha = 0f),
+            0.7f to Color.Black.copy(alpha = 0.09f),
+            1f to Color.Black.copy(alpha = 0.3f),
+        ),
+        start = Offset(0f, Float.POSITIVE_INFINITY),
+        end = Offset(Float.POSITIVE_INFINITY, 0f),
+    ),
+    shape = shape,
+)
+
+/**
+ * 포즈 컴포넌트에 적용되는 그라데이션 배경
+ * 상단에서 134/242 지점까지 어두워지는 효과
+ */
+fun Modifier.poseBackground(
+    shape: Shape = RoundedCornerShape(12.dp),
+): Modifier = this.background(
+    brush = Brush.verticalGradient(
+        colorStops = arrayOf(
+            0f to Color.Black.copy(alpha = 0.2f),
+            134f / 242f to Color.Black.copy(alpha = 0f),
+        ),
+    ),
+    shape = shape,
+)
+
+/**
  * 블러 효과가 적용된 배경을 설정하는 Modifier 확장 함수
  *
  * @param hazeState Haze 블러 효과를 관리하는 상태 객체

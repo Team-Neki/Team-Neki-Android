@@ -5,6 +5,7 @@ import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.model.response.PoseDetailResponse
 import com.neki.android.core.data.remote.model.response.PoseResponse
+import com.neki.android.core.data.remote.model.response.ScrappedPoseResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -40,6 +41,19 @@ class PoseService @Inject constructor(
     suspend fun getRandomPose(headCount: String): BasicResponse<PoseDetailResponse> {
         return client.get("/api/poses/random") {
             parameter("headCount", headCount)
+        }.body()
+    }
+
+    // 스크랩된 포즈 목록 조회
+    suspend fun getScrappedPoses(
+        page: Int = 0,
+        size: Int = 20,
+        sortOrder: String = "DESC",
+    ): BasicResponse<ScrappedPoseResponse> {
+        return client.get("/api/poses/scrap") {
+            parameter("page", page)
+            parameter("size", size)
+            parameter("sortOrder", sortOrder)
         }.body()
     }
 

@@ -30,7 +30,9 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 fun WarningDialog(
     content: String,
     onDismissRequest: () -> Unit,
-    properties: DialogProperties = DialogProperties(),
+    properties: DialogProperties = DialogProperties(
+        usePlatformDefaultWidth = false,
+    ),
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,

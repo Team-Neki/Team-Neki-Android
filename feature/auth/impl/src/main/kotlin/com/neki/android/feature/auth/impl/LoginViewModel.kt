@@ -23,6 +23,7 @@ class LoginViewModel @Inject constructor(
         mviIntentStore(
             initialState = LoginState(),
             onIntent = ::onIntent,
+            initialFetchData = { store.onIntent(LoginIntent.EnterLoginScreen) },
         )
 
     private fun onIntent(
@@ -32,29 +33,26 @@ class LoginViewModel @Inject constructor(
         postSideEffect: (LoginSideEffect) -> Unit,
     ) {
         when (intent) {
-            LoginIntent.EnterLoginScreen -> checkLoginState(reduce, postSideEffect)
+            LoginIntent.EnterLoginScreen -> fetchInitialData(postSideEffect)
             LoginIntent.ClickKakaoLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
             is LoginIntent.SuccessLogin -> loginFromKakao(intent.idToken, reduce, postSideEffect)
             LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
         }
     }
 
-    private fun checkLoginState(
-        reduce: (LoginState.() -> LoginState) -> Unit,
-        postSideEffect: (LoginSideEffect) -> Unit,
-    ) = viewModelScope.launch {
+    private fun fetchInitialData(postSideEffect: (LoginSideEffect) -> Unit) = viewModelScope.launch {
         if (tokenRepository.isSavedTokens().first()) {
-            Timber.d("JWT 토큰 O")
             authRepository.updateAccessToken(
                 refreshToken = tokenRepository.getRefreshToken().first(),
             ).onSuccess {
+                tokenRepository.saveTokens(it.accessToken, it.refreshToken)
                 postSideEffect(LoginSideEffect.NavigateToHome)
-            }.onFailure {
-                Timber.d(it.message.toString())
+            }.onFailure { exception ->
+                Timber.e(exception)
                 authEventManager.emitTokenExpired()
             }
         } else {
-            Timber.d("JWT 토큰 X")
+            Timber.d("저장된 JWT 토큰이 없습니다.")
         }
     }
 
@@ -70,11 +68,10 @@ class LoginViewModel @Inject constructor(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
                 )
-
                 postSideEffect(LoginSideEffect.NavigateToHome)
             }
-            .onFailure {
-                Timber.d(it.message.toString())
+            .onFailure { exception ->
+                Timber.e(exception)
             }
         reduce { copy(isLoading = false) }
     }

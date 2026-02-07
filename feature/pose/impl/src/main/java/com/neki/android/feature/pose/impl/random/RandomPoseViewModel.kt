@@ -8,6 +8,7 @@ import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.pose.impl.const.PoseConst
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -125,7 +126,9 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         if (state.hasPrevious) {
-            reduce { copy(currentIndex = currentIndex - 1) }
+            val previousIndex = state.currentIndex - 1
+            reduce { copy(currentIndex = previousIndex) }
+            postSideEffect(RandomPoseEffect.SwipePoseImage(previousIndex))
         } else {
             postSideEffect(RandomPoseEffect.ShowToast("첫번째 포즈입니다."))
         }
@@ -136,34 +139,36 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
-        if (state.currentIndex >= state.poseList.lastIndex) return
-
-        reduce { copy(currentIndex = currentIndex + 1) }
-
-        // 뒤에서 2번째였으면 다음 포즈 미리 캐싱
-        if (state.currentIndex == state.poseList.lastIndex - 1) {
-            fetchNextPose(reduce, postSideEffect)
+        // 마지막 인덱스에 도달
+        if (state.currentIndex >= state.poseList.lastIndex) {
+            postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
+            return
         }
-    }
 
-    private fun fetchNextPose(
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
-        postSideEffect: (RandomPoseEffect) -> Unit,
-    ) {
-        viewModelScope.launch {
-            poseRepository.getRandomPose(headCount = peopleCount)
-                .onSuccess { pose ->
-                    reduce {
+        val nextIndex = state.currentIndex + 1
+        reduce { copy(currentIndex = nextIndex) }
+        postSideEffect(RandomPoseEffect.SwipePoseImage(nextIndex))
+
+        // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
+        if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD) {
+            viewModelScope.launch {
+                when (val result = fetchRandomPose(poseList = state.poseList)) {
+                    is FetchPoseResult.Success -> reduce {
                         copy(
-                            poseList = (poseList + pose).toImmutableList(),
-                            committedScraps = committedScraps + (pose.id to pose.isScrapped),
+                            poseList = (poseList + result.pose).toImmutableList(),
+                            committedScraps = committedScraps + (result.pose.id to result.pose.isScrapped),
                         )
                     }
-                    postSideEffect(RandomPoseEffect.RequestImageBuilder(pose.poseImageUrl))
+
+                    is FetchPoseResult.Duplicated ->
+                        Timber.d("프리페치 생략: ${result.tryCount}회 시도 후 중복 포즈")
+
+                    is FetchPoseResult.Failure -> {
+                        Timber.e(result.throwable)
+                        postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
+                    }
                 }
-                .onFailure { error ->
-                    Timber.e(error)
-                }
+            }
         }
     }
 
@@ -175,12 +180,31 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             reduce { copy(isLoading = true) }
 
             val poses = mutableListOf<Pose>()
+            var totalFallbackCount = 0
 
-            // 초기에 3개 로드
-            repeat(3) {
-                poseRepository.getRandomPose(headCount = peopleCount)
-                    .onSuccess { pose -> poses.add(pose) }
-                    .onFailure { error -> Timber.e(error) }
+            // 초기에 INITIAL_POSE_LOAD_COUNT개 로드
+            while (
+                poses.size < PoseConst.INITIAL_POSE_LOAD_COUNT &&
+                totalFallbackCount < PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT
+            ) {
+                val result = fetchRandomPose(
+                    poseList = poses,
+                    maxFallbackCount = PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT - totalFallbackCount,
+                )
+
+                totalFallbackCount += result.tryCount
+
+                when (result) {
+                    is FetchPoseResult.Success -> poses.add(result.pose)
+                    is FetchPoseResult.Failure -> {
+                        Timber.e(result.throwable)
+                        postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
+                        break
+                    }
+
+                    is FetchPoseResult.Duplicated ->
+                        Timber.d("초기 로드: ${result.tryCount}회 시도 후 중복 포즈")
+                }
             }
 
             if (poses.isNotEmpty()) {
@@ -197,6 +221,29 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
             }
         }
+    }
+
+    private suspend fun fetchRandomPose(
+        poseList: List<Pose>,
+        maxFallbackCount: Int = PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT,
+    ): FetchPoseResult {
+        var tryCount = 0
+
+        while (tryCount < maxFallbackCount) {
+            tryCount++
+            poseRepository.getRandomPose(headCount = peopleCount)
+                .onSuccess { pose ->
+                    if (poseList.none { it.id == pose.id }) {
+                        return FetchPoseResult.Success(tryCount, pose)
+                    }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                    return FetchPoseResult.Failure(tryCount, error)
+                }
+        }
+
+        return FetchPoseResult.Duplicated(tryCount)
     }
 
     override fun onCleared() {

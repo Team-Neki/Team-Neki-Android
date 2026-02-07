@@ -299,7 +299,6 @@ fun MapScreen(
         WarningDialog(
             content = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
             onDismissRequest = { onIntent(MapIntent.ClickCloseInfoIcon) },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
         )
     }
 
@@ -317,7 +316,6 @@ fun MapScreen(
             buttonText = "확인",
             onDismissRequest = { onIntent(MapIntent.DismissLocationPermissionDialog) },
             onClick = { onIntent(MapIntent.ConfirmLocationPermissionDialog) },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
         )
     }
 

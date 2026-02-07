@@ -19,4 +19,5 @@ sealed interface PoseDetailIntent {
 sealed interface PoseDetailSideEffect {
     data object NavigateBack : PoseDetailSideEffect
     data class ShowToast(val message: String) : PoseDetailSideEffect
+    data class NotifyScrapChanged(val poseId: Long, val isScrapped: Boolean) : PoseDetailSideEffect
 }

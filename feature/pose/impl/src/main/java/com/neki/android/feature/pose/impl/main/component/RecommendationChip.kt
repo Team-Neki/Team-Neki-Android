@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.pose.impl.R
+import com.neki.android.core.designsystem.R
 
 @Composable
 internal fun RecommendationChip(
@@ -40,7 +40,7 @@ internal fun RecommendationChip(
             tint = Color.Unspecified,
         )
         Text(
-            text = "랜덤포즈 추천",
+            text = "랜덤 포즈 추천",
             style = NekiTheme.typography.title18SemiBold,
             color = NekiTheme.colorScheme.white,
         )

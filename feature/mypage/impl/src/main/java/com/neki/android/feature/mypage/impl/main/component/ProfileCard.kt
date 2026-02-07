@@ -1,8 +1,6 @@
 package com.neki.android.feature.mypage.impl.main.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,9 +12,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.clickableSingle
@@ -24,10 +25,10 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.HorizontalSpacer
 
 @Composable
-fun ProfileCard(
+internal fun ProfileCard(
     profileImageUrl: String = "",
     name: String,
-    loginType: String = "KAKAO",
+    loginType: String,
     onClickCard: () -> Unit = {},
 ) {
     Row(
@@ -37,13 +38,13 @@ fun ProfileCard(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
+        AsyncImage(
             modifier = Modifier
                 .size(78.dp)
-                .background(
-                    color = NekiTheme.colorScheme.gray800,
-                    shape = CircleShape,
-                ),
+                .clip(CircleShape),
+            model = profileImageUrl.ifEmpty { R.drawable.image_empty_profile_image },
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
         )
         HorizontalSpacer(16.dp)
         Column(
@@ -58,7 +59,7 @@ fun ProfileCard(
             )
             Text(
                 text = "$loginType 로그인",
-                style = NekiTheme.typography.caption12Regular,
+                style = NekiTheme.typography.body14Regular,
                 color = NekiTheme.colorScheme.gray600,
             )
         }
@@ -77,6 +78,7 @@ private fun ProfileCardPreview() {
     NekiTheme {
         ProfileCard(
             name = "오종석",
+            loginType = "KAKAO",
         )
     }
 }

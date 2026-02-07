@@ -36,6 +36,7 @@ class PoseDetailViewModel @AssistedInject constructor(
         mviIntentStore(
             initialState = PoseDetailState(),
             onIntent = ::onIntent,
+            initialFetchData = { store.onIntent(PoseDetailIntent.EnterPoseDetailScreen) },
         )
 
     init {
@@ -69,7 +70,10 @@ class PoseDetailViewModel @AssistedInject constructor(
             PoseDetailIntent.EnterPoseDetailScreen -> fetchPoseData(reduce)
             PoseDetailIntent.ClickBackIcon -> postSideEffect(PoseDetailSideEffect.NavigateBack)
             PoseDetailIntent.ClickScrapIcon -> handleScrapToggle(state, reduce)
-            is PoseDetailIntent.ScrapCommitted -> reduce { copy(committedScrap = intent.newScrap) }
+            is PoseDetailIntent.ScrapCommitted -> {
+                reduce { copy(committedScrap = intent.newScrap) }
+                postSideEffect(PoseDetailSideEffect.NotifyScrapChanged(id, intent.newScrap))
+            }
             is PoseDetailIntent.RevertScrap -> reduce { copy(pose = pose.copy(isScrapped = intent.originalScrap)) }
         }
     }
