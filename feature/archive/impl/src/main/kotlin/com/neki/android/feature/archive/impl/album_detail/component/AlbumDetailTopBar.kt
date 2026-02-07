@@ -11,10 +11,10 @@ import com.neki.android.feature.archive.impl.model.SelectMode
 internal fun AlbumDetailTopBar(
     title: String,
     selectMode: SelectMode,
-    onClickBack: () -> Unit,
-    onClickSelect: () -> Unit,
-    onClickCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    onClickBack: () -> Unit = {},
+    onClickSelect: () -> Unit = {},
+    onClickCancel: () -> Unit = {},
 ) {
     BackTitleTextButtonTopBar(
         modifier = modifier,
@@ -42,9 +42,6 @@ private fun AlbumDetailTopBarPreview() {
         AlbumDetailTopBar(
             title = "Album Title",
             selectMode = SelectMode.DEFAULT,
-            onClickBack = {},
-            onClickSelect = {},
-            onClickCancel = {},
         )
     }
 }
@@ -56,9 +53,6 @@ private fun AlbumDetailTopBarSelectingPreview() {
         AlbumDetailTopBar(
             title = "Album Title",
             selectMode = SelectMode.SELECTING,
-            onClickBack = {},
-            onClickSelect = {},
-            onClickCancel = {},
         )
     }
 }
