@@ -156,15 +156,13 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     headCount = peopleCount,
                     excludeIds = state.randomPoseIds,
                     maxRetry = PoseConst.MAXIMUM_RANDOM_POSE_RETRY_COUNT,
-                )
-                    .onSuccess { pose ->
-                        reduce { copy(poseList = (poseList + pose).toImmutableList()) }
-                    }
-                    .onFailure { error ->
-                        if (error is RandomPoseRetryExhaustedException)
-                            Timber.e(error, "중복 포즈")
-                        else Timber.e(error)
-                    }
+                ).onSuccess { pose ->
+                    reduce { copy(poseList = (poseList + pose).toImmutableList()) }
+                }.onFailure { error ->
+                    if (error is RandomPoseRetryExhaustedException)
+                        Timber.e(error, "중복 포즈")
+                    else Timber.e(error)
+                }
             }
         }
     }
