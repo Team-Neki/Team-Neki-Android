@@ -14,6 +14,9 @@ sealed interface AuthNavKey : NavKey {
 
     @Serializable
     data object Login : AuthNavKey
+
+    @Serializable
+    data object Term : AuthNavKey
 }
 
 fun AuthNavigator.navigateToOnboarding() {
@@ -22,4 +25,8 @@ fun AuthNavigator.navigateToOnboarding() {
 
 fun AuthNavigator.navigateToLogin() {
     navigate(AuthNavKey.Login)
+}
+
+fun AuthNavigator.navigateToTerm() {
+    navigate(AuthNavKey.Term)
 }

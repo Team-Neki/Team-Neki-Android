@@ -7,9 +7,11 @@ import com.neki.android.core.navigation.root.RootNavKey
 import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.auth.api.navigateToLogin
 import com.neki.android.feature.auth.api.navigateToOnboarding
+import com.neki.android.feature.auth.api.navigateToTerm
 import com.neki.android.feature.auth.impl.login.LoginRoute
 import com.neki.android.feature.auth.impl.onboarding.OnboardingRoute
 import com.neki.android.feature.auth.impl.splash.SplashRoute
+import com.neki.android.feature.auth.impl.term.TermRoute
 
 typealias AuthEntryProviderInstaller = EntryProviderScope<NavKey>.() -> Unit
 
@@ -32,6 +34,12 @@ private fun EntryProviderScope<NavKey>.authEntry(authNavigator: AuthNavigator) {
 
     entry<AuthNavKey.Login> {
         LoginRoute(
+            navigateToTerm = authNavigator::navigateToTerm,
+        )
+    }
+
+    entry<AuthNavKey.Term> {
+        TermRoute(
             navigateToMain = { authNavigator.navigateRoot(RootNavKey.Main) },
         )
     }
