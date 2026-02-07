@@ -9,33 +9,36 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
-import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import com.neki.android.feature.archive.impl.album_detail.component.EmptyContent
+import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailTopBar
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
+import com.neki.android.feature.archive.impl.component.EmptyContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
@@ -45,6 +48,7 @@ import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 internal fun AlbumDetailRoute(
@@ -93,21 +97,73 @@ internal fun AlbumDetailScreen(
 ) {
     val lazyState = rememberLazyStaggeredGridState()
 
-    val isRefreshing = pagingItems.loadState.refresh is LoadState.Loading
-    val isEmpty = pagingItems.itemCount == 0 && pagingItems.loadState.refresh is LoadState.NotLoading
+    val isRefreshing by remember {
+        derivedStateOf { pagingItems.loadState.refresh is LoadState.Loading }
+    }
+    val isEmpty by remember {
+        derivedStateOf { pagingItems.itemCount == 0 && pagingItems.loadState.refresh is LoadState.NotLoading }
+    }
 
     BackHandler(enabled = true) {
         onIntent(AlbumDetailIntent.OnBackPressed)
     }
 
+    if (isEmpty) {
+        EmptyContent(
+            title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
+            onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
+        )
+    } else {
+        AlbumDetailContent(
+            uiState = uiState,
+            pagingItems = pagingItems,
+            lazyState = lazyState,
+            onIntent = onIntent,
+        )
+    }
+
+    if (isRefreshing || uiState.isLoading) {
+        LoadingDialog()
+    }
+
+    if (uiState.isShowDeleteDialog) {
+        DeletePhotoDialog(
+            onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteDialog) },
+            onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteDialogConfirmButton) },
+            onClickCancel = { onIntent(AlbumDetailIntent.ClickDeleteDialogCancelButton) },
+        )
+    }
+
+    if (uiState.isShowDeleteBottomSheet) {
+        DoubleButtonOptionBottomSheet(
+            title = "사진을 삭제하시겠어요?",
+            options = PhotoDeleteOption.entries.toImmutableList(),
+            selectedOption = uiState.selectedDeleteOption,
+            primaryButtonText = "삭제하기",
+            secondaryButtonText = "취소",
+            onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteBottomSheet) },
+            onClickSecondaryButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
+            onClickPrimaryButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },
+            onOptionSelect = { onIntent(AlbumDetailIntent.SelectDeleteOption(it)) },
+        )
+    }
+}
+
+@Composable
+internal fun AlbumDetailContent(
+    uiState: AlbumDetailState,
+    pagingItems: LazyPagingItems<Photo>,
+    lazyState: LazyStaggeredGridState,
+    modifier: Modifier = Modifier,
+    onIntent: (AlbumDetailIntent) -> Unit = {},
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white),
     ) {
         AlbumDetailTopBar(
-            hasNoPhoto = isEmpty,
-            title = if (uiState.isFavoriteAlbum) "즐겨찾는 사진" else uiState.title,
+            title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
             selectMode = uiState.selectMode,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
             onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectButton) },
@@ -173,73 +229,29 @@ internal fun AlbumDetailScreen(
             onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
         )
     }
-
-    if (isRefreshing || uiState.isLoading) {
-        LoadingDialog()
-    }
-
-    if (isEmpty) {
-        EmptyContent(
-            isFavorite = uiState.isFavoriteAlbum,
-        )
-    }
-
-    if (uiState.isShowDeleteDialog) {
-        DeletePhotoDialog(
-            onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteDialog) },
-            onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteDialogConfirmButton) },
-            onClickCancel = { onIntent(AlbumDetailIntent.ClickDeleteDialogCancelButton) },
-        )
-    }
-
-    if (uiState.isShowDeleteBottomSheet) {
-        DoubleButtonOptionBottomSheet(
-            title = "사진을 삭제하시겠어요?",
-            options = PhotoDeleteOption.entries.toImmutableList(),
-            selectedOption = uiState.selectedDeleteOption,
-            primaryButtonText = "삭제하기",
-            secondaryButtonText = "취소",
-            onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteBottomSheet) },
-            onClickSecondaryButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetCancelButton) },
-            onClickPrimaryButton = { onIntent(AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton) },
-            onOptionSelect = { onIntent(AlbumDetailIntent.SelectDeleteOption(it)) },
-        )
-    }
 }
 
+@Preview
 @Composable
-private fun AlbumDetailTopBar(
-    title: String,
-    selectMode: SelectMode,
-    onClickBack: () -> Unit,
-    onClickSelect: () -> Unit,
-    onClickCancel: () -> Unit,
-    modifier: Modifier = Modifier,
-    hasNoPhoto: Boolean = false,
-) {
-    if (hasNoPhoto) {
-        BackTitleTopBar(
-            modifier = modifier,
-            title = title,
-            onBack = onClickBack,
+private fun AlbumDetailScreenPreview() {
+    val photos = (0..10).map {
+        Photo(
+            id = it.toLong(),
+            imageUrl = "",
+            isFavorite = false,
+            date = "2024-04-2$it",
         )
-    } else {
-        BackTitleTextButtonTopBar(
-            modifier = modifier,
-            title = title,
-            buttonLabel = when (selectMode) {
-                SelectMode.DEFAULT -> "선택"
-                SelectMode.SELECTING -> "취소"
-            },
-            enabledTextColor = when (selectMode) {
-                SelectMode.DEFAULT -> NekiTheme.colorScheme.primary500
-                SelectMode.SELECTING -> NekiTheme.colorScheme.gray800
-            },
-            onBack = onClickBack,
-            onClickTextButton = when (selectMode) {
-                SelectMode.DEFAULT -> onClickSelect
-                SelectMode.SELECTING -> onClickCancel
-            },
+    }
+
+    val pagingData = PagingData.from(photos)
+    val pagingItems = flowOf(pagingData).collectAsLazyPagingItems()
+
+    NekiTheme {
+        AlbumDetailScreen(
+            uiState = AlbumDetailState(
+                title = "앨범 상세",
+            ),
+            pagingItems = pagingItems,
         )
     }
 }

@@ -41,6 +41,7 @@ import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
+import com.neki.android.feature.archive.impl.component.EmptyContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
@@ -110,6 +111,52 @@ internal fun AllPhotoScreen(
     lazyState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     onIntent: (AllPhotoIntent) -> Unit = {},
 ) {
+    val isRefreshing by remember(pagingItems) {
+        derivedStateOf { pagingItems.loadState.refresh is LoadState.Loading }
+    }
+    val isEmpty by remember(pagingItems) {
+        derivedStateOf { pagingItems.itemCount == 0 && pagingItems.loadState.refresh is LoadState.NotLoading }
+    }
+
+    BackHandler(enabled = true) {
+        onIntent(AllPhotoIntent.OnBackPressed)
+    }
+
+    if (isEmpty) {
+        EmptyContent(
+            title = "모든 사진",
+            onClickBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
+        )
+    } else {
+        AllPhotoContent(
+            uiState = uiState,
+            pagingItems = pagingItems,
+            lazyState = lazyState,
+            onIntent = onIntent,
+        )
+    }
+
+    if (isRefreshing || uiState.isLoading) {
+        LoadingDialog()
+    }
+
+    if (uiState.isShowDeleteDialog) {
+        DeletePhotoDialog(
+            onDismissRequest = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
+            onClickDelete = { onIntent(AllPhotoIntent.ClickDeleteDialogConfirmButton) },
+            onClickCancel = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
+        )
+    }
+}
+
+@Composable
+private fun AllPhotoContent(
+    uiState: AllPhotoState,
+    pagingItems: LazyPagingItems<Photo>,
+    lazyState: LazyStaggeredGridState,
+    modifier: Modifier = Modifier,
+    onIntent: (AllPhotoIntent) -> Unit = {},
+) {
     val density = LocalDensity.current
     var filterBarHeightPx by remember { mutableIntStateOf(0) }
     val topPadding = with(density) { filterBarHeightPx.toDp() }
@@ -121,18 +168,8 @@ internal fun AllPhotoScreen(
         }
     }
 
-    val isRefreshing by remember {
-        derivedStateOf {
-            pagingItems.loadState.refresh is LoadState.Loading && pagingItems.itemCount == 0
-        }
-    }
-
-    BackHandler(enabled = true) {
-        onIntent(AllPhotoIntent.OnBackPressed)
-    }
-
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white),
     ) {
@@ -216,18 +253,6 @@ internal fun AllPhotoScreen(
             isEnabled = uiState.selectedPhotos.isNotEmpty(),
             onClickDownload = { onIntent(AllPhotoIntent.ClickDownloadIcon) },
             onClickDelete = { onIntent(AllPhotoIntent.ClickDeleteIcon) },
-        )
-    }
-
-    if (isRefreshing || uiState.isLoading) {
-        LoadingDialog()
-    }
-
-    if (uiState.isShowDeleteDialog) {
-        DeletePhotoDialog(
-            onDismissRequest = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
-            onClickDelete = { onIntent(AllPhotoIntent.ClickDeleteDialogConfirmButton) },
-            onClickCancel = { onIntent(AllPhotoIntent.DismissDeleteDialog) },
         )
     }
 }

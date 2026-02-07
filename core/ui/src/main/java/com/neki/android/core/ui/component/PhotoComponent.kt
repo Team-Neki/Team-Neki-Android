@@ -1,7 +1,6 @@
 package com.neki.android.core.ui.component
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -22,11 +21,10 @@ fun PhotoComponent(
     photo: Photo,
     modifier: Modifier = Modifier,
     onClickItem: (Photo) -> Unit = {},
-    additionalContent: @Composable BoxScope.() -> Unit = {},
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(8.dp))
             .noRippleClickable { onClickItem(photo) },
     ) {
         AsyncImage(
@@ -37,8 +35,6 @@ fun PhotoComponent(
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
         )
-
-        additionalContent()
     }
 }
 

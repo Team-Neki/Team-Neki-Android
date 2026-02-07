@@ -119,7 +119,8 @@ internal fun ArchiveMainScreen(
                 onClickQRScan = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
                 onClickGallery = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
                 onClickNewAlbum = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
-                onDismissPopup = { onIntent(ArchiveMainIntent.DismissAddDialog) },
+                onDismissAddPopup = { onIntent(ArchiveMainIntent.DismissAddPopup) },
+                onDismissToolTipPopup = { onIntent(ArchiveMainIntent.DismissToolTipPopup) },
             )
             ArchiveMainContent(
                 uiState = uiState,
@@ -275,7 +276,7 @@ private fun ArchiveMainScreenPreview() {
 
     val favoriteAlbum = AlbumPreview(
         id = 0,
-        title = "즐겨찾는 사진",
+        title = "즐겨찾기",
         thumbnailUrl = "https://picsum.photos/seed/fav1/200/300",
         photoCount = 5,
     )
@@ -296,7 +297,7 @@ private fun ArchiveMainScreenPreview() {
 private fun ArchiveMainScreenEmptyPreview() {
     val favoriteAlbum = AlbumPreview(
         id = 0,
-        title = "즐겨찾는 사진",
+        title = "즐겨찾기",
     )
 
     NekiTheme {

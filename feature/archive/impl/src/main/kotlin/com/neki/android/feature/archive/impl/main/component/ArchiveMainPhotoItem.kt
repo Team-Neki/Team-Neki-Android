@@ -1,7 +1,9 @@
 package com.neki.android.feature.archive.impl.main.component
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -11,10 +13,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.modifier.photoBackground
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.PhotoComponent
+import com.neki.android.core.ui.component.PhotoGridItemOverlay
 
 @Composable
 internal fun ArchiveMainPhotoItem(
@@ -22,11 +24,19 @@ internal fun ArchiveMainPhotoItem(
     modifier: Modifier = Modifier,
     onClickItem: (Photo) -> Unit = {},
 ) {
-    PhotoComponent(
-        photo = photo,
-        modifier = modifier.photoBackground(),
-        onClickItem = onClickItem,
+    Box(
+        modifier = modifier,
     ) {
+        PhotoComponent(
+            photo = photo,
+            onClickItem = onClickItem,
+        )
+
+        PhotoGridItemOverlay(
+            modifier = Modifier.matchParentSize(),
+            shape = RoundedCornerShape(8.dp),
+        )
+
         if (photo.isFavorite) {
             Icon(
                 modifier = Modifier

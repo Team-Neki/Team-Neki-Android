@@ -2,7 +2,6 @@ package com.neki.android.feature.archive.impl.album
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -90,7 +89,6 @@ internal fun AllAlbumScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item {
                 FavoriteAlbumRowComponent(
@@ -165,7 +163,7 @@ private fun AllAlbumScreenPreview() {
     NekiTheme {
         AllAlbumScreen(
             uiState = AllAlbumState(
-                favoriteAlbum = AlbumPreview(id = 0, title = "즐겨찾는 사진", photoCount = 3),
+                favoriteAlbum = AlbumPreview(id = 0, title = "즐겨찾기", photoCount = 3),
                 albums = persistentListOf(
                     AlbumPreview(id = 1, title = "제주도 여행 2024", photoCount = 4),
                     AlbumPreview(id = 2, title = "가족 생일파티", photoCount = 2),
@@ -183,7 +181,7 @@ private fun AllAlbumScreenSelectingPreview() {
     NekiTheme {
         AllAlbumScreen(
             uiState = AllAlbumState(
-                favoriteAlbum = AlbumPreview(id = 0, title = "즐겨찾는 사진", photoCount = 3),
+                favoriteAlbum = AlbumPreview(id = 0, title = "즐겨찾기", photoCount = 3),
                 albums = persistentListOf(
                     AlbumPreview(id = 1, title = "제주도 여행 2024", photoCount = 4),
                     AlbumPreview(id = 2, title = "가족 생일파티", photoCount = 2),
