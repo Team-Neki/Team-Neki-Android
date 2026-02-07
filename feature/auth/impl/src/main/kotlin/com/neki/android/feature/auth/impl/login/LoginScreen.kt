@@ -10,47 +10,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.common.kakao.KakaoAuthHelper
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.core.common.kakao.KakaoAuthHelper
-import com.neki.android.feature.auth.impl.LoginIntent
-import com.neki.android.feature.auth.impl.LoginSideEffect
-import com.neki.android.feature.auth.impl.LoginState
-import com.neki.android.feature.auth.impl.LoginViewModel
-import com.neki.android.feature.auth.impl.component.GradientBackground
+import com.neki.android.feature.auth.impl.AuthIntent
+import com.neki.android.feature.auth.impl.AuthSideEffect
+import com.neki.android.feature.auth.impl.AuthState
+import com.neki.android.feature.auth.impl.AuthViewModel
 import com.neki.android.feature.auth.impl.login.component.LoginBackground
 import com.neki.android.feature.auth.impl.login.component.LoginBottomContent
 import timber.log.Timber
 
 @Composable
-fun LoginRoute(
-    viewModel: LoginViewModel = hiltViewModel(),
+internal fun LoginRoute(
+    viewModel: AuthViewModel = hiltViewModel(),
     navigateToTerm: () -> Unit,
 ) {
-    val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
-
     val context = LocalContext.current
+    val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val kakaoAuthHelper = remember { KakaoAuthHelper(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToTerm -> navigateToTerm()
-            LoginSideEffect.NavigateToKakaoRedirectingUri -> {
+            AuthSideEffect.NavigateToTerm -> navigateToTerm()
+            AuthSideEffect.NavigateToKakaoRedirectingUri -> {
                 kakaoAuthHelper.login(
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
-                        viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))
+                        viewModel.store.onIntent(AuthIntent.SuccessLogin(idToken))
                     },
                     onFailure = { message ->
                         Timber.d("로그인 실패 $message")
                     },
                 )
             }
-
-            is LoginSideEffect.ShowToastMessage -> {
+            is AuthSideEffect.ShowToastMessage -> {
                 Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             }
+            else -> {}
         }
     }
 
@@ -61,15 +59,15 @@ fun LoginRoute(
 }
 
 @Composable
-fun LoginScreen(
-    uiState: LoginState = LoginState(),
-    onIntent: (LoginIntent) -> Unit = {},
+private fun LoginScreen(
+    uiState: AuthState = AuthState(),
+    onIntent: (AuthIntent) -> Unit = {},
 ) {
     Box {
         LoginBackground()
         LoginBottomContent(
             modifier = Modifier.align(Alignment.BottomCenter),
-            onClick = { onIntent(LoginIntent.ClickKakaoLogin) },
+            onClick = { onIntent(AuthIntent.ClickKakaoLogin) },
         )
     }
 }

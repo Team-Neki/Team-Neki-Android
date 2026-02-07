@@ -14,39 +14,39 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
+class AuthViewModel @Inject constructor(
     private val authEventManager: AuthEventManager,
     private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
-    val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
+    val store: MviIntentStore<AuthState, AuthIntent, AuthSideEffect> =
         mviIntentStore(
-            initialState = LoginState(),
+            initialState = AuthState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(LoginIntent.EnterLoginScreen) },
+            initialFetchData = { store.onIntent(AuthIntent.EnterLoginScreen) },
         )
 
     private fun onIntent(
-        intent: LoginIntent,
-        state: LoginState,
-        reduce: (LoginState.() -> LoginState) -> Unit,
-        postSideEffect: (LoginSideEffect) -> Unit,
+        intent: AuthIntent,
+        state: AuthState,
+        reduce: (AuthState.() -> AuthState) -> Unit,
+        postSideEffect: (AuthSideEffect) -> Unit,
     ) {
         when (intent) {
-            LoginIntent.EnterLoginScreen -> fetchInitialData(postSideEffect)
-            LoginIntent.ClickKakaoLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
-            is LoginIntent.SuccessLogin -> loginFromKakao(intent.idToken, reduce, postSideEffect)
-            LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
+            AuthIntent.EnterLoginScreen -> fetchInitialData(postSideEffect)
+            AuthIntent.ClickKakaoLogin -> postSideEffect(AuthSideEffect.NavigateToKakaoRedirectingUri)
+            is AuthIntent.SuccessLogin -> loginWithKakao(intent.idToken, reduce, postSideEffect)
+            AuthIntent.FailLogin -> postSideEffect(AuthSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
         }
     }
 
-    private fun fetchInitialData(postSideEffect: (LoginSideEffect) -> Unit) = viewModelScope.launch {
+    private fun fetchInitialData(postSideEffect: (AuthSideEffect) -> Unit) = viewModelScope.launch {
         if (tokenRepository.isSavedTokens().first()) {
             authRepository.updateAccessToken(
                 refreshToken = tokenRepository.getRefreshToken().first(),
             ).onSuccess {
                 tokenRepository.saveTokens(it.accessToken, it.refreshToken)
-                postSideEffect(LoginSideEffect.NavigateToTerm)
+                postSideEffect(AuthSideEffect.NavigateToTerm)
             }.onFailure { exception ->
                 Timber.e(exception)
                 authEventManager.emitTokenExpired()
@@ -56,10 +56,10 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun loginFromKakao(
+    private fun loginWithKakao(
         idToken: String,
-        reduce: (LoginState.() -> LoginState) -> Unit,
-        postSideEffect: (LoginSideEffect) -> Unit,
+        reduce: (AuthState.() -> AuthState) -> Unit,
+        postSideEffect: (AuthSideEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
         authRepository.loginWithKakao(idToken)
@@ -68,7 +68,7 @@ class LoginViewModel @Inject constructor(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
                 )
-                postSideEffect(LoginSideEffect.NavigateToTerm)
+                postSideEffect(AuthSideEffect.NavigateToTerm)
             }
             .onFailure { exception ->
                 Timber.e(exception)
