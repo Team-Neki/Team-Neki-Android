@@ -34,37 +34,40 @@ internal fun OnboardingScreen(
     onClickLoginButton: () -> Unit = {},
 ) {
     val pages = OnboardingPage.entries
-    val pagerState = rememberPagerState { pages.size }
+    val pageSize = pages.size
+    val infinitePageCount = Int.MAX_VALUE
+    val initialPage = infinitePageCount / 2 - (infinitePageCount / 2) % pageSize
+    val pagerState = rememberPagerState(initialPage = initialPage) { infinitePageCount }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = NekiTheme.colorScheme.white)
     ) {
+        VerticalSpacer(60.dp)
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .padding(bottom = 38.dp),
+                .weight(1f),
             state = pagerState,
         ) { page ->
             Column {
                 TextSection(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 104.dp, start = 32.dp, bottom = 28.dp),
-                    page = pages[page],
+                        .padding(start = 32.dp, bottom = 28.dp),
+                    page = pages[page % pageSize],
                 )
-                OnboardingPageContent(imageRes = pages[page].imageRes)
+                OnboardingPageContent(imageRes = pages[page % pageSize].imageRes)
             }
         }
 
         PagerIndicator(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(bottom = 38.dp),
-            pageCount = pages.size,
-            currentPage = pagerState.currentPage,
+                .padding(vertical = 38.dp),
+            pageCount = pageSize,
+            currentPage = pagerState.currentPage % pageSize,
         )
 
         CTAButtonPrimary(
