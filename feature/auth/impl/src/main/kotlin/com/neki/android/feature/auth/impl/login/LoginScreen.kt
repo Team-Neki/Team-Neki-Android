@@ -1,9 +1,7 @@
-package com.neki.android.feature.auth.impl
+package com.neki.android.feature.auth.impl.login
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -16,9 +14,12 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.common.kakao.KakaoAuthHelper
-import com.neki.android.feature.auth.impl.component.KakaoLoginButton
-import com.neki.android.feature.auth.impl.component.LoginBackground
-import com.neki.android.feature.auth.impl.component.LoginBottomContent
+import com.neki.android.feature.auth.impl.LoginIntent
+import com.neki.android.feature.auth.impl.LoginSideEffect
+import com.neki.android.feature.auth.impl.LoginState
+import com.neki.android.feature.auth.impl.LoginViewModel
+import com.neki.android.feature.auth.impl.component.GradientBackground
+import com.neki.android.feature.auth.impl.login.component.LoginBottomContent
 import timber.log.Timber
 
 @Composable
@@ -64,7 +65,7 @@ fun LoginScreen(
     onIntent: (LoginIntent) -> Unit = {},
 ) {
     Box {
-        LoginBackground()
+        GradientBackground()
         LoginBottomContent(
             modifier = Modifier.align(Alignment.BottomCenter),
             onClick = { onIntent(LoginIntent.ClickKakaoLogin) },
