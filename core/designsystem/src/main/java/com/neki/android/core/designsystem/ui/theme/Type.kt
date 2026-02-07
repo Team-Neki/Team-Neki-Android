@@ -31,6 +31,19 @@ private val pretendardStyle = TextStyle(
 )
 
 internal val defaultNekiTypography = NekiTypography(
+    // Title 28
+    title28Bold = pretendardStyle.copy(
+        fontWeight = FontWeight.Bold,
+        fontSize = 28.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-0.02).em,
+    ),
+    title28SemiBold = pretendardStyle.copy(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-0.02).em,
+    ),
     // Title 24
     title24Bold = pretendardStyle.copy(
         fontWeight = FontWeight.Bold,
@@ -162,6 +175,9 @@ internal val defaultNekiTypography = NekiTypography(
 
 @Immutable
 data class NekiTypography(
+    // Title 28
+    val title28Bold: TextStyle,
+    val title28SemiBold: TextStyle,
     // Title 24
     val title24Bold: TextStyle,
     val title24SemiBold: TextStyle,
