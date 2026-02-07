@@ -18,6 +18,7 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.auth.impl.component.GradientBackground
+import com.neki.android.feature.auth.impl.splash.component.SplashBackground
 import kotlinx.coroutines.delay
 
 @Composable
@@ -34,27 +35,9 @@ internal fun SplashRoute(
 
 @Composable
 internal fun SplashScreen() {
-    Box(
+    SplashBackground(
         modifier = Modifier.fillMaxSize()
-    ) {
-        GradientBackground()
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 133.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp)
-        ) {
-            Image(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_neki_logo_white),
-                contentDescription = null
-            )
-            Image(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_splash_text),
-                contentDescription = null
-            )
-        }
-    }
+    )
 }
 
 @ComponentPreview
