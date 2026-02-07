@@ -1,37 +1,13 @@
 package com.neki.android.core.designsystem.modifier
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
-
-/**
- * 사진, 포즈 컴포넌트에 적용되는 그라데이션 배경
- */
-fun Modifier.photoGridBackground(
-    shape: Shape = RoundedCornerShape(8.dp),
-): Modifier = this
-    .background(
-        color = Color.Black.copy(alpha = 0.04f),
-        shape = shape,
-    )
-    .background(
-        brush = Brush.verticalGradient(
-            colorStops = arrayOf(
-                0f to Color.Black.copy(alpha = 0.2f),
-                134f / 242f to Color.Black.copy(alpha = 0f),
-            ),
-        ),
-        shape = shape,
-    )
 
 /**
  * 블러 효과가 적용된 배경을 설정하는 Modifier 확장 함수
