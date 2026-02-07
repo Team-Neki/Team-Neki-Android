@@ -2,6 +2,7 @@ package com.neki.android.feature.auth.impl.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,11 +45,11 @@ internal fun OnboardingScreen(
             .fillMaxSize()
             .background(color = NekiTheme.colorScheme.white)
     ) {
-        VerticalSpacer(60.dp)
+        VerticalSpacer(60f)
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(400f),
             state = pagerState,
         ) { page ->
             Column {
@@ -61,15 +62,12 @@ internal fun OnboardingScreen(
                 OnboardingPageContent(imageRes = pages[page % pageSize].imageRes)
             }
         }
-
+        VerticalSpacer(38f)
         PagerIndicator(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(vertical = 38.dp),
+            modifier = Modifier.align(Alignment.CenterHorizontally),
             pageCount = pageSize,
             currentPage = pagerState.currentPage % pageSize,
         )
-
         CTAButtonPrimary(
             modifier = Modifier
                 .padding(horizontal = 20.dp, vertical = 28.dp)
