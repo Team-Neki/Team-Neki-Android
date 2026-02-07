@@ -7,7 +7,7 @@ import com.neki.android.core.navigation.root.RootNavKey
 import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.auth.api.navigateToLogin
 import com.neki.android.feature.auth.api.navigateToOnboarding
-import com.neki.android.feature.auth.impl.LoginRoute
+import com.neki.android.feature.auth.impl.login.LoginRoute
 import com.neki.android.feature.auth.impl.onboarding.OnboardingRoute
 import com.neki.android.feature.auth.impl.splash.SplashRoute
 
