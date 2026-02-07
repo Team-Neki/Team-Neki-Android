@@ -102,7 +102,6 @@ internal fun RandomPoseScreen(
                     onClickScrap = { onIntent(RandomPoseIntent.ClickScrapIcon) },
                 )
             }
-            VerticalSpacer(4.dp)
         }
 
         if (uiState.isShowTutorial) {
