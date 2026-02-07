@@ -37,7 +37,7 @@ internal fun RandomPoseImagePager(
         modifier = modifier,
         state = pagerState,
         beyondViewportPageCount = PoseConst.POSE_PREFETCH_THRESHOLD,
-        userScrollEnabled = false,
+        userScrollEnabled = true,
     ) { index ->
         RandomPoseImage(
             pose = poseList[index],
