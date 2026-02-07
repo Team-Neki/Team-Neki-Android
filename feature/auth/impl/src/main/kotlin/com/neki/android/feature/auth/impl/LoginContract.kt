@@ -12,7 +12,7 @@ sealed interface LoginIntent {
 }
 
 sealed interface LoginSideEffect {
-    data object NavigateToHome : LoginSideEffect
+    data object NavigateToTerm : LoginSideEffect
     data object NavigateToKakaoRedirectingUri : LoginSideEffect
     data class ShowToastMessage(val message: String) : LoginSideEffect
 }

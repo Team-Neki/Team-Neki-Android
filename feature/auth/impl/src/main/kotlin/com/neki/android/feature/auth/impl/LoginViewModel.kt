@@ -46,7 +46,7 @@ class LoginViewModel @Inject constructor(
                 refreshToken = tokenRepository.getRefreshToken().first(),
             ).onSuccess {
                 tokenRepository.saveTokens(it.accessToken, it.refreshToken)
-                postSideEffect(LoginSideEffect.NavigateToHome)
+                postSideEffect(LoginSideEffect.NavigateToTerm)
             }.onFailure { exception ->
                 Timber.e(exception)
                 authEventManager.emitTokenExpired()
@@ -68,7 +68,7 @@ class LoginViewModel @Inject constructor(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
                 )
-                postSideEffect(LoginSideEffect.NavigateToHome)
+                postSideEffect(LoginSideEffect.NavigateToTerm)
             }
             .onFailure { exception ->
                 Timber.e(exception)

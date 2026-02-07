@@ -19,13 +19,14 @@ import com.neki.android.feature.auth.impl.LoginSideEffect
 import com.neki.android.feature.auth.impl.LoginState
 import com.neki.android.feature.auth.impl.LoginViewModel
 import com.neki.android.feature.auth.impl.component.GradientBackground
+import com.neki.android.feature.auth.impl.login.component.LoginBackground
 import com.neki.android.feature.auth.impl.login.component.LoginBottomContent
 import timber.log.Timber
 
 @Composable
 fun LoginRoute(
     viewModel: LoginViewModel = hiltViewModel(),
-    navigateToMain: () -> Unit,
+    navigateToTerm: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
@@ -34,7 +35,7 @@ fun LoginRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToHome -> navigateToMain()
+            LoginSideEffect.NavigateToTerm -> navigateToTerm()
             LoginSideEffect.NavigateToKakaoRedirectingUri -> {
                 kakaoAuthHelper.login(
                     onSuccess = { idToken ->
@@ -65,7 +66,7 @@ fun LoginScreen(
     onIntent: (LoginIntent) -> Unit = {},
 ) {
     Box {
-        GradientBackground()
+        LoginBackground()
         LoginBottomContent(
             modifier = Modifier.align(Alignment.BottomCenter),
             onClick = { onIntent(LoginIntent.ClickKakaoLogin) },
