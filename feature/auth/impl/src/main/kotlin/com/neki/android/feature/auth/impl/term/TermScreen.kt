@@ -12,11 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.auth.impl.login.LoginIntent
 import com.neki.android.feature.auth.impl.login.LoginSideEffect
@@ -88,6 +90,10 @@ private fun TermScreen(
                 enabled = uiState.isAllRequiredAgreed,
             )
         }
+    }
+
+    if (uiState.isLoading) {
+        LoadingDialog()
     }
 }
 
