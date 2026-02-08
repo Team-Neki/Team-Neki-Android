@@ -10,6 +10,7 @@ data class RandomPoseUiState(
     val currentIndex: Int = 0,
     val poseList: ImmutableList<Pose> = persistentListOf(),
     val committedScraps: Map<Long, Boolean> = emptyMap(),
+    val hasNewPose: Boolean = false,
 ) {
     val currentPose: Pose?
         get() = poseList.getOrNull(currentIndex)

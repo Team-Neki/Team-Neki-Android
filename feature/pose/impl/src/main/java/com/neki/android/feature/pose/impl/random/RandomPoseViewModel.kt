@@ -155,7 +155,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect(RandomPoseEffect.SwipePoseImage(nextIndex))
 
         // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
-        if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD) {
+        if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
             viewModelScope.launch {
                 poseRepository.getSingleRandomPose(
                     headCount = peopleCount,
@@ -164,6 +164,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     reduce { copy(poseList = (poseList + pose).toImmutableList()) }
                 }.onFailure { error ->
                     if (error is HttpException && error.code() == NO_MORE_RANDOM_POSE) {
+                        reduce { copy(hasNewPose = false) }
                         postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
                     } else Timber.e(error)
                 }
