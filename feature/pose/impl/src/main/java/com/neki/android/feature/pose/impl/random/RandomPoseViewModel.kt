@@ -184,7 +184,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
     ) {
         viewModelScope.launch {
-            if (userRepository.hasVisitedRandomPose.first()) {
+            if (!userRepository.hasVisitedRandomPose.first()) {
                 userRepository.markRandomPoseAsVisited()
             } else {
                 reduce { copy(isShowTutorial = false) }
