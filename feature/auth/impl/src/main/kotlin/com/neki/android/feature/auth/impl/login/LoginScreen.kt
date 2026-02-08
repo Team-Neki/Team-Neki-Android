@@ -25,13 +25,13 @@ internal fun LoginRoute(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
-    val kakaoAuthHelper = remember { KakaoAuthHelper(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             LoginSideEffect.NavigateToTerm -> navigateToTerm()
             LoginSideEffect.NavigateToKakaoRedirectingUri -> {
-                kakaoAuthHelper.login(
+                KakaoAuthHelper.login(
+                    context = context,
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
                         viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))

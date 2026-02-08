@@ -3,10 +3,9 @@ package com.neki.android.core.common.kakao
 import android.content.Context
 import com.kakao.sdk.user.UserApiClient
 
-class KakaoAuthHelper(
-    private val context: Context,
-) {
+object KakaoAuthHelper {
     fun login(
+        context: Context,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit,
     ) {
