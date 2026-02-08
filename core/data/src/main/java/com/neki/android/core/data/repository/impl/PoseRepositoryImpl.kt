@@ -69,38 +69,34 @@ class PoseRepositoryImpl @Inject constructor(
     override suspend fun getSingleRandomPose(
         headCount: PeopleCount,
         excludeIds: Set<Long>,
-        maxRetry: Int,
     ): Result<Pose> = runSuspendCatching {
-        repeat(maxRetry) {
-            val pose = poseService.getRandomPose(headCount = headCount.name).data.toModel()
-            if (pose.id !in excludeIds) {
-                return@runSuspendCatching pose
-            }
-        }
-        throw RandomPoseRetryExhaustedException("새로운 포즈를 찾지 못했어요")
+        val excludeIdsString = excludeIds.joinToString(",")
+        poseService.getRandomPose(
+            headCount = headCount.name,
+            excludeIds = excludeIdsString,
+        ).data.toModel()
     }
 
     override suspend fun getMultipleRandomPose(
         headCount: PeopleCount,
         excludeIds: Set<Long>,
         poseSize: Int,
-        maxRetry: Int,
     ): Result<List<Pose>> = runSuspendCatching {
         val result = mutableListOf<Pose>()
         val collectedIds = excludeIds.toMutableSet()
-        var retryCount = 0
+        repeat(poseSize) {
+            val excludeIdsString = collectedIds.joinToString(",")
+            val pose = poseService.getRandomPose(
+                headCount = headCount.name,
+                excludeIds = excludeIdsString,
+            ).data.toModel()
 
-        while (result.size < poseSize && retryCount < maxRetry) {
-            val pose = poseService.getRandomPose(headCount = headCount.name).data.toModel()
             if (pose.id !in collectedIds) {
                 result.add(pose)
                 collectedIds.add(pose.id)
-            } else {
-                retryCount++
             }
         }
-
-        result.ifEmpty { throw RandomPoseRetryExhaustedException("새로운 포즈를 찾지 못했어요") }
+        return@runSuspendCatching result
     }
 
     override suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit> = runSuspendCatching {

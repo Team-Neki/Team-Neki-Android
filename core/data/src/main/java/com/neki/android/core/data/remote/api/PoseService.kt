@@ -37,9 +37,10 @@ class PoseService @Inject constructor(
     }
 
     // 랜덤 포즈 조회
-    suspend fun getRandomPose(headCount: String): BasicResponse<PoseDetailResponse> {
+    suspend fun getRandomPose(headCount: String, excludeIds: String): BasicResponse<PoseDetailResponse> {
         return client.get("/api/poses/random") {
             parameter("headCount", headCount)
+            parameter("excludeIds", excludeIds)
         }.body()
     }
 

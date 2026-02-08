@@ -22,14 +22,12 @@ interface PoseRepository {
     suspend fun getSingleRandomPose(
         headCount: PeopleCount,
         excludeIds: Set<Long>,
-        maxRetry: Int,
     ): Result<Pose>
 
     suspend fun getMultipleRandomPose(
         headCount: PeopleCount,
         excludeIds: Set<Long>,
         poseSize: Int,
-        maxRetry: Int,
     ): Result<List<Pose>>
 
     suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit>

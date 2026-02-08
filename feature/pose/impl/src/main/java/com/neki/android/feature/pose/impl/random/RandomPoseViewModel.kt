@@ -159,7 +159,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 poseRepository.getSingleRandomPose(
                     headCount = peopleCount,
                     excludeIds = state.randomPoseIds,
-                    maxRetry = PoseConst.MAXIMUM_RANDOM_POSE_RETRY_COUNT,
                 ).onSuccess { pose ->
                     reduce { copy(poseList = (poseList + pose).toImmutableList()) }
                 }.onFailure { error ->
@@ -207,7 +206,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 headCount = peopleCount,
                 excludeIds = emptySet(),
                 poseSize = PoseConst.INITIAL_POSE_LOAD_COUNT,
-                maxRetry = PoseConst.MAXIMUM_RANDOM_POSE_RETRY_COUNT,
             ).onSuccess { data ->
                 reduce {
                     copy(
