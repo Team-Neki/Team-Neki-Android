@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
@@ -51,7 +50,6 @@ private fun WhiteNekiAppLogoPreview() {
         WhiteNekiAppLogo()
     }
 }
-
 
 @Preview
 @Composable
