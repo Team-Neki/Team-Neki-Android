@@ -1,4 +1,4 @@
-package com.neki.android.feature.auth.impl
+package com.neki.android.feature.auth.impl.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,32 +15,32 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(
+class LoginViewModel @Inject constructor(
     private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
-    val store: MviIntentStore<AuthState, AuthIntent, AuthSideEffect> =
+    val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
         mviIntentStore(
-            initialState = AuthState(),
+            initialState = LoginState(),
             onIntent = ::onIntent,
         )
 
     private fun onIntent(
-        intent: AuthIntent,
-        state: AuthState,
-        reduce: (AuthState.() -> AuthState) -> Unit,
-        postSideEffect: (AuthSideEffect) -> Unit,
+        intent: LoginIntent,
+        state: LoginState,
+        reduce: (LoginState.() -> LoginState) -> Unit,
+        postSideEffect: (LoginSideEffect) -> Unit,
     ) {
         when (intent) {
-            AuthIntent.ClickKakaoLogin -> postSideEffect(AuthSideEffect.NavigateToKakaoRedirectingUri)
-            is AuthIntent.SuccessLogin -> {
+            LoginIntent.ClickKakaoLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
+            is LoginIntent.SuccessLogin -> {
                 reduce { copy(kakaoIdToken = intent.idToken) }
-                postSideEffect(AuthSideEffect.NavigateToTerm)
+                postSideEffect(LoginSideEffect.NavigateToTerm)
             }
-            AuthIntent.FailLogin -> postSideEffect(AuthSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
+            LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
 
             // Term
-            AuthIntent.ClickAgreeAll -> {
+            LoginIntent.ClickAgreeAll -> {
                 if (state.isAllRequiredAgreed) {
                     reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
                 } else {
@@ -48,7 +48,7 @@ class AuthViewModel @Inject constructor(
                     reduce { copy(agreedTerms = allRequiredTerms, isAllRequiredAgreed = true) }
                 }
             }
-            is AuthIntent.ClickAgreeTerm -> {
+            is LoginIntent.ClickAgreeTerm -> {
                 val newAgreedTerms = if (intent.term in state.agreedTerms) {
                     (state.agreedTerms - intent.term).toPersistentSet()
                 } else {
@@ -59,19 +59,19 @@ class AuthViewModel @Inject constructor(
                     .all { it in newAgreedTerms }
                 reduce { copy(agreedTerms = newAgreedTerms, isAllRequiredAgreed = isAllRequiredAgreed) }
             }
-            is AuthIntent.ClickTermNavigateUrl -> {
-                postSideEffect(AuthSideEffect.NavigateUrl(intent.term.url))
+            is LoginIntent.ClickTermNavigateUrl -> {
+                postSideEffect(LoginSideEffect.NavigateUrl(intent.term.url))
             }
-            AuthIntent.ClickNext -> {
+            LoginIntent.ClickNext -> {
                 val idToken = state.kakaoIdToken
                 if (state.isAllRequiredAgreed) {
                     loginWithKakao(idToken, reduce, postSideEffect)
                 }
             }
-            AuthIntent.ClickBack -> {
-                postSideEffect(AuthSideEffect.NavigateBack)
+            LoginIntent.ClickBack -> {
+                postSideEffect(LoginSideEffect.NavigateBack)
             }
-            AuthIntent.ResetTermState -> {
+            LoginIntent.ResetTermState -> {
                 reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
             }
         }
@@ -79,8 +79,8 @@ class AuthViewModel @Inject constructor(
 
     private fun loginWithKakao(
         idToken: String,
-        reduce: (AuthState.() -> AuthState) -> Unit,
-        postSideEffect: (AuthSideEffect) -> Unit,
+        reduce: (LoginState.() -> LoginState) -> Unit,
+        postSideEffect: (LoginSideEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
         authRepository.loginWithKakao(idToken)
@@ -90,7 +90,7 @@ class AuthViewModel @Inject constructor(
                     refreshToken = it.refreshToken,
                 )
                 authRepository.setReadOnboarding(true)
-                postSideEffect(AuthSideEffect.NavigateToMain)
+                postSideEffect(LoginSideEffect.NavigateToMain)
             }
             .onFailure { exception ->
                 Timber.e(exception)

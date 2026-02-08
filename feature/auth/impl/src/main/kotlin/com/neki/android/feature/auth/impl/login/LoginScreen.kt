@@ -14,17 +14,13 @@ import com.neki.android.core.common.kakao.KakaoAuthHelper
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.auth.impl.AuthIntent
-import com.neki.android.feature.auth.impl.AuthSideEffect
-import com.neki.android.feature.auth.impl.AuthState
-import com.neki.android.feature.auth.impl.AuthViewModel
 import com.neki.android.feature.auth.impl.login.component.LoginBackground
 import com.neki.android.feature.auth.impl.login.component.LoginBottomContent
 import timber.log.Timber
 
 @Composable
 internal fun LoginRoute(
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModel: LoginViewModel = hiltViewModel(),
     navigateToTerm: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -33,19 +29,19 @@ internal fun LoginRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            AuthSideEffect.NavigateToTerm -> navigateToTerm()
-            AuthSideEffect.NavigateToKakaoRedirectingUri -> {
+            LoginSideEffect.NavigateToTerm -> navigateToTerm()
+            LoginSideEffect.NavigateToKakaoRedirectingUri -> {
                 kakaoAuthHelper.login(
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
-                        viewModel.store.onIntent(AuthIntent.SuccessLogin(idToken))
+                        viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))
                     },
                     onFailure = { message ->
                         Timber.d("로그인 실패 $message")
                     },
                 )
             }
-            is AuthSideEffect.ShowToastMessage -> {
+            is LoginSideEffect.ShowToastMessage -> {
                 Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             }
             else -> {}
@@ -60,14 +56,14 @@ internal fun LoginRoute(
 
 @Composable
 private fun LoginScreen(
-    uiState: AuthState = AuthState(),
-    onIntent: (AuthIntent) -> Unit = {},
+    uiState: LoginState = LoginState(),
+    onIntent: (LoginIntent) -> Unit = {},
 ) {
     Box {
         LoginBackground()
         LoginBottomContent(
             modifier = Modifier.align(Alignment.BottomCenter),
-            onClick = { onIntent(AuthIntent.ClickKakaoLogin) },
+            onClick = { onIntent(LoginIntent.ClickKakaoLogin) },
         )
     }
 }

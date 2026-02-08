@@ -18,16 +18,16 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.auth.impl.AuthIntent
-import com.neki.android.feature.auth.impl.AuthSideEffect
-import com.neki.android.feature.auth.impl.AuthState
-import com.neki.android.feature.auth.impl.AuthViewModel
+import com.neki.android.feature.auth.impl.login.LoginIntent
+import com.neki.android.feature.auth.impl.login.LoginSideEffect
+import com.neki.android.feature.auth.impl.login.LoginState
+import com.neki.android.feature.auth.impl.login.LoginViewModel
 import com.neki.android.feature.auth.impl.term.component.TermContent
 import com.neki.android.feature.auth.impl.term.component.TermTopBar
 
 @Composable
 internal fun TermRoute(
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModel: LoginViewModel = hiltViewModel(),
     navigateToMain: () -> Unit,
     navigateBack: () -> Unit,
 ) {
@@ -36,15 +36,15 @@ internal fun TermRoute(
 
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.store.onIntent(AuthIntent.ResetTermState)
+            viewModel.store.onIntent(LoginIntent.ResetTermState)
         }
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            AuthSideEffect.NavigateToMain -> navigateToMain()
-            AuthSideEffect.NavigateBack -> navigateBack()
-            is AuthSideEffect.NavigateUrl -> {
+            LoginSideEffect.NavigateToMain -> navigateToMain()
+            LoginSideEffect.NavigateBack -> navigateBack()
+            is LoginSideEffect.NavigateUrl -> {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.url))
                 context.startActivity(intent)
             }
@@ -60,12 +60,12 @@ internal fun TermRoute(
 
 @Composable
 private fun TermScreen(
-    uiState: AuthState = AuthState(),
-    onIntent: (AuthIntent) -> Unit = {},
+    uiState: LoginState = LoginState(),
+    onIntent: (LoginIntent) -> Unit = {},
 ) {
     Column {
         TermTopBar(
-            onClickBack = { onIntent(AuthIntent.ClickBack) }
+            onClickBack = { onIntent(LoginIntent.ClickBack) }
         )
         Column(
             modifier = Modifier
@@ -76,14 +76,14 @@ private fun TermScreen(
                 modifier = Modifier.weight(1f),
                 agreedTerms = uiState.agreedTerms,
                 isAllRequiredAgreed = uiState.isAllRequiredAgreed,
-                onClickAgreeAll = { onIntent(AuthIntent.ClickAgreeAll) },
-                onClickAgreeTerm = { onIntent(AuthIntent.ClickAgreeTerm(it)) },
-                onClickTermDetail = { onIntent(AuthIntent.ClickTermNavigateUrl(it)) },
+                onClickAgreeAll = { onIntent(LoginIntent.ClickAgreeAll) },
+                onClickAgreeTerm = { onIntent(LoginIntent.ClickAgreeTerm(it)) },
+                onClickTermDetail = { onIntent(LoginIntent.ClickTermNavigateUrl(it)) },
             )
             CTAButtonPrimary(
                 modifier = Modifier.fillMaxWidth(),
                 text = "다음으로",
-                onClick = { onIntent(AuthIntent.ClickNext) },
+                onClick = { onIntent(LoginIntent.ClickNext) },
                 enabled = uiState.isAllRequiredAgreed,
             )
         }
