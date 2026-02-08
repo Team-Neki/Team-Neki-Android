@@ -1,34 +1,35 @@
-package com.neki.android.feature.auth.impl
+package com.neki.android.feature.auth.impl.login
 
-import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.common.kakao.KakaoAuthHelper
+import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.core.common.kakao.KakaoAuthHelper
-import com.neki.android.feature.auth.impl.component.LoginContent
+import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.auth.impl.login.component.LoginBackground
+import com.neki.android.feature.auth.impl.login.component.LoginBottomContent
 import timber.log.Timber
 
 @Composable
-fun LoginRoute(
+internal fun LoginRoute(
     viewModel: LoginViewModel = hiltViewModel(),
-    navigateToMain: () -> Unit,
+    navigateToTerm: () -> Unit,
 ) {
-    val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
-
     val context = LocalContext.current
-    val kakaoAuthHelper = remember { KakaoAuthHelper(context) }
+    val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToHome -> navigateToMain()
+            LoginSideEffect.NavigateToTerm -> navigateToTerm()
             LoginSideEffect.NavigateToKakaoRedirectingUri -> {
-                kakaoAuthHelper.login(
+                KakaoAuthHelper.login(
+                    context = context,
                     onSuccess = { idToken ->
                         Timber.d("로그인 성공 $idToken")
                         viewModel.store.onIntent(LoginIntent.SuccessLogin(idToken))
@@ -40,28 +41,32 @@ fun LoginRoute(
             }
 
             is LoginSideEffect.ShowToastMessage -> {
-                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+                nekiToast.showToast(text = sideEffect.message)
             }
+
+            else -> {}
         }
     }
 
     LoginScreen(
-        uiState = uiState,
         onIntent = viewModel.store::onIntent,
     )
 }
 
 @Composable
-fun LoginScreen(
-    uiState: LoginState = LoginState(),
+private fun LoginScreen(
     onIntent: (LoginIntent) -> Unit = {},
 ) {
-    LoginContent(
-        onClickKakaoLogin = { onIntent(LoginIntent.ClickKakaoLogin) },
-    )
+    Box {
+        LoginBackground()
+        LoginBottomContent(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            onClick = { onIntent(LoginIntent.ClickKakaoLogin) },
+        )
+    }
 }
 
-@Preview(showBackground = true)
+@ComponentPreview
 @Composable
 private fun LoginScreenPreview() {
     NekiTheme {

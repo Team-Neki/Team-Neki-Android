@@ -59,7 +59,7 @@ private fun EntryProviderScope<NavKey>.myPageEntry(navigator: Navigator) {
         ProfileSettingRoute(
             navigateBack = navigator::goBack,
             navigateToEditProfile = navigator::navigateToEditProfile,
-            navigateToLogin = { navigator.navigateRoot(RootNavKey.Login) },
+            navigateToLogin = { navigator.navigateRoot(RootNavKey.Auth) },
         )
     }
 

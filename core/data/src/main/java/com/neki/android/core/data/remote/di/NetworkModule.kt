@@ -88,7 +88,7 @@ internal object NetworkModule {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        if (tokenRepository.isSavedTokens().first()) {
+                        if (tokenRepository.hasTokens().first()) {
                             BearerTokens(
                                 accessToken = tokenRepository.getAccessToken().first(),
                                 refreshToken = tokenRepository.getRefreshToken().first(),

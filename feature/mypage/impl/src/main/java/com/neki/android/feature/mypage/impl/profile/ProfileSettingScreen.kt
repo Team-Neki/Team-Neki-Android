@@ -4,13 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.common.kakao.KakaoAuthHelper
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -24,7 +23,6 @@ import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
 import com.neki.android.feature.mypage.impl.profile.component.ProfileSettingTopBar
 import com.neki.android.feature.mypage.impl.profile.component.SettingProfileImage
-import com.neki.android.core.common.kakao.KakaoAuthHelper
 import timber.log.Timber
 
 @Composable
@@ -34,9 +32,7 @@ internal fun ProfileSettingRoute(
     navigateToEditProfile: () -> Unit,
     navigateToLogin: () -> Unit,
 ) {
-    val context = LocalContext.current
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
-    val kakaoAuthHelper = remember { KakaoAuthHelper(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -44,13 +40,13 @@ internal fun ProfileSettingRoute(
             MyPageEffect.NavigateToEditProfile -> navigateToEditProfile()
             MyPageEffect.NavigateToLogin -> navigateToLogin()
             MyPageEffect.LogoutWithKakao -> {
-                kakaoAuthHelper.logout(
+                KakaoAuthHelper.logout(
                     onSuccess = { navigateToLogin() },
                     onFailure = { Timber.e(it) },
                 )
             }
             MyPageEffect.UnlinkWithKakao -> {
-                kakaoAuthHelper.unlink(
+                KakaoAuthHelper.unlink(
                     onSuccess = { navigateToLogin() },
                     onFailure = { Timber.e(it) },
                 )

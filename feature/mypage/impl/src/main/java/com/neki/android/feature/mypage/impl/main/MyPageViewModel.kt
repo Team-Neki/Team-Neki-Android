@@ -190,6 +190,7 @@ internal class MyPageViewModel @Inject constructor(
         authRepository.withdrawAccount()
             .onSuccess {
                 tokenRepository.clearTokens()
+                authRepository.setCompletedOnboarding(false)
                 reduce { copy(isLoading = false) }
                 postSideEffect(MyPageEffect.UnlinkWithKakao)
             }
