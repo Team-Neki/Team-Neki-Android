@@ -22,12 +22,15 @@ class AuthNavigatorImpl @Inject constructor(
         state.stack.add(key)
     }
 
+    override fun navigateAndClear(key: NavKey) {
+        state.stack.clear()
+        state.stack.add(key)
+    }
+
     override fun goBack(): Boolean {
         return if (state.stack.size > 1) {
             state.stack.removeLast()
             true
-        } else {
-            false
-        }
+        } else false
     }
 }

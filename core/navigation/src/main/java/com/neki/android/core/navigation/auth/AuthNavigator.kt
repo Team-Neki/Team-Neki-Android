@@ -6,5 +6,6 @@ import com.neki.android.core.navigation.root.RootNavKey
 interface AuthNavigator {
     fun navigateRoot(rootNavKey: RootNavKey)
     fun navigate(key: NavKey)
+    fun navigateAndClear(key: NavKey)
     fun goBack(): Boolean
 }

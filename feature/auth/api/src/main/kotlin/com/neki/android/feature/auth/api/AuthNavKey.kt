@@ -19,12 +19,12 @@ sealed interface AuthNavKey : NavKey {
     data object Term : AuthNavKey
 }
 
-fun AuthNavigator.navigateToOnboarding() {
-    navigate(AuthNavKey.Onboarding)
+fun AuthNavigator.navigateToOnboardingAndClear() {
+    navigateAndClear(AuthNavKey.Onboarding)
 }
 
-fun AuthNavigator.navigateToLogin() {
-    navigate(AuthNavKey.Login)
+fun AuthNavigator.navigateToLoginAndClear() {
+    navigateAndClear(AuthNavKey.Login)
 }
 
 fun AuthNavigator.navigateToTerm() {

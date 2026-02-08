@@ -6,8 +6,8 @@ import com.neki.android.core.navigation.HiltSharedViewModelStoreNavEntryDecorato
 import com.neki.android.core.navigation.auth.AuthNavigator
 import com.neki.android.core.navigation.root.RootNavKey
 import com.neki.android.feature.auth.api.AuthNavKey
-import com.neki.android.feature.auth.api.navigateToLogin
-import com.neki.android.feature.auth.api.navigateToOnboarding
+import com.neki.android.feature.auth.api.navigateToLoginAndClear
+import com.neki.android.feature.auth.api.navigateToOnboardingAndClear
 import com.neki.android.feature.auth.api.navigateToTerm
 import com.neki.android.feature.auth.impl.login.LoginRoute
 import com.neki.android.feature.auth.impl.onboarding.OnboardingRoute
@@ -20,12 +20,12 @@ fun authEntryProvider(authNavigator: AuthNavigator): AuthEntryProviderInstaller 
     authEntry(authNavigator)
 }
 
-private fun EntryProviderScope<NavKey>.authEntry(authNavigator: AuthNavigator) {
+private fun EntryProviderScope<NavKey>.authEntry(navigator: AuthNavigator) {
     entry<AuthNavKey.Splash>(
         clazzContentKey = { key -> key.toString() },
     ) {
         SplashRoute(
-            navigateToOnboarding = authNavigator::navigateToOnboarding,
+            navigateToOnboarding = navigator::navigateToOnboardingAndClear,
         )
     }
 
@@ -35,7 +35,7 @@ private fun EntryProviderScope<NavKey>.authEntry(authNavigator: AuthNavigator) {
         ),
     ) {
         OnboardingRoute(
-            navigateToLogin = authNavigator::navigateToLogin,
+            navigateToLogin = navigator::navigateToLoginAndClear,
         )
     }
 
@@ -45,7 +45,7 @@ private fun EntryProviderScope<NavKey>.authEntry(authNavigator: AuthNavigator) {
         ),
     ) {
         LoginRoute(
-            navigateToTerm = authNavigator::navigateToTerm,
+            navigateToTerm = navigator::navigateToTerm,
         )
     }
 
@@ -55,8 +55,8 @@ private fun EntryProviderScope<NavKey>.authEntry(authNavigator: AuthNavigator) {
         ),
     ) {
         TermRoute(
-            navigateToMain = { authNavigator.navigateRoot(RootNavKey.Main) },
-            navigateBack = authNavigator::goBack,
+            navigateToMain = { navigator.navigateRoot(RootNavKey.Main) },
+            navigateBack = navigator::goBack,
         )
     }
 }
