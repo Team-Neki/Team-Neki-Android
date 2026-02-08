@@ -3,6 +3,7 @@ package com.neki.android.feature.auth.impl.login
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -11,6 +12,7 @@ import com.neki.android.core.common.kakao.KakaoAuthHelper
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.auth.impl.login.component.LoginBackground
 import com.neki.android.feature.auth.impl.login.component.LoginBottomContent
 import timber.log.Timber
@@ -21,6 +23,7 @@ internal fun LoginRoute(
     navigateToTerm: () -> Unit,
 ) {
     val context = LocalContext.current
+    val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -39,7 +42,7 @@ internal fun LoginRoute(
             }
 
             is LoginSideEffect.ShowToastMessage -> {
-                Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+                nekiToast.showToast(text = sideEffect.message)
             }
 
             else -> {}
