@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.logo.WhiteNekiTypoLogo
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.auth.impl.component.GradientBackground
@@ -40,10 +42,8 @@ internal fun LoginBackground() {
                     imageVector = ImageVector.vectorResource(R.drawable.icon_neki_logo_white),
                     contentDescription = null,
                 )
-                Image(
-                    modifier = Modifier.width(94.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_neki_text_logo_white),
-                    contentDescription = null,
+                WhiteNekiTypoLogo(
+                    modifier = Modifier.size(width = 93.8.dp, height = 36.6.dp),
                 )
             }
             VerticalSpacer(24.dp)
