@@ -218,11 +218,11 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     )
                 }
             }.onFailure { error ->
-                Timber.e(error)
                 reduce { copy(isLoading = false) }
                 if (error is RandomPoseRetryExhaustedException)
                     Timber.e(error, "중복 포즈")
                 else Timber.e(error)
+                postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
             }
         }
     }
