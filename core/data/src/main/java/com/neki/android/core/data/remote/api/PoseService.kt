@@ -5,7 +5,6 @@ import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.model.response.PoseDetailResponse
 import com.neki.android.core.data.remote.model.response.PoseResponse
-import com.neki.android.core.data.remote.model.response.ScrappedPoseResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -49,7 +48,7 @@ class PoseService @Inject constructor(
         page: Int = 0,
         size: Int = 20,
         sortOrder: String = "DESC",
-    ): BasicResponse<ScrappedPoseResponse> {
+    ): BasicResponse<PoseResponse> {
         return client.get("/api/poses/scrap") {
             parameter("page", page)
             parameter("size", size)

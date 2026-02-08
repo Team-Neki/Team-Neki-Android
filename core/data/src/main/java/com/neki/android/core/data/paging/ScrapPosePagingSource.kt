@@ -14,12 +14,11 @@ class ScrapPosePagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Pose> {
         return try {
             val page = params.key ?: 0
-            val response = poseService.getScrappedPoses(
+            val poses = poseService.getScrappedPoses(
                 page = page,
                 size = params.loadSize,
                 sortOrder = sortOrder.name,
-            )
-            val poses = response.data.toModels()
+            ).data.toModels()
 
             LoadResult.Page(
                 data = poses,
