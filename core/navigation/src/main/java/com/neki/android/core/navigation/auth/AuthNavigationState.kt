@@ -26,16 +26,16 @@ class AuthNavigationState @Inject constructor(
 fun AuthNavigationState.toEntries(
     entryProvider: (NavKey) -> NavEntry<NavKey>,
 ): SnapshotStateList<NavEntry<NavKey>> {
-    val hvmd = rememberHiltSharedViewModelStoreNavEntryDecorator<NavKey>()
+    val sharedViewModelStoreNavEntryDecorator = rememberHiltSharedViewModelStoreNavEntryDecorator<NavKey>()
     val decorators = listOf(
         rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
         rememberViewModelStoreNavEntryDecorator<NavKey>(),
-        hvmd,
+        sharedViewModelStoreNavEntryDecorator,
     )
 
     DisposableEffect(Unit) {
         onDispose {
-            hvmd.clearAll()
+            sharedViewModelStoreNavEntryDecorator.clearAll()
         }
     }
 

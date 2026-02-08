@@ -33,12 +33,12 @@ class NavigationState @Inject constructor(
 fun NavigationState.toEntries(
     entryProvider: (NavKey) -> NavEntry<NavKey>,
 ): SnapshotStateList<NavEntry<NavKey>> {
-    val hvmd = rememberHiltSharedViewModelStoreNavEntryDecorator<NavKey>()
+    val sharedViewModelStoreNavEntryDecorator = rememberHiltSharedViewModelStoreNavEntryDecorator<NavKey>()
     val decoratedEntries = subStacks.mapValues { (_, stack) ->
         val decorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
             rememberViewModelStoreNavEntryDecorator<NavKey>(),
-            hvmd,
+            sharedViewModelStoreNavEntryDecorator,
         )
         rememberDecoratedNavEntries(
             backStack = stack,
@@ -49,7 +49,7 @@ fun NavigationState.toEntries(
 
     DisposableEffect(Unit) {
         onDispose {
-            hvmd.clearAll()
+            sharedViewModelStoreNavEntryDecorator.clearAll()
         }
     }
 
