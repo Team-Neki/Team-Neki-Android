@@ -19,14 +19,14 @@ class UserRepositoryImpl @Inject constructor(
     @UserDataStore private val dataStore: DataStore<Preferences>,
     private val userService: UserService,
 ) : UserRepository {
-    override val isFirstVisitRandomPose: Flow<Boolean> =
+    override val hasVisitedRandomPose: Flow<Boolean> =
         dataStore.data.map { preferences ->
             preferences[DataStoreKey.IS_FIRST_VISIT_RANDOM_POSE] ?: false
         }
 
-    override suspend fun setFirstVisitRandomPose(value: Boolean) {
+    override suspend fun markRandomPoseAsVisited() {
         dataStore.edit { preferences ->
-            preferences[DataStoreKey.IS_FIRST_VISIT_RANDOM_POSE] = value
+            preferences[DataStoreKey.IS_FIRST_VISIT_RANDOM_POSE] = true
         }
     }
 
