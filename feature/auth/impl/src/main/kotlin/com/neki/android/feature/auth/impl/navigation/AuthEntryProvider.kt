@@ -21,28 +21,22 @@ fun authEntryProvider(authNavigator: AuthNavigator): AuthEntryProviderInstaller 
 }
 
 private fun EntryProviderScope<NavKey>.authEntry(navigator: AuthNavigator) {
-    entry<AuthNavKey.Splash>(
-        clazzContentKey = { key -> key.toString() },
-    ) {
+    entry<AuthNavKey.Splash> {
         SplashRoute(
             navigateToOnboarding = navigator::navigateToOnboardingAndClear,
+            navigateToLogin = navigator::navigateToLoginAndClear,
+            navigateToMain = { navigator.navigateRoot(RootNavKey.Main) },
         )
     }
 
-    entry<AuthNavKey.Onboarding>(
-        metadata = HiltSharedViewModelStoreNavEntryDecorator.parent(
-            AuthNavKey.Splash.toString(),
-        ),
-    ) {
+    entry<AuthNavKey.Onboarding> {
         OnboardingRoute(
             navigateToLogin = navigator::navigateToLoginAndClear,
         )
     }
 
     entry<AuthNavKey.Login>(
-        metadata = HiltSharedViewModelStoreNavEntryDecorator.parent(
-            AuthNavKey.Splash.toString(),
-        ),
+        clazzContentKey = { key -> key.toString() },
     ) {
         LoginRoute(
             navigateToTerm = navigator::navigateToTerm,
@@ -51,7 +45,7 @@ private fun EntryProviderScope<NavKey>.authEntry(navigator: AuthNavigator) {
 
     entry<AuthNavKey.Term>(
         metadata = HiltSharedViewModelStoreNavEntryDecorator.parent(
-            AuthNavKey.Splash.toString(),
+            AuthNavKey.Login.toString(),
         ),
     ) {
         TermRoute(
