@@ -44,7 +44,7 @@ class SplashViewModel @Inject constructor(
                 return@launch
             }
 
-            if (tokenRepository.isSavedTokens().first()) {
+            if (tokenRepository.hasTokens().first()) {
                 authRepository.updateAccessToken(
                     refreshToken = tokenRepository.getRefreshToken().first(),
                 ).onSuccess {

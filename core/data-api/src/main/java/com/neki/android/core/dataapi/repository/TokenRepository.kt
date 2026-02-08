@@ -7,7 +7,7 @@ interface TokenRepository {
         accessToken: String,
         refreshToken: String,
     )
-    fun isSavedTokens(): Flow<Boolean>
+    fun hasTokens(): Flow<Boolean>
     fun getAccessToken(): Flow<String>
     fun getRefreshToken(): Flow<String>
     suspend fun clearTokens()

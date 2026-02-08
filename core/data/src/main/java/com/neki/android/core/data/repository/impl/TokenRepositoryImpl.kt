@@ -27,7 +27,7 @@ class TokenRepositoryImpl @Inject constructor(
         authCacheManager.invalidateTokenCache()
     }
 
-    override fun isSavedTokens(): Flow<Boolean> {
+    override fun hasTokens(): Flow<Boolean> {
         return dataStore.data.map { preferences ->
             val accessToken = preferences[DataStoreKey.ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) }
             val refreshToken = preferences[DataStoreKey.REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) }
