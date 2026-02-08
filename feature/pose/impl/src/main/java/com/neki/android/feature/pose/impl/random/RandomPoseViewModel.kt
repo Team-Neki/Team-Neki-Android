@@ -3,9 +3,9 @@ package com.neki.android.feature.pose.impl.random
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
+import com.neki.android.core.common.exception.RandomPoseRetryExhaustedException
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
-import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.pose.impl.const.PoseConst
@@ -152,21 +152,16 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
         if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD) {
             viewModelScope.launch {
-                when (val result = fetchRandomPose(poseList = state.poseList)) {
-                    is FetchPoseResult.Success -> reduce {
-                        copy(
-                            poseList = (poseList + result.pose).toImmutableList(),
-                            committedScraps = committedScraps + (result.pose.id to result.pose.isScrapped),
-                        )
-                    }
-
-                    is FetchPoseResult.Duplicated ->
-                        Timber.d("프리페치 생략: ${result.tryCount}회 시도 후 중복 포즈")
-
-                    is FetchPoseResult.Failure -> {
-                        Timber.e(result.throwable)
-                        postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
-                    }
+                poseRepository.getSingleRandomPose(
+                    headCount = peopleCount,
+                    excludeIds = state.randomPoseIds,
+                    maxRetry = PoseConst.MAXIMUM_RANDOM_POSE_RETRY_COUNT,
+                ).onSuccess { pose ->
+                    reduce { copy(poseList = (poseList + pose).toImmutableList()) }
+                }.onFailure { error ->
+                    if (error is RandomPoseRetryExhaustedException)
+                        Timber.e(error, "중복 포즈")
+                    else Timber.e(error)
                 }
             }
         }
@@ -179,71 +174,29 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            val poses = mutableListOf<Pose>()
-            var totalFallbackCount = 0
-
             // 초기에 INITIAL_POSE_LOAD_COUNT개 로드
-            while (
-                poses.size < PoseConst.INITIAL_POSE_LOAD_COUNT &&
-                totalFallbackCount < PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT
-            ) {
-                val result = fetchRandomPose(
-                    poseList = poses,
-                    maxFallbackCount = PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT - totalFallbackCount,
-                )
-
-                totalFallbackCount += result.tryCount
-
-                when (result) {
-                    is FetchPoseResult.Success -> poses.add(result.pose)
-                    is FetchPoseResult.Failure -> {
-                        Timber.e(result.throwable)
-                        postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
-                        break
-                    }
-
-                    is FetchPoseResult.Duplicated ->
-                        Timber.d("초기 로드: ${result.tryCount}회 시도 후 중복 포즈")
-                }
-            }
-
-            if (poses.isNotEmpty()) {
+            poseRepository.getMultipleRandomPose(
+                headCount = peopleCount,
+                excludeIds = emptySet(),
+                poseSize = PoseConst.INITIAL_POSE_LOAD_COUNT,
+                maxRetry = PoseConst.MAXIMUM_RANDOM_POSE_RETRY_COUNT,
+            ).onSuccess { data ->
                 reduce {
                     copy(
                         isLoading = false,
-                        poseList = poses.toImmutableList(),
-                        committedScraps = poses.associate { it.id to it.isScrapped },
+                        poseList = data.toImmutableList(),
+                        committedScraps = data.associate { it.id to it.isScrapped },
                         currentIndex = 0,
                     )
                 }
-            } else {
+            }.onFailure { error ->
+                Timber.e(error)
                 reduce { copy(isLoading = false) }
-                postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
+                if (error is RandomPoseRetryExhaustedException)
+                    Timber.e(error, "중복 포즈")
+                else Timber.e(error)
             }
         }
-    }
-
-    private suspend fun fetchRandomPose(
-        poseList: List<Pose>,
-        maxFallbackCount: Int = PoseConst.MAXIMUM_RANDOM_POSE_FALLBACK_COUNT,
-    ): FetchPoseResult {
-        var tryCount = 0
-
-        while (tryCount < maxFallbackCount) {
-            tryCount++
-            poseRepository.getRandomPose(headCount = peopleCount)
-                .onSuccess { pose ->
-                    if (poseList.none { it.id == pose.id }) {
-                        return FetchPoseResult.Success(tryCount, pose)
-                    }
-                }
-                .onFailure { error ->
-                    Timber.e(error)
-                    return FetchPoseResult.Failure(tryCount, error)
-                }
-        }
-
-        return FetchPoseResult.Duplicated(tryCount)
     }
 
     override fun onCleared() {

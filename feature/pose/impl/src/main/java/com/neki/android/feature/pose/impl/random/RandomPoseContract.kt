@@ -16,12 +16,9 @@ data class RandomPoseUiState(
 
     val hasPrevious: Boolean
         get() = currentIndex > 0
-}
 
-internal sealed class FetchPoseResult(val tryCount: Int) {
-    class Success(tryCount: Int, val pose: Pose) : FetchPoseResult(tryCount)
-    class Duplicated(tryCount: Int) : FetchPoseResult(tryCount)
-    class Failure(tryCount: Int, val throwable: Throwable) : FetchPoseResult(tryCount)
+    val randomPoseIds: Set<Long>
+        get() = poseList.map { it.id }.toSet()
 }
 
 sealed interface RandomPoseIntent {

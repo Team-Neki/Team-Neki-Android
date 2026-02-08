@@ -19,7 +19,18 @@ interface PoseRepository {
 
     suspend fun getPose(poseId: Long): Result<Pose>
 
-    suspend fun getRandomPose(headCount: PeopleCount): Result<Pose>
+    suspend fun getSingleRandomPose(
+        headCount: PeopleCount,
+        excludeIds: Set<Long>,
+        maxRetry: Int,
+    ): Result<Pose>
+
+    suspend fun getMultipleRandomPose(
+        headCount: PeopleCount,
+        excludeIds: Set<Long>,
+        poseSize: Int,
+        maxRetry: Int,
+    ): Result<List<Pose>>
 
     suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit>
 }
