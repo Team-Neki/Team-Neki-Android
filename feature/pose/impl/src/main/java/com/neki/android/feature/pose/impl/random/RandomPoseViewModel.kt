@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.common.exception.RandomPoseRetryExhaustedException
 import com.neki.android.core.dataapi.repository.PoseRepository
+import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -17,6 +18,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -24,6 +26,7 @@ import timber.log.Timber
 internal class RandomPoseViewModel @AssistedInject constructor(
     @Assisted private val peopleCount: PeopleCount,
     private val poseRepository: PoseRepository,
+    private val userRepository: UserRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
@@ -48,7 +51,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         when (intent) {
-            RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialPoses(state, reduce, postSideEffect)
+            RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialData(state, reduce, postSideEffect)
 
             // 튜토리얼
             RandomPoseIntent.ClickLeftSwipe -> handleMovePrevious(state, reduce, postSideEffect)
@@ -163,6 +166,27 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                         Timber.e(error, "중복 포즈")
                     else Timber.e(error)
                 }
+            }
+        }
+    }
+
+    private fun fetchInitialData(
+        state: RandomPoseUiState,
+        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        postSideEffect: (RandomPoseEffect) -> Unit,
+    ) {
+        checkFirstVisit(reduce)
+        fetchInitialPoses(state, reduce, postSideEffect)
+    }
+
+    private fun checkFirstVisit(
+        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            if (userRepository.isFirstVisitRandomPose.first()) {
+                userRepository.setFirstVisitRandomPose(false)
+            } else {
+                reduce { copy(isShowTutorial = false) }
             }
         }
     }
