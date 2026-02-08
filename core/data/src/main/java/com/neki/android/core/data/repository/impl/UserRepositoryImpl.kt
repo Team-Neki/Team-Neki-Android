@@ -2,6 +2,7 @@ package com.neki.android.core.data.repository.impl
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.neki.android.core.data.local.di.UserDataStore
 import com.neki.android.core.data.remote.api.UserService
@@ -21,12 +22,12 @@ class UserRepositoryImpl @Inject constructor(
 ) : UserRepository {
     override val hasVisitedRandomPose: Flow<Boolean> =
         dataStore.data.map { preferences ->
-            preferences[DataStoreKey.HAS_VISITED_RANDOM_POSE] ?: false
+            preferences[HAS_VISITED_RANDOM_POSE] ?: false
         }
 
     override suspend fun markRandomPoseAsVisited() {
         dataStore.edit { preferences ->
-            preferences[DataStoreKey.HAS_VISITED_RANDOM_POSE] = true
+            preferences[HAS_VISITED_RANDOM_POSE] = true
         }
     }
 
@@ -40,5 +41,9 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun updateProfileImage(mediaId: Long?): Result<Unit> = runSuspendCatching {
         userService.updateProfileImage(UpdateProfileImageRequest(mediaId))
+    }
+
+    companion object {
+        private val HAS_VISITED_RANDOM_POSE = booleanPreferencesKey("is_first_visit_random_pose")
     }
 }
