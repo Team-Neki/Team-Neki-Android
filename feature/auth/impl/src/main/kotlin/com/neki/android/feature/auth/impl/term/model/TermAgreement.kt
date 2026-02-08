@@ -1,5 +1,7 @@
 package com.neki.android.feature.auth.impl.term.model
 
+import kotlinx.collections.immutable.toPersistentSet
+
 enum class TermAgreement(
     val title: String,
     val isRequired: Boolean,
@@ -19,5 +21,9 @@ enum class TermAgreement(
         title = "위치정보 수집 및 이용 동의",
         isRequired = true,
         url = "https://lydian-tip-26b.notion.site/2ee0d9441db080b48223fb0b3263da08?pvs=74",
-    ),
+    );
+
+    companion object {
+        val allRequiredTerms = entries.filter { it.isRequired }.toPersistentSet()
+    }
 }

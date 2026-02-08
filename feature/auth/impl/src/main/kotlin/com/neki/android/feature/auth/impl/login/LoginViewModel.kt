@@ -44,8 +44,7 @@ class LoginViewModel @Inject constructor(
                 if (state.isAllRequiredAgreed) {
                     reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
                 } else {
-                    val allRequiredTerms = TermAgreement.entries.filter { it.isRequired }.toPersistentSet()
-                    reduce { copy(agreedTerms = allRequiredTerms, isAllRequiredAgreed = true) }
+                    reduce { copy(agreedTerms = TermAgreement.allRequiredTerms, isAllRequiredAgreed = true) }
                 }
             }
 
@@ -55,9 +54,7 @@ class LoginViewModel @Inject constructor(
                 } else {
                     (state.agreedTerms + intent.term).toPersistentSet()
                 }
-                val isAllRequiredAgreed = TermAgreement.entries
-                    .filter { it.isRequired }
-                    .all { it in newAgreedTerms }
+                val isAllRequiredAgreed = TermAgreement.allRequiredTerms.all { it in newAgreedTerms }
                 reduce { copy(agreedTerms = newAgreedTerms, isAllRequiredAgreed = isAllRequiredAgreed) }
             }
 
