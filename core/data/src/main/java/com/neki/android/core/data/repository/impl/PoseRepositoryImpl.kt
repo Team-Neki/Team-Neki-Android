@@ -3,16 +3,17 @@ package com.neki.android.core.data.repository.impl
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.neki.android.core.common.exception.RandomPoseRetryExhaustedException
 import com.neki.android.core.data.paging.PosePagingSource
 import com.neki.android.core.data.paging.ScrapPosePagingSource
 import com.neki.android.core.data.remote.api.PoseService
 import com.neki.android.core.data.util.runSuspendCatching
+import com.neki.android.core.dataapi.repository.NO_MORE_RANDOM_POSE
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
 import kotlinx.coroutines.flow.Flow
+import retrofit2.HttpException
 import javax.inject.Inject
 
 private const val PAGE_SIZE = 20
@@ -86,10 +87,16 @@ class PoseRepositoryImpl @Inject constructor(
         val collectedIds = excludeIds.toMutableSet()
         repeat(poseSize) {
             val excludeIdsString = collectedIds.joinToString(",")
-            val pose = poseService.getRandomPose(
-                headCount = headCount.name,
-                excludeIds = excludeIdsString,
-            ).data.toModel()
+            val pose = try {
+                poseService.getRandomPose(
+                    headCount = headCount.name,
+                    excludeIds = excludeIdsString,
+                ).data.toModel()
+            } catch (e: HttpException) {
+                // Http Error Code 이지만, 클라이언트에서 성공으로 취급
+                if (e.code() == NO_MORE_RANDOM_POSE) return@runSuspendCatching result
+                else throw e
+            }
 
             if (pose.id !in collectedIds) {
                 result.add(pose)

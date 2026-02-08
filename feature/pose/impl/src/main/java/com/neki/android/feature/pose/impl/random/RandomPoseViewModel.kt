@@ -3,7 +3,7 @@ package com.neki.android.feature.pose.impl.random
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
-import com.neki.android.core.common.exception.RandomPoseRetryExhaustedException
+import com.neki.android.core.dataapi.repository.NO_MORE_RANDOM_POSE
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.PeopleCount
@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = RandomPoseViewModel.Factory::class)
@@ -162,9 +163,9 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 ).onSuccess { pose ->
                     reduce { copy(poseList = (poseList + pose).toImmutableList()) }
                 }.onFailure { error ->
-                    if (error is RandomPoseRetryExhaustedException)
-                        Timber.e(error, "중복 포즈")
-                    else Timber.e(error)
+                    if (error is HttpException && error.code() == NO_MORE_RANDOM_POSE) {
+                        postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
+                    } else Timber.e(error)
                 }
             }
         }
@@ -217,10 +218,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 }
             }.onFailure { error ->
                 reduce { copy(isLoading = false) }
-                if (error is RandomPoseRetryExhaustedException)
-                    Timber.e(error, "중복 포즈")
-                else Timber.e(error)
                 postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
+                Timber.e(error)
             }
         }
     }
