@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -20,10 +19,10 @@ import com.neki.android.feature.auth.impl.component.GradientBackground
 
 @Composable
 internal fun SplashBackground(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
+        modifier = modifier,
     ) {
         GradientBackground()
         Column(
@@ -31,15 +30,15 @@ internal fun SplashBackground(
                 .fillMaxWidth()
                 .padding(top = 133.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
             Image(
                 imageVector = ImageVector.vectorResource(R.drawable.icon_neki_logo_white),
-                contentDescription = null
+                contentDescription = null,
             )
             Image(
                 imageVector = ImageVector.vectorResource(R.drawable.icon_splash_text),
-                contentDescription = null
+                contentDescription = null,
             )
         }
     }
@@ -47,7 +46,7 @@ internal fun SplashBackground(
 
 @ComponentPreview
 @Composable
-internal fun SplashBackgroundPreview() {
+private fun SplashBackgroundPreview() {
     NekiTheme {
         SplashBackground()
     }

@@ -27,10 +27,12 @@ internal fun SplashRoute(
                 delay(1000)
                 navigateToOnboarding()
             }
+
             SplashSideEffect.NavigateToLogin -> {
                 delay(1000)
                 navigateToLogin()
             }
+
             SplashSideEffect.NavigateToMain -> {
                 delay(1000)
                 navigateToMain()
@@ -44,7 +46,7 @@ internal fun SplashRoute(
 @Composable
 private fun SplashScreen() {
     SplashBackground(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     )
 }
 

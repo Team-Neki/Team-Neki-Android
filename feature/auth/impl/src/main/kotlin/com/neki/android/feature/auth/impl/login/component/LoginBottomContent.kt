@@ -42,7 +42,7 @@ internal fun LoginBottomContent(
 }
 
 @Composable
-internal fun KakaoLoginButton(
+private fun KakaoLoginButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {

@@ -48,6 +48,7 @@ internal fun TermRoute(
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.url))
                 context.startActivity(intent)
             }
+
             else -> {}
         }
     }
@@ -65,12 +66,12 @@ private fun TermScreen(
 ) {
     Column {
         TermTopBar(
-            onClickBack = { onIntent(LoginIntent.ClickBack) }
+            onClickBack = { onIntent(LoginIntent.ClickBack) },
         )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 12.dp, start = 20.dp, end = 20.dp, bottom = 34.dp)
+                .padding(top = 12.dp, start = 20.dp, end = 20.dp, bottom = 34.dp),
         ) {
             TermContent(
                 modifier = Modifier.weight(1f),

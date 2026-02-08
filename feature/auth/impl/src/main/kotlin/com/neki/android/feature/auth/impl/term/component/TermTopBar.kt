@@ -6,7 +6,7 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun TermTopBar(
+internal fun TermTopBar(
     onClickBack: () -> Unit = {},
 ) {
     BackTitleTopBar(

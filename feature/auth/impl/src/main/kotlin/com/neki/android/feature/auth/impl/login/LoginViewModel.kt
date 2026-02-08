@@ -37,9 +37,9 @@ class LoginViewModel @Inject constructor(
                 reduce { copy(kakaoIdToken = intent.idToken) }
                 postSideEffect(LoginSideEffect.NavigateToTerm)
             }
+
             LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
 
-            // Term
             LoginIntent.ClickAgreeAll -> {
                 if (state.isAllRequiredAgreed) {
                     reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
@@ -48,6 +48,7 @@ class LoginViewModel @Inject constructor(
                     reduce { copy(agreedTerms = allRequiredTerms, isAllRequiredAgreed = true) }
                 }
             }
+
             is LoginIntent.ClickAgreeTerm -> {
                 val newAgreedTerms = if (intent.term in state.agreedTerms) {
                     (state.agreedTerms - intent.term).toPersistentSet()
@@ -59,18 +60,22 @@ class LoginViewModel @Inject constructor(
                     .all { it in newAgreedTerms }
                 reduce { copy(agreedTerms = newAgreedTerms, isAllRequiredAgreed = isAllRequiredAgreed) }
             }
+
             is LoginIntent.ClickTermNavigateUrl -> {
                 postSideEffect(LoginSideEffect.NavigateUrl(intent.term.url))
             }
+
             LoginIntent.ClickNext -> {
                 val idToken = state.kakaoIdToken
                 if (state.isAllRequiredAgreed) {
                     loginWithKakao(idToken, reduce, postSideEffect)
                 }
             }
+
             LoginIntent.ClickBack -> {
                 postSideEffect(LoginSideEffect.NavigateBack)
             }
+
             LoginIntent.ResetTermState -> {
                 reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
             }

@@ -41,22 +41,22 @@ internal fun LoginRoute(
                     },
                 )
             }
+
             is LoginSideEffect.ShowToastMessage -> {
                 Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
             }
+
             else -> {}
         }
     }
 
     LoginScreen(
-        uiState = uiState,
         onIntent = viewModel.store::onIntent,
     )
 }
 
 @Composable
 private fun LoginScreen(
-    uiState: LoginState = LoginState(),
     onIntent: (LoginIntent) -> Unit = {},
 ) {
     Box {

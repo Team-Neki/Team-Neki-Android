@@ -2,7 +2,6 @@ package com.neki.android.feature.auth.impl.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,8 +16,8 @@ import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.auth.impl.onboarding.component.OnboardingPageContent
-import com.neki.android.feature.auth.impl.onboarding.component.TextSection
 import com.neki.android.feature.auth.impl.onboarding.component.PagerIndicator
+import com.neki.android.feature.auth.impl.onboarding.component.TextSection
 import com.neki.android.feature.auth.impl.onboarding.model.OnboardingPage
 
 @Composable
@@ -43,7 +42,7 @@ private fun OnboardingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = NekiTheme.colorScheme.white)
+            .background(color = NekiTheme.colorScheme.white),
     ) {
         VerticalSpacer(60f)
         HorizontalPager(
@@ -73,7 +72,7 @@ private fun OnboardingScreen(
                 .padding(horizontal = 20.dp, vertical = 28.dp)
                 .fillMaxWidth(),
             text = "회원가입 및 로그인",
-            onClick = onClickLoginButton
+            onClick = onClickLoginButton,
         )
     }
 }

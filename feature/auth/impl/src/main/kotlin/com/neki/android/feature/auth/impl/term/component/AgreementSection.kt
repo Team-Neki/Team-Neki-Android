@@ -21,7 +21,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.auth.impl.term.model.TermAgreement
 
 @Composable
-fun AgreementSection(
+internal fun AgreementSection(
     agreement: TermAgreement,
     isAgreed: Boolean = false,
     onClickAgree: () -> Unit = {},

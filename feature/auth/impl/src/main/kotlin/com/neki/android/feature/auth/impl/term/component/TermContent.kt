@@ -28,7 +28,7 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
 
 @Composable
-fun TermContent(
+internal fun TermContent(
     modifier: Modifier = Modifier,
     agreedTerms: ImmutableSet<TermAgreement> = persistentSetOf(),
     isAllRequiredAgreed: Boolean = false,
@@ -37,18 +37,18 @@ fun TermContent(
     onClickTermDetail: (TermAgreement) -> Unit = {},
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Image(
             modifier = Modifier.padding(bottom = 12.dp),
             imageVector = ImageVector.vectorResource(R.drawable.icon_agreement),
-            contentDescription = null
+            contentDescription = null,
         )
         Text(
             modifier = Modifier.padding(bottom = 24.dp),
             text = "편리한 네키 이용을 위한\n필수 약관에 동의해주세요.",
             style = NekiTheme.typography.title24SemiBold,
-            color = NekiTheme.colorScheme.gray900
+            color = NekiTheme.colorScheme.gray900,
         )
         Row(
             modifier = Modifier
@@ -57,26 +57,26 @@ fun TermContent(
                 .border(
                     width = 1.dp,
                     color = if (isAllRequiredAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray100,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
                 )
                 .background(
                     shape = RoundedCornerShape(12.dp),
-                    color = NekiTheme.colorScheme.white
+                    color = NekiTheme.colorScheme.white,
                 )
                 .padding(vertical = 18.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Icon(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (isAllRequiredAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200
+                tint = if (isAllRequiredAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
             )
             Text(
                 text = "약관 전체 동의",
                 style = NekiTheme.typography.title18SemiBold,
-                color = NekiTheme.colorScheme.gray900
+                color = NekiTheme.colorScheme.gray900,
             )
         }
         VerticalSpacer(12.dp)
