@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +15,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.logo.WhiteNekiAppLogo
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.auth.impl.component.GradientBackground
 
@@ -32,9 +34,8 @@ internal fun SplashBackground(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-            Image(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_neki_logo_white),
-                contentDescription = null,
+            WhiteNekiAppLogo(
+                modifier = Modifier.size(width = 73.89.dp, height = 80.41.dp),
             )
             Image(
                 imageVector = ImageVector.vectorResource(R.drawable.icon_splash_text),

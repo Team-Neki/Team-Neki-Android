@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.logo.WhiteNekiAppLogo
 import com.neki.android.core.designsystem.logo.WhiteNekiTypoLogo
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
@@ -37,10 +38,8 @@ internal fun LoginBackground() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(15.36.dp),
             ) {
-                Image(
-                    modifier = Modifier.width(33.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_neki_logo_white),
-                    contentDescription = null,
+                WhiteNekiAppLogo(
+                    modifier = Modifier.size(width = 33.3.dp, height = 37.6.dp),
                 )
                 WhiteNekiTypoLogo(
                     modifier = Modifier.size(width = 93.8.dp, height = 36.6.dp),
