@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,7 @@ import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.auth.impl.login.LoginIntent
 import com.neki.android.feature.auth.impl.login.LoginSideEffect
 import com.neki.android.feature.auth.impl.login.LoginState
@@ -34,6 +36,7 @@ internal fun TermRoute(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
+    val nekiToast = remember { NekiToast(context) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -48,6 +51,10 @@ internal fun TermRoute(
             is LoginSideEffect.NavigateUrl -> {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.url))
                 context.startActivity(intent)
+            }
+
+            is LoginSideEffect.ShowToastMessage -> {
+                nekiToast.showToast(sideEffect.message)
             }
 
             else -> {}
