@@ -28,16 +28,15 @@ internal fun AgreementSection(
     onClickNavigateUrl: () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(
             modifier = Modifier
                 .weight(1f)
-                .noRippleClickable(onClick = onClickAgree),
+                .noRippleClickable(onClick = onClickAgree)
+                .padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
