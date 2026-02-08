@@ -14,8 +14,6 @@ import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
 import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.ResponseException
-import io.ktor.client.plugins.ServerResponseException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -81,8 +79,8 @@ class PoseRepositoryImpl @Inject constructor(
                 headCount = headCount.name,
                 excludeIds = excludeIdsString,
             ).data.toModel()
-        } catch (e: ResponseException) {
-            if (e is ClientRequestException && e.response.status.value == NO_MORE_RANDOM_POSE)
+        } catch (e: ClientRequestException) {
+            if (e.response.status.value == NO_MORE_RANDOM_POSE)
                 throw ClientApiException(NO_MORE_RANDOM_POSE, e.message)
             else throw e
         }

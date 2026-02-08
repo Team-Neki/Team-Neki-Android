@@ -52,6 +52,8 @@ formatting:
 exceptions:
     TooGenericExceptionCaught:
         active: false
+    SwallowedException:
+        active: false
 
 style:
     FunctionOnlyReturningConstant:
