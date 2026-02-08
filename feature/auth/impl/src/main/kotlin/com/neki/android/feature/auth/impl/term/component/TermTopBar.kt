@@ -7,7 +7,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 fun TermTopBar(
-    onClickBack: () -> Unit= {},
+    onClickBack: () -> Unit = {},
 ) {
     BackTitleTopBar(
         title = "이용약관",
