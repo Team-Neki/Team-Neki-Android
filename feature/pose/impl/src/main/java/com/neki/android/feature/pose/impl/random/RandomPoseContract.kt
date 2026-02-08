@@ -33,6 +33,7 @@ sealed interface RandomPoseIntent {
     data object ClickScrapIcon : RandomPoseIntent
     data object ClickLeftSwipe : RandomPoseIntent
     data object ClickRightSwipe : RandomPoseIntent
+    data class ScrapChanged(val poseId: Long, val isScrapped: Boolean) : RandomPoseIntent
 }
 
 sealed interface RandomPoseEffect {

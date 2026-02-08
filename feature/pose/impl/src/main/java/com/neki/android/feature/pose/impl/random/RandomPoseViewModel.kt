@@ -66,60 +66,61 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 }
             }
 
-            RandomPoseIntent.ClickScrapIcon -> handleScrapToggle(state, reduce)
+            RandomPoseIntent.ClickScrapIcon -> {
+                val currentPost = state.currentPose ?: return
+                handleScrapToggle(currentPost.id, !currentPost.isScrapped, reduce)
+            }
+
+            is RandomPoseIntent.ScrapChanged -> handleScrapToggle(intent.poseId, intent.isScrapped, reduce)
         }
     }
 
     private fun handleScrapToggle(
-        state: RandomPoseUiState,
+        poseId: Long,
+        newScrapStatus: Boolean,
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
     ) {
-        state.currentPose?.let { currentPose ->
-            val poseId = currentPose.id
-            val newScrapStatus = !currentPose.isScrapped
-
-            // UI 즉시 업데이트
-            reduce {
-                copy(
-                    poseList = poseList.map { pose ->
-                        if (pose.id == poseId) {
-                            pose.copy(isScrapped = newScrapStatus)
-                        } else {
-                            pose
-                        }
-                    }.toImmutableList(),
-                )
-            }
-
-            // 해당 포즈의 이전 Job 취소 후 새로운 Job 시작
-            scrapJobs[poseId]?.cancel()
-            scrapJobs[poseId] = viewModelScope.launch {
-                delay(500)
-                val committedScrap = store.uiState.value.committedScraps[poseId]
-                if (committedScrap == newScrapStatus || committedScrap == null) return@launch
-
-                poseRepository.updateScrap(poseId, newScrapStatus)
-                    .onSuccess {
-                        Timber.d("updateScrap success for poseId: $poseId")
-                        reduce {
-                            copy(committedScraps = committedScraps + (poseId to newScrapStatus))
-                        }
+        // UI 즉시 업데이트
+        reduce {
+            copy(
+                poseList = poseList.map { pose ->
+                    if (pose.id == poseId) {
+                        pose.copy(isScrapped = newScrapStatus)
+                    } else {
+                        pose
                     }
-                    .onFailure { error ->
-                        Timber.e(error, "updateScrap failed for poseId: $poseId")
-                        reduce {
-                            copy(
-                                poseList = poseList.map { pose ->
-                                    if (pose.id == poseId) {
-                                        pose.copy(isScrapped = committedScrap)
-                                    } else {
-                                        pose
-                                    }
-                                }.toImmutableList(),
-                            )
-                        }
+                }.toImmutableList(),
+            )
+        }
+
+        // 해당 포즈의 이전 Job 취소 후 새로운 Job 시작
+        scrapJobs[poseId]?.cancel()
+        scrapJobs[poseId] = viewModelScope.launch {
+            delay(500)
+            val committedScrap = store.uiState.value.committedScraps[poseId]
+            if (committedScrap == newScrapStatus || committedScrap == null) return@launch
+
+            poseRepository.updateScrap(poseId, newScrapStatus)
+                .onSuccess {
+                    Timber.d("updateScrap success for poseId: $poseId")
+                    reduce {
+                        copy(committedScraps = committedScraps + (poseId to newScrapStatus))
                     }
-            }
+                }
+                .onFailure { error ->
+                    Timber.e(error, "updateScrap failed for poseId: $poseId")
+                    reduce {
+                        copy(
+                            poseList = poseList.map { pose ->
+                                if (pose.id == poseId) {
+                                    pose.copy(isScrapped = committedScrap)
+                                } else {
+                                    pose
+                                }
+                            }.toImmutableList(),
+                        )
+                    }
+                }
         }
     }
 

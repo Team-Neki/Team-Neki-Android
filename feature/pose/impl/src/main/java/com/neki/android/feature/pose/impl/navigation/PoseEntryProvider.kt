@@ -16,6 +16,7 @@ import com.neki.android.feature.pose.impl.detail.PoseDetailViewModel
 import com.neki.android.feature.pose.impl.main.PoseIntent
 import com.neki.android.feature.pose.impl.main.PoseRoute
 import com.neki.android.feature.pose.impl.main.PoseViewModel
+import com.neki.android.feature.pose.impl.random.RandomPoseIntent
 import com.neki.android.feature.pose.impl.random.RandomPoseRoute
 import com.neki.android.feature.pose.impl.random.RandomPoseViewModel
 import dagger.Module
@@ -68,12 +69,23 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: Navigator) {
     }
 
     entry<PoseNavKey.RandomPose> { key ->
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<RandomPoseViewModel, RandomPoseViewModel.Factory>(
+            creationCallback = { factory ->
+                factory.create(key.peopleCount)
+            },
+        )
+
+        ResultEffect<PoseResult>(resultBus) { result ->
+            when (result) {
+                is PoseResult.ScrapChanged -> {
+                    viewModel.store.onIntent(RandomPoseIntent.ScrapChanged(result.poseId, result.isScrapped))
+                }
+            }
+        }
+
         RandomPoseRoute(
-            viewModel = hiltViewModel<RandomPoseViewModel, RandomPoseViewModel.Factory>(
-                creationCallback = { factory ->
-                    factory.create(key.peopleCount)
-                },
-            ),
+            viewModel = viewModel,
             navigateBack = navigator::goBack,
             navigateToPoseDetail = navigator::navigateToPoseDetail,
         )
