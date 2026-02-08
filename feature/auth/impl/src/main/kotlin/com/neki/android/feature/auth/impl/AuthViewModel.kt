@@ -2,7 +2,6 @@ package com.neki.android.feature.auth.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
@@ -11,14 +10,12 @@ import com.neki.android.feature.auth.impl.term.model.TermAgreement
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentSet
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authEventManager: AuthEventManager,
     private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
@@ -26,7 +23,6 @@ class AuthViewModel @Inject constructor(
         mviIntentStore(
             initialState = AuthState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(AuthIntent.EnterLoginScreen) },
         )
 
     private fun onIntent(
@@ -36,9 +32,11 @@ class AuthViewModel @Inject constructor(
         postSideEffect: (AuthSideEffect) -> Unit,
     ) {
         when (intent) {
-            AuthIntent.EnterLoginScreen -> fetchInitialData(postSideEffect)
             AuthIntent.ClickKakaoLogin -> postSideEffect(AuthSideEffect.NavigateToKakaoRedirectingUri)
-            is AuthIntent.SuccessLogin -> loginWithKakao(intent.idToken, reduce, postSideEffect)
+            is AuthIntent.SuccessLogin -> {
+                reduce { copy(kakaoIdToken = intent.idToken) }
+                postSideEffect(AuthSideEffect.NavigateToTerm)
+            }
             AuthIntent.FailLogin -> postSideEffect(AuthSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
 
             // Term
@@ -65,29 +63,17 @@ class AuthViewModel @Inject constructor(
                 postSideEffect(AuthSideEffect.NavigateUrl(intent.term.url))
             }
             AuthIntent.ClickNext -> {
+                val idToken = state.kakaoIdToken
                 if (state.isAllRequiredAgreed) {
-                    postSideEffect(AuthSideEffect.NavigateToMain)
+                    loginWithKakao(idToken, reduce, postSideEffect)
                 }
             }
             AuthIntent.ClickBack -> {
                 postSideEffect(AuthSideEffect.NavigateBack)
             }
-        }
-    }
-
-    private fun fetchInitialData(postSideEffect: (AuthSideEffect) -> Unit) = viewModelScope.launch {
-        if (tokenRepository.isSavedTokens().first()) {
-            authRepository.updateAccessToken(
-                refreshToken = tokenRepository.getRefreshToken().first(),
-            ).onSuccess {
-                tokenRepository.saveTokens(it.accessToken, it.refreshToken)
-                postSideEffect(AuthSideEffect.NavigateToTerm)
-            }.onFailure { exception ->
-                Timber.e(exception)
-                authEventManager.emitTokenExpired()
+            AuthIntent.ResetTermState -> {
+                reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
             }
-        } else {
-            Timber.d("저장된 JWT 토큰이 없습니다.")
         }
     }
 
@@ -103,7 +89,8 @@ class AuthViewModel @Inject constructor(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
                 )
-                postSideEffect(AuthSideEffect.NavigateToTerm)
+                authRepository.setReadOnboarding(true)
+                postSideEffect(AuthSideEffect.NavigateToMain)
             }
             .onFailure { exception ->
                 Timber.e(exception)
