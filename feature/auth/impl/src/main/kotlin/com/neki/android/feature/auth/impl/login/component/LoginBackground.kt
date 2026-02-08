@@ -25,25 +25,25 @@ import com.neki.android.feature.auth.impl.component.GradientBackground
 @Composable
 internal fun LoginBackground() {
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         GradientBackground()
         Column(
-            modifier = Modifier.padding(start = 32.dp, top = 164.dp)
+            modifier = Modifier.padding(start = 32.dp, top = 164.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(15.36.dp)
+                horizontalArrangement = Arrangement.spacedBy(15.36.dp),
             ) {
                 Image(
                     modifier = Modifier.width(33.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_neki_logo_white),
-                    contentDescription = null
+                    contentDescription = null,
                 )
                 Image(
                     modifier = Modifier.width(94.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_neki_text_logo_white),
-                    contentDescription = null
+                    contentDescription = null,
                 )
             }
             VerticalSpacer(24.dp)

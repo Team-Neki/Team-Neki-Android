@@ -31,12 +31,12 @@ internal fun LoginBottomContent(
             .fillMaxWidth()
             .background(
                 color = NekiTheme.colorScheme.white,
-                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
             )
-            .padding(top = 32.dp, bottom = 56.dp, start = 20.dp, end = 20.dp)
+            .padding(top = 32.dp, bottom = 56.dp, start = 20.dp, end = 20.dp),
     ) {
         KakaoLoginButton(
-            onClick = onClick
+            onClick = onClick,
         )
     }
 }

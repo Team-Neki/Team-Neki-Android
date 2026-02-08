@@ -1,6 +1,5 @@
 package com.neki.android.feature.auth.impl.onboarding.component
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,10 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.auth.impl.onboarding.model.OnboardingPage
 
@@ -24,15 +21,15 @@ internal fun TextSection(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Box(
             modifier = Modifier
                 .background(
                     shape = CircleShape,
-                    color = NekiTheme.colorScheme.primary25
+                    color = NekiTheme.colorScheme.primary25,
                 )
-                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .padding(horizontal = 12.dp, vertical = 4.dp),
         ) {
             Text(
                 text = page.title,

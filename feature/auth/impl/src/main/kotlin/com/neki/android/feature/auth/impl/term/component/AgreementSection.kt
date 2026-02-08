@@ -32,7 +32,7 @@ internal fun AgreementSection(
             .fillMaxWidth()
             .padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(
             modifier = Modifier
@@ -46,18 +46,18 @@ internal fun AgreementSection(
                     .size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (isAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200
+                tint = if (isAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
             )
             Text(
                 modifier = Modifier.padding(end = 2.dp),
                 text = if (agreement.isRequired) "(필수)" else "(선택)",
                 style = NekiTheme.typography.body14Medium,
-                color = NekiTheme.colorScheme.gray500
+                color = NekiTheme.colorScheme.gray500,
             )
             Text(
                 text = agreement.title,
                 style = NekiTheme.typography.body16Medium,
-                color = NekiTheme.colorScheme.gray900
+                color = NekiTheme.colorScheme.gray900,
             )
         }
         Icon(
@@ -66,7 +66,7 @@ internal fun AgreementSection(
                 .noRippleClickableSingle(onClick = onClickNavigateUrl),
             imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
             contentDescription = null,
-            tint = NekiTheme.colorScheme.gray300
+            tint = NekiTheme.colorScheme.gray300,
         )
     }
 }
