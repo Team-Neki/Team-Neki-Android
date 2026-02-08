@@ -1,6 +1,5 @@
 package com.neki.android.feature.auth.impl.login
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
