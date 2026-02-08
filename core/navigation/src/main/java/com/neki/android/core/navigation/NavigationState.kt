@@ -1,6 +1,7 @@
 package com.neki.android.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -32,17 +33,24 @@ class NavigationState @Inject constructor(
 fun NavigationState.toEntries(
     entryProvider: (NavKey) -> NavEntry<NavKey>,
 ): SnapshotStateList<NavEntry<NavKey>> {
+    val hvmd = rememberHiltSharedViewModelStoreNavEntryDecorator<NavKey>()
     val decoratedEntries = subStacks.mapValues { (_, stack) ->
         val decorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
             rememberViewModelStoreNavEntryDecorator<NavKey>(),
-            rememberHiltSharedViewModelStoreNavEntryDecorator(),
+            hvmd,
         )
         rememberDecoratedNavEntries(
             backStack = stack,
             entryDecorators = decorators,
             entryProvider = entryProvider,
         )
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            hvmd.clearAll()
+        }
     }
 
     return topLevelStack

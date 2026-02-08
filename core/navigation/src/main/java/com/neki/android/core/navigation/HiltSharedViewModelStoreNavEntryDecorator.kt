@@ -51,7 +51,7 @@ fun <T : Any> rememberHiltSharedViewModelStoreNavEntryDecorator(
  * hiltViewModel()과 함께 사용 가능.
  */
 class HiltSharedViewModelStoreNavEntryDecorator<T : Any>(
-    viewModelStore: ViewModelStore,
+    private val viewModelStore: ViewModelStore,
     removeViewModelStoreOnPop: () -> Boolean,
 ) : NavEntryDecorator<T>(
     onPop = { key ->
@@ -95,6 +95,10 @@ class HiltSharedViewModelStoreNavEntryDecorator<T : Any>(
         }
     },
 ) {
+    fun clearAll() {
+        viewModelStore.getHiltEntryViewModel().clearAll()
+    }
+
     companion object {
         private const val PARENT_CONTENT_KEY = "hilt_shared_decorator_parent_content_key"
 
@@ -114,6 +118,11 @@ private class HiltEntryViewModel : ViewModel() {
 
     fun clearViewModelStoreOwnerForKey(key: Any) {
         owners.remove(key)?.clear()
+    }
+
+    fun clearAll() {
+        owners.forEach { (_, store) -> store.clear() }
+        owners.clear()
     }
 
     override fun onCleared() {

@@ -1,6 +1,7 @@
 package com.neki.android.core.navigation.auth
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -25,11 +26,19 @@ class AuthNavigationState @Inject constructor(
 fun AuthNavigationState.toEntries(
     entryProvider: (NavKey) -> NavEntry<NavKey>,
 ): SnapshotStateList<NavEntry<NavKey>> {
+    val hvmd = rememberHiltSharedViewModelStoreNavEntryDecorator<NavKey>()
     val decorators = listOf(
         rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
         rememberViewModelStoreNavEntryDecorator<NavKey>(),
-        rememberHiltSharedViewModelStoreNavEntryDecorator(),
+        hvmd,
     )
+
+    DisposableEffect(Unit) {
+        onDispose {
+            hvmd.clearAll()
+        }
+    }
+
     return rememberDecoratedNavEntries(
         backStack = stack,
         entryDecorators = decorators,
