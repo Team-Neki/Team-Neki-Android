@@ -9,7 +9,6 @@ import com.neki.android.core.data.remote.api.UserService
 import com.neki.android.core.data.remote.model.request.UpdateProfileImageRequest
 import com.neki.android.core.data.remote.model.request.UpdateUserInfoRequest
 import com.neki.android.core.data.util.runSuspendCatching
-import com.neki.android.core.dataapi.datastore.DataStoreKey
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.UserInfo
 import kotlinx.coroutines.flow.Flow
