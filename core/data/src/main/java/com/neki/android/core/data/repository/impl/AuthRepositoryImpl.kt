@@ -39,19 +39,19 @@ class AuthRepositoryImpl @Inject constructor(
         authService.withdrawAccount()
     }
 
-    override fun isReadOnboarding(): Flow<Boolean> {
+    override fun hasCompletedOnboarding(): Flow<Boolean> {
         return dataStore.data.map { preferences ->
-            preferences[IS_READ_ONBOARDING] ?: false
+            preferences[HAS_COMPLETED_ONBOARDING] ?: false
         }
     }
 
-    override suspend fun setReadOnboarding(value: Boolean) {
+    override suspend fun setCompletedOnboarding(value: Boolean) {
         dataStore.edit { preferences ->
-            preferences[IS_READ_ONBOARDING] = value
+            preferences[HAS_COMPLETED_ONBOARDING] = value
         }
     }
 
     companion object {
-        private val IS_READ_ONBOARDING = booleanPreferencesKey("is_read_onboarding")
+        private val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
     }
 }

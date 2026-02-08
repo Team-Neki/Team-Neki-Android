@@ -38,8 +38,8 @@ class SplashViewModel @Inject constructor(
 
     private fun fetchAuthState(postSideEffect: (SplashSideEffect) -> Unit) {
         viewModelScope.launch {
-            val isReadOnboarding = authRepository.isReadOnboarding().first()
-            if (!isReadOnboarding) {
+            val hasCompletedOnboarding = authRepository.hasCompletedOnboarding().first()
+            if (!hasCompletedOnboarding) {
                 postSideEffect(SplashSideEffect.NavigateToOnboarding)
                 return@launch
             }

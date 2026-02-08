@@ -94,7 +94,7 @@ class LoginViewModel @Inject constructor(
                     accessToken = it.accessToken,
                     refreshToken = it.refreshToken,
                 )
-                authRepository.setReadOnboarding(true)
+                authRepository.setCompletedOnboarding(true)
                 postSideEffect(LoginSideEffect.NavigateToMain)
             }
             .onFailure { exception ->

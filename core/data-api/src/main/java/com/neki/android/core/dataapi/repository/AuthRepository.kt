@@ -8,6 +8,6 @@ interface AuthRepository {
     suspend fun updateAccessToken(refreshToken: String): Result<Auth>
     suspend fun withdrawAccount(): Result<Unit>
 
-    fun isReadOnboarding(): Flow<Boolean>
-    suspend fun setReadOnboarding(value: Boolean)
+    fun hasCompletedOnboarding(): Flow<Boolean>
+    suspend fun setCompletedOnboarding(value: Boolean)
 }
