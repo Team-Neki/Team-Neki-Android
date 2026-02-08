@@ -48,7 +48,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         when (intent) {
-            RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialPoses(reduce, postSideEffect)
+            RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialPoses(state, reduce, postSideEffect)
 
             // 튜토리얼
             RandomPoseIntent.ClickLeftSwipe -> handleMovePrevious(state, reduce, postSideEffect)
@@ -168,9 +168,12 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     }
 
     private fun fetchInitialPoses(
+        state: RandomPoseUiState,
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
+        if (state.poseList.isNotEmpty()) return
+
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
