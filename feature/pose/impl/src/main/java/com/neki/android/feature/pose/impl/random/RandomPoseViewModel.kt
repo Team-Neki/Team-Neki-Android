@@ -161,7 +161,12 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     headCount = peopleCount,
                     excludeIds = state.randomPoseIds,
                 ).onSuccess { pose ->
-                    reduce { copy(poseList = (poseList + pose).toImmutableList()) }
+                    reduce {
+                        copy(
+                            poseList = (poseList + pose).toImmutableList(),
+                            committedScraps = committedScraps + (pose.id to pose.isScrapped),
+                        )
+                    }
                 }.onFailure { error ->
                     if (error is ClientApiException && error.code == NO_MORE_RANDOM_POSE) {
                         reduce { copy(hasNewPose = false) }
