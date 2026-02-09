@@ -1,13 +1,21 @@
 package com.neki.android.feature.auth.impl.login
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.repository.AuthRepository
+import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor() : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val tokenRepository: TokenRepository,
+) : ViewModel() {
     val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
         mviIntentStore(
             initialState = LoginState(),
@@ -22,13 +30,29 @@ class LoginViewModel @Inject constructor() : ViewModel() {
     ) {
         when (intent) {
             LoginIntent.ClickKakaoLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
-
-            is LoginIntent.SuccessLogin -> {
-                reduce { copy(kakaoIdToken = intent.idToken) }
-                postSideEffect(LoginSideEffect.NavigateToTerm(intent.idToken))
-            }
-
-            LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
+            is LoginIntent.SuccessKakaoLogin -> signUp(intent.idToken, reduce, postSideEffect)
+            LoginIntent.FailKakaoLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
         }
+    }
+
+    private fun signUp(
+        kakaoIdToken: String,
+        reduce: (LoginState.() -> LoginState) -> Unit,
+        postSideEffect: (LoginSideEffect) -> Unit,
+    ) = viewModelScope.launch {
+        reduce { copy(isLoading = true) }
+        authRepository.loginWithKakao(kakaoIdToken)
+            .onSuccess { authResult ->
+                tokenRepository.saveTokens(
+                    accessToken = authResult.accessToken,
+                    refreshToken = authResult.refreshToken,
+                )
+                postSideEffect(LoginSideEffect.NavigateToTerm)
+            }
+            .onFailure { exception ->
+                Timber.e(exception)
+                postSideEffect(LoginSideEffect.ShowToastMessage("가입에 실패했습니다. 다시 시도해주세요."))
+            }
+        reduce { copy(isLoading = false) }
     }
 }

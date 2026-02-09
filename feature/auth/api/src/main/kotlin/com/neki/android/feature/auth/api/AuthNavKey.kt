@@ -16,7 +16,7 @@ sealed interface AuthNavKey : NavKey {
     data object Login : AuthNavKey
 
     @Serializable
-    data class Term(val kakaoIdToken: String) : AuthNavKey
+    data object Term : AuthNavKey
 }
 
 fun AuthNavigator.navigateToOnboardingAndClear() {
@@ -27,6 +27,6 @@ fun AuthNavigator.navigateToLoginAndClear() {
     navigateAndClear(AuthNavKey.Login)
 }
 
-fun AuthNavigator.navigateToTerm(kakaoIdToken: String) {
-    navigate(AuthNavKey.Term(kakaoIdToken))
+fun AuthNavigator.navigateToTerm() {
+    navigate(AuthNavKey.Term)
 }

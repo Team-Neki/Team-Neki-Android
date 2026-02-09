@@ -4,22 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TermRepository
-import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-@HiltViewModel(assistedFactory = TermViewModel.Factory::class)
-class TermViewModel @AssistedInject constructor(
-    @Assisted private val kakaoIdToken: String,
+@HiltViewModel
+class TermViewModel @Inject constructor(
     private val termRepository: TermRepository,
-    private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
@@ -60,7 +55,7 @@ class TermViewModel @AssistedInject constructor(
 
             TermIntent.ClickNext -> {
                 if (state.isAllRequiredChecked) {
-                    signUpAndAgreeTerms(state, reduce, postSideEffect)
+                    agreeTerms(state, reduce, postSideEffect)
                 }
             }
 
@@ -84,31 +79,12 @@ class TermViewModel @AssistedInject constructor(
         }
     }
 
-    private fun signUpAndAgreeTerms(
+    private fun agreeTerms(
         state: TermState,
         reduce: (TermState.() -> TermState) -> Unit,
         postSideEffect: (TermSideEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
-        authRepository.loginWithKakao(kakaoIdToken)
-            .onSuccess { authResult ->
-                tokenRepository.saveTokens(
-                    accessToken = authResult.accessToken,
-                    refreshToken = authResult.refreshToken,
-                )
-                agreeTerms(state, postSideEffect)
-            }
-            .onFailure { exception ->
-                Timber.e(exception)
-                postSideEffect(TermSideEffect.ShowToastMessage("로그인에 실패했습니다. 다시 시도해주세요."))
-            }
-        reduce { copy(isLoading = false) }
-    }
-
-    private suspend fun agreeTerms(
-        state: TermState,
-        postSideEffect: (TermSideEffect) -> Unit,
-    ) {
         val checkedTermIds = state.terms.filter { it.isChecked }.map { it.id }
         termRepository.agreeTerms(checkedTermIds)
             .onSuccess {
@@ -119,10 +95,6 @@ class TermViewModel @AssistedInject constructor(
                 Timber.e(exception)
                 postSideEffect(TermSideEffect.ShowToastMessage("약관 동의에 실패했습니다. 다시 시도해주세요."))
             }
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(kakaoIdToken: String): TermViewModel
+        reduce { copy(isLoading = false) }
     }
 }
