@@ -18,12 +18,11 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.auth.impl.term.model.TermAgreement
+import com.neki.android.core.model.Term
 
 @Composable
 internal fun AgreementSection(
-    agreement: TermAgreement,
-    isAgreed: Boolean = false,
+    term: Term,
     onClickAgree: () -> Unit = {},
     onClickNavigateUrl: () -> Unit = {},
 ) {
@@ -45,16 +44,16 @@ internal fun AgreementSection(
                     .size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (isAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
+                tint = if (term.isChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
             )
             Text(
                 modifier = Modifier.padding(end = 2.dp),
-                text = if (agreement.isRequired) "(필수)" else "(선택)",
+                text = if (term.isRequired) "(필수)" else "(선택)",
                 style = NekiTheme.typography.body14Medium,
                 color = NekiTheme.colorScheme.gray500,
             )
             Text(
-                text = agreement.title,
+                text = term.title,
                 style = NekiTheme.typography.body16Medium,
                 color = NekiTheme.colorScheme.gray900,
             )
@@ -74,6 +73,6 @@ internal fun AgreementSection(
 @Composable
 private fun TermSectionPreview() {
     NekiTheme {
-        AgreementSection(agreement = TermAgreement.SERVICE_TERMS)
+        AgreementSection(term = Term(title = "서비스 이용 약관", isRequired = true))
     }
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -21,10 +20,6 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import com.neki.android.feature.auth.impl.login.LoginIntent
-import com.neki.android.feature.auth.impl.login.LoginSideEffect
-import com.neki.android.feature.auth.impl.login.LoginState
-import com.neki.android.feature.auth.impl.login.LoginViewModel
 import com.neki.android.feature.auth.impl.term.component.TermContent
 import com.neki.android.feature.auth.impl.term.component.TermTopBar
 
@@ -69,12 +64,12 @@ internal fun TermRoute(
 
 @Composable
 private fun TermScreen(
-    uiState: LoginState = LoginState(),
-    onIntent: (LoginIntent) -> Unit = {},
+    uiState: TermState = TermState(),
+    onIntent: (TermIntent) -> Unit = {},
 ) {
     Column {
         TermTopBar(
-            onClickBack = { onIntent(LoginIntent.ClickBack) },
+            onClickBack = { onIntent(TermIntent.ClickBack) },
         )
         Column(
             modifier = Modifier
@@ -88,12 +83,17 @@ private fun TermScreen(
                 onClickAgreeAll = { onIntent(LoginIntent.ClickAgreeAll) },
                 onClickAgreeTerm = { onIntent(LoginIntent.ClickAgreeTerm(it)) },
                 onClickTermDetail = { onIntent(LoginIntent.ClickTermNavigateUrl(it)) },
+                isAllRequiredChecked = uiState.isAllRequiredChecked,
+                onClickAgreeAll = { onIntent(TermIntent.ClickAgreeAll) },
+                onClickAgreeTerm = { onIntent(TermIntent.ClickAgreeTerm(it)) },
+                onClickTermDetail = { onIntent(TermIntent.ClickTermNavigateUrl(it)) },
             )
             CTAButtonPrimary(
                 modifier = Modifier.fillMaxWidth(),
                 text = "다음으로",
                 onClick = { onIntent(LoginIntent.ClickNext) },
                 enabled = uiState.isAllRequiredAgreed,
+                enabled = uiState.isAllRequiredChecked,
             )
         }
     }
