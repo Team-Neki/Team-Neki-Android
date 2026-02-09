@@ -24,7 +24,7 @@ class UserRepositoryImpl @Inject constructor(
             preferences[HAS_VISITED_RANDOM_POSE] ?: false
         }
 
-    override suspend fun markRandomPoseAsVisited() {
+    override suspend fun setRandomPoseVisited() {
         dataStore.edit { preferences ->
             preferences[HAS_VISITED_RANDOM_POSE] = true
         }
