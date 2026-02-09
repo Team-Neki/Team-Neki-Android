@@ -60,7 +60,7 @@ class TermViewModel @AssistedInject constructor(
 
             TermIntent.ClickNext -> {
                 if (state.isAllRequiredChecked) {
-                    loginWithKakao(reduce, postSideEffect)
+                    signUpAndAgreeTerms(state, reduce, postSideEffect)
                 }
             }
 
@@ -84,25 +84,41 @@ class TermViewModel @AssistedInject constructor(
         }
     }
 
-    private fun loginWithKakao(
+    private fun signUpAndAgreeTerms(
+        state: TermState,
         reduce: (TermState.() -> TermState) -> Unit,
         postSideEffect: (TermSideEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
         authRepository.loginWithKakao(kakaoIdToken)
-            .onSuccess {
+            .onSuccess { authResult ->
                 tokenRepository.saveTokens(
-                    accessToken = it.accessToken,
-                    refreshToken = it.refreshToken,
+                    accessToken = authResult.accessToken,
+                    refreshToken = authResult.refreshToken,
                 )
-                authRepository.setCompletedOnboarding(true)
-                postSideEffect(TermSideEffect.NavigateToMain)
+                agreeTerms(state, postSideEffect)
             }
             .onFailure { exception ->
                 Timber.e(exception)
                 postSideEffect(TermSideEffect.ShowToastMessage("로그인에 실패했습니다. 다시 시도해주세요."))
             }
         reduce { copy(isLoading = false) }
+    }
+
+    private suspend fun agreeTerms(
+        state: TermState,
+        postSideEffect: (TermSideEffect) -> Unit,
+    ) {
+        val checkedTermIds = state.terms.filter { it.isChecked }.map { it.id }
+        termRepository.agreeTerms(checkedTermIds)
+            .onSuccess {
+                authRepository.setCompletedOnboarding(true)
+                postSideEffect(TermSideEffect.NavigateToMain)
+            }
+            .onFailure { exception ->
+                Timber.e(exception)
+                postSideEffect(TermSideEffect.ShowToastMessage("약관 동의에 실패했습니다. 다시 시도해주세요."))
+            }
     }
 
     @AssistedFactory
