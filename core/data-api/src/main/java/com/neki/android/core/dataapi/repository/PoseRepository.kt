@@ -6,6 +6,8 @@ import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 
+const val NO_MORE_RANDOM_POSE = 400
+
 interface PoseRepository {
 
     fun getPosesFlow(
@@ -22,14 +24,12 @@ interface PoseRepository {
     suspend fun getSingleRandomPose(
         headCount: PeopleCount,
         excludeIds: Set<Long>,
-        maxRetry: Int,
     ): Result<Pose>
 
     suspend fun getMultipleRandomPose(
         headCount: PeopleCount,
         excludeIds: Set<Long>,
         poseSize: Int,
-        maxRetry: Int,
     ): Result<List<Pose>>
 
     suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit>

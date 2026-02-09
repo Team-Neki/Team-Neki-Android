@@ -3,15 +3,17 @@ package com.neki.android.core.data.repository.impl
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.neki.android.core.common.exception.RandomPoseRetryExhaustedException
+import com.neki.android.core.common.exception.ClientApiException
 import com.neki.android.core.data.paging.PosePagingSource
 import com.neki.android.core.data.paging.ScrapPosePagingSource
 import com.neki.android.core.data.remote.api.PoseService
 import com.neki.android.core.data.util.runSuspendCatching
+import com.neki.android.core.dataapi.repository.NO_MORE_RANDOM_POSE
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
+import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -69,38 +71,47 @@ class PoseRepositoryImpl @Inject constructor(
     override suspend fun getSingleRandomPose(
         headCount: PeopleCount,
         excludeIds: Set<Long>,
-        maxRetry: Int,
     ): Result<Pose> = runSuspendCatching {
-        repeat(maxRetry) {
-            val pose = poseService.getRandomPose(headCount = headCount.name).data.toModel()
-            if (pose.id !in excludeIds) {
-                return@runSuspendCatching pose
-            }
+        val excludeIdsString = excludeIds.joinToString(",")
+
+        return@runSuspendCatching try {
+            poseService.getRandomPose(
+                headCount = headCount.name,
+                excludeIds = excludeIdsString,
+            ).data.toModel()
+        } catch (e: ClientRequestException) {
+            if (e.response.status.value == NO_MORE_RANDOM_POSE)
+                throw ClientApiException(NO_MORE_RANDOM_POSE, e.message)
+            else throw e
         }
-        throw RandomPoseRetryExhaustedException("새로운 포즈를 찾지 못했어요")
     }
 
     override suspend fun getMultipleRandomPose(
         headCount: PeopleCount,
         excludeIds: Set<Long>,
         poseSize: Int,
-        maxRetry: Int,
     ): Result<List<Pose>> = runSuspendCatching {
         val result = mutableListOf<Pose>()
         val collectedIds = excludeIds.toMutableSet()
-        var retryCount = 0
+        repeat(poseSize) {
+            val excludeIdsString = collectedIds.joinToString(",")
+            val pose = try {
+                poseService.getRandomPose(
+                    headCount = headCount.name,
+                    excludeIds = excludeIdsString,
+                ).data.toModel()
+            } catch (e: ClientRequestException) {
+                // Http Error Code 이지만, 클라이언트에서 성공으로 취급
+                if (e.response.status.value == NO_MORE_RANDOM_POSE) return@runSuspendCatching result
+                else throw e
+            }
 
-        while (result.size < poseSize && retryCount < maxRetry) {
-            val pose = poseService.getRandomPose(headCount = headCount.name).data.toModel()
             if (pose.id !in collectedIds) {
                 result.add(pose)
                 collectedIds.add(pose.id)
-            } else {
-                retryCount++
             }
         }
-
-        result.ifEmpty { throw RandomPoseRetryExhaustedException("새로운 포즈를 찾지 못했어요") }
+        return@runSuspendCatching result
     }
 
     override suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit> = runSuspendCatching {

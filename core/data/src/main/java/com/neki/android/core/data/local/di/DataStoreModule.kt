@@ -17,6 +17,9 @@ private val Context.authDataStore: DataStore<Preferences> by preferencesDataStor
 private const val TOKEN_DATASTORE = "token_datastore"
 private val Context.tokenDataStore: DataStore<Preferences> by preferencesDataStore(name = TOKEN_DATASTORE)
 
+private const val USER_DATASTORE = "user_datastore"
+private val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name = USER_DATASTORE)
+
 @InstallIn(SingletonComponent::class)
 @Module
 internal object DataStoreModule {
@@ -30,4 +33,9 @@ internal object DataStoreModule {
     @Singleton
     @Provides
     fun provideTokenDataStore(@ApplicationContext context: Context): DataStore<Preferences> = context.tokenDataStore
+
+    @UserDataStore
+    @Singleton
+    @Provides
+    fun provideUserDataStore(@ApplicationContext context: Context): DataStore<Preferences> = context.userDataStore
 }

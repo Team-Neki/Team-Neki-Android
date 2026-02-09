@@ -3,8 +3,10 @@ package com.neki.android.feature.pose.impl.random
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
-import com.neki.android.core.common.exception.RandomPoseRetryExhaustedException
+import com.neki.android.core.common.exception.ClientApiException
+import com.neki.android.core.dataapi.repository.NO_MORE_RANDOM_POSE
 import com.neki.android.core.dataapi.repository.PoseRepository
+import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -17,6 +19,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -24,6 +27,7 @@ import timber.log.Timber
 internal class RandomPoseViewModel @AssistedInject constructor(
     @Assisted private val peopleCount: PeopleCount,
     private val poseRepository: PoseRepository,
+    private val userRepository: UserRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
@@ -48,7 +52,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         when (intent) {
-            RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialPoses(reduce, postSideEffect)
+            RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialData(state, reduce, postSideEffect)
 
             // 튜토리얼
             RandomPoseIntent.ClickLeftSwipe -> handleMovePrevious(state, reduce, postSideEffect)
@@ -63,60 +67,61 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 }
             }
 
-            RandomPoseIntent.ClickScrapIcon -> handleScrapToggle(state, reduce)
+            RandomPoseIntent.ClickScrapIcon -> {
+                val currentPost = state.currentPose ?: return
+                handleScrapToggle(currentPost.id, !currentPost.isScrapped, reduce)
+            }
+
+            is RandomPoseIntent.ScrapChanged -> handleScrapToggle(intent.poseId, intent.isScrapped, reduce)
         }
     }
 
     private fun handleScrapToggle(
-        state: RandomPoseUiState,
+        poseId: Long,
+        newScrapStatus: Boolean,
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
     ) {
-        state.currentPose?.let { currentPose ->
-            val poseId = currentPose.id
-            val newScrapStatus = !currentPose.isScrapped
-
-            // UI 즉시 업데이트
-            reduce {
-                copy(
-                    poseList = poseList.map { pose ->
-                        if (pose.id == poseId) {
-                            pose.copy(isScrapped = newScrapStatus)
-                        } else {
-                            pose
-                        }
-                    }.toImmutableList(),
-                )
-            }
-
-            // 해당 포즈의 이전 Job 취소 후 새로운 Job 시작
-            scrapJobs[poseId]?.cancel()
-            scrapJobs[poseId] = viewModelScope.launch {
-                delay(500)
-                val committedScrap = store.uiState.value.committedScraps[poseId]
-                if (committedScrap == newScrapStatus || committedScrap == null) return@launch
-
-                poseRepository.updateScrap(poseId, newScrapStatus)
-                    .onSuccess {
-                        Timber.d("updateScrap success for poseId: $poseId")
-                        reduce {
-                            copy(committedScraps = committedScraps + (poseId to newScrapStatus))
-                        }
+        // UI 즉시 업데이트
+        reduce {
+            copy(
+                poseList = poseList.map { pose ->
+                    if (pose.id == poseId) {
+                        pose.copy(isScrapped = newScrapStatus)
+                    } else {
+                        pose
                     }
-                    .onFailure { error ->
-                        Timber.e(error, "updateScrap failed for poseId: $poseId")
-                        reduce {
-                            copy(
-                                poseList = poseList.map { pose ->
-                                    if (pose.id == poseId) {
-                                        pose.copy(isScrapped = committedScrap)
-                                    } else {
-                                        pose
-                                    }
-                                }.toImmutableList(),
-                            )
-                        }
+                }.toImmutableList(),
+            )
+        }
+
+        // 해당 포즈의 이전 Job 취소 후 새로운 Job 시작
+        scrapJobs[poseId]?.cancel()
+        scrapJobs[poseId] = viewModelScope.launch {
+            delay(500)
+            val committedScrap = store.uiState.value.committedScraps[poseId]
+            if (committedScrap == newScrapStatus || committedScrap == null) return@launch
+
+            poseRepository.updateScrap(poseId, newScrapStatus)
+                .onSuccess {
+                    Timber.d("updateScrap success for poseId: $poseId")
+                    reduce {
+                        copy(committedScraps = committedScraps + (poseId to newScrapStatus))
                     }
-            }
+                }
+                .onFailure { error ->
+                    Timber.e(error, "updateScrap failed for poseId: $poseId")
+                    reduce {
+                        copy(
+                            poseList = poseList.map { pose ->
+                                if (pose.id == poseId) {
+                                    pose.copy(isScrapped = committedScrap)
+                                } else {
+                                    pose
+                                }
+                            }.toImmutableList(),
+                        )
+                    }
+                }
         }
     }
 
@@ -150,27 +155,56 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect(RandomPoseEffect.SwipePoseImage(nextIndex))
 
         // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
-        if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD) {
+        if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
             viewModelScope.launch {
                 poseRepository.getSingleRandomPose(
                     headCount = peopleCount,
                     excludeIds = state.randomPoseIds,
-                    maxRetry = PoseConst.MAXIMUM_RANDOM_POSE_RETRY_COUNT,
                 ).onSuccess { pose ->
-                    reduce { copy(poseList = (poseList + pose).toImmutableList()) }
+                    reduce {
+                        copy(
+                            poseList = (poseList + pose).toImmutableList(),
+                            committedScraps = committedScraps + (pose.id to pose.isScrapped),
+                        )
+                    }
                 }.onFailure { error ->
-                    if (error is RandomPoseRetryExhaustedException)
-                        Timber.e(error, "중복 포즈")
-                    else Timber.e(error)
+                    if (error is ClientApiException && error.code == NO_MORE_RANDOM_POSE) {
+                        reduce { copy(hasNewPose = false) }
+                        postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
+                    } else Timber.e(error)
                 }
             }
         }
     }
 
-    private fun fetchInitialPoses(
+    private fun fetchInitialData(
+        state: RandomPoseUiState,
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
+        checkFirstVisit(reduce)
+        fetchInitialPoses(state, reduce, postSideEffect)
+    }
+
+    private fun checkFirstVisit(
+        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            if (!userRepository.hasVisitedRandomPose.first()) {
+                userRepository.setRandomPoseVisited()
+            } else {
+                reduce { copy(isShowTutorial = false) }
+            }
+        }
+    }
+
+    private fun fetchInitialPoses(
+        state: RandomPoseUiState,
+        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        postSideEffect: (RandomPoseEffect) -> Unit,
+    ) {
+        if (state.poseList.isNotEmpty()) return
+
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
@@ -179,7 +213,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 headCount = peopleCount,
                 excludeIds = emptySet(),
                 poseSize = PoseConst.INITIAL_POSE_LOAD_COUNT,
-                maxRetry = PoseConst.MAXIMUM_RANDOM_POSE_RETRY_COUNT,
             ).onSuccess { data ->
                 reduce {
                     copy(
@@ -190,11 +223,9 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     )
                 }
             }.onFailure { error ->
-                Timber.e(error)
                 reduce { copy(isLoading = false) }
-                if (error is RandomPoseRetryExhaustedException)
-                    Timber.e(error, "중복 포즈")
-                else Timber.e(error)
+                postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
+                Timber.e(error)
             }
         }
     }
