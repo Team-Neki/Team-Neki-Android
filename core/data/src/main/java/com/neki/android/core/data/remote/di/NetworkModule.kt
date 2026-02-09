@@ -51,6 +51,7 @@ internal object NetworkModule {
     val sendWithoutAuthUrls = listOf(
         "/api/auth/kakao/login",
         "/api/auth/refresh",
+        "/api/terms",
     )
 
     private val json = Json {
