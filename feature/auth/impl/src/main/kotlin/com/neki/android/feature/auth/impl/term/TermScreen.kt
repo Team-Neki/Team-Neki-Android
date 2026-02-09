@@ -25,7 +25,7 @@ import com.neki.android.feature.auth.impl.term.component.TermTopBar
 
 @Composable
 internal fun TermRoute(
-    viewModel: LoginViewModel = hiltViewModel(),
+    viewModel: TermViewModel = hiltViewModel(),
     navigateToMain: () -> Unit,
     navigateBack: () -> Unit,
 ) {
@@ -33,26 +33,18 @@ internal fun TermRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val nekiToast = remember { NekiToast(context) }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.store.onIntent(LoginIntent.ResetTermState)
-        }
-    }
-
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToMain -> navigateToMain()
-            LoginSideEffect.NavigateBack -> navigateBack()
-            is LoginSideEffect.NavigateUrl -> {
+            TermSideEffect.NavigateToMain -> navigateToMain()
+            TermSideEffect.NavigateBack -> navigateBack()
+            is TermSideEffect.NavigateUrl -> {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.url))
                 context.startActivity(intent)
             }
 
-            is LoginSideEffect.ShowToastMessage -> {
+            is TermSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(sideEffect.message)
             }
-
-            else -> {}
         }
     }
 
