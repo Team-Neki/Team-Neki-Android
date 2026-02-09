@@ -1,6 +1,5 @@
 package com.neki.android.feature.auth.impl.term
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.AuthRepository
@@ -8,25 +7,25 @@ import com.neki.android.core.dataapi.repository.TermRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltViewModel
-class TermViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = TermViewModel.Factory::class)
+class TermViewModel @AssistedInject constructor(
+    @Assisted private val kakaoIdToken: String,
     private val termRepository: TermRepository,
     private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
 
-    private val kakaoIdToken: String = savedStateHandle["kakaoIdToken"] ?: ""
-
     val store: MviIntentStore<TermState, TermIntent, TermSideEffect> =
         mviIntentStore(
-            initialState = TermState(kakaoIdToken = kakaoIdToken),
+            initialState = TermState(),
             onIntent = ::onIntent,
             initialFetchData = { store.onIntent(TermIntent.EnterTermScreen) },
         )
@@ -61,7 +60,7 @@ class TermViewModel @Inject constructor(
 
             TermIntent.ClickNext -> {
                 if (state.isAllRequiredChecked) {
-                    loginWithKakao(state.kakaoIdToken, reduce, postSideEffect)
+                    loginWithKakao(reduce, postSideEffect)
                 }
             }
 
@@ -86,12 +85,11 @@ class TermViewModel @Inject constructor(
     }
 
     private fun loginWithKakao(
-        idToken: String,
         reduce: (TermState.() -> TermState) -> Unit,
         postSideEffect: (TermSideEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
-        authRepository.loginWithKakao(idToken)
+        authRepository.loginWithKakao(kakaoIdToken)
             .onSuccess {
                 tokenRepository.saveTokens(
                     accessToken = it.accessToken,
@@ -105,5 +103,10 @@ class TermViewModel @Inject constructor(
                 postSideEffect(TermSideEffect.ShowToastMessage("로그인에 실패했습니다. 다시 시도해주세요."))
             }
         reduce { copy(isLoading = false) }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(kakaoIdToken: String): TermViewModel
     }
 }

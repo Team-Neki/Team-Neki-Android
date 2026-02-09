@@ -6,7 +6,6 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class TermState(
     val isLoading: Boolean = false,
-    val kakaoIdToken: String = "",
     val terms: ImmutableList<Term> = persistentListOf(),
 ) {
     val isAllRequiredChecked: Boolean
