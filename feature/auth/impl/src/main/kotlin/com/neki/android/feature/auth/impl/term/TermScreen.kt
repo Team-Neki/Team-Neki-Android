@@ -78,11 +78,7 @@ private fun TermScreen(
         ) {
             TermContent(
                 modifier = Modifier.weight(1f),
-                agreedTerms = uiState.agreedTerms,
-                isAllRequiredAgreed = uiState.isAllRequiredAgreed,
-                onClickAgreeAll = { onIntent(LoginIntent.ClickAgreeAll) },
-                onClickAgreeTerm = { onIntent(LoginIntent.ClickAgreeTerm(it)) },
-                onClickTermDetail = { onIntent(LoginIntent.ClickTermNavigateUrl(it)) },
+                terms = uiState.terms,
                 isAllRequiredChecked = uiState.isAllRequiredChecked,
                 onClickAgreeAll = { onIntent(TermIntent.ClickAgreeAll) },
                 onClickAgreeTerm = { onIntent(TermIntent.ClickAgreeTerm(it)) },
@@ -91,8 +87,7 @@ private fun TermScreen(
             CTAButtonPrimary(
                 modifier = Modifier.fillMaxWidth(),
                 text = "다음으로",
-                onClick = { onIntent(LoginIntent.ClickNext) },
-                enabled = uiState.isAllRequiredAgreed,
+                onClick = { onIntent(TermIntent.ClickNext) },
                 enabled = uiState.isAllRequiredChecked,
             )
         }
