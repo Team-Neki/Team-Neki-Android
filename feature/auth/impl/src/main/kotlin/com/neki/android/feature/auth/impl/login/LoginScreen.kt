@@ -19,14 +19,14 @@ import timber.log.Timber
 @Composable
 internal fun LoginRoute(
     viewModel: LoginViewModel = hiltViewModel(),
-    navigateToTerm: () -> Unit,
+    navigateToTerm: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToTerm -> navigateToTerm()
+            is LoginSideEffect.NavigateToTerm -> navigateToTerm(sideEffect.kakaoIdToken)
             LoginSideEffect.NavigateToKakaoRedirectingUri -> {
                 KakaoAuthHelper.login(
                     context = context,
