@@ -63,7 +63,7 @@ class LoginViewModel @Inject constructor(
     ) {
         userRepository.getUserInfo()
             .onSuccess { userInfo ->
-                if (userInfo.agreeTerms) {
+                if (userInfo.isRequiredTermsAgreed) {
                     postSideEffect(LoginSideEffect.NavigateToMain)
                 } else {
                     postSideEffect(LoginSideEffect.NavigateToTerm)

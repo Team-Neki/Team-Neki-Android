@@ -18,6 +18,6 @@ data class UserInfoResponse(
         nickname = name,
         profileImageUrl = profileImageUrl,
         loginType = providerType,
-        agreeTerms = agreeTerms,
+        isRequiredTermsAgreed = agreeTerms,
     )
 }
