@@ -20,6 +20,6 @@ class TermRepositoryImpl @Inject constructor(
                 TermAgreementsRequest.Agreement(termId = termId, agreed = true)
             },
         )
-        termService.agreeTerms(request)
+        termService.agreeTerms(request).data
     }
 }
