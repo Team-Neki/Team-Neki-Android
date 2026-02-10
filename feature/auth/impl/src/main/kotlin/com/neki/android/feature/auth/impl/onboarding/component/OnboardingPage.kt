@@ -33,7 +33,7 @@ internal fun OnboardingPageContent(
 private fun OnboardingPageContentPreview() {
     NekiTheme {
         OnboardingPageContent(
-            imageRes = R.drawable.icon_onboarding_01,
+            imageRes = R.drawable.image_onboarding_01,
         )
     }
 }
