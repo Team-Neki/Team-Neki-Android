@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
+import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val tokenRepository: TokenRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
         mviIntentStore(
@@ -47,12 +49,30 @@ class LoginViewModel @Inject constructor(
                     accessToken = authResult.accessToken,
                     refreshToken = authResult.refreshToken,
                 )
-                postSideEffect(LoginSideEffect.NavigateToTerm)
+                checkTermAgreementState(postSideEffect)
             }
             .onFailure { exception ->
                 Timber.e(exception)
                 postSideEffect(LoginSideEffect.ShowToastMessage("가입에 실패했습니다. 다시 시도해주세요."))
             }
         reduce { copy(isLoading = false) }
+    }
+
+    private suspend fun checkTermAgreementState(
+        postSideEffect: (LoginSideEffect) -> Unit,
+    ) {
+        userRepository.getUserInfo()
+            .onSuccess { userInfo ->
+                if (userInfo.agreeTerms) {
+                    authRepository.setCompletedOnboarding(true)
+                    postSideEffect(LoginSideEffect.NavigateToMain)
+                } else {
+                    postSideEffect(LoginSideEffect.NavigateToTerm)
+                }
+            }
+            .onFailure { exception ->
+                Timber.e(exception)
+                postSideEffect(LoginSideEffect.NavigateToTerm)
+            }
     }
 }

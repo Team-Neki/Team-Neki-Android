@@ -23,6 +23,7 @@ import timber.log.Timber
 internal fun LoginRoute(
     viewModel: LoginViewModel = hiltViewModel(),
     navigateToTerm: () -> Unit,
+    navigateToMain: () -> Unit,
 ) {
     val context = LocalContext.current
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
@@ -30,6 +31,7 @@ internal fun LoginRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
+            LoginSideEffect.NavigateToMain -> navigateToMain()
             LoginSideEffect.NavigateToTerm -> navigateToTerm()
             LoginSideEffect.NavigateToKakaoRedirectingUri -> {
                 KakaoAuthHelper.login(

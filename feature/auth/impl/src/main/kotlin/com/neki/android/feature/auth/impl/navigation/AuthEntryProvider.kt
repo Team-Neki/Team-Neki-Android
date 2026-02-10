@@ -37,6 +37,7 @@ private fun EntryProviderScope<NavKey>.authEntry(navigator: AuthNavigator) {
     entry<AuthNavKey.Login> {
         LoginRoute(
             navigateToTerm = navigator::navigateToTerm,
+            navigateToMain = { navigator.navigateRoot(RootNavKey.Main) },
         )
     }
 
