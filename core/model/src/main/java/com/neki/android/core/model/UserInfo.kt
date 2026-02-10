@@ -8,4 +8,5 @@ data class UserInfo(
     val nickname: String = "",
     val profileImageUrl: String = "",
     val loginType: String = "",
+    val agreeTerms: Boolean = false,
 )
