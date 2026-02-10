@@ -22,12 +22,12 @@ android {
     }
 
     defaultConfig {
-        buildConfigField("String", "NAVER_MAP_CLIENT_ID", properties["NAVER_MAP_CLIENT_ID"].toString())
-        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = buildConfigField(
-            "String",
-            "KAKAO_NATIVE_APP_KEY",
-            properties["KAKAO_NATIVE_APP_KEY"].toString()
-        )
+        val naverMapClientId = properties["NAVER_MAP_CLIENT_ID"].toString()
+        val kakaoKey = properties["KAKAO_NATIVE_APP_KEY"].toString()
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
+
+        buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
     }
 
     signingConfigs {
