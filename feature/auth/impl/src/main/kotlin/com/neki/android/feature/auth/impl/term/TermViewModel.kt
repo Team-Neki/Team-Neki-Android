@@ -35,7 +35,7 @@ class TermViewModel @Inject constructor(
             TermIntent.EnterTermScreen -> fetchTerms(reduce)
 
             TermIntent.ClickAgreeAll -> {
-                val shouldCheckAll = !state.isAllRequiredChecked
+                val shouldCheckAll = !state.isAllRequiredTermChecked
                 val updatedTerms = state.terms.map { term ->
                     if (term.isRequired) term.copy(isChecked = shouldCheckAll) else term
                 }.toImmutableList()
@@ -54,7 +54,7 @@ class TermViewModel @Inject constructor(
             }
 
             TermIntent.ClickNext -> {
-                if (state.isAllRequiredChecked) {
+                if (state.isAllRequiredTermChecked) {
                     agreeTerms(state, reduce, postSideEffect)
                 }
             }

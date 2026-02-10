@@ -8,7 +8,7 @@ data class TermState(
     val isLoading: Boolean = false,
     val terms: ImmutableList<Term> = persistentListOf(),
 ) {
-    val isAllRequiredChecked: Boolean
+    val isAllRequiredTermChecked: Boolean
         get() = terms.filter { it.isRequired }.all { it.isChecked }
 }
 

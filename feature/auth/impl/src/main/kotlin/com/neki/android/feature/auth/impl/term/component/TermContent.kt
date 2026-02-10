@@ -31,7 +31,7 @@ import kotlinx.collections.immutable.persistentListOf
 internal fun TermContent(
     modifier: Modifier = Modifier,
     terms: ImmutableList<Term> = persistentListOf(),
-    isAllRequiredChecked: Boolean = false,
+    isAllRequiredTermChecked: Boolean = false,
     onClickAgreeAll: () -> Unit = {},
     onClickAgreeTerm: (Term) -> Unit = {},
     onClickTermDetail: (Term) -> Unit = {},
@@ -56,7 +56,7 @@ internal fun TermContent(
                 .noRippleClickable(onClick = onClickAgreeAll)
                 .border(
                     width = 1.dp,
-                    color = if (isAllRequiredChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray100,
+                    color = if (isAllRequiredTermChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray100,
                     shape = RoundedCornerShape(12.dp),
                 )
                 .background(
@@ -71,7 +71,7 @@ internal fun TermContent(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (isAllRequiredChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
+                tint = if (isAllRequiredTermChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
             )
             Text(
                 text = "약관 전체 동의",
