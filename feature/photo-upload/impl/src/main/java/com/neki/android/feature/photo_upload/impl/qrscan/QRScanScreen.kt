@@ -18,8 +18,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.permission.CameraPermissionManager
 import com.neki.android.core.common.permission.navigateToAppSettings
-import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
-import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlertDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -91,10 +89,12 @@ internal fun QRScanScreen(
         QRScanViewType.QR_SCAN -> {
             QRScannerContent(
                 modifier = Modifier.fillMaxSize(),
+                isPermissionRationaleDialogShown = uiState.isPermissionRationaleDialogShown,
+                isOpenAppSettingDialogShown = uiState.isOpenAppSettingDialogShown,
+                isDownloadNeededDialogShown = uiState.isDownloadNeededDialogShown,
+                isUnSupportedBrandDialogShown = uiState.isUnSupportedBrandDialogShown,
                 isTorchEnabled = uiState.isTorchEnabled,
-                onClickTorch = { onIntent(QRScanIntent.ToggleTorch) },
-                onClickClose = { onIntent(QRScanIntent.ClickCloseQRScan) },
-                onQRCodeScanned = { url -> onIntent(QRScanIntent.ScanQRCode(url)) },
+                onIntent = onIntent,
             )
         }
 
@@ -110,28 +110,6 @@ internal fun QRScanScreen(
                 }
             }
         }
-    }
-
-    if (uiState.isShowShouldDownloadDialog) {
-        SingleButtonAlertDialog(
-            title = "갤러리에 사진을 먼저 다운받아주세요",
-            content = "해당 브랜드는 웹사이트에서 사진을 저장해야\n네키에 자동으로 저장돼요",
-            buttonText = "사진 다운로드하러가기",
-            onDismissRequest = { onIntent(QRScanIntent.DismissShouldDownloadDialog) },
-            onClick = { onIntent(QRScanIntent.ClickGoDownload) },
-        )
-    }
-
-    if (uiState.isShowUnSupportedBrandDialog) {
-        SingleButtonWithTextButtonAlertDialog(
-            title = "지원하지 않는 브랜드예요",
-            content = "갤러리에서 사진을 추가해 바로 저장할 수 있어요\n원하는 브랜드가 있다면 제안해주세요!",
-            buttonText = "갤러리에서 추가하기",
-            textButtonText = "브랜드 제안하기",
-            onDismissRequest = { onIntent(QRScanIntent.DismissUnSupportedBrandDialog) },
-            onButtonClick = { onIntent(QRScanIntent.ClickUploadGallery) },
-            onTextButtonClick = { onIntent(QRScanIntent.ClickProposeBrand) },
-        )
     }
 }
 

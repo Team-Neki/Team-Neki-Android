@@ -42,23 +42,22 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.neki.android.core.common.permission.CameraPermissionManager
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
+import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlertDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.photo_upload.impl.qrscan.QRScanIntent
 
+
 @Composable
 internal fun QRScannerContent(
     modifier: Modifier = Modifier,
+    isPermissionRationaleDialogShown: Boolean = false,
+    isOpenAppSettingDialogShown: Boolean = false,
+    isDownloadNeededDialogShown: Boolean = false,
+    isUnSupportedBrandDialogShown: Boolean = false,
     isTorchEnabled: Boolean = false,
-    isDownloadNeededDialogShown : Boolean = false,
-    isUnSupportedBrandDialogShown : Boolean = false,
-    onGrantCameraPermission: () -> Unit = {},
-    onDenyCameraPermissionOnce: () -> Unit = {},
-    onDenyCameraPermissionPermanent: () -> Unit = {},
-    onClickTorch: () -> Unit = {},
-    onClickClose: () -> Unit = {},
-    onQRCodeScanned: (String) -> Unit = {},
+    onIntent: (QRScanIntent) -> Unit = {},
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current as Activity
@@ -68,9 +67,9 @@ internal fun QRScannerContent(
 
     LifecycleResumeEffect(Unit) {
         when {
-            CameraPermissionManager.isGrantedCameraPermission(context) -> onGrantCameraPermission()
-            CameraPermissionManager.shouldShowCameraRationale(activity) -> onDenyCameraPermissionOnce()
-            else -> onDenyCameraPermissionPermanent()
+            CameraPermissionManager.isGrantedCameraPermission(context) -> onIntent(QRScanIntent.GrantCameraPermission)
+            CameraPermissionManager.shouldShowCameraRationale(activity) -> onIntent(QRScanIntent.DenyCameraPermissionOnce)
+            else -> onIntent(QRScanIntent.DenyCameraPermissionPermanent)
         }
 
         onPauseOrDispose { }
@@ -103,7 +102,7 @@ internal fun QRScannerContent(
                     null
                 }
             },
-            onQRCodeScanned = onQRCodeScanned,
+            onQRCodeScanned = { url -> onIntent(QRScanIntent.ScanQRCode(url)) },
         )
         DimExceptContent(
             modifier = Modifier.fillMaxSize(),
@@ -120,7 +119,7 @@ internal fun QRScannerContent(
                 Box(modifier = Modifier.fillMaxWidth()) {
                     NekiIconButton(
                         modifier = Modifier.padding(start = 8.dp),
-                        onClick = onClickClose,
+                        onClick = { onIntent(QRScanIntent.ClickCloseQRScan) },
                     ) {
                         Icon(
                             modifier = Modifier.size(24.dp),
@@ -171,7 +170,7 @@ internal fun QRScannerContent(
                             if (isTorchEnabled) Color.White
                             else Color.White.copy(alpha = 0.1f),
                         ),
-                    onClick = onClickTorch,
+                    onClick = { onIntent(QRScanIntent.ToggleTorch) },
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.icon_qr_light),
@@ -181,6 +180,30 @@ internal fun QRScannerContent(
                 }
             }
         }
+    }
+
+    if (isPermissionRationaleDialogShown) {
+        DoubleButtonAlertDialog(
+            title = "카메라 권한",
+            content = "QR 인식을 위해 카메라 접근이 필요해요",
+            grayButtonText = "취소",
+            primaryButtonText = "허용",
+            onDismissRequest = { onIntent(QRScanIntent.DismissPermissionRationaleDialog) },
+            onClickGrayButton = { onIntent(QRScanIntent.ClickPermissionRationaleDialogCancel) },
+            onClickPrimaryButton = { onIntent(QRScanIntent.ClickPermissionRationaleDialogConfirm) },
+        )
+    }
+
+    if (isOpenAppSettingDialogShown) {
+        DoubleButtonAlertDialog(
+            title = "카메라 권한",
+            content = "설정에서 카메라 접근을 허용하면 QR 스캔이 가능해요",
+            grayButtonText = "취소",
+            primaryButtonText = "허용",
+            onDismissRequest = { onIntent(QRScanIntent.DismissOpenAppSettingDialog) },
+            onClickGrayButton = { onIntent(QRScanIntent.ClickOpenAppSettingDialogCancel) },
+            onClickPrimaryButton = { onIntent(QRScanIntent.ClickOpenAppSettingDialogConfirm) },
+        )
     }
 
     if (isDownloadNeededDialogShown) {
