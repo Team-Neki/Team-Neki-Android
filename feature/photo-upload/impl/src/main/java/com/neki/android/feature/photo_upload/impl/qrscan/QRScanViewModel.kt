@@ -23,6 +23,28 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (QRScanSideEffect) -> Unit,
     ) {
         when (intent) {
+            QRScanIntent.GrantCameraPermission -> reduce { copy(isCameraPermissionGranted = true) }
+            QRScanIntent.DenyCameraPermissionOnce -> reduce { copy(isPermissionRationaleDialogShown = true) }
+            QRScanIntent.DenyCameraPermissionPermanent -> reduce { copy(isOpenAppSettingDialogShown = true) }
+
+            QRScanIntent.DismissPermissionRationaleDialog -> reduce { copy(isPermissionRationaleDialogShown = false) }
+            QRScanIntent.ClickPermissionRationaleDialogCancel -> reduce { copy(isPermissionRationaleDialogShown = false) }
+            QRScanIntent.ClickPermissionRationaleDialogConfirm -> {
+                reduce { copy(isPermissionRationaleDialogShown = false) }
+                postSideEffect(QRScanSideEffect.RequestCameraPermission)
+            }
+
+            QRScanIntent.DismissOpenAppSettingDialog -> reduce { copy(isOpenAppSettingDialogShown = false) }
+            QRScanIntent.ClickOpenAppSettingDialogCancel -> {
+                reduce { copy(isOpenAppSettingDialogShown = false) }
+                postSideEffect(QRScanSideEffect.NavigateBack)
+            }
+
+            QRScanIntent.ClickOpenAppSettingDialogConfirm -> {
+                reduce { copy(isOpenAppSettingDialogShown = false) }
+                postSideEffect(QRScanSideEffect.MoveAppSettings)
+            }
+
             QRScanIntent.ToggleTorch -> reduce { copy(isTorchEnabled = !this.isTorchEnabled) }
             QRScanIntent.ClickCloseQRScan -> postSideEffect(QRScanSideEffect.NavigateBack)
             is QRScanIntent.ScanQRCode -> {
