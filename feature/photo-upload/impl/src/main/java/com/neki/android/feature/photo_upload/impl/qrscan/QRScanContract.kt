@@ -10,8 +10,8 @@ data class QRScanState(
     val viewType: QRScanViewType = QRScanViewType.QR_SCAN,
     val scannedUrl: String? = null,
     val detectedImageUrl: String? = null,
-    val isShowShouldDownloadDialog: Boolean = false,
-    val isShowUnSupportedBrandDialog: Boolean = false,
+    val isDownloadNeededDialogShown: Boolean = false,
+    val isUnSupportedBrandDialogShown: Boolean = false,
     val isTorchEnabled: Boolean = false,
 )
 

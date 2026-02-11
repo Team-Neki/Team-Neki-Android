@@ -55,7 +55,7 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                         reduce {
                             copy(
                                 scannedUrl = intent.scannedUrl,
-                                isShowShouldDownloadDialog = true,
+                                isDownloadNeededDialogShown = true,
                             )
                         }
                     } else {
@@ -67,7 +67,7 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                         }
                     }
                 } else {
-                    reduce { copy(isShowUnSupportedBrandDialog = true) }
+                    reduce { copy(isUnSupportedBrandDialogShown = true) }
                 }
             }
 
@@ -78,15 +78,15 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
 
             is QRScanIntent.DetectImageUrl -> postSideEffect(QRScanSideEffect.SetQRScannedResult(intent.imageUrl))
 
-            QRScanIntent.DismissShouldDownloadDialog -> reduce { copy(isShowShouldDownloadDialog = false) }
+            QRScanIntent.DismissShouldDownloadDialog -> reduce { copy(isDownloadNeededDialogShown = false) }
             QRScanIntent.ClickGoDownload -> reduce {
                 copy(
                     viewType = QRScanViewType.WEB_VIEW,
-                    isShowShouldDownloadDialog = false,
+                    isDownloadNeededDialogShown = false,
                 )
             }
 
-            QRScanIntent.DismissUnSupportedBrandDialog -> reduce { copy(isShowUnSupportedBrandDialog = false) }
+            QRScanIntent.DismissUnSupportedBrandDialog -> reduce { copy(isUnSupportedBrandDialogShown = false) }
             QRScanIntent.ClickUploadGallery -> postSideEffect(QRScanSideEffect.SetOpenGalleryResult)
             QRScanIntent.ClickProposeBrand -> postSideEffect(QRScanSideEffect.OpenBrandProposalUrl)
         }

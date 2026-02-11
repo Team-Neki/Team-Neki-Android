@@ -1,6 +1,10 @@
 package com.neki.android.feature.photo_upload.impl.qrscan
 
+import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,6 +16,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.common.permission.CameraPermissionManager
+import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlertDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -30,7 +36,21 @@ internal fun QRScanRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = LocalActivity.current as Activity
     val nekiToast = remember { NekiToast(context) }
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        when {
+            isGranted -> viewModel.store.onIntent(QRScanIntent.GrantCameraPermission)
+            CameraPermissionManager.shouldShowCameraRationale(activity) -> viewModel.store.onIntent(QRScanIntent.DenyCameraPermissionOnce)
+            else -> viewModel.store.onIntent(QRScanIntent.DenyCameraPermissionPermanent)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        cameraPermissionLauncher.launch(CameraPermissionManager.CAMERA_PERMISSION)
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -39,6 +59,7 @@ internal fun QRScanRoute(
                 setQRResult(QRScanResult.QRCodeScanned(sideEffect.imageUrl))
                 navigateBack()
             }
+
             is QRScanSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             QRScanSideEffect.OpenBrandProposalUrl -> {
                 val intent = Intent(Intent.ACTION_VIEW, BuildConfig.BRAND_PROPOSAL_URL.toUri())
@@ -49,8 +70,12 @@ internal fun QRScanRoute(
                 setQRResult(QRScanResult.OpenGallery)
                 navigateBack()
             }
+
+            QRScanSideEffect.RequestCameraPermission -> cameraPermissionLauncher.launch(CameraPermissionManager.CAMERA_PERMISSION)
+            QRScanSideEffect.MoveAppSettings -> navigateToAppSettings(context)
         }
     }
+
     QRScanScreen(
         uiState = uiState,
         onIntent = viewModel.store::onIntent,

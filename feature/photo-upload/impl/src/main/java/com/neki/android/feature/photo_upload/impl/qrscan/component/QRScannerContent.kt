@@ -1,6 +1,8 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.component
 
+import android.app.Activity
 import android.graphics.RectF
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -35,21 +38,43 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.neki.android.core.common.permission.CameraPermissionManager
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
+import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
+import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlertDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.feature.photo_upload.impl.qrscan.QRScanIntent
 
 @Composable
 internal fun QRScannerContent(
     modifier: Modifier = Modifier,
     isTorchEnabled: Boolean = false,
+    isDownloadNeededDialogShown : Boolean = false,
+    isUnSupportedBrandDialogShown : Boolean = false,
+    onGrantCameraPermission: () -> Unit = {},
+    onDenyCameraPermissionOnce: () -> Unit = {},
+    onDenyCameraPermissionPermanent: () -> Unit = {},
     onClickTorch: () -> Unit = {},
     onClickClose: () -> Unit = {},
     onQRCodeScanned: (String) -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val activity = LocalActivity.current as Activity
     var frameOffset: Offset? by remember { mutableStateOf(null) }
     var frameSize: IntSize? by remember { mutableStateOf(null) }
     var containerSize: IntSize? by remember { mutableStateOf(null) }
+
+    LifecycleResumeEffect(Unit) {
+        when {
+            CameraPermissionManager.isGrantedCameraPermission(context) -> onGrantCameraPermission()
+            CameraPermissionManager.shouldShowCameraRationale(activity) -> onDenyCameraPermissionOnce()
+            else -> onDenyCameraPermissionPermanent()
+        }
+
+        onPauseOrDispose { }
+    }
 
     Box(
         modifier = modifier
@@ -156,6 +181,28 @@ internal fun QRScannerContent(
                 }
             }
         }
+    }
+
+    if (isDownloadNeededDialogShown) {
+        SingleButtonAlertDialog(
+            title = "갤러리에 사진을 먼저 다운받아주세요",
+            content = "해당 브랜드는 웹사이트에서 사진을 저장해야\n네키에 자동으로 저장돼요",
+            buttonText = "사진 다운로드하러가기",
+            onDismissRequest = { onIntent(QRScanIntent.DismissShouldDownloadDialog) },
+            onClick = { onIntent(QRScanIntent.ClickGoDownload) },
+        )
+    }
+
+    if (isUnSupportedBrandDialogShown) {
+        SingleButtonWithTextButtonAlertDialog(
+            title = "지원하지 않는 브랜드예요",
+            content = "갤러리에서 사진을 추가해 바로 저장할 수 있어요\n원하는 브랜드가 있다면 제안해주세요!",
+            buttonText = "갤러리에서 추가하기",
+            textButtonText = "브랜드 제안하기",
+            onDismissRequest = { onIntent(QRScanIntent.DismissUnSupportedBrandDialog) },
+            onButtonClick = { onIntent(QRScanIntent.ClickUploadGallery) },
+            onTextButtonClick = { onIntent(QRScanIntent.ClickProposeBrand) },
+        )
     }
 }
 
