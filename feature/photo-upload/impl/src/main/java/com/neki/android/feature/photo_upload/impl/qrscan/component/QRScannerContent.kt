@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,12 +61,12 @@ internal fun QRScannerContent(
     var frameOffset: Offset? by remember { mutableStateOf(null) }
     var frameSize: IntSize? by remember { mutableStateOf(null) }
     var containerSize: IntSize? by remember { mutableStateOf(null) }
-    var isNavigatedAppSettings by remember { mutableStateOf(false) }
+    var isNavigatedToSettings by rememberSaveable { mutableStateOf(false) }
 
     LifecycleResumeEffect(Unit) {
-        if (isNavigatedAppSettings) {
+        if (isNavigatedToSettings) {
             onIntent(QRScanIntent.RequestCameraPermission)
-            isNavigatedAppSettings = false
+            isNavigatedToSettings = false
         }
 
         onPauseOrDispose { }
@@ -205,7 +206,7 @@ internal fun QRScannerContent(
             onClickGrayButton = { onIntent(QRScanIntent.ClickOpenAppSettingDialogCancel) },
             onClickPrimaryButton = {
                 onIntent(QRScanIntent.ClickOpenAppSettingDialogConfirm)
-                isNavigatedAppSettings = true
+                isNavigatedToSettings = true
             },
             properties = DialogProperties(
                 usePlatformDefaultWidth = false,
