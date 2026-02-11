@@ -4,20 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
+import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.feature.auth.impl.term.model.TermAgreement
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.persistentSetOf
-import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
+    private val tokenRepository: TokenRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
         mviIntentStore(
@@ -33,71 +32,46 @@ class LoginViewModel @Inject constructor(
     ) {
         when (intent) {
             LoginIntent.ClickKakaoLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
-            is LoginIntent.SuccessLogin -> {
-                reduce { copy(kakaoIdToken = intent.idToken) }
-                postSideEffect(LoginSideEffect.NavigateToTerm)
-            }
-
-            LoginIntent.FailLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
-
-            LoginIntent.ClickAgreeAll -> {
-                if (state.isAllRequiredAgreed) {
-                    reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
-                } else {
-                    reduce { copy(agreedTerms = TermAgreement.allRequiredTerms, isAllRequiredAgreed = true) }
-                }
-            }
-
-            is LoginIntent.ClickAgreeTerm -> {
-                val newAgreedTerms = if (intent.term in state.agreedTerms) {
-                    (state.agreedTerms - intent.term).toPersistentSet()
-                } else {
-                    (state.agreedTerms + intent.term).toPersistentSet()
-                }
-                val isAllRequiredAgreed = TermAgreement.allRequiredTerms.all { it in newAgreedTerms }
-                reduce { copy(agreedTerms = newAgreedTerms, isAllRequiredAgreed = isAllRequiredAgreed) }
-            }
-
-            is LoginIntent.ClickTermNavigateUrl -> {
-                postSideEffect(LoginSideEffect.NavigateUrl(intent.term.url))
-            }
-
-            LoginIntent.ClickNext -> {
-                val idToken = state.kakaoIdToken
-                if (state.isAllRequiredAgreed) {
-                    loginWithKakao(idToken, reduce, postSideEffect)
-                }
-            }
-
-            LoginIntent.ClickBack -> {
-                postSideEffect(LoginSideEffect.NavigateBack)
-            }
-
-            LoginIntent.ResetTermState -> {
-                reduce { copy(agreedTerms = persistentSetOf(), isAllRequiredAgreed = false) }
-            }
+            is LoginIntent.SuccessKakaoLogin -> signUp(intent.idToken, reduce, postSideEffect)
+            LoginIntent.FailKakaoLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
         }
     }
 
-    private fun loginWithKakao(
-        idToken: String,
+    private fun signUp(
+        kakaoIdToken: String,
         reduce: (LoginState.() -> LoginState) -> Unit,
         postSideEffect: (LoginSideEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
-        authRepository.loginWithKakao(idToken)
-            .onSuccess {
+        authRepository.loginWithKakao(kakaoIdToken)
+            .onSuccess { authResult ->
                 tokenRepository.saveTokens(
-                    accessToken = it.accessToken,
-                    refreshToken = it.refreshToken,
+                    accessToken = authResult.accessToken,
+                    refreshToken = authResult.refreshToken,
                 )
-                authRepository.setCompletedOnboarding(true)
-                postSideEffect(LoginSideEffect.NavigateToMain)
+                checkTermAgreementState(postSideEffect)
             }
             .onFailure { exception ->
                 Timber.e(exception)
-                postSideEffect(LoginSideEffect.ShowToastMessage("로그인에 실패했습니다. 다시 시도해주세요."))
+                postSideEffect(LoginSideEffect.ShowToastMessage("가입에 실패했습니다. 다시 시도해주세요."))
             }
         reduce { copy(isLoading = false) }
+    }
+
+    private suspend fun checkTermAgreementState(
+        postSideEffect: (LoginSideEffect) -> Unit,
+    ) {
+        userRepository.getUserInfo()
+            .onSuccess { userInfo ->
+                if (userInfo.isRequiredTermsAgreed) {
+                    postSideEffect(LoginSideEffect.NavigateToMain)
+                } else {
+                    postSideEffect(LoginSideEffect.NavigateToTerm)
+                }
+            }
+            .onFailure { exception ->
+                Timber.e(exception)
+                postSideEffect(LoginSideEffect.NavigateToTerm)
+            }
     }
 }
