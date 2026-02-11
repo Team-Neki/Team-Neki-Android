@@ -13,8 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntSize
-import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.DIM_COLOR
-import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRAME_CORNER_RADIUS
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst.DIM_COLOR
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst.FRAME_CORNER_RADIUS
 
 @Composable
 internal fun DimExceptContent(

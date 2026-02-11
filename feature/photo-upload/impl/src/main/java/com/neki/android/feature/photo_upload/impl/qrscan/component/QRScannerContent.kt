@@ -45,6 +45,7 @@ import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlertDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.photo_upload.impl.qrscan.QRScanIntent
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst
 
 @Composable
 internal fun QRScannerContent(
@@ -199,7 +200,7 @@ internal fun QRScannerContent(
             title = "카메라 권한",
             content = NekiPermission.CAMERA_PERMANENT_DENIED_DIALOG_CONTENT,
             grayButtonText = "취소",
-            primaryButtonText = "앱 설정으로 이동",
+            primaryButtonText = QRScanConst.OPEN_APP_SETTING_DIALOG_BUTTON_TEXT,
             onDismissRequest = { onIntent(QRScanIntent.DismissOpenAppSettingDialog) },
             onClickGrayButton = { onIntent(QRScanIntent.ClickOpenAppSettingDialogCancel) },
             onClickPrimaryButton = {
