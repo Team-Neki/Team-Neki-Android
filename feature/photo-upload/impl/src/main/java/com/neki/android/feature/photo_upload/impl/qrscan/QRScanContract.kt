@@ -16,6 +16,7 @@ data class QRScanState(
 )
 
 sealed interface QRScanIntent {
+    data object RequestCameraPermission : QRScanIntent
     data object GrantCameraPermission : QRScanIntent
     data object DenyCameraPermissionOnce : QRScanIntent
     data object DenyCameraPermissionPermanent : QRScanIntent

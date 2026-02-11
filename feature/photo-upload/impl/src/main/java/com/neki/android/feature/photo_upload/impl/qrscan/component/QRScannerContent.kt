@@ -38,8 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import com.neki.android.core.common.permission.CameraPermissionManager
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
@@ -64,12 +64,12 @@ internal fun QRScannerContent(
     var frameOffset: Offset? by remember { mutableStateOf(null) }
     var frameSize: IntSize? by remember { mutableStateOf(null) }
     var containerSize: IntSize? by remember { mutableStateOf(null) }
+    var isNavigatedAppSettings by remember { mutableStateOf(false) }
 
     LifecycleResumeEffect(Unit) {
-        when {
-            CameraPermissionManager.isGrantedCameraPermission(context) -> onIntent(QRScanIntent.GrantCameraPermission)
-            CameraPermissionManager.shouldShowCameraRationale(activity) -> onIntent(QRScanIntent.DenyCameraPermissionOnce)
-            else -> onIntent(QRScanIntent.DenyCameraPermissionPermanent)
+        if (isNavigatedAppSettings) {
+            onIntent(QRScanIntent.RequestCameraPermission)
+            isNavigatedAppSettings = false
         }
 
         onPauseOrDispose { }
@@ -191,6 +191,11 @@ internal fun QRScannerContent(
             onDismissRequest = { onIntent(QRScanIntent.DismissPermissionRationaleDialog) },
             onClickGrayButton = { onIntent(QRScanIntent.ClickPermissionRationaleDialogCancel) },
             onClickPrimaryButton = { onIntent(QRScanIntent.ClickPermissionRationaleDialogConfirm) },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            ),
         )
     }
 
@@ -199,10 +204,18 @@ internal fun QRScannerContent(
             title = "카메라 권한",
             content = "설정에서 카메라 접근을 허용하면 QR 스캔이 가능해요",
             grayButtonText = "취소",
-            primaryButtonText = "허용",
+            primaryButtonText = "앱 설정으로 이동",
             onDismissRequest = { onIntent(QRScanIntent.DismissOpenAppSettingDialog) },
             onClickGrayButton = { onIntent(QRScanIntent.ClickOpenAppSettingDialogCancel) },
-            onClickPrimaryButton = { onIntent(QRScanIntent.ClickOpenAppSettingDialogConfirm) },
+            onClickPrimaryButton = {
+                onIntent(QRScanIntent.ClickOpenAppSettingDialogConfirm)
+                isNavigatedAppSettings = true
+            },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            ),
         )
     }
 
