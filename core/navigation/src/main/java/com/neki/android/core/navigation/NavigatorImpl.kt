@@ -1,6 +1,7 @@
 package com.neki.android.core.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.neki.android.core.navigation.auth.AuthNavigationState
 import com.neki.android.core.navigation.root.RootNavKey
 import com.neki.android.core.navigation.root.RootNavigationState
 import dagger.hilt.android.scopes.ActivityRetainedScoped
@@ -9,6 +10,7 @@ import javax.inject.Inject
 @ActivityRetainedScoped
 class NavigatorImpl @Inject constructor(
     private val rootState: RootNavigationState,
+    private val authState: AuthNavigationState,
     val state: NavigationState,
 ) : Navigator {
     override fun navigateRoot(rootNavKey: RootNavKey) {
@@ -24,6 +26,14 @@ class NavigatorImpl @Inject constructor(
             stack.clear()
             stack.add(key)
         }
+    }
+
+    override fun navigateToLogin(loginKey: NavKey) {
+        clearRootSubStack()
+        authState.stack.clear()
+        authState.stack.add(loginKey)
+        rootState.stack.clear()
+        rootState.stack.add(RootNavKey.Auth)
     }
 
     override fun navigate(key: NavKey) {

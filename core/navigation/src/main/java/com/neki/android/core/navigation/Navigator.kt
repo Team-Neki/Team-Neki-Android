@@ -9,6 +9,7 @@ typealias EntryProviderInstaller = EntryProviderScope<NavKey>.() -> Unit
 interface Navigator {
     fun navigateRoot(rootNavKey: RootNavKey)
     fun navigate(key: NavKey)
+    fun navigateToLogin(loginKey: NavKey)
     fun goBack()
     fun remove(key: NavKey)
 }
