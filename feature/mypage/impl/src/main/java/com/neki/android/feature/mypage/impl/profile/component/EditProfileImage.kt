@@ -42,13 +42,8 @@ internal fun EditProfileImage(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .border(
-                    width = 1.dp,
-                    shape = CircleShape,
-                    color = NekiTheme.colorScheme.primary400,
-                )
                 .background(
-                    color = NekiTheme.colorScheme.white,
+                    color = NekiTheme.colorScheme.gray700,
                     shape = CircleShape,
                 )
                 .padding(8.dp)
@@ -58,7 +53,7 @@ internal fun EditProfileImage(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.icon_camera),
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.primary400,
+                tint = NekiTheme.colorScheme.white,
             )
         }
     }
