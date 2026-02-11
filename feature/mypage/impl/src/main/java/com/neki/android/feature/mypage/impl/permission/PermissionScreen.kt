@@ -29,7 +29,7 @@ import com.neki.android.feature.mypage.impl.main.MyPageEffect
 import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
-import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
+import com.neki.android.core.common.permission.NekiPermission
 
 @Composable
 internal fun PermissionRoute(

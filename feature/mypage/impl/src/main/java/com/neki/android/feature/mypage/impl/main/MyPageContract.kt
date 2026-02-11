@@ -2,7 +2,7 @@ package com.neki.android.feature.mypage.impl.main
 
 import com.neki.android.core.model.UserInfo
 import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
-import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
+import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 
 data class MyPageState(
