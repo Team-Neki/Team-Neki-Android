@@ -5,7 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.EntryProviderInstaller
 import com.neki.android.core.navigation.HiltSharedViewModelStoreNavEntryDecorator
 import com.neki.android.core.navigation.Navigator
-import com.neki.android.core.navigation.root.RootNavKey
+import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.mypage.api.MyPageNavKey
 import com.neki.android.feature.mypage.api.navigateToEditProfile
 import com.neki.android.feature.mypage.api.navigateToPermission
@@ -59,7 +59,7 @@ private fun EntryProviderScope<NavKey>.myPageEntry(navigator: Navigator) {
         ProfileSettingRoute(
             navigateBack = navigator::goBack,
             navigateToEditProfile = navigator::navigateToEditProfile,
-            navigateToLogin = { navigator.navigateRoot(RootNavKey.Auth) },
+            navigateToLogin = { navigator.navigateToLogin(AuthNavKey.Login) },
         )
     }
 
