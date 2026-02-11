@@ -1,8 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.component
 
-import android.app.Activity
 import android.graphics.RectF
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -48,7 +45,6 @@ import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlert
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.photo_upload.impl.qrscan.QRScanIntent
 
-
 @Composable
 internal fun QRScannerContent(
     modifier: Modifier = Modifier,
@@ -59,8 +55,6 @@ internal fun QRScannerContent(
     isTorchEnabled: Boolean = false,
     onIntent: (QRScanIntent) -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val activity = LocalActivity.current as Activity
     var frameOffset: Offset? by remember { mutableStateOf(null) }
     var frameSize: IntSize? by remember { mutableStateOf(null) }
     var containerSize: IntSize? by remember { mutableStateOf(null) }
