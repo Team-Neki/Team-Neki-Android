@@ -20,4 +20,10 @@ enum class NekiPermission(
         subTitle = "저장 사진 및 추억 리마인드에 필요해요.",
         dialogContent = "사진 저장 완료·오류 안내를 알려드리기 위해\n알림 권한이 필요해요",
     ),
+    ;
+
+    companion object {
+        // TODO: 기획 정의 후 문구 수정
+        const val CAMERA_PERMANENT_DENIED_DIALOG_CONTENT = "설정에서 카메라 접근을 허용하면 QR 스캔이 가능해요"
+    }
 }

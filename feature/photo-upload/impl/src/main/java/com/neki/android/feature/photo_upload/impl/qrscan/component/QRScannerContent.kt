@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
@@ -178,8 +179,8 @@ internal fun QRScannerContent(
 
     if (isPermissionRationaleDialogShown) {
         DoubleButtonAlertDialog(
-            title = "카메라 권한",
-            content = "QR 인식을 위해 카메라 접근이 필요해요",
+            title = NekiPermission.CAMERA.title,
+            content = NekiPermission.CAMERA.dialogContent,
             grayButtonText = "취소",
             primaryButtonText = "허용",
             onDismissRequest = { onIntent(QRScanIntent.DismissPermissionRationaleDialog) },
@@ -196,7 +197,7 @@ internal fun QRScannerContent(
     if (isOpenAppSettingDialogShown) {
         DoubleButtonAlertDialog(
             title = "카메라 권한",
-            content = "설정에서 카메라 접근을 허용하면 QR 스캔이 가능해요",
+            content = NekiPermission.CAMERA_PERMANENT_DENIED_DIALOG_CONTENT,
             grayButtonText = "취소",
             primaryButtonText = "앱 설정으로 이동",
             onDismissRequest = { onIntent(QRScanIntent.DismissOpenAppSettingDialog) },
