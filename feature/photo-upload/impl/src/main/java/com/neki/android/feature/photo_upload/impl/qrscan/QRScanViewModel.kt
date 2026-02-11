@@ -25,14 +25,26 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
         when (intent) {
             QRScanIntent.RequestCameraPermission -> postSideEffect(QRScanSideEffect.RequestCameraPermission)
             QRScanIntent.GrantCameraPermission -> reduce { copy(isCameraPermissionGranted = true) }
-            QRScanIntent.DenyCameraPermissionOnce -> reduce { copy(isPermissionRationaleDialogShown = true) }
-            QRScanIntent.DenyCameraPermissionPermanent -> reduce { copy(isOpenAppSettingDialogShown = true) }
+            QRScanIntent.DenyCameraPermissionOnce -> reduce {
+                copy(
+                    isPermissionRationaleDialogShown = true,
+                    isCameraPermissionGranted = false,
+                )
+            }
+
+            QRScanIntent.DenyCameraPermissionPermanent -> reduce {
+                copy(
+                    isOpenAppSettingDialogShown = true,
+                    isCameraPermissionGranted = false,
+                )
+            }
 
             QRScanIntent.DismissPermissionRationaleDialog -> reduce { copy(isPermissionRationaleDialogShown = false) }
             QRScanIntent.ClickPermissionRationaleDialogCancel -> {
                 reduce { copy(isPermissionRationaleDialogShown = false) }
                 postSideEffect(QRScanSideEffect.NavigateBack)
             }
+
             QRScanIntent.ClickPermissionRationaleDialogConfirm -> {
                 reduce { copy(isPermissionRationaleDialogShown = false) }
                 postSideEffect(QRScanSideEffect.RequestCameraPermission)
