@@ -4,7 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.neki.android.core.common.exception.ApiErrorCode.NO_MORE_RANDOM_POSE
-import com.neki.android.core.common.exception.NekiApiException
+import com.neki.android.core.common.exception.NoMorePoseException
 import com.neki.android.core.data.paging.PosePagingSource
 import com.neki.android.core.data.paging.ScrapPosePagingSource
 import com.neki.android.core.data.remote.api.PoseService
@@ -80,8 +80,10 @@ class PoseRepositoryImpl @Inject constructor(
                 excludeIds = excludeIdsString,
             ).data.toModel()
         } catch (e: ClientRequestException) {
-            if (e.response.status.value == NO_MORE_RANDOM_POSE) throw NekiApiException.NoMorePoseException(NO_MORE_RANDOM_POSE, e.message, e)
-            else throw e
+            if (e.response.status.value == NO_MORE_RANDOM_POSE)
+                throw NoMorePoseException(NO_MORE_RANDOM_POSE, e.message, e)
+            else
+                throw e
         }
     }
 
