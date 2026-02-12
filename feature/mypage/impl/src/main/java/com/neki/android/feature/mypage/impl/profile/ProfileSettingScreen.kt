@@ -11,7 +11,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.kakao.KakaoAuthHelper
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.DoubleButtonDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.LoadingDialog
