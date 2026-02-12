@@ -47,7 +47,7 @@ internal fun MapRefreshChip(
     ) {
         Icon(
             modifier = Modifier.size(16.dp),
-            imageVector = ImageVector.vectorResource(R.drawable.icon_rotation),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_rotate),
             contentDescription = null,
             tint = NekiTheme.colorScheme.primary400,
         )

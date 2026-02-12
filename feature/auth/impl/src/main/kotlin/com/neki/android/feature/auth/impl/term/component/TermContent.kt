@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
@@ -41,7 +42,7 @@ internal fun TermContent(
     ) {
         Image(
             modifier = Modifier.padding(bottom = 12.dp),
-            imageVector = ImageVector.vectorResource(R.drawable.icon_agreement),
+            painter = painterResource(R.drawable.image_agreement),
             contentDescription = null,
         )
         Text(

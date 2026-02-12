@@ -131,8 +131,7 @@ private fun PhotoBoothDetailCard(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_find_direction),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_road),
                 contentDescription = null,
                 tint = Color.Unspecified,
             )

@@ -210,23 +210,33 @@ internal fun AnchoredPanelContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(SpanStyle(color = NekiTheme.colorScheme.primary400)) {
-                        append("가까운")
-                    }
-                    append(" 네컷 사진 브랜드 📌")
-                },
-                color = NekiTheme.colorScheme.gray900,
-                style = NekiTheme.typography.title18Bold,
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = NekiTheme.colorScheme.primary400)) {
+                            append("가까운")
+                        }
+                        append(" 네컷 사진 브랜드")
+                    },
+                    color = NekiTheme.colorScheme.gray900,
+                    style = NekiTheme.typography.title18Bold,
+                )
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_pin),
+                    contentDescription = null,
+                    tint = Color.Unspecified
+                )
+            }
             Icon(
                 modifier = Modifier
-                    .size(24.dp)
                     .noRippleClickableSingle(onClick = onClickInfoIcon)
                     .padding(2.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_info_gray_stroke),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_info_storke),
                 contentDescription = null,
+                tint = NekiTheme.colorScheme.gray300
             )
         }
         VerticalSpacer(8.dp)

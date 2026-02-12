@@ -189,7 +189,7 @@ internal fun PhotoBoothMarkerContent(
                                 if (isFocused) FOCUSED_MARKER_IMAGE_RADIUS.dp else MARKER_IMAGE_RADIUS.dp,
                             ),
                         ),
-                    painter = painterResource(R.drawable.icon_info_gray_stroke),
+                    painter = painterResource(R.drawable.icon_info_storke),
                     contentScale = ContentScale.Crop,
                     contentDescription = null,
                 )

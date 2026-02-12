@@ -37,12 +37,9 @@ internal fun CurrentLocationButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            modifier = Modifier.size(20.dp),
-            imageVector = ImageVector.vectorResource(
-                if (isActiveCurrentLocation) R.drawable.icon_current_location_on else R.drawable.icon_current_location_off,
-            ),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_current_position),
             contentDescription = null,
-            tint = Color.Unspecified,
+            tint = if (isActiveCurrentLocation) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray800,
         )
     }
 }

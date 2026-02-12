@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -42,23 +43,18 @@ internal fun EditProfileImage(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .border(
-                    width = 1.dp,
-                    shape = CircleShape,
-                    color = NekiTheme.colorScheme.primary400,
-                )
                 .background(
-                    color = NekiTheme.colorScheme.white,
+                    color = NekiTheme.colorScheme.gray700,
                     shape = CircleShape,
                 )
-                .padding(8.dp)
-                .noRippleClickableSingle(onClick = onClickCameraIcon),
+                .noRippleClickableSingle(onClick = onClickCameraIcon)
+                .padding(8.dp),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_camera),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_camera_filled),
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.primary400,
+                tint = Color.Unspecified,
             )
         }
     }
