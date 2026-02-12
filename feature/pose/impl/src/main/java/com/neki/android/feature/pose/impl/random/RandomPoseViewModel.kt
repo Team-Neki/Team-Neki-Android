@@ -3,8 +3,8 @@ package com.neki.android.feature.pose.impl.random
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
-import com.neki.android.core.common.exception.ClientApiException
-import com.neki.android.core.dataapi.repository.NO_MORE_RANDOM_POSE
+import com.neki.android.core.common.exception.ApiErrorCode.NO_MORE_RANDOM_POSE
+import com.neki.android.core.common.exception.NekiApiException
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.PeopleCount
@@ -168,7 +168,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                         )
                     }
                 }.onFailure { error ->
-                    if (error is ClientApiException && error.code == NO_MORE_RANDOM_POSE) {
+                    if (error is NekiApiException.NoMorePoseException && error.code == NO_MORE_RANDOM_POSE) {
                         reduce { copy(hasNewPose = false) }
                         postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
                     } else Timber.e(error)
