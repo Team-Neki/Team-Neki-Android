@@ -1,6 +1,10 @@
 package com.neki.android.feature.photo_upload.impl.qrscan
 
+import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,8 +16,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
-import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlertDialog
+import com.neki.android.core.common.permission.CameraPermissionManager
+import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -30,7 +34,21 @@ internal fun QRScanRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = LocalActivity.current as Activity
     val nekiToast = remember { NekiToast(context) }
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        when {
+            isGranted -> viewModel.store.onIntent(QRScanIntent.GrantCameraPermission)
+            CameraPermissionManager.shouldShowCameraRationale(activity) -> viewModel.store.onIntent(QRScanIntent.DenyCameraPermissionOnce)
+            else -> viewModel.store.onIntent(QRScanIntent.DenyCameraPermissionPermanent)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        cameraPermissionLauncher.launch(CameraPermissionManager.CAMERA_PERMISSION)
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -39,6 +57,7 @@ internal fun QRScanRoute(
                 setQRResult(QRScanResult.QRCodeScanned(sideEffect.imageUrl))
                 navigateBack()
             }
+
             is QRScanSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             QRScanSideEffect.OpenBrandProposalUrl -> {
                 val intent = Intent(Intent.ACTION_VIEW, BuildConfig.BRAND_PROPOSAL_URL.toUri())
@@ -49,8 +68,12 @@ internal fun QRScanRoute(
                 setQRResult(QRScanResult.OpenGallery)
                 navigateBack()
             }
+
+            QRScanSideEffect.RequestCameraPermission -> cameraPermissionLauncher.launch(CameraPermissionManager.CAMERA_PERMISSION)
+            QRScanSideEffect.MoveAppSettings -> navigateToAppSettings(context)
         }
     }
+
     QRScanScreen(
         uiState = uiState,
         onIntent = viewModel.store::onIntent,
@@ -66,10 +89,12 @@ internal fun QRScanScreen(
         QRScanViewType.QR_SCAN -> {
             QRScannerContent(
                 modifier = Modifier.fillMaxSize(),
+                isPermissionRationaleDialogShown = uiState.isPermissionRationaleDialogShown,
+                isOpenAppSettingDialogShown = uiState.isOpenAppSettingDialogShown,
+                isDownloadNeededDialogShown = uiState.isDownloadNeededDialogShown,
+                isUnSupportedBrandDialogShown = uiState.isUnSupportedBrandDialogShown,
                 isTorchEnabled = uiState.isTorchEnabled,
-                onClickTorch = { onIntent(QRScanIntent.ToggleTorch) },
-                onClickClose = { onIntent(QRScanIntent.ClickCloseQRScan) },
-                onQRCodeScanned = { url -> onIntent(QRScanIntent.ScanQRCode(url)) },
+                onIntent = onIntent,
             )
         }
 
@@ -85,28 +110,6 @@ internal fun QRScanScreen(
                 }
             }
         }
-    }
-
-    if (uiState.isShowShouldDownloadDialog) {
-        SingleButtonAlertDialog(
-            title = "갤러리에 사진을 먼저 다운받아주세요",
-            content = "해당 브랜드는 웹사이트에서 사진을 저장해야\n네키에 자동으로 저장돼요",
-            buttonText = "사진 다운로드하러가기",
-            onDismissRequest = { onIntent(QRScanIntent.DismissShouldDownloadDialog) },
-            onClick = { onIntent(QRScanIntent.ClickGoDownload) },
-        )
-    }
-
-    if (uiState.isShowUnSupportedBrandDialog) {
-        SingleButtonWithTextButtonAlertDialog(
-            title = "지원하지 않는 브랜드예요",
-            content = "갤러리에서 사진을 추가해 바로 저장할 수 있어요\n원하는 브랜드가 있다면 제안해주세요!",
-            buttonText = "갤러리에서 추가하기",
-            textButtonText = "브랜드 제안하기",
-            onDismissRequest = { onIntent(QRScanIntent.DismissUnSupportedBrandDialog) },
-            onButtonClick = { onIntent(QRScanIntent.ClickUploadGallery) },
-            onTextButtonClick = { onIntent(QRScanIntent.ClickProposeBrand) },
-        )
     }
 }
 

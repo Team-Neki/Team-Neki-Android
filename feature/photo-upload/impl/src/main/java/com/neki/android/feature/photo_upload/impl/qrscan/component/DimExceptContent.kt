@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -12,7 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntSize
-import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.DIM_COLOR
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst.DIM_COLOR
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst.FRAME_CORNER_RADIUS
 
 @Composable
 internal fun DimExceptContent(
@@ -38,6 +40,7 @@ internal fun DimExceptContent(
                 topLeft = offSet,
                 size = Size(size.width.toFloat(), size.height.toFloat()),
                 blendMode = BlendMode.Clear,
+                cornerRadius = CornerRadius(FRAME_CORNER_RADIUS.toFloat()),
             )
         }
     }

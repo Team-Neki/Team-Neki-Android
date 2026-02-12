@@ -23,6 +23,44 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
         postSideEffect: (QRScanSideEffect) -> Unit,
     ) {
         when (intent) {
+            QRScanIntent.RequestCameraPermission -> postSideEffect(QRScanSideEffect.RequestCameraPermission)
+            QRScanIntent.GrantCameraPermission -> reduce { copy(isCameraPermissionGranted = true) }
+            QRScanIntent.DenyCameraPermissionOnce -> reduce {
+                copy(
+                    isPermissionRationaleDialogShown = true,
+                    isCameraPermissionGranted = false,
+                )
+            }
+
+            QRScanIntent.DenyCameraPermissionPermanent -> reduce {
+                copy(
+                    isOpenAppSettingDialogShown = true,
+                    isCameraPermissionGranted = false,
+                )
+            }
+
+            QRScanIntent.DismissPermissionRationaleDialog -> reduce { copy(isPermissionRationaleDialogShown = false) }
+            QRScanIntent.ClickPermissionRationaleDialogCancel -> {
+                reduce { copy(isPermissionRationaleDialogShown = false) }
+                postSideEffect(QRScanSideEffect.NavigateBack)
+            }
+
+            QRScanIntent.ClickPermissionRationaleDialogConfirm -> {
+                reduce { copy(isPermissionRationaleDialogShown = false) }
+                postSideEffect(QRScanSideEffect.RequestCameraPermission)
+            }
+
+            QRScanIntent.DismissOpenAppSettingDialog -> reduce { copy(isOpenAppSettingDialogShown = false) }
+            QRScanIntent.ClickOpenAppSettingDialogCancel -> {
+                reduce { copy(isOpenAppSettingDialogShown = false) }
+                postSideEffect(QRScanSideEffect.NavigateBack)
+            }
+
+            QRScanIntent.ClickOpenAppSettingDialogConfirm -> {
+                reduce { copy(isOpenAppSettingDialogShown = false) }
+                postSideEffect(QRScanSideEffect.MoveAppSettings)
+            }
+
             QRScanIntent.ToggleTorch -> reduce { copy(isTorchEnabled = !this.isTorchEnabled) }
             QRScanIntent.ClickCloseQRScan -> postSideEffect(QRScanSideEffect.NavigateBack)
             is QRScanIntent.ScanQRCode -> {
@@ -33,7 +71,7 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                         reduce {
                             copy(
                                 scannedUrl = intent.scannedUrl,
-                                isShowShouldDownloadDialog = true,
+                                isDownloadNeededDialogShown = true,
                             )
                         }
                     } else {
@@ -45,7 +83,7 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                         }
                     }
                 } else {
-                    reduce { copy(isShowUnSupportedBrandDialog = true) }
+                    reduce { copy(isUnSupportedBrandDialogShown = true) }
                 }
             }
 
@@ -56,15 +94,15 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
 
             is QRScanIntent.DetectImageUrl -> postSideEffect(QRScanSideEffect.SetQRScannedResult(intent.imageUrl))
 
-            QRScanIntent.DismissShouldDownloadDialog -> reduce { copy(isShowShouldDownloadDialog = false) }
+            QRScanIntent.DismissShouldDownloadDialog -> reduce { copy(isDownloadNeededDialogShown = false) }
             QRScanIntent.ClickGoDownload -> reduce {
                 copy(
                     viewType = QRScanViewType.WEB_VIEW,
-                    isShowShouldDownloadDialog = false,
+                    isDownloadNeededDialogShown = false,
                 )
             }
 
-            QRScanIntent.DismissUnSupportedBrandDialog -> reduce { copy(isShowUnSupportedBrandDialog = false) }
+            QRScanIntent.DismissUnSupportedBrandDialog -> reduce { copy(isUnSupportedBrandDialogShown = false) }
             QRScanIntent.ClickUploadGallery -> postSideEffect(QRScanSideEffect.SetOpenGalleryResult)
             QRScanIntent.ClickProposeBrand -> postSideEffect(QRScanSideEffect.OpenBrandProposalUrl)
         }

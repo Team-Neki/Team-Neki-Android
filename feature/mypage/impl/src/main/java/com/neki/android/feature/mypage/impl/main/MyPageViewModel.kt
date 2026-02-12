@@ -8,7 +8,7 @@ import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.domain.usecase.UploadProfileImageUseCase
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
+import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
