@@ -18,12 +18,8 @@ fun Uri.toByteArray(
     quality: Int = DEFAULT_QUALITY,
     format: Bitmap.CompressFormat = Bitmap.CompressFormat.JPEG,
 ): ByteArray? {
-    val orientation = context.contentResolver.openInputStream(this)?.use { input ->
-        ExifInterface(input).getAttributeInt(
-            ExifInterface.TAG_ORIENTATION,
-            ExifInterface.ORIENTATION_UNDEFINED,
-        )
-    } ?: ExifInterface.ORIENTATION_UNDEFINED
+    val orientation = getOrientation(context.contentResolver)
+
     val bytes = context.contentResolver.openInputStream(this)?.use { it.readBytes() } ?: return null
     val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return null
     val rotatedBitmap = bitmap.applyOrientation(orientation)
