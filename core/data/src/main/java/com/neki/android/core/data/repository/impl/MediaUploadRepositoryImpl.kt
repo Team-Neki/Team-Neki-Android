@@ -23,6 +23,8 @@ class MediaUploadRepositoryImpl @Inject constructor(
         fileName: String,
         contentType: String,
         mediaType: String,
+        width: Int?,
+        height: Int?,
     ) = runSuspendCatching {
         uploadService.getUploadTicket(
             requestBody = MediaUploadTicketRequest(
@@ -31,6 +33,9 @@ class MediaUploadRepositoryImpl @Inject constructor(
                         filename = fileName,
                         contentType = contentType,
                         mediaType = mediaType,
+                        width = width,
+                        height = height,
+                        size = if (width != null && height != null) (width + height).toLong() else null,
                     ),
                 ),
             ),
@@ -42,6 +47,8 @@ class MediaUploadRepositoryImpl @Inject constructor(
         fileName: String,
         contentType: String,
         mediaType: String,
+        width: Int?,
+        height: Int?,
     ) = runSuspendCatching {
         uploadService.getUploadTicket(
             requestBody = MediaUploadTicketRequest(
@@ -49,7 +56,9 @@ class MediaUploadRepositoryImpl @Inject constructor(
                     MediaUploadTicketRequest.Item(
                         filename = fileName,
                         contentType = contentType,
-                        mediaType = mediaType,
+                        mediaType = mediaType, width = width,
+                        height = height,
+                        size = if (width != null && height != null) (width + height).toLong() else null,
                     )
                 },
             ),

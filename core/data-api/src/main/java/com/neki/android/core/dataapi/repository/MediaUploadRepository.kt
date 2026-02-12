@@ -9,6 +9,8 @@ interface MediaUploadRepository {
         fileName: String,
         contentType: String,
         mediaType: String,
+        width: Int? =null,
+        height: Int?=null,
     ): Result<MediaUploadTicket>
 
     suspend fun getMultipleUploadTicket(
@@ -16,6 +18,8 @@ interface MediaUploadRepository {
         fileName: String,
         contentType: String,
         mediaType: String,
+        width: Int? =null,
+        height: Int?=null,
     ): Result<List<MediaUploadTicket>>
 
     suspend fun uploadImageFromUri(
