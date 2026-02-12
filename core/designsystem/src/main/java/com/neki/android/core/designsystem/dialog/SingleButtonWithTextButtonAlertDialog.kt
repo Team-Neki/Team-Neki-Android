@@ -84,7 +84,7 @@ fun SingleButtonWithTextButtonAlertDialog(
             Column(
                 modifier = Modifier.padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 CTAButtonPrimary(
                     text = buttonText,
@@ -96,11 +96,11 @@ fun SingleButtonWithTextButtonAlertDialog(
                 )
                 Text(
                     modifier = Modifier
+                        .clickableSingle(onClick = onTextButtonClick)
                         .padding(
                             vertical = 4.dp,
                             horizontal = 56.dp,
-                        )
-                        .clickableSingle(onClick = onTextButtonClick),
+                        ),
                     text = textButtonText,
                     style = NekiTheme.typography.body14Regular,
                     color = NekiTheme.colorScheme.primary600,
