@@ -90,7 +90,7 @@ fun EditProfileScreen(
         when (uiState.profileImageState) {
             is EditProfileImageType.OriginalImageUrl -> {}
             is EditProfileImageType.ImageUri -> displayProfileImage = uiState.profileImageState.uri
-            EditProfileImageType.Default -> displayProfileImage = R.drawable.image_empty_profile_image
+            EditProfileImageType.Default -> displayProfileImage = R.drawable.image_profile_empty
         }
     }
 

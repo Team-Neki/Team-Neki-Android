@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -36,9 +37,11 @@ internal fun EditProfileImage(
             modifier = Modifier
                 .size(imageSize)
                 .clip(CircleShape),
-            model = profileImage ?: R.drawable.image_empty_profile_image,
+            model = profileImage ?: R.drawable.image_profile_empty,
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.image_profile_empty),
+            error = painterResource(R.drawable.image_profile_empty),
         )
         Box(
             modifier = Modifier
