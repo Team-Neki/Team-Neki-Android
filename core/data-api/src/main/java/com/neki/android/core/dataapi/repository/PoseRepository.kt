@@ -6,8 +6,6 @@ import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 
-const val NO_MORE_RANDOM_POSE = 400
-
 interface PoseRepository {
 
     fun getPosesFlow(
