@@ -9,5 +9,5 @@ open class NekiApiException(
 class NoMorePoseException(
     override val code: Int,
     override val message: String,
-    override val cause: Throwable? = null,
+    override val cause: Throwable?,
 ) : NekiApiException(code, message, cause)
