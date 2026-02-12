@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.common.exception.ApiErrorCode.NO_MORE_RANDOM_POSE
-import com.neki.android.core.common.exception.NekiApiException
 import com.neki.android.core.common.exception.NoMorePoseException
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.dataapi.repository.UserRepository
