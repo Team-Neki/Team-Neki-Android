@@ -2,35 +2,21 @@ package com.neki.android.core.dataapi.repository
 
 import android.net.Uri
 import com.neki.android.core.model.ContentType
+import com.neki.android.core.model.MediaType
 import com.neki.android.core.model.MediaUploadTicket
 
 interface MediaUploadRepository {
-    suspend fun getSingleUploadTicket(
-        fileName: String,
-        contentType: String,
-        mediaType: String,
-        width: Int? =null,
-        height: Int?=null,
-    ): Result<MediaUploadTicket>
-
-    suspend fun getMultipleUploadTicket(
-        uploadCount: Int,
-        fileName: String,
-        contentType: String,
-        mediaType: String,
-        width: Int? =null,
-        height: Int?=null,
-    ): Result<List<MediaUploadTicket>>
-
     suspend fun uploadImageFromUri(
-        uploadUrl: String,
+        fileName: String,
         uri: Uri,
         contentType: ContentType,
-    ): Result<Unit>
+        mediaType: String,
+    ): Result<Long>
 
     suspend fun uploadImageFromUrl(
-        uploadUrl: String,
         imageUrl: String,
+        fileName: String,
         contentType: ContentType,
-    ): Result<Unit>
+        mediaType: MediaType,
+    ) : Result<Long>
 }
