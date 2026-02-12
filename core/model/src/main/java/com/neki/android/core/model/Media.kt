@@ -20,4 +20,14 @@ enum class MediaType(val label: String) {
 enum class ContentType(val label: String) {
     JPEG("image/jpeg"),
     PNG("image/png"),
+    ;
+
+    companion object {
+        fun fromString(type: String) = when {
+            type.contains("jpg") -> JPEG
+            type.contains("jpeg") -> JPEG
+            type.contains("png") -> PNG
+            else -> JPEG
+        }
+    }
 }
