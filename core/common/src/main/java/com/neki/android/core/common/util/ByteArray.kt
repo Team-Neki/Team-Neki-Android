@@ -16,6 +16,15 @@ import java.net.URL
 
 private const val DEFAULT_QUALITY = 80
 
+/**
+ * Uri에서 이미지를 읽어와 크기 정보와 함께 ByteArray로 변환합니다.
+ * 이미지의 방향(Orientation)을 확인하여 올바르게 회전시킵니다.
+ *
+ * @param context 컨텍스트
+ * @param quality 이미지 압축 품질 (0-100, 기본값 80)
+ * @param contentType 이미지 포맷 (JPEG, PNG 등)
+ * @return 이미지 크기 및 데이터가 포함된 MediaMetaData 객체. 실패 시 null 반환.
+ */
 fun Uri.toByteArrayWithSize(
     context: Context,
     quality: Int = DEFAULT_QUALITY,
@@ -47,6 +56,12 @@ fun Uri.toByteArrayWithSize(
     )
 }
 
+/**
+ * Uri의 EXIF 정보를 통해 이미지의 방향(Orientation)을 가져옵니다.
+ *
+ * @param resolver ContentResolver
+ * @return EXIF Orientation 값 (기본값: ORIENTATION_UNDEFINED)
+ */
 private fun Uri.getOrientation(resolver: ContentResolver) = resolver.openInputStream(this)?.use { input ->
     ExifInterface(input).getAttributeInt(
         ExifInterface.TAG_ORIENTATION,
@@ -54,6 +69,12 @@ private fun Uri.getOrientation(resolver: ContentResolver) = resolver.openInputSt
     )
 } ?: ExifInterface.ORIENTATION_UNDEFINED
 
+/**
+ * 주어진 Orientation 값에 따라 비트맵을 회전하거나 대칭시킵니다.
+ *
+ * @param orientation EXIF Orientation 값
+ * @return 회전/대칭이 적용된 새로운 비트맵. 변경이 필요 없는 경우 원본 반환.
+ */
 private fun Bitmap.applyOrientation(orientation: Int): Bitmap {
     val matrix = Matrix()
     when (orientation) {
@@ -77,6 +98,13 @@ private fun Bitmap.applyOrientation(orientation: Int): Bitmap {
     return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
 }
 
+/**
+ * ByteArray 형태의 이미지를 지정된 포맷과 품질로 압축합니다.
+ *
+ * @param quality 이미지 압축 품질 (0-100)
+ * @param format 이미지 압축 포맷
+ * @return 압축된 이미지 데이터 (ByteArray)
+ */
 private fun ByteArray.compress(
     quality: Int,
     format: Bitmap.CompressFormat,
@@ -89,6 +117,13 @@ private fun ByteArray.compress(
     }
 }
 
+/**
+ * 이미지 URL에서 데이터를 다운로드하여 크기 정보와 함께 ByteArray로 변환합니다.
+ *
+ * @param quality 이미지 압축 품질 (0-100, 기본값 80)
+ * @param contentType 이미지 포맷
+ * @return 이미지 크기 및 데이터가 포함된 MediaMetaData 객체
+ */
 suspend fun String.urlToByteArrayWithSize(
     quality: Int = DEFAULT_QUALITY,
     contentType: ContentType = ContentType.JPEG,
@@ -109,6 +144,9 @@ suspend fun String.urlToByteArrayWithSize(
     )
 }
 
+/**
+ * ContentType을 Bitmap.CompressFormat으로 변환합니다.
+ */
 private fun ContentType.toCompressFormat(): Bitmap.CompressFormat = when (this) {
     ContentType.JPEG -> Bitmap.CompressFormat.JPEG
     ContentType.PNG -> Bitmap.CompressFormat.PNG
