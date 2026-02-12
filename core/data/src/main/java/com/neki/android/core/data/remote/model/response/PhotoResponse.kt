@@ -17,8 +17,8 @@ data class PhotoResponse(
         @SerialName("imageUrl") val imageUrl: String,
         @SerialName("favorite") val favorite: Boolean,
         @SerialName("contentType") val contentType: String,
-        @SerialName("width") val width: Int,
-        @SerialName("height") val height: Int,
+        @SerialName("width") val width: Int? = null,
+        @SerialName("height") val height: Int? = null,
         @SerialName("createdAt") val createdAt: String,
     ) {
         internal fun toModel() = Photo(
