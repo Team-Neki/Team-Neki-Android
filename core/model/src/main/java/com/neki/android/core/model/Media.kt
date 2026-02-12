@@ -5,6 +5,12 @@ data class MediaUploadTicket(
     val uploadUrl: String,
 )
 
+class MediaMetaData(
+    val width: Int,
+    val height: Int,
+    val imageBytes: ByteArray,
+)
+
 enum class MediaType(val label: String) {
     USER_PROFILE("user-profiles"),
     PHOTO_BOOTH("photo-booth"),

@@ -1,12 +1,9 @@
 package com.neki.android.core.data.repository.impl
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
-import com.neki.android.core.common.util.getImageSize
-import com.neki.android.core.common.util.getImageSizeFromUrl
-import com.neki.android.core.common.util.toByteArray
-import com.neki.android.core.common.util.urlToByteArray
+import com.neki.android.core.common.util.toByteArrayWithSize
+import com.neki.android.core.common.util.urlToByteArrayWithSize
 import com.neki.android.core.data.remote.api.UploadService
 import com.neki.android.core.data.remote.model.request.MediaUploadTicketRequest
 import com.neki.android.core.data.util.runSuspendCatching
@@ -29,25 +26,21 @@ class MediaUploadRepositoryImpl @Inject constructor(
         contentType: ContentType,
         mediaType: String,
     ) = runSuspendCatching {
-        val imageBytes = withContext(Dispatchers.Default) {
-            uri.toByteArray(
-                context = context,
-                format = contentType.toCompressFormat(),
-            ) ?: error("Failed to convert uri to byte array")
-        }
-        val (width, height) = uri.getImageSize(context)
+        val metadata = withContext(Dispatchers.Default) {
+            uri.toByteArrayWithSize(context = context, contentType = contentType)
+        } ?: error("Failed to convert uri to byte array")
 
         val (mediaId, presignedUrl) = getSingleUploadTicket(
             fileName = fileName,
             contentType = contentType.label,
             mediaType = MediaType.USER_PROFILE.name,
-            width = width,
-            height = height,
+            width = metadata.width,
+            height = metadata.height,
         ).getOrThrow()
 
         uploadService.uploadImage(
             presignedUrl = presignedUrl,
-            imageBytes = imageBytes,
+            imageBytes = metadata.imageBytes,
             contentType = contentType.label,
         )
         return@runSuspendCatching mediaId
@@ -59,23 +52,19 @@ class MediaUploadRepositoryImpl @Inject constructor(
         contentType: ContentType,
         mediaType: MediaType,
     ): Result<Long> = runSuspendCatching {
-        val (width, height) = imageUrl.getImageSizeFromUrl()
-
-        val imageBytes = imageUrl.urlToByteArray(
-            format = contentType.toCompressFormat(),
-        )
+        val metaData = imageUrl.urlToByteArrayWithSize(contentType = contentType)
 
         val (mediaId, presignedUrl) = getSingleUploadTicket(
             fileName = fileName,
             contentType = contentType.label,
             mediaType = MediaType.PHOTO_BOOTH.name,
-            width = width,
-            height = height,
+            width = metaData.width,
+            height = metaData.height,
         ).getOrThrow()
 
         uploadService.uploadImage(
             presignedUrl = presignedUrl,
-            imageBytes = imageBytes,
+            imageBytes = metaData.imageBytes,
             contentType = contentType.label,
         )
 
@@ -103,10 +92,5 @@ class MediaUploadRepositoryImpl @Inject constructor(
                 ),
             ),
         ).data.toModels().first()
-    }
-
-    private fun ContentType.toCompressFormat(): Bitmap.CompressFormat = when (this) {
-        ContentType.JPEG -> Bitmap.CompressFormat.JPEG
-        ContentType.PNG -> Bitmap.CompressFormat.PNG
     }
 }
