@@ -35,7 +35,7 @@ internal fun AgreementSection(
             modifier = Modifier
                 .weight(1f)
                 .noRippleClickable(onClick = onClickAgree)
-                .padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
+                .padding(start = 10.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
