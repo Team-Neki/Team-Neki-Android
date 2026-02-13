@@ -103,20 +103,20 @@ private fun PhotoBoothDetailCard(
                 Text(
                     text = photoBooth.brandName,
                     color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold,
+                    style = NekiTheme.typography.title20SemiBold,
                 )
-                HorizontalSpacer(4.dp)
+                HorizontalSpacer(6.dp)
                 Text(
                     text = photoBooth.branchName,
                     color = NekiTheme.colorScheme.gray600,
-                    style = NekiTheme.typography.caption12Medium,
+                    style = NekiTheme.typography.body14Medium,
                 )
             }
             VerticalSpacer(4.dp)
             Text(
                 text = photoBooth.distance.formatDistance(),
                 color = NekiTheme.colorScheme.gray400,
-                style = NekiTheme.typography.caption12Medium,
+                style = NekiTheme.typography.body14Medium,
             )
         }
         HorizontalSpacer(1f)

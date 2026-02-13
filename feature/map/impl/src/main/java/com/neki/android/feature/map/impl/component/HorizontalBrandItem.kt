@@ -51,7 +51,7 @@ internal fun HorizontalBrandItem(
                 Text(
                     text = photoBooth.brandName,
                     color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold,
+                    style = NekiTheme.typography.title18SemiBold,
                 )
                 HorizontalSpacer(4.dp)
                 Text(
