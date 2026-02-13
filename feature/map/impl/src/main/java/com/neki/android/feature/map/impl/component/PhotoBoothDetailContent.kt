@@ -91,8 +91,8 @@ private fun PhotoBoothDetailCard(
                 .clip(RoundedCornerShape(8.dp))
                 .size(64.dp),
             model = photoBooth.imageUrl,
-            placeholder = painterResource(R.drawable.icon_life_four_cut),
-            error = painterResource(R.drawable.icon_life_four_cut),
+            placeholder = painterResource(R.drawable.icon_photo_booth_empty),
+            error = painterResource(R.drawable.icon_photo_booth_empty),
             contentDescription = null,
         )
         HorizontalSpacer(16.dp)

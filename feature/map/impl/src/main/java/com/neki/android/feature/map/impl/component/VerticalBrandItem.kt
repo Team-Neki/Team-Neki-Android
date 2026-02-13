@@ -51,8 +51,8 @@ internal fun VerticalBrandItem(
                     .fillMaxSize()
                     .clip(CircleShape),
                 model = brand.imageUrl,
-                placeholder = painterResource(R.drawable.icon_life_four_cut),
-                error = painterResource(R.drawable.icon_life_four_cut),
+                placeholder = painterResource(R.drawable.icon_photo_booth_empty),
+                error = painterResource(R.drawable.icon_photo_booth_empty),
                 contentDescription = null,
             )
 
