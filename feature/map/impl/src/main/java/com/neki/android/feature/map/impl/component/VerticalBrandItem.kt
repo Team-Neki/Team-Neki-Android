@@ -79,7 +79,7 @@ internal fun VerticalBrandItem(
         Text(
             text = brand.name,
             color = if (brand.isChecked) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray900,
-            style = NekiTheme.typography.body14Medium,
+            style = NekiTheme.typography.body14SemiBold,
             textAlign = TextAlign.Center,
         )
     }

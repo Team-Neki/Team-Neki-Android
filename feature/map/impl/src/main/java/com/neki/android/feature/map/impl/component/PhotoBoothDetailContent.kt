@@ -46,6 +46,7 @@ internal fun PhotoBoothDetailContent(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -58,7 +59,6 @@ internal fun PhotoBoothDetailContent(
             )
             CloseButton(onClick = onClickCloseCard)
         }
-        VerticalSpacer(12.dp)
         PhotoBoothDetailCard(
             photoBooth = photoBooth,
             onClick = onClickCard,
@@ -96,7 +96,9 @@ private fun PhotoBoothDetailCard(
             contentDescription = null,
         )
         HorizontalSpacer(16.dp)
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -119,7 +121,6 @@ private fun PhotoBoothDetailCard(
                 style = NekiTheme.typography.body14Medium,
             )
         }
-        HorizontalSpacer(1f)
         Box(
             modifier = Modifier
                 .background(
