@@ -39,10 +39,10 @@ internal fun MapRefreshChip(
             .border(
                 width = 1.dp,
                 shape = CircleShape,
-                color = NekiTheme.colorScheme.gray100,
+                color = NekiTheme.colorScheme.primary400,
             )
-            .padding(horizontal = 13.09.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(horizontal = 13.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
@@ -52,7 +52,7 @@ internal fun MapRefreshChip(
             tint = NekiTheme.colorScheme.primary400,
         )
         Text(
-            text = "현 위치에서 탐색",
+            text = "이 지역 재검색",
             style = NekiTheme.typography.body14SemiBold,
             color = NekiTheme.colorScheme.gray800,
         )

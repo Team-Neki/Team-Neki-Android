@@ -2,6 +2,7 @@ package com.neki.android.feature.map.impl.component
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.splineBasedDecay
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
@@ -40,9 +41,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -146,7 +149,7 @@ internal fun AnchoredDraggablePanel(
         Column {
             CurrentLocationButton(
                 modifier = Modifier
-                    .padding(start = 20.dp, bottom = 12.dp)
+                    .padding(start = 20.dp, bottom = 8.dp)
                     .alpha(alpha = if (dragLevel == DragLevel.THIRD) 0f else 1f),
                 isActiveCurrentLocation = isCurrentLocation,
                 onClick = onClickCurrentLocation,
@@ -242,16 +245,22 @@ internal fun AnchoredPanelContent(
         VerticalSpacer(8.dp)
         val filteredNearbyPhotoBooths = nearbyPhotoBooths.filter { it.isCheckedBrand }
         if (filteredNearbyPhotoBooths.isEmpty()) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 175.5.dp),
-                contentAlignment = Alignment.Center,
+                    .padding(top = 123.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                Image(
+                    painter = painterResource(R.drawable.image_near_photo_booth_empty),
+                    contentDescription = null,
+                )
                 Text(
-                    text = "1km 이내에 가까운 네컷 사진관이 없어요!",
+                    text = "1km 이내에 가까운\n네컷 사진관이 없어요!",
                     color = NekiTheme.colorScheme.gray500,
                     style = NekiTheme.typography.body16Medium,
+                    textAlign = TextAlign.Center,
                 )
             }
         } else {
@@ -260,7 +269,7 @@ internal fun AnchoredPanelContent(
                     .weight(1f)
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp),
+                contentPadding = PaddingValues(bottom = 128.dp),
             ) {
                 items(filteredNearbyPhotoBooths) { photoBooth ->
                     HorizontalBrandItem(

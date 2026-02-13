@@ -33,7 +33,7 @@ internal fun CurrentLocationButton(
                 color = NekiTheme.colorScheme.white,
             )
             .clickable(onClick = onClick)
-            .padding(8.dp),
+            .padding(6.dp),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
