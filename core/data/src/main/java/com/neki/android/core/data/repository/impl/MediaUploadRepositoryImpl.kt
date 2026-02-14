@@ -58,7 +58,7 @@ class MediaUploadRepositoryImpl @Inject constructor(
         val (mediaId, presignedUrl) = getSingleUploadTicket(
             fileName = fileName,
             contentType = contentType.label,
-            mediaType = mediaType.name,
+            mediaType = mediaType.label,
             width = metaData.width,
             height = metaData.height,
             fileSize = metaData.imageBytes.size.toLong(),
