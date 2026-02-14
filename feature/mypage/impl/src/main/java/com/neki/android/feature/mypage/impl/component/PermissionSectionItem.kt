@@ -21,7 +21,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 internal fun PermissionSectionItem(
-    title: String,
+    type: String,
     subTitle: String,
     isGranted: Boolean,
     onClick: () -> Unit = {},
@@ -38,7 +38,7 @@ internal fun PermissionSectionItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text = title,
+                text = type,
                 color = NekiTheme.colorScheme.gray900,
                 style = NekiTheme.typography.title18Medium,
             )
@@ -71,7 +71,7 @@ internal fun PermissionSectionItem(
 private fun PermissionSectionItemCameraPreview() {
     NekiTheme {
         PermissionSectionItem(
-            title = "카메라",
+            type = "카메라",
             subTitle = "QR 촬영에 필요해요.",
             isGranted = true,
         )
@@ -83,7 +83,7 @@ private fun PermissionSectionItemCameraPreview() {
 private fun PermissionSectionItemLocationPreview() {
     NekiTheme {
         PermissionSectionItem(
-            title = "위치",
+            type = "위치",
             subTitle = "QR 촬영에 필요해요.",
             isGranted = false,
         )
