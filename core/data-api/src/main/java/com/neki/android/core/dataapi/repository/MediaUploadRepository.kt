@@ -9,7 +9,7 @@ interface MediaUploadRepository {
         fileName: String,
         uri: Uri,
         contentType: ContentType,
-        mediaType: String,
+        mediaType: MediaType,
     ): Result<Long>
 
     suspend fun uploadImageFromUrl(

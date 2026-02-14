@@ -29,7 +29,7 @@ class UploadProfileImageUseCase @Inject constructor(
                 fileName = fileName,
                 uri = uri,
                 contentType = contentType,
-                mediaType = MediaType.USER_PROFILE.name,
+                mediaType = MediaType.USER_PROFILE,
             ).getOrThrow()
 
             userRepository.updateProfileImage(mediaId).getOrThrow()

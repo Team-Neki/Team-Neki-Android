@@ -24,7 +24,7 @@ class MediaUploadRepositoryImpl @Inject constructor(
         fileName: String,
         uri: Uri,
         contentType: ContentType,
-        mediaType: String,
+        mediaType: MediaType,
     ) = runSuspendCatching {
         val metadata = withContext(Dispatchers.Default) {
             uri.toByteArrayWithSize(context = context, contentType = contentType)
@@ -33,7 +33,7 @@ class MediaUploadRepositoryImpl @Inject constructor(
         val (mediaId, presignedUrl) = getSingleUploadTicket(
             fileName = fileName,
             contentType = contentType.label,
-            mediaType = mediaType,
+            mediaType = mediaType.label,
             width = metadata.width,
             height = metadata.height,
             fileSize = metadata.imageBytes.size.toLong(),

@@ -33,7 +33,7 @@ class UploadMultiplePhotoUseCase @Inject constructor(
                         uri = uri,
                         contentType = contentType,
                         fileName = fileName,
-                        mediaType = MediaType.PHOTO_BOOTH.name,
+                        mediaType = MediaType.PHOTO_BOOTH,
                     ).getOrThrow()
                 }
             }.awaitAll()
