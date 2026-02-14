@@ -46,7 +46,8 @@ import com.neki.android.feature.mypage.impl.main.MyPageViewModel
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 import com.neki.android.feature.mypage.impl.profile.component.EditProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileEditTopBar
-import com.neki.android.feature.mypage.impl.profile.component.ProfileImageChooseDialog
+import com.neki.android.feature.mypage.impl.profile.component.SelectProfileImageDialog
+import com.neki.android.feature.mypage.impl.profile.component.ProfileImageOption
 import timber.log.Timber
 
 @Composable
@@ -175,15 +176,21 @@ fun EditProfileScreen(
         }
     }
 
-    if (uiState.isShowImageChooseDialog) {
-        ProfileImageChooseDialog(
-            onDismissRequest = { onIntent(MyPageIntent.DismissImageChooseDialog) },
-            onClickDefaultProfile = { onIntent(MyPageIntent.SelectProfileImage(EditProfileImageType.Default)) },
-            onClickSelectPhoto = {
-                onIntent(MyPageIntent.DismissImageChooseDialog)
-                photoPicker.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                )
+    if (uiState.isShowImageSelectDialog) {
+        SelectProfileImageDialog(
+            onDismissRequest = { onIntent(MyPageIntent.DismissImageSelectDialog) },
+            onSelect = { option ->
+                when (option) {
+                    ProfileImageOption.DEFAULT_PROFILE -> {
+                        onIntent(MyPageIntent.SelectProfileImage(EditProfileImageType.Default))
+                    }
+                    ProfileImageOption.SELECT_PHOTO -> {
+                        onIntent(MyPageIntent.DismissImageSelectDialog)
+                        photoPicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    }
+                }
             },
         )
     }

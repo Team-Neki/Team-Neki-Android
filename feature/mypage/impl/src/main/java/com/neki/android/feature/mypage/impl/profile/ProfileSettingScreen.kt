@@ -11,7 +11,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.kakao.KakaoAuthHelper
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
+import com.neki.android.core.designsystem.dialog.DoubleButtonDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -90,7 +90,7 @@ fun ProfileSettingScreen(
     }
 
     if (uiState.isShowLogoutDialog) {
-        DoubleButtonAlertDialog(
+        DoubleButtonDialog(
             title = "로그아웃을 하시겠습니까?",
             content = "다시 로그인해야 서비스를 이용할 수 있어요.",
             grayButtonText = "취소",
@@ -103,7 +103,7 @@ fun ProfileSettingScreen(
     }
 
     if (uiState.isShowWithdrawDialog) {
-        DoubleButtonAlertDialog(
+        DoubleButtonDialog(
             title = "정말 탈퇴하시겠어요?",
             content = "계정을 탈퇴하면 사진과 정보가 모두 삭제되며,\n삭제된 데이터는 복구할 수 없어요.",
             grayButtonText = "취소",

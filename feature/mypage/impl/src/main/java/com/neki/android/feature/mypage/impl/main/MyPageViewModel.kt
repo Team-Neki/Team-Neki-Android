@@ -55,9 +55,9 @@ internal class MyPageViewModel @Inject constructor(
             }
 
             MyPageIntent.ClickEditIcon -> postSideEffect(MyPageEffect.NavigateToEditProfile)
-            MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageChooseDialog = true) }
-            MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
-            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageState = intent.image, isShowImageChooseDialog = false) }
+            MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageSelectDialog = true) }
+            MyPageIntent.DismissImageSelectDialog -> reduce { copy(isShowImageSelectDialog = false) }
+            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageState = intent.image, isShowImageSelectDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
                 val isNicknameChanged = state.userInfo.nickname != intent.nickname
                 val isProfileImageChanged = state.profileImageState !is EditProfileImageType.OriginalImageUrl

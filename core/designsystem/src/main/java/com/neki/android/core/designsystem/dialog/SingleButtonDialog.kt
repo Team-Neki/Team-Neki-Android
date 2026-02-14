@@ -1,12 +1,10 @@
 package com.neki.android.core.designsystem.dialog
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -14,18 +12,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun SingleButtonAlertDialog(
+fun SingleButtonDialog(
     title: String,
     content: String,
     buttonText: String,
@@ -53,14 +49,9 @@ fun SingleButtonAlertDialog(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Image(
-                modifier = Modifier.size(64.dp),
-                painter = painterResource(R.drawable.image_dialog_alert),
-                contentDescription = null,
-            )
             Column(
                 modifier = Modifier.padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -90,9 +81,9 @@ fun SingleButtonAlertDialog(
 
 @ComponentPreview
 @Composable
-private fun SingleButtonAlertDialogPreview() {
+private fun SingleButtonDialogPreview() {
     NekiTheme {
-        SingleButtonAlertDialog(
+        SingleButtonDialog(
             title = "메인 텍스트가 들어가는 곳",
             content = "보조 설명 텍스트가 들어가는 공간입니다",
             buttonText = "텍스트",
