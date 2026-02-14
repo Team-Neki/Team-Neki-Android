@@ -41,7 +41,7 @@ import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
-import com.neki.android.feature.archive.impl.component.EmptyContent
+import com.neki.android.feature.archive.impl.component.EmptyAlbumContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
@@ -123,7 +123,7 @@ internal fun AllPhotoScreen(
     }
 
     if (isEmpty) {
-        EmptyContent(
+        EmptyAlbumContent(
             title = "모든 사진",
             onClickBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
         )

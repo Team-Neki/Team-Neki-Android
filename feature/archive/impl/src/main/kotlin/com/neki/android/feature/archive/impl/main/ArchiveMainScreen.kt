@@ -48,7 +48,7 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
 import com.neki.android.feature.archive.impl.main.component.AlbumUploadOption
 import com.neki.android.feature.archive.impl.main.component.SelectWithAlbumDialog
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
-import com.neki.android.feature.archive.impl.main.component.NoPhotoContent
+import com.neki.android.feature.archive.impl.main.component.EmptyContent
 import kotlinx.collections.immutable.persistentListOf
 import timber.log.Timber
 
@@ -243,7 +243,12 @@ private fun ArchiveMainContent(
 
         if (uiState.recentPhotos.isEmpty()) {
             item(span = StaggeredGridItemSpan.FullLine) {
-                NoPhotoContent()
+                EmptyContent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 70.dp),
+                    emptyText = "아직 등록된 사진이 없어요\n찍은 네컷을 저장해보세요!",
+                )
             }
         }
 
