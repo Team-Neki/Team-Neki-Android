@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -41,6 +42,7 @@ fun FavoriteAlbumRowComponent(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         FavoriteAlbumThumbnail(
+            isEmpty = album.photoCount == 0,
             thumbnailUrl = album.thumbnailUrl,
         )
 
@@ -68,6 +70,7 @@ fun AlbumRowComponent(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         AlbumThumbnail(
+            isEmpty = album.photoCount == 0,
             thumbnailUrl = album.thumbnailUrl,
         )
 
@@ -88,6 +91,7 @@ fun AlbumRowComponent(
 @Composable
 private fun FavoriteAlbumThumbnail(
     thumbnailUrl: String?,
+    isEmpty: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -96,45 +100,80 @@ private fun FavoriteAlbumThumbnail(
             .clip(RoundedCornerShape(8.dp)),
         contentAlignment = Alignment.Center,
     ) {
-        AsyncImage(
-            modifier = Modifier.matchParentSize(),
-            model = thumbnailUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-        )
+        if (isEmpty || thumbnailUrl == null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(NekiTheme.colorScheme.gray50),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    modifier = Modifier.size(28.dp),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_empty_gallery_thumbnail),
+                    tint = NekiTheme.colorScheme.gray100,
+                    contentDescription = null,
+                )
+            }
+        } else {
+            AsyncImage(
+                modifier = Modifier
+                    .background(color = Color.Black.copy(alpha = 0.04f))
+                    .matchParentSize(),
+                model = thumbnailUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
 
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(NekiTheme.colorScheme.favoriteAlbumCover.copy(alpha = 0.5f)),
-        )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(NekiTheme.colorScheme.favoriteAlbumCover.copy(alpha = 0.5f)),
+            )
 
-        Icon(
-            modifier = Modifier.size(20.dp),
-            imageVector = ImageVector.vectorResource(R.drawable.icon_heart_filled),
-            contentDescription = null,
-            tint = NekiTheme.colorScheme.white,
-        )
+            Icon(
+                modifier = Modifier.size(20.dp),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_heart_filled),
+                contentDescription = null,
+                tint = NekiTheme.colorScheme.white,
+            )
+        }
     }
 }
 
 @Composable
 private fun AlbumThumbnail(
     thumbnailUrl: String?,
+    isEmpty: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    AsyncImage(
-        modifier = modifier
-            .size(72.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(
-                color = NekiTheme.colorScheme.gray50,
-                shape = RoundedCornerShape(8.dp),
-            ),
-        model = thumbnailUrl,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-    )
+    if (isEmpty) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .background(NekiTheme.colorScheme.gray50),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                modifier = Modifier.size(28.dp),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_empty_gallery_thumbnail),
+                tint = NekiTheme.colorScheme.gray100,
+                contentDescription = null,
+            )
+        }
+    } else {
+        AsyncImage(
+            modifier = modifier
+                .size(72.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    color = NekiTheme.colorScheme.gray50,
+                    shape = RoundedCornerShape(8.dp),
+                ),
+            model = thumbnailUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+        )
+    }
 }
 
 @Composable
@@ -165,12 +204,23 @@ private fun AlbumInfo(
 @Composable
 private fun FavoriteAlbumRowComponentPreview() {
     NekiTheme {
-        FavoriteAlbumRowComponent(
-            album = AlbumPreview(
-                id = 0,
-                title = "즐겨찾기",
-            ),
-        )
+        Column {
+            FavoriteAlbumRowComponent(
+                album = AlbumPreview(
+                    id = 0,
+                    title = "즐겨찾기",
+                    photoCount = 0,
+                ),
+            )
+            FavoriteAlbumRowComponent(
+                album = AlbumPreview(
+                    id = 0,
+                    title = "즐겨찾기",
+                    thumbnailUrl = "https://example.com/photo.jpg",
+                    photoCount = 12,
+                ),
+            )
+        }
     }
 }
 
@@ -178,12 +228,23 @@ private fun FavoriteAlbumRowComponentPreview() {
 @Composable
 private fun AlbumRowComponentPreview() {
     NekiTheme {
-        AlbumRowComponent(
-            album = AlbumPreview(
-                id = 1,
-                title = "일반앨범제목",
-            ),
-        )
+        Column {
+            AlbumRowComponent(
+                album = AlbumPreview(
+                    id = 1,
+                    title = "빈 앨범",
+                    photoCount = 0,
+                ),
+            )
+            AlbumRowComponent(
+                album = AlbumPreview(
+                    id = 2,
+                    title = "일반앨범제목",
+                    thumbnailUrl = "https://example.com/photo.jpg",
+                    photoCount = 5,
+                ),
+            )
+        }
     }
 }
 
@@ -191,20 +252,22 @@ private fun AlbumRowComponentPreview() {
 @Composable
 private fun AlbumRowComponentSelectablePreview() {
     NekiTheme {
-        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Column {
             AlbumRowComponent(
                 album = AlbumPreview(
                     id = 1,
-                    title = "선택되지 않은 앨범",
+                    title = "선택되지 않은 빈 앨범",
+                    photoCount = 0,
                 ),
                 isSelectable = true,
                 isSelected = false,
             )
-
             AlbumRowComponent(
                 album = AlbumPreview(
                     id = 2,
                     title = "선택된 앨범",
+                    thumbnailUrl = "https://example.com/photo.jpg",
+                    photoCount = 8,
                 ),
                 isSelectable = true,
                 isSelected = true,

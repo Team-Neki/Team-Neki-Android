@@ -166,23 +166,40 @@ private fun ArchiveAlbumItem(
 
     Box(
         modifier = modifier
+            .cardShadow()
             .height(166.dp)
             .clip(RoundedCornerShape(8.dp))
             .noRippleClickable(onClick = onClick),
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .cardShadow(shape = RoundedCornerShape(8.dp))
-                .matchParentSize()
-                .hazeSource(hazeState)
-                .then(
-                    if (!thumbnailImage.isNullOrBlank()) Modifier
-                    else Modifier.background(color = NekiTheme.colorScheme.gray50),
-                ),
-            model = thumbnailImage,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-        )
+        if (photoCount == 0 || thumbnailImage == null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .hazeSource(hazeState)
+                    .background(NekiTheme.colorScheme.gray25),
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.TopCenter)
+                        .padding(top = 38.dp),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_empty_gallery_thumbnail),
+                    tint = NekiTheme.colorScheme.gray100,
+                    contentDescription = null,
+                )
+            }
+        } else {
+            AsyncImage(
+                modifier = Modifier
+                    .cardShadow(shape = RoundedCornerShape(8.dp))
+                    .background(color = Color.Black.copy(alpha = 0.04f))
+                    .matchParentSize()
+                    .hazeSource(hazeState),
+                model = thumbnailImage,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+        }
         AlbumFolder(
             modifier = Modifier.align(Alignment.BottomCenter),
             hazeState = hazeState,
@@ -284,10 +301,19 @@ private fun AlbumFolderLayout(
 @Composable
 private fun FavoriteAlbumItemPreview() {
     NekiTheme {
-        Box(modifier = Modifier.padding(8.dp)) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ArchiveAlbumItem(
+                isFavorite = true,
+                title = "즐겨찾기",
+                photoCount = 0,
+            )
             ArchiveAlbumItem(
                 isFavorite = true,
                 title = "네키 화이팅화이팅",
+                thumbnailImage = "https://example.com/photo.jpg",
                 photoCount = 10,
             )
         }
@@ -298,9 +324,17 @@ private fun FavoriteAlbumItemPreview() {
 @Composable
 private fun ArchiveAlbumItemPreview() {
     NekiTheme {
-        Box(modifier = Modifier.padding(8.dp)) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ArchiveAlbumItem(
+                title = "빈 앨범",
+                photoCount = 0,
+            )
             ArchiveAlbumItem(
                 title = "네키 화이팅화이팅",
+                thumbnailImage = "https://example.com/photo.jpg",
                 photoCount = 10,
             )
         }
