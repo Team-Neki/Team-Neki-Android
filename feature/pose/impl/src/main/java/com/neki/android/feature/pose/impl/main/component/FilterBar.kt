@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -86,6 +87,7 @@ private fun PeopleCountFilter(
             else NekiTheme.colorScheme.gray700,
         )
         Icon(
+            modifier = Modifier.size(20.dp),
             imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_down),
             contentDescription = null,
             tint = NekiTheme.colorScheme.gray400,
