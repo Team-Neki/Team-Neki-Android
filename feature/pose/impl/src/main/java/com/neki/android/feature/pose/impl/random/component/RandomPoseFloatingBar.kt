@@ -22,9 +22,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.designsystem.R
 
 @Composable
 internal fun RandomPoseFloatingBarContent(
@@ -82,10 +82,6 @@ private fun RandomPoseFloatingBar(
         modifier = modifier
             .fillMaxWidth()
             .clip(CircleShape)
-            .background(
-                color = NekiTheme.colorScheme.white.copy(alpha = 0.6f),
-                shape = CircleShape,
-            )
             .border(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
@@ -94,6 +90,10 @@ private fun RandomPoseFloatingBar(
                         NekiTheme.colorScheme.white.copy(alpha = 0f),
                     ),
                 ),
+                shape = CircleShape,
+            )
+            .background(
+                color = NekiTheme.colorScheme.white.copy(alpha = 0.3f),
                 shape = CircleShape,
             )
             .padding(8.dp),
