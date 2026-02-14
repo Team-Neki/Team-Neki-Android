@@ -9,7 +9,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -55,7 +54,7 @@ internal fun PhotoDetailActionBar(
                     ImageVector.vectorResource(R.drawable.icon_heart_stroked)
                 },
                 contentDescription = null,
-                tint = if(isFavorite) {
+                tint = if (isFavorite) {
                     NekiTheme.colorScheme.primary400
                 } else {
                     NekiTheme.colorScheme.gray700
