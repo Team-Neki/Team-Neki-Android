@@ -24,9 +24,9 @@ enum class ContentType(val label: String) {
 
     companion object {
         fun fromString(type: String) = when {
-            type.contains("jpg") -> JPEG
-            type.contains("jpeg") -> JPEG
-            type.contains("png") -> PNG
+            type.contains("jpg", ignoreCase = true) -> JPEG
+            type.contains("jpeg", ignoreCase = true) -> JPEG
+            type.contains("png", ignoreCase = true) -> PNG
             else -> JPEG
         }
     }
