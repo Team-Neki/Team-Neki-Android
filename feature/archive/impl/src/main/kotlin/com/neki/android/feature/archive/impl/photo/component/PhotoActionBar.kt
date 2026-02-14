@@ -44,7 +44,8 @@ internal fun PhotoActionBar(
                         ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_download),
                     contentDescription = null,
-                    tint = if (isEnabled) NekiTheme.colorScheme.gray600 else NekiTheme.colorScheme.gray200,
+                    tint = if (isEnabled) NekiTheme.colorScheme.gray700
+                    else NekiTheme.colorScheme.gray200,
                 )
             },
             endContent = {
@@ -57,7 +58,8 @@ internal fun PhotoActionBar(
                         ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
                     contentDescription = null,
-                    tint = if (isEnabled) NekiTheme.colorScheme.gray600 else NekiTheme.colorScheme.gray200,
+                    tint = if (isEnabled) NekiTheme.colorScheme.gray700
+                    else NekiTheme.colorScheme.gray200,
                 )
             },
         )
@@ -81,7 +83,7 @@ private fun PhotoActionBarDisabledPreview() {
     NekiTheme {
         PhotoActionBar(
             visible = true,
-            isEnabled = true,
+            isEnabled = false,
         )
     }
 }
