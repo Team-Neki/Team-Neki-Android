@@ -231,7 +231,6 @@ private fun ArchiveAlbumItem(
         } else {
             AsyncImage(
                 modifier = Modifier
-                    .cardShadow(shape = RoundedCornerShape(8.dp))
                     .background(color = Color.Black.copy(alpha = 0.04f))
                     .matchParentSize()
                     .hazeSource(hazeState),
