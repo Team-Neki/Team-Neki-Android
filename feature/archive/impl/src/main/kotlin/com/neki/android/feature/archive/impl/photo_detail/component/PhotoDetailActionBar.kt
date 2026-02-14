@@ -48,11 +48,10 @@ internal fun PhotoDetailActionBar(
                 modifier = Modifier
                     .size(28.dp)
                     .noRippleClickable { onClickFavorite() },
-                imageVector = if (isFavorite) {
-                    ImageVector.vectorResource(R.drawable.icon_heart_filled)
-                } else {
-                    ImageVector.vectorResource(R.drawable.icon_heart_stroked)
-                },
+                imageVector = ImageVector.vectorResource(
+                    if (isFavorite) R.drawable.icon_heart_filled
+                    else R.drawable.icon_heart_stroked,
+                ),
                 contentDescription = null,
                 tint = if (isFavorite) {
                     NekiTheme.colorScheme.primary400
