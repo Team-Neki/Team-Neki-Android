@@ -66,7 +66,7 @@ internal fun SelectablePhotoItem(
                     .align(Alignment.TopEnd)
                     .padding(top = 10.dp, end = 10.dp)
                     .size(20.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_heart),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_heart_filled),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.white,
             )

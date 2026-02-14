@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -35,9 +36,10 @@ internal fun RecommendationChip(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.icon_repeat_recommendation),
+            modifier = Modifier.size(20.dp),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_repeat),
             contentDescription = null,
-            tint = Color.Unspecified,
+            tint = NekiTheme.colorScheme.primary400,
         )
         Text(
             text = "랜덤 포즈 추천",

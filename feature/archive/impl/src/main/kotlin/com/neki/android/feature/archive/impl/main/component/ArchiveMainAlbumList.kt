@@ -250,7 +250,7 @@ private fun AlbumFolder(
                 ) {
                     Icon(
                         modifier = Modifier.size(12.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_heart),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_heart_filled),
                         contentDescription = null,
                         tint = NekiTheme.colorScheme.white,
                     )
