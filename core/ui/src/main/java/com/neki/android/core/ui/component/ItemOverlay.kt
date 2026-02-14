@@ -47,7 +47,7 @@ fun SelectedPhotoGridItemOverlay(
             .border(
                 width = 2.dp,
                 color = NekiTheme.colorScheme.primary400,
-                shape = RoundedCornerShape(8.dp),
+                shape = shape,
             )
             .background(
                 color = Color.Black.copy(alpha = 0.2f),
