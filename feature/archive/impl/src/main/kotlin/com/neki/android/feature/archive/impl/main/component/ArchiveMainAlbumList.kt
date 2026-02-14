@@ -215,14 +215,14 @@ private fun ArchiveAlbumItem(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .hazeSource(hazeState)
-                    .background(NekiTheme.colorScheme.gray25),
+                    .background(NekiTheme.colorScheme.gray25)
+                    .hazeSource(hazeState),
             ) {
                 Icon(
                     modifier = Modifier
+                        .padding(top = 38.dp)
                         .size(40.dp)
-                        .align(Alignment.TopCenter)
-                        .padding(top = 38.dp),
+                        .align(Alignment.TopCenter),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_empty_gallery_thumbnail),
                     tint = NekiTheme.colorScheme.gray100,
                     contentDescription = null,
@@ -341,7 +341,9 @@ private fun AlbumFolderLayout(
 @Composable
 private fun AddAlbumItemPreview() {
     NekiTheme {
-        AddAlbumItem()
+        Box(modifier = Modifier.padding(8.dp)) {
+            AddAlbumItem()
+        }
     }
 }
 
