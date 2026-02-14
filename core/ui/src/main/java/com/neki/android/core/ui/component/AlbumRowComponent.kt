@@ -146,10 +146,11 @@ private fun AlbumThumbnail(
     isEmpty: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    if (isEmpty) {
+    if (isEmpty || thumbnailUrl == null) {
         Box(
             modifier = Modifier
                 .size(72.dp)
+                .clip(RoundedCornerShape(8.dp))
                 .background(NekiTheme.colorScheme.gray50),
             contentAlignment = Alignment.Center,
         ) {
