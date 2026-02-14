@@ -28,8 +28,8 @@ internal fun RecommendationChip(
 ) {
     Row(
         modifier = modifier
-            .clip(CircleShape)
             .buttonShadow()
+            .clip(CircleShape)
             .clickableSingle(onClick = onClick)
             .background(shape = CircleShape, color = NekiTheme.colorScheme.gray800)
             .padding(horizontal = 16.dp, vertical = 8.dp),
