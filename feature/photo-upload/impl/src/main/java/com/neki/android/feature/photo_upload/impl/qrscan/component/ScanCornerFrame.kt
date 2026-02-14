@@ -17,9 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRAME_CORNER_LENGTH
-import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRAME_CORNER_RADIUS
-import com.neki.android.feature.photo_upload.impl.qrscan.const.QRLayoutConst.FRAME_STROKE_WIDTH
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst.FRAME_CORNER_LENGTH
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst.FRAME_CORNER_RADIUS
+import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst.FRAME_STROKE_WIDTH
 
 @Composable
 internal fun ScanCornerFrame(

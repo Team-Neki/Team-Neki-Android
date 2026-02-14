@@ -8,7 +8,7 @@ import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.domain.usecase.UploadProfileImageUseCase
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
+import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -55,9 +55,9 @@ internal class MyPageViewModel @Inject constructor(
             }
 
             MyPageIntent.ClickEditIcon -> postSideEffect(MyPageEffect.NavigateToEditProfile)
-            MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageChooseDialog = true) }
-            MyPageIntent.DismissImageChooseDialog -> reduce { copy(isShowImageChooseDialog = false) }
-            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageState = intent.image, isShowImageChooseDialog = false) }
+            MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageSelectDialog = true) }
+            MyPageIntent.DismissImageSelectDialog -> reduce { copy(isShowImageSelectDialog = false) }
+            is MyPageIntent.SelectProfileImage -> reduce { copy(profileImageState = intent.image, isShowImageSelectDialog = false) }
             is MyPageIntent.ClickEditComplete -> {
                 val isNicknameChanged = state.userInfo.nickname != intent.nickname
                 val isProfileImageChanged = state.profileImageState !is EditProfileImageType.OriginalImageUrl

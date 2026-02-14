@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
@@ -42,9 +43,11 @@ internal fun ProfileCard(
             modifier = Modifier
                 .size(78.dp)
                 .clip(CircleShape),
-            model = profileImageUrl.ifEmpty { R.drawable.image_empty_profile_image },
+            model = profileImageUrl.ifEmpty { R.drawable.image_profile_empty },
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.image_profile_empty),
+            error = painterResource(R.drawable.image_profile_empty),
         )
         HorizontalSpacer(16.dp)
         Column(

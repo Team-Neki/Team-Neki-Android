@@ -49,7 +49,7 @@ class ArchiveMainViewModel @Inject constructor(
             is ArchiveMainIntent.QRCodeScanned -> reduce {
                 copy(
                     scannedImageUrl = intent.imageUrl,
-                    isShowChooseWithAlbumDialog = true,
+                    isShowSelectWithAlbumDialog = true,
                 )
             }
 
@@ -74,16 +74,16 @@ class ArchiveMainViewModel @Inject constructor(
 
             is ArchiveMainIntent.SelectGalleryImage -> reduce {
                 copy(
-                    isShowChooseWithAlbumDialog = true,
+                    isShowSelectWithAlbumDialog = true,
                     selectedUris = intent.uris.toImmutableList(),
                 )
             }
 
-            ArchiveMainIntent.DismissChooseWithAlbumDialog -> reduce { copy(isShowChooseWithAlbumDialog = false) }
+            ArchiveMainIntent.DismissSelectWithAlbumDialog -> reduce { copy(isShowSelectWithAlbumDialog = false) }
             ArchiveMainIntent.ClickUploadWithAlbumRow -> {
                 reduce {
                     copy(
-                        isShowChooseWithAlbumDialog = false,
+                        isShowSelectWithAlbumDialog = false,
                         scannedImageUrl = null,
                         selectedUris = persistentListOf(),
                     )
@@ -171,7 +171,7 @@ class ArchiveMainViewModel @Inject constructor(
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
-        reduce { copy(isShowChooseWithAlbumDialog = false) }
+        reduce { copy(isShowSelectWithAlbumDialog = false) }
         val onSuccessSideEffect = {
             reduce { copy(isLoading = false) }
             postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))

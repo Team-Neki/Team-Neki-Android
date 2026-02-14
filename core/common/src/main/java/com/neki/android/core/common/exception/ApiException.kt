@@ -1,11 +1,13 @@
 package com.neki.android.core.common.exception
 
-class ServerApiException(
-    val code: Int,
-    message: String,
-) : Throwable(message)
+open class NekiApiException(
+    open val code: Int,
+    override val message: String,
+    override val cause: Throwable?,
+) : Exception(message, cause)
 
-class ClientApiException(
-    val code: Int,
-    message: String,
-) : Throwable(message)
+class NoMorePoseException(
+    override val code: Int,
+    override val message: String,
+    override val cause: Throwable?,
+) : NekiApiException(code, message, cause)

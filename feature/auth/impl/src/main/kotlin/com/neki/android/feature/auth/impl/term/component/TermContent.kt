@@ -16,32 +16,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.Term
 import com.neki.android.core.ui.compose.VerticalSpacer
-import com.neki.android.feature.auth.impl.term.model.TermAgreement
-import kotlinx.collections.immutable.ImmutableSet
-import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 internal fun TermContent(
     modifier: Modifier = Modifier,
-    agreedTerms: ImmutableSet<TermAgreement> = persistentSetOf(),
-    isAllRequiredAgreed: Boolean = false,
+    terms: ImmutableList<Term> = persistentListOf(),
+    isAllRequiredTermChecked: Boolean = false,
     onClickAgreeAll: () -> Unit = {},
-    onClickAgreeTerm: (TermAgreement) -> Unit = {},
-    onClickTermDetail: (TermAgreement) -> Unit = {},
+    onClickAgreeTerm: (Term) -> Unit = {},
+    onClickTermDetail: (Term) -> Unit = {},
 ) {
     Column(
         modifier = modifier,
     ) {
         Image(
             modifier = Modifier.padding(bottom = 12.dp),
-            imageVector = ImageVector.vectorResource(R.drawable.icon_agreement),
+            painter = painterResource(R.drawable.image_agreement),
             contentDescription = null,
         )
         Text(
@@ -56,7 +57,7 @@ internal fun TermContent(
                 .noRippleClickable(onClick = onClickAgreeAll)
                 .border(
                     width = 1.dp,
-                    color = if (isAllRequiredAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray100,
+                    color = if (isAllRequiredTermChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray100,
                     shape = RoundedCornerShape(12.dp),
                 )
                 .background(
@@ -71,7 +72,7 @@ internal fun TermContent(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (isAllRequiredAgreed) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
+                tint = if (isAllRequiredTermChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
             )
             Text(
                 text = "약관 전체 동의",
@@ -80,12 +81,11 @@ internal fun TermContent(
             )
         }
         VerticalSpacer(12.dp)
-        TermAgreement.entries.forEach { agreement ->
+        terms.forEach { term ->
             AgreementSection(
-                agreement = agreement,
-                isAgreed = agreement in agreedTerms,
-                onClickAgree = { onClickAgreeTerm(agreement) },
-                onClickNavigateUrl = { onClickTermDetail(agreement) },
+                term = term,
+                onClickAgree = { onClickAgreeTerm(term) },
+                onClickNavigateUrl = { onClickTermDetail(term) },
             )
         }
     }

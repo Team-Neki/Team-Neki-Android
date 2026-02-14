@@ -2,7 +2,7 @@ package com.neki.android.feature.mypage.impl.main
 
 import com.neki.android.core.model.UserInfo
 import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
-import com.neki.android.feature.mypage.impl.permission.const.NekiPermission
+import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 
 data class MyPageState(
@@ -12,7 +12,7 @@ data class MyPageState(
     val profileImageState: EditProfileImageType = EditProfileImageType.OriginalImageUrl(""),
     val isShowLogoutDialog: Boolean = false,
     val isShowWithdrawDialog: Boolean = false,
-    val isShowImageChooseDialog: Boolean = false,
+    val isShowImageSelectDialog: Boolean = false,
     // Permission
     val isGrantedCamera: Boolean = false,
     val isGrantedLocation: Boolean = false,
@@ -37,7 +37,7 @@ sealed interface MyPageIntent {
     data object ClickBackIcon : MyPageIntent
     data object ClickEditIcon : MyPageIntent
     data object ClickCameraIcon : MyPageIntent
-    data object DismissImageChooseDialog : MyPageIntent
+    data object DismissImageSelectDialog : MyPageIntent
     data class SelectProfileImage(val image: EditProfileImageType) : MyPageIntent
     data class ClickEditComplete(val nickname: String) : MyPageIntent
     data object ClickLogout : MyPageIntent

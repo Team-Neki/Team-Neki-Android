@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -21,16 +20,12 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import com.neki.android.feature.auth.impl.login.LoginIntent
-import com.neki.android.feature.auth.impl.login.LoginSideEffect
-import com.neki.android.feature.auth.impl.login.LoginState
-import com.neki.android.feature.auth.impl.login.LoginViewModel
 import com.neki.android.feature.auth.impl.term.component.TermContent
 import com.neki.android.feature.auth.impl.term.component.TermTopBar
 
 @Composable
 internal fun TermRoute(
-    viewModel: LoginViewModel = hiltViewModel(),
+    viewModel: TermViewModel = hiltViewModel(),
     navigateToMain: () -> Unit,
     navigateBack: () -> Unit,
 ) {
@@ -38,26 +33,18 @@ internal fun TermRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val nekiToast = remember { NekiToast(context) }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.store.onIntent(LoginIntent.ResetTermState)
-        }
-    }
-
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            LoginSideEffect.NavigateToMain -> navigateToMain()
-            LoginSideEffect.NavigateBack -> navigateBack()
-            is LoginSideEffect.NavigateUrl -> {
+            TermSideEffect.NavigateToMain -> navigateToMain()
+            TermSideEffect.NavigateBack -> navigateBack()
+            is TermSideEffect.NavigateUrl -> {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.url))
                 context.startActivity(intent)
             }
 
-            is LoginSideEffect.ShowToastMessage -> {
+            is TermSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(sideEffect.message)
             }
-
-            else -> {}
         }
     }
 
@@ -69,12 +56,12 @@ internal fun TermRoute(
 
 @Composable
 private fun TermScreen(
-    uiState: LoginState = LoginState(),
-    onIntent: (LoginIntent) -> Unit = {},
+    uiState: TermState = TermState(),
+    onIntent: (TermIntent) -> Unit = {},
 ) {
     Column {
         TermTopBar(
-            onClickBack = { onIntent(LoginIntent.ClickBack) },
+            onClickBack = { onIntent(TermIntent.ClickBack) },
         )
         Column(
             modifier = Modifier
@@ -83,17 +70,17 @@ private fun TermScreen(
         ) {
             TermContent(
                 modifier = Modifier.weight(1f),
-                agreedTerms = uiState.agreedTerms,
-                isAllRequiredAgreed = uiState.isAllRequiredAgreed,
-                onClickAgreeAll = { onIntent(LoginIntent.ClickAgreeAll) },
-                onClickAgreeTerm = { onIntent(LoginIntent.ClickAgreeTerm(it)) },
-                onClickTermDetail = { onIntent(LoginIntent.ClickTermNavigateUrl(it)) },
+                terms = uiState.terms,
+                isAllRequiredTermChecked = uiState.isAllRequiredTermChecked,
+                onClickAgreeAll = { onIntent(TermIntent.ClickAgreeAll) },
+                onClickAgreeTerm = { onIntent(TermIntent.ClickAgreeTerm(it)) },
+                onClickTermDetail = { onIntent(TermIntent.ClickTermNavigateUrl(it)) },
             )
             CTAButtonPrimary(
                 modifier = Modifier.fillMaxWidth(),
                 text = "다음으로",
-                onClick = { onIntent(LoginIntent.ClickNext) },
-                enabled = uiState.isAllRequiredAgreed,
+                onClick = { onIntent(TermIntent.ClickNext) },
+                enabled = uiState.isAllRequiredTermChecked,
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.neki.android.core.designsystem.dialog
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,8 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -62,12 +63,11 @@ fun WarningDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_dialog_alert),
-                    tint = Color.Unspecified,
+                Image(
+                    modifier = Modifier.size(64.dp),
+                    painter = painterResource(R.drawable.image_dialog_alert),
                     contentDescription = null,
                 )
-
                 Text(
                     text = content,
                     style = NekiTheme.typography.body14Regular,
