@@ -16,7 +16,7 @@ data class ArchiveMainState(
     val scannedImageUrl: String? = null,
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
     val isShowAddDialog: Boolean = false,
-    val isShowChooseWithAlbumDialog: Boolean = false,
+    val isShowSelectWithAlbumDialog: Boolean = false,
     val isShowAddAlbumBottomSheet: Boolean = false,
 ) {
     val uploadType: UploadType
@@ -38,7 +38,7 @@ sealed interface ArchiveMainIntent {
 
     data object ClickGalleryUploadRow : ArchiveMainIntent
     data class SelectGalleryImage(val uris: List<Uri>) : ArchiveMainIntent
-    data object DismissChooseWithAlbumDialog : ArchiveMainIntent
+    data object DismissSelectWithAlbumDialog : ArchiveMainIntent
     data object ClickUploadWithAlbumRow : ArchiveMainIntent
     data object ClickUploadWithoutAlbumRow : ArchiveMainIntent
 

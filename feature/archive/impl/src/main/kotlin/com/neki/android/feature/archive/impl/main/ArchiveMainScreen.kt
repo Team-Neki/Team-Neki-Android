@@ -46,7 +46,7 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
 import com.neki.android.feature.archive.impl.main.component.AlbumUploadOption
-import com.neki.android.feature.archive.impl.main.component.ChooseWithAlbumDialog
+import com.neki.android.feature.archive.impl.main.component.SelectWithAlbumDialog
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
 import com.neki.android.feature.archive.impl.main.component.NoPhotoContent
 import kotlinx.collections.immutable.persistentListOf
@@ -176,9 +176,9 @@ internal fun ArchiveMainScreen(
         )
     }
 
-    if (uiState.isShowChooseWithAlbumDialog) {
-        ChooseWithAlbumDialog(
-            onDismissRequest = { onIntent(ArchiveMainIntent.DismissChooseWithAlbumDialog) },
+    if (uiState.isShowSelectWithAlbumDialog) {
+        SelectWithAlbumDialog(
+            onDismissRequest = { onIntent(ArchiveMainIntent.DismissSelectWithAlbumDialog) },
             onSelect = { option ->
                 when (option) {
                     AlbumUploadOption.WITHOUT_ALBUM -> onIntent(ArchiveMainIntent.ClickUploadWithoutAlbumRow)

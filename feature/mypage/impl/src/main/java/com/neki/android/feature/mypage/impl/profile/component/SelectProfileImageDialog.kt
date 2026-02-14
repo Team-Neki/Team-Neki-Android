@@ -16,7 +16,7 @@ internal enum class ProfileImageOption(val label: String) {
 }
 
 @Composable
-internal fun ChooseProfileImageDialog(
+internal fun SelectProfileImageDialog(
     properties: DialogProperties = DialogProperties(usePlatformDefaultWidth = false),
     onDismissRequest: () -> Unit = {},
     onSelect: (ProfileImageOption) -> Unit = {},
@@ -31,8 +31,8 @@ internal fun ChooseProfileImageDialog(
 
 @ComponentPreview
 @Composable
-private fun ChooseProfileImageDialogPreview() {
+private fun SelectProfileImageDialogPreview() {
     NekiTheme {
-        ChooseProfileImageDialog()
+        SelectProfileImageDialog()
     }
 }

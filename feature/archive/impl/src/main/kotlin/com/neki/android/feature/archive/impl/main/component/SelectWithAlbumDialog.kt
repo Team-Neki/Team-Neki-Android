@@ -15,7 +15,7 @@ internal enum class AlbumUploadOption(val label: String) {
 }
 
 @Composable
-internal fun ChooseWithAlbumDialog(
+internal fun SelectWithAlbumDialog(
     onDismissRequest: () -> Unit = {},
     onSelect: (AlbumUploadOption) -> Unit = {},
 ) {
@@ -28,8 +28,8 @@ internal fun ChooseWithAlbumDialog(
 
 @ComponentPreview
 @Composable
-private fun ChooseWithAlbumDialogPreview() {
+private fun SelectWithAlbumDialogPreview() {
     NekiTheme {
-        ChooseWithAlbumDialog()
+        SelectWithAlbumDialog()
     }
 }
