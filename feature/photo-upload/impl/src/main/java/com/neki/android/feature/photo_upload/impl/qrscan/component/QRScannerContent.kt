@@ -122,7 +122,7 @@ internal fun QRScannerContent(
                             modifier = Modifier.size(24.dp),
                             imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = NekiTheme.colorScheme.white,
                         )
                     }
                 }
