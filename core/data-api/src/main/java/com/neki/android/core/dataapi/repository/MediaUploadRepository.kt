@@ -3,7 +3,6 @@ package com.neki.android.core.dataapi.repository
 import android.net.Uri
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.MediaType
-import com.neki.android.core.model.MediaUploadTicket
 
 interface MediaUploadRepository {
     suspend fun uploadImageFromUri(
@@ -18,5 +17,5 @@ interface MediaUploadRepository {
         fileName: String,
         contentType: ContentType,
         mediaType: MediaType,
-    ) : Result<Long>
+    ): Result<Long>
 }
