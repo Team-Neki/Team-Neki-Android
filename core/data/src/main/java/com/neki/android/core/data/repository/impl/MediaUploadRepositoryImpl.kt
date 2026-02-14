@@ -33,9 +33,10 @@ class MediaUploadRepositoryImpl @Inject constructor(
         val (mediaId, presignedUrl) = getSingleUploadTicket(
             fileName = fileName,
             contentType = contentType.label,
-            mediaType = MediaType.USER_PROFILE.name,
+            mediaType = mediaType,
             width = metadata.width,
             height = metadata.height,
+            fileSize = metadata.imageBytes.size.toLong(),
         ).getOrThrow()
 
         uploadService.uploadImage(
@@ -57,9 +58,10 @@ class MediaUploadRepositoryImpl @Inject constructor(
         val (mediaId, presignedUrl) = getSingleUploadTicket(
             fileName = fileName,
             contentType = contentType.label,
-            mediaType = MediaType.PHOTO_BOOTH.name,
+            mediaType = mediaType.name,
             width = metaData.width,
             height = metaData.height,
+            fileSize = metaData.imageBytes.size.toLong(),
         ).getOrThrow()
 
         uploadService.uploadImage(
@@ -77,6 +79,7 @@ class MediaUploadRepositoryImpl @Inject constructor(
         mediaType: String,
         width: Int?,
         height: Int?,
+        fileSize: Long?,
     ) = runSuspendCatching {
         uploadService.getUploadTicket(
             requestBody = MediaUploadTicketRequest(
@@ -87,7 +90,7 @@ class MediaUploadRepositoryImpl @Inject constructor(
                         mediaType = mediaType,
                         width = width,
                         height = height,
-                        size = if (width != null && height != null) (width + height).toLong() else null,
+                        size = fileSize,
                     ),
                 ),
             ),
