@@ -25,10 +25,10 @@ class UploadMultiplePhotoUseCase @Inject constructor(
     ): Result<Unit> = runSuspendCatching {
         require(imageUris.isNotEmpty()) { "imageUris must not be empty" }
 
-        val fileName = generateFileName(contentType)
         val mediaIds = coroutineScope {
             imageUris.map { uri ->
                 async {
+                    val fileName = generateFileName(contentType)
                     mediaUploadRepository.uploadImageFromUri(
                         uri = uri,
                         contentType = contentType,
