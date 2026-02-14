@@ -26,7 +26,7 @@ internal fun EmptyAlbumContent(
 
         EmptyContent(
             modifier = Modifier.align(Alignment.Center),
-            emptyText = "아직 등록된 사진이 없어요\n새로운 사진을 등록하고 앨범에 추가해보세요!",
+            emptyText = "아직 등록된 사진이 없어요\n찍은 네컷을 저장해보세요!",
         )
     }
 }
