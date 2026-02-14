@@ -10,6 +10,7 @@ import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.MediaType
+import com.neki.android.core.model.MediaUploadTicket
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,7 +26,7 @@ class MediaUploadRepositoryImpl @Inject constructor(
         uri: Uri,
         contentType: ContentType,
         mediaType: MediaType,
-    ) = runSuspendCatching {
+    ): Result<Long> = runSuspendCatching {
         val metadata = withContext(Dispatchers.Default) {
             uri.toByteArrayWithSize(context = context, contentType = contentType)
         } ?: error("Failed to convert uri to byte array")
@@ -80,7 +81,7 @@ class MediaUploadRepositoryImpl @Inject constructor(
         width: Int?,
         height: Int?,
         fileSize: Long?,
-    ) = runSuspendCatching {
+    ): Result<MediaUploadTicket> = runSuspendCatching {
         uploadService.getUploadTicket(
             requestBody = MediaUploadTicketRequest(
                 items = listOf(
