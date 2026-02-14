@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -26,11 +25,11 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
-import com.neki.android.core.designsystem.modifier.poseBackground
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
-import com.neki.android.core.designsystem.R
+import com.neki.android.core.ui.component.GridItemOverlay
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_VERTICAL_SPACING
 
@@ -83,10 +82,9 @@ private fun PoseItem(
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
         )
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .poseBackground(shape = RectangleShape),
+        GridItemOverlay(
+            modifier = Modifier.matchParentSize(),
+            shape = RoundedCornerShape(12.dp),
         )
         if (pose.isScrapped) {
             Icon(
