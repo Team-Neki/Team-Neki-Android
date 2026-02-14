@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -230,7 +229,7 @@ internal fun AnchoredPanelContent(
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.icon_pin),
                     contentDescription = null,
-                    tint = Color.Unspecified
+                    tint = Color.Unspecified,
                 )
             }
             Icon(
@@ -239,7 +238,7 @@ internal fun AnchoredPanelContent(
                     .padding(2.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_info_storke),
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.gray300
+                tint = NekiTheme.colorScheme.gray300,
             )
         }
         VerticalSpacer(8.dp)
@@ -250,7 +249,7 @@ internal fun AnchoredPanelContent(
                     .fillMaxWidth()
                     .padding(top = 123.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Image(
                     painter = painterResource(R.drawable.image_near_photo_booth_empty),
