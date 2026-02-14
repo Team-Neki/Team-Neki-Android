@@ -51,8 +51,8 @@ internal fun VerticalBrandItem(
                     .fillMaxSize()
                     .clip(CircleShape),
                 model = brand.imageUrl,
-                placeholder = painterResource(R.drawable.icon_life_four_cut),
-                error = painterResource(R.drawable.icon_life_four_cut),
+                placeholder = painterResource(R.drawable.icon_photo_booth_empty),
+                error = painterResource(R.drawable.icon_photo_booth_empty),
                 contentDescription = null,
             )
 
@@ -79,7 +79,7 @@ internal fun VerticalBrandItem(
         Text(
             text = brand.name,
             color = if (brand.isChecked) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray900,
-            style = NekiTheme.typography.body14Medium,
+            style = NekiTheme.typography.body14SemiBold,
             textAlign = TextAlign.Center,
         )
     }

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -28,7 +29,7 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 @Composable
 internal fun SettingProfileImage(
     nickname: String,
-    profileImage: Any? = null,
+    profileImage: String = "",
     imageSize: Dp = 142.dp,
     onClickEdit: () -> Unit,
 ) {
@@ -40,9 +41,11 @@ internal fun SettingProfileImage(
             modifier = Modifier
                 .size(imageSize)
                 .clip(CircleShape),
-            model = profileImage ?: R.drawable.image_empty_profile_image,
+            model = profileImage.ifEmpty { R.drawable.image_profile_empty },
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.image_profile_empty),
+            error = painterResource(R.drawable.image_profile_empty),
         )
         VerticalSpacer(16.dp)
         Row(

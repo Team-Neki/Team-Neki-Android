@@ -46,6 +46,7 @@ internal fun PhotoBoothDetailContent(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -58,7 +59,6 @@ internal fun PhotoBoothDetailContent(
             )
             CloseButton(onClick = onClickCloseCard)
         }
-        VerticalSpacer(12.dp)
         PhotoBoothDetailCard(
             photoBooth = photoBooth,
             onClick = onClickCard,
@@ -91,35 +91,36 @@ private fun PhotoBoothDetailCard(
                 .clip(RoundedCornerShape(8.dp))
                 .size(64.dp),
             model = photoBooth.imageUrl,
-            placeholder = painterResource(R.drawable.icon_life_four_cut),
-            error = painterResource(R.drawable.icon_life_four_cut),
+            placeholder = painterResource(R.drawable.icon_photo_booth_empty),
+            error = painterResource(R.drawable.icon_photo_booth_empty),
             contentDescription = null,
         )
         HorizontalSpacer(16.dp)
-        Column {
+        Column(
+            modifier = Modifier.weight(1f),
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = photoBooth.brandName,
                     color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold,
+                    style = NekiTheme.typography.title20SemiBold,
                 )
-                HorizontalSpacer(4.dp)
+                HorizontalSpacer(6.dp)
                 Text(
                     text = photoBooth.branchName,
                     color = NekiTheme.colorScheme.gray600,
-                    style = NekiTheme.typography.caption12Medium,
+                    style = NekiTheme.typography.body14Medium,
                 )
             }
             VerticalSpacer(4.dp)
             Text(
                 text = photoBooth.distance.formatDistance(),
                 color = NekiTheme.colorScheme.gray400,
-                style = NekiTheme.typography.caption12Medium,
+                style = NekiTheme.typography.body14Medium,
             )
         }
-        HorizontalSpacer(1f)
         Box(
             modifier = Modifier
                 .background(
@@ -131,8 +132,7 @@ private fun PhotoBoothDetailCard(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_find_direction),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_road),
                 contentDescription = null,
                 tint = Color.Unspecified,
             )
