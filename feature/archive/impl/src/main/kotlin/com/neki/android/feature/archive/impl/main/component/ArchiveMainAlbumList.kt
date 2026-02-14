@@ -40,9 +40,12 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.backgroundHazeBlur
 import com.neki.android.core.designsystem.modifier.cardShadow
+import com.neki.android.core.designsystem.modifier.dashStroke
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ALBUM_ITEM_HEIGHT
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ALBUM_ITEM_WIDTH
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -154,6 +157,43 @@ internal fun ArchiveMainAlbumList(
 }
 
 @Composable
+private fun AddAlbumItem(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) {
+    Box(
+        modifier = modifier
+            .height(ARCHIVE_ALBUM_ITEM_HEIGHT.dp)
+            .width(ARCHIVE_ALBUM_ITEM_WIDTH.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .dashStroke(
+                color = NekiTheme.colorScheme.primary400,
+                strokeWidth = 2.dp,
+                cornerRadius = 8.dp,
+            )
+            .noRippleClickable(onClick = onClick),
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                modifier = Modifier.size(28.dp),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_plus),
+                tint = NekiTheme.colorScheme.primary400,
+                contentDescription = null,
+            )
+            Text(
+                text = "새 앨범 추가",
+                style = NekiTheme.typography.body14Medium,
+                color = NekiTheme.colorScheme.primary400,
+            )
+        }
+    }
+}
+
+@Composable
 private fun ArchiveAlbumItem(
     title: String,
     photoCount: Int,
@@ -167,7 +207,7 @@ private fun ArchiveAlbumItem(
     Box(
         modifier = modifier
             .cardShadow()
-            .height(166.dp)
+            .height(ARCHIVE_ALBUM_ITEM_HEIGHT.dp)
             .clip(RoundedCornerShape(8.dp))
             .noRippleClickable(onClick = onClick),
     ) {
@@ -219,7 +259,7 @@ private fun AlbumFolder(
     isFavorite: Boolean = false,
 ) {
     AlbumFolderLayout(
-        modifier = modifier.width(124.dp),
+        modifier = modifier.width(ARCHIVE_ALBUM_ITEM_WIDTH.dp),
         hazeState = hazeState,
         color = if (isFavorite) NekiTheme.colorScheme.favoriteAlbumCover
         else NekiTheme.colorScheme.defaultAlbumCover,
@@ -295,6 +335,14 @@ private fun AlbumFolderLayout(
             ),
         content = content,
     )
+}
+
+@ComponentPreview
+@Composable
+private fun AddAlbumItemPreview() {
+    NekiTheme {
+        AddAlbumItem()
+    }
 }
 
 @ComponentPreview
