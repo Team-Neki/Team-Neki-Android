@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 private const val DEFAULT_ARROW_POSITION = 16
@@ -51,6 +52,7 @@ fun ToolTipPopup(
     toolTipColor: ToolTipColor = ToolTipColor.Gray800,
     hasCloseButton: Boolean = false,
     onDismissRequest: () -> Unit = {},
+    onClickCloseButton: () -> Unit = {},
 ) {
     Popup(
         alignment = alignment,
@@ -64,6 +66,7 @@ fun ToolTipPopup(
             arrowPosition = arrowPosition,
             arrowAlignment = arrowAlignment,
             hasCloseButton = hasCloseButton,
+            onClickCloseButton = onClickCloseButton,
         )
     }
 }
@@ -110,6 +113,7 @@ private fun ToolTipContent(
     toolTipColor: ToolTipColor = ToolTipColor.Gray800,
     arrowPosition: Dp = DEFAULT_ARROW_POSITION.dp,
     hasCloseButton: Boolean = false,
+    onClickCloseButton: () -> Unit = {},
 ) {
     val backgroundColor = when (toolTipColor) {
         ToolTipColor.Gray800 -> NekiTheme.colorScheme.gray800
@@ -149,7 +153,9 @@ private fun ToolTipContent(
             )
             if (hasCloseButton) {
                 Icon(
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier
+                        .size(16.dp)
+                        .noRippleClickableSingle(onClick = onClickCloseButton),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                     tint = iconTint,
                     contentDescription = null,
