@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -227,6 +228,7 @@ internal fun AnchoredPanelContent(
                     style = NekiTheme.typography.title18Bold,
                 )
                 Icon(
+                    modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_pin),
                     contentDescription = null,
                     tint = Color.Unspecified,
