@@ -6,4 +6,6 @@ import com.neki.android.core.navigation.Navigator
 
 typealias EntryProviderInstaller = EntryProviderScope<NavKey>.() -> Unit
 
-interface MainNavigator : Navigator
+interface MainNavigator : Navigator {
+    val state: MainNavigationState
+}

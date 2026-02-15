@@ -13,15 +13,16 @@ import androidx.navigation3.runtime.entryProvider
 import com.neki.android.core.dataapi.auth.AuthEvent
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.navigation.auth.AuthNavigator
+import com.neki.android.core.navigation.auth.toEntries
 import com.neki.android.core.navigation.main.EntryProviderInstaller
-import com.neki.android.core.navigation.main.MainNavigatorImpl
+import com.neki.android.core.navigation.main.MainNavigator
+import com.neki.android.core.navigation.main.toEntries
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEventBus
 import com.neki.android.core.navigation.root.RootNavKey
 import com.neki.android.core.navigation.root.RootNavigationState
-import com.neki.android.core.navigation.main.toEntries
-import com.neki.android.core.navigation.auth.AuthNavigatorImpl
-import com.neki.android.core.navigation.auth.toEntries
+import com.neki.android.core.navigation.root.RootNavigator
 import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.auth.impl.navigation.authEntryProvider
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,10 +36,13 @@ class MainActivity : ComponentActivity() {
     lateinit var rootNavigationState: RootNavigationState
 
     @Inject
-    lateinit var authNavigator: AuthNavigatorImpl
+    lateinit var rootNavigator: RootNavigator
 
     @Inject
-    lateinit var mainNavigator: MainNavigatorImpl
+    lateinit var authNavigator: AuthNavigator
+
+    @Inject
+    lateinit var mainNavigator: MainNavigator
 
     @Inject
     lateinit var entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller>
@@ -62,7 +66,7 @@ class MainActivity : ComponentActivity() {
                                 AuthScreen(
                                     entries = authNavigator.state.toEntries(
                                         entryProvider = entryProvider {
-                                            authEntryProvider(authNavigator).invoke(this)
+                                            authEntryProvider(rootNavigator, authNavigator).invoke(this)
                                         },
                                     ),
                                     onBack = { authNavigator.goBack() },
@@ -71,17 +75,17 @@ class MainActivity : ComponentActivity() {
 
                             RootNavKey.Main -> {
                                 MainScreen(
-                                    currentKey = mainNavigator.mainState.currentKey,
-                                    currentTopLevelKey = mainNavigator.mainState.currentTopLevelKey,
-                                    topLevelKeys = mainNavigator.mainState.topLevelKeys,
-                                    entries = mainNavigator.mainState.toEntries(
+                                    currentKey = mainNavigator.state.currentKey,
+                                    currentTopLevelKey = mainNavigator.state.currentTopLevelKey,
+                                    topLevelKeys = mainNavigator.state.topLevelKeys,
+                                    entries = mainNavigator.state.toEntries(
                                         entryProvider = entryProvider {
                                             entryProviderScopes.forEach { builder -> this.builder() }
                                         },
                                     ),
                                     onTabSelected = { mainNavigator.navigate(it) },
                                     onBack = { mainNavigator.goBack() },
-                                    navigateToLogin = { mainNavigator.navigateRoot(RootNavKey.Auth(AuthNavKey.Login)) },
+                                    navigateToLogin = { rootNavigator.navigateToAuth(AuthNavKey.Login) },
                                 )
                             }
                         }
@@ -103,7 +107,7 @@ class MainActivity : ComponentActivity() {
                             Toast.LENGTH_SHORT,
                         ).show()
 
-                        mainNavigator.navigateRoot(RootNavKey.Auth(AuthNavKey.Login))
+                        rootNavigator.navigateToAuth(AuthNavKey.Login)
                     }
                 }
             }

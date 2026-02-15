@@ -2,10 +2,10 @@ package com.neki.android.feature.mypage.impl.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.neki.android.core.navigation.main.EntryProviderInstaller
 import com.neki.android.core.navigation.HiltSharedViewModelStoreNavEntryDecorator
+import com.neki.android.core.navigation.main.EntryProviderInstaller
 import com.neki.android.core.navigation.main.MainNavigator
-import com.neki.android.core.navigation.root.RootNavKey
+import com.neki.android.core.navigation.root.RootNavigator
 import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.mypage.api.MyPageNavKey
 import com.neki.android.feature.mypage.api.navigateToEditProfile
@@ -27,18 +27,24 @@ object MyPageEntryProviderModule {
 
     @IntoSet
     @Provides
-    fun provideMyPageEntryBuilder(navigator: MainNavigator): EntryProviderInstaller = {
-        myPageEntry(navigator)
+    fun provideMyPageEntryBuilder(
+        rootNavigator: RootNavigator,
+        mainNavigator: MainNavigator,
+    ): EntryProviderInstaller = {
+        myPageEntry(rootNavigator, mainNavigator)
     }
 }
 
-private fun EntryProviderScope<NavKey>.myPageEntry(navigator: MainNavigator) {
+private fun EntryProviderScope<NavKey>.myPageEntry(
+    rootNavigator: RootNavigator,
+    mainNavigator: MainNavigator,
+) {
     entry<MyPageNavKey.MyPage>(
         clazzContentKey = { key -> key.toString() },
     ) {
         MyPageRoute(
-            navigateToPermission = navigator::navigateToPermission,
-            navigateToProfile = navigator::navigateToProfile,
+            navigateToPermission = mainNavigator::navigateToPermission,
+            navigateToProfile = mainNavigator::navigateToProfile,
         )
     }
 
@@ -48,7 +54,7 @@ private fun EntryProviderScope<NavKey>.myPageEntry(navigator: MainNavigator) {
         ),
     ) {
         PermissionRoute(
-            navigateBack = navigator::goBack,
+            navigateBack = mainNavigator::goBack,
         )
     }
 
@@ -58,9 +64,9 @@ private fun EntryProviderScope<NavKey>.myPageEntry(navigator: MainNavigator) {
         ),
     ) {
         ProfileSettingRoute(
-            navigateBack = navigator::goBack,
-            navigateToEditProfile = navigator::navigateToEditProfile,
-            navigateToLogin = { navigator.navigateRoot(RootNavKey.Auth(AuthNavKey.Login)) },
+            navigateBack = mainNavigator::goBack,
+            navigateToEditProfile = mainNavigator::navigateToEditProfile,
+            navigateToLogin = { rootNavigator.navigateToAuth(AuthNavKey.Login) },
         )
     }
 
@@ -70,7 +76,7 @@ private fun EntryProviderScope<NavKey>.myPageEntry(navigator: MainNavigator) {
         ),
     ) {
         EditProfileRoute(
-            navigateBack = navigator::goBack,
+            navigateBack = mainNavigator::goBack,
         )
     }
 }
