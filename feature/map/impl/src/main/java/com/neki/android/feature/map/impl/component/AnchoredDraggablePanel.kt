@@ -53,7 +53,6 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.modifier.dropdownShadow
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
@@ -70,9 +69,11 @@ internal fun AnchoredDraggablePanel(
     nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
     isCurrentLocation: Boolean = false,
+    isShowInfoTooltip: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
+    onDismissInfoTooltip: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickNearPhotoBooth: (PhotoBooth) -> Unit = {},
 ) {
@@ -157,7 +158,9 @@ internal fun AnchoredDraggablePanel(
             AnchoredPanelContent(
                 brands = brands,
                 nearbyPhotoBooths = nearbyPhotoBooths,
+                isShowInfoTooltip = isShowInfoTooltip,
                 onClickInfoIcon = onClickInfoIcon,
+                onDismissInfoTooltip = onDismissInfoTooltip,
                 onClickBrand = onClickBrand,
                 onClickPhotoBooth = onClickNearPhotoBooth,
             )
@@ -169,7 +172,9 @@ internal fun AnchoredDraggablePanel(
 internal fun AnchoredPanelContent(
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
+    isShowInfoTooltip: Boolean = false,
     onClickInfoIcon: () -> Unit = {},
+    onDismissInfoTooltip: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickPhotoBooth: (PhotoBooth) -> Unit = {},
 ) {
@@ -234,14 +239,10 @@ internal fun AnchoredPanelContent(
                     tint = Color.Unspecified,
                 )
             }
-            Icon(
-                modifier = Modifier
-                    .noRippleClickableSingle(onClick = onClickInfoIcon)
-                    .padding(start = 2.dp, top = 2.dp, bottom = 2.dp)
-                    .size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_info_stroked),
-                contentDescription = null,
-                tint = NekiTheme.colorScheme.gray300,
+            InfoToolTip(
+                isShowTooltip = isShowInfoTooltip,
+                onClickInfoIcon = onClickInfoIcon,
+                onDismissTooltip = onDismissInfoTooltip,
             )
         }
         VerticalSpacer(8.dp)

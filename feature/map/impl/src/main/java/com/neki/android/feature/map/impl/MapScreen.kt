@@ -243,8 +243,10 @@ fun MapScreen(
             dragLevel = uiState.dragLevel,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
-            onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
+            isShowInfoTooltip = uiState.isShowInfoTooltip,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
+            onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
+            onDismissInfoTooltip = { onIntent(MapIntent.ClickCloseInfoIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
@@ -294,13 +296,6 @@ fun MapScreen(
                 )
             }
         }
-    }
-
-    if (uiState.isShowInfoDialog) {
-        WarningDialog(
-            content = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
-            onDismissRequest = { onIntent(MapIntent.ClickCloseInfoIcon) },
-        )
     }
 
     if (uiState.isShowDirectionBottomSheet) {
