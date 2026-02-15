@@ -12,5 +12,8 @@ data class MediaUploadTicketRequest(
         @SerialName("contentType") val contentType: String,
         @SerialName("filename") val filename: String = "",
         @SerialName("mediaType") val mediaType: String,
+        @SerialName("width") val width: Int? = null,
+        @SerialName("height") val height: Int? = null,
+        @SerialName("size") val size: Long? = null,
     )
 }

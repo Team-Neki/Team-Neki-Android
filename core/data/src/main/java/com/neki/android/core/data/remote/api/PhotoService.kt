@@ -5,7 +5,6 @@ import com.neki.android.core.data.remote.model.request.RegisterPhotoRequest
 import com.neki.android.core.data.remote.model.request.UpdateFavoriteRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
-import com.neki.android.core.data.remote.model.response.FavoritePhotoResponse
 import com.neki.android.core.data.remote.model.response.FavoriteSummaryResponse
 import com.neki.android.core.data.remote.model.response.PhotoResponse
 import com.neki.android.core.data.remote.model.response.RegisterPhotoResponse
@@ -59,7 +58,7 @@ class PhotoService @Inject constructor(
         page: Int = 0,
         size: Int = 20,
         sortOrder: String,
-    ): BasicResponse<FavoritePhotoResponse> {
+    ): BasicResponse<PhotoResponse> {
         return client.get("/api/photos/favorite") {
             parameter("page", page)
             parameter("size", size)

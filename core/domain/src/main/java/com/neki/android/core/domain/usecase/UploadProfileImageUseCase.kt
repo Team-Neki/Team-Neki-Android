@@ -20,26 +20,18 @@ class UploadProfileImageUseCase @Inject constructor(
         contentType: ContentType = ContentType.JPEG,
     ): Result<Unit> = runSuspendCatching {
         if (uri == null) {
-            // null 이면 1, 2 과정 없이 바로 기본 프로필 이미지로 변경 요청
+            // null 이면 바로 기본 프로필 이미지로 변경 요청
             userRepository.updateProfileImage(null).getOrThrow()
         } else {
             val fileName = ContentTypeUtil.generateFileName(contentType)
 
-            // 1. 업로드 티켓 발급 (mediaId, presignedUrl)
-            val (mediaId, presignedUrl) = mediaUploadRepository.getSingleUploadTicket(
+            val mediaId = mediaUploadRepository.uploadImageFromUri(
                 fileName = fileName,
-                contentType = contentType.label,
-                mediaType = MediaType.USER_PROFILE.name,
-            ).getOrThrow()
-
-            // 2. Presigned URL로 이미지 업로드
-            mediaUploadRepository.uploadImageFromUri(
-                uploadUrl = presignedUrl,
                 uri = uri,
                 contentType = contentType,
+                mediaType = MediaType.USER_PROFILE,
             ).getOrThrow()
 
-            // 3. 프로필 이미지 갱신
             userRepository.updateProfileImage(mediaId).getOrThrow()
         }
     }

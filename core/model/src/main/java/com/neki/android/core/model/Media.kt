@@ -1,16 +1,14 @@
 package com.neki.android.core.model
 
-data class Media(
-    val mediaId: Long = 0L,
-    val folderId: Long? = null,
-    val fileName: String = "",
-    val contentType: ContentType = ContentType.JPEG,
-    val mediaType: MediaType = MediaType.PHOTO_BOOTH,
-)
-
 data class MediaUploadTicket(
     val mediaId: Long,
     val uploadUrl: String,
+)
+
+class MediaMetaData(
+    val width: Int,
+    val height: Int,
+    val imageBytes: ByteArray,
 )
 
 enum class MediaType(val label: String) {
@@ -22,4 +20,14 @@ enum class MediaType(val label: String) {
 enum class ContentType(val label: String) {
     JPEG("image/jpeg"),
     PNG("image/png"),
+    ;
+
+    companion object {
+        fun fromString(type: String) = when {
+            type.contains("jpg", ignoreCase = true) -> JPEG
+            type.contains("jpeg", ignoreCase = true) -> JPEG
+            type.contains("png", ignoreCase = true) -> PNG
+            else -> JPEG
+        }
+    }
 }

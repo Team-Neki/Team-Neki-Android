@@ -1,6 +1,5 @@
 package com.neki.android.feature.auth.impl.term.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,15 +26,16 @@ internal fun AgreementSection(
     onClickNavigateUrl: () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(
             modifier = Modifier
                 .weight(1f)
                 .noRippleClickable(onClick = onClickAgree)
-                .padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -44,7 +44,8 @@ internal fun AgreementSection(
                     .size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (term.isChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
+                tint = if (term.isChecked) NekiTheme.colorScheme.primary500
+                else NekiTheme.colorScheme.gray200,
             )
             Text(
                 modifier = Modifier.padding(end = 2.dp),
@@ -60,8 +61,9 @@ internal fun AgreementSection(
         }
         Icon(
             modifier = Modifier
-                .size(24.dp)
-                .noRippleClickableSingle(onClick = onClickNavigateUrl),
+                .noRippleClickableSingle(onClick = onClickNavigateUrl)
+                .padding(vertical = 10.dp)
+                .size(24.dp),
             imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
             contentDescription = null,
             tint = NekiTheme.colorScheme.gray300,

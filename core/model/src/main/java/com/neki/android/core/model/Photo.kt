@@ -10,4 +10,7 @@ data class Photo(
     val imageUrl: String = "",
     val isFavorite: Boolean = false,
     val date: String = "",
+    val width: Int? = null,
+    val height: Int? = null,
+    val contentType: ContentType = ContentType.JPEG,
 )

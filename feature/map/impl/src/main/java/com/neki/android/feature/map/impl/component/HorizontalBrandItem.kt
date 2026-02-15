@@ -39,8 +39,8 @@ internal fun HorizontalBrandItem(
                 .clip(RoundedCornerShape(8.dp))
                 .size(64.dp),
             model = photoBooth.imageUrl,
-            placeholder = painterResource(R.drawable.icon_life_four_cut),
-            error = painterResource(R.drawable.icon_life_four_cut),
+            placeholder = painterResource(R.drawable.icon_photo_booth_empty),
+            error = painterResource(R.drawable.icon_photo_booth_empty),
             contentDescription = null,
         )
         HorizontalSpacer(16.dp)
@@ -51,7 +51,7 @@ internal fun HorizontalBrandItem(
                 Text(
                     text = photoBooth.brandName,
                     color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title18Bold,
+                    style = NekiTheme.typography.title18SemiBold,
                 )
                 HorizontalSpacer(4.dp)
                 Text(

@@ -40,7 +40,7 @@ internal fun ToMapChip(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.icon_map_pin),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_map_filled),
             contentDescription = null,
             tint = Color.Unspecified,
         )
