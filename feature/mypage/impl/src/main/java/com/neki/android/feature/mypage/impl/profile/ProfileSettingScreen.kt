@@ -38,7 +38,6 @@ internal fun ProfileSettingRoute(
         when (sideEffect) {
             MyPageEffect.NavigateBack -> navigateBack()
             MyPageEffect.NavigateToEditProfile -> navigateToEditProfile()
-            MyPageEffect.NavigateToLogin -> navigateToLogin()
             MyPageEffect.LogoutWithKakao -> {
                 KakaoAuthHelper.logout(
                     onSuccess = { navigateToLogin() },
