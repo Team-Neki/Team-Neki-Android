@@ -22,9 +22,8 @@ class AuthNavigatorImpl @Inject constructor(
         state.stack.add(key)
     }
 
-    override fun navigateAndClear(key: NavKey) {
-        state.stack.clear()
-        state.stack.add(key)
+    override fun remove(key: NavKey) {
+        state.stack.remove(key)
     }
 
     override fun goBack() {
