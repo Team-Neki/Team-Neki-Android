@@ -5,8 +5,8 @@ import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.auth.AuthNavigator
 import com.neki.android.core.navigation.root.RootNavKey
 import com.neki.android.feature.auth.api.AuthNavKey
-import com.neki.android.feature.auth.api.navigateToLoginAndClear
-import com.neki.android.feature.auth.api.navigateToOnboardingAndClear
+import com.neki.android.feature.auth.api.navigateToLogin
+import com.neki.android.feature.auth.api.navigateToOnboarding
 import com.neki.android.feature.auth.api.navigateToTerm
 import com.neki.android.feature.auth.impl.login.LoginRoute
 import com.neki.android.feature.auth.impl.onboarding.OnboardingRoute
@@ -20,17 +20,26 @@ fun authEntryProvider(authNavigator: AuthNavigator): AuthEntryProviderInstaller 
 }
 
 private fun EntryProviderScope<NavKey>.authEntry(navigator: AuthNavigator) {
-    entry<AuthNavKey.Splash> {
+    entry<AuthNavKey.Splash> { key ->
         SplashRoute(
-            navigateToOnboarding = navigator::navigateToOnboardingAndClear,
-            navigateToLogin = navigator::navigateToLoginAndClear,
+            navigateToOnboarding = {
+                navigator.remove(key)
+                navigator.navigateToOnboarding()
+            },
+            navigateToLogin = {
+                navigator.remove(key)
+                navigator.navigateToLogin()
+            },
             navigateToMain = { navigator.navigateRoot(RootNavKey.Main) },
         )
     }
 
-    entry<AuthNavKey.Onboarding> {
+    entry<AuthNavKey.Onboarding> { key ->
         OnboardingRoute(
-            navigateToLogin = navigator::navigateToLoginAndClear,
+            navigateToLogin = {
+                navigator.remove(key)
+                navigator.navigateToLogin()
+            },
         )
     }
 
