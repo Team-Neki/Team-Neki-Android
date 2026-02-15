@@ -37,7 +37,8 @@ internal fun CurrentLocationButton(
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.icon_current_position),
             contentDescription = null,
-            tint = if (isActiveCurrentLocation) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray800,
+            tint = if (isActiveCurrentLocation) NekiTheme.colorScheme.primary500
+            else NekiTheme.colorScheme.gray800,
         )
     }
 }

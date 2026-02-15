@@ -44,7 +44,8 @@ internal fun AgreementSection(
                     .size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (term.isChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
+                tint = if (term.isChecked) NekiTheme.colorScheme.primary500
+                else NekiTheme.colorScheme.gray200,
             )
             Text(
                 modifier = Modifier.padding(end = 2.dp),
