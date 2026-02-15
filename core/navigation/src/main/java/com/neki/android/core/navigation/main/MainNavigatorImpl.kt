@@ -45,11 +45,7 @@ class MainNavigatorImpl @Inject constructor(
 
     override fun goBack() {
         when (mainState.currentKey) {
-            mainState.startKey -> error("You cannot go back from the start route")
-            mainState.currentTopLevelKey -> {
-                mainState.topLevelStack.removeLastOrNull()
-            }
-
+            mainState.currentTopLevelKey -> mainState.topLevelStack.removeLastOrNull()
             else -> mainState.currentSubStack.removeLastOrNull()
         }
     }
