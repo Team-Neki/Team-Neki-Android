@@ -239,7 +239,7 @@ internal fun AnchoredPanelContent(
                     .noRippleClickableSingle(onClick = onClickInfoIcon)
                     .padding(start = 2.dp, top = 2.dp, bottom = 2.dp)
                     .size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_info_stroke),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_info_stroked),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.gray300,
             )

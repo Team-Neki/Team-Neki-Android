@@ -28,7 +28,7 @@ import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
-import com.neki.android.feature.pose.impl.main.component.FilterBar
+import com.neki.android.feature.pose.impl.main.component.PoseFilterBar
 import com.neki.android.feature.pose.impl.main.component.PeopleCountBottomSheet
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.feature.pose.impl.main.component.PoseListContent
@@ -157,7 +157,7 @@ fun PoseContent(
                 state = lazyState,
                 onClickItem = onClickPoseItem,
             )
-            FilterBar(
+            PoseFilterBar(
                 modifier = Modifier
                     .onSizeChanged { size ->
                         if (filterBarHeightPx != 0) return@onSizeChanged

@@ -72,7 +72,8 @@ internal fun TermContent(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (isAllRequiredTermChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray200,
+                tint = if (isAllRequiredTermChecked) NekiTheme.colorScheme.primary500
+                else NekiTheme.colorScheme.gray200,
             )
             Text(
                 text = "약관 전체 동의",

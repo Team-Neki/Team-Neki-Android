@@ -45,6 +45,7 @@ internal fun PoseDetailRoute(
             is PoseDetailSideEffect.ShowToast -> {
                 nekiToast.showToast(sideEffect.message)
             }
+
             is PoseDetailSideEffect.NotifyScrapChanged -> {
                 resultEventBus.sendResult(
                     result = PoseResult.ScrapChanged(sideEffect.poseId, sideEffect.isScrapped),
@@ -94,11 +95,12 @@ internal fun PoseDetailScreen(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(
-                    if (uiState.pose.isScrapped) R.drawable.icon_scrap
-                    else R.drawable.icon_scrap_unselected,
+                    if (uiState.pose.isScrapped) R.drawable.icon_scrap_filled
+                    else R.drawable.icon_scrap_stroked,
                 ),
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.gray500,
+                tint = if (uiState.pose.isScrapped) NekiTheme.colorScheme.gray900
+                else NekiTheme.colorScheme.gray500,
             )
         }
     }
