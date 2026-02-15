@@ -27,10 +27,7 @@ class AuthNavigatorImpl @Inject constructor(
         state.stack.add(key)
     }
 
-    override fun goBack(): Boolean {
-        return if (state.stack.size > 1) {
-            state.stack.removeLastOrNull()
-            true
-        } else false
+    override fun goBack() {
+        state.stack.removeLastOrNull()
     }
 }
