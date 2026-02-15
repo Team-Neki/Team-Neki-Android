@@ -13,7 +13,6 @@ class AuthNavigatorImpl @Inject constructor(
 ) : AuthNavigator {
     override fun navigateRoot(rootNavKey: RootNavKey) {
         state.stack.clear()
-        state.stack.add(state.startKey)
         rootState.stack.clear()
         rootState.stack.add(rootNavKey)
     }
@@ -22,11 +21,11 @@ class AuthNavigatorImpl @Inject constructor(
         state.stack.add(key)
     }
 
-    override fun remove(key: NavKey) {
-        state.stack.remove(key)
-    }
-
     override fun goBack() {
         state.stack.removeLastOrNull()
+    }
+
+    override fun remove(key: NavKey) {
+        state.stack.remove(key)
     }
 }

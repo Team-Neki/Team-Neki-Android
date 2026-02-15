@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
                 NekiTheme {
                     CompositionLocalProvider(LocalResultEventBus provides resultBus) {
                         when (rootNavigationState.currentRootKey) {
-                            RootNavKey.Auth -> {
+                            is RootNavKey.Auth -> {
                                 AuthScreen(
                                     entries = authNavigator.state.toEntries(
                                         entryProvider = entryProvider {
@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     onTabSelected = { mainNavigator.navigate(it) },
                                     onBack = { mainNavigator.goBack() },
-                                    navigateToLogin = { mainNavigator.navigateToLogin(AuthNavKey.Login) },
+                                    navigateToLogin = { mainNavigator.navigateRoot(RootNavKey.Auth(AuthNavKey.Login)) },
                                 )
                             }
                         }
@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
                             Toast.LENGTH_SHORT,
                         ).show()
 
-                        mainNavigator.navigateToLogin(AuthNavKey.Login)
+                        mainNavigator.navigateRoot(RootNavKey.Auth(AuthNavKey.Login))
                     }
                 }
             }

@@ -13,12 +13,17 @@ class MainNavigatorImpl @Inject constructor(
     private val authState: AuthNavigationState,
     val mainState: MainNavigationState,
 ) : MainNavigator {
-    override fun navigateToLogin(loginKey: NavKey) {
+    override fun navigateRoot(rootNavKey: RootNavKey) {
         clearMainStack()
-        authState.stack.clear()
-        authState.stack.add(loginKey)
+        when (rootNavKey) {
+            is RootNavKey.Auth -> {
+                authState.stack.clear()
+                authState.stack.add(rootNavKey.startKey)
+            }
+            is RootNavKey.Main -> {}
+        }
         rootState.stack.clear()
-        rootState.stack.add(RootNavKey.Auth)
+        rootState.stack.add(rootNavKey)
     }
 
     private fun clearMainStack() {
