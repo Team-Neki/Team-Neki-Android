@@ -22,6 +22,7 @@ import com.neki.android.core.navigation.root.RootNavigationState
 import com.neki.android.core.navigation.main.toEntries
 import com.neki.android.core.navigation.auth.AuthNavigatorImpl
 import com.neki.android.core.navigation.auth.toEntries
+import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.auth.impl.navigation.authEntryProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -80,7 +81,7 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     onTabSelected = { mainNavigator.navigate(it) },
                                     onBack = { mainNavigator.goBack() },
-                                    navigateToLogin = { mainNavigator.navigateRoot(RootNavKey.Auth) },
+                                    navigateToLogin = { mainNavigator.navigateToLogin(AuthNavKey.Login) },
                                 )
                             }
                         }
@@ -102,7 +103,7 @@ class MainActivity : ComponentActivity() {
                             Toast.LENGTH_SHORT,
                         ).show()
 
-                        mainNavigator.navigateRoot(RootNavKey.Auth)
+                        mainNavigator.navigateToLogin(AuthNavKey.Login)
                     }
                 }
             }
