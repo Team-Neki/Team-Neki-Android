@@ -13,13 +13,13 @@ import androidx.navigation3.runtime.entryProvider
 import com.neki.android.core.dataapi.auth.AuthEvent
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.navigation.EntryProviderInstaller
-import com.neki.android.core.navigation.NavigatorImpl
+import com.neki.android.core.navigation.main.EntryProviderInstaller
+import com.neki.android.core.navigation.main.MainNavigatorImpl
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEventBus
 import com.neki.android.core.navigation.root.RootNavKey
 import com.neki.android.core.navigation.root.RootNavigationState
-import com.neki.android.core.navigation.toEntries
+import com.neki.android.core.navigation.main.toEntries
 import com.neki.android.core.navigation.auth.AuthNavigatorImpl
 import com.neki.android.core.navigation.auth.toEntries
 import com.neki.android.feature.auth.impl.navigation.authEntryProvider
@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
     lateinit var authNavigator: AuthNavigatorImpl
 
     @Inject
-    lateinit var navigator: NavigatorImpl
+    lateinit var mainNavigator: MainNavigatorImpl
 
     @Inject
     lateinit var entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller>
@@ -70,17 +70,17 @@ class MainActivity : ComponentActivity() {
 
                             RootNavKey.Main -> {
                                 MainScreen(
-                                    currentKey = navigator.state.currentKey,
-                                    currentTopLevelKey = navigator.state.currentTopLevelKey,
-                                    topLevelKeys = navigator.state.topLevelKeys,
-                                    entries = navigator.state.toEntries(
+                                    currentKey = mainNavigator.mainState.currentKey,
+                                    currentTopLevelKey = mainNavigator.mainState.currentTopLevelKey,
+                                    topLevelKeys = mainNavigator.mainState.topLevelKeys,
+                                    entries = mainNavigator.mainState.toEntries(
                                         entryProvider = entryProvider {
                                             entryProviderScopes.forEach { builder -> this.builder() }
                                         },
                                     ),
-                                    onTabSelected = { navigator.navigate(it) },
-                                    onBack = { navigator.goBack() },
-                                    navigateToLogin = { navigator.navigateRoot(RootNavKey.Auth) },
+                                    onTabSelected = { mainNavigator.navigate(it) },
+                                    onBack = { mainNavigator.goBack() },
+                                    navigateToLogin = { mainNavigator.navigateRoot(RootNavKey.Auth) },
                                 )
                             }
                         }
@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
                             Toast.LENGTH_SHORT,
                         ).show()
 
-                        navigator.navigateRoot(RootNavKey.Auth)
+                        mainNavigator.navigateRoot(RootNavKey.Auth)
                     }
                 }
             }

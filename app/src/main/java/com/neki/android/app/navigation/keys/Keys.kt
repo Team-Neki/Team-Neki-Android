@@ -7,5 +7,5 @@ import com.neki.android.feature.auth.api.AuthNavKey
 
 internal val START_ROOT_NAV_KEY = RootNavKey.Auth
 internal val START_AUTH_NAV_KEY = AuthNavKey.Splash
-internal val START_NAV_KEY = ArchiveNavKey.Archive
-internal val TOP_LEVEL_NAV_KEYS = TopLevelNavItem.entries.map { it.navKey }
+internal val START_MAIN_NAV_KEY = ArchiveNavKey.Archive
+internal val TOP_LEVEL_MAIN_NAV_KEYS = TopLevelNavItem.entries.map { it.navKey }

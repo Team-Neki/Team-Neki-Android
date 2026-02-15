@@ -2,9 +2,9 @@ package com.neki.android.feature.mypage.impl.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.neki.android.core.navigation.EntryProviderInstaller
+import com.neki.android.core.navigation.main.EntryProviderInstaller
 import com.neki.android.core.navigation.HiltSharedViewModelStoreNavEntryDecorator
-import com.neki.android.core.navigation.Navigator
+import com.neki.android.core.navigation.main.MainNavigator
 import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.mypage.api.MyPageNavKey
 import com.neki.android.feature.mypage.api.navigateToEditProfile
@@ -26,12 +26,12 @@ object MyPageEntryProviderModule {
 
     @IntoSet
     @Provides
-    fun provideMyPageEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
+    fun provideMyPageEntryBuilder(navigator: MainNavigator): EntryProviderInstaller = {
         myPageEntry(navigator)
     }
 }
 
-private fun EntryProviderScope<NavKey>.myPageEntry(navigator: Navigator) {
+private fun EntryProviderScope<NavKey>.myPageEntry(navigator: MainNavigator) {
     entry<MyPageNavKey.MyPage>(
         clazzContentKey = { key -> key.toString() },
     ) {

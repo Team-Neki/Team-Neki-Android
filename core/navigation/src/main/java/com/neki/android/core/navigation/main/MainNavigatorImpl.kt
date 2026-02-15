@@ -1,4 +1,4 @@
-package com.neki.android.core.navigation
+package com.neki.android.core.navigation.main
 
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.auth.AuthNavigationState
@@ -8,11 +8,11 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 import javax.inject.Inject
 
 @ActivityRetainedScoped
-class NavigatorImpl @Inject constructor(
+class MainNavigatorImpl @Inject constructor(
     private val rootState: RootNavigationState,
     private val authState: AuthNavigationState,
-    val state: NavigationState,
-) : Navigator {
+    val mainState: MainNavigationState,
+) : MainNavigator {
     override fun navigateRoot(rootNavKey: RootNavKey) {
         clearRootSubStack()
         rootState.stack.clear()
@@ -20,9 +20,9 @@ class NavigatorImpl @Inject constructor(
     }
 
     private fun clearRootSubStack() {
-        state.topLevelStack.clear()
-        state.topLevelStack.add(state.startKey)
-        state.subStacks.forEach { (key, stack) ->
+        this@MainNavigatorImpl.mainState.topLevelStack.clear()
+        mainState.topLevelStack.add(mainState.startKey)
+        mainState.subStacks.forEach { (key, stack) ->
             stack.clear()
             stack.add(key)
         }
@@ -38,46 +38,46 @@ class NavigatorImpl @Inject constructor(
 
     override fun navigate(key: NavKey) {
         when (key) {
-            state.currentTopLevelKey -> clearSubStack()
-            in state.topLevelKeys -> goToTopLevel(key)
+            mainState.currentTopLevelKey -> clearSubStack()
+            in mainState.topLevelKeys -> goToTopLevel(key)
             else -> goToKey(key)
         }
     }
 
     override fun goBack() {
-        when (state.currentKey) {
-            state.startKey -> error("You cannot go back from the start route")
-            state.currentTopLevelKey -> {
-                state.topLevelStack.removeLastOrNull()
+        when (mainState.currentKey) {
+            mainState.startKey -> error("You cannot go back from the start route")
+            mainState.currentTopLevelKey -> {
+                mainState.topLevelStack.removeLastOrNull()
             }
 
-            else -> state.currentSubStack.removeLastOrNull()
+            else -> mainState.currentSubStack.removeLastOrNull()
         }
     }
 
     private fun goToKey(key: NavKey) {
-        state.currentSubStack.apply {
+        mainState.currentSubStack.apply {
             remove(key)
             add(key)
         }
     }
 
     private fun goToTopLevel(key: NavKey) {
-        state.topLevelStack.apply {
-            if (key == state.startKey) clear()
+        mainState.topLevelStack.apply {
+            if (key == mainState.startKey) clear()
             else remove(key)
             add(key)
         }
     }
 
     private fun clearSubStack() {
-        state.currentSubStack.run {
+        mainState.currentSubStack.run {
             if (size > 1) subList(1, size).clear()
         }
     }
 
     override fun remove(key: NavKey) {
-        state.currentSubStack.apply {
+        mainState.currentSubStack.apply {
             remove(key)
         }
     }

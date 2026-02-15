@@ -1,7 +1,7 @@
 package com.neki.android.app.navigation.di
 
-import com.neki.android.core.navigation.Navigator
-import com.neki.android.core.navigation.NavigatorImpl
+import com.neki.android.core.navigation.main.MainNavigator
+import com.neki.android.core.navigation.main.MainNavigatorImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,7 +12,7 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 internal interface AppModule {
 
     @Binds
-    fun bindsNavigator(
-        impl: NavigatorImpl,
-    ): Navigator
+    fun bindsMainNavigator(
+        mainNavigatorImpl: MainNavigatorImpl,
+    ): MainNavigator
 }

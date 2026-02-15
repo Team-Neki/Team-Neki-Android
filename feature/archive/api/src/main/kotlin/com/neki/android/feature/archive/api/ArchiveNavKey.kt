@@ -2,7 +2,7 @@ package com.neki.android.feature.archive.api
 
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.model.Photo
-import com.neki.android.core.navigation.Navigator
+import com.neki.android.core.navigation.main.MainNavigator
 import kotlinx.serialization.Serializable
 
 sealed interface ArchiveNavKey : NavKey {
@@ -27,22 +27,22 @@ sealed interface ArchiveNavKey : NavKey {
     data class PhotoDetail(val photo: Photo) : ArchiveNavKey
 }
 
-fun Navigator.navigateToArchive() {
+fun MainNavigator.navigateToArchive() {
     navigate(ArchiveNavKey.Archive)
 }
 
-fun Navigator.navigateToAllPhoto() {
+fun MainNavigator.navigateToAllPhoto() {
     navigate(ArchiveNavKey.AllPhoto)
 }
 
-fun Navigator.navigateToAllAlbum() {
+fun MainNavigator.navigateToAllAlbum() {
     navigate(ArchiveNavKey.AllAlbum)
 }
 
-fun Navigator.navigateToAlbumDetail(id: Long, title: String = "", isFavorite: Boolean = false) {
+fun MainNavigator.navigateToAlbumDetail(id: Long, title: String = "", isFavorite: Boolean = false) {
     navigate(ArchiveNavKey.AlbumDetail(isFavorite, title, id))
 }
 
-fun Navigator.navigateToPhotoDetail(photo: Photo) {
+fun MainNavigator.navigateToPhotoDetail(photo: Photo) {
     navigate(ArchiveNavKey.PhotoDetail(photo))
 }

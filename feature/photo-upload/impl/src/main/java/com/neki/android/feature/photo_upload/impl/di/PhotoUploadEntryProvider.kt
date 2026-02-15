@@ -3,8 +3,8 @@ package com.neki.android.feature.photo_upload.impl.di
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.neki.android.core.navigation.EntryProviderInstaller
-import com.neki.android.core.navigation.Navigator
+import com.neki.android.core.navigation.main.EntryProviderInstaller
+import com.neki.android.core.navigation.main.MainNavigator
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
@@ -24,12 +24,12 @@ object PhotoUploadEntryProvider {
 
     @IntoSet
     @Provides
-    fun providePhotoUploadEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
+    fun providePhotoUploadEntryBuilder(navigator: MainNavigator): EntryProviderInstaller = {
         photoUploadEntry(navigator)
     }
 }
 
-private fun EntryProviderScope<NavKey>.photoUploadEntry(navigator: Navigator) {
+private fun EntryProviderScope<NavKey>.photoUploadEntry(navigator: MainNavigator) {
     entry<PhotoUploadNavKey.QRScan> {
         val resultBus = LocalResultEventBus.current
 
