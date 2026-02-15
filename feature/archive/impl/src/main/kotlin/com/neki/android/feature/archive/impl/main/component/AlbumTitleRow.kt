@@ -44,10 +44,10 @@ internal fun AlbumTitleRow(
                     color = NekiTheme.colorScheme.gray500,
                 )
                 Icon(
+                    modifier = Modifier.size(20.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
                     contentDescription = null,
                     tint = NekiTheme.colorScheme.gray500,
-                    modifier = Modifier.size(20.dp),
                 )
             }
         }

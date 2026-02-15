@@ -122,7 +122,7 @@ internal fun QRScannerContent(
                             modifier = Modifier.size(24.dp),
                             imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = NekiTheme.colorScheme.white,
                         )
                     }
                 }
@@ -170,7 +170,10 @@ internal fun QRScannerContent(
                     onClick = { onIntent(QRScanIntent.ToggleTorch) },
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_qr_light),
+                        imageVector = ImageVector.vectorResource(
+                            if (isTorchEnabled) R.drawable.icon_torch_on
+                            else R.drawable.icon_torch_off,
+                        ),
                         contentDescription = null,
                         tint = if (isTorchEnabled) Color.Black else Color.White,
                     )
