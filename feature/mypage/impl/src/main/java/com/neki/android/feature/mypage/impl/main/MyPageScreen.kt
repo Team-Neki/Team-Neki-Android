@@ -44,8 +44,6 @@ internal fun MyPageRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
         when (effect) {
-            MyPageEffect.NavigateBack -> {}
-            MyPageEffect.NavigateToLogin -> {}
             MyPageEffect.NavigateToNotification -> {}
             MyPageEffect.NavigateToProfile -> navigateToProfile()
             MyPageEffect.NavigateToPermission -> navigateToPermission()

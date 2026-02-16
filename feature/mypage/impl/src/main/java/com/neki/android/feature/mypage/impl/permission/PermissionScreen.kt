@@ -133,7 +133,7 @@ fun PermissionScreen(
         SectionTitleText(text = "권한 설정")
         NekiPermission.entries.forEach { permission ->
             PermissionSectionItem(
-                title = permission.title,
+                type = permission.type,
                 subTitle = permission.subTitle,
                 isGranted = when (permission) {
                     NekiPermission.CAMERA -> uiState.isGrantedCamera
@@ -147,7 +147,7 @@ fun PermissionScreen(
 
     if (uiState.isShowPermissionDialog && uiState.clickedPermission != null) {
         DoubleButtonAlertDialog(
-            title = uiState.clickedPermission.title,
+            title = uiState.clickedPermission.dialogTitle,
             content = uiState.clickedPermission.dialogContent,
             grayButtonText = "취소",
             primaryButtonText = "허용",
