@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -35,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.app.R
 import com.neki.android.app.navigation.TopLevelNavItem
-import com.neki.android.core.designsystem.modifier.noRippleClickable
+import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.modifier.tabbarShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.designsystem.R as DesignR
@@ -160,26 +163,32 @@ private fun BottomNavigationFab(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val gradientStartColor = if (isPressed) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.primary300
+    val gradientEndColor = if (isPressed) NekiTheme.colorScheme.primary600 else NekiTheme.colorScheme.primary500
+
     Box(
         modifier = modifier
             .size(44.dp)
             .background(
                 shape = CircleShape,
-                color = NekiTheme.colorScheme.white
+                color = NekiTheme.colorScheme.white,
             )
             .padding(3.dp)
             .background(
                 brush = Brush.linearGradient(
                     colorStops = arrayOf(
-                        0.1816f to NekiTheme.colorScheme.primary300,
-                        0.8318f to NekiTheme.colorScheme.primary500,
+                        0.1816f to gradientStartColor,
+                        0.8318f to gradientEndColor,
                     ),
                     start = Offset(Float.POSITIVE_INFINITY, 0f),
                     end = Offset(0f, Float.POSITIVE_INFINITY),
                 ),
                 shape = CircleShape,
             )
-            .noRippleClickable(onClick = onClick),
+            .clip(CircleShape)
+            .clickableSingle(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
