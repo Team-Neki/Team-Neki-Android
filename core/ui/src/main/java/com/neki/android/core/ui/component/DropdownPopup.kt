@@ -1,6 +1,7 @@
 package com.neki.android.core.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,13 +48,14 @@ fun <T> DropdownPopup(
                     shape = RoundedCornerShape(8.dp),
                 )
                 .padding(vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             items.forEach { item ->
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickableSingle { onSelect(item) }
-                        .padding(horizontal = 16.dp, vertical = 5.dp),
+                        .padding(horizontal = 12.dp, vertical = 5.dp),
                     text = itemLabel(item),
                     style = NekiTheme.typography.body14Medium,
                 )
