@@ -84,6 +84,7 @@ class ArchiveMainViewModel @Inject constructor(
             ArchiveMainIntent.ClickAllAlbumText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllAlbum)
             ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum(-1L))
             is ArchiveMainIntent.ClickAlbumItem -> postSideEffect(ArchiveMainSideEffect.NavigateToAlbumDetail(intent.albumId, intent.albumTitle))
+            ArchiveMainIntent.ClickAddAlbum -> reduce { copy(isShowAddAlbumBottomSheet = true) }
 
             // Photo Intent
             ArchiveMainIntent.ClickAllPhotoText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllPhoto)

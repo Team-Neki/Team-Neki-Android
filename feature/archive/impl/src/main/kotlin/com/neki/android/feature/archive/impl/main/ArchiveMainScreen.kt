@@ -126,6 +126,7 @@ internal fun ArchiveMainScreen(
                 onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it.id, it.title)) },
                 onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
                 onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
+                onClickAddAlbum = { onIntent(ArchiveMainIntent.ClickAddAlbum) },
             )
         }
 
@@ -193,6 +194,7 @@ private fun ArchiveMainContent(
     onClickAlbumItem: (AlbumPreview) -> Unit,
     onClickShowAllPhoto: () -> Unit,
     onClickPhotoItem: (Photo) -> Unit,
+    onClickAddAlbum: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -225,6 +227,7 @@ private fun ArchiveMainContent(
                 albumList = uiState.albums,
                 onClickFavoriteAlbum = onClickFavoriteAlbum,
                 onClickAlbumItem = onClickAlbumItem,
+                onClickAddAlbum =onClickAddAlbum,
             )
         }
 

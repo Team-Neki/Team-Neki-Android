@@ -42,6 +42,7 @@ sealed interface ArchiveMainIntent {
     data object ClickAllAlbumText : ArchiveMainIntent
     data object ClickFavoriteAlbum : ArchiveMainIntent
     data class ClickAlbumItem(val albumId: Long, val albumTitle: String) : ArchiveMainIntent
+    data object ClickAddAlbum : ArchiveMainIntent
 
     // Photo Intent
     data object ClickAllPhotoText : ArchiveMainIntent
