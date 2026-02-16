@@ -113,7 +113,7 @@ private fun AddPhotoOptionButton(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(32.dp),
                 imageVector = ImageVector.vectorResource(iconRes),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.gray700,

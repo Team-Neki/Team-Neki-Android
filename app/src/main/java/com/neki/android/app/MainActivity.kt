@@ -23,6 +23,8 @@ import com.neki.android.core.navigation.toEntries
 import com.neki.android.core.navigation.auth.AuthNavigatorImpl
 import com.neki.android.core.navigation.auth.toEntries
 import com.neki.android.feature.auth.impl.navigation.authEntryProvider
+import com.neki.android.feature.photo_upload.api.navigateToQRScan
+import com.neki.android.feature.photo_upload.api.navigateToUploadAlbum
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -69,7 +71,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             RootNavKey.Main -> {
-                                MainScreen(
+                                MainRoute(
                                     currentKey = navigator.state.currentKey,
                                     currentTopLevelKey = navigator.state.currentTopLevelKey,
                                     topLevelKeys = navigator.state.topLevelKeys,
@@ -80,9 +82,9 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     onTabSelected = { navigator.navigate(it) },
                                     onBack = { navigator.goBack() },
-                                    onClickFab = {
-                                        // TODO: 사진 추가 화면으로 네비게이션 구현
-                                    },
+                                    navigateToQRScan = navigator::navigateToQRScan,
+                                    navigateToUploadAlbumWithGallery = navigator::navigateToUploadAlbum,
+                                    navigateToUploadAlbumWithQRScan = navigator::navigateToUploadAlbum,
                                 )
                             }
                         }
