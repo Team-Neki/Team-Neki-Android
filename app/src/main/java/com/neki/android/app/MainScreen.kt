@@ -25,7 +25,6 @@ fun MainScreen(
     entries: SnapshotStateList<NavEntry<NavKey>>,
     onTabSelected: (NavKey) -> Unit,
     onBack: () -> Unit,
-    navigateToLogin: () -> Unit,
     onClickFab: () -> Unit,
 ) {
     val shouldShowBottomBar by remember(currentKey) {

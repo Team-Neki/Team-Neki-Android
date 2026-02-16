@@ -80,7 +80,6 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     onTabSelected = { navigator.navigate(it) },
                                     onBack = { navigator.goBack() },
-                                    navigateToLogin = { navigator.navigateRoot(RootNavKey.Auth) },
                                     onClickFab = {
                                         // TODO: 사진 추가 화면으로 네비게이션 구현
                                     },
