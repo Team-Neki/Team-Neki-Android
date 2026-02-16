@@ -185,7 +185,7 @@ internal fun QRScannerContent(
 
     if (isPermissionRationaleDialogShown) {
         DoubleButtonAlertDialog(
-            title = NekiPermission.CAMERA.title,
+            title = NekiPermission.CAMERA.dialogTitle,
             content = NekiPermission.CAMERA.dialogContent,
             grayButtonText = "취소",
             primaryButtonText = "허용",

@@ -62,7 +62,6 @@ sealed interface MyPageEffect {
     data object NavigateToPermission : MyPageEffect
     data class OpenExternalLink(val url: String) : MyPageEffect
     data object NavigateBack : MyPageEffect
-    data object NavigateToLogin : MyPageEffect
     data class MoveAppSettings(val permission: NekiPermission) : MyPageEffect
     data class RequestPermission(val permission: NekiPermission) : MyPageEffect
     data object OpenOssLicenses : MyPageEffect
