@@ -3,12 +3,8 @@ package com.neki.android.feature.archive.impl.photo.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +14,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.actionbar.NekiBothSidesActionBar
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
@@ -35,41 +32,37 @@ internal fun PhotoActionBar(
         enter = expandVertically(expandFrom = Alignment.Top),
         exit = shrinkVertically(shrinkTowards = Alignment.Top),
     ) {
-        Column(
-            modifier = modifier.fillMaxWidth(),
-        ) {
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                thickness = 1.dp,
-                color = NekiTheme.colorScheme.gray75,
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        NekiBothSidesActionBar(
+            modifier = Modifier.fillMaxWidth(),
+            startContent = {
                 Icon(
-                    modifier = Modifier.noRippleClickableSingle(
-                        enabled = isEnabled,
-                        onClick = onClickDownload,
-                    ),
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .noRippleClickableSingle(
+                            enabled = isEnabled,
+                            onClick = onClickDownload,
+                        ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_download),
                     contentDescription = null,
-                    tint = if (isEnabled) NekiTheme.colorScheme.gray600 else NekiTheme.colorScheme.gray200,
+                    tint = if (isEnabled) NekiTheme.colorScheme.gray700
+                    else NekiTheme.colorScheme.gray200,
                 )
+            },
+            endContent = {
                 Icon(
-                    modifier = Modifier.noRippleClickableSingle(
-                        enabled = isEnabled,
-                        onClick = onClickDelete,
-                    ),
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .noRippleClickableSingle(
+                            enabled = isEnabled,
+                            onClick = onClickDelete,
+                        ),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
                     contentDescription = null,
-                    tint = if (isEnabled) NekiTheme.colorScheme.gray600 else NekiTheme.colorScheme.gray200,
+                    tint = if (isEnabled) NekiTheme.colorScheme.gray700
+                    else NekiTheme.colorScheme.gray200,
                 )
-            }
-        }
+            },
+        )
     }
 }
 
@@ -90,7 +83,7 @@ private fun PhotoActionBarDisabledPreview() {
     NekiTheme {
         PhotoActionBar(
             visible = true,
-            isEnabled = true,
+            isEnabled = false,
         )
     }
 }

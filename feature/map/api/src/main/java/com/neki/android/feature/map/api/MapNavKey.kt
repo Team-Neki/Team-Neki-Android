@@ -1,7 +1,7 @@
 package com.neki.android.feature.map.api
 
 import androidx.navigation3.runtime.NavKey
-import com.neki.android.core.navigation.Navigator
+import com.neki.android.core.navigation.main.MainNavigator
 import kotlinx.serialization.Serializable
 
 sealed interface MapNavKey : NavKey {
@@ -10,6 +10,6 @@ sealed interface MapNavKey : NavKey {
     data object Map : MapNavKey
 }
 
-fun Navigator.navigateToMap() {
+fun MainNavigator.navigateToMap() {
     navigate(MapNavKey.Map)
 }

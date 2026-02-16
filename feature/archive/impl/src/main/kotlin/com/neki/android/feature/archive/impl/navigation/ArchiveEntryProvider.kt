@@ -3,8 +3,8 @@ package com.neki.android.feature.archive.impl.navigation
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.neki.android.core.navigation.EntryProviderInstaller
-import com.neki.android.core.navigation.Navigator
+import com.neki.android.core.navigation.main.EntryProviderInstaller
+import com.neki.android.core.navigation.main.MainNavigator
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.feature.archive.api.ArchiveNavKey
@@ -40,12 +40,12 @@ object ArchiveEntryProviderModule {
 
     @IntoSet
     @Provides
-    fun provideArchiveEntryBuilder(navigator: Navigator): EntryProviderInstaller = {
+    fun provideArchiveEntryBuilder(navigator: MainNavigator): EntryProviderInstaller = {
         archiveEntry(navigator)
     }
 }
 
-private fun EntryProviderScope<NavKey>.archiveEntry(navigator: Navigator) {
+private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
     entry<ArchiveNavKey.Archive> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<ArchiveMainViewModel>()

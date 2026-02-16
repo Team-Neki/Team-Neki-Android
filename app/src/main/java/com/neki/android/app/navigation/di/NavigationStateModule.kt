@@ -1,11 +1,11 @@
 package com.neki.android.app.navigation.di
 
 import com.neki.android.app.navigation.keys.START_AUTH_NAV_KEY
-import com.neki.android.app.navigation.keys.START_NAV_KEY
+import com.neki.android.app.navigation.keys.START_MAIN_NAV_KEY
 import com.neki.android.app.navigation.keys.START_ROOT_NAV_KEY
-import com.neki.android.app.navigation.keys.TOP_LEVEL_NAV_KEYS
-import com.neki.android.core.navigation.NavigationState
+import com.neki.android.app.navigation.keys.TOP_LEVEL_MAIN_NAV_KEYS
 import com.neki.android.core.navigation.auth.AuthNavigationState
+import com.neki.android.core.navigation.main.MainNavigationState
 import com.neki.android.core.navigation.root.RootNavigationState
 import dagger.Module
 import dagger.Provides
@@ -15,7 +15,7 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-internal object NavigationModule {
+internal object NavigationStateModule {
 
     @Provides
     @ActivityRetainedScoped
@@ -35,10 +35,10 @@ internal object NavigationModule {
 
     @Provides
     @ActivityRetainedScoped
-    fun providesNavigationState(): NavigationState {
-        return NavigationState(
-            startKey = START_NAV_KEY,
-            topLevelKeys = TOP_LEVEL_NAV_KEYS.toSet(),
+    fun providesMainNavigationState(): MainNavigationState {
+        return MainNavigationState(
+            startKey = START_MAIN_NAV_KEY,
+            topLevelKeys = TOP_LEVEL_MAIN_NAV_KEYS.toSet(),
         )
     }
 }
