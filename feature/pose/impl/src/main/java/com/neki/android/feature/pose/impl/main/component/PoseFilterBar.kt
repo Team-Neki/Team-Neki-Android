@@ -20,7 +20,7 @@ internal fun PoseFilterBar(
         isDownIconChipSelected = peopleCount != null,
         isDefaultChipSelected = isScrapSelected,
         downIconChipDisplayText = peopleCount?.displayText ?: "인원수",
-        defaultChipDisplayText = "스크랩",
+        defaultChipDisplayText = "북마크",
         modifier = modifier,
         visible = visible,
         onClickDownIconChip = onClickPeopleCount,

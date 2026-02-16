@@ -44,7 +44,7 @@ class PoseService @Inject constructor(
         }.body()
     }
 
-    // 스크랩된 포즈 목록 조회
+    // 북마크된 포즈 목록 조회
     suspend fun getScrappedPoses(
         page: Int = 0,
         size: Int = 20,
@@ -57,7 +57,7 @@ class PoseService @Inject constructor(
         }.body()
     }
 
-    // 스크랩 업데이트
+    // 북마크 업데이트
     suspend fun updateScrap(poseId: Long, scrap: Boolean): BasicNullableResponse<Unit> {
         return client.patch("/api/poses/$poseId/scrap") {
             setBody(UpdateScrapRequest(scrap))

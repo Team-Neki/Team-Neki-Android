@@ -138,7 +138,7 @@ private fun RandomPoseFloatingBar(
                         if (isScrapped) R.drawable.icon_scrap_filled
                         else R.drawable.icon_scrap_stroked,
                     ),
-                    contentDescription = "스크랩",
+                    contentDescription = "북마크",
                     tint = NekiTheme.colorScheme.white,
                 )
             }
