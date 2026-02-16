@@ -85,7 +85,6 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     onTabSelected = { mainNavigator.navigate(it) },
                                     onBack = { mainNavigator.goBack() },
-                                    navigateToLogin = { rootNavigator.navigateToAuth(AuthNavKey.Login) },
                                 )
                             }
                         }
