@@ -6,7 +6,7 @@ import androidx.paging.PagingData
 import com.neki.android.core.common.exception.ApiErrorCode.NO_MORE_RANDOM_POSE
 import com.neki.android.core.common.exception.NoMorePoseException
 import com.neki.android.core.data.paging.PosePagingSource
-import com.neki.android.core.data.paging.ScrapPosePagingSource
+import com.neki.android.core.data.paging.BookmarkPosePagingSource
 import com.neki.android.core.data.remote.api.PoseService
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.PoseRepository
@@ -45,7 +45,7 @@ class PoseRepositoryImpl @Inject constructor(
         ).flow
     }
 
-    override fun getScrappedPosesFlow(
+    override fun getBookmarkedPosesFlow(
         sortOrder: SortOrder,
     ): Flow<PagingData<Pose>> {
         return Pager(
@@ -56,7 +56,7 @@ class PoseRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
             ),
             pagingSourceFactory = {
-                ScrapPosePagingSource(
+                BookmarkPosePagingSource(
                     poseService = poseService,
                     sortOrder = sortOrder,
                 )
@@ -115,7 +115,7 @@ class PoseRepositoryImpl @Inject constructor(
         return@runSuspendCatching result
     }
 
-    override suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit> = runSuspendCatching {
-        poseService.updateScrap(poseId, scrap)
+    override suspend fun updateBookmark(poseId: Long, bookmark: Boolean): Result<Unit> = runSuspendCatching {
+        poseService.updateBookmark(poseId, bookmark)
     }
 }

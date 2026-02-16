@@ -6,7 +6,7 @@ import com.neki.android.core.data.remote.api.PoseService
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
 
-class ScrapPosePagingSource(
+class BookmarkPosePagingSource(
     private val poseService: PoseService,
     private val sortOrder: SortOrder,
 ) : PagingSource<Int, Pose>() {
@@ -14,7 +14,7 @@ class ScrapPosePagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Pose> {
         return try {
             val page = params.key ?: 0
-            val poses = poseService.getScrappedPoses(
+            val poses = poseService.getBookmarkedPoses(
                 page = page,
                 size = params.loadSize,
                 sortOrder = sortOrder.name,

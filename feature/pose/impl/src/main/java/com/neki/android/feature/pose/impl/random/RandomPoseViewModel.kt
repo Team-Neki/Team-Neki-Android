@@ -31,7 +31,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
-    private val scrapJobs = mutableMapOf<Long, Job>()
+    private val bookmarkJobs = mutableMapOf<Long, Job>()
 
     @AssistedFactory
     interface Factory {
@@ -67,18 +67,18 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 }
             }
 
-            RandomPoseIntent.ClickScrapIcon -> {
+            RandomPoseIntent.ClickBookmarkIcon -> {
                 val currentPost = state.currentPose ?: return
-                handleScrapToggle(currentPost.id, !currentPost.isScrapped, reduce)
+                handleBookmarkToggle(currentPost.id, !currentPost.isBookmarked, reduce)
             }
 
-            is RandomPoseIntent.ScrapChanged -> handleScrapToggle(intent.poseId, intent.isScrapped, reduce)
+            is RandomPoseIntent.BookmarkChanged -> handleBookmarkToggle(intent.poseId, intent.isBookmarked, reduce)
         }
     }
 
-    private fun handleScrapToggle(
+    private fun handleBookmarkToggle(
         poseId: Long,
-        newScrapStatus: Boolean,
+        newBookmarkStatus: Boolean,
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
     ) {
         // UI 즉시 업데이트
@@ -86,7 +86,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             copy(
                 poseList = poseList.map { pose ->
                     if (pose.id == poseId) {
-                        pose.copy(isScrapped = newScrapStatus)
+                        pose.copy(isBookmarked = newBookmarkStatus)
                     } else {
                         pose
                     }
@@ -95,26 +95,26 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         }
 
         // 해당 포즈의 이전 Job 취소 후 새로운 Job 시작
-        scrapJobs[poseId]?.cancel()
-        scrapJobs[poseId] = viewModelScope.launch {
+        bookmarkJobs[poseId]?.cancel()
+        bookmarkJobs[poseId] = viewModelScope.launch {
             delay(500)
-            val committedScrap = store.uiState.value.committedScraps[poseId]
-            if (committedScrap == newScrapStatus || committedScrap == null) return@launch
+            val committedBookmark = store.uiState.value.committedBookmarks[poseId]
+            if (committedBookmark == newBookmarkStatus || committedBookmark == null) return@launch
 
-            poseRepository.updateScrap(poseId, newScrapStatus)
+            poseRepository.updateBookmark(poseId, newBookmarkStatus)
                 .onSuccess {
-                    Timber.d("updateScrap success for poseId: $poseId")
+                    Timber.d("updateBookmark success for poseId: $poseId")
                     reduce {
-                        copy(committedScraps = committedScraps + (poseId to newScrapStatus))
+                        copy(committedBookmarks = committedBookmarks + (poseId to newBookmarkStatus))
                     }
                 }
                 .onFailure { error ->
-                    Timber.e(error, "updateScrap failed for poseId: $poseId")
+                    Timber.e(error, "updateBookmark failed for poseId: $poseId")
                     reduce {
                         copy(
                             poseList = poseList.map { pose ->
                                 if (pose.id == poseId) {
-                                    pose.copy(isScrapped = committedScrap)
+                                    pose.copy(isBookmarked = committedBookmark)
                                 } else {
                                     pose
                                 }
@@ -164,7 +164,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     reduce {
                         copy(
                             poseList = (poseList + pose).toImmutableList(),
-                            committedScraps = committedScraps + (pose.id to pose.isScrapped),
+                            committedBookmarks = committedBookmarks + (pose.id to pose.isBookmarked),
                         )
                     }
                 }.onFailure { error ->
@@ -218,7 +218,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     copy(
                         isLoading = false,
                         poseList = data.toImmutableList(),
-                        committedScraps = data.associate { it.id to it.isScrapped },
+                        committedBookmarks = data.associate { it.id to it.isBookmarked },
                         currentIndex = 0,
                     )
                 }
@@ -235,12 +235,12 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
         val state = store.uiState.value
         state.poseList.forEach { pose ->
-            val currentScrap = pose.isScrapped
-            val committedScrap = state.committedScraps[pose.id]
+            val currentBookmark = pose.isBookmarked
+            val committedBookmark = state.committedBookmarks[pose.id]
 
-            if (committedScrap != null && currentScrap != committedScrap) {
+            if (committedBookmark != null && currentBookmark != committedBookmark) {
                 applicationScope.launch {
-                    poseRepository.updateScrap(pose.id, currentScrap)
+                    poseRepository.updateBookmark(pose.id, currentBookmark)
                 }
             }
         }

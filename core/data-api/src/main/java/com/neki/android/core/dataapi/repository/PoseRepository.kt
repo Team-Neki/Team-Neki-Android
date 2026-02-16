@@ -13,7 +13,7 @@ interface PoseRepository {
         sortOrder: SortOrder = SortOrder.DESC,
     ): Flow<PagingData<Pose>>
 
-    fun getScrappedPosesFlow(
+    fun getBookmarkedPosesFlow(
         sortOrder: SortOrder = SortOrder.DESC,
     ): Flow<PagingData<Pose>>
 
@@ -30,5 +30,5 @@ interface PoseRepository {
         poseSize: Int,
     ): Result<List<Pose>>
 
-    suspend fun updateScrap(poseId: Long, scrap: Boolean): Result<Unit>
+    suspend fun updateBookmark(poseId: Long, bookmark: Boolean): Result<Unit>
 }

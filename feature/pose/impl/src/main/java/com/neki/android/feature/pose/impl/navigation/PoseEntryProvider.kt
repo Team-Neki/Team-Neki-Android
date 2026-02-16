@@ -43,8 +43,8 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: MainNavigator) {
 
         ResultEffect<PoseResult>(resultBus) { result ->
             when (result) {
-                is PoseResult.ScrapChanged -> {
-                    viewModel.store.onIntent(PoseIntent.ScrapChanged(result.poseId, result.isScrapped))
+                is PoseResult.BookmarkChanged -> {
+                    viewModel.store.onIntent(PoseIntent.BookmarkChanged(result.poseId, result.isBookmarked))
                 }
             }
         }
@@ -78,8 +78,8 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: MainNavigator) {
 
         ResultEffect<PoseResult>(resultBus) { result ->
             when (result) {
-                is PoseResult.ScrapChanged -> {
-                    viewModel.store.onIntent(RandomPoseIntent.ScrapChanged(result.poseId, result.isScrapped))
+                is PoseResult.BookmarkChanged -> {
+                    viewModel.store.onIntent(RandomPoseIntent.BookmarkChanged(result.poseId, result.isBookmarked))
                 }
             }
         }

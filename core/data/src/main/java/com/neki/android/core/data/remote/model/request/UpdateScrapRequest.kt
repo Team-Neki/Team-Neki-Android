@@ -4,6 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UpdateScrapRequest(
-    @SerialName("scrap") val scrap: Boolean,
+data class UpdateBookmarkRequest(
+    @SerialName("scrap") val bookmark: Boolean,
 )

@@ -41,9 +41,9 @@ internal fun PoseDetailRoute(
                 nekiToast.showToast(sideEffect.message)
             }
 
-            is PoseDetailSideEffect.NotifyScrapChanged -> {
+            is PoseDetailSideEffect.NotifyBookmarkChanged -> {
                 resultEventBus.sendResult(
-                    result = PoseResult.ScrapChanged(sideEffect.poseId, sideEffect.isScrapped),
+                    result = PoseResult.BookmarkChanged(sideEffect.poseId, sideEffect.isBookmarked),
                     allowDuplicate = false,
                 )
             }
@@ -83,8 +83,8 @@ internal fun PoseDetailScreen(
             color = NekiTheme.colorScheme.gray75,
         )
         PoseActionBar(
-            isScrapped = uiState.pose.isScrapped,
-            onClickScrap = { onIntent(PoseDetailIntent.ClickScrapIcon) },
+            isBookmarked = uiState.pose.isBookmarked,
+            onClickBookmark = { onIntent(PoseDetailIntent.ClickBookmarkIcon) },
         )
     }
 }
@@ -98,7 +98,7 @@ private fun PoseDetailScreenPreview() {
                 pose = Pose(
                     id = 1,
                     poseImageUrl = "https://picsum.photos/400/600",
-                    isScrapped = false,
+                    isBookmarked = false,
                 ),
             ),
         )
@@ -107,14 +107,14 @@ private fun PoseDetailScreenPreview() {
 
 @DevicePreview
 @Composable
-private fun PoseDetailScreenScrappedPreview() {
+private fun PoseDetailScreenBookmarkedPreview() {
     NekiTheme {
         PoseDetailScreen(
             uiState = PoseDetailState(
                 pose = Pose(
                     id = 1,
                     poseImageUrl = "https://picsum.photos/400/600",
-                    isScrapped = true,
+                    isBookmarked = true,
                 ),
             ),
         )

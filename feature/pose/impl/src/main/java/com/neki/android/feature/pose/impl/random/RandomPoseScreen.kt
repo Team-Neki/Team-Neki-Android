@@ -96,10 +96,10 @@ internal fun RandomPoseScreen(
             uiState.currentPose?.let { pose ->
                 RandomPoseFloatingBarContent(
                     modifier = Modifier.fillMaxWidth(),
-                    isScrapped = pose.isScrapped,
+                    isBookmarked = pose.isBookmarked,
                     onClickClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
                     onClickGoToDetail = { onIntent(RandomPoseIntent.ClickGoToDetailIcon) },
-                    onClickScrap = { onIntent(RandomPoseIntent.ClickScrapIcon) },
+                    onClickBookmark = { onIntent(RandomPoseIntent.ClickBookmarkIcon) },
                 )
             }
         }

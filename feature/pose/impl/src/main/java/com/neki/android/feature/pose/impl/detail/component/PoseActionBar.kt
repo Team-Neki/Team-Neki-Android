@@ -17,25 +17,25 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 internal fun PoseActionBar(
-    isScrapped: Boolean,
+    isBookmarked: Boolean,
     modifier: Modifier = Modifier,
-    onClickScrap: () -> Unit = {},
+    onClickBookmark: () -> Unit = {},
 ) {
     NekiEndActionBar(
         modifier = modifier.fillMaxWidth(),
     ) {
         NekiIconButton(
             modifier = Modifier.padding(8.dp),
-            onClick = onClickScrap,
+            onClick = onClickBookmark,
         ) {
             Icon(
                 modifier = Modifier.size(28.dp),
                 imageVector = ImageVector.vectorResource(
-                    if (isScrapped) R.drawable.icon_scrap_filled
-                    else R.drawable.icon_scrap_stroked,
+                    if (isBookmarked) R.drawable.icon_bookmark_filled
+                    else R.drawable.icon_bookmark_stroked,
                 ),
                 contentDescription = null,
-                tint = if (isScrapped) NekiTheme.colorScheme.gray900
+                tint = if (isBookmarked) NekiTheme.colorScheme.gray900
                 else NekiTheme.colorScheme.gray500,
             )
         }
@@ -44,16 +44,16 @@ internal fun PoseActionBar(
 
 @ComponentPreview
 @Composable
-private fun ScrappedPoseActionBarPreview() {
+private fun BookmarkedPoseActionBarPreview() {
     NekiTheme {
-        PoseActionBar(isScrapped = true)
+        PoseActionBar(isBookmarked = true)
     }
 }
 
 @ComponentPreview
 @Composable
-private fun UnScrappedPoseActionBarPreview() {
+private fun UnBookmarkedPoseActionBarPreview() {
     NekiTheme {
-        PoseActionBar(isScrapped = false)
+        PoseActionBar(isBookmarked = false)
     }
 }

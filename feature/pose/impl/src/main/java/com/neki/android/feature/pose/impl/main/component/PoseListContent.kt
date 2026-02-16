@@ -104,13 +104,13 @@ private fun PoseItem(
             modifier = Modifier.matchParentSize(),
             shape = RoundedCornerShape(12.dp),
         )
-        if (pose.isScrapped) {
+        if (pose.isBookmarked) {
             Icon(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(top = 10.dp, end = 10.dp)
                     .size(20.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_scrap_filled),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_bookmark_filled),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.white,
             )
