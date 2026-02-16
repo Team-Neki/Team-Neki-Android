@@ -206,7 +206,7 @@ private fun ArchiveAlbumItem(
 
     Box(
         modifier = modifier
-            .cardShadow()
+            .cardShadow(shape = RoundedCornerShape(8.dp))
             .height(ARCHIVE_ALBUM_ITEM_HEIGHT.dp)
             .clip(RoundedCornerShape(8.dp))
             .noRippleClickable(onClick = onClick),
