@@ -44,6 +44,7 @@ fun AddPhotoBottomSheet(
         sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         containerColor = NekiTheme.colorScheme.white,
+        dragHandle = { BottomSheetDragHandle(color = NekiTheme.colorScheme.gray100) },
     ) {
         AddPhotoBottomSheetContent(
             onClickQRScan = onClickQRScan,
@@ -63,7 +64,6 @@ private fun AddPhotoBottomSheetContent(
             .padding(horizontal = 20.dp)
             .padding(bottom = 44.dp),
     ) {
-        BottomSheetDragHandle()
         Text(
             text = "네컷사진 추가",
             style = NekiTheme.typography.title20SemiBold,
