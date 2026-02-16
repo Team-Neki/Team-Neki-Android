@@ -1,5 +1,6 @@
 package com.neki.android.feature.archive.impl.photo_detail.component
 
+import android.R.attr.contentDescription
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,24 +39,20 @@ internal fun PhotoDetailActionBar(
                         .noRippleClickable { onClickDownload() },
                     imageVector = ImageVector.vectorResource(R.drawable.icon_download),
                     contentDescription = null,
-                    tint = NekiTheme.colorScheme.gray500,
+                    tint = NekiTheme.colorScheme.gray700,
                 )
 
                 Icon(
                     modifier = Modifier
                         .size(28.dp)
                         .noRippleClickable { onClickFavorite() },
-                    imageVector = if (isFavorite) {
-                        ImageVector.vectorResource(R.drawable.icon_heart_filled)
-                    } else {
-                        ImageVector.vectorResource(R.drawable.icon_heart_stroked)
-                    },
+                    imageVector = ImageVector.vectorResource(
+                        if (isFavorite) R.drawable.icon_heart_filled
+                        else R.drawable.icon_heart_stroked,
+                    ),
                     contentDescription = null,
-                    tint = if (isFavorite) {
-                        NekiTheme.colorScheme.primary400
-                    } else {
-                        NekiTheme.colorScheme.gray700
-                    },
+                    tint = if (isFavorite) NekiTheme.colorScheme.primary400
+                    else NekiTheme.colorScheme.gray700,
                 )
             }
         },
@@ -67,7 +64,7 @@ internal fun PhotoDetailActionBar(
                     .noRippleClickable { onClickDelete() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.gray600,
+                tint = NekiTheme.colorScheme.gray700,
             )
         },
     )
