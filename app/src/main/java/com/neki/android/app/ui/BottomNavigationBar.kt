@@ -188,7 +188,11 @@ private fun BottomNavigationFab(
                 shape = CircleShape,
             )
             .clip(CircleShape)
-            .clickableSingle(onClick = onClick),
+            .clickableSingle(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
