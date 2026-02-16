@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -100,6 +101,7 @@ private fun NekiStartActionBarPreview() {
                 onClick = {},
             ) {
                 Icon(
+                    modifier = Modifier.size(28.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
                     contentDescription = null,
                     tint = NekiTheme.colorScheme.gray900,
