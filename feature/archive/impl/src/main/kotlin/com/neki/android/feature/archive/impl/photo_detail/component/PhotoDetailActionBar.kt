@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.photo_detail.component
 
-import android.R.attr.contentDescription
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
