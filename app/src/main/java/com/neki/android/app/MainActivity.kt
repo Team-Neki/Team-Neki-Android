@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             RootNavKey.Main -> {
-                                MainScreen(
+                                MainRoute(
                                     currentKey = mainNavigator.state.currentKey,
                                     currentTopLevelKey = mainNavigator.state.currentTopLevelKey,
                                     topLevelKeys = mainNavigator.state.topLevelKeys,
@@ -87,9 +87,9 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     onTabSelected = { mainNavigator.navigate(it) },
                                     onBack = { mainNavigator.goBack() },
-                                    navigateToQRScan = navigator::navigateToQRScan,
-                                    navigateToUploadAlbumWithGallery = navigator::navigateToUploadAlbum,
-                                    navigateToUploadAlbumWithQRScan = navigator::navigateToUploadAlbum,
+                                    navigateToQRScan = mainNavigator::navigateToQRScan,
+                                    navigateToUploadAlbumWithGallery = mainNavigator::navigateToUploadAlbum,
+                                    navigateToUploadAlbumWithQRScan = mainNavigator::navigateToUploadAlbum,
                                 )
                             }
                         }
