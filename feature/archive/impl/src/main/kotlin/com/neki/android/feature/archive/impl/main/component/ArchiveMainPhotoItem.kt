@@ -16,7 +16,7 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.PhotoComponent
-import com.neki.android.core.ui.component.PhotoGridItemOverlay
+import com.neki.android.core.ui.component.GridItemOverlay
 
 @Composable
 internal fun ArchiveMainPhotoItem(
@@ -32,7 +32,7 @@ internal fun ArchiveMainPhotoItem(
             onClickItem = onClickItem,
         )
 
-        PhotoGridItemOverlay(
+        GridItemOverlay(
             modifier = Modifier.matchParentSize(),
             shape = RoundedCornerShape(8.dp),
         )

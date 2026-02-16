@@ -1,6 +1,7 @@
 package com.neki.android.core.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,7 +15,7 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun PhotoGridItemOverlay(
+fun GridItemOverlay(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(8.dp),
 ) {
@@ -42,18 +43,35 @@ fun SelectedPhotoGridItemOverlay(
     shape: Shape = RoundedCornerShape(8.dp),
 ) {
     Box(
-        modifier = modifier.background(
-            color = Color.Black.copy(alpha = 0.2f),
-            shape = shape,
-        ),
+        modifier = modifier
+            .border(
+                width = 2.dp,
+                color = NekiTheme.colorScheme.primary400,
+                shape = shape,
+            )
+            .background(
+                color = Color.Black.copy(alpha = 0.2f),
+                shape = shape,
+            ),
     )
 }
 
 @ComponentPreview
 @Composable
-private fun PhotoGridItemOverlayPreview() {
+private fun GridItemOverlayPreview() {
     NekiTheme {
-        PhotoGridItemOverlay(
+        GridItemOverlay(
+            modifier = Modifier
+                .size(80.dp),
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun SelectedPhotoGridItemOverlayPreview() {
+    NekiTheme {
+        SelectedPhotoGridItemOverlay(
             modifier = Modifier
                 .size(80.dp),
         )

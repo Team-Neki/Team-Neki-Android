@@ -26,6 +26,7 @@ import com.neki.android.core.designsystem.button.CTAButtonGray
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.compose.VerticalSpacer
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -83,18 +84,17 @@ internal fun <T> DoubleButtonOptionBottomSheetContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 34.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(top = 4.dp, bottom = 34.dp),
     ) {
         Text(
+            modifier = Modifier.padding(horizontal = 20.dp),
             text = title,
             style = NekiTheme.typography.title20SemiBold,
             color = NekiTheme.colorScheme.gray900,
         )
-
+        VerticalSpacer(12.dp)
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             options.forEach { option ->
                 OptionRow(
@@ -104,9 +104,12 @@ internal fun <T> DoubleButtonOptionBottomSheetContent(
                 )
             }
         }
+        VerticalSpacer(16.dp)
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             CTAButtonGray(
@@ -136,7 +139,7 @@ private fun OptionRow(
         modifier = modifier
             .fillMaxWidth()
             .noRippleClickable(onClick = onClick)
-            .padding(vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

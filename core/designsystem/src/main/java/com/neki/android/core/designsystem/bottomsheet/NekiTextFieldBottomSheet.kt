@@ -1,26 +1,15 @@
 package com.neki.android.core.designsystem.bottomsheet
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.InputTransformation
-import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.maxLength
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -28,14 +17,10 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.NekiTextFieldWithError
 import com.neki.android.core.designsystem.button.CTAButtonGray
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -124,20 +109,13 @@ private fun NekiTextFieldBottomSheetContent(
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            NekiBottomSheetTextField(
+            NekiTextFieldWithError(
                 textFieldState = textFieldState,
                 placeholder = placeholder,
                 maxLength = maxLength,
                 isError = isError,
                 keyboardOptions = keyboardOptions,
-            )
-
-            // Error message
-            Text(
-                modifier = Modifier.heightIn(min = 16.dp),
-                text = if (isError) errorMessage.orEmpty() else "",
-                style = NekiTheme.typography.caption12Regular,
-                color = NekiTheme.colorScheme.primary600,
+                errorMessage = errorMessage,
             )
         }
 
@@ -161,75 +139,6 @@ private fun NekiTextFieldBottomSheetContent(
             )
         }
     }
-}
-
-@Composable
-private fun NekiBottomSheetTextField(
-    textFieldState: TextFieldState,
-    modifier: Modifier = Modifier,
-    placeholder: String = "",
-    maxLength: Int? = null,
-    isError: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-
-    val borderColor = when {
-        isError -> NekiTheme.colorScheme.primary600
-        isFocused -> NekiTheme.colorScheme.gray700
-        else -> NekiTheme.colorScheme.gray75
-    }
-
-    BasicTextField(
-        state = textFieldState,
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = NekiTheme.colorScheme.white,
-                shape = RoundedCornerShape(8.dp),
-            )
-            .border(
-                width = 1.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(8.dp),
-            )
-            .padding(horizontal = 16.dp, vertical = 13.dp),
-        textStyle = NekiTheme.typography.body16Medium.copy(
-            color = NekiTheme.colorScheme.gray900,
-        ),
-        inputTransformation = maxLength?.let { InputTransformation.maxLength(it) },
-        interactionSource = interactionSource,
-        cursorBrush = SolidColor(NekiTheme.colorScheme.gray800),
-        lineLimits = TextFieldLineLimits.SingleLine,
-        keyboardOptions = keyboardOptions,
-        decorator = { innerTextField ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    if (textFieldState.text.isEmpty()) {
-                        Text(
-                            text = placeholder,
-                            style = NekiTheme.typography.body16Regular,
-                            color = NekiTheme.colorScheme.gray300,
-                        )
-                    }
-                    innerTextField()
-                }
-                maxLength?.let {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${textFieldState.text.length}/$maxLength",
-                        style = NekiTheme.typography.caption12Regular,
-                        color = NekiTheme.colorScheme.gray300,
-                    )
-                }
-            }
-        },
-    )
 }
 
 @ComponentPreview

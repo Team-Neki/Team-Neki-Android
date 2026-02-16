@@ -1,7 +1,7 @@
 package com.neki.android.feature.mypage.api
 
 import androidx.navigation3.runtime.NavKey
-import com.neki.android.core.navigation.Navigator
+import com.neki.android.core.navigation.main.MainNavigator
 import kotlinx.serialization.Serializable
 
 sealed interface MyPageNavKey : NavKey {
@@ -19,18 +19,18 @@ sealed interface MyPageNavKey : NavKey {
     data object EditProfile : MyPageNavKey
 }
 
-fun Navigator.navigateToMyPage() {
+fun MainNavigator.navigateToMyPage() {
     navigate(MyPageNavKey.MyPage)
 }
 
-fun Navigator.navigateToPermission() {
+fun MainNavigator.navigateToPermission() {
     navigate(MyPageNavKey.Permission)
 }
 
-fun Navigator.navigateToProfile() {
+fun MainNavigator.navigateToProfile() {
     navigate(MyPageNavKey.Profile)
 }
 
-fun Navigator.navigateToEditProfile() {
+fun MainNavigator.navigateToEditProfile() {
     navigate(MyPageNavKey.EditProfile)
 }

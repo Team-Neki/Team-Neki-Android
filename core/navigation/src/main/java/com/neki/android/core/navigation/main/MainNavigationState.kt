@@ -1,4 +1,4 @@
-package com.neki.android.core.navigation
+package com.neki.android.core.navigation.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -12,9 +12,10 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import com.neki.android.core.navigation.rememberHiltSharedViewModelStoreNavEntryDecorator
 import javax.inject.Inject
 
-class NavigationState @Inject constructor(
+class MainNavigationState @Inject constructor(
     val startKey: NavKey,
     val topLevelKeys: Set<NavKey>,
 ) {
@@ -30,7 +31,7 @@ class NavigationState @Inject constructor(
 }
 
 @Composable
-fun NavigationState.toEntries(
+fun MainNavigationState.toEntries(
     entryProvider: (NavKey) -> NavEntry<NavKey>,
 ): SnapshotStateList<NavEntry<NavKey>> {
     val sharedViewModelStoreNavEntryDecorator = rememberHiltSharedViewModelStoreNavEntryDecorator<NavKey>()

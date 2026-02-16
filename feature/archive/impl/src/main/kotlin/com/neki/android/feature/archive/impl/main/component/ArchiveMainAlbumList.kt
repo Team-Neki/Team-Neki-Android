@@ -40,9 +40,12 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.backgroundHazeBlur
 import com.neki.android.core.designsystem.modifier.cardShadow
+import com.neki.android.core.designsystem.modifier.dashStroke
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ALBUM_ITEM_HEIGHT
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ALBUM_ITEM_WIDTH
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -154,6 +157,43 @@ internal fun ArchiveMainAlbumList(
 }
 
 @Composable
+private fun AddAlbumItem(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) {
+    Box(
+        modifier = modifier
+            .height(ARCHIVE_ALBUM_ITEM_HEIGHT.dp)
+            .width(ARCHIVE_ALBUM_ITEM_WIDTH.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .dashStroke(
+                color = NekiTheme.colorScheme.primary400,
+                strokeWidth = 2.dp,
+                cornerRadius = 8.dp,
+            )
+            .noRippleClickable(onClick = onClick),
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                modifier = Modifier.size(28.dp),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_plus),
+                tint = NekiTheme.colorScheme.primary400,
+                contentDescription = null,
+            )
+            Text(
+                text = "새 앨범 추가",
+                style = NekiTheme.typography.body14Medium,
+                color = NekiTheme.colorScheme.primary400,
+            )
+        }
+    }
+}
+
+@Composable
 private fun ArchiveAlbumItem(
     title: String,
     photoCount: Int,
@@ -166,23 +206,39 @@ private fun ArchiveAlbumItem(
 
     Box(
         modifier = modifier
-            .height(166.dp)
+            .cardShadow(shape = RoundedCornerShape(8.dp))
+            .height(ARCHIVE_ALBUM_ITEM_HEIGHT.dp)
             .clip(RoundedCornerShape(8.dp))
             .noRippleClickable(onClick = onClick),
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .cardShadow(shape = RoundedCornerShape(8.dp))
-                .matchParentSize()
-                .hazeSource(hazeState)
-                .then(
-                    if (!thumbnailImage.isNullOrBlank()) Modifier
-                    else Modifier.background(color = NekiTheme.colorScheme.gray50),
-                ),
-            model = thumbnailImage,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-        )
+        if (photoCount == 0 || thumbnailImage == null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(NekiTheme.colorScheme.gray25)
+                    .hazeSource(hazeState),
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .padding(top = 38.dp)
+                        .size(40.dp)
+                        .align(Alignment.TopCenter),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_empty_gallery_thumbnail),
+                    tint = NekiTheme.colorScheme.gray100,
+                    contentDescription = null,
+                )
+            }
+        } else {
+            AsyncImage(
+                modifier = Modifier
+                    .background(color = Color.Black.copy(alpha = 0.04f))
+                    .matchParentSize()
+                    .hazeSource(hazeState),
+                model = thumbnailImage,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+        }
         AlbumFolder(
             modifier = Modifier.align(Alignment.BottomCenter),
             hazeState = hazeState,
@@ -202,7 +258,7 @@ private fun AlbumFolder(
     isFavorite: Boolean = false,
 ) {
     AlbumFolderLayout(
-        modifier = modifier.width(124.dp),
+        modifier = modifier.width(ARCHIVE_ALBUM_ITEM_WIDTH.dp),
         hazeState = hazeState,
         color = if (isFavorite) NekiTheme.colorScheme.favoriteAlbumCover
         else NekiTheme.colorScheme.defaultAlbumCover,
@@ -282,12 +338,31 @@ private fun AlbumFolderLayout(
 
 @ComponentPreview
 @Composable
-private fun FavoriteAlbumItemPreview() {
+private fun AddAlbumItemPreview() {
     NekiTheme {
         Box(modifier = Modifier.padding(8.dp)) {
+            AddAlbumItem()
+        }
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun FavoriteAlbumItemPreview() {
+    NekiTheme {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ArchiveAlbumItem(
+                isFavorite = true,
+                title = "즐겨찾기",
+                photoCount = 0,
+            )
             ArchiveAlbumItem(
                 isFavorite = true,
                 title = "네키 화이팅화이팅",
+                thumbnailImage = "https://example.com/photo.jpg",
                 photoCount = 10,
             )
         }
@@ -298,9 +373,17 @@ private fun FavoriteAlbumItemPreview() {
 @Composable
 private fun ArchiveAlbumItemPreview() {
     NekiTheme {
-        Box(modifier = Modifier.padding(8.dp)) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ArchiveAlbumItem(
+                title = "빈 앨범",
+                photoCount = 0,
+            )
             ArchiveAlbumItem(
                 title = "네키 화이팅화이팅",
+                thumbnailImage = "https://example.com/photo.jpg",
                 photoCount = 10,
             )
         }

@@ -29,6 +29,7 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.logo.PrimaryNekiTypoLogo
 import com.neki.android.core.designsystem.modifier.dropdownShadow
+import com.neki.android.core.designsystem.popup.ArrowDirection
 import com.neki.android.core.designsystem.popup.ToolTipPopup
 import com.neki.android.core.designsystem.topbar.NekiLeftTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -107,9 +108,10 @@ private fun ArchiveToolTip(
 
     ToolTipPopup(
         tooltipText = "버튼을 눌러 네컷을 추가할 수 있어요",
-        color = NekiTheme.colorScheme.gray800,
         offset = offset,
         alignment = Alignment.TopEnd,
+        arrowDirection = ArrowDirection.Up,
+        arrowAlignment = Alignment.CenterEnd,
         onDismissRequest = onDismissRequest,
     )
 }
