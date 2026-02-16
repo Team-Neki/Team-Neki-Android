@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.actionbar.NekiBothSidesActionBar
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
@@ -25,51 +25,48 @@ internal fun PhotoDetailActionBar(
     onClickFavorite: () -> Unit = {},
     onClickDelete: () -> Unit = {},
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+    NekiBothSidesActionBar(
+        modifier = modifier.fillMaxWidth(),
+        startContent = {
+            Row(
+                modifier = Modifier.padding(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .noRippleClickable { onClickDownload() },
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_download),
+                    contentDescription = null,
+                    tint = NekiTheme.colorScheme.gray700,
+                )
+
+                Icon(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .noRippleClickable { onClickFavorite() },
+                    imageVector = ImageVector.vectorResource(
+                        if (isFavorite) R.drawable.icon_heart_filled
+                        else R.drawable.icon_heart_stroked,
+                    ),
+                    contentDescription = null,
+                    tint = if (isFavorite) NekiTheme.colorScheme.primary400
+                    else NekiTheme.colorScheme.gray700,
+                )
+            }
+        },
+        endContent = {
             Icon(
                 modifier = Modifier
+                    .padding(20.dp)
                     .size(28.dp)
-                    .noRippleClickable { onClickDownload() },
-                imageVector = ImageVector.vectorResource(R.drawable.icon_download),
+                    .noRippleClickable { onClickDelete() },
+                imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
                 contentDescription = null,
-                tint = NekiTheme.colorScheme.gray500,
+                tint = NekiTheme.colorScheme.gray700,
             )
-
-            Icon(
-                modifier = Modifier
-                    .size(28.dp)
-                    .noRippleClickable { onClickFavorite() },
-                imageVector = ImageVector.vectorResource(
-                    if (isFavorite) R.drawable.icon_heart_filled
-                    else R.drawable.icon_heart_stroked,
-                ),
-                contentDescription = null,
-                tint = if (isFavorite) {
-                    NekiTheme.colorScheme.primary400
-                } else {
-                    NekiTheme.colorScheme.gray700
-                },
-            )
-        }
-
-        Icon(
-            modifier = Modifier
-                .size(28.dp)
-                .noRippleClickable { onClickDelete() },
-            imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
-            contentDescription = null,
-            tint = NekiTheme.colorScheme.gray600,
-        )
-    }
+        },
+    )
 }
 
 @ComponentPreview

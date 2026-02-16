@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,7 @@ fun FilterBar(
     defaultChipDisplayText: String,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
+    chipShape: Shape = CircleShape,
     onClickDownIconChip: () -> Unit = {},
     onClickDefaultChip: () -> Unit = {},
 ) {
@@ -50,11 +52,13 @@ fun FilterBar(
             DownIconFilterChip(
                 isSelected = isDownIconChipSelected,
                 displayText = downIconChipDisplayText,
+                chipShape = chipShape,
                 onClick = onClickDownIconChip,
             )
             DefaultFilterChip(
                 isSelected = isDefaultChipSelected,
                 displayText = defaultChipDisplayText,
+                chipShape = chipShape,
                 onClick = onClickDefaultChip,
             )
         }
@@ -66,12 +70,13 @@ private fun DownIconFilterChip(
     isSelected: Boolean,
     displayText: String,
     modifier: Modifier = Modifier,
+    chipShape: Shape = CircleShape,
     onClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
             .background(
-                shape = CircleShape,
+                shape = chipShape,
                 color = if (isSelected) NekiTheme.colorScheme.gray800
                 else NekiTheme.colorScheme.gray50,
             )
@@ -100,12 +105,13 @@ private fun DefaultFilterChip(
     isSelected: Boolean,
     displayText: String,
     modifier: Modifier = Modifier,
+    chipShape: Shape = CircleShape,
     onClick: () -> Unit = {},
 ) {
     Text(
         modifier = modifier
             .background(
-                shape = CircleShape,
+                shape = chipShape,
                 color = if (isSelected) NekiTheme.colorScheme.gray800
                 else NekiTheme.colorScheme.gray50,
             )

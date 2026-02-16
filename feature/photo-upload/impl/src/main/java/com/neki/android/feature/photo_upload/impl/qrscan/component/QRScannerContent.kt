@@ -161,7 +161,7 @@ internal fun QRScannerContent(
                 NekiIconButton(
                     modifier = Modifier
                         .padding(top = 37.dp)
-                        .size(48.dp)
+                        .size(56.dp)
                         .clip(CircleShape)
                         .background(
                             if (isTorchEnabled) Color.White
@@ -170,6 +170,7 @@ internal fun QRScannerContent(
                     onClick = { onIntent(QRScanIntent.ToggleTorch) },
                 ) {
                     Icon(
+                        modifier = Modifier.size(28.dp),
                         imageVector = ImageVector.vectorResource(
                             if (isTorchEnabled) R.drawable.icon_torch_on
                             else R.drawable.icon_torch_off,

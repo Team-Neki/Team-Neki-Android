@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.component
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,7 +18,7 @@ import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.PhotoComponent
-import com.neki.android.core.ui.component.PhotoGridItemOverlay
+import com.neki.android.core.ui.component.GridItemOverlay
 import com.neki.android.core.ui.component.SelectedPhotoGridItemOverlay
 import com.neki.android.core.ui.component.SelectionCheckbox
 
@@ -37,14 +36,7 @@ internal fun SelectablePhotoItem(
     ) {
         PhotoComponent(
             photo = photo,
-            modifier = Modifier.then(
-                if (isSelected)
-                    Modifier.border(
-                        width = 2.dp,
-                        color = NekiTheme.colorScheme.primary400,
-                        shape = RoundedCornerShape(8.dp),
-                    ) else Modifier.clip(RoundedCornerShape(8.dp)),
-            ),
+            modifier = Modifier.clip(RoundedCornerShape(8.dp)),
             onClickItem = onClickItem,
         )
 
@@ -54,7 +46,7 @@ internal fun SelectablePhotoItem(
                 shape = RoundedCornerShape(8.dp),
             )
         } else {
-            PhotoGridItemOverlay(
+            GridItemOverlay(
                 modifier = Modifier.matchParentSize(),
                 shape = RoundedCornerShape(8.dp),
             )

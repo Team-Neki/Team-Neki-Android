@@ -35,24 +35,6 @@ fun NekiTitleTopBar(
 }
 
 @Composable
-fun NekiLeftTitleTopBar(
-    modifier: Modifier = Modifier,
-    title: @Composable (() -> Unit)? = null,
-    actions: @Composable (() -> Unit)? = null,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(54.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        title?.invoke()
-        actions?.invoke()
-    }
-}
-
-@Composable
 private fun NekiTopBar(
     modifier: Modifier = Modifier,
     title: @Composable ((Modifier) -> Unit)? = null,
@@ -67,5 +49,23 @@ private fun NekiTopBar(
         leadingIcon?.invoke(Modifier.align(Alignment.CenterStart))
         title?.invoke(Modifier.align(Alignment.Center))
         actions?.invoke(Modifier.align(Alignment.CenterEnd))
+    }
+}
+
+@Composable
+fun NekiLeftTitleTopBar(
+    modifier: Modifier = Modifier,
+    title: @Composable (() -> Unit)? = null,
+    actions: @Composable (() -> Unit)? = null,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(54.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        title?.invoke()
+        actions?.invoke()
     }
 }
