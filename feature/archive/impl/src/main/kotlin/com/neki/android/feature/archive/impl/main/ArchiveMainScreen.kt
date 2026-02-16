@@ -41,14 +41,14 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.main.component.AlbumUploadOption
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
-import com.neki.android.feature.archive.impl.main.component.AlbumUploadOption
-import com.neki.android.feature.archive.impl.main.component.SelectWithAlbumDialog
-import com.neki.android.feature.archive.impl.main.component.GotoTopButton
 import com.neki.android.feature.archive.impl.main.component.EmptyContent
+import com.neki.android.feature.archive.impl.main.component.GotoTopButton
+import com.neki.android.feature.archive.impl.main.component.SelectWithAlbumDialog
 import kotlinx.collections.immutable.persistentListOf
 import timber.log.Timber
 
@@ -114,13 +114,8 @@ internal fun ArchiveMainScreen(
             ArchiveMainTopBar(
                 modifier = Modifier.padding(start = 20.dp, end = 8.dp),
                 showTooltip = uiState.isFirstEntered,
-                showAddPopup = uiState.isShowAddDialog,
-                onClickPlusIcon = { onIntent(ArchiveMainIntent.ClickAddIcon) },
+                onClickQRCodeIcon = { onIntent(ArchiveMainIntent.ClickQRScanIcon) },
                 onClickNotificationIcon = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
-                onClickQRScan = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
-                onClickGallery = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
-                onClickNewAlbum = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
-                onDismissAddPopup = { onIntent(ArchiveMainIntent.DismissAddPopup) },
                 onDismissToolTipPopup = { onIntent(ArchiveMainIntent.DismissToolTipPopup) },
             )
             ArchiveMainContent(

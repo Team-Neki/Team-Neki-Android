@@ -15,7 +15,6 @@ data class ArchiveMainState(
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
     val scannedImageUrl: String? = null,
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
-    val isShowAddDialog: Boolean = false,
     val isShowSelectWithAlbumDialog: Boolean = false,
     val isShowAddAlbumBottomSheet: Boolean = false,
 ) {
@@ -26,23 +25,17 @@ data class ArchiveMainState(
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent
     data object RefreshArchiveMainScreen : ArchiveMainIntent
-    data class QRCodeScanned(val imageUrl: String) : ArchiveMainIntent
     data object ClickScreen : ArchiveMainIntent
     data object ClickGoToTopButton : ArchiveMainIntent
 
     // TopBar Intent
-    data object ClickAddIcon : ArchiveMainIntent
-    data object DismissAddPopup : ArchiveMainIntent
     data object DismissToolTipPopup : ArchiveMainIntent
-    data object ClickQRScanRow : ArchiveMainIntent
+    data object ClickQRScanIcon : ArchiveMainIntent
 
-    data object ClickGalleryUploadRow : ArchiveMainIntent
     data class SelectGalleryImage(val uris: List<Uri>) : ArchiveMainIntent
     data object DismissSelectWithAlbumDialog : ArchiveMainIntent
     data object ClickUploadWithAlbumRow : ArchiveMainIntent
     data object ClickUploadWithoutAlbumRow : ArchiveMainIntent
-
-    data object ClickAddNewAlbumRow : ArchiveMainIntent
     data object ClickNotificationIcon : ArchiveMainIntent
 
     // Album Intent
@@ -57,6 +50,10 @@ sealed interface ArchiveMainIntent {
     // Add Album BottomSheet Intent
     data object DismissAddAlbumBottomSheet : ArchiveMainIntent
     data class ClickAddAlbumButton(val albumName: String) : ArchiveMainIntent
+
+    // Result
+    data class QRCodeScanned(val imageUrl: String) : ArchiveMainIntent
+    data object ReceiveOpenGalleryResult : ArchiveMainIntent
 }
 
 sealed interface ArchiveMainSideEffect {

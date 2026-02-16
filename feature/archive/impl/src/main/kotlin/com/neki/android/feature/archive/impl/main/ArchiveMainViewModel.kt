@@ -46,31 +46,14 @@ class ArchiveMainViewModel @Inject constructor(
     ) {
         if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
-            is ArchiveMainIntent.QRCodeScanned -> reduce {
-                copy(
-                    scannedImageUrl = intent.imageUrl,
-                    isShowSelectWithAlbumDialog = true,
-                )
-            }
-
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
             ArchiveMainIntent.RefreshArchiveMainScreen -> fetchInitialData(reduce)
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
             // TopBar Intent
-            ArchiveMainIntent.ClickAddIcon -> reduce { copy(isShowAddDialog = true) }
-            ArchiveMainIntent.DismissAddPopup -> reduce { copy(isShowAddDialog = false) }
             ArchiveMainIntent.DismissToolTipPopup -> reduce { copy(isFirstEntered = false) }
-            ArchiveMainIntent.ClickQRScanRow -> {
-                reduce { copy(isShowAddDialog = false) }
-                postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
-            }
-
-            ArchiveMainIntent.ClickGalleryUploadRow -> {
-                reduce { copy(isShowAddDialog = false) }
-                postSideEffect(ArchiveMainSideEffect.OpenGallery)
-            }
+            ArchiveMainIntent.ClickQRScanIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
 
             is ArchiveMainIntent.SelectGalleryImage -> reduce {
                 copy(
@@ -95,13 +78,6 @@ class ArchiveMainViewModel @Inject constructor(
 
             ArchiveMainIntent.ClickUploadWithoutAlbumRow -> uploadWithoutAlbum(state, reduce, postSideEffect)
 
-            ArchiveMainIntent.ClickAddNewAlbumRow -> reduce {
-                copy(
-                    isShowAddDialog = false,
-                    isShowAddAlbumBottomSheet = true,
-                )
-            }
-
             ArchiveMainIntent.ClickNotificationIcon -> {}
 
             // Album Intent
@@ -116,6 +92,16 @@ class ArchiveMainViewModel @Inject constructor(
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
             is ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(intent.albumName, reduce, postSideEffect)
+
+            // Result
+            is ArchiveMainIntent.QRCodeScanned -> reduce {
+                copy(
+                    scannedImageUrl = intent.imageUrl,
+                    isShowSelectWithAlbumDialog = true,
+                )
+            }
+
+            ArchiveMainIntent.ReceiveOpenGalleryResult -> postSideEffect(ArchiveMainSideEffect.OpenGallery)
         }
     }
 
