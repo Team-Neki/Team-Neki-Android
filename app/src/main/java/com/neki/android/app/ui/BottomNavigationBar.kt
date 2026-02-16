@@ -59,7 +59,7 @@ fun BottomNavigationBar(
     ) {
         Box(
             modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = Alignment.BottomCenter,
         ) {
             Surface(
                 modifier = Modifier

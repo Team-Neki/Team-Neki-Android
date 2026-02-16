@@ -57,7 +57,7 @@ class MainViewModel @Inject constructor(
                     copy(
                         isShowSelectWithAlbumDialog = false,
                         scannedImageUrl = null,
-                        selectedUris = persistentListOf()
+                        selectedUris = persistentListOf(),
                     )
                 }
                 if (state.scannedImageUrl != null) {
