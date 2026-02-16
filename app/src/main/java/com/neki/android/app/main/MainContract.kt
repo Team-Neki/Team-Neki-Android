@@ -1,4 +1,4 @@
-package com.neki.android.app
+package com.neki.android.app.main
 
 import android.net.Uri
 import kotlinx.collections.immutable.ImmutableList

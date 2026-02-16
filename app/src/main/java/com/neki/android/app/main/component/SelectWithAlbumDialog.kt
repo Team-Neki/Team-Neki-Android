@@ -1,4 +1,4 @@
-package com.neki.android.app.ui
+package com.neki.android.app.main.component
 
 import androidx.compose.runtime.Composable
 import com.neki.android.core.designsystem.ComponentPreview

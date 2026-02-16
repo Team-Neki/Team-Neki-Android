@@ -1,4 +1,4 @@
-package com.neki.android.app.ui
+package com.neki.android.app.main.component
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.border
@@ -29,7 +29,7 @@ import com.neki.android.feature.archive.impl.R as ArchiveR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddPhotoBottomSheet(
+internal fun AddPhotoBottomSheet(
     onDismissRequest: () -> Unit,
     onClickQRScan: () -> Unit,
     onClickGallery: () -> Unit,

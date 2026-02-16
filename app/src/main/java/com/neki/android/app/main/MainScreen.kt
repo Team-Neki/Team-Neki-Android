@@ -1,4 +1,4 @@
-package com.neki.android.app
+package com.neki.android.app.main
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -20,10 +20,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
-import com.neki.android.app.ui.AddPhotoBottomSheet
-import com.neki.android.app.ui.AlbumUploadOption
+import com.neki.android.app.main.component.AddPhotoBottomSheet
+import com.neki.android.app.main.component.AlbumUploadOption
 import com.neki.android.app.ui.BottomNavigationBar
-import com.neki.android.app.ui.SelectWithAlbumDialog
+import com.neki.android.app.main.component.SelectWithAlbumDialog
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.core.ui.component.LoadingDialog
