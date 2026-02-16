@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
+import com.neki.android.core.designsystem.popup.ArrowDirection
 import com.neki.android.core.designsystem.popup.ToolTipPopup
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
@@ -41,9 +42,10 @@ internal fun InfoToolTip(
         if (isShowTooltip) {
             ToolTipPopup(
                 tooltipText = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
-                color = NekiTheme.colorScheme.gray800,
                 offset = IntOffset(popupOffsetX, popupOffsetY),
                 alignment = Alignment.TopEnd,
+                arrowDirection = ArrowDirection.Up,
+                arrowAlignment = Alignment.CenterEnd,
                 onDismissRequest = onDismissTooltip,
             )
         }
