@@ -20,6 +20,51 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
+/**
+ * 단순 액션용 드롭다운
+ * */
+@Composable
+fun <T> DropdownPopup(
+    items: ImmutableList<T>,
+    onSelect: (T) -> Unit,
+    onDismissRequest: () -> Unit,
+    itemLabel: (T) -> String,
+    modifier: Modifier = Modifier,
+    offset: IntOffset = IntOffset.Zero,
+    alignment: Alignment = Alignment.TopStart,
+) {
+    Popup(
+        offset = offset,
+        alignment = alignment,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(focusable = true),
+    ) {
+        Column(
+            modifier = modifier
+                .dropdownShadow(shape = RoundedCornerShape(8.dp))
+                .background(
+                    color = NekiTheme.colorScheme.white,
+                    shape = RoundedCornerShape(8.dp),
+                )
+                .padding(vertical = 6.dp),
+        ) {
+            items.forEach { item ->
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickableSingle { onSelect(item) }
+                        .padding(horizontal = 16.dp, vertical = 5.dp),
+                    text = itemLabel(item),
+                    style = NekiTheme.typography.body14Medium,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 선택값을 유지해야하는 경우에 쓰이는 드롭다운
+ * */
 @Composable
 fun <T> DropdownPopup(
     items: ImmutableList<T>,
