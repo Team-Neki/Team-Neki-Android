@@ -26,6 +26,7 @@ fun MainScreen(
     onTabSelected: (NavKey) -> Unit,
     onBack: () -> Unit,
     navigateToLogin: () -> Unit,
+    onClickFab: () -> Unit,
 ) {
     val shouldShowBottomBar by remember(currentKey) {
         mutableStateOf(currentKey in topLevelKeys)
@@ -41,6 +42,7 @@ fun MainScreen(
                 currentTab = currentTopLevelKey,
                 currentKey = currentKey,
                 onTabSelected = { onTabSelected(it.navKey) },
+                onClickFab = onClickFab,
             )
         },
     ) { innerPadding ->
