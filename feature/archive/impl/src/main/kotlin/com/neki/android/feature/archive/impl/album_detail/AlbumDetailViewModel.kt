@@ -189,6 +189,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
             // TODO: 추후 즐겨찾기 옵션 추가
             uploadMultiplePhotoUseCase(
                 imageUris = imageUris,
+                folderId = id.takeUnless { isFavoriteAlbum },
             ).onSuccess {
                 reduce { copy(isLoading = false) }
                 postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
