@@ -103,7 +103,6 @@ private fun SelectingTopBar(
     )
 }
 
-
 @ComponentPreview
 @Composable
 private fun AllAlbumTopBarDefaultPreview() {

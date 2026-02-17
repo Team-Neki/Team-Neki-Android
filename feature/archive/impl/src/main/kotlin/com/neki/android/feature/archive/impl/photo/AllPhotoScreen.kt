@@ -123,10 +123,7 @@ internal fun AllPhotoScreen(
     }
 
     if (isEmpty) {
-        EmptyAlbumContent(
-            title = "모든 사진",
-            onClickBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
-        )
+        EmptyAlbumContent()
     } else {
         AllPhotoContent(
             uiState = uiState,
