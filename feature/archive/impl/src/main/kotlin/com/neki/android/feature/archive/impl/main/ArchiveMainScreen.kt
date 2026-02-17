@@ -45,7 +45,7 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
-import com.neki.android.feature.archive.impl.main.component.EmptyContent
+import com.neki.android.feature.archive.impl.component.EmptyPhotoContent
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
 import com.neki.android.feature.archive.impl.main.component.SelectWithAlbumDialog
 import kotlinx.collections.immutable.persistentListOf
@@ -234,7 +234,7 @@ private fun ArchiveMainContent(
 
         if (uiState.recentPhotos.isEmpty()) {
             item(span = StaggeredGridItemSpan.FullLine) {
-                EmptyContent(
+                EmptyPhotoContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 70.dp),
