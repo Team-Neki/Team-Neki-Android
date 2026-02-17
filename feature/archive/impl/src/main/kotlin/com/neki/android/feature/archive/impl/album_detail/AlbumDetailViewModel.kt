@@ -90,7 +90,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
             AlbumDetailIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.ClickOptionIcon -> reduce { copy(isShowOptionPopup = true) }
             AlbumDetailIntent.DismissOptionPopup -> reduce { copy(isShowOptionPopup = false) }
-            AlbumDetailIntent.ClickSelectButton -> {
+            AlbumDetailIntent.ClickSelectOption -> {
                 reduce {
                     copy(
                         selectMode = SelectMode.SELECTING,
@@ -99,14 +99,18 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 }
             }
 
-            AlbumDetailIntent.ClickAddPhotoButton -> {
+            AlbumDetailIntent.ClickAddPhotoOption -> {
                 reduce { copy(isShowOptionPopup = false) }
                 postSideEffect(AlbumDetailSideEffect.OpenGallery)
             }
 
-            AlbumDetailIntent.ClickRenameAlbumButton -> {
-                reduce { copy(isShowOptionPopup = false) }
-                // TODO: 앨범 이름 변경
+            AlbumDetailIntent.ClickRenameAlbumOption -> {
+                reduce {
+                    copy(
+                        isShowOptionPopup = false,
+                        isShowRenameAlbumBottomSheet = true,
+                    )
+                }
             }
 
             AlbumDetailIntent.ClickCancelButton -> reduce {
@@ -140,6 +144,36 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
             is AlbumDetailIntent.FavoriteChanged -> {
                 updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
+            }
+
+            AlbumDetailIntent.DismissRenameBottomSheet -> reduce { copy(isShowRenameAlbumBottomSheet = false) }
+            AlbumDetailIntent.ClickRenameBottomSheetCancelButton -> reduce { copy(isShowRenameAlbumBottomSheet = false) }
+            AlbumDetailIntent.ClickRenameBottomSheetConfirmButton -> handleRenameAlbum(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun handleRenameAlbum(
+        state: AlbumDetailState,
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        reduce { copy(isLoading = true) }
+        viewModelScope.launch {
+            folderRepository.updateFolder(
+                folderId = id,
+                name = state.renameAlbumTextState.text.toString(),
+            ).onSuccess {
+                reduce {
+                    copy(
+                        isShowRenameAlbumBottomSheet = false,
+                        isLoading = false,
+                    )
+                }
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("앨범 이름을 변경했어요"))
+            }.onFailure { e ->
+                Timber.e(e)
+                reduce { copy(isLoading = false) }
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("앨범 이름 변경에 실패했어요"))
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.neki.android.feature.archive.impl.album_detail
 
 import android.net.Uri
+import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.Photo
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
@@ -17,6 +18,9 @@ data class AlbumDetailState(
     val isShowDeleteDialog: Boolean = false,
     val isShowDeleteBottomSheet: Boolean = false,
     val selectedDeleteOption: PhotoDeleteOption = PhotoDeleteOption.REMOVE_FROM_ALBUM,
+
+    val renameAlbumTextState: TextFieldState = TextFieldState(),
+    val isShowRenameAlbumBottomSheet: Boolean = false,
 )
 
 enum class PhotoDeleteOption(val label: String) {
@@ -34,9 +38,9 @@ sealed interface AlbumDetailIntent {
     data object ClickBackIcon : AlbumDetailIntent
     data object OnBackPressed : AlbumDetailIntent
     data object ClickOptionIcon : AlbumDetailIntent
-    data object ClickSelectButton : AlbumDetailIntent
-    data object ClickAddPhotoButton : AlbumDetailIntent
-    data object ClickRenameAlbumButton : AlbumDetailIntent
+    data object ClickSelectOption : AlbumDetailIntent
+    data object ClickAddPhotoOption : AlbumDetailIntent
+    data object ClickRenameAlbumOption : AlbumDetailIntent
     data object ClickCancelButton : AlbumDetailIntent
     data object DismissOptionPopup : AlbumDetailIntent
 
@@ -60,6 +64,11 @@ sealed interface AlbumDetailIntent {
 
     // Gallery Intent
     data class SelectGalleryImage(val uris: List<Uri>) : AlbumDetailIntent
+
+    // Rename BottomSheet Intent
+    data object DismissRenameBottomSheet : AlbumDetailIntent
+    data object ClickRenameBottomSheetCancelButton : AlbumDetailIntent
+    data object ClickRenameBottomSheetConfirmButton : AlbumDetailIntent
 
     // Result Intent
     data class PhotoDeleted(val photoIds: List<Long>) : AlbumDetailIntent
