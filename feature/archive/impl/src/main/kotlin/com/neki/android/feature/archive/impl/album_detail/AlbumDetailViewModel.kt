@@ -109,6 +109,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     copy(
                         isShowOptionPopup = false,
                         isShowRenameAlbumBottomSheet = true,
+                        renameAlbumTextState = TextFieldState(initialText = title),
                     )
                 }
             }
@@ -146,8 +147,12 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
             }
 
-            AlbumDetailIntent.DismissRenameBottomSheet -> reduce { copy(isShowRenameAlbumBottomSheet = false) }
-            AlbumDetailIntent.ClickRenameBottomSheetCancelButton -> reduce { copy(isShowRenameAlbumBottomSheet = false) }
+            AlbumDetailIntent.DismissRenameBottomSheet -> reduce {
+                copy(isShowRenameAlbumBottomSheet = false, renameAlbumTextState = TextFieldState())
+            }
+            AlbumDetailIntent.ClickRenameBottomSheetCancelButton -> reduce {
+                copy(isShowRenameAlbumBottomSheet = false, renameAlbumTextState = TextFieldState())
+            }
             AlbumDetailIntent.ClickRenameBottomSheetConfirmButton -> handleRenameAlbum(state, reduce, postSideEffect)
         }
     }
@@ -159,7 +164,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     ) {
         reduce { copy(isLoading = true) }
         viewModelScope.launch {
-            val newName = state.renameAlbumTextState.text.toString()
+            val newName = state.renameAlbumTextState.text.trim().toString()
             folderRepository.updateFolder(
                 folderId = id,
                 name = newName,
