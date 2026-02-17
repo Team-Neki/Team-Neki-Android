@@ -39,7 +39,7 @@ class FolderRepositoryImpl @Inject constructor(
 
     override suspend fun updateFolder(folderId: Long, name: String): Result<Unit> = runSuspendCatching {
         folderService.updateFolder(
-            folderId = 1L,
+            folderId = folderId,
             requestBody = UpdateFolderRequest(name = name),
         ).data
     }

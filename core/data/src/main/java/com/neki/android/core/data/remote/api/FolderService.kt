@@ -13,6 +13,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import javax.inject.Inject
@@ -47,7 +48,7 @@ class FolderService @Inject constructor(
 
     // 폴더 갱신 (이름 변경)
     suspend fun updateFolder(folderId: Long, requestBody: UpdateFolderRequest): BasicNullableResponse<Unit> {
-        return client.post("/api/folders/$folderId") {
+        return client.patch("/api/folders/$folderId") {
             setBody(requestBody)
         }.body()
     }
