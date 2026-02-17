@@ -159,12 +159,14 @@ class AlbumDetailViewModel @AssistedInject constructor(
     ) {
         reduce { copy(isLoading = true) }
         viewModelScope.launch {
+            val newName = state.renameAlbumTextState.text.toString()
             folderRepository.updateFolder(
                 folderId = id,
-                name = state.renameAlbumTextState.text.toString(),
+                name = newName,
             ).onSuccess {
                 reduce {
                     copy(
+                        title = newName,
                         isShowRenameAlbumBottomSheet = false,
                         isLoading = false,
                     )
