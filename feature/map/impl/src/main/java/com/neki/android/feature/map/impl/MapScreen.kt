@@ -39,7 +39,6 @@ import com.naver.maps.map.compose.rememberFusedLocationSource
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
-import com.neki.android.core.designsystem.dialog.WarningDialog
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast

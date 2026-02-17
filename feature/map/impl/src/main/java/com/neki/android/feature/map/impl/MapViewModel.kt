@@ -64,7 +64,7 @@ class MapViewModel @Inject constructor(
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
-            MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoTooltip = true) }
+            MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoTooltip = true, hasInfoTooltipShown = true) }
             MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoTooltip = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, reduce)
@@ -79,7 +79,13 @@ class MapViewModel @Inject constructor(
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
-            is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
+            is MapIntent.ChangeDragLevel -> {
+                if (intent.dragLevel == DragLevel.THIRD && !state.hasInfoTooltipShown) {
+                    reduce { copy(dragLevel = intent.dragLevel, isShowInfoTooltip = true, hasInfoTooltipShown = true) }
+                } else {
+                    reduce { copy(dragLevel = intent.dragLevel) }
+                }
+            }
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
             MapIntent.ClickDirectionIcon -> {

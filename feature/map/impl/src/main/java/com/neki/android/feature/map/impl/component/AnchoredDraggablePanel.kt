@@ -240,7 +240,7 @@ internal fun AnchoredPanelContent(
                 )
             }
             InfoToolTip(
-                isShowTooltip = isShowInfoTooltip,
+                isShowInfoTooltip = isShowInfoTooltip,
                 onClickInfoIcon = onClickInfoIcon,
                 onDismissTooltip = onDismissInfoTooltip,
             )

@@ -21,7 +21,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
 internal fun InfoToolTip(
-    isShowTooltip: Boolean,
+    isShowInfoTooltip: Boolean,
     onClickInfoIcon: () -> Unit,
     onDismissTooltip: () -> Unit,
 ) {
@@ -39,7 +39,7 @@ internal fun InfoToolTip(
             contentDescription = null,
             tint = NekiTheme.colorScheme.gray300,
         )
-        if (isShowTooltip) {
+        if (isShowInfoTooltip) {
             ToolTipPopup(
                 tooltipText = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
                 offset = IntOffset(popupOffsetX, popupOffsetY),
@@ -58,7 +58,7 @@ private fun InfoToolTipPreview() {
     NekiTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             InfoToolTip(
-                isShowTooltip = true,
+                isShowInfoTooltip = true,
                 onClickInfoIcon = {},
                 onDismissTooltip = {},
             )
