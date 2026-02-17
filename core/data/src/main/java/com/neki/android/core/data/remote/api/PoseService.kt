@@ -50,7 +50,7 @@ class PoseService @Inject constructor(
         size: Int = 20,
         sortOrder: String = "DESC",
     ): BasicResponse<PoseResponse> {
-        return client.get("/api/poses/bookmark") {
+        return client.get("/api/poses/scrap") {
             parameter("page", page)
             parameter("size", size)
             parameter("sortOrder", sortOrder)
