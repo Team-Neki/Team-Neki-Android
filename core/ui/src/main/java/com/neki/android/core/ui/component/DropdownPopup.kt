@@ -57,7 +57,7 @@ fun <T> DropdownPopup(
                         .clickableSingle { onSelect(item) }
                         .padding(horizontal = 12.dp, vertical = 5.dp),
                     text = itemLabel(item),
-                    style = NekiTheme.typography.body14Medium,
+                    style = NekiTheme.typography.body16Medium,
                 )
             }
         }

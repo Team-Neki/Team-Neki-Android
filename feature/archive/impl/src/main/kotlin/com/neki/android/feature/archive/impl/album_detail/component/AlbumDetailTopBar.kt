@@ -95,7 +95,7 @@ internal fun AlbumDetailTopBar(
                 },
                 onDismissRequest = onDismissPopup,
                 itemLabel = { it.label },
-                modifier = Modifier.width(158.dp),
+                modifier = Modifier.width(120.dp),
                 offset = IntOffset(x = popupOffsetX, y = popupOffsetY),
                 alignment = Alignment.TopEnd,
             )
