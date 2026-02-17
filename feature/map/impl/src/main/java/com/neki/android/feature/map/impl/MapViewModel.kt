@@ -64,7 +64,13 @@ class MapViewModel @Inject constructor(
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
-            MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoTooltip = true, hasInfoTooltipShown = true) }
+            MapIntent.ClickInfoIcon -> {
+                if (state.dragLevel == DragLevel.THIRD) {
+                    reduce { copy(isShowInfoTooltip = true, hasInfoTooltipShown = true) }
+                } else {
+                    reduce { copy(dragLevel = DragLevel.THIRD, isShowInfoTooltip = true, hasInfoTooltipShown = true) }
+                }
+            }
             MapIntent.DismissInfoTooltip -> reduce { copy(isShowInfoTooltip = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, reduce)
