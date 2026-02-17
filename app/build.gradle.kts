@@ -23,11 +23,8 @@ android {
 
     defaultConfig {
         val naverMapClientId = properties["NAVER_MAP_CLIENT_ID"].toString()
-        val kakaoKey = properties["KAKAO_NATIVE_APP_KEY"].toString()
-        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
 
         buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
-        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
     }
 
     signingConfigs {
@@ -39,13 +36,25 @@ android {
         }
     }
     buildTypes {
-        getByName("release") {
+        debug {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+
+            val kakaoKey = properties["KAKAO_DEV_NATIVE_APP_KEY"].toString()
+            manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
+            buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
+        }
+        release {
             isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            val kakaoKey = properties["KAKAO_NATIVE_APP_KEY"].toString()
+            manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
+            buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
         }
     }
 
