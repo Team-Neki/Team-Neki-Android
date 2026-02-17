@@ -80,11 +80,11 @@ fun PoseScreen(
     ) {
         PoseContent(
             selectedPeopleCount = uiState.selectedPeopleCount,
-            isScrapSelected = uiState.isShowScrappedPose,
+            isBookmarkSelected = uiState.isShowBookmarkedPose,
             posePagingItems = posePagingItems,
             onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
-            onClickScrap = { onIntent(PoseIntent.ClickScrapChip) },
+            onClickBookmark = { onIntent(PoseIntent.ClickBookmarkChip) },
             onClickPoseItem = { onIntent(PoseIntent.ClickPoseItem(it)) },
         )
 
@@ -122,11 +122,11 @@ fun PoseScreen(
 fun PoseContent(
     modifier: Modifier = Modifier,
     selectedPeopleCount: PeopleCount?,
-    isScrapSelected: Boolean,
+    isBookmarkSelected: Boolean,
     posePagingItems: LazyPagingItems<Pose>,
     onClickAlarmIcon: () -> Unit = {},
     onClickPeopleCount: () -> Unit = {},
-    onClickScrap: () -> Unit = {},
+    onClickBookmark: () -> Unit = {},
     onClickPoseItem: (Pose) -> Unit = {},
 ) {
     val lazyState = rememberLazyStaggeredGridState()
@@ -164,10 +164,10 @@ fun PoseContent(
                         else filterBarHeightPx = size.height
                     },
                 peopleCount = selectedPeopleCount,
-                isScrapSelected = isScrapSelected,
+                isBookmarkSelected = isBookmarkSelected,
                 visible = showFilterBar,
                 onClickPeopleCount = onClickPeopleCount,
-                onClickScrap = onClickScrap,
+                onClickBookmark = onClickBookmark,
             )
         }
     }

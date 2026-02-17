@@ -9,7 +9,7 @@ data class RandomPoseUiState(
     val isShowTutorial: Boolean = true,
     val currentIndex: Int = 0,
     val poseList: ImmutableList<Pose> = persistentListOf(),
-    val committedScraps: Map<Long, Boolean> = emptyMap(),
+    val committedBookmarks: Map<Long, Boolean> = emptyMap(),
     val hasNewPose: Boolean = true,
 ) {
     val currentPose: Pose?
@@ -31,10 +31,10 @@ sealed interface RandomPoseIntent {
     // 기본화면
     data object ClickCloseIcon : RandomPoseIntent
     data object ClickGoToDetailIcon : RandomPoseIntent
-    data object ClickScrapIcon : RandomPoseIntent
+    data object ClickBookmarkIcon : RandomPoseIntent
     data object ClickLeftSwipe : RandomPoseIntent
     data object ClickRightSwipe : RandomPoseIntent
-    data class ScrapChanged(val poseId: Long, val isScrapped: Boolean) : RandomPoseIntent
+    data class BookmarkChanged(val poseId: Long, val isBookmarked: Boolean) : RandomPoseIntent
 }
 
 sealed interface RandomPoseEffect {

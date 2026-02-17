@@ -123,7 +123,7 @@ private fun NekiEndActionBarPreview() {
                 onClick = {},
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_scrap_stroked),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_bookmark_stroked),
                     contentDescription = null,
                     tint = NekiTheme.colorScheme.gray500,
                 )
@@ -156,7 +156,7 @@ private fun NekiBothSidesActionBarPreview() {
                     onClick = {},
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_scrap_stroked),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_bookmark_stroked),
                         contentDescription = null,
                         tint = NekiTheme.colorScheme.gray500,
                     )

@@ -10,13 +10,13 @@ data class PoseDetailResponse(
     @SerialName("poseId") val poseId: Long,
     @SerialName("headCount") val headCount: String,
     @SerialName("imageUrl") val imageUrl: String,
-    @SerialName("scrap") val scrap: Boolean,
+    @SerialName("scrap") val bookmark: Boolean,
     @SerialName("contentType") val contentType: String,
     @SerialName("createdAt") val createdAt: String,
 ) {
     internal fun toModel() = Pose(
         id = poseId,
-        isScrapped = scrap,
+        isBookmarked = bookmark,
         poseImageUrl = imageUrl,
         peopleCount = PeopleCount.entries.find { it.name == headCount }?.value ?: 1,
     )

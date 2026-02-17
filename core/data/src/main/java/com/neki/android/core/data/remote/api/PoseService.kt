@@ -1,6 +1,6 @@
 package com.neki.android.core.data.remote.api
 
-import com.neki.android.core.data.remote.model.request.UpdateScrapRequest
+import com.neki.android.core.data.remote.model.request.UpdateBookmarkRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.model.response.PoseDetailResponse
@@ -44,8 +44,8 @@ class PoseService @Inject constructor(
         }.body()
     }
 
-    // 스크랩된 포즈 목록 조회
-    suspend fun getScrappedPoses(
+    // 북마크된 포즈 목록 조회
+    suspend fun getBookmarkedPoses(
         page: Int = 0,
         size: Int = 20,
         sortOrder: String = "DESC",
@@ -57,10 +57,10 @@ class PoseService @Inject constructor(
         }.body()
     }
 
-    // 스크랩 업데이트
-    suspend fun updateScrap(poseId: Long, scrap: Boolean): BasicNullableResponse<Unit> {
+    // 북마크 업데이트
+    suspend fun updateBookmark(poseId: Long, bookmark: Boolean): BasicNullableResponse<Unit> {
         return client.patch("/api/poses/$poseId/scrap") {
-            setBody(UpdateScrapRequest(scrap))
+            setBody(UpdateBookmarkRequest(bookmark))
         }.body()
     }
 }

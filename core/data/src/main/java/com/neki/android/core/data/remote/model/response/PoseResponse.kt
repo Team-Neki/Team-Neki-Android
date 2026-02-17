@@ -15,7 +15,7 @@ data class PoseResponse(
         @SerialName("poseId") val poseId: Long,
         @SerialName("headCount") val headCount: String,
         @SerialName("imageUrl") val imageUrl: String,
-        @SerialName("scrap") val scrap: Boolean,
+        @SerialName("scrap") val bookmark: Boolean,
         @SerialName("contentType") val contentType: String,
         @SerialName("createdAt") val createdAt: String,
     ) {
@@ -23,7 +23,7 @@ data class PoseResponse(
             id = poseId,
             poseImageUrl = imageUrl,
             peopleCount = PeopleCount.entries.find { it.name == headCount }?.value ?: 1,
-            isScrapped = scrap,
+            isBookmarked = bookmark,
         )
     }
 

@@ -132,7 +132,7 @@ private fun FilterBarDefaultPreview() {
             isDownIconChipSelected = false,
             isDefaultChipSelected = false,
             downIconChipDisplayText = "인원수",
-            defaultChipDisplayText = "스크랩",
+            defaultChipDisplayText = "북마크",
         )
     }
 }
@@ -145,7 +145,7 @@ private fun FilterBarSelectedPreview() {
             isDownIconChipSelected = true,
             isDefaultChipSelected = true,
             downIconChipDisplayText = "2인",
-            defaultChipDisplayText = "스크랩",
+            defaultChipDisplayText = "북마크",
         )
     }
 }

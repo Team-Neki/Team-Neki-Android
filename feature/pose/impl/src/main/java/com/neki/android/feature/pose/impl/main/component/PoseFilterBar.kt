@@ -10,21 +10,21 @@ import com.neki.android.core.ui.component.FilterBar
 @Composable
 internal fun PoseFilterBar(
     peopleCount: PeopleCount?,
-    isScrapSelected: Boolean,
+    isBookmarkSelected: Boolean,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
     onClickPeopleCount: () -> Unit = {},
-    onClickScrap: () -> Unit = {},
+    onClickBookmark: () -> Unit = {},
 ) {
     FilterBar(
         isDownIconChipSelected = peopleCount != null,
-        isDefaultChipSelected = isScrapSelected,
+        isDefaultChipSelected = isBookmarkSelected,
         downIconChipDisplayText = peopleCount?.displayText ?: "인원수",
-        defaultChipDisplayText = "스크랩",
+        defaultChipDisplayText = "북마크",
         modifier = modifier,
         visible = visible,
         onClickDownIconChip = onClickPeopleCount,
-        onClickDefaultChip = onClickScrap,
+        onClickDefaultChip = onClickBookmark,
     )
 }
 
@@ -34,7 +34,7 @@ private fun PoseFilterBarPreview() {
     NekiTheme {
         PoseFilterBar(
             peopleCount = null,
-            isScrapSelected = false,
+            isBookmarkSelected = false,
         )
     }
 }
