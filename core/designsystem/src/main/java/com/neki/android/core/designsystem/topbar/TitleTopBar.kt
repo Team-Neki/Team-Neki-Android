@@ -1,5 +1,6 @@
 package com.neki.android.core.designsystem.topbar
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -170,6 +171,7 @@ fun BackTitleTopBar(
 fun BackTitleOptionTopBar(
     title: String,
     modifier: Modifier = Modifier,
+    @DrawableRes optionIconRes: Int = R.drawable.icon_option,
     onBack: () -> Unit = {},
     onClickIcon: () -> Unit = {},
 ) {
@@ -200,7 +202,7 @@ fun BackTitleOptionTopBar(
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_kebab),
+                    imageVector = ImageVector.vectorResource(optionIconRes),
                     tint = NekiTheme.colorScheme.gray800,
                     contentDescription = null,
                 )
@@ -217,7 +219,7 @@ fun BackTitleTextButtonOptionTopBar(
     enabled: Boolean = true,
     enabledTextColor: Color = NekiTheme.colorScheme.primary500,
     disabledTextColor: Color = NekiTheme.colorScheme.gray200,
-    optionIconRes: Int = R.drawable.icon_option,
+    @DrawableRes optionIconRes: Int = R.drawable.icon_option,
     onBack: () -> Unit = {},
     onClickTextButton: () -> Unit = {},
     onClickIcon: () -> Unit = {},
