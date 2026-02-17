@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.neki.android.application)
     alias(libs.plugins.neki.android.application.compose)
     alias(libs.plugins.oss.licenses)
+    alias(libs.plugins.google.services)
 }
 
 val localPropertiesFile = project.rootProject.file("local.properties")
@@ -83,6 +84,10 @@ dependencies {
     implementation(projects.feature.photoUpload.impl)
 
     implementation(libs.timber)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.ui)
