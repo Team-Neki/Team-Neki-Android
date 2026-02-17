@@ -40,7 +40,6 @@ import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailTopBar
-import timber.log.Timber
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.EmptyAlbumContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
@@ -53,6 +52,7 @@ import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.flowOf
+import timber.log.Timber
 
 @Composable
 internal fun AlbumDetailRoute(
@@ -121,19 +121,35 @@ internal fun AlbumDetailScreen(
     BackHandler(enabled = true) {
         onIntent(AlbumDetailIntent.OnBackPressed)
     }
-
-    if (isEmpty) {
-        EmptyAlbumContent(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(NekiTheme.colorScheme.white),
+    ) {
+        AlbumDetailTopBar(
+            isFavoriteAlbum = uiState.isFavoriteAlbum,
             title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
+            selectMode = uiState.selectMode,
+            showOptionPopup = uiState.isShowOptionPopup,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
+            onClickOptionIcon = { onIntent(AlbumDetailIntent.ClickOptionIcon) },
+            onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectOption) },
+            onClickAddPhoto = { onIntent(AlbumDetailIntent.ClickAddPhotoOption) },
+            onClickRenameAlbum = { onIntent(AlbumDetailIntent.ClickRenameAlbumOption) },
+            onClickCancel = { onIntent(AlbumDetailIntent.ClickCancelButton) },
+            onDismissPopup = { onIntent(AlbumDetailIntent.DismissOptionPopup) },
         )
-    } else {
-        AlbumDetailContent(
-            uiState = uiState,
-            pagingItems = pagingItems,
-            lazyState = lazyState,
-            onIntent = onIntent,
-        )
+
+        if (isEmpty) {
+            EmptyAlbumContent()
+        } else {
+            AlbumDetailContent(
+                uiState = uiState,
+                pagingItems = pagingItems,
+                lazyState = lazyState,
+                onIntent = onIntent,
+            )
+        }
     }
 
     if (isRefreshing || uiState.isLoading) {
@@ -176,20 +192,6 @@ internal fun AlbumDetailContent(
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white),
     ) {
-        AlbumDetailTopBar(
-            isFavoriteAlbum = uiState.isFavoriteAlbum,
-            title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
-            selectMode = uiState.selectMode,
-            showOptionPopup = uiState.isShowOptionPopup,
-            onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
-            onClickOptionIcon = { onIntent(AlbumDetailIntent.ClickOptionIcon) },
-            onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectButton) },
-            onClickAddPhoto = { onIntent(AlbumDetailIntent.ClickAddPhotoButton) },
-            onClickRenameAlbum = { onIntent(AlbumDetailIntent.ClickRenameAlbumButton) },
-            onClickCancel = { onIntent(AlbumDetailIntent.ClickCancelButton) },
-            onDismissPopup = { onIntent(AlbumDetailIntent.DismissOptionPopup) },
-        )
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
