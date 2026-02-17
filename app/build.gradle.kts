@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.neki.android.application.compose)
     alias(libs.plugins.oss.licenses)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 val localPropertiesFile = project.rootProject.file("local.properties")
