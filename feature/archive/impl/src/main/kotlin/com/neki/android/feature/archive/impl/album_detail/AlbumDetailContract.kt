@@ -1,5 +1,6 @@
 package com.neki.android.feature.archive.impl.album_detail
 
+import android.net.Uri
 import com.neki.android.core.model.Photo
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
@@ -10,6 +11,7 @@ data class AlbumDetailState(
     val title: String = "",
     val isFavoriteAlbum: Boolean = false,
     val selectMode: SelectMode = SelectMode.DEFAULT,
+    val isShowOptionPopup: Boolean = false,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
     val deletedPhotoIds: Set<Long> = emptySet(),
     val isShowDeleteDialog: Boolean = false,
@@ -31,8 +33,12 @@ sealed interface AlbumDetailIntent {
     // TopBar Intent
     data object ClickBackIcon : AlbumDetailIntent
     data object OnBackPressed : AlbumDetailIntent
+    data object ClickOptionIcon : AlbumDetailIntent
     data object ClickSelectButton : AlbumDetailIntent
+    data object ClickAddPhotoButton : AlbumDetailIntent
+    data object ClickRenameAlbumButton : AlbumDetailIntent
     data object ClickCancelButton : AlbumDetailIntent
+    data object DismissOptionPopup : AlbumDetailIntent
 
     // Photo Intent
     data class ClickPhotoItem(val photo: Photo) : AlbumDetailIntent
@@ -52,6 +58,9 @@ sealed interface AlbumDetailIntent {
     data object ClickDeleteBottomSheetCancelButton : AlbumDetailIntent
     data object ClickDeleteBottomSheetConfirmButton : AlbumDetailIntent
 
+    // Gallery Intent
+    data class SelectGalleryImage(val uris: List<Uri>) : AlbumDetailIntent
+
     // Result Intent
     data class PhotoDeleted(val photoIds: List<Long>) : AlbumDetailIntent
     data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : AlbumDetailIntent
@@ -62,4 +71,5 @@ sealed interface AlbumDetailSideEffect {
     data class NavigateToPhotoDetail(val photo: Photo) : AlbumDetailSideEffect
     data class ShowToastMessage(val message: String) : AlbumDetailSideEffect
     data class DownloadImages(val imageUrls: List<String>) : AlbumDetailSideEffect
+    data object OpenGallery : AlbumDetailSideEffect
 }

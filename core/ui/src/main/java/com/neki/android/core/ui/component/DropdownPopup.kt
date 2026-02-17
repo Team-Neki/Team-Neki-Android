@@ -42,10 +42,10 @@ fun <T> DropdownPopup(
     ) {
         Column(
             modifier = modifier
-                .dropdownShadow(shape = RoundedCornerShape(8.dp))
+                .dropdownShadow(shape = RoundedCornerShape(12.dp))
                 .background(
                     color = NekiTheme.colorScheme.white,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(12.dp),
                 )
                 .padding(vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),

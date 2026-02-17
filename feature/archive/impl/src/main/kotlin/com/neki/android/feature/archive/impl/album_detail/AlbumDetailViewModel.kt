@@ -85,7 +85,24 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
             AlbumDetailIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
-            AlbumDetailIntent.ClickSelectButton -> reduce { copy(selectMode = SelectMode.SELECTING) }
+            AlbumDetailIntent.ClickOptionIcon -> reduce { copy(isShowOptionPopup = true) }
+            AlbumDetailIntent.DismissOptionPopup -> reduce { copy(isShowOptionPopup = false) }
+            AlbumDetailIntent.ClickSelectButton -> {
+                reduce {
+                    copy(
+                        selectMode = SelectMode.SELECTING,
+                        isShowOptionPopup = false,
+                    )
+                }
+            }
+            AlbumDetailIntent.ClickAddPhotoButton -> {
+                reduce { copy(isShowOptionPopup = false) }
+                postSideEffect(AlbumDetailSideEffect.OpenGallery)
+            }
+            AlbumDetailIntent.ClickRenameAlbumButton -> {
+                reduce { copy(isShowOptionPopup = false) }
+                // TODO: 앨범 이름 변경
+            }
             AlbumDetailIntent.ClickCancelButton -> reduce {
                 copy(
                     selectMode = SelectMode.DEFAULT,
@@ -106,6 +123,11 @@ class AlbumDetailViewModel @AssistedInject constructor(
             is AlbumDetailIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AlbumDetailIntent.ClickDeleteBottomSheetCancelButton -> reduce { copy(isShowDeleteBottomSheet = false) }
             AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumPhotoDelete(state, reduce, postSideEffect)
+
+            // Gallery Intent
+            is AlbumDetailIntent.SelectGalleryImage -> {
+                // TODO: 선택된 사진을 앨범에 추가
+            }
 
             // Result Intent
             is AlbumDetailIntent.PhotoDeleted -> {

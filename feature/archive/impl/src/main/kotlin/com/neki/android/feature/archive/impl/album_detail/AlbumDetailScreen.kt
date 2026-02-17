@@ -1,6 +1,9 @@
 package com.neki.android.feature.archive.impl.album_detail
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +40,7 @@ import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailTopBar
+import timber.log.Timber
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.EmptyAlbumContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
@@ -60,6 +64,13 @@ internal fun AlbumDetailRoute(
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+        if (uris.isNotEmpty()) {
+            viewModel.store.onIntent(AlbumDetailIntent.SelectGalleryImage(uris))
+        } else {
+            Timber.d("No media selected")
+        }
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -77,6 +88,10 @@ internal fun AlbumDetailRoute(
                     .onFailure {
                         nekiToast.showToast(text = "다운로드에 실패했어요")
                     }
+            }
+
+            AlbumDetailSideEffect.OpenGallery -> {
+                photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }
         }
     }
@@ -163,11 +178,17 @@ internal fun AlbumDetailContent(
             .background(NekiTheme.colorScheme.white),
     ) {
         AlbumDetailTopBar(
+            isFavoriteAlbum = uiState.isFavoriteAlbum,
             title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
             selectMode = uiState.selectMode,
+            showOptionPopup = uiState.isShowOptionPopup,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
+            onClickOptionIcon = { onIntent(AlbumDetailIntent.ClickOptionIcon) },
             onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectButton) },
+            onClickAddPhoto = { onIntent(AlbumDetailIntent.ClickAddPhotoButton) },
+            onClickRenameAlbum = { onIntent(AlbumDetailIntent.ClickRenameAlbumButton) },
             onClickCancel = { onIntent(AlbumDetailIntent.ClickCancelButton) },
+            onDismissPopup = { onIntent(AlbumDetailIntent.DismissOptionPopup) },
         )
 
         Box(
