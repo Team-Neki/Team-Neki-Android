@@ -90,9 +90,8 @@ internal fun AlbumDetailRoute(
                     }
             }
 
-            AlbumDetailSideEffect.OpenGallery -> {
-                photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            }
+            AlbumDetailSideEffect.OpenGallery -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            AlbumDetailSideEffect.RefreshPhotos -> pagingItems.refresh()
         }
     }
 

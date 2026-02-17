@@ -72,4 +72,5 @@ sealed interface AlbumDetailSideEffect {
     data class ShowToastMessage(val message: String) : AlbumDetailSideEffect
     data class DownloadImages(val imageUrls: List<String>) : AlbumDetailSideEffect
     data object OpenGallery : AlbumDetailSideEffect
+    data object RefreshPhotos : AlbumDetailSideEffect
 }

@@ -1,5 +1,6 @@
 package com.neki.android.feature.archive.impl.album_detail
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -8,6 +9,7 @@ import androidx.paging.filter
 import androidx.paging.map
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -32,6 +34,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     @Assisted private val isFavoriteAlbum: Boolean,
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
+    private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -95,14 +98,17 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     )
                 }
             }
+
             AlbumDetailIntent.ClickAddPhotoButton -> {
                 reduce { copy(isShowOptionPopup = false) }
                 postSideEffect(AlbumDetailSideEffect.OpenGallery)
             }
+
             AlbumDetailIntent.ClickRenameAlbumButton -> {
                 reduce { copy(isShowOptionPopup = false) }
                 // TODO: 앨범 이름 변경
             }
+
             AlbumDetailIntent.ClickCancelButton -> reduce {
                 copy(
                     selectMode = SelectMode.DEFAULT,
@@ -125,16 +131,38 @@ class AlbumDetailViewModel @AssistedInject constructor(
             AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumPhotoDelete(state, reduce, postSideEffect)
 
             // Gallery Intent
-            is AlbumDetailIntent.SelectGalleryImage -> {
-                // TODO: 선택된 사진을 앨범에 추가
-            }
+            is AlbumDetailIntent.SelectGalleryImage -> uploadMultipleImages(intent.uris, reduce, postSideEffect)
 
             // Result Intent
             is AlbumDetailIntent.PhotoDeleted -> {
                 deletedPhotoIds.update { it + intent.photoIds.toSet() }
             }
+
             is AlbumDetailIntent.FavoriteChanged -> {
                 updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
+            }
+        }
+    }
+
+    private fun uploadMultipleImages(
+        imageUris: List<Uri>,
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+
+            // TODO: 추후 즐겨찾기 옵션 추가
+            uploadMultiplePhotoUseCase(
+                imageUris = imageUris,
+            ).onSuccess {
+                reduce { copy(isLoading = false) }
+                postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("새로운 사진을 추가했어요"))
+            }.onFailure { error ->
+                Timber.e(error)
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+                reduce { copy(isLoading = false) }
             }
         }
     }
