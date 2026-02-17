@@ -245,7 +245,7 @@ fun MapScreen(
             isShowInfoTooltip = uiState.isShowInfoTooltip,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
-            onDismissInfoTooltip = { onIntent(MapIntent.ClickCloseInfoIcon) },
+            onDismissInfoTooltip = { onIntent(MapIntent.DismissInfoTooltip) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )

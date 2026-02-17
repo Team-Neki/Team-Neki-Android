@@ -65,7 +65,7 @@ class MapViewModel @Inject constructor(
             }
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoTooltip = true, hasInfoTooltipShown = true) }
-            MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoTooltip = false) }
+            MapIntent.DismissInfoTooltip -> reduce { copy(isShowInfoTooltip = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, reduce)
             is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent.photoBooth, reduce, postSideEffect)
