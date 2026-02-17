@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -144,12 +143,11 @@ internal fun ArchiveMainScreen(
     }
 
     if (uiState.isShowAddAlbumBottomSheet) {
-        val textFieldState = rememberTextFieldState()
         val existingAlbumNames = remember(uiState.albums) { uiState.albums.map { it.title } }
 
-        val errorMessage by remember(textFieldState.text) {
+        val errorMessage by remember(uiState.albumNameTextState.text) {
             derivedStateOf {
-                val name = textFieldState.text.toString()
+                val name = uiState.albumNameTextState.text.toString()
                 when {
                     existingAlbumNames.contains(name) -> "이미 사용 중인 앨범명이에요."
                     else -> null
@@ -158,15 +156,10 @@ internal fun ArchiveMainScreen(
         }
 
         AddAlbumBottomSheet(
-            textFieldState = textFieldState,
+            textFieldState = uiState.albumNameTextState,
             onDismissRequest = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
             onClickCancel = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
-            onClickConfirm = {
-                val albumName = textFieldState.text.toString()
-                if (errorMessage == null && albumName.isNotBlank()) {
-                    onIntent(ArchiveMainIntent.ClickAddAlbumButton(albumName))
-                }
-            },
+            onClickConfirm = { onIntent(ArchiveMainIntent.ClickAddAlbumButton) },
             isError = errorMessage != null,
             errorMessage = errorMessage,
         )
@@ -227,7 +220,7 @@ private fun ArchiveMainContent(
                 albumList = uiState.albums,
                 onClickFavoriteAlbum = onClickFavoriteAlbum,
                 onClickAlbumItem = onClickAlbumItem,
-                onClickAddAlbum =onClickAddAlbum,
+                onClickAddAlbum = onClickAddAlbum,
             )
         }
 

@@ -59,7 +59,7 @@ private fun AddAlbumBottomSheetErrorPreview() {
             onClickCancel = {},
             onClickConfirm = {},
             isError = true,
-            errorMessage = "앨범명은 최대 16자까지 입력할 수 있어요.",
+            errorMessage = "앨범명은 최대 10자까지 입력할 수 있어요.",
         )
     }
 }

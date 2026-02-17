@@ -1,5 +1,6 @@
 package com.neki.android.feature.archive.impl.album
 
+import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
@@ -14,6 +15,7 @@ data class AllAlbumState(
     val isShowOptionPopup: Boolean = false,
     val selectedDeleteOption: AlbumDeleteOption = AlbumDeleteOption.DELETE_WITH_PHOTOS,
     val isShowAddAlbumBottomSheet: Boolean = false,
+    val albumNameTextState: TextFieldState = TextFieldState(),
     val isShowDeleteAlbumBottomSheet: Boolean = false,
 )
 
@@ -45,7 +47,7 @@ sealed interface AllAlbumIntent {
 
     // Add Album BottomSheet Intent
     data object DismissAddAlbumBottomSheet : AllAlbumIntent
-    data class ClickAddAlbumButton(val albumName: String) : AllAlbumIntent
+    data object ClickAddAlbumButton : AllAlbumIntent
 
     // Delete Album BottomSheet Intent
     data object DismissDeleteAlbumBottomSheet : AllAlbumIntent

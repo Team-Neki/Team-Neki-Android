@@ -1,6 +1,7 @@
 package com.neki.android.feature.archive.impl.main
 
 import android.net.Uri
+import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.UploadType
@@ -17,6 +18,7 @@ data class ArchiveMainState(
     val selectedUris: ImmutableList<Uri> = persistentListOf(),
     val isShowSelectWithAlbumDialog: Boolean = false,
     val isShowAddAlbumBottomSheet: Boolean = false,
+    val albumNameTextState: TextFieldState = TextFieldState(),
 ) {
     val uploadType: UploadType
         get() = if (scannedImageUrl != null) UploadType.QR_CODE else UploadType.GALLERY
@@ -50,7 +52,7 @@ sealed interface ArchiveMainIntent {
 
     // Add Album BottomSheet Intent
     data object DismissAddAlbumBottomSheet : ArchiveMainIntent
-    data class ClickAddAlbumButton(val albumName: String) : ArchiveMainIntent
+    data object ClickAddAlbumButton : ArchiveMainIntent
 
     // Result
     data class QRCodeScanned(val imageUrl: String) : ArchiveMainIntent

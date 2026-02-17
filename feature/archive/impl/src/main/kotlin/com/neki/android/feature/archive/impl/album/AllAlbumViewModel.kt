@@ -69,7 +69,7 @@ class AllAlbumViewModel @Inject constructor(
 
             // Add Album BottomSheet Intent
             AllAlbumIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
-            is AllAlbumIntent.ClickAddAlbumButton -> handleAddAlbum(intent.albumName, reduce, postSideEffect)
+            AllAlbumIntent.ClickAddAlbumButton -> handleAddAlbum(state.albumNameTextState.text.toString(), reduce, postSideEffect)
 
             // Delete Album BottomSheet Intent
             AllAlbumIntent.DismissDeleteAlbumBottomSheet -> reduce { copy(isShowDeleteAlbumBottomSheet = false) }
