@@ -37,11 +37,13 @@ class PhotoRepositoryImpl @Inject constructor(
     override suspend fun registerPhoto(
         mediaIds: List<Long>,
         folderId: Long?,
+        favorite: Boolean,
     ): Result<Unit> = runSuspendCatching {
         photoService.registerPhoto(
             requestBody = RegisterPhotoRequest(
                 folderId = folderId,
                 uploads = mediaIds.map { RegisterPhotoRequest.Upload(mediaId = it) },
+                favorite = favorite,
             ),
         ).data
     }

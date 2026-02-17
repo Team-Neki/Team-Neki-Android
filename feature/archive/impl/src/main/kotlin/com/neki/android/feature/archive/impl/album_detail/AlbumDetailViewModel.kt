@@ -151,9 +151,11 @@ class AlbumDetailViewModel @AssistedInject constructor(
             AlbumDetailIntent.DismissRenameBottomSheet -> reduce {
                 copy(isShowRenameAlbumBottomSheet = false, renameAlbumTextState = TextFieldState())
             }
+
             AlbumDetailIntent.ClickRenameBottomSheetCancelButton -> reduce {
                 copy(isShowRenameAlbumBottomSheet = false, renameAlbumTextState = TextFieldState())
             }
+
             AlbumDetailIntent.ClickRenameBottomSheetConfirmButton -> handleRenameAlbum(state, reduce, postSideEffect)
         }
     }
@@ -194,10 +196,10 @@ class AlbumDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            // TODO: 추후 즐겨찾기 옵션 추가
             uploadMultiplePhotoUseCase(
                 imageUris = imageUris,
                 folderId = id.takeUnless { isFavoriteAlbum },
+                favorite = isFavoriteAlbum,
             ).onSuccess {
                 reduce { copy(isLoading = false) }
                 postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
