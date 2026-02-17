@@ -135,7 +135,7 @@ private fun NekiTextFieldBottomSheetContent(
                 modifier = Modifier.weight(230f),
                 text = confirmButtonText,
                 onClick = onClickConfirm,
-                enabled = textFieldState.text.isNotEmpty() && !isError,
+                enabled = textFieldState.text.trim().isNotEmpty() && !isError,
             )
         }
     }

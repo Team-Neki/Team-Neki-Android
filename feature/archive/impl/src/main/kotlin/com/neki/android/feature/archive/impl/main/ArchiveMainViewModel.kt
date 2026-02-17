@@ -92,7 +92,7 @@ class ArchiveMainViewModel @Inject constructor(
 
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
-            ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(state.albumNameTextState.text.toString(), reduce, postSideEffect)
+            ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(state.albumNameTextState.text.trim().toString(), reduce, postSideEffect)
 
             // Result
             is ArchiveMainIntent.QRCodeScanned -> reduce {
