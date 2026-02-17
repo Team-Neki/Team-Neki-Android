@@ -13,6 +13,7 @@ import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.DropdownPopup
 import com.neki.android.feature.archive.impl.model.SelectMode
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 private enum class FavoriteOptionItem(val label: String) {
@@ -33,6 +34,7 @@ internal fun AlbumDetailTopBar(
     selectMode: SelectMode,
     showOptionPopup: Boolean,
     modifier: Modifier = Modifier,
+    hasNoPhoto: Boolean = false,
     onClickBack: () -> Unit = {},
     onClickOptionIcon: () -> Unit = {},
     onClickSelect: () -> Unit = {},
@@ -70,6 +72,7 @@ internal fun AlbumDetailTopBar(
 
         if (isFavoriteAlbum) {
             DropdownPopup(
+                disabledIndex = persistentListOf(0).takeIf { hasNoPhoto },
                 items = FavoriteOptionItem.entries.toImmutableList(),
                 onSelect = { item ->
                     when (item) {
@@ -85,6 +88,7 @@ internal fun AlbumDetailTopBar(
             )
         } else {
             DropdownPopup(
+                disabledIndex = persistentListOf(0).takeIf { hasNoPhoto },
                 items = CustomOptionItem.entries.toImmutableList(),
                 onSelect = { item ->
                     when (item) {

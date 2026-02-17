@@ -19,6 +19,7 @@ import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 /**
@@ -31,6 +32,7 @@ fun <T> DropdownPopup(
     onDismissRequest: () -> Unit,
     itemLabel: (T) -> String,
     modifier: Modifier = Modifier,
+    disabledIndex: ImmutableList<Int>? = null,
     offset: IntOffset = IntOffset.Zero,
     alignment: Alignment = Alignment.TopStart,
 ) {
@@ -50,14 +52,20 @@ fun <T> DropdownPopup(
                 .padding(vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            items.forEach { item ->
+            items.forEachIndexed { index, item ->
+                val isDisabled = disabledIndex?.contains(index) == true
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickableSingle { onSelect(item) }
+                        .then(
+                            if (isDisabled) Modifier
+                            else Modifier.clickableSingle { onSelect(item) },
+                        )
                         .padding(horizontal = 12.dp, vertical = 5.dp),
                     text = itemLabel(item),
                     style = NekiTheme.typography.body16Medium,
+                    color = if (isDisabled) NekiTheme.colorScheme.gray200
+                    else NekiTheme.colorScheme.gray900,
                 )
             }
         }

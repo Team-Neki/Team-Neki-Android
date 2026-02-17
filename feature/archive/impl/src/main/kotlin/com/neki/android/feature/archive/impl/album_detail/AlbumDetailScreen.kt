@@ -134,6 +134,7 @@ internal fun AlbumDetailScreen(
             title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
             selectMode = uiState.selectMode,
             showOptionPopup = uiState.isShowOptionPopup,
+            hasNoPhoto = isEmpty,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
             onClickOptionIcon = { onIntent(AlbumDetailIntent.ClickOptionIcon) },
             onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectOption) },
