@@ -20,7 +20,6 @@ data class MapState(
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
     val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val isShowInfoTooltip: Boolean = false,
-    val hasInfoTooltipShown: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
 )

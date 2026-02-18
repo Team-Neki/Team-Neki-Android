@@ -30,6 +30,17 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    override val hasVisibledInfoToolTip: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[HAS_INFO_TOOLTIP_VISIBLED] ?: false
+        }
+
+    override suspend fun setInfoToolTipVisibled() {
+        dataStore.edit { preferences ->
+            preferences[HAS_INFO_TOOLTIP_VISIBLED] = true
+        }
+    }
+
     override suspend fun getUserInfo(): Result<UserInfo> = runSuspendCatching {
         userService.getUserInfo().data.toModel()
     }
@@ -44,5 +55,6 @@ class UserRepositoryImpl @Inject constructor(
 
     companion object {
         private val HAS_VISITED_RANDOM_POSE = booleanPreferencesKey("is_first_visit_random_pose")
+        private val HAS_INFO_TOOLTIP_VISIBLED = booleanPreferencesKey("is_first_visible_info_tooltip")
     }
 }
