@@ -183,12 +183,14 @@ internal fun AlbumDetailScreen(
     }
 
     if (uiState.isShowRenameAlbumBottomSheet) {
+        val isNameChanged by remember(uiState.renameAlbumTextState.text) {
+            derivedStateOf { uiState.renameAlbumTextState.text.toString() != uiState.title }
+        }
         val errorMessage by remember(uiState.renameAlbumTextState.text) {
             derivedStateOf {
-                val newName = uiState.renameAlbumTextState.text.toString()
+                val name = uiState.renameAlbumTextState.text.toString()
                 when {
-                    newName == uiState.title -> "이미 사용 중인 앨범명이에요."
-                    newName.length > ARCHIVE_ALBUM_NAME_MAX_LENGTH -> "앨범명은 최대 10자까지 가능해요."
+                    name.length > ARCHIVE_ALBUM_NAME_MAX_LENGTH -> "앨범명은 최대 10자까지 가능해요."
                     // TODO: 이미 존재하는 앨범명 중복처리
                     else -> null
                 }
@@ -201,6 +203,7 @@ internal fun AlbumDetailScreen(
             onClickConfirm = { onIntent(AlbumDetailIntent.ClickRenameBottomSheetConfirmButton) },
             isError = errorMessage != null,
             errorMessage = errorMessage,
+            isConfirmEnabled = isNameChanged,
         )
     }
 }

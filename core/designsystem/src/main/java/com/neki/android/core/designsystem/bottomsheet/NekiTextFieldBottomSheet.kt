@@ -41,6 +41,7 @@ fun NekiTextFieldBottomSheet(
     confirmButtonText: String = "추가하기",
     isError: Boolean = false,
     errorMessage: String? = null,
+    isConfirmEnabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     ModalBottomSheet(
@@ -62,6 +63,7 @@ fun NekiTextFieldBottomSheet(
             confirmButtonText = confirmButtonText,
             isError = isError,
             errorMessage = errorMessage,
+            isConfirmEnabled = isConfirmEnabled,
             keyboardOptions = keyboardOptions,
         )
     }
@@ -80,6 +82,7 @@ private fun NekiTextFieldBottomSheetContent(
     confirmButtonText: String = "추가하기",
     isError: Boolean = false,
     errorMessage: String? = null,
+    isConfirmEnabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     Column(
@@ -135,7 +138,7 @@ private fun NekiTextFieldBottomSheetContent(
                 modifier = Modifier.weight(230f),
                 text = confirmButtonText,
                 onClick = onClickConfirm,
-                enabled = textFieldState.text.trim().isNotEmpty() && !isError,
+                enabled = textFieldState.text.trim().isNotEmpty() && !isError && isConfirmEnabled,
             )
         }
     }

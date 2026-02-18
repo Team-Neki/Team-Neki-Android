@@ -15,6 +15,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import androidx.compose.foundation.text.input.TextFieldState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,7 +43,7 @@ class AllAlbumViewModel @Inject constructor(
             // TopBar Intent
             AllAlbumIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AllAlbumIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
-            AllAlbumIntent.ClickCreateButton -> reduce { copy(isShowAddAlbumBottomSheet = true) }
+            AllAlbumIntent.ClickCreateButton -> reduce { copy(isShowAddAlbumBottomSheet = true, albumNameTextState = TextFieldState()) }
             AllAlbumIntent.ClickOptionIcon -> reduce { copy(isShowOptionPopup = true) }
             AllAlbumIntent.DismissOptionPopup -> reduce { copy(isShowOptionPopup = false) }
             AllAlbumIntent.ClickDeleteOptionRow -> reduce {
@@ -182,7 +183,7 @@ class AllAlbumViewModel @Inject constructor(
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
                     Timber.e(error)
                 }
-            reduce { copy(isShowAddAlbumBottomSheet = false) }
+            reduce { copy(isShowAddAlbumBottomSheet = false, albumNameTextState = TextFieldState()) }
         }
     }
 

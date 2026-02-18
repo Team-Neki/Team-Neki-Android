@@ -19,6 +19,7 @@ internal fun RenameAlbumBottomSheet(
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorMessage: String? = null,
+    isConfirmEnabled: Boolean = true,
 ) {
     NekiTextFieldBottomSheet(
         title = "앨범 이름 변경",
@@ -33,6 +34,7 @@ internal fun RenameAlbumBottomSheet(
         confirmButtonText = "변경하기",
         isError = isError,
         errorMessage = errorMessage,
+        isConfirmEnabled = isConfirmEnabled,
     )
 }
 

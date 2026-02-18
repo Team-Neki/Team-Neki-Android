@@ -18,6 +18,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import androidx.compose.foundation.text.input.TextFieldState
 import javax.inject.Inject
 
 private const val DEFAULT_PHOTOS_SIZE = 20
@@ -84,7 +85,7 @@ class ArchiveMainViewModel @Inject constructor(
             ArchiveMainIntent.ClickAllAlbumText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllAlbum)
             ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum(-1L))
             is ArchiveMainIntent.ClickAlbumItem -> postSideEffect(ArchiveMainSideEffect.NavigateToAlbumDetail(intent.albumId, intent.albumTitle))
-            ArchiveMainIntent.ClickAddAlbum -> reduce { copy(isShowAddAlbumBottomSheet = true) }
+            ArchiveMainIntent.ClickAddAlbum -> reduce { copy(isShowAddAlbumBottomSheet = true, albumNameTextState = TextFieldState()) }
 
             // Photo Intent
             ArchiveMainIntent.ClickAllPhotoText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllPhoto)
@@ -239,7 +240,7 @@ class ArchiveMainViewModel @Inject constructor(
                     postSideEffect(ArchiveMainSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
                     Timber.e(error)
                 }
-            reduce { copy(isShowAddAlbumBottomSheet = false) }
+            reduce { copy(isShowAddAlbumBottomSheet = false, albumNameTextState = TextFieldState()) }
         }
     }
 }
