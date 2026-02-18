@@ -156,6 +156,7 @@ internal fun AnchoredDraggablePanel(
                 onClick = onClickCurrentLocation,
             )
             AnchoredPanelContent(
+                dragLevel = dragLevel,
                 brands = brands,
                 nearbyPhotoBooths = nearbyPhotoBooths,
                 isShowInfoTooltip = isShowInfoTooltip,
@@ -170,6 +171,7 @@ internal fun AnchoredDraggablePanel(
 
 @Composable
 internal fun AnchoredPanelContent(
+    dragLevel: DragLevel,
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     isShowInfoTooltip: Boolean = false,
@@ -240,6 +242,7 @@ internal fun AnchoredPanelContent(
                 )
             }
             InfoToolTip(
+                dragLevel = dragLevel,
                 isShowInfoTooltip = isShowInfoTooltip,
                 onClickInfoIcon = onClickInfoIcon,
                 onDismissTooltip = onDismissInfoTooltip,
@@ -290,6 +293,7 @@ internal fun AnchoredPanelContent(
 private fun AnchoredPanelContentPreview() {
     NekiTheme {
         AnchoredPanelContent(
+            dragLevel = DragLevel.FIRST,
             brands = persistentListOf(
                 Brand(isChecked = false, name = "인생네컷", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/LIFEFOURCUTS_LOGO_v1.png"),
                 Brand(isChecked = false, name = "포토그레이", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOGRAY_LOGO_v1.png"),

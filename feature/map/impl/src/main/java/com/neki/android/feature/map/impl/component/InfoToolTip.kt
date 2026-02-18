@@ -19,16 +19,32 @@ import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.popup.ArrowDirection
 import com.neki.android.core.designsystem.popup.ToolTipPopup
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.feature.map.impl.DragLevel
 
 @Composable
 internal fun InfoToolTip(
+    dragLevel: DragLevel,
     isShowInfoTooltip: Boolean,
     onClickInfoIcon: () -> Unit,
     onDismissTooltip: () -> Unit,
 ) {
     val density = LocalDensity.current
     val popupOffsetX = with(density) { 9.dp.toPx().toInt() }
-    val popupOffsetY = with(density) { 34.dp.toPx().toInt() }
+    val popupOffsetY = with(density) {
+        when (dragLevel) {
+            DragLevel.SECOND -> (-34).dp.toPx().toInt()
+            DragLevel.THIRD -> 34.dp.toPx().toInt()
+            else -> 0
+        }
+    }
+    val tooltipAlignment = when (dragLevel) {
+        DragLevel.THIRD -> Alignment.TopEnd
+        else -> Alignment.BottomEnd
+    }
+    val arrowDirection = when (dragLevel) {
+        DragLevel.THIRD -> ArrowDirection.Up
+        else -> ArrowDirection.Down
+    }
 
     Box {
         Icon(
@@ -44,11 +60,11 @@ internal fun InfoToolTip(
             ToolTipPopup(
                 tooltipText = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
                 offset = IntOffset(popupOffsetX, popupOffsetY),
-                alignment = Alignment.TopEnd,
-                arrowDirection = ArrowDirection.Up,
+                alignment = tooltipAlignment,
+                arrowDirection = arrowDirection,
                 arrowAlignment = Alignment.CenterEnd,
                 onDismissRequest = onDismissTooltip,
-                properties = PopupProperties(focusable = true)
+                properties = PopupProperties(focusable = true),
             )
         }
     }
@@ -60,6 +76,7 @@ private fun InfoToolTipPreview() {
     NekiTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             InfoToolTip(
+                dragLevel = DragLevel.SECOND,
                 isShowInfoTooltip = true,
                 onClickInfoIcon = {},
                 onDismissTooltip = {},
