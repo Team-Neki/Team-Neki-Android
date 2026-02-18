@@ -74,6 +74,7 @@ private fun AddPhotoBottomSheetContent(
             horizontalArrangement = Arrangement.spacedBy(36.dp, Alignment.CenterHorizontally),
         ) {
             AddPhotoOptionButton(
+                modifier = Modifier.padding(horizontal = 4.dp),
                 iconRes = ArchiveR.drawable.icon_qrcode_scan,
                 label = "QR로 추가",
                 onClick = onClickQRScan,
@@ -91,10 +92,11 @@ private fun AddPhotoBottomSheetContent(
 private fun AddPhotoOptionButton(
     @DrawableRes iconRes: Int,
     label: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .noRippleClickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
