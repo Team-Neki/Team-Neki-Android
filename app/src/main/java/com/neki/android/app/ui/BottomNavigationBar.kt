@@ -86,7 +86,7 @@ fun BottomNavigationBar(
 
                     // 중앙 FAB 라벨 영역
                     FabLabel(
-                        modifier = Modifier.padding(horizontal = 6.5.dp, vertical = 2.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                     )
 
                     tabs.drop(2).forEach { tab ->
