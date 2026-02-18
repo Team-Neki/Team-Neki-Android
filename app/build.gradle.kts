@@ -23,12 +23,6 @@ android {
         buildConfig = true
     }
 
-    defaultConfig {
-        val naverMapClientId = properties["NAVER_MAP_CLIENT_ID"].toString()
-
-        buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
-    }
-
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("neki_key_store.jks")
@@ -42,6 +36,9 @@ android {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
 
+            val naverMapClientId = properties["NAVER_MAP_DEV_CLIENT_ID"].toString()
+            buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
+
             val kakaoKey = properties["KAKAO_DEV_NATIVE_APP_KEY"].toString()
             manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
             buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
@@ -53,6 +50,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            val naverMapClientId = properties["NAVER_MAP_CLIENT_ID"].toString()
+            buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
 
             val kakaoKey = properties["KAKAO_NATIVE_APP_KEY"].toString()
             manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
