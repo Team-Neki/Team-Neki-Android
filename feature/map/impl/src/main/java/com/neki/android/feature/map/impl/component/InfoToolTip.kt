@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
@@ -47,6 +48,7 @@ internal fun InfoToolTip(
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterEnd,
                 onDismissRequest = onDismissTooltip,
+                properties = PopupProperties(focusable = true)
             )
         }
     }
