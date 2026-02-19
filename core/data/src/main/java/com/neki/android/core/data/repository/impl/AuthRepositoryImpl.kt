@@ -21,18 +21,18 @@ class AuthRepositoryImpl @Inject constructor(
     @AuthDataStore private val dataStore: DataStore<Preferences>,
     private val authService: AuthService,
 ) : AuthRepository {
-    override val dismissedMinVersion: Flow<String> =
+    override val dismissedVersion: Flow<String> =
         dataStore.data.map { preferences ->
-            preferences[DISMISSED_MIN_VERSION] ?: ""
+            preferences[DISMISSED_VERSION] ?: ""
         }
 
     override suspend fun getAppVersion(): Result<AppVersion> = runSuspendCatching {
         authService.getAppVersion(platform = "android").data.toModel()
     }
 
-    override suspend fun setDismissedMinVersion(minVersion: String) {
+    override suspend fun setDismissedVersion(version: String) {
         dataStore.edit { preferences ->
-            preferences[DISMISSED_MIN_VERSION] = minVersion
+            preferences[DISMISSED_VERSION] = version
         }
     }
 
@@ -70,6 +70,6 @@ class AuthRepositoryImpl @Inject constructor(
 
     companion object {
         private val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
-        private val DISMISSED_MIN_VERSION = stringPreferencesKey("dismissed_min_version")
+        private val DISMISSED_VERSION = stringPreferencesKey("dismissed_version")
     }
 }

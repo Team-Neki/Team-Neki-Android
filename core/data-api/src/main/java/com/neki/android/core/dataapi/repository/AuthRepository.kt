@@ -5,9 +5,9 @@ import com.neki.android.core.model.Auth
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {
-    val dismissedMinVersion: Flow<String>
+    val dismissedVersion: Flow<String>
     suspend fun getAppVersion(): Result<AppVersion>
-    suspend fun setDismissedMinVersion(minVersion: String)
+    suspend fun setDismissedVersion(version: String)
 
     suspend fun loginWithKakao(idToken: String): Result<Auth>
     suspend fun updateAccessToken(refreshToken: String): Result<Auth>

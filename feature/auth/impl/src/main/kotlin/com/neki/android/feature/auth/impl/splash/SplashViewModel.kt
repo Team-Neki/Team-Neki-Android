@@ -67,7 +67,7 @@ class SplashViewModel @Inject constructor(
                         }
 
                         UpdateType.Optional -> {
-                            val dismissedVersion = authRepository.dismissedMinVersion.first()
+                            val dismissedVersion = authRepository.dismissedVersion.first()
                             if (dismissedVersion != appVersion.currentVersion) {
                                 reduce {
                                     copy(
@@ -94,7 +94,7 @@ class SplashViewModel @Inject constructor(
         postSideEffect: (SplashSideEffect) -> Unit,
     ) {
         viewModelScope.launch {
-            authRepository.setDismissedMinVersion(state.minVersion)
+            authRepository.setDismissedVersion(state.minVersion)
             reduce { copy(updateType = UpdateType.None) }
             fetchAuthState(postSideEffect)
         }
