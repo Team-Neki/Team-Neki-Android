@@ -1,16 +1,15 @@
 package com.neki.android.feature.auth.impl.splash
 
-import com.neki.android.feature.auth.impl.splash.model.UpdateType
-
 data class SplashState(
-    val updateType: UpdateType = UpdateType.None,
-    val minVersion: String = "",
+    val isShowRequiredUpdateDialog: Boolean = false,
+    val isShowOptionalUpdateDialog: Boolean = false,
+    val currentVersion: String = "",
 )
 
 sealed interface SplashIntent {
     data class EnterSplashScreen(val appVersion: String) : SplashIntent
-    data object ClickDismissUpdateDialog : SplashIntent
-    data object ClickUpdateButton : SplashIntent
+    data object ClickUpdateDialogDismissButton : SplashIntent
+    data object ClickUpdateDialogConfirmButton : SplashIntent
 }
 
 sealed interface SplashSideEffect {

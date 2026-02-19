@@ -16,7 +16,6 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.auth.impl.splash.component.OptionalUpdateDialog
 import com.neki.android.feature.auth.impl.splash.component.RequiredUpdateDialog
 import com.neki.android.feature.auth.impl.splash.component.SplashBackground
-import com.neki.android.feature.auth.impl.splash.model.UpdateType
 
 @Composable
 internal fun SplashRoute(
@@ -65,22 +64,18 @@ private fun SplashScreen(
         modifier = Modifier.fillMaxSize(),
     )
 
-    when (uiState.updateType) {
-        UpdateType.Required -> {
-            RequiredUpdateDialog(
-                onClickUpdate = { onIntent(SplashIntent.ClickUpdateButton) },
-            )
-        }
+    if (uiState.isShowRequiredUpdateDialog) {
+        RequiredUpdateDialog(
+            onClickUpdate = { onIntent(SplashIntent.ClickUpdateDialogConfirmButton) },
+        )
+    }
 
-        UpdateType.Optional -> {
-            OptionalUpdateDialog(
-                onDismissRequest = { onIntent(SplashIntent.ClickDismissUpdateDialog) },
-                onClickUpdate = { onIntent(SplashIntent.ClickUpdateButton) },
-                onClickDismiss = { onIntent(SplashIntent.ClickDismissUpdateDialog) },
-            )
-        }
-
-        UpdateType.None -> {}
+    if (uiState.isShowOptionalUpdateDialog) {
+        OptionalUpdateDialog(
+            onClickUpdate = { onIntent(SplashIntent.ClickUpdateDialogConfirmButton) },
+            onClickDismiss = { onIntent(SplashIntent.ClickUpdateDialogDismissButton) },
+            onDismissRequest = { onIntent(SplashIntent.ClickUpdateDialogDismissButton) },
+        )
     }
 }
 

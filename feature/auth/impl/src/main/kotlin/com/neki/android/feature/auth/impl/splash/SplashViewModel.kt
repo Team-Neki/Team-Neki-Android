@@ -34,8 +34,8 @@ class SplashViewModel @Inject constructor(
     ) {
         when (intent) {
             is SplashIntent.EnterSplashScreen -> checkVersionAndAuth(intent.appVersion, reduce, postSideEffect)
-            SplashIntent.ClickDismissUpdateDialog -> handleDismissUpdate(state, reduce, postSideEffect)
-            SplashIntent.ClickUpdateButton -> postSideEffect(SplashSideEffect.NavigatePlayStore)
+            SplashIntent.ClickUpdateDialogDismissButton -> handleDismissUpdate(state, reduce, postSideEffect)
+            SplashIntent.ClickUpdateDialogConfirmButton -> postSideEffect(SplashSideEffect.NavigatePlayStore)
         }
     }
 
@@ -55,21 +55,14 @@ class SplashViewModel @Inject constructor(
 
                     when (updateType) {
                         UpdateType.None -> fetchAuthState(postSideEffect)
-                        UpdateType.Required -> {
-                            reduce {
-                                copy(
-                                    updateType = UpdateType.Required,
-                                    minVersion = appVersion.minVersion,
-                                )
-                            }
-                        }
+                        UpdateType.Required -> reduce { copy(isShowRequiredUpdateDialog = true) }
                         UpdateType.Optional -> {
                             val dismissedVersion = authRepository.dismissedVersion.first()
                             if (dismissedVersion != appVersion.currentVersion) {
                                 reduce {
                                     copy(
-                                        updateType = UpdateType.Optional,
-                                        minVersion = appVersion.currentVersion,
+                                        isShowOptionalUpdateDialog = true,
+                                        currentVersion = appVersion.currentVersion,
                                     )
                                 }
                             } else {
@@ -91,8 +84,8 @@ class SplashViewModel @Inject constructor(
         postSideEffect: (SplashSideEffect) -> Unit,
     ) {
         viewModelScope.launch {
-            authRepository.setDismissedVersion(state.minVersion)
-            reduce { copy(updateType = UpdateType.None) }
+            authRepository.setDismissedVersion(state.currentVersion)
+            reduce { copy(isShowOptionalUpdateDialog = false) }
             fetchAuthState(postSideEffect)
         }
     }
