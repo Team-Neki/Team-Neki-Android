@@ -4,12 +4,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.neki.android.core.data.local.di.AuthDataStore
 import com.neki.android.core.data.remote.api.AuthService
 import com.neki.android.core.data.remote.model.request.KakaoLoginRequest
 import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.AuthRepository
+import com.neki.android.core.model.AppVersion
 import com.neki.android.core.model.Auth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,6 +21,21 @@ class AuthRepositoryImpl @Inject constructor(
     @AuthDataStore private val dataStore: DataStore<Preferences>,
     private val authService: AuthService,
 ) : AuthRepository {
+    override val dismissedMinVersion: Flow<String> =
+        dataStore.data.map { preferences ->
+            preferences[DISMISSED_MIN_VERSION] ?: ""
+        }
+
+    override suspend fun getAppVersion(): Result<AppVersion> = runSuspendCatching {
+        authService.getAppVersion(platform = "android").data.toModel()
+    }
+
+    override suspend fun setDismissedMinVersion(minVersion: String) {
+        dataStore.edit { preferences ->
+            preferences[DISMISSED_MIN_VERSION] = minVersion
+        }
+    }
+
     override suspend fun loginWithKakao(idToken: String): Result<Auth> = runSuspendCatching {
         authService.loginWithKakao(
             requestBody = KakaoLoginRequest(
@@ -53,5 +70,6 @@ class AuthRepositoryImpl @Inject constructor(
 
     companion object {
         private val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
+        private val DISMISSED_MIN_VERSION = stringPreferencesKey("dismissed_min_version")
     }
 }
