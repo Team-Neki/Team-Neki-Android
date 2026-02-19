@@ -142,9 +142,13 @@ class SplashViewModel @Inject constructor(
         }
     }
 
-    private fun compareVersions(appVersion: String, version2: String): Int {
+    /**
+     * 버전 문자열을 각 자릿수를 비교하여 차이를 반환
+     * @return 양수: appVersion이 더 높음, 0: 같음, 음수: appVersion이 더 낮음
+     */
+    private fun compareVersions(appVersion: String, compareVersion: String): Int {
         val parts1 = appVersion.split(".").map { it.toIntOrNull() ?: 0 }
-        val parts2 = version2.split(".").map { it.toIntOrNull() ?: 0 }
+        val parts2 = compareVersion.split(".").map { it.toIntOrNull() ?: 0 }
         val maxLength = maxOf(parts1.size, parts2.size)
 
         for (i in 0 until maxLength) {
