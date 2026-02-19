@@ -1,14 +1,13 @@
 package com.neki.android.feature.auth.impl.splash
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
@@ -18,8 +17,6 @@ import com.neki.android.feature.auth.impl.splash.component.OptionalUpdateDialog
 import com.neki.android.feature.auth.impl.splash.component.RequiredUpdateDialog
 import com.neki.android.feature.auth.impl.splash.component.SplashBackground
 import com.neki.android.feature.auth.impl.splash.model.UpdateType
-import kotlinx.coroutines.delay
-import androidx.core.net.toUri
 
 @Composable
 internal fun SplashRoute(
@@ -44,7 +41,7 @@ internal fun SplashRoute(
             SplashSideEffect.NavigatePlayStore -> {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    "market://details?id=${context.packageName}".toUri()
+                    "market://details?id=${context.packageName}".toUri(),
                 ).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }

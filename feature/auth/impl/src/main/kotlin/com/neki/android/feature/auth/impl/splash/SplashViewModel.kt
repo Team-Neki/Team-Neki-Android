@@ -54,10 +54,7 @@ class SplashViewModel @Inject constructor(
                     )
 
                     when (updateType) {
-                        UpdateType.None -> {
-                            fetchAuthState(postSideEffect)
-                        }
-
+                        UpdateType.None -> fetchAuthState(postSideEffect)
                         UpdateType.Required -> {
                             reduce {
                                 copy(
@@ -66,7 +63,6 @@ class SplashViewModel @Inject constructor(
                                 )
                             }
                         }
-
                         UpdateType.Optional -> {
                             val dismissedVersion = authRepository.dismissedVersion.first()
                             if (dismissedVersion != appVersion.currentVersion) {
