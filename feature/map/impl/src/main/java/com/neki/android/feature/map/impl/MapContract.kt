@@ -32,6 +32,7 @@ sealed interface MapIntent {
     data object GrantedLocationPermission : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
+    data class ClickClusterMarker(val southWest: LocLatLng, val northEast: LocLatLng) : MapIntent
     data class ClickRefreshButton(val mapBounds: MapBounds) : MapIntent
     data object ClickDirectionIcon : MapIntent
     data object GestureOnMap : MapIntent
@@ -61,6 +62,10 @@ sealed interface MapEffect {
     data class MoveCameraToPosition(
         val locLatLng: LocLatLng,
         val isRequiredLoadPhotoBooths: Boolean = false,
+    ) : MapEffect
+    data class ZoomToClusterBounds(
+        val southWest: LocLatLng,
+        val northEast: LocLatLng,
     ) : MapEffect
     data object OpenDirectionBottomSheet : MapEffect
     data class ShowToastMessage(val message: String) : MapEffect

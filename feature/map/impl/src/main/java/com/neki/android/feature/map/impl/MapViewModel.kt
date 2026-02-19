@@ -81,6 +81,7 @@ class MapViewModel @Inject constructor(
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
+            is MapIntent.ClickClusterMarker -> postSideEffect(MapEffect.ZoomToClusterBounds(intent.southWest, intent.northEast))
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
             MapIntent.ClickDirectionIcon -> {
                 if (LocationPermissionManager.isGrantedLocationPermission(context)) {
