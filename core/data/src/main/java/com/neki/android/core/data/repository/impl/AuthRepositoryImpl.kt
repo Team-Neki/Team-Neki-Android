@@ -40,6 +40,7 @@ class AuthRepositoryImpl @Inject constructor(
         authService.loginWithKakao(
             requestBody = KakaoLoginRequest(
                 idToken = idToken,
+                platform = "android",
             ),
         ).data.toModel()
     }
