@@ -52,7 +52,7 @@ internal object NetworkModule {
         "/api/auth/kakao/login",
         "/api/auth/refresh",
         "/api/terms",
-        "/api/versions/ANDROID",
+        "/api/versions/android",
     )
 
     private val json = Json {
