@@ -19,6 +19,7 @@ import com.neki.android.feature.auth.impl.splash.component.RequiredUpdateDialog
 import com.neki.android.feature.auth.impl.splash.component.SplashBackground
 import com.neki.android.feature.auth.impl.splash.model.UpdateType
 import kotlinx.coroutines.delay
+import androidx.core.net.toUri
 
 @Composable
 internal fun SplashRoute(
@@ -37,35 +38,17 @@ internal fun SplashRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            SplashSideEffect.NavigateToOnboarding -> {
-                delay(1000)
-                navigateToOnboarding()
-            }
-
-            SplashSideEffect.NavigateToLogin -> {
-                delay(1000)
-                navigateToLogin()
-            }
-
-            SplashSideEffect.NavigateToMain -> {
-                delay(1000)
-                navigateToMain()
-            }
-
+            SplashSideEffect.NavigateToOnboarding -> navigateToOnboarding()
+            SplashSideEffect.NavigateToLogin -> navigateToLogin()
+            SplashSideEffect.NavigateToMain -> navigateToMain()
             SplashSideEffect.NavigatePlayStore -> {
-                val packageName = context.packageName
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://play.google.com/store/apps/details?id=$packageName"),
-                    )
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    "market://details?id=${context.packageName}".toUri()
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
+                context.startActivity(intent)
             }
         }
     }
