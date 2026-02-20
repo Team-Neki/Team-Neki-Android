@@ -23,10 +23,10 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", properties["BASE_URL"].toString())
+            buildConfigField("String", "BASE_URL", properties["DEV_BASE_URL"].toString())
         }
         release {
-            buildConfigField("String", "BASE_URL", properties["DEV_BASE_URL"].toString())
+            buildConfigField("String", "BASE_URL", properties["BASE_URL"].toString())
         }
     }
 }
