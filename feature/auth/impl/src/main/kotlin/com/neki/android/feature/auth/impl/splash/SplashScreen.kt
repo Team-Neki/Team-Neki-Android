@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.delay
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -16,6 +17,7 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.auth.impl.splash.component.OptionalUpdateDialog
 import com.neki.android.feature.auth.impl.splash.component.RequiredUpdateDialog
 import com.neki.android.feature.auth.impl.splash.component.SplashBackground
+import com.neki.android.feature.auth.impl.splash.model.SplashConst
 
 @Composable
 internal fun SplashRoute(
@@ -28,6 +30,7 @@ internal fun SplashRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
+        delay(SplashConst.SPLASH_DELAY)
         val appVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: ""
         viewModel.store.onIntent(SplashIntent.EnterSplashScreen(appVersion))
     }

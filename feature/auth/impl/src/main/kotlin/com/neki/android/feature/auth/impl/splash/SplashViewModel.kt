@@ -8,7 +8,6 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.auth.impl.splash.model.UpdateType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -92,7 +91,6 @@ class SplashViewModel @Inject constructor(
 
     private fun fetchAuthState(postSideEffect: (SplashSideEffect) -> Unit) {
         viewModelScope.launch {
-            delay(1000)
             if (!authRepository.hasCompletedOnboarding().first()) {
                 postSideEffect(SplashSideEffect.NavigateToOnboarding)
                 return@launch
