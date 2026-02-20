@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -35,6 +36,7 @@ internal fun CurrentLocationButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
+            modifier = Modifier.size(28.dp),
             imageVector = ImageVector.vectorResource(R.drawable.icon_current_position),
             contentDescription = null,
             tint = if (isActiveCurrentLocation) NekiTheme.colorScheme.primary500

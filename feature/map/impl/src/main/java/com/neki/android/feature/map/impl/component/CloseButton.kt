@@ -35,7 +35,7 @@ internal fun CloseButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(24.dp),
             imageVector = ImageVector.vectorResource(R.drawable.icon_close),
             contentDescription = null,
             tint = NekiTheme.colorScheme.gray800,
