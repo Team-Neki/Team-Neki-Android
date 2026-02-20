@@ -82,7 +82,7 @@ class MapViewModel @Inject constructor(
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
-            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, state, reduce)
+            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, state.shouldShowInfoTooltip, reduce)
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
             MapIntent.ClickDirectionIcon -> {
@@ -279,7 +279,7 @@ class MapViewModel @Inject constructor(
     private fun fetchInitialData(reduce: (MapState.() -> MapState) -> Unit) {
         viewModelScope.launch {
             val hasShownInfoTooltip = userRepository.hasShownInfoToolTip.first()
-            reduce { copy(isLoading = true, isShowInfoTooltip = !hasShownInfoTooltip) }
+            reduce { copy(isLoading = true, shouldShowInfoTooltip = !hasShownInfoTooltip) }
 
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
@@ -397,14 +397,14 @@ class MapViewModel @Inject constructor(
 
     private fun handleChangeDragLevel(
         dragLevel: DragLevel,
-        state: MapState,
+        shouldShowInfoTooltip: Boolean,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         viewModelScope.launch {
             if (dragLevel == DragLevel.THIRD) {
-                if (state.isShowInfoTooltip) {
+                if (shouldShowInfoTooltip) {
+                    reduce { copy(dragLevel = dragLevel, isShowInfoTooltip = true, shouldShowInfoTooltip = false) }
                     userRepository.setInfoToolTipShown()
-                    reduce { copy(dragLevel = dragLevel, isShowInfoTooltip = true) }
                 } else {
                     reduce { copy(dragLevel = dragLevel) }
                 }
