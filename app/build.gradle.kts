@@ -92,4 +92,5 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.hilt.lifecycle.viewModel.compose)
 }

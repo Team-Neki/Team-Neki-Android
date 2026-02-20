@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
+import com.neki.android.app.main.MainRoute
 import com.neki.android.core.dataapi.auth.AuthEvent
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -25,6 +26,8 @@ import com.neki.android.core.navigation.root.RootNavigationState
 import com.neki.android.core.navigation.root.RootNavigator
 import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.auth.impl.navigation.authEntryProvider
+import com.neki.android.feature.photo_upload.api.navigateToQRScan
+import com.neki.android.feature.photo_upload.api.navigateToUploadAlbum
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -74,7 +77,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             RootNavKey.Main -> {
-                                MainScreen(
+                                MainRoute(
                                     currentKey = mainNavigator.state.currentKey,
                                     currentTopLevelKey = mainNavigator.state.currentTopLevelKey,
                                     topLevelKeys = mainNavigator.state.topLevelKeys,
@@ -85,6 +88,9 @@ class MainActivity : ComponentActivity() {
                                     ),
                                     onTabSelected = { mainNavigator.navigate(it) },
                                     onBack = { mainNavigator.goBack() },
+                                    navigateToQRScan = mainNavigator::navigateToQRScan,
+                                    navigateToUploadAlbumWithGallery = mainNavigator::navigateToUploadAlbum,
+                                    navigateToUploadAlbumWithQRScan = mainNavigator::navigateToUploadAlbum,
                                 )
                             }
                         }
