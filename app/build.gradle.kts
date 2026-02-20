@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.neki.android.application)
     alias(libs.plugins.neki.android.application.compose)
     alias(libs.plugins.oss.licenses)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 val localPropertiesFile = project.rootProject.file("local.properties")
@@ -21,15 +23,6 @@ android {
         buildConfig = true
     }
 
-    defaultConfig {
-        val naverMapClientId = properties["NAVER_MAP_CLIENT_ID"].toString()
-        val kakaoKey = properties["KAKAO_NATIVE_APP_KEY"].toString()
-        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
-
-        buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
-        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
-    }
-
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("neki_key_store.jks")
@@ -39,13 +32,31 @@ android {
         }
     }
     buildTypes {
-        getByName("release") {
+        debug {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+
+            val naverMapClientId = properties["NAVER_MAP_DEV_CLIENT_ID"].toString()
+            buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
+
+            val kakaoKey = properties["KAKAO_DEV_NATIVE_APP_KEY"].toString()
+            manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
+            buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
+        }
+        release {
             isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            val naverMapClientId = properties["NAVER_MAP_CLIENT_ID"].toString()
+            buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
+
+            val kakaoKey = properties["KAKAO_NATIVE_APP_KEY"].toString()
+            manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
+            buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
         }
     }
 
@@ -74,6 +85,10 @@ dependencies {
     implementation(projects.feature.photoUpload.impl)
 
     implementation(libs.timber)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.ui)
