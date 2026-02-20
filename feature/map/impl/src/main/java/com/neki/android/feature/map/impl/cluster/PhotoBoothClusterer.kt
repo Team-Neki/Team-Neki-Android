@@ -4,12 +4,12 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.text.TextPaint
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.core.graphics.drawable.toBitmap
+import androidx.core.content.res.ResourcesCompat
 import com.naver.maps.geometry.LatLng
+import com.neki.android.core.designsystem.R as DesignSystemR
 import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.clustering.ClusterMarkerInfo
@@ -20,6 +20,7 @@ import com.naver.maps.map.clustering.LeafMarkerInfo
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.neki.android.core.model.PhotoBooth
+import androidx.core.graphics.toColorInt
 
 /**
  * PhotoBooth 마커 클러스터링을 위한 Clusterer 빌더
@@ -31,8 +32,17 @@ internal object PhotoBoothClusterer {
     private const val MIN_CLUSTERING_ZOOM = 9
     private const val MAX_CLUSTERING_ZOOM = 16
     private const val MAX_SCREEN_DISTANCE = 200.0
-    private const val CLUSTER_MARKER_SIZE = 50
-    private const val CLUSTER_TEXT_SIZE = 20f
+
+    // 클러스터 마커 스타일 (Figma: btn_pin_map)
+    private const val CLUSTER_TEXT_SIZE = 20f // title20SemiBold
+    private const val CLUSTER_LETTER_SPACING = -0.02f // letterSpacing: -0.02em
+    private const val CLUSTER_CORNER_RADIUS = 18f
+    private const val CLUSTER_BOX_SIZE = 54f // 테두리 포함 고정 크기
+    private const val CLUSTER_STROKE_WIDTH = 2f // 흰색 테두리
+    // pinShadow: offset (0, 1), blur 2.5, alpha 0.40
+    private const val PIN_SHADOW_OFFSET_Y = 1f
+    private const val PIN_SHADOW_BLUR = 2.5f
+    private const val PIN_SHADOW_ALPHA = 0.40f
 
     /**
      * 클러스터 매니저 생성
@@ -231,35 +241,81 @@ internal object PhotoBoothClusterer {
         return OverlayImage.fromBitmap(bitmap)
     }
 
-    /**클러스터 마커 아이콘 생성**/
+    /**클러스터 마커 아이콘 생성 (둥근 사각형 배경 + 숫자)**/
     private fun createClusterIcon(context: Context, count: Int): OverlayImage {
         val density = context.resources.displayMetrics.density
-        val size = (CLUSTER_MARKER_SIZE * density).toInt()
 
-        // 원형 배경 생성
-        val circleDrawable = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
-            setColor(Color.parseColor("#333333"))
-            setStroke((2 * density).toInt(), Color.WHITE)
-            setSize(size, size)
+        // 배경 크기 (고정 54dp)
+        val shadowPadding = 4 * density
+        val bgSize = CLUSTER_BOX_SIZE * density
+        val totalSize = (bgSize + shadowPadding * 2).toInt()
+
+        // 비트맵 생성
+        val bitmap = android.graphics.Bitmap.createBitmap(
+            totalSize,
+            totalSize,
+            android.graphics.Bitmap.Config.ARGB_8888,
+        )
+        val canvas = android.graphics.Canvas(bitmap)
+
+        // 그림자 Paint (pinShadow 스타일: offset (0, 1), blur 2.5, alpha 0.40)
+        val shadowPaint = Paint().apply {
+            isAntiAlias = true
+            color = Color.TRANSPARENT
+            setShadowLayer(
+                PIN_SHADOW_BLUR * density,
+                0f,
+                PIN_SHADOW_OFFSET_Y * density,
+                Color.argb((255 * PIN_SHADOW_ALPHA).toInt(), 0, 0, 0),
+            )
         }
 
-        val bitmap = circleDrawable.toBitmap(size, size)
+        // 배경 Paint (NekiColors.primary400: #FF5647)
+        val backgroundPaint = Paint().apply {
+            isAntiAlias = true
+            color = Color.parseColor("#FF5647")
+            style = Paint.Style.FILL
+        }
 
-        // 숫자 텍스트 그리기
-        val canvas = android.graphics.Canvas(bitmap)
+        // 테두리 Paint (흰색 2px)
+        val strokePaint = Paint().apply {
+            isAntiAlias = true
+            color = Color.WHITE
+            style = Paint.Style.STROKE
+            this.strokeWidth = CLUSTER_STROKE_WIDTH * density
+        }
+
+        // 배경 영역 (정사각형 54dp)
+        val bgRect = android.graphics.RectF(
+            shadowPadding,
+            shadowPadding,
+            shadowPadding + bgSize,
+            shadowPadding + bgSize,
+        )
+
+        val cornerRadius = CLUSTER_CORNER_RADIUS * density
+
+        // 텍스트 크기 및 Paint 설정 (title20SemiBold 스타일)
         val textPaint = TextPaint().apply {
             color = Color.WHITE
             textSize = CLUSTER_TEXT_SIZE * density
             isAntiAlias = true
             textAlign = Paint.Align.CENTER
-            typeface = Typeface.DEFAULT_BOLD
+            typeface = ResourcesCompat.getFont(context, DesignSystemR.font.pretendard_semibold)
+            letterSpacing = CLUSTER_LETTER_SPACING
         }
 
-        val text = if (count > 99) "99+" else count.toString()
         val textHeight = textPaint.descent() - textPaint.ascent()
-        val textOffset = textHeight / 2 - textPaint.descent()
-        canvas.drawText(text, size / 2f, size / 2f + textOffset, textPaint)
+        val textX = shadowPadding + bgSize / 2
+        val textY = shadowPadding + bgSize / 2 + (textHeight / 2 - textPaint.descent())
+        val text = if (count > 99) "99+" else count.toString()
+
+        canvas.apply {
+            drawRoundRect(bgRect, cornerRadius, cornerRadius, shadowPaint)
+            drawRoundRect(bgRect, cornerRadius, cornerRadius, backgroundPaint)
+            drawRoundRect(bgRect, cornerRadius, cornerRadius, strokePaint)
+            drawText(text, textX, textY, textPaint)
+        }
 
         return OverlayImage.fromBitmap(bitmap)
     }
