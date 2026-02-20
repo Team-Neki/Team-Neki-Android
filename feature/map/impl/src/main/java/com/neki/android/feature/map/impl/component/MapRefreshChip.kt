@@ -41,7 +41,7 @@ internal fun MapRefreshChip(
                 shape = CircleShape,
                 color = NekiTheme.colorScheme.primary400,
             )
-            .padding(horizontal = 13.dp, vertical = 12.dp),
+            .padding(horizontal = 13.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
