@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.UploadType
@@ -16,6 +17,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import androidx.compose.foundation.text.input.TextFieldState
@@ -29,6 +31,7 @@ class ArchiveMainViewModel @Inject constructor(
     private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     val store: MviIntentStore<ArchiveMainState, ArchiveMainIntent, ArchiveMainSideEffect> =
@@ -53,7 +56,10 @@ class ArchiveMainViewModel @Inject constructor(
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
             // TopBar Intent
-            ArchiveMainIntent.DismissToolTipPopup -> reduce { copy(isFirstEntered = false) }
+            ArchiveMainIntent.DismissToolTipPopup -> {
+                reduce { copy(isFirstEntered = false) }
+                viewModelScope.launch { userRepository.setQRInfoToolTipShown() }
+            }
             ArchiveMainIntent.ClickQRScanIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
 
             is ArchiveMainIntent.SelectGalleryImage -> reduce {
@@ -114,6 +120,7 @@ class ArchiveMainViewModel @Inject constructor(
             reduce { copy(isLoading = true) }
             try {
                 awaitAll(
+                    async { checkFirstVisit(reduce) },
                     async { fetchFavoriteSummary(reduce) },
                     async { fetchPhotos(reduce) },
                     async { fetchFolders(reduce) },
@@ -121,6 +128,12 @@ class ArchiveMainViewModel @Inject constructor(
             } finally {
                 reduce { copy(isLoading = false) }
             }
+        }
+    }
+
+    private suspend fun checkFirstVisit(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
+        if (!userRepository.hasShownQRInfoToolTip.first()) {
+            reduce { copy(isFirstEntered = true) }
         }
     }
 
