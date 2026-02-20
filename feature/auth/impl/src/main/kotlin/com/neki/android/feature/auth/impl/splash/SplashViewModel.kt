@@ -48,9 +48,9 @@ class SplashViewModel @Inject constructor(
             authRepository.getAppVersion()
                 .onSuccess { appVersion ->
                     val updateType = getUpdateType(
-                        appVersion = currentAppVersion,
+                        currentAppVersion = currentAppVersion,
                         minVersion = appVersion.minVersion,
-                        currentVersion = appVersion.currentVersion,
+                        latestVersion = appVersion.currentVersion,
                     )
 
                     when (updateType) {
@@ -62,7 +62,7 @@ class SplashViewModel @Inject constructor(
                                 reduce {
                                     copy(
                                         isShowOptionalUpdateDialog = true,
-                                        currentVersion = appVersion.currentVersion,
+                                        latestVersion = appVersion.currentVersion,
                                     )
                                 }
                             } else {
@@ -84,7 +84,7 @@ class SplashViewModel @Inject constructor(
         postSideEffect: (SplashSideEffect) -> Unit,
     ) {
         viewModelScope.launch {
-            authRepository.setDismissedVersion(state.currentVersion)
+            authRepository.setDismissedVersion(state.latestVersion)
             reduce { copy(isShowOptionalUpdateDialog = false) }
             fetchAuthState(postSideEffect)
         }
@@ -121,13 +121,13 @@ class SplashViewModel @Inject constructor(
      * - appVersion < minVersion: 필수 업데이트 (Required)
      */
     private fun getUpdateType(
-        appVersion: String,
+        currentAppVersion: String,
         minVersion: String,
-        currentVersion: String,
+        latestVersion: String,
     ): UpdateType {
         return when {
-            compareVersions(appVersion, currentVersion) >= 0 -> UpdateType.None
-            compareVersions(appVersion, minVersion) >= 0 -> UpdateType.Optional
+            compareVersions(currentAppVersion, latestVersion) >= 0 -> UpdateType.None
+            compareVersions(currentAppVersion, minVersion) >= 0 -> UpdateType.Optional
             else -> UpdateType.Required
         }
     }

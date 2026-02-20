@@ -3,7 +3,7 @@ package com.neki.android.feature.auth.impl.splash
 data class SplashState(
     val isShowRequiredUpdateDialog: Boolean = false,
     val isShowOptionalUpdateDialog: Boolean = false,
-    val currentVersion: String = "",
+    val latestVersion: String = "",
 )
 
 sealed interface SplashIntent {
