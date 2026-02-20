@@ -18,6 +18,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import androidx.compose.foundation.text.input.TextFieldState
 import javax.inject.Inject
 
 private const val DEFAULT_PHOTOS_SIZE = 20
@@ -46,31 +47,14 @@ class ArchiveMainViewModel @Inject constructor(
     ) {
         if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
-            is ArchiveMainIntent.QRCodeScanned -> reduce {
-                copy(
-                    scannedImageUrl = intent.imageUrl,
-                    isShowSelectWithAlbumDialog = true,
-                )
-            }
-
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
             ArchiveMainIntent.RefreshArchiveMainScreen -> fetchInitialData(reduce)
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
             // TopBar Intent
-            ArchiveMainIntent.ClickAddIcon -> reduce { copy(isShowAddDialog = true) }
-            ArchiveMainIntent.DismissAddPopup -> reduce { copy(isShowAddDialog = false) }
             ArchiveMainIntent.DismissToolTipPopup -> reduce { copy(isFirstEntered = false) }
-            ArchiveMainIntent.ClickQRScanRow -> {
-                reduce { copy(isShowAddDialog = false) }
-                postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
-            }
-
-            ArchiveMainIntent.ClickGalleryUploadRow -> {
-                reduce { copy(isShowAddDialog = false) }
-                postSideEffect(ArchiveMainSideEffect.OpenGallery)
-            }
+            ArchiveMainIntent.ClickQRScanIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
 
             is ArchiveMainIntent.SelectGalleryImage -> reduce {
                 copy(
@@ -95,19 +79,13 @@ class ArchiveMainViewModel @Inject constructor(
 
             ArchiveMainIntent.ClickUploadWithoutAlbumRow -> uploadWithoutAlbum(state, reduce, postSideEffect)
 
-            ArchiveMainIntent.ClickAddNewAlbumRow -> reduce {
-                copy(
-                    isShowAddDialog = false,
-                    isShowAddAlbumBottomSheet = true,
-                )
-            }
-
             ArchiveMainIntent.ClickNotificationIcon -> {}
 
             // Album Intent
             ArchiveMainIntent.ClickAllAlbumText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllAlbum)
             ArchiveMainIntent.ClickFavoriteAlbum -> postSideEffect(ArchiveMainSideEffect.NavigateToFavoriteAlbum(-1L))
             is ArchiveMainIntent.ClickAlbumItem -> postSideEffect(ArchiveMainSideEffect.NavigateToAlbumDetail(intent.albumId, intent.albumTitle))
+            ArchiveMainIntent.ClickAddAlbum -> reduce { copy(isShowAddAlbumBottomSheet = true, albumNameTextState = TextFieldState()) }
 
             // Photo Intent
             ArchiveMainIntent.ClickAllPhotoText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllPhoto)
@@ -115,7 +93,17 @@ class ArchiveMainViewModel @Inject constructor(
 
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
-            is ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(intent.albumName, reduce, postSideEffect)
+            ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(state.albumNameTextState.text.trim().toString(), reduce, postSideEffect)
+
+            // Result
+            is ArchiveMainIntent.QRCodeScanned -> reduce {
+                copy(
+                    scannedImageUrl = intent.imageUrl,
+                    isShowSelectWithAlbumDialog = true,
+                )
+            }
+
+            ArchiveMainIntent.ReceiveOpenGalleryResult -> postSideEffect(ArchiveMainSideEffect.OpenGallery)
         }
     }
 
@@ -252,7 +240,7 @@ class ArchiveMainViewModel @Inject constructor(
                     postSideEffect(ArchiveMainSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
                     Timber.e(error)
                 }
-            reduce { copy(isShowAddAlbumBottomSheet = false) }
+            reduce { copy(isShowAddAlbumBottomSheet = false, albumNameTextState = TextFieldState()) }
         }
     }
 }

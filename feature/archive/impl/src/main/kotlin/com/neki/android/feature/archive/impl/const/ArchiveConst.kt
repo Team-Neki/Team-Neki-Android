@@ -19,5 +19,5 @@ internal object ArchiveConst {
     // Album
     internal const val ARCHIVE_ALBUM_ITEM_WIDTH = 124
     internal const val ARCHIVE_ALBUM_ITEM_HEIGHT = 166
-    internal const val ARCHIVE_ALBUM_NAME_MAX_LENGTH = 16
+    internal const val ARCHIVE_ALBUM_NAME_MAX_LENGTH = 10
 }

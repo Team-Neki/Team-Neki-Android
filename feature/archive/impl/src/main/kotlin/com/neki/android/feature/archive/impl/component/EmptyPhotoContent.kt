@@ -1,4 +1,4 @@
-package com.neki.android.feature.archive.impl.main.component
+package com.neki.android.feature.archive.impl.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +18,7 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-internal fun EmptyContent(
+internal fun EmptyPhotoContent(
     emptyText: String,
     modifier: Modifier = Modifier,
 ) {
@@ -45,9 +45,9 @@ internal fun EmptyContent(
 
 @ComponentPreview
 @Composable
-private fun EmptyContentPreview() {
+private fun EmptyPhotoContentPreview() {
     NekiTheme {
-        EmptyContent(
+        EmptyPhotoContent(
             emptyText = "아직 등록된 사진이 없어요\n찍은 네컷을 네키에 저장해보세요!",
         )
     }

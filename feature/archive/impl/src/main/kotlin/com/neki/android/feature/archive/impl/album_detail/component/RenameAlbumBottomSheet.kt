@@ -1,4 +1,4 @@
-package com.neki.android.feature.archive.impl.component
+package com.neki.android.feature.archive.impl.album_detail.component
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,7 +11,7 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ALBUM_NA
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun AddAlbumBottomSheet(
+internal fun RenameAlbumBottomSheet(
     textFieldState: TextFieldState,
     onDismissRequest: () -> Unit,
     onClickCancel: () -> Unit,
@@ -19,10 +19,11 @@ internal fun AddAlbumBottomSheet(
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorMessage: String? = null,
+    isConfirmEnabled: Boolean = true,
 ) {
     NekiTextFieldBottomSheet(
-        title = "새 앨범 추가",
-        subtitle = "네컷사진을 모을 앨범명을 입력하세요",
+        title = "앨범 이름 변경",
+        subtitle = "변경할 앨범 이름을 입력하세요",
         textFieldState = textFieldState,
         onDismissRequest = onDismissRequest,
         onClickCancel = onClickCancel,
@@ -30,18 +31,19 @@ internal fun AddAlbumBottomSheet(
         modifier = modifier,
         placeholder = "앨범명을 입력하세요",
         maxLength = ARCHIVE_ALBUM_NAME_MAX_LENGTH,
-        confirmButtonText = "추가하기",
+        confirmButtonText = "변경하기",
         isError = isError,
         errorMessage = errorMessage,
+        isConfirmEnabled = isConfirmEnabled,
     )
 }
 
 @ComponentPreview
 @Composable
-private fun AddAlbumBottomSheetPreview() {
+private fun RenameAlbumBottomSheetPreview() {
     NekiTheme {
-        AddAlbumBottomSheet(
-            textFieldState = TextFieldState(),
+        RenameAlbumBottomSheet(
+            textFieldState = TextFieldState("앨범명"),
             onDismissRequest = {},
             onClickCancel = {},
             onClickConfirm = {},
@@ -51,15 +53,13 @@ private fun AddAlbumBottomSheetPreview() {
 
 @ComponentPreview
 @Composable
-private fun AddAlbumBottomSheetErrorPreview() {
+private fun RenameAlbumBottomSheetErrorPreview() {
     NekiTheme {
-        AddAlbumBottomSheet(
-            textFieldState = TextFieldState(),
+        RenameAlbumBottomSheet(
+            textFieldState = TextFieldState("즐겨찾기즐겨찾기즐겨찾기"),
             onDismissRequest = {},
             onClickCancel = {},
             onClickConfirm = {},
-            isError = true,
-            errorMessage = "앨범명은 최대 10자까지 입력할 수 있어요.",
         )
     }
 }

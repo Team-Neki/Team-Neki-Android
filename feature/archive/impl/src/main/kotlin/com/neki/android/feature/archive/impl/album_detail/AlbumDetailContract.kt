@@ -1,5 +1,7 @@
 package com.neki.android.feature.archive.impl.album_detail
 
+import android.net.Uri
+import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.Photo
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
@@ -10,11 +12,15 @@ data class AlbumDetailState(
     val title: String = "",
     val isFavoriteAlbum: Boolean = false,
     val selectMode: SelectMode = SelectMode.DEFAULT,
+    val isShowOptionPopup: Boolean = false,
     val selectedPhotos: ImmutableList<Photo> = persistentListOf(),
     val deletedPhotoIds: Set<Long> = emptySet(),
     val isShowDeleteDialog: Boolean = false,
     val isShowDeleteBottomSheet: Boolean = false,
     val selectedDeleteOption: PhotoDeleteOption = PhotoDeleteOption.REMOVE_FROM_ALBUM,
+
+    val renameAlbumTextState: TextFieldState = TextFieldState(),
+    val isShowRenameAlbumBottomSheet: Boolean = false,
 )
 
 enum class PhotoDeleteOption(val label: String) {
@@ -31,8 +37,12 @@ sealed interface AlbumDetailIntent {
     // TopBar Intent
     data object ClickBackIcon : AlbumDetailIntent
     data object OnBackPressed : AlbumDetailIntent
-    data object ClickSelectButton : AlbumDetailIntent
+    data object ClickOptionIcon : AlbumDetailIntent
+    data object ClickSelectOption : AlbumDetailIntent
+    data object ClickAddPhotoOption : AlbumDetailIntent
+    data object ClickRenameAlbumOption : AlbumDetailIntent
     data object ClickCancelButton : AlbumDetailIntent
+    data object DismissOptionPopup : AlbumDetailIntent
 
     // Photo Intent
     data class ClickPhotoItem(val photo: Photo) : AlbumDetailIntent
@@ -52,6 +62,14 @@ sealed interface AlbumDetailIntent {
     data object ClickDeleteBottomSheetCancelButton : AlbumDetailIntent
     data object ClickDeleteBottomSheetConfirmButton : AlbumDetailIntent
 
+    // Gallery Intent
+    data class SelectGalleryImage(val uris: List<Uri>) : AlbumDetailIntent
+
+    // Rename BottomSheet Intent
+    data object DismissRenameBottomSheet : AlbumDetailIntent
+    data object ClickRenameBottomSheetCancelButton : AlbumDetailIntent
+    data object ClickRenameBottomSheetConfirmButton : AlbumDetailIntent
+
     // Result Intent
     data class PhotoDeleted(val photoIds: List<Long>) : AlbumDetailIntent
     data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : AlbumDetailIntent
@@ -62,4 +80,6 @@ sealed interface AlbumDetailSideEffect {
     data class NavigateToPhotoDetail(val photo: Photo) : AlbumDetailSideEffect
     data class ShowToastMessage(val message: String) : AlbumDetailSideEffect
     data class DownloadImages(val imageUrls: List<String>) : AlbumDetailSideEffect
+    data object OpenGallery : AlbumDetailSideEffect
+    data object RefreshPhotos : AlbumDetailSideEffect
 }
