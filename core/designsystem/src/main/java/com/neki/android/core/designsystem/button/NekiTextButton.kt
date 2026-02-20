@@ -19,8 +19,6 @@ fun NekiTextButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     multipleEventsCutterEnabled: Boolean = true,
-    enabledTextColor: Color = NekiTheme.colorScheme.primary500,
-    disabledTextColor: Color = NekiTheme.colorScheme.gray200,
     contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
     content: @Composable () -> Unit = {},
 ) {
@@ -36,10 +34,6 @@ fun NekiTextButton(
         modifier = modifier,
         contentPadding = contentPadding,
         enabled = enabled,
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = enabledTextColor,
-            disabledContentColor = disabledTextColor,
-        ),
     ) {
         content()
     }
@@ -54,6 +48,7 @@ private fun NekiTextButtonPreview() {
         ) {
             Text(
                 text = "텍스트버튼",
+                color = NekiTheme.colorScheme.primary500,
             )
         }
     }
