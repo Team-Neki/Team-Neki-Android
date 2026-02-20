@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -75,12 +76,12 @@ private fun AddPhotoBottomSheetContent(
         ) {
             AddPhotoOptionButton(
                 modifier = Modifier.padding(horizontal = 4.dp),
-                iconRes = ArchiveR.drawable.icon_qrcode_scan,
+                iconRes = R.drawable.icon_qr_scan,
                 label = "QR로 추가",
                 onClick = onClickQRScan,
             )
             AddPhotoOptionButton(
-                iconRes = ArchiveR.drawable.icon_upload_gallery,
+                iconRes = R.drawable.icon_add_photo,
                 label = "갤러리에서 추가",
                 onClick = onClickGallery,
             )
