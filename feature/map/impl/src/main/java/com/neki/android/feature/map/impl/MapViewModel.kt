@@ -400,8 +400,8 @@ class MapViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             if (dragLevel == DragLevel.THIRD) {
-                if (!userRepository.hasVisibledInfoToolTip.first()) {
-                    userRepository.setInfoToolTipVisibled()
+                if (!userRepository.hasShownInfoToolTip.first()) {
+                    userRepository.setInfoToolTipShown()
                     reduce { copy(dragLevel = dragLevel, isShowInfoTooltip = true) }
                 } else {
                     reduce { copy(dragLevel = dragLevel) }

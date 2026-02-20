@@ -30,12 +30,12 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override val hasVisibledInfoToolTip: Flow<Boolean> =
+    override val hasShownInfoToolTip: Flow<Boolean> =
         dataStore.data.map { preferences ->
             preferences[HAS_INFO_TOOLTIP_VISIBLED] ?: false
         }
 
-    override suspend fun setInfoToolTipVisibled() {
+    override suspend fun setInfoToolTipShown() {
         dataStore.edit { preferences ->
             preferences[HAS_INFO_TOOLTIP_VISIBLED] = true
         }
