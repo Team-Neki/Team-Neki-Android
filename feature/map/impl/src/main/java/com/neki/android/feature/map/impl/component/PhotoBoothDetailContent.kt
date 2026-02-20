@@ -45,7 +45,7 @@ internal fun PhotoBoothDetailContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(start = 20.dp, end = 20.dp, bottom = 26.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
