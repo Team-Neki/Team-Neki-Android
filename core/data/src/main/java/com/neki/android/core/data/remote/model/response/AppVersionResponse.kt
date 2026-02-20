@@ -12,6 +12,6 @@ data class AppVersionResponse(
 ) {
     fun toModel() = AppVersion(
         minVersion = this.minVersion,
-        currentVersion = this.currentVersion,
+        latestVersion = this.currentVersion,
     )
 }

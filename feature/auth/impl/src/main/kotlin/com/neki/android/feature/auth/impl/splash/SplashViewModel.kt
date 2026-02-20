@@ -50,7 +50,7 @@ class SplashViewModel @Inject constructor(
                     val updateType = getUpdateType(
                         currentAppVersion = currentAppVersion,
                         minVersion = appVersion.minVersion,
-                        latestVersion = appVersion.currentVersion,
+                        latestVersion = appVersion.latestVersion,
                     )
 
                     when (updateType) {
@@ -58,11 +58,11 @@ class SplashViewModel @Inject constructor(
                         UpdateType.Required -> reduce { copy(isShowRequiredUpdateDialog = true) }
                         UpdateType.Optional -> {
                             val dismissedVersion = authRepository.dismissedVersion.first()
-                            if (dismissedVersion != appVersion.currentVersion) {
+                            if (dismissedVersion != appVersion.latestVersion) {
                                 reduce {
                                     copy(
                                         isShowOptionalUpdateDialog = true,
-                                        latestVersion = appVersion.currentVersion,
+                                        latestVersion = appVersion.latestVersion,
                                     )
                                 }
                             } else {
@@ -116,9 +116,9 @@ class SplashViewModel @Inject constructor(
 
     /**
      * 버전 체크 로직:
-     * - appVersion >= currentVersion: 최신 버전 (None)
-     * - minVersion <= appVersion < currentVersion: 선택 업데이트 (Optional)
-     * - appVersion < minVersion: 필수 업데이트 (Required)
+     * - currentAppVersion >= latestVersion: 최신 버전 (None)
+     * - minVersion <= currentAppVersion < latestVersion: 선택 업데이트 (Optional)
+     * - currentAppVersion < minVersion: 필수 업데이트 (Required)
      */
     private fun getUpdateType(
         currentAppVersion: String,
@@ -136,8 +136,8 @@ class SplashViewModel @Inject constructor(
      * 버전 문자열을 각 자릿수를 비교하여 차이를 반환
      * @return 양수: appVersion이 더 높음, 0: 같음, 음수: appVersion이 더 낮음
      */
-    private fun compareVersions(appVersion: String, compareVersion: String): Int {
-        val parts1 = appVersion.split(".").map { it.toIntOrNull() ?: 0 }
+    private fun compareVersions(currentAppVersion: String, compareVersion: String): Int {
+        val parts1 = currentAppVersion.split(".").map { it.toIntOrNull() ?: 0 }
         val parts2 = compareVersion.split(".").map { it.toIntOrNull() ?: 0 }
         val maxLength = maxOf(parts1.size, parts2.size)
 
