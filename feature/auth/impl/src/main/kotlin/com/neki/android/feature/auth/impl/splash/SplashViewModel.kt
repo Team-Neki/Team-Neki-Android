@@ -6,6 +6,7 @@ import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.auth.impl.splash.model.UpdateType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -20,9 +21,8 @@ class SplashViewModel @Inject constructor(
 
     val store: MviIntentStore<SplashState, SplashIntent, SplashSideEffect> =
         mviIntentStore(
-            initialState = SplashState,
+            initialState = SplashState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(SplashIntent.EnterSplashScreen) },
         )
 
     private fun onIntent(
@@ -32,14 +32,66 @@ class SplashViewModel @Inject constructor(
         postSideEffect: (SplashSideEffect) -> Unit,
     ) {
         when (intent) {
-            SplashIntent.EnterSplashScreen -> fetchAuthState(postSideEffect)
+            is SplashIntent.EnterSplashScreen -> checkVersionAndAuth(intent.appVersion, reduce, postSideEffect)
+            SplashIntent.ClickUpdateDialogDismissButton -> handleDismissUpdate(state, reduce, postSideEffect)
+            SplashIntent.ClickUpdateDialogConfirmButton -> postSideEffect(SplashSideEffect.NavigatePlayStore)
+        }
+    }
+
+    private fun checkVersionAndAuth(
+        currentAppVersion: String,
+        reduce: (SplashState.() -> SplashState) -> Unit,
+        postSideEffect: (SplashSideEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            authRepository.getAppVersion()
+                .onSuccess { appVersion ->
+                    val updateType = getUpdateType(
+                        currentAppVersion = currentAppVersion,
+                        minVersion = appVersion.minVersion,
+                        latestVersion = appVersion.latestVersion,
+                    )
+
+                    when (updateType) {
+                        UpdateType.None -> fetchAuthState(postSideEffect)
+                        UpdateType.Required -> reduce { copy(isShowRequiredUpdateDialog = true) }
+                        UpdateType.Optional -> {
+                            val dismissedVersion = authRepository.dismissedVersion.first()
+                            if (dismissedVersion != appVersion.latestVersion) {
+                                reduce {
+                                    copy(
+                                        isShowOptionalUpdateDialog = true,
+                                        latestVersion = appVersion.latestVersion,
+                                    )
+                                }
+                            } else {
+                                fetchAuthState(postSideEffect)
+                            }
+                        }
+                    }
+                }
+                .onFailure { exception ->
+                    Timber.e(exception, "Failed to fetch app version")
+                    fetchAuthState(postSideEffect)
+                }
+        }
+    }
+
+    private fun handleDismissUpdate(
+        state: SplashState,
+        reduce: (SplashState.() -> SplashState) -> Unit,
+        postSideEffect: (SplashSideEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            authRepository.setDismissedVersion(state.latestVersion)
+            reduce { copy(isShowOptionalUpdateDialog = false) }
+            fetchAuthState(postSideEffect)
         }
     }
 
     private fun fetchAuthState(postSideEffect: (SplashSideEffect) -> Unit) {
         viewModelScope.launch {
-            val hasCompletedOnboarding = authRepository.hasCompletedOnboarding().first()
-            if (!hasCompletedOnboarding) {
+            if (!authRepository.hasCompletedOnboarding().first()) {
                 postSideEffect(SplashSideEffect.NavigateToOnboarding)
                 return@launch
             }
@@ -58,5 +110,40 @@ class SplashViewModel @Inject constructor(
                 postSideEffect(SplashSideEffect.NavigateToLogin)
             }
         }
+    }
+
+    /**
+     * 버전 체크 로직:
+     * - currentAppVersion >= latestVersion: 최신 버전 (None)
+     * - minVersion <= currentAppVersion < latestVersion: 선택 업데이트 (Optional)
+     * - currentAppVersion < minVersion: 필수 업데이트 (Required)
+     */
+    private fun getUpdateType(
+        currentAppVersion: String,
+        minVersion: String,
+        latestVersion: String,
+    ): UpdateType {
+        return when {
+            compareVersions(currentAppVersion, latestVersion) >= 0 -> UpdateType.None
+            compareVersions(currentAppVersion, minVersion) >= 0 -> UpdateType.Optional
+            else -> UpdateType.Required
+        }
+    }
+
+    /**
+     * 버전 문자열을 각 자릿수를 비교하여 차이를 반환
+     * @return 양수: appVersion이 더 높음, 0: 같음, 음수: appVersion이 더 낮음
+     */
+    private fun compareVersions(currentAppVersion: String, compareVersion: String): Int {
+        val parts1 = currentAppVersion.split(".").map { it.toIntOrNull() ?: 0 }
+        val parts2 = compareVersion.split(".").map { it.toIntOrNull() ?: 0 }
+        val maxLength = maxOf(parts1.size, parts2.size)
+
+        for (i in 0 until maxLength) {
+            val v1 = parts1.getOrElse(i) { 0 }
+            val v2 = parts2.getOrElse(i) { 0 }
+            if (v1 != v2) return v1 - v2
+        }
+        return 0
     }
 }
