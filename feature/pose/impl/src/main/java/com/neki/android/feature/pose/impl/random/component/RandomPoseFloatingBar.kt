@@ -29,10 +29,10 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 internal fun RandomPoseFloatingBarContent(
     modifier: Modifier = Modifier,
-    isScrapped: Boolean = false,
+    isBookmarked: Boolean = false,
     onClickClose: () -> Unit = {},
     onClickGoToDetail: () -> Unit = {},
-    onClickScrap: () -> Unit = {},
+    onClickBookmark: () -> Unit = {},
 ) {
     Box(
         modifier = modifier,
@@ -44,10 +44,10 @@ internal fun RandomPoseFloatingBarContent(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
                 .padding(top = 38.dp, bottom = 34.dp),
-            isScrapped = isScrapped,
+            isBookmarked = isBookmarked,
             onClickClose = onClickClose,
             onClickGoToDetail = onClickGoToDetail,
-            onClickScrap = onClickScrap,
+            onClickBookmark = onClickBookmark,
         )
     }
 }
@@ -73,10 +73,10 @@ private fun RandomPoseFloatingBarBackground(
 @Composable
 private fun RandomPoseFloatingBar(
     modifier: Modifier = Modifier,
-    isScrapped: Boolean = false,
+    isBookmarked: Boolean = false,
     onClickClose: () -> Unit = {},
     onClickGoToDetail: () -> Unit = {},
-    onClickScrap: () -> Unit = {},
+    onClickBookmark: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -129,16 +129,16 @@ private fun RandomPoseFloatingBar(
             }
 
             RandomPoseButton(
-                onClick = onClickScrap,
+                onClick = onClickBookmark,
                 backgroundColor = NekiTheme.colorScheme.primary400,
             ) {
                 Icon(
                     modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(
-                        if (isScrapped) R.drawable.icon_scrap_filled
-                        else R.drawable.icon_scrap_stroked,
+                        if (isBookmarked) R.drawable.icon_bookmark_filled
+                        else R.drawable.icon_bookmark_stroked,
                     ),
-                    contentDescription = "스크랩",
+                    contentDescription = "북마크",
                     tint = NekiTheme.colorScheme.white,
                 )
             }
@@ -206,12 +206,12 @@ private fun RandomPoseFloatingBarContentPreview() {
 
 @ComponentPreview
 @Composable
-private fun RandomPoseFloatingBarContentScrappedPreview() {
+private fun RandomPoseFloatingBarContentBookmarkedPreview() {
     NekiTheme {
         RandomPoseFloatingBarContent(
             modifier = Modifier
                 .fillMaxWidth(),
-            isScrapped = true,
+            isBookmarked = true,
         )
     }
 }

@@ -5,19 +5,19 @@ import com.neki.android.core.model.Pose
 data class PoseDetailState(
     val isLoading: Boolean = false,
     val pose: Pose = Pose(),
-    val committedScrap: Boolean = false,
+    val committedBookmark: Boolean = false,
 )
 
 sealed interface PoseDetailIntent {
     data object EnterPoseDetailScreen : PoseDetailIntent
     data object ClickBackIcon : PoseDetailIntent
-    data object ClickScrapIcon : PoseDetailIntent
-    data class ScrapCommitted(val newScrap: Boolean) : PoseDetailIntent
-    data class RevertScrap(val originalScrap: Boolean) : PoseDetailIntent
+    data object ClickBookmarkIcon : PoseDetailIntent
+    data class BookmarkCommitted(val newBookmark: Boolean) : PoseDetailIntent
+    data class RevertBookmark(val originalBookmark: Boolean) : PoseDetailIntent
 }
 
 sealed interface PoseDetailSideEffect {
     data object NavigateBack : PoseDetailSideEffect
     data class ShowToast(val message: String) : PoseDetailSideEffect
-    data class NotifyScrapChanged(val poseId: Long, val isScrapped: Boolean) : PoseDetailSideEffect
+    data class NotifyBookmarkChanged(val poseId: Long, val isBookmarked: Boolean) : PoseDetailSideEffect
 }

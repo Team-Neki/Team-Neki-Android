@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class RegisterPhotoRequest(
     @SerialName("folderId") val folderId: Long? = null,
     @SerialName("uploads") val uploads: List<Upload>,
+    @SerialName("favorite") val favorite: Boolean,
 ) {
     @Serializable
     data class Upload(

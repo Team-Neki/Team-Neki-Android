@@ -26,18 +26,18 @@ internal class PoseViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _headCountFilter = MutableStateFlow<PeopleCount?>(null)
-    private val _isScrapOnly = MutableStateFlow(false)
-    private val updatedScraps = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
+    private val _isBookmarkOnly = MutableStateFlow(false)
+    private val updatedBookmarks = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val originalPagingData: Flow<PagingData<Pose>> = combine(
         _headCountFilter,
-        _isScrapOnly,
-    ) { headCount, isScrapOnly ->
-        headCount to isScrapOnly
-    }.flatMapLatest { (headCount, isScrapOnly) ->
-        if (isScrapOnly) {
-            poseRepository.getScrappedPosesFlow()
+        _isBookmarkOnly,
+    ) { headCount, isBookmarkOnly ->
+        headCount to isBookmarkOnly
+    }.flatMapLatest { (headCount, isBookmarkOnly) ->
+        if (isBookmarkOnly) {
+            poseRepository.getBookmarkedPosesFlow()
         } else {
             poseRepository.getPosesFlow(
                 headCount = headCount,
@@ -48,11 +48,11 @@ internal class PoseViewModel @Inject constructor(
 
     val posePagingData: Flow<PagingData<Pose>> = combine(
         originalPagingData,
-        updatedScraps,
-    ) { pagingData, scraps ->
+        updatedBookmarks,
+    ) { pagingData, bookmarks ->
         pagingData.map { pose ->
-            scraps[pose.id]?.let { isScrapped ->
-                pose.copy(isScrapped = isScrapped)
+            bookmarks[pose.id]?.let { isBookmarked ->
+                pose.copy(isBookmarked = isBookmarked)
             } ?: pose
         }
     }
@@ -77,13 +77,13 @@ internal class PoseViewModel @Inject constructor(
             is PoseIntent.ClickPeopleCountSheetItem -> handlePeopleCountSheetItem(intent, state, reduce)
             PoseIntent.DismissPeopleCountBottomSheet -> reduce { copy(isShowPeopleCountBottomSheet = false) }
             PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
-            PoseIntent.ClickScrapChip -> {
-                val newValue = !state.isShowScrappedPose
-                _isScrapOnly.value = newValue
+            PoseIntent.ClickBookmarkChip -> {
+                val newValue = !state.isShowBookmarkedPose
+                _isBookmarkOnly.value = newValue
                 _headCountFilter.value = null
                 reduce {
                     copy(
-                        isShowScrappedPose = newValue,
+                        isShowBookmarkedPose = newValue,
                         selectedPeopleCount = null,
                     )
                 }
@@ -106,8 +106,8 @@ internal class PoseViewModel @Inject constructor(
                 postSideEffect(PoseEffect.NavigateToRandomPose(selectedCount))
             }
 
-            is PoseIntent.ScrapChanged -> {
-                updatedScraps.update { it + (intent.poseId to intent.isScrapped) }
+            is PoseIntent.BookmarkChanged -> {
+                updatedBookmarks.update { it + (intent.poseId to intent.isBookmarked) }
             }
         }
     }
@@ -117,12 +117,12 @@ internal class PoseViewModel @Inject constructor(
         state: PoseState,
         reduce: (PoseState.() -> PoseState) -> Unit,
     ) {
-        _isScrapOnly.value = false
+        _isBookmarkOnly.value = false
         if (intent.peopleCount == state.selectedPeopleCount) {
             _headCountFilter.value = null
             reduce {
                 copy(
-                    isShowScrappedPose = false,
+                    isShowBookmarkedPose = false,
                     isShowPeopleCountBottomSheet = false,
                     selectedPeopleCount = null,
                 )
@@ -131,7 +131,7 @@ internal class PoseViewModel @Inject constructor(
             _headCountFilter.value = intent.peopleCount
             reduce {
                 copy(
-                    isShowScrappedPose = false,
+                    isShowBookmarkedPose = false,
                     selectedPeopleCount = intent.peopleCount.takeIf { it != state.selectedPeopleCount },
                     isShowPeopleCountBottomSheet = false,
                 )

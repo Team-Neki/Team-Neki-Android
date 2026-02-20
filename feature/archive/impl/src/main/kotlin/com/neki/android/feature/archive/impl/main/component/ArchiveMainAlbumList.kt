@@ -127,6 +127,7 @@ internal fun ArchiveMainAlbumList(
     albumList: ImmutableList<AlbumPreview> = persistentListOf(),
     onClickFavoriteAlbum: () -> Unit = {},
     onClickAlbumItem: (AlbumPreview) -> Unit = {},
+    onClickAddAlbum: () -> Unit = {},
 ) {
     LazyRow(
         modifier = modifier,
@@ -151,6 +152,11 @@ internal fun ArchiveMainAlbumList(
                 photoCount = album.photoCount,
                 thumbnailImage = album.thumbnailUrl,
                 onClick = { onClickAlbumItem(album) },
+            )
+        }
+        item {
+            AddAlbumItem(
+                onClick = onClickAddAlbum,
             )
         }
     }

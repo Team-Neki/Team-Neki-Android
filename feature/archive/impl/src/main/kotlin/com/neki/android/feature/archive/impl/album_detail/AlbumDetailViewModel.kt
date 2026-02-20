@@ -1,5 +1,7 @@
 package com.neki.android.feature.archive.impl.album_detail
 
+import android.net.Uri
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -8,6 +10,7 @@ import androidx.paging.filter
 import androidx.paging.map
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -32,6 +35,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     @Assisted private val isFavoriteAlbum: Boolean,
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
+    private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -85,7 +89,32 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
             AlbumDetailIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
-            AlbumDetailIntent.ClickSelectButton -> reduce { copy(selectMode = SelectMode.SELECTING) }
+            AlbumDetailIntent.ClickOptionIcon -> reduce { copy(isShowOptionPopup = true) }
+            AlbumDetailIntent.DismissOptionPopup -> reduce { copy(isShowOptionPopup = false) }
+            AlbumDetailIntent.ClickSelectOption -> {
+                reduce {
+                    copy(
+                        selectMode = SelectMode.SELECTING,
+                        isShowOptionPopup = false,
+                    )
+                }
+            }
+
+            AlbumDetailIntent.ClickAddPhotoOption -> {
+                reduce { copy(isShowOptionPopup = false) }
+                postSideEffect(AlbumDetailSideEffect.OpenGallery)
+            }
+
+            AlbumDetailIntent.ClickRenameAlbumOption -> {
+                reduce {
+                    copy(
+                        isShowOptionPopup = false,
+                        isShowRenameAlbumBottomSheet = true,
+                        renameAlbumTextState = TextFieldState(initialText = title),
+                    )
+                }
+            }
+
             AlbumDetailIntent.ClickCancelButton -> reduce {
                 copy(
                     selectMode = SelectMode.DEFAULT,
@@ -107,12 +136,78 @@ class AlbumDetailViewModel @AssistedInject constructor(
             AlbumDetailIntent.ClickDeleteBottomSheetCancelButton -> reduce { copy(isShowDeleteBottomSheet = false) }
             AlbumDetailIntent.ClickDeleteBottomSheetConfirmButton -> handleAlbumPhotoDelete(state, reduce, postSideEffect)
 
+            // Gallery Intent
+            is AlbumDetailIntent.SelectGalleryImage -> uploadMultipleImages(intent.uris, reduce, postSideEffect)
+
             // Result Intent
             is AlbumDetailIntent.PhotoDeleted -> {
                 deletedPhotoIds.update { it + intent.photoIds.toSet() }
             }
+
             is AlbumDetailIntent.FavoriteChanged -> {
                 updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
+            }
+
+            AlbumDetailIntent.DismissRenameBottomSheet -> reduce {
+                copy(isShowRenameAlbumBottomSheet = false, renameAlbumTextState = TextFieldState())
+            }
+
+            AlbumDetailIntent.ClickRenameBottomSheetCancelButton -> reduce {
+                copy(isShowRenameAlbumBottomSheet = false, renameAlbumTextState = TextFieldState())
+            }
+
+            AlbumDetailIntent.ClickRenameBottomSheetConfirmButton -> handleRenameAlbum(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun handleRenameAlbum(
+        state: AlbumDetailState,
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        reduce { copy(isLoading = true) }
+        viewModelScope.launch {
+            val newName = state.renameAlbumTextState.text.trim().toString()
+            folderRepository.updateFolder(
+                folderId = id,
+                name = newName,
+            ).onSuccess {
+                reduce {
+                    copy(
+                        title = newName,
+                        isShowRenameAlbumBottomSheet = false,
+                        isLoading = false,
+                    )
+                }
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("앨범 이름을 변경했어요"))
+            }.onFailure { e ->
+                Timber.e(e)
+                reduce { copy(isLoading = false) }
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("앨범 이름 변경에 실패했어요"))
+            }
+        }
+    }
+
+    private fun uploadMultipleImages(
+        imageUris: List<Uri>,
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+
+            uploadMultiplePhotoUseCase(
+                imageUris = imageUris,
+                folderId = id.takeUnless { isFavoriteAlbum },
+                favorite = isFavoriteAlbum,
+            ).onSuccess {
+                reduce { copy(isLoading = false) }
+                postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("새로운 사진을 추가했어요"))
+            }.onFailure { error ->
+                Timber.e(error)
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+                reduce { copy(isLoading = false) }
             }
         }
     }

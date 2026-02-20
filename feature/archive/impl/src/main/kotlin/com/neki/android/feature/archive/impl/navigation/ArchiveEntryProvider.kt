@@ -56,7 +56,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                 }
 
                 QRScanResult.OpenGallery -> {
-                    viewModel.store.onIntent(ArchiveMainIntent.ClickGalleryUploadRow)
+                    viewModel.store.onIntent(ArchiveMainIntent.ReceiveOpenGalleryResult)
                 }
             }
         }

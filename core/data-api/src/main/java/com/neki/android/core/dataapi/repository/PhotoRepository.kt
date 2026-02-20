@@ -16,6 +16,7 @@ interface PhotoRepository {
     suspend fun registerPhoto(
         mediaIds: List<Long>,
         folderId: Long? = null,
+        favorite: Boolean = false,
     ): Result<Unit>
 
     suspend fun deletePhoto(photoId: Long): Result<Unit>

@@ -35,13 +35,14 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.neki.android.core.designsystem.DevicePreview
+import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
-import com.neki.android.feature.archive.impl.component.EmptyAlbumContent
+import com.neki.android.feature.archive.impl.component.EmptyPhotoContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
@@ -123,10 +124,7 @@ internal fun AllPhotoScreen(
     }
 
     if (isEmpty) {
-        EmptyAlbumContent(
-            title = "모든 사진",
-            onClickBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
-        )
+        EmptyAllPhotoContent()
     } else {
         AllPhotoContent(
             uiState = uiState,
@@ -257,10 +255,28 @@ private fun AllPhotoContent(
     }
 }
 
+@Composable
+private fun EmptyAllPhotoContent(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+    ) {
+        BackTitleTopBar(
+            title = "모든 사진",
+            onBack = onBack,
+        )
+        EmptyPhotoContent(
+            emptyText = "아직 등록된 사진이 없어요\n찍은 네컷을 네키에 저장해보세요!",
+        )
+    }
+}
+
 @DevicePreview
 @Composable
-private fun AllPhotoScreenPreview() {
+private fun EmptyAllPhotoScreenPreview() {
     NekiTheme {
-        // Preview는 Paging 없이 간단히 표시
+        EmptyAllPhotoContent()
     }
 }

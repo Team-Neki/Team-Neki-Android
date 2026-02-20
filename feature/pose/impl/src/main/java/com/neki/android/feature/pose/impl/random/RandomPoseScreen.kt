@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
-import com.neki.android.core.designsystem.topbar.CloseTitleTopBar
+import com.neki.android.core.designsystem.topbar.NekiTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -77,9 +77,8 @@ internal fun RandomPoseScreen(
                 .fillMaxSize()
                 .hazeSource(state = hazeState),
         ) {
-            CloseTitleTopBar(
+            NekiTitleTopBar(
                 title = "랜덤포즈",
-                onClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
             )
             VerticalSpacer(42.dp)
 
@@ -96,10 +95,10 @@ internal fun RandomPoseScreen(
             uiState.currentPose?.let { pose ->
                 RandomPoseFloatingBarContent(
                     modifier = Modifier.fillMaxWidth(),
-                    isScrapped = pose.isScrapped,
+                    isBookmarked = pose.isBookmarked,
                     onClickClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
                     onClickGoToDetail = { onIntent(RandomPoseIntent.ClickGoToDetailIcon) },
-                    onClickScrap = { onIntent(RandomPoseIntent.ClickScrapIcon) },
+                    onClickBookmark = { onIntent(RandomPoseIntent.ClickBookmarkIcon) },
                 )
             }
         }

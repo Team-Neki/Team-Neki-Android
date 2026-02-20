@@ -9,8 +9,8 @@ data class PoseState(
     val isLoading: Boolean = false,
     val selectedPeopleCount: PeopleCount? = null,
     val selectedRandomPosePeopleCount: PeopleCount? = null,
-    val isShowScrappedPose: Boolean = false,
-    val scrappedPoseList: ImmutableList<Pose> = persistentListOf(),
+    val isShowBookmarkedPose: Boolean = false,
+    val bookmarkedPoseList: ImmutableList<Pose> = persistentListOf(),
     val isShowPeopleCountBottomSheet: Boolean = false,
     val isShowRandomPosePeopleCountBottomSheet: Boolean = false,
 )
@@ -21,13 +21,13 @@ sealed interface PoseIntent {
     data object ClickPeopleCountChip : PoseIntent
     data object DismissPeopleCountBottomSheet : PoseIntent
     data object DismissRandomPosePeopleCountBottomSheet : PoseIntent
-    data object ClickScrapChip : PoseIntent
+    data object ClickBookmarkChip : PoseIntent
     data class ClickPoseItem(val item: Pose) : PoseIntent
     data class ClickPeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseRecommendation : PoseIntent
     data class ClickRandomPosePeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseBottomSheetSelectButton : PoseIntent
-    data class ScrapChanged(val poseId: Long, val isScrapped: Boolean) : PoseIntent
+    data class BookmarkChanged(val poseId: Long, val isBookmarked: Boolean) : PoseIntent
 }
 
 sealed interface PoseEffect {

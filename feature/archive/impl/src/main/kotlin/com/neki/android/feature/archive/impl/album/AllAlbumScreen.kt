@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -113,12 +112,11 @@ internal fun AllAlbumScreen(
     }
 
     if (uiState.isShowAddAlbumBottomSheet) {
-        val textFieldState = rememberTextFieldState()
         val existingAlbumNames = remember(uiState.albums) { uiState.albums.map { it.title } }
 
-        val errorMessage by remember(textFieldState.text) {
+        val errorMessage by remember(uiState.albumNameTextState.text) {
             derivedStateOf {
-                val name = textFieldState.text.toString()
+                val name = uiState.albumNameTextState.text.toString()
                 if (existingAlbumNames.contains(name)) {
                     "이미 사용 중인 앨범명이에요."
                 } else {
@@ -128,15 +126,10 @@ internal fun AllAlbumScreen(
         }
 
         AddAlbumBottomSheet(
-            textFieldState = textFieldState,
+            textFieldState = uiState.albumNameTextState,
             onDismissRequest = { onIntent(AllAlbumIntent.DismissAddAlbumBottomSheet) },
             onClickCancel = { onIntent(AllAlbumIntent.DismissAddAlbumBottomSheet) },
-            onClickConfirm = {
-                val albumName = textFieldState.text.toString()
-                if (errorMessage == null && albumName.isNotBlank()) {
-                    onIntent(AllAlbumIntent.ClickAddAlbumButton(albumName))
-                }
-            },
+            onClickConfirm = { onIntent(AllAlbumIntent.ClickAddAlbumButton) },
             isError = errorMessage != null,
             errorMessage = errorMessage,
         )

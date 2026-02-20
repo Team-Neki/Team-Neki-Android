@@ -1,6 +1,7 @@
 package com.neki.android.core.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,59 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
+/**
+ * 단순 액션용 드롭다운
+ * */
+@Composable
+fun <T> DropdownPopup(
+    items: ImmutableList<T>,
+    onSelect: (T) -> Unit,
+    onDismissRequest: () -> Unit,
+    itemLabel: (T) -> String,
+    modifier: Modifier = Modifier,
+    disabledIndex: ImmutableList<Int>? = null,
+    offset: IntOffset = IntOffset.Zero,
+    alignment: Alignment = Alignment.TopStart,
+) {
+    Popup(
+        offset = offset,
+        alignment = alignment,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(focusable = true),
+    ) {
+        Column(
+            modifier = modifier
+                .dropdownShadow(shape = RoundedCornerShape(12.dp))
+                .background(
+                    color = NekiTheme.colorScheme.white,
+                    shape = RoundedCornerShape(12.dp),
+                )
+                .padding(vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            items.forEachIndexed { index, item ->
+                val isDisabled = disabledIndex?.contains(index) == true
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (isDisabled) Modifier
+                            else Modifier.clickableSingle { onSelect(item) },
+                        )
+                        .padding(horizontal = 12.dp, vertical = 5.dp),
+                    text = itemLabel(item),
+                    style = NekiTheme.typography.body16Medium,
+                    color = if (isDisabled) NekiTheme.colorScheme.gray200
+                    else NekiTheme.colorScheme.gray900,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 선택값을 유지해야하는 경우에 쓰이는 드롭다운
+ * */
 @Composable
 fun <T> DropdownPopup(
     items: ImmutableList<T>,

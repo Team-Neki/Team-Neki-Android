@@ -8,6 +8,6 @@ import kotlinx.serialization.Serializable
 data class Pose(
     val id: Long = 0L,
     val poseImageUrl: String = "",
-    val isScrapped: Boolean = false,
+    val isBookmarked: Boolean = false,
     val peopleCount: Int = 0,
 )

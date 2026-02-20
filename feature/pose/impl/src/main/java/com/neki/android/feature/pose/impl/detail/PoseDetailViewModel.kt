@@ -25,7 +25,7 @@ class PoseDetailViewModel @AssistedInject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
-    private val scrapRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
+    private val bookmarkRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
 
     @AssistedFactory
     interface Factory {
@@ -41,19 +41,19 @@ class PoseDetailViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            scrapRequests
+            bookmarkRequests
                 .debounce(500)
-                .collect { newScrap ->
-                    val committedScrap = store.uiState.value.committedScrap
-                    if (committedScrap != newScrap) {
-                        poseRepository.updateScrap(id, newScrap)
+                .collect { newBookmark ->
+                    val committedBookmark = store.uiState.value.committedBookmark
+                    if (committedBookmark != newBookmark) {
+                        poseRepository.updateBookmark(id, newBookmark)
                             .onSuccess {
-                                Timber.d("updateScrap success")
-                                store.onIntent(PoseDetailIntent.ScrapCommitted(newScrap))
+                                Timber.d("updateBookmark success")
+                                store.onIntent(PoseDetailIntent.BookmarkCommitted(newBookmark))
                             }
                             .onFailure { error ->
-                                Timber.e(error, "updateScrap failed")
-                                store.onIntent(PoseDetailIntent.RevertScrap(committedScrap))
+                                Timber.e(error, "updateBookmark failed")
+                                store.onIntent(PoseDetailIntent.RevertBookmark(committedBookmark))
                             }
                     }
                 }
@@ -69,29 +69,29 @@ class PoseDetailViewModel @AssistedInject constructor(
         when (intent) {
             PoseDetailIntent.EnterPoseDetailScreen -> fetchPoseData(reduce)
             PoseDetailIntent.ClickBackIcon -> postSideEffect(PoseDetailSideEffect.NavigateBack)
-            PoseDetailIntent.ClickScrapIcon -> handleScrapToggle(state, reduce)
-            is PoseDetailIntent.ScrapCommitted -> {
-                reduce { copy(committedScrap = intent.newScrap) }
-                postSideEffect(PoseDetailSideEffect.NotifyScrapChanged(id, intent.newScrap))
+            PoseDetailIntent.ClickBookmarkIcon -> handleBookmarkToggle(state, reduce)
+            is PoseDetailIntent.BookmarkCommitted -> {
+                reduce { copy(committedBookmark = intent.newBookmark) }
+                postSideEffect(PoseDetailSideEffect.NotifyBookmarkChanged(id, intent.newBookmark))
             }
-            is PoseDetailIntent.RevertScrap -> reduce { copy(pose = pose.copy(isScrapped = intent.originalScrap)) }
+            is PoseDetailIntent.RevertBookmark -> reduce { copy(pose = pose.copy(isBookmarked = intent.originalBookmark)) }
         }
     }
 
-    private fun handleScrapToggle(
+    private fun handleBookmarkToggle(
         state: PoseDetailState,
         reduce: (PoseDetailState.() -> PoseDetailState) -> Unit,
     ) {
-        val newScrapStatus = !state.pose.isScrapped
-        viewModelScope.launch { scrapRequests.emit(newScrapStatus) }
-        reduce { copy(pose = pose.copy(isScrapped = newScrapStatus)) }
+        val newBookmarkStatus = !state.pose.isBookmarked
+        viewModelScope.launch { bookmarkRequests.emit(newBookmarkStatus) }
+        reduce { copy(pose = pose.copy(isBookmarked = newBookmarkStatus)) }
     }
 
     private fun fetchPoseData(reduce: (PoseDetailState.() -> PoseDetailState) -> Unit) {
         viewModelScope.launch {
             poseRepository.getPose(poseId = id)
                 .onSuccess { data ->
-                    reduce { copy(pose = data, committedScrap = data.isScrapped) }
+                    reduce { copy(pose = data, committedBookmark = data.isBookmarked) }
                 }
                 .onFailure { error ->
                     Timber.e(error)
@@ -102,12 +102,12 @@ class PoseDetailViewModel @AssistedInject constructor(
     override fun onCleared() {
         super.onCleared()
 
-        val currentScrap = store.uiState.value.pose.isScrapped
-        val committedScrap = store.uiState.value.committedScrap
+        val currentBookmark = store.uiState.value.pose.isBookmarked
+        val committedBookmark = store.uiState.value.committedBookmark
 
-        if (currentScrap != committedScrap) {
+        if (currentBookmark != committedBookmark) {
             applicationScope.launch {
-                poseRepository.updateScrap(id, currentScrap)
+                poseRepository.updateBookmark(id, currentBookmark)
             }
         }
     }
