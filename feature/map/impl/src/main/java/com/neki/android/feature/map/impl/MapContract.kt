@@ -19,7 +19,7 @@ data class MapState(
     val brandImageCache: ImmutableMap<String, ImageBitmap> = persistentMapOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
     val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
-    val isShowInfoDialog: Boolean = false,
+    val isShowInfoTooltip: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
 )
@@ -39,7 +39,7 @@ sealed interface MapIntent {
     // in 패널
     data object ClickCurrentLocationIcon : MapIntent
     data object ClickInfoIcon : MapIntent
-    data object ClickCloseInfoIcon : MapIntent
+    data object DismissInfoTooltip : MapIntent
     data object ClickToMapChip : MapIntent
     data class ClickVerticalBrand(val brand: Brand) : MapIntent
     data class ClickNearPhotoBooth(val photoBooth: PhotoBooth) : MapIntent

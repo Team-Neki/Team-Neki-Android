@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
@@ -51,6 +52,7 @@ fun ToolTipPopup(
     arrowPosition: Dp = DEFAULT_ARROW_POSITION.dp,
     toolTipColor: ToolTipColor = ToolTipColor.Gray800,
     hasCloseButton: Boolean = false,
+    properties: PopupProperties = PopupProperties(),
     onDismissRequest: () -> Unit = {},
     onClickCloseButton: () -> Unit = {},
 ) {
@@ -58,6 +60,7 @@ fun ToolTipPopup(
         alignment = alignment,
         offset = offset,
         onDismissRequest = onDismissRequest,
+        properties = properties,
     ) {
         ToolTipContent(
             tooltipText = tooltipText,

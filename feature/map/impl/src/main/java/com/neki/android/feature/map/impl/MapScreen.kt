@@ -39,7 +39,6 @@ import com.naver.maps.map.compose.rememberFusedLocationSource
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
-import com.neki.android.core.designsystem.dialog.WarningDialog
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -202,6 +201,7 @@ fun MapScreen(
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
             locationTrackingMode = locationTrackingMode,
+            minZoom = MapConst.MIN_ZOOM_LEVEL,
         )
     }
     val mapUiSettings = remember {
@@ -242,8 +242,10 @@ fun MapScreen(
             dragLevel = uiState.dragLevel,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
-            onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
+            isShowInfoTooltip = uiState.isShowInfoTooltip,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
+            onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
+            onDismissInfoTooltip = { onIntent(MapIntent.DismissInfoTooltip) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
         )
@@ -293,13 +295,6 @@ fun MapScreen(
                 )
             }
         }
-    }
-
-    if (uiState.isShowInfoDialog) {
-        WarningDialog(
-            content = "가까운 네컷 사진 브랜드는\n1km 기준으로 표시돼요.",
-            onDismissRequest = { onIntent(MapIntent.ClickCloseInfoIcon) },
-        )
     }
 
     if (uiState.isShowDirectionBottomSheet) {
