@@ -70,8 +70,8 @@ class SplashViewModel @Inject constructor(
                         }
                     }
                 }
-                .onFailure { exception ->
-                    Timber.e(exception, "Failed to fetch app version")
+                .onFailure { e ->
+                    Timber.e(e, "Failed to fetch app version")
                     fetchAuthState(postSideEffect)
                 }
         }
@@ -102,8 +102,8 @@ class SplashViewModel @Inject constructor(
                 ).onSuccess {
                     tokenRepository.saveTokens(it.accessToken, it.refreshToken)
                     postSideEffect(SplashSideEffect.NavigateToMain)
-                }.onFailure { exception ->
-                    Timber.e(exception)
+                }.onFailure { e ->
+                    Timber.e(e)
                     postSideEffect(SplashSideEffect.NavigateToLogin)
                 }
             } else {

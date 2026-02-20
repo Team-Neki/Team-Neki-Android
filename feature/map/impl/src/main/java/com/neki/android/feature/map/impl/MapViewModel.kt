@@ -29,6 +29,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -113,7 +114,8 @@ class MapViewModel @Inject constructor(
                     reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
                     postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true))
                 }
-                .onFailure {
+                .onFailure { e ->
+                    Timber.e(e)
                     // 위치 조회 실패 시 강남역으로 카메라 이동
                     postSideEffect(
                         MapEffect.MoveCameraToPosition(
@@ -286,7 +288,8 @@ class MapViewModel @Inject constructor(
                     reduce { copy(isLoading = false, brands = loadedBrands.toImmutableList()) }
                     cacheBrandImages(loadedBrands, reduce)
                 }
-                .onFailure {
+                .onFailure { e ->
+                    Timber.e(e)
                     reduce { copy(isLoading = false) }
                 }
         }
@@ -388,7 +391,8 @@ class MapViewModel @Inject constructor(
                         }.toImmutableList(),
                     )
                 }
-            }.onFailure {
+            }.onFailure { e ->
+                Timber.e(e)
                 reduce { copy(isLoading = false) }
                 postSideEffect(MapEffect.ShowToastMessage("포토부스 조회에 실패했습니다."))
             }

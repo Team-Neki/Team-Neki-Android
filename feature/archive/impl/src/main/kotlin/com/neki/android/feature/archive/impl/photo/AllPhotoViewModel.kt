@@ -223,8 +223,8 @@ class AllPhotoViewModel @Inject constructor(
                     }
                     postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 삭제했어요"))
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                     reduce { copy(isLoading = false) }
                     postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
                 }

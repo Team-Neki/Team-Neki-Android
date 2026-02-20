@@ -46,8 +46,8 @@ class PhotoDetailViewModel @AssistedInject constructor(
                                 Timber.d("updateFavorite success")
                                 store.onIntent(PhotoDetailIntent.FavoriteCommitted(newFavorite))
                             }
-                            .onFailure { error ->
-                                Timber.e(error, "updateFavorite failed")
+                            .onFailure { e ->
+                                Timber.e(e, "updateFavorite failed")
                                 store.onIntent(PhotoDetailIntent.RevertFavorite(committedFavorite))
                             }
                     }
@@ -114,8 +114,8 @@ class PhotoDetailViewModel @AssistedInject constructor(
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
                     postSideEffect(PhotoDetailSideEffect.NavigateBack)
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                     reduce { copy(isLoading = false) }
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
                 }

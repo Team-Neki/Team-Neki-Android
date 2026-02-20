@@ -105,8 +105,8 @@ class MainViewModel @Inject constructor(
                     reduce { copy(isLoading = false, scannedImageUrl = null) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                     reduce { copy(isLoading = false) }
                     postSideEffect(MainSideEffect.ShowToast("이미지 업로드에 실패했어요"))
                 }
@@ -126,8 +126,8 @@ class MainViewModel @Inject constructor(
                     reduce { copy(isLoading = false, selectedUris = persistentListOf()) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                     reduce { copy(isLoading = false) }
                     postSideEffect(MainSideEffect.ShowToast("이미지 업로드에 실패했어요"))
                 }
