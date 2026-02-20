@@ -11,6 +11,7 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
+import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.MviIntentStore
@@ -26,6 +27,7 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,6 +35,7 @@ import javax.inject.Inject
 class MapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val mapRepository: MapRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
@@ -64,8 +67,8 @@ class MapViewModel @Inject constructor(
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
-            MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoDialog = true) }
-            MapIntent.ClickCloseInfoIcon -> reduce { copy(isShowInfoDialog = false) }
+            MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoTooltip = true) }
+            MapIntent.DismissInfoTooltip -> reduce { copy(isShowInfoTooltip = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, reduce)
             is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent.photoBooth, reduce, postSideEffect)
@@ -79,7 +82,7 @@ class MapViewModel @Inject constructor(
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
-            is MapIntent.ChangeDragLevel -> reduce { copy(dragLevel = intent.dragLevel) }
+            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, state, reduce)
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
             MapIntent.ClickDirectionIcon -> {
@@ -275,7 +278,8 @@ class MapViewModel @Inject constructor(
 
     private fun fetchInitialData(reduce: (MapState.() -> MapState) -> Unit) {
         viewModelScope.launch {
-            reduce { copy(isLoading = true) }
+            val hasShownInfoTooltip = userRepository.hasShownInfoToolTip.first()
+            reduce { copy(isLoading = true, isShowInfoTooltip = !hasShownInfoTooltip) }
 
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
@@ -387,6 +391,25 @@ class MapViewModel @Inject constructor(
             }.onFailure {
                 reduce { copy(isLoading = false) }
                 postSideEffect(MapEffect.ShowToastMessage("포토부스 조회에 실패했습니다."))
+            }
+        }
+    }
+
+    private fun handleChangeDragLevel(
+        dragLevel: DragLevel,
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        viewModelScope.launch {
+            if (dragLevel == DragLevel.THIRD) {
+                if (state.isShowInfoTooltip) {
+                    userRepository.setInfoToolTipShown()
+                    reduce { copy(dragLevel = dragLevel, isShowInfoTooltip = true) }
+                } else {
+                    reduce { copy(dragLevel = dragLevel) }
+                }
+            } else {
+                reduce { copy(dragLevel = dragLevel) }
             }
         }
     }
