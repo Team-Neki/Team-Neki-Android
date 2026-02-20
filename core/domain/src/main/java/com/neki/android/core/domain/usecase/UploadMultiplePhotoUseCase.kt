@@ -22,6 +22,7 @@ class UploadMultiplePhotoUseCase @Inject constructor(
         imageUris: List<Uri>,
         contentType: ContentType = ContentType.JPEG,
         folderId: Long? = null,
+        favorite: Boolean = false,
     ): Result<Unit> = runSuspendCatching {
         require(imageUris.isNotEmpty()) { "imageUris must not be empty" }
 
@@ -42,6 +43,7 @@ class UploadMultiplePhotoUseCase @Inject constructor(
         photoRepository.registerPhoto(
             mediaIds = mediaIds,
             folderId = folderId,
+            favorite = favorite,
         ).getOrThrow()
     }
 }

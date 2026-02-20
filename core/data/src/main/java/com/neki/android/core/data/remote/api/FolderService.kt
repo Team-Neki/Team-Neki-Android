@@ -3,6 +3,7 @@ package com.neki.android.core.data.remote.api
 import com.neki.android.core.data.remote.model.request.CreateFolderRequest
 import com.neki.android.core.data.remote.model.request.DeleteFolderRequest
 import com.neki.android.core.data.remote.model.request.DeletePhotoRequest
+import com.neki.android.core.data.remote.model.request.UpdateFolderRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.model.response.CreateFolderResponse
@@ -12,6 +13,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import javax.inject.Inject
@@ -40,6 +42,13 @@ class FolderService @Inject constructor(
     // 폴더에서 사진 제거 (사진 자체는 삭제되지 않음)
     suspend fun removePhotosFromFolder(folderId: Long, requestBody: DeletePhotoRequest): BasicNullableResponse<Unit> {
         return client.delete("/api/folders/$folderId/photos") {
+            setBody(requestBody)
+        }.body()
+    }
+
+    // 폴더 갱신 (이름 변경)
+    suspend fun updateFolder(folderId: Long, requestBody: UpdateFolderRequest): BasicNullableResponse<Unit> {
+        return client.patch("/api/folders/$folderId") {
             setBody(requestBody)
         }.body()
     }

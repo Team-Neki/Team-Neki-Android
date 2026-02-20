@@ -1,6 +1,9 @@
 package com.neki.android.feature.archive.impl.album_detail
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,9 +40,11 @@ import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailTopBar
+import com.neki.android.feature.archive.impl.album_detail.component.RenameAlbumBottomSheet
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.EmptyAlbumContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
+import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_ALBUM_NAME_MAX_LENGTH
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING
@@ -47,8 +52,10 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOU
 import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.flowOf
+import timber.log.Timber
 
 @Composable
 internal fun AlbumDetailRoute(
@@ -60,6 +67,13 @@ internal fun AlbumDetailRoute(
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
+        if (uris.isNotEmpty()) {
+            viewModel.store.onIntent(AlbumDetailIntent.SelectGalleryImage(uris))
+        } else {
+            Timber.d("No media selected")
+        }
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -78,6 +92,9 @@ internal fun AlbumDetailRoute(
                         nekiToast.showToast(text = "다운로드에 실패했어요")
                     }
             }
+
+            AlbumDetailSideEffect.OpenGallery -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            AlbumDetailSideEffect.RefreshPhotos -> pagingItems.refresh()
         }
     }
 
@@ -107,19 +124,36 @@ internal fun AlbumDetailScreen(
     BackHandler(enabled = true) {
         onIntent(AlbumDetailIntent.OnBackPressed)
     }
-
-    if (isEmpty) {
-        EmptyAlbumContent(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(NekiTheme.colorScheme.white),
+    ) {
+        AlbumDetailTopBar(
+            isFavoriteAlbum = uiState.isFavoriteAlbum,
             title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
+            selectMode = uiState.selectMode,
+            showOptionPopup = uiState.isShowOptionPopup,
+            hasNoPhoto = isEmpty,
             onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
+            onClickOptionIcon = { onIntent(AlbumDetailIntent.ClickOptionIcon) },
+            onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectOption) },
+            onClickAddPhoto = { onIntent(AlbumDetailIntent.ClickAddPhotoOption) },
+            onClickRenameAlbum = { onIntent(AlbumDetailIntent.ClickRenameAlbumOption) },
+            onClickCancel = { onIntent(AlbumDetailIntent.ClickCancelButton) },
+            onDismissPopup = { onIntent(AlbumDetailIntent.DismissOptionPopup) },
         )
-    } else {
-        AlbumDetailContent(
-            uiState = uiState,
-            pagingItems = pagingItems,
-            lazyState = lazyState,
-            onIntent = onIntent,
-        )
+
+        if (isEmpty) {
+            EmptyAlbumContent()
+        } else {
+            AlbumDetailContent(
+                uiState = uiState,
+                pagingItems = pagingItems,
+                lazyState = lazyState,
+                onIntent = onIntent,
+            )
+        }
     }
 
     if (isRefreshing || uiState.isLoading) {
@@ -147,6 +181,31 @@ internal fun AlbumDetailScreen(
             onOptionSelect = { onIntent(AlbumDetailIntent.SelectDeleteOption(it)) },
         )
     }
+
+    if (uiState.isShowRenameAlbumBottomSheet) {
+        val isNameChanged by remember(uiState.renameAlbumTextState.text) {
+            derivedStateOf { uiState.renameAlbumTextState.text.toString() != uiState.title }
+        }
+        val errorMessage by remember(uiState.renameAlbumTextState.text) {
+            derivedStateOf {
+                val name = uiState.renameAlbumTextState.text.toString()
+                when {
+                    name.length > ARCHIVE_ALBUM_NAME_MAX_LENGTH -> "앨범명은 최대 10자까지 가능해요."
+                    // TODO: 이미 존재하는 앨범명 중복처리
+                    else -> null
+                }
+            }
+        }
+        RenameAlbumBottomSheet(
+            textFieldState = uiState.renameAlbumTextState,
+            onDismissRequest = { onIntent(AlbumDetailIntent.DismissRenameBottomSheet) },
+            onClickCancel = { onIntent(AlbumDetailIntent.ClickRenameBottomSheetCancelButton) },
+            onClickConfirm = { onIntent(AlbumDetailIntent.ClickRenameBottomSheetConfirmButton) },
+            isError = errorMessage != null,
+            errorMessage = errorMessage,
+            isConfirmEnabled = isNameChanged,
+        )
+    }
 }
 
 @Composable
@@ -162,14 +221,6 @@ internal fun AlbumDetailContent(
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white),
     ) {
-        AlbumDetailTopBar(
-            title = if (uiState.isFavoriteAlbum) "즐겨찾기" else uiState.title,
-            selectMode = uiState.selectMode,
-            onClickBack = { onIntent(AlbumDetailIntent.ClickBackIcon) },
-            onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectButton) },
-            onClickCancel = { onIntent(AlbumDetailIntent.ClickCancelButton) },
-        )
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -250,6 +301,101 @@ private fun AlbumDetailScreenPreview() {
         AlbumDetailScreen(
             uiState = AlbumDetailState(
                 title = "앨범 상세",
+            ),
+            pagingItems = pagingItems,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AlbumDetailScreenEmptyPreview() {
+    val pagingData = PagingData.from(emptyList<Photo>())
+    val pagingItems = flowOf(pagingData).collectAsLazyPagingItems()
+
+    NekiTheme {
+        AlbumDetailScreen(
+            uiState = AlbumDetailState(
+                title = "빈 앨범",
+            ),
+            pagingItems = pagingItems,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AlbumDetailScreenFavoritePreview() {
+    val photos = (0..5).map {
+        Photo(
+            id = it.toLong(),
+            imageUrl = "",
+            isFavorite = true,
+            date = "2024-04-2$it",
+        )
+    }
+
+    val pagingData = PagingData.from(photos)
+    val pagingItems = flowOf(pagingData).collectAsLazyPagingItems()
+
+    NekiTheme {
+        AlbumDetailScreen(
+            uiState = AlbumDetailState(
+                title = "즐겨찾기",
+                isFavoriteAlbum = true,
+            ),
+            pagingItems = pagingItems,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AlbumDetailScreenSelectModePreview() {
+    val photos = (0..10).map {
+        Photo(
+            id = it.toLong(),
+            imageUrl = "",
+            isFavorite = false,
+            date = "2024-04-2$it",
+        )
+    }
+
+    val pagingData = PagingData.from(photos)
+    val pagingItems = flowOf(pagingData).collectAsLazyPagingItems()
+
+    NekiTheme {
+        AlbumDetailScreen(
+            uiState = AlbumDetailState(
+                title = "앨범 상세",
+                selectMode = SelectMode.SELECTING,
+                selectedPhotos = persistentListOf(photos[0], photos[2], photos[4]),
+            ),
+            pagingItems = pagingItems,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AlbumDetailScreenOptionPopupPreview() {
+    val photos = (0..5).map {
+        Photo(
+            id = it.toLong(),
+            imageUrl = "",
+            isFavorite = false,
+            date = "2024-04-2$it",
+        )
+    }
+
+    val pagingData = PagingData.from(photos)
+    val pagingItems = flowOf(pagingData).collectAsLazyPagingItems()
+
+    NekiTheme {
+        AlbumDetailScreen(
+            uiState = AlbumDetailState(
+                title = "앨범 상세",
+                isShowOptionPopup = true,
             ),
             pagingItems = pagingItems,
         )

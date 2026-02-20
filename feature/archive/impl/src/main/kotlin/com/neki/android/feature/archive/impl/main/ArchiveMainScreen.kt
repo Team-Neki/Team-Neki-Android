@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -41,14 +40,14 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
 import com.neki.android.feature.archive.impl.const.ArchiveConst.ARCHIVE_GRID_ITEM_SPACING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOUT_BOTTOM_PADDING
+import com.neki.android.feature.archive.impl.main.component.AlbumUploadOption
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainAlbumList
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainPhotoItem
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
-import com.neki.android.feature.archive.impl.main.component.AlbumUploadOption
-import com.neki.android.feature.archive.impl.main.component.SelectWithAlbumDialog
+import com.neki.android.feature.archive.impl.component.EmptyPhotoContent
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
-import com.neki.android.feature.archive.impl.main.component.EmptyContent
+import com.neki.android.feature.archive.impl.main.component.SelectWithAlbumDialog
 import kotlinx.collections.immutable.persistentListOf
 import timber.log.Timber
 
@@ -114,13 +113,8 @@ internal fun ArchiveMainScreen(
             ArchiveMainTopBar(
                 modifier = Modifier.padding(start = 20.dp, end = 8.dp),
                 showTooltip = uiState.isFirstEntered,
-                showAddPopup = uiState.isShowAddDialog,
-                onClickPlusIcon = { onIntent(ArchiveMainIntent.ClickAddIcon) },
+                onClickQRCodeIcon = { onIntent(ArchiveMainIntent.ClickQRScanIcon) },
                 onClickNotificationIcon = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
-                onClickQRScan = { onIntent(ArchiveMainIntent.ClickQRScanRow) },
-                onClickGallery = { onIntent(ArchiveMainIntent.ClickGalleryUploadRow) },
-                onClickNewAlbum = { onIntent(ArchiveMainIntent.ClickAddNewAlbumRow) },
-                onDismissAddPopup = { onIntent(ArchiveMainIntent.DismissAddPopup) },
                 onDismissToolTipPopup = { onIntent(ArchiveMainIntent.DismissToolTipPopup) },
             )
             ArchiveMainContent(
@@ -131,6 +125,7 @@ internal fun ArchiveMainScreen(
                 onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it.id, it.title)) },
                 onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
                 onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
+                onClickAddAlbum = { onIntent(ArchiveMainIntent.ClickAddAlbum) },
             )
         }
 
@@ -148,12 +143,11 @@ internal fun ArchiveMainScreen(
     }
 
     if (uiState.isShowAddAlbumBottomSheet) {
-        val textFieldState = rememberTextFieldState()
         val existingAlbumNames = remember(uiState.albums) { uiState.albums.map { it.title } }
 
-        val errorMessage by remember(textFieldState.text) {
+        val errorMessage by remember(uiState.albumNameTextState.text) {
             derivedStateOf {
-                val name = textFieldState.text.toString()
+                val name = uiState.albumNameTextState.text.toString()
                 when {
                     existingAlbumNames.contains(name) -> "이미 사용 중인 앨범명이에요."
                     else -> null
@@ -162,15 +156,10 @@ internal fun ArchiveMainScreen(
         }
 
         AddAlbumBottomSheet(
-            textFieldState = textFieldState,
+            textFieldState = uiState.albumNameTextState,
             onDismissRequest = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
             onClickCancel = { onIntent(ArchiveMainIntent.DismissAddAlbumBottomSheet) },
-            onClickConfirm = {
-                val albumName = textFieldState.text.toString()
-                if (errorMessage == null && albumName.isNotBlank()) {
-                    onIntent(ArchiveMainIntent.ClickAddAlbumButton(albumName))
-                }
-            },
+            onClickConfirm = { onIntent(ArchiveMainIntent.ClickAddAlbumButton) },
             isError = errorMessage != null,
             errorMessage = errorMessage,
         )
@@ -198,6 +187,7 @@ private fun ArchiveMainContent(
     onClickAlbumItem: (AlbumPreview) -> Unit,
     onClickShowAllPhoto: () -> Unit,
     onClickPhotoItem: (Photo) -> Unit,
+    onClickAddAlbum: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -230,6 +220,7 @@ private fun ArchiveMainContent(
                 albumList = uiState.albums,
                 onClickFavoriteAlbum = onClickFavoriteAlbum,
                 onClickAlbumItem = onClickAlbumItem,
+                onClickAddAlbum = onClickAddAlbum,
             )
         }
 
@@ -243,7 +234,7 @@ private fun ArchiveMainContent(
 
         if (uiState.recentPhotos.isEmpty()) {
             item(span = StaggeredGridItemSpan.FullLine) {
-                EmptyContent(
+                EmptyPhotoContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 70.dp),

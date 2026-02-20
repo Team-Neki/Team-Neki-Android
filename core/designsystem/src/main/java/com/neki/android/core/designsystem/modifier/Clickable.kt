@@ -60,6 +60,7 @@ fun Modifier.clickableSingle(
     onClickLabel: String? = null,
     role: Role? = null,
     interactionSource: MutableInteractionSource? = null,
+    indication: IndicationNodeFactory? = ripple(),
     onClick: () -> Unit,
 ): Modifier = this.then(
     ClickableSingleElement(
@@ -67,7 +68,7 @@ fun Modifier.clickableSingle(
         onClickLabel = onClickLabel,
         role = role,
         onClick = onClick,
-        indicationNodeFactory = ripple(),
+        indicationNodeFactory = indication,
         interactionSource = interactionSource,
     ),
 )

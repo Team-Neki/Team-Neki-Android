@@ -64,6 +64,7 @@ class LoginViewModel @Inject constructor(
         userRepository.getUserInfo()
             .onSuccess { userInfo ->
                 if (userInfo.isRequiredTermsAgreed) {
+                    authRepository.setCompletedOnboarding(true)
                     postSideEffect(LoginSideEffect.NavigateToMain)
                 } else {
                     postSideEffect(LoginSideEffect.NavigateToTerm)
