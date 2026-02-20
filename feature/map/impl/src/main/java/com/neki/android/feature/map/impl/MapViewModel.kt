@@ -82,7 +82,7 @@ class MapViewModel @Inject constructor(
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
-            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, reduce)
+            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, state, reduce)
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
             MapIntent.ClickDirectionIcon -> {
@@ -278,7 +278,8 @@ class MapViewModel @Inject constructor(
 
     private fun fetchInitialData(reduce: (MapState.() -> MapState) -> Unit) {
         viewModelScope.launch {
-            reduce { copy(isLoading = true) }
+            val hasShownInfoTooltip = userRepository.hasShownInfoToolTip.first()
+            reduce { copy(isLoading = true, isShowInfoTooltip = !hasShownInfoTooltip) }
 
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
@@ -396,11 +397,12 @@ class MapViewModel @Inject constructor(
 
     private fun handleChangeDragLevel(
         dragLevel: DragLevel,
+        state: MapState,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         viewModelScope.launch {
             if (dragLevel == DragLevel.THIRD) {
-                if (!userRepository.hasShownInfoToolTip.first()) {
+                if (state.isShowInfoTooltip) {
                     userRepository.setInfoToolTipShown()
                     reduce { copy(dragLevel = dragLevel, isShowInfoTooltip = true) }
                 } else {
