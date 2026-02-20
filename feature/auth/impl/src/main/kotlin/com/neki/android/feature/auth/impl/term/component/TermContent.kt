@@ -42,8 +42,8 @@ internal fun TermContent(
     ) {
         Image(
             modifier = Modifier
-                .size(64.dp)
-                .padding(bottom = 12.dp),
+                .padding(bottom = 12.dp)
+                .size(64.dp),
             painter = painterResource(R.drawable.image_agreement),
             contentDescription = null,
         )
