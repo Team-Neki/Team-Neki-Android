@@ -67,6 +67,6 @@ class UserRepositoryImpl @Inject constructor(
     companion object {
         private val HAS_VISITED_RANDOM_POSE = booleanPreferencesKey("is_first_visit_random_pose")
         private val HAS_SHOWN_INFO_TOOLTIP = booleanPreferencesKey("is_first_expand_bottom_sheet")
-        private val HAS_SHOWN_QR_INFO_TOOLTIP = booleanPreferencesKey("has_shown_qr_info_tooltip")
+        private val HAS_SHOWN_QR_INFO_TOOLTIP = booleanPreferencesKey("is_first_visit_archive")
     }
 }
