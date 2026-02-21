@@ -112,21 +112,6 @@ internal fun QRScannerContent(
         ) {
             // 상단 영역 - weight(234f)
             Column(modifier = Modifier.weight(234f)) {
-                // TopBar (고정 크기)
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    NekiIconButton(
-                        modifier = Modifier.padding(start = 8.dp),
-                        onClick = { onIntent(QRScanIntent.ClickCloseQRScan) },
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            imageVector = ImageVector.vectorResource(R.drawable.icon_close),
-                            contentDescription = null,
-                            tint = NekiTheme.colorScheme.white,
-                        )
-                    }
-                }
-
                 // Scanner 상단 영역에서부터 (32-3)만큼 떨어짐
                 Box(
                     modifier = Modifier
@@ -161,7 +146,7 @@ internal fun QRScannerContent(
                 NekiIconButton(
                     modifier = Modifier
                         .padding(top = 37.dp)
-                        .size(56.dp)
+                        .size(48.dp)
                         .clip(CircleShape)
                         .background(
                             if (isTorchEnabled) Color.White
@@ -172,8 +157,8 @@ internal fun QRScannerContent(
                     Icon(
                         modifier = Modifier.size(28.dp),
                         imageVector = ImageVector.vectorResource(
-                            if (isTorchEnabled) R.drawable.icon_torch_on
-                            else R.drawable.icon_torch_off,
+                            if (isTorchEnabled) R.drawable.icon_torch_off
+                            else R.drawable.icon_torch_on,
                         ),
                         contentDescription = null,
                         tint = if (isTorchEnabled) Color.Black else Color.White,

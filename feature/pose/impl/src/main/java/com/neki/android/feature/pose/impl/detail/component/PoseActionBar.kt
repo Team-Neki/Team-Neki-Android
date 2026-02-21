@@ -1,5 +1,6 @@
 package com.neki.android.feature.pose.impl.detail.component
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,11 +23,13 @@ internal fun PoseActionBar(
     onClickBookmark: () -> Unit = {},
 ) {
     NekiEndActionBar(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp), // TODO: 추후 터치 영역 수정에 따라 조정
     ) {
         NekiIconButton(
-            modifier = Modifier.padding(8.dp),
             onClick = onClickBookmark,
+            contentPadding = PaddingValues(8.dp),
         ) {
             Icon(
                 modifier = Modifier.size(28.dp),
