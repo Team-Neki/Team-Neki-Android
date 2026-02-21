@@ -149,8 +149,7 @@ internal fun QRScannerContent(
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(
-                            if (isTorchEnabled) Color.White
-                            else Color.White.copy(alpha = 0.1f),
+                            color = NekiTheme.colorScheme.white.copy(alpha = 0.1f),
                         ),
                     onClick = { onIntent(QRScanIntent.ToggleTorch) },
                 ) {
@@ -161,7 +160,7 @@ internal fun QRScannerContent(
                             else R.drawable.icon_torch_on,
                         ),
                         contentDescription = null,
-                        tint = if (isTorchEnabled) Color.Black else Color.White,
+                        tint = NekiTheme.colorScheme.white.copy,
                     )
                 }
             }
