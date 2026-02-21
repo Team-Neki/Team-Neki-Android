@@ -1,5 +1,8 @@
 package com.neki.android.app.main
 
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -112,13 +115,6 @@ fun MainScreen(
             .fillMaxSize()
             .navigationBarsPadding(),
         bottomBar = {
-            BottomNavigationBar(
-                visible = shouldShowBottomBar,
-                currentTab = currentTopLevelKey,
-                currentKey = currentKey,
-                onTabSelected = { onTabSelected(it.navKey) },
-                onClickFab = { onIntent(MainIntent.ClickAddPhotoFab) },
-            )
             if (shouldShowBottomBar) {
                 BottomNavigationBar(
                     currentTab = currentTopLevelKey,
@@ -135,6 +131,8 @@ fun MainScreen(
             ),
             entries = entries,
             onBack = onBack,
+            transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
+            popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
         )
     }
 
