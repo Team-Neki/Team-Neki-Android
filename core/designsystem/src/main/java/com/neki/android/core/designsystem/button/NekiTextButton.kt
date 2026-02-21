@@ -21,6 +21,20 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
+/**
+ * 텍스트 전용 버튼 컴포넌트.
+ * Box + clickableSingle 기반으로, 500ms 중복 클릭 방지와 리플 효과를 포함한다.
+ *
+ * @param onClick 클릭 이벤트 핸들러
+ * @param modifier 이 버튼에 적용할 [Modifier]
+ * @param enabled 버튼 활성화 여부
+ * @param shape 버튼의 클리핑 및 테두리 모양. 기본값은 [RectangleShape]
+ * @param contentColor 활성 상태의 콘텐츠 색상. [Color.Unspecified]이면 content에서 직접 지정
+ * @param disabledContentColor 비활성 상태의 콘텐츠 색상
+ * @param border 테두리. null이면 테두리 없음
+ * @param contentPadding 버튼 내부 패딩. 기본값 horizontal 20.dp, vertical 15.dp
+ * @param content 버튼 내부 콘텐츠. 일반적으로 [Text]
+ */
 @Composable
 fun NekiTextButton(
     onClick: () -> Unit,
