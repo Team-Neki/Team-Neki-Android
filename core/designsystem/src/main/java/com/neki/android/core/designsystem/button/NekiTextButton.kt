@@ -1,15 +1,24 @@
 package com.neki.android.core.designsystem.button
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.modifier.MultipleEventsCutter
-import com.neki.android.core.designsystem.modifier.get
+import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -17,24 +26,34 @@ fun NekiTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    multipleEventsCutterEnabled: Boolean = true,
-    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
+    shape: Shape = RectangleShape,
+    contentColor: Color = Color.Unspecified,
+    disabledContentColor: Color = Color.Unspecified,
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 15.dp),
     content: @Composable () -> Unit = {},
 ) {
-    val multipleEventsCutter = remember { MultipleEventsCutter.get() }
-    TextButton(
-        onClick = {
-            if (multipleEventsCutterEnabled) {
-                multipleEventsCutter.processEvent { onClick() }
-            } else {
-                onClick()
-            }
-        },
-        modifier = modifier,
-        contentPadding = contentPadding,
-        enabled = enabled,
+    val resolvedContentColor = if (enabled) contentColor else disabledContentColor
+
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .then(if (border != null) Modifier.border(border, shape) else Modifier)
+            .clickableSingle(
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            )
+            .padding(contentPadding),
+        contentAlignment = Alignment.Center,
     ) {
-        content()
+        if (resolvedContentColor != Color.Unspecified) {
+            CompositionLocalProvider(LocalContentColor provides resolvedContentColor) {
+                content()
+            }
+        } else {
+            content()
+        }
     }
 }
 
@@ -42,9 +61,7 @@ fun NekiTextButton(
 @Composable
 private fun NekiTextButtonPreview() {
     NekiTheme {
-        NekiTextButton(
-            onClick = {},
-        ) {
+        NekiTextButton(onClick = {}) {
             Text(
                 text = "텍스트버튼",
                 color = NekiTheme.colorScheme.primary500,

@@ -1,57 +1,63 @@
 package com.neki.android.core.designsystem.button
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.modifier.MultipleEventsCutter
-import com.neki.android.core.designsystem.modifier.get
+import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
-/**
- * 중복 클릭 방지 기능이 포함된 아이콘 버튼 컴포넌트
- *
- * @param onClick 클릭 이벤트 핸들러
- * @param enabled 버튼 활성화 여부
- * @param multipleEventsCutterEnabled 중복 클릭 방지 활성화 여부
- *
- * Note: IconButton의 default size는 48.dp
- */
 @Composable
 fun NekiIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    multipleEventsCutterEnabled: Boolean = true,
-    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
-    interactionSource: MutableInteractionSource? = null,
+    shape: Shape = CircleShape,
+    contentColor: Color = Color.Unspecified,
+    disabledContentColor: Color = Color.Unspecified,
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = PaddingValues(8.dp),
     content: @Composable () -> Unit,
 ) {
-    val multipleEventsCutter = remember { MultipleEventsCutter.get() }
-    IconButton(
-        modifier = modifier,
-        onClick = {
-            if (multipleEventsCutterEnabled) {
-                multipleEventsCutter.processEvent { onClick() }
-            } else {
-                onClick()
-            }
-        },
-        enabled = enabled,
-        colors = colors,
-        interactionSource = interactionSource,
+    val resolvedContentColor = if (enabled) contentColor else disabledContentColor
+
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .then(if (border != null) Modifier.border(border, shape) else Modifier)
+            .clickableSingle(
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            )
+            .padding(contentPadding),
+        contentAlignment = Alignment.Center,
     ) {
-        content()
+        if (resolvedContentColor != Color.Unspecified) {
+            CompositionLocalProvider(LocalContentColor provides resolvedContentColor) {
+                content()
+            }
+        } else {
+            content()
+        }
     }
 }
 
@@ -59,7 +65,11 @@ fun NekiIconButton(
 @Composable
 private fun NekiIconButtonPreview() {
     NekiTheme {
-        NekiIconButton(onClick = {}) {
+        NekiIconButton(
+            modifier = Modifier.size(52.dp),
+            onClick = {},
+            contentPadding = PaddingValues(12.dp),
+        ) {
             Icon(
                 modifier = Modifier.size(28.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_close),
