@@ -119,6 +119,14 @@ fun MainScreen(
                 onTabSelected = { onTabSelected(it.navKey) },
                 onClickFab = { onIntent(MainIntent.ClickAddPhotoFab) },
             )
+            if (shouldShowBottomBar) {
+                BottomNavigationBar(
+                    currentTab = currentTopLevelKey,
+                    currentKey = currentKey,
+                    onTabSelected = { onTabSelected(it.navKey) },
+                    onClickFab = { onIntent(MainIntent.ClickAddPhotoFab) },
+                )
+            }
         },
     ) { innerPadding ->
         NavDisplay(
