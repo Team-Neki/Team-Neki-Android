@@ -88,8 +88,9 @@ internal fun AlbumDetailRoute(
                     .onSuccess {
                         nekiToast.showToast(text = "사진을 갤러리에 다운로드했어요")
                     }
-                    .onFailure {
+                    .onFailure { e ->
                         nekiToast.showToast(text = "다운로드에 실패했어요")
+                        Timber.e(e)
                     }
             }
 

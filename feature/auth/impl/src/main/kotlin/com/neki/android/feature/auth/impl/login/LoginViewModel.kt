@@ -51,8 +51,8 @@ class LoginViewModel @Inject constructor(
                 )
                 checkTermAgreementState(postSideEffect)
             }
-            .onFailure { exception ->
-                Timber.e(exception)
+            .onFailure { e ->
+                Timber.e(e)
                 postSideEffect(LoginSideEffect.ShowToastMessage("가입에 실패했습니다. 다시 시도해주세요."))
             }
         reduce { copy(isLoading = false) }
@@ -70,8 +70,8 @@ class LoginViewModel @Inject constructor(
                     postSideEffect(LoginSideEffect.NavigateToTerm)
                 }
             }
-            .onFailure { exception ->
-                Timber.e(exception)
+            .onFailure { e ->
+                Timber.e(e)
                 postSideEffect(LoginSideEffect.NavigateToTerm)
             }
     }

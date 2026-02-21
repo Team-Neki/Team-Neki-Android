@@ -90,8 +90,8 @@ class UploadAlbumViewModel @AssistedInject constructor(
             .onSuccess { data ->
                 reduce { copy(favoriteAlbum = data) }
             }
-            .onFailure { error ->
-                Timber.e(error)
+            .onFailure { e ->
+                Timber.e(e)
             }
     }
 
@@ -100,8 +100,8 @@ class UploadAlbumViewModel @AssistedInject constructor(
             .onSuccess { data ->
                 reduce { copy(albums = data.toImmutableList()) }
             }
-            .onFailure { error ->
-                Timber.e(error)
+            .onFailure { e ->
+                Timber.e(e)
             }
     }
 
@@ -157,8 +157,8 @@ class UploadAlbumViewModel @AssistedInject constructor(
             ).onSuccess { data ->
                 Timber.d(data.toString())
                 onSuccessAction()
-            }.onFailure { error ->
-                onFailureAction(error)
+            }.onFailure { e ->
+                onFailureAction(e)
             }
         }
     }
@@ -178,8 +178,8 @@ class UploadAlbumViewModel @AssistedInject constructor(
                 folderId = albumId,
             ).onSuccess {
                 onSuccessAction()
-            }.onFailure { error ->
-                onFailureAction(error)
+            }.onFailure { e ->
+                onFailureAction(e)
             }
         }
     }

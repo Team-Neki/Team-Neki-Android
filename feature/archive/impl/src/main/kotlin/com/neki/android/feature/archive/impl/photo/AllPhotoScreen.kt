@@ -56,6 +56,7 @@ import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 internal fun AllPhotoRoute(
@@ -90,8 +91,9 @@ internal fun AllPhotoRoute(
                     .onSuccess {
                         nekiToast.showToast(text = "사진을 갤러리에 다운로드했어요")
                     }
-                    .onFailure {
+                    .onFailure { e ->
                         nekiToast.showToast(text = "다운로드에 실패했어요")
+                        Timber.e(e)
                     }
             }
         }

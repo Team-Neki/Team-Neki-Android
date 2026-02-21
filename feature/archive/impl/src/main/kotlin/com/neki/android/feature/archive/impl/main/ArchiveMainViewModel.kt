@@ -142,8 +142,8 @@ class ArchiveMainViewModel @Inject constructor(
             .onSuccess { data ->
                 reduce { copy(favoriteAlbum = data) }
             }
-            .onFailure { error ->
-                Timber.e(error)
+            .onFailure { e ->
+                Timber.e(e)
             }
     }
 
@@ -152,8 +152,8 @@ class ArchiveMainViewModel @Inject constructor(
             .onSuccess { data ->
                 reduce { copy(recentPhotos = data.toImmutableList()) }
             }
-            .onFailure { error ->
-                Timber.e(error)
+            .onFailure { e ->
+                Timber.e(e)
             }
     }
 
@@ -162,8 +162,8 @@ class ArchiveMainViewModel @Inject constructor(
             .onSuccess { data ->
                 reduce { copy(albums = data.toImmutableList()) }
             }
-            .onFailure { error ->
-                Timber.e(error)
+            .onFailure { e ->
+                Timber.e(e)
             }
     }
 
@@ -208,8 +208,8 @@ class ArchiveMainViewModel @Inject constructor(
             ).onSuccess {
                 fetchPhotos(reduce, 1) // 가장 최신 데이터 가져오기
                 onSuccess()
-            }.onFailure { error ->
-                Timber.e(error)
+            }.onFailure { e ->
+                Timber.e(e)
                 postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
                 reduce { copy(isLoading = false) }
             }
@@ -230,8 +230,8 @@ class ArchiveMainViewModel @Inject constructor(
             ).onSuccess {
                 fetchPhotos(reduce)
                 onSuccess()
-            }.onFailure { error ->
-                Timber.e(error)
+            }.onFailure { e ->
+                Timber.e(e)
                 postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
                 reduce { copy(isLoading = false) }
             }
@@ -249,9 +249,9 @@ class ArchiveMainViewModel @Inject constructor(
                     fetchFolders(reduce)
                     postSideEffect(ArchiveMainSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
                 }
-                .onFailure { error ->
+                .onFailure { e ->
                     postSideEffect(ArchiveMainSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
-                    Timber.e(error)
+                    Timber.e(e)
                 }
             reduce { copy(isShowAddAlbumBottomSheet = false, albumNameTextState = TextFieldState()) }
         }

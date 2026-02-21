@@ -51,8 +51,8 @@ class PoseDetailViewModel @AssistedInject constructor(
                                 Timber.d("updateBookmark success")
                                 store.onIntent(PoseDetailIntent.BookmarkCommitted(newBookmark))
                             }
-                            .onFailure { error ->
-                                Timber.e(error, "updateBookmark failed")
+                            .onFailure { e ->
+                                Timber.e(e, "updateBookmark failed")
                                 store.onIntent(PoseDetailIntent.RevertBookmark(committedBookmark))
                             }
                     }
@@ -93,8 +93,8 @@ class PoseDetailViewModel @AssistedInject constructor(
                 .onSuccess { data ->
                     reduce { copy(pose = data, committedBookmark = data.isBookmarked) }
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                 }
         }
     }
