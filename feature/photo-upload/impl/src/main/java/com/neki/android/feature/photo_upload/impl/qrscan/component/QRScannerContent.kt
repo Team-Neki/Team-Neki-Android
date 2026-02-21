@@ -147,7 +147,6 @@ internal fun QRScannerContent(
                     modifier = Modifier
                         .padding(top = 37.dp)
                         .size(48.dp)
-                        .clip(CircleShape)
                         .background(
                             color = NekiTheme.colorScheme.white.copy(alpha = 0.1f),
                         ),
