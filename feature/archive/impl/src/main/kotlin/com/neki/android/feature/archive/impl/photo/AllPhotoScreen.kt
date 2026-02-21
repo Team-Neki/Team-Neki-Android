@@ -126,7 +126,9 @@ internal fun AllPhotoScreen(
     }
 
     if (isEmpty) {
-        EmptyAllPhotoContent()
+        EmptyAllPhotoContent(
+            onBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
+        )
     } else {
         AllPhotoContent(
             uiState = uiState,
