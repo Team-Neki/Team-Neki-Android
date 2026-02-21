@@ -10,7 +10,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class ArchiveMainState(
     val isLoading: Boolean = false,
-    val isFirstEntered: Boolean = true,
+    val isFirstEntered: Boolean = false,
     val favoriteAlbum: AlbumPreview = AlbumPreview(title = "즐겨찾는사진"),
     val albums: ImmutableList<AlbumPreview> = persistentListOf(),
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),

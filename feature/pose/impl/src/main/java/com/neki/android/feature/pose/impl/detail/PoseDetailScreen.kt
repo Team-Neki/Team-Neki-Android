@@ -3,7 +3,6 @@ package com.neki.android.feature.pose.impl.detail
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -11,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.DevicePreview
@@ -76,11 +74,6 @@ internal fun PoseDetailScreen(
                 .weight(1f),
             contentScale = ContentScale.Fit,
             alignment = Alignment.Center,
-        )
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            thickness = 1.dp,
-            color = NekiTheme.colorScheme.gray75,
         )
         PoseActionBar(
             isBookmarked = uiState.pose.isBookmarked,
