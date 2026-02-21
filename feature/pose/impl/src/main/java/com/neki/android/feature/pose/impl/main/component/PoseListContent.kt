@@ -32,6 +32,7 @@ import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.component.GridItemOverlay
@@ -45,6 +46,7 @@ internal fun PoseListContent(
     posePagingItems: LazyPagingItems<Pose>,
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     onClickItem: (Pose) -> Unit = {},
+    onClickBookmark: (Pose) -> Unit = {},
 ) {
     LazyVerticalStaggeredGrid(
         modifier = modifier
@@ -64,6 +66,7 @@ internal fun PoseListContent(
                 PoseItem(
                     pose = pose,
                     onClickItem = onClickItem,
+                    onClickBookmark = onClickBookmark,
                 )
             }
         }
@@ -75,6 +78,7 @@ private fun PoseItem(
     pose: Pose,
     modifier: Modifier = Modifier,
     onClickItem: (Pose) -> Unit = {},
+    onClickBookmark: (Pose) -> Unit = {},
 ) {
     var aspectRatio by rememberSaveable { mutableFloatStateOf(0f) }
 
@@ -104,17 +108,20 @@ private fun PoseItem(
             modifier = Modifier.matchParentSize(),
             shape = RoundedCornerShape(12.dp),
         )
-        if (pose.isBookmarked) {
-            Icon(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 10.dp, end = 10.dp)
-                    .size(20.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_bookmark_filled),
-                contentDescription = null,
-                tint = NekiTheme.colorScheme.white,
-            )
-        }
+
+        Icon(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .noRippleClickableSingle { onClickBookmark(pose) }
+                .padding(10.dp)
+                .size(20.dp),
+            imageVector = ImageVector.vectorResource(
+                if (pose.isBookmarked) R.drawable.icon_bookmark_filled
+                else R.drawable.icon_bookmark_stroked_alpha_filled,
+            ),
+            contentDescription = null,
+            tint = NekiTheme.colorScheme.white,
+        )
     }
 }
 

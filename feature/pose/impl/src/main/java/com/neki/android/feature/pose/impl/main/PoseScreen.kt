@@ -6,13 +6,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -35,6 +38,9 @@ import com.neki.android.feature.pose.impl.main.component.PoseListContent
 import com.neki.android.feature.pose.impl.main.component.PoseTopBar
 import com.neki.android.feature.pose.impl.main.component.RandomPosePeopleCountBottomSheet
 import com.neki.android.feature.pose.impl.main.component.RecommendationChip
+import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun PoseRoute(
@@ -46,6 +52,8 @@ internal fun PoseRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val posePagingItems = viewModel.posePagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
+    val lazyState = rememberLazyStaggeredGridState()
+    val coroutineScope = rememberCoroutineScope()
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -53,12 +61,19 @@ internal fun PoseRoute(
             is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
             is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.poseId)
             is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+            PoseEffect.ScrollToTop -> coroutineScope.launch {
+                snapshotFlow { posePagingItems.loadState.refresh }
+                    .dropWhile { it is LoadState.NotLoading }
+                    .first { it is LoadState.NotLoading }
+                lazyState.scrollToItem(0)
+            }
         }
     }
 
     PoseScreen(
         uiState = uiState,
         posePagingItems = posePagingItems,
+        lazyState = lazyState,
         onIntent = viewModel.store::onIntent,
     )
 }
@@ -67,6 +82,7 @@ internal fun PoseRoute(
 fun PoseScreen(
     uiState: PoseState = PoseState(),
     posePagingItems: LazyPagingItems<Pose>,
+    lazyState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     onIntent: (PoseIntent) -> Unit = {},
 ) {
     val isRefreshing by remember {
@@ -82,10 +98,12 @@ fun PoseScreen(
             selectedPeopleCount = uiState.selectedPeopleCount,
             isBookmarkSelected = uiState.isShowBookmarkedPose,
             posePagingItems = posePagingItems,
+            lazyState = lazyState,
             onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickBookmark = { onIntent(PoseIntent.ClickBookmarkChip) },
             onClickPoseItem = { onIntent(PoseIntent.ClickPoseItem(it)) },
+            onClickBookmarkIcon = { onIntent(PoseIntent.ClickBookmarkIcon(it)) },
         )
 
         RecommendationChip(
@@ -124,19 +142,19 @@ fun PoseContent(
     selectedPeopleCount: PeopleCount?,
     isBookmarkSelected: Boolean,
     posePagingItems: LazyPagingItems<Pose>,
+    lazyState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     onClickAlarmIcon: () -> Unit = {},
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
     onClickPoseItem: (Pose) -> Unit = {},
+    onClickBookmarkIcon: (Pose) -> Unit = {},
 ) {
-    val lazyState = rememberLazyStaggeredGridState()
     val density = LocalDensity.current
     var filterBarHeightPx by remember { mutableIntStateOf(0) }
     val topPadding = with(density) { filterBarHeightPx.toDp() }
     val showFilterBar by remember {
         derivedStateOf {
-            !lazyState.canScrollBackward ||
-                lazyState.lastScrolledBackward
+            !lazyState.canScrollBackward || lazyState.lastScrolledBackward
         }
     }
 
@@ -156,6 +174,7 @@ fun PoseContent(
                 posePagingItems = posePagingItems,
                 state = lazyState,
                 onClickItem = onClickPoseItem,
+                onClickBookmark = onClickBookmarkIcon,
             )
             PoseFilterBar(
                 modifier = Modifier

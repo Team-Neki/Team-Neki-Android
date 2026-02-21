@@ -27,6 +27,7 @@ sealed interface PoseIntent {
     data object ClickRandomPoseRecommendation : PoseIntent
     data class ClickRandomPosePeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseBottomSheetSelectButton : PoseIntent
+    data class ClickBookmarkIcon(val pose: Pose) : PoseIntent
     data class BookmarkChanged(val poseId: Long, val isBookmarked: Boolean) : PoseIntent
 }
 
@@ -35,4 +36,5 @@ sealed interface PoseEffect {
     data class NavigateToRandomPose(val peopleCount: PeopleCount) : PoseEffect
     data class NavigateToPoseDetail(val poseId: Long) : PoseEffect
     data class ShowToast(val message: String) : PoseEffect
+    data object ScrollToTop : PoseEffect
 }
