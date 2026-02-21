@@ -75,12 +75,12 @@ private fun AddPhotoBottomSheetContent(
         ) {
             AddPhotoOptionButton(
                 modifier = Modifier.padding(horizontal = 4.dp),
-                iconRes = R.drawable.icon_qr_scan,
+                iconRes = R.drawable.icon_bell,
                 label = "QR로 추가",
                 onClick = onClickQRScan,
             )
             AddPhotoOptionButton(
-                iconRes = R.drawable.icon_add_photo,
+                iconRes = R.drawable.icon_bell,
                 label = "갤러리에서 추가",
                 onClick = onClickGallery,
             )

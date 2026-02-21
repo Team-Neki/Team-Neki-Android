@@ -176,7 +176,7 @@ internal fun QRScannerContent(
                             else R.drawable.icon_torch_off,
                         ),
                         contentDescription = null,
-                        tint = if (isTorchEnabled) Color.Black else Color.White,
+                        tint = NekiTheme.colorScheme.white.copy(alpha = 0.1f),
                     )
                 }
             }
