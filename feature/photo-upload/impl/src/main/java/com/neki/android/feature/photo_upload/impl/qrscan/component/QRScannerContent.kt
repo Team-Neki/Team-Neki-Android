@@ -160,7 +160,7 @@ internal fun QRScannerContent(
                             else R.drawable.icon_torch_on,
                         ),
                         contentDescription = null,
-                        tint = NekiTheme.colorScheme.white.copy,
+                        tint = NekiTheme.colorScheme.white,
                     )
                 }
             }
