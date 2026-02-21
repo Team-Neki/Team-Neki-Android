@@ -57,8 +57,8 @@ class AllPhotoViewModel @Inject constructor(
         originalPagingData,
         deletedPhotoIds,
         updatedFavorites,
-        _isFavoriteOnly,
-    ) { pagingData, deletedIds, favorites, isFavoriteOnly ->
+    ) { pagingData, deletedIds, favorites ->
+        val isFavoriteOnly = _isFavoriteOnly.value
         pagingData
             .filter { photo -> photo.id !in deletedIds }
             .map { photo ->
@@ -123,6 +123,7 @@ class AllPhotoViewModel @Inject constructor(
                         .onFailure { e ->
                             Timber.e(e)
                             updatedFavorites.update { it + (photo.id to photo.isFavorite) }
+                            postSideEffect(AllPhotoSideEffect.ShowToastMessage("즐겨찾기 변경에 실패했어요"))
                         }
                 }
             }

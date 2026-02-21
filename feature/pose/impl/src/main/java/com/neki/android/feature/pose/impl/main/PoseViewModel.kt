@@ -52,8 +52,8 @@ internal class PoseViewModel @Inject constructor(
     val posePagingData: Flow<PagingData<Pose>> = combine(
         originalPagingData,
         updatedBookmarks,
-        _isBookmarkOnly,
-    ) { pagingData, bookmarks, isBookmarkOnly ->
+    ) { pagingData, bookmarks ->
+        val isBookmarkOnly = _isBookmarkOnly.value
         pagingData
             .map { pose ->
                 bookmarks[pose.id]?.let { isBookmarked ->
