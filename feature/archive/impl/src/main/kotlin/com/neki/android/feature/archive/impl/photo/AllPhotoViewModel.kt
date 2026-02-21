@@ -57,13 +57,17 @@ class AllPhotoViewModel @Inject constructor(
         originalPagingData,
         deletedPhotoIds,
         updatedFavorites,
-    ) { pagingData, deletedIds, favorites ->
+        _isFavoriteOnly,
+    ) { pagingData, deletedIds, favorites, isFavoriteOnly ->
         pagingData
             .filter { photo -> photo.id !in deletedIds }
             .map { photo ->
                 favorites[photo.id]?.let { isFavorite ->
                     photo.copy(isFavorite = isFavorite)
                 } ?: photo
+            }
+            .let { data ->
+                if (isFavoriteOnly) data.filter { it.isFavorite } else data
             }
     }
 
@@ -110,6 +114,19 @@ class AllPhotoViewModel @Inject constructor(
             is AllPhotoIntent.PhotoDeleted -> {
                 deletedPhotoIds.update { it + intent.photoIds.toSet() }
             }
+            is AllPhotoIntent.ClickFavoriteIcon -> {
+                val photo = intent.photo
+                val newFavorite = !photo.isFavorite
+                updatedFavorites.update { it + (photo.id to newFavorite) }
+                viewModelScope.launch {
+                    photoRepository.updateFavorite(photo.id, newFavorite)
+                        .onFailure { e ->
+                            Timber.e(e)
+                            updatedFavorites.update { it + (photo.id to photo.isFavorite) }
+                        }
+                }
+            }
+
             is AllPhotoIntent.FavoriteChanged -> {
                 updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
             }

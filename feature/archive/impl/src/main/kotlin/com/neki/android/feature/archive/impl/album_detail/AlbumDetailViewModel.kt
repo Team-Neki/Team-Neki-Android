@@ -65,6 +65,9 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     photo.copy(isFavorite = isFavorite)
                 } ?: photo
             }
+            .let { data ->
+                if (isFavoriteAlbum) data.filter { it.isFavorite } else data
+            }
     }
 
     val store: MviIntentStore<AlbumDetailState, AlbumDetailIntent, AlbumDetailSideEffect> =
@@ -142,6 +145,19 @@ class AlbumDetailViewModel @AssistedInject constructor(
             // Result Intent
             is AlbumDetailIntent.PhotoDeleted -> {
                 deletedPhotoIds.update { it + intent.photoIds.toSet() }
+            }
+
+            is AlbumDetailIntent.ClickFavoriteIcon -> {
+                val photo = intent.photo
+                val newFavorite = !photo.isFavorite
+                updatedFavorites.update { it + (photo.id to newFavorite) }
+                viewModelScope.launch {
+                    photoRepository.updateFavorite(photo.id, newFavorite)
+                        .onFailure { e ->
+                            Timber.e(e)
+                            updatedFavorites.update { it + (photo.id to photo.isFavorite) }
+                        }
+                }
             }
 
             is AlbumDetailIntent.FavoriteChanged -> {

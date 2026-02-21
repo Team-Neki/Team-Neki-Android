@@ -72,6 +72,7 @@ sealed interface AlbumDetailIntent {
 
     // Result Intent
     data class PhotoDeleted(val photoIds: List<Long>) : AlbumDetailIntent
+    data class ClickFavoriteIcon(val photo: Photo) : AlbumDetailIntent
     data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : AlbumDetailIntent
 }
 

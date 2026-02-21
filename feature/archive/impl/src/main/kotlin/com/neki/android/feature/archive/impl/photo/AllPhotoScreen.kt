@@ -213,6 +213,7 @@ private fun AllPhotoContent(
                             isSelectMode = uiState.selectMode == SelectMode.SELECTING,
                             onClickItem = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
                             onClickSelect = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
+                            onClickFavorite = { onIntent(AllPhotoIntent.ClickFavoriteIcon(photo)) },
                         )
                     }
                 }

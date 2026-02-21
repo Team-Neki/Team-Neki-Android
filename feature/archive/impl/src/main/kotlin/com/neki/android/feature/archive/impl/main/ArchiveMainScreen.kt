@@ -125,6 +125,7 @@ internal fun ArchiveMainScreen(
                 onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it.id, it.title)) },
                 onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
                 onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
+                onClickFavorite = { photo -> onIntent(ArchiveMainIntent.ClickFavoriteIcon(photo)) },
                 onClickAddAlbum = { onIntent(ArchiveMainIntent.ClickAddAlbum) },
             )
         }
@@ -187,6 +188,7 @@ private fun ArchiveMainContent(
     onClickAlbumItem: (AlbumPreview) -> Unit,
     onClickShowAllPhoto: () -> Unit,
     onClickPhotoItem: (Photo) -> Unit,
+    onClickFavorite: (Photo) -> Unit,
     onClickAddAlbum: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -250,6 +252,7 @@ private fun ArchiveMainContent(
             ArchiveMainPhotoItem(
                 photo = photo,
                 onClickItem = onClickPhotoItem,
+                onClickFavorite = onClickFavorite,
             )
         }
     }

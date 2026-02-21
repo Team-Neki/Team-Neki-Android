@@ -49,6 +49,7 @@ sealed interface ArchiveMainIntent {
     // Photo Intent
     data object ClickAllPhotoText : ArchiveMainIntent
     data class ClickPhotoItem(val photo: Photo) : ArchiveMainIntent
+    data class ClickFavoriteIcon(val photo: Photo) : ArchiveMainIntent
 
     // Add Album BottomSheet Intent
     data object DismissAddAlbumBottomSheet : ArchiveMainIntent

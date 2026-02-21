@@ -253,6 +253,7 @@ internal fun AlbumDetailContent(
                             isSelectMode = uiState.selectMode == SelectMode.SELECTING,
                             onClickItem = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
                             onClickSelect = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
+                            onClickFavorite = { onIntent(AlbumDetailIntent.ClickFavoriteIcon(photo)) },
                         )
                     }
                 }
