@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,11 +34,13 @@ internal fun PhotoActionBar(
         exit = shrinkVertically(shrinkTowards = Alignment.Top),
     ) {
         NekiBothSidesActionBar(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
             startContent = {
                 Icon(
                     modifier = Modifier
-                        .padding(20.dp)
+                        .size(28.dp)
                         .noRippleClickableSingle(
                             enabled = isEnabled,
                             onClick = onClickDownload,
@@ -51,7 +54,7 @@ internal fun PhotoActionBar(
             endContent = {
                 Icon(
                     modifier = Modifier
-                        .padding(20.dp)
+                        .size(28.dp)
                         .noRippleClickableSingle(
                             enabled = isEnabled,
                             onClick = onClickDelete,
