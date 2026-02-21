@@ -45,23 +45,23 @@ class PhotoRepositoryImpl @Inject constructor(
                 uploads = mediaIds.map { RegisterPhotoRequest.Upload(mediaId = it) },
                 favorite = favorite,
             ),
-        ).data
+        )
     }
 
     override suspend fun deletePhoto(photoId: Long): Result<Unit> = runSuspendCatching {
         photoService.deletePhoto(
             requestBody = DeletePhotoRequest(photoIds = listOf(photoId)),
-        ).data
+        )
     }
 
     override suspend fun deletePhoto(photoIds: List<Long>): Result<Unit> = runSuspendCatching {
         photoService.deletePhoto(
             requestBody = DeletePhotoRequest(photoIds = photoIds),
-        ).data
+        )
     }
 
     override suspend fun updateFavorite(photoId: Long, favorite: Boolean): Result<Unit> = runSuspendCatching {
-        photoService.updateFavorite(photoId, favorite).data
+        photoService.updateFavorite(photoId, favorite)
     }
 
     override suspend fun getFavoritePhotos(
