@@ -139,7 +139,7 @@ fun MainScreen(
             modifier = Modifier.padding(
                 when (currentKey) {
                     ArchiveNavKey.Archive, PoseNavKey.PoseMain, MyPageNavKey.MyPage -> innerPadding
-                    MapNavKey.Map -> PaddingValues(bottom = innerPadding.calculateBottomPadding())
+                    is PoseNavKey.RandomPose, MapNavKey.Map -> PaddingValues(bottom = innerPadding.calculateBottomPadding())
                     PhotoUploadNavKey.QRScan -> PaddingValues.Zero
                     else -> PaddingValues(top = innerPadding.calculateTopPadding())
                 },
