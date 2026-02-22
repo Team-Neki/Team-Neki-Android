@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -31,9 +32,9 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.clustering.Clusterer
 import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.CameraUpdateReason
+import com.naver.maps.map.compose.DisposableMapEffect
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import com.naver.maps.map.compose.LocationTrackingMode
-import com.naver.maps.map.compose.MapEffect as NaverMapEffect
 import com.naver.maps.map.compose.MapProperties
 import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.NaverMap
@@ -231,12 +232,10 @@ fun MapScreen(
     }
 
     var clusterer by remember { mutableStateOf<Clusterer<PhotoBoothClusterItem>?>(null) }
+    val currentBrandImageCache by rememberUpdatedState(uiState.brandImageCache)
 
-    // 브랜드 이미지 캐시 참조 (클러스터러에서 사용)
-    val brandImageCache = uiState.brandImageCache
-
-    // 마커 데이터 또는 이미지 캐시 변경 시 클러스터 업데이트
-    LaunchedEffect(uiState.mapMarkers, brandImageCache, clusterer) {
+    // 마커 데이터 변경 시 클러스터 업데이트
+    LaunchedEffect(uiState.mapMarkers, clusterer) {
         clusterer?.let { clusterManager ->
             clusterManager.clear()
             val clusterItemsMap = uiState.mapMarkers
@@ -261,9 +260,7 @@ fun MapScreen(
             },
         ) {
             // Clusterer가 모든 마커를 관리 (클러스터 + 개별 마커)
-            NaverMapEffect(brandImageCache) { naverMap ->
-                // 이미지 캐시가 변경될 때마다 클러스터러 재생성
-                clusterer?.map = null
+            DisposableMapEffect(Unit) { naverMap ->
                 clusterer = PhotoBoothClusterer.create(
                     context = context,
                     naverMap = naverMap,
@@ -279,11 +276,15 @@ fun MapScreen(
                         onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
                     },
                     getBrandImage = { imageUrl ->
-                        brandImageCache[imageUrl]
+                        currentBrandImageCache[imageUrl]
                     },
                 )
+
+                onDispose {
+                    clusterer?.map = null
+                    clusterer = null
+                }
             }
-            // Composable 마커는 사용하지 않음 - Clusterer가 모든 마커 관리
         }
 
         AnchoredDraggablePanel(
