@@ -36,8 +36,8 @@ internal fun ArchiveMainTitleRow(
             color = NekiTheme.colorScheme.gray900,
         )
         NekiTextButton(
-            contentPadding = PaddingValues(start = 12.dp, top = 4.dp, bottom = 4.dp),
             onClick = onClickShowAllAlbum,
+            contentPadding = PaddingValues(start = 12.dp, top = 4.dp, bottom = 4.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
