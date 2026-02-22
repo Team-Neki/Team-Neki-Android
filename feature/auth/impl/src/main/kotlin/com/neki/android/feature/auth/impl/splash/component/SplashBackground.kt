@@ -27,20 +27,22 @@ internal fun SplashBackground(
         modifier = modifier,
     ) {
         GradientBackground()
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 177.42.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp),
-        ) {
-            WhiteNekiAppLogo(
-                modifier = Modifier.size(width = 73.89.dp, height = 80.41.dp),
-            )
-            Image(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_splash_text),
-                contentDescription = null,
-            )
+        Column {
+            Box(modifier = Modifier.weight(177f))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(32.dp),
+            ) {
+                WhiteNekiAppLogo(
+                    modifier = Modifier.size(width = 73.89.dp, height = 80.41.dp),
+                )
+                Image(
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_splash_text),
+                    contentDescription = null,
+                )
+            }
+            Box(modifier = Modifier.weight(427f))
         }
     }
 }
