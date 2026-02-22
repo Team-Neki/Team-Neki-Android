@@ -98,7 +98,7 @@ class ArchiveMainViewModel @Inject constructor(
             // Photo Intent
             ArchiveMainIntent.ClickAllPhotoText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllPhoto)
             is ArchiveMainIntent.ClickPhotoItem -> postSideEffect(ArchiveMainSideEffect.NavigateToPhotoDetail(intent.photo))
-            is ArchiveMainIntent.ClickFavoriteIcon -> handleFavoriteToggle(intent.photo, state, reduce)
+            is ArchiveMainIntent.ClickFavoriteIcon -> handleFavoriteToggle(intent.photo, reduce)
 
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
@@ -243,7 +243,6 @@ class ArchiveMainViewModel @Inject constructor(
 
     private fun handleFavoriteToggle(
         photo: Photo,
-        state: ArchiveMainState,
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
     ) {
         val newFavorite = !photo.isFavorite
