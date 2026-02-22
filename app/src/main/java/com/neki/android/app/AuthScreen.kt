@@ -3,6 +3,9 @@ package com.neki.android.app
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -20,6 +23,8 @@ import com.neki.android.feature.map.api.MapNavKey
 import com.neki.android.feature.mypage.api.MyPageNavKey
 import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
 import com.neki.android.feature.pose.api.PoseNavKey
+
+private const val SLIDE_ANIMATION_DURATION = 800
 
 @Composable
 fun AuthScreen(
@@ -46,8 +51,24 @@ fun AuthScreen(
             ),
             entries = entries,
             onBack = onBack,
-            transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
-            popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
+            transitionSpec = {
+                when (currentKey) {
+                    AuthNavKey.Login, AuthNavKey.Term -> ContentTransform(
+                        targetContentEnter = slideInHorizontally(tween(SLIDE_ANIMATION_DURATION)) { it },
+                        initialContentExit = slideOutHorizontally(tween(SLIDE_ANIMATION_DURATION)) { -it },
+                    )
+                    else -> ContentTransform(EnterTransition.None, ExitTransition.None)
+                }
+            },
+            popTransitionSpec = {
+                when (currentKey) {
+                    AuthNavKey.Login -> ContentTransform(
+                        targetContentEnter = slideInHorizontally(tween(SLIDE_ANIMATION_DURATION)) { -it },
+                        initialContentExit = slideOutHorizontally(tween(SLIDE_ANIMATION_DURATION)) { it },
+                    )
+                    else -> ContentTransform(EnterTransition.None, ExitTransition.None)
+                }
+            },
         )
     }
 }
