@@ -117,7 +117,7 @@ internal fun QRScannerContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .statusBarsPadding()
+                        .statusBarsPadding(),
                 ) {
                     NekiIconButton(
                         modifier = Modifier.padding(start = 8.dp),

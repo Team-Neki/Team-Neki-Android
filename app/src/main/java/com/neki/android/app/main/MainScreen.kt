@@ -81,6 +81,7 @@ fun MainRoute(
             MainSideEffect.OpenGallery -> photoPicker.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
             )
+
             is MainSideEffect.NavigateToUploadAlbumWithGallery -> navigateToUploadAlbumWithGallery(sideEffect.uriStrings)
             is MainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
             is MainSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
@@ -121,7 +122,7 @@ fun MainScreen(
                 when (currentKey) {
                     PhotoUploadNavKey.QRScan -> Modifier
                     else -> Modifier.navigationBarsPadding()
-                }
+                },
             ),
         bottomBar = {
             if (shouldShowBottomBar) {

@@ -17,12 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
-import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.auth.api.AuthNavKey
-import com.neki.android.feature.map.api.MapNavKey
-import com.neki.android.feature.mypage.api.MyPageNavKey
-import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
-import com.neki.android.feature.pose.api.PoseNavKey
 
 private const val SLIDE_ANIMATION_DURATION = 800
 
@@ -39,7 +34,7 @@ fun AuthScreen(
                 when (currentKey) {
                     AuthNavKey.Splash -> Modifier
                     else -> Modifier.navigationBarsPadding()
-                }
+                },
             ),
     ) { innerPadding ->
         NavDisplay(
@@ -47,7 +42,7 @@ fun AuthScreen(
                 when (currentKey) {
                     AuthNavKey.Splash, AuthNavKey.Login -> PaddingValues.Zero
                     else -> innerPadding
-                }
+                },
             ),
             entries = entries,
             onBack = onBack,
@@ -57,6 +52,7 @@ fun AuthScreen(
                         targetContentEnter = slideInHorizontally(tween(SLIDE_ANIMATION_DURATION)) { it },
                         initialContentExit = slideOutHorizontally(tween(SLIDE_ANIMATION_DURATION)) { -it },
                     )
+
                     else -> ContentTransform(EnterTransition.None, ExitTransition.None)
                 }
             },
@@ -66,6 +62,7 @@ fun AuthScreen(
                         targetContentEnter = slideInHorizontally(tween(SLIDE_ANIMATION_DURATION)) { -it },
                         initialContentExit = slideOutHorizontally(tween(SLIDE_ANIMATION_DURATION)) { it },
                     )
+
                     else -> ContentTransform(EnterTransition.None, ExitTransition.None)
                 }
             },
