@@ -26,10 +26,11 @@ internal fun PhotoDetailActionBar(
     onClickDelete: () -> Unit = {},
 ) {
     NekiBothSidesActionBar(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(20.dp),
         startContent = {
             Row(
-                modifier = Modifier.padding(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Icon(
@@ -58,7 +59,6 @@ internal fun PhotoDetailActionBar(
         endContent = {
             Icon(
                 modifier = Modifier
-                    .padding(20.dp)
                     .size(28.dp)
                     .noRippleClickable { onClickDelete() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
