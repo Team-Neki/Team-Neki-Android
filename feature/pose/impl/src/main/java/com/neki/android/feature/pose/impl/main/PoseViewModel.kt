@@ -155,7 +155,7 @@ internal class PoseViewModel @Inject constructor(
             reduce {
                 copy(
                     isShowBookmarkedPose = false,
-                    selectedPeopleCount = intent.peopleCount.takeIf { it != state.selectedPeopleCount },
+                    selectedPeopleCount = intent.peopleCount,
                     isShowPeopleCountBottomSheet = false,
                 )
             }
