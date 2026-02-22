@@ -1,5 +1,8 @@
 package com.neki.android.app
 
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -43,6 +46,8 @@ fun AuthScreen(
             ),
             entries = entries,
             onBack = onBack,
+            transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
+            popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
         )
     }
 }
