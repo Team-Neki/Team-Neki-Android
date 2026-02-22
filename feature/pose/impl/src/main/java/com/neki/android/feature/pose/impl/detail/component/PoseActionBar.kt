@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.actionbar.NekiEndActionBar
-import com.neki.android.core.designsystem.button.NekiIconButton
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -22,23 +22,24 @@ internal fun PoseActionBar(
     onClickBookmark: () -> Unit = {},
 ) {
     NekiEndActionBar(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(20.dp),
     ) {
-        NekiIconButton(
-            modifier = Modifier.padding(8.dp),
-            onClick = onClickBookmark,
-        ) {
-            Icon(
-                modifier = Modifier.size(28.dp),
-                imageVector = ImageVector.vectorResource(
-                    if (isBookmarked) R.drawable.icon_bookmark_filled
-                    else R.drawable.icon_bookmark_stroked,
+        Icon(
+            modifier = Modifier
+                .size(28.dp)
+                .noRippleClickableSingle(
+                    onClick = onClickBookmark,
                 ),
-                contentDescription = null,
-                tint = if (isBookmarked) NekiTheme.colorScheme.gray900
-                else NekiTheme.colorScheme.gray500,
-            )
-        }
+            imageVector = ImageVector.vectorResource(
+                if (isBookmarked) R.drawable.icon_bookmark_filled
+                else R.drawable.icon_bookmark_stroked,
+            ),
+            contentDescription = null,
+            tint = if (isBookmarked) NekiTheme.colorScheme.gray900
+            else NekiTheme.colorScheme.gray500,
+        )
     }
 }
 

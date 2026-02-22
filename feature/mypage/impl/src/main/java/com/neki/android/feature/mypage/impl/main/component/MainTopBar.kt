@@ -1,5 +1,6 @@
 package com.neki.android.feature.mypage.impl.main.component
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,6 +37,7 @@ internal fun MainTopBar(
         actions = {
             NekiIconButton(
                 onClick = onClickIcon,
+                contentPadding = PaddingValues(8.dp),
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),
