@@ -48,7 +48,6 @@ fun BottomNavigationBar(
     onClickFab: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
     ) {
         Surface(
