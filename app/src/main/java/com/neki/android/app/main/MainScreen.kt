@@ -32,8 +32,12 @@ import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.map.api.MapNavKey
+import com.neki.android.feature.mypage.api.MyPageNavKey
+import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
 import com.neki.android.feature.photo_upload.api.QRScanResult
+import com.neki.android.feature.pose.api.PoseNavKey
 import timber.log.Timber
 
 @Composable
@@ -113,7 +117,12 @@ fun MainScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .then(
+                when (currentKey) {
+                    PhotoUploadNavKey.QRScan -> Modifier
+                    else -> Modifier.navigationBarsPadding()
+                }
+            ),
         bottomBar = {
             if (shouldShowBottomBar) {
                 BottomNavigationBar(
@@ -127,7 +136,12 @@ fun MainScreen(
     ) { innerPadding ->
         NavDisplay(
             modifier = Modifier.padding(
-                if (currentKey == MapNavKey.Map) PaddingValues(bottom = innerPadding.calculateBottomPadding()) else innerPadding,
+                when (currentKey) {
+                    ArchiveNavKey.Archive, PoseNavKey.PoseMain, MyPageNavKey.MyPage -> innerPadding
+                    MapNavKey.Map -> PaddingValues(bottom = innerPadding.calculateBottomPadding())
+                    PhotoUploadNavKey.QRScan -> PaddingValues.Zero
+                    else -> PaddingValues(top = innerPadding.calculateTopPadding())
+                },
             ),
             entries = entries,
             onBack = onBack,
