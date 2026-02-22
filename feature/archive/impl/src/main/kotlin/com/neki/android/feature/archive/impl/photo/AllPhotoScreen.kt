@@ -265,7 +265,7 @@ private fun EmptyAllPhotoContent(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
 ) {
-    Column(
+    Box(
         modifier = modifier.fillMaxSize(),
     ) {
         BackTitleTopBar(
@@ -273,6 +273,7 @@ private fun EmptyAllPhotoContent(
             onBack = onBack,
         )
         EmptyPhotoContent(
+            modifier = Modifier.align(Alignment.Center),
             emptyText = "아직 등록된 사진이 없어요\n찍은 네컷을 네키에 저장해보세요!",
         )
     }
