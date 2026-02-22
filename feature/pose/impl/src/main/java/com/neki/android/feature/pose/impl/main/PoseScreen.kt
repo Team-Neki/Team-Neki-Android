@@ -34,6 +34,7 @@ import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TO
 import com.neki.android.feature.pose.impl.main.component.PoseFilterBar
 import com.neki.android.feature.pose.impl.main.component.PeopleCountBottomSheet
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.pose.impl.main.component.PoseListContent
 import com.neki.android.feature.pose.impl.main.component.PoseTopBar
 import com.neki.android.feature.pose.impl.main.component.RandomPosePeopleCountBottomSheet
@@ -52,6 +53,7 @@ internal fun PoseRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val posePagingItems = viewModel.posePagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
+    val nekiToast = remember { NekiToast(context) }
     val lazyState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -60,7 +62,7 @@ internal fun PoseRoute(
             PoseEffect.NavigateToNotification -> navigateToNotification()
             is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
             is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.poseId)
-            is PoseEffect.ShowToast -> Toast.makeText(context, sideEffect.message, Toast.LENGTH_SHORT).show()
+            is PoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             PoseEffect.ScrollToTop -> coroutineScope.launch {
                 snapshotFlow { posePagingItems.loadState.refresh }
                     .dropWhile { it is LoadState.NotLoading }
