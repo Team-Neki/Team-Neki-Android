@@ -30,7 +30,7 @@ internal fun SplashBackground(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 133.dp),
+                .padding(top = 177.42.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -113,7 +114,11 @@ internal fun QRScannerContent(
             // 상단 영역 - weight(234f)
             Column(modifier = Modifier.weight(234f)) {
                 // TopBar (고정 크기)
-                Box(modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                ) {
                     NekiIconButton(
                         modifier = Modifier.padding(start = 8.dp),
                         onClick = { onIntent(QRScanIntent.ClickCloseQRScan) },
