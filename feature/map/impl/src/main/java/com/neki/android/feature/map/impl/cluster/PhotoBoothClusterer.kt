@@ -124,15 +124,15 @@ internal object PhotoBoothClusterer {
         val bitmap = createBitmap(totalSize, totalSize)
         val canvas = Canvas(bitmap)
 
-        // 그림자 Paint (pinShadow 스타일: offset (0, 1), blur 2.5, alpha 0.40)
+        // 그림자 Paint
         val shadowPaint = Paint().apply {
             isAntiAlias = true
             color = Color.TRANSPARENT
             setShadowLayer(
-                ClustererConst.PIN_SHADOW_BLUR * density,
+                ClustererConst.CLUSTER_SHADOW_BLUR * density,
                 0f,
-                ClustererConst.PIN_SHADOW_OFFSET_Y * density,
-                Color.argb((255 * ClustererConst.PIN_SHADOW_ALPHA).toInt(), 0, 0, 0),
+                ClustererConst.CLUSTER_SHADOW_OFFSET_Y * density,
+                Color.argb((255 * ClustererConst.CLUSTER_SHADOW_ALPHA).toInt(), 0, 0, 0),
             )
         }
 
@@ -214,10 +214,10 @@ internal object PhotoBoothClusterer {
             isAntiAlias = true
             color = Color.TRANSPARENT
             setShadowLayer(
-                4 * density,
+                ClustererConst.LEAF_SHADOW_BLUR * density,
                 0f,
-                2 * density,
-                "#40000000".toColorInt(),
+                ClustererConst.LEAF_SHADOW_OFFSET_Y * density,
+                Color.argb((255 * ClustererConst.LEAF_SHADOW_ALPHA).toInt(), 0, 0, 0),
             )
         }
 
