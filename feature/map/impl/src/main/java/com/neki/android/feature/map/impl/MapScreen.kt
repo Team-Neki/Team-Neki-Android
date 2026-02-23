@@ -259,7 +259,6 @@ fun MapScreen(
                 onIntent(MapIntent.UpdateCurrentLocation(LocLatLng(location.latitude, location.longitude)))
             },
         ) {
-            // Clusterer가 모든 마커를 관리 (클러스터 + 개별 마커)
             DisposableMapEffect(Unit) { naverMap ->
                 clusterer = PhotoBoothClusterer.create(
                     context = context,
