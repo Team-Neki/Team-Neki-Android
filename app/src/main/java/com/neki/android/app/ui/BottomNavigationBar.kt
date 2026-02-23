@@ -1,8 +1,5 @@
 package com.neki.android.app.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -11,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,67 +41,58 @@ import com.neki.android.core.designsystem.R as DesignR
 
 @Composable
 fun BottomNavigationBar(
-    visible: Boolean,
     currentKey: NavKey,
     currentTab: NavKey,
     tabs: List<TopLevelNavItem> = TopLevelNavItem.entries,
     onTabSelected: (TopLevelNavItem) -> Unit,
     onClickFab: () -> Unit,
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = slideInVertically { it },
-        exit = slideOutVertically { it },
+    Box(
+        contentAlignment = Alignment.BottomCenter,
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.BottomCenter,
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .tabbarShadow(),
+            color = NekiTheme.colorScheme.white,
         ) {
-            Surface(
+            Row(
                 modifier = Modifier
-                    .navigationBarsPadding()
                     .fillMaxWidth()
-                    .tabbarShadow(),
-                color = NekiTheme.colorScheme.white,
+                    .padding(horizontal = 13.5.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Bottom,
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 13.5.dp, vertical = 2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    tabs.take(2).forEach { tab ->
-                        BottomNavigationBarItem(
-                            modifier = Modifier.weight(1f),
-                            selected = tab.navKey == currentTab,
-                            tab = tab,
-                            onClick = { if (tab.navKey != currentKey) onTabSelected(tab) },
-                        )
-                    }
-
-                    // 중앙 FAB 라벨 영역
-                    FabLabel(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                tabs.take(2).forEach { tab ->
+                    BottomNavigationBarItem(
+                        modifier = Modifier.weight(1f),
+                        selected = tab.navKey == currentTab,
+                        tab = tab,
+                        onClick = { if (tab.navKey != currentKey) onTabSelected(tab) },
                     )
+                }
 
-                    tabs.drop(2).forEach { tab ->
-                        BottomNavigationBarItem(
-                            modifier = Modifier.weight(1f),
-                            selected = tab.navKey == currentTab,
-                            tab = tab,
-                            onClick = { if (tab.navKey != currentKey) onTabSelected(tab) },
-                        )
-                    }
+                // 중앙 FAB 라벨 영역
+                FabLabel(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                )
+
+                tabs.drop(2).forEach { tab ->
+                    BottomNavigationBarItem(
+                        modifier = Modifier.weight(1f),
+                        selected = tab.navKey == currentTab,
+                        tab = tab,
+                        onClick = { if (tab.navKey != currentKey) onTabSelected(tab) },
+                    )
                 }
             }
-
-            BottomNavigationFab(
-                modifier = Modifier
-                    .offset(y = (-22).dp),
-                onClick = onClickFab,
-            )
         }
+
+        BottomNavigationFab(
+            modifier = Modifier
+                .offset(y = (-22).dp),
+            onClick = onClickFab,
+        )
     }
 }
 
@@ -213,7 +200,6 @@ private fun BottomNavigationBarPreview() {
             modifier = Modifier.padding(top = 40.dp),
         ) {
             BottomNavigationBar(
-                visible = true,
                 tabs = TopLevelNavItem.entries,
                 currentTab = currentTab.navKey,
                 currentKey = currentTab.navKey,

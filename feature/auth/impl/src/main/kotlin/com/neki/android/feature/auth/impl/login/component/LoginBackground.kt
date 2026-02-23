@@ -26,33 +26,37 @@ internal fun LoginBackground() {
         modifier = Modifier.fillMaxSize(),
     ) {
         GradientBackground()
-        Column(
-            modifier = Modifier.padding(start = 32.dp, top = 164.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(15.36.dp),
+        Column {
+            Box(modifier = Modifier.weight(164f))
+            Column(
+                modifier = Modifier.padding(start = 32.dp),
             ) {
-                WhiteNekiAppLogo(
-                    modifier = Modifier.size(width = 33.3.dp, height = 37.6.dp),
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(15.36.dp),
+                ) {
+                    WhiteNekiAppLogo(
+                        modifier = Modifier.size(width = 33.3.dp, height = 37.6.dp),
+                    )
+                    WhiteNekiTypoLogo(
+                        modifier = Modifier.size(width = 93.8.dp, height = 36.6.dp),
+                    )
+                }
+                VerticalSpacer(24.dp)
+                Text(
+                    text = "네컷의 순간이\n이어지는 곳",
+                    style = NekiTheme.typography.title24Bold,
+                    fontSize = 32.sp,
+                    color = NekiTheme.colorScheme.white,
                 )
-                WhiteNekiTypoLogo(
-                    modifier = Modifier.size(width = 93.8.dp, height = 36.6.dp),
+                VerticalSpacer(12.dp)
+                Text(
+                    text = "위치, 포즈, 아카이빙까지",
+                    style = NekiTheme.typography.body16SemiBold,
+                    color = NekiTheme.colorScheme.white,
                 )
             }
-            VerticalSpacer(24.dp)
-            Text(
-                text = "네컷의 순간이 \n이어지는 곳",
-                style = NekiTheme.typography.title24Bold,
-                fontSize = 32.sp,
-                color = NekiTheme.colorScheme.white,
-            )
-            VerticalSpacer(12.dp)
-            Text(
-                text = "위치, 포즈, 아카이빙까지",
-                style = NekiTheme.typography.body16SemiBold,
-                color = NekiTheme.colorScheme.white,
-            )
+            Box(modifier = Modifier.weight(464f))
         }
     }
 }
