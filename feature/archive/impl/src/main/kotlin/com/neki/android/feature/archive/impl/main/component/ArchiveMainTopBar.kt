@@ -28,7 +28,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 internal fun ArchiveMainTopBar(
     modifier: Modifier = Modifier,
     onClickQRCodeIcon: () -> Unit = {},
-    onClickNotificationIcon: () -> Unit = {},
+//    onClickNotificationIcon: () -> Unit = {},
     onDismissToolTipPopup: () -> Unit = {},
     showTooltip: Boolean = true,
 ) {
@@ -60,17 +60,17 @@ internal fun ArchiveMainTopBar(
                         )
                     }
                 }
-                NekiIconButton(
-                    onClick = onClickNotificationIcon,
-                    contentPadding = PaddingValues(8.dp),
-                ) {
-                    Icon(
-                        modifier = Modifier.size(28.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
-                        contentDescription = null,
-                        tint = NekiTheme.colorScheme.gray500,
-                    )
-                }
+//                NekiIconButton(
+//                    onClick = onClickNotificationIcon,
+//                    contentPadding = PaddingValues(8.dp),
+//                ) {
+//                    Icon(
+//                        modifier = Modifier.size(28.dp),
+//                        imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
+//                        contentDescription = null,
+//                        tint = NekiTheme.colorScheme.gray500,
+//                    )
+//                }
             }
         },
     )

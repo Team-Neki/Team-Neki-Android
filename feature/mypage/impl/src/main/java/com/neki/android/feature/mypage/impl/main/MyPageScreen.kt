@@ -72,7 +72,7 @@ fun MyPageScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         MainTopBar(
-            onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
+//            onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
         )
         ProfileCard(
             profileImageUrl = uiState.userInfo.profileImageUrl,

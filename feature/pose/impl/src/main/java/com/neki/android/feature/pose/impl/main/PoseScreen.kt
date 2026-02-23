@@ -100,7 +100,7 @@ fun PoseScreen(
             isBookmarkSelected = uiState.isShowBookmarkedPose,
             posePagingItems = posePagingItems,
             lazyState = lazyState,
-            onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
+//            onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickBookmark = { onIntent(PoseIntent.ClickBookmarkChip) },
             onClickPoseItem = { onIntent(PoseIntent.ClickPoseItem(it)) },
@@ -144,7 +144,6 @@ fun PoseContent(
     isBookmarkSelected: Boolean,
     posePagingItems: LazyPagingItems<Pose>,
     lazyState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
-    onClickAlarmIcon: () -> Unit = {},
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
     onClickPoseItem: (Pose) -> Unit = {},
@@ -162,9 +161,7 @@ fun PoseContent(
     Column(
         modifier = modifier.fillMaxSize(),
     ) {
-        PoseTopBar(
-            onClickIcon = onClickAlarmIcon,
-        )
+        PoseTopBar()
         Box(
             modifier = Modifier
                 .fillMaxWidth()
