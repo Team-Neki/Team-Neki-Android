@@ -111,7 +111,6 @@ internal fun ArchiveMainScreen(
     ) {
         Column {
             ArchiveMainTopBar(
-                modifier = Modifier.padding(start = 20.dp, end = 8.dp),
                 showTooltip = uiState.isFirstEntered,
                 onClickQRCodeIcon = { onIntent(ArchiveMainIntent.ClickQRScanIcon) },
 //                onClickNotificationIcon = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
