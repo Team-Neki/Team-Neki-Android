@@ -8,6 +8,7 @@ import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
+import com.neki.android.core.model.Photo
 import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -60,6 +61,7 @@ class ArchiveMainViewModel @Inject constructor(
                 reduce { copy(isFirstEntered = false) }
                 viewModelScope.launch { userRepository.setQRInfoToolTipShown() }
             }
+
             ArchiveMainIntent.ClickQRScanIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
 
             is ArchiveMainIntent.SelectGalleryImage -> reduce {
@@ -96,6 +98,7 @@ class ArchiveMainViewModel @Inject constructor(
             // Photo Intent
             ArchiveMainIntent.ClickAllPhotoText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllPhoto)
             is ArchiveMainIntent.ClickPhotoItem -> postSideEffect(ArchiveMainSideEffect.NavigateToPhotoDetail(intent.photo))
+            is ArchiveMainIntent.ClickFavoriteIcon -> handleFavoriteToggle(intent.photo, reduce)
 
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
@@ -235,6 +238,33 @@ class ArchiveMainViewModel @Inject constructor(
                 postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
                 reduce { copy(isLoading = false) }
             }
+        }
+    }
+
+    private fun handleFavoriteToggle(
+        photo: Photo,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+    ) {
+        val newFavorite = !photo.isFavorite
+        reduce {
+            copy(
+                recentPhotos = recentPhotos.map {
+                    if (it.id == photo.id) it.copy(isFavorite = newFavorite) else it
+                }.toImmutableList(),
+            )
+        }
+        viewModelScope.launch {
+            photoRepository.updateFavorite(photo.id, newFavorite)
+                .onFailure { e ->
+                    Timber.e(e)
+                    reduce {
+                        copy(
+                            recentPhotos = recentPhotos.map {
+                                if (it.id == photo.id) it.copy(isFavorite = photo.isFavorite) else it
+                            }.toImmutableList(),
+                        )
+                    }
+                }
         }
     }
 

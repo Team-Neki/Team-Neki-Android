@@ -45,6 +45,7 @@ sealed interface AllPhotoIntent {
 
     // Result Intent
     data class PhotoDeleted(val photoIds: List<Long>) : AllPhotoIntent
+    data class ClickFavoriteIcon(val photo: Photo) : AllPhotoIntent
     data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : AllPhotoIntent
 }
 
