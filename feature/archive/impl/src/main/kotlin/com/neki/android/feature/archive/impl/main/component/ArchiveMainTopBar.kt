@@ -1,6 +1,7 @@
 package com.neki.android.feature.archive.impl.main.component
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,12 +28,12 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 internal fun ArchiveMainTopBar(
     modifier: Modifier = Modifier,
     onClickQRCodeIcon: () -> Unit = {},
-    onClickNotificationIcon: () -> Unit = {},
+//    onClickNotificationIcon: () -> Unit = {},
     onDismissToolTipPopup: () -> Unit = {},
     showTooltip: Boolean = true,
 ) {
     NekiLeftTitleTopBar(
-        modifier = modifier,
+        modifier = modifier.padding(start = 20.dp, end = 12.dp),
         title = {
             PrimaryNekiTypoLogo()
         },
@@ -43,6 +44,7 @@ internal fun ArchiveMainTopBar(
                 Box {
                     NekiIconButton(
                         onClick = onClickQRCodeIcon,
+                        contentPadding = PaddingValues(8.dp),
                     ) {
                         Icon(
                             modifier = Modifier.size(28.dp),
@@ -58,16 +60,17 @@ internal fun ArchiveMainTopBar(
                         )
                     }
                 }
-                NekiIconButton(
-                    onClick = onClickNotificationIcon,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(28.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
-                        contentDescription = null,
-                        tint = NekiTheme.colorScheme.gray500,
-                    )
-                }
+//                NekiIconButton(
+//                    onClick = onClickNotificationIcon,
+//                    contentPadding = PaddingValues(8.dp),
+//                ) {
+//                    Icon(
+//                        modifier = Modifier.size(28.dp),
+//                        imageVector = ImageVector.vectorResource(R.drawable.icon_bell),
+//                        contentDescription = null,
+//                        tint = NekiTheme.colorScheme.gray500,
+//                    )
+//                }
             }
         },
     )
@@ -97,7 +100,6 @@ private fun ArchiveToolTip(
 private fun ArchiveMainTopBarPreview() {
     NekiTheme {
         ArchiveMainTopBar(
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
             showTooltip = false,
         )
     }
@@ -109,7 +111,6 @@ private fun ArchiveMainTopBarWithTooltipPreview() {
     NekiTheme {
         Box(modifier = Modifier.height(200.dp)) {
             ArchiveMainTopBar(
-                modifier = Modifier.padding(start = 20.dp, end = 8.dp),
                 showTooltip = true,
             )
         }

@@ -20,27 +20,27 @@ class FolderRepositoryImpl @Inject constructor(
     override suspend fun createFolder(name: String): Result<Unit> = runSuspendCatching {
         folderService.createFolder(
             requestBody = CreateFolderRequest(name = name),
-        ).data
+        )
     }
 
     override suspend fun deleteFolder(id: List<Long>, deletePhotos: Boolean): Result<Unit> = runSuspendCatching {
         folderService.deleteFolder(
             requestBody = DeleteFolderRequest(folderIds = id),
             deletePhotos = deletePhotos,
-        ).data
+        )
     }
 
     override suspend fun removePhotosFromFolder(folderId: Long, photoIds: List<Long>): Result<Unit> = runSuspendCatching {
         folderService.removePhotosFromFolder(
             folderId = folderId,
             requestBody = DeletePhotoRequest(photoIds = photoIds),
-        ).data
+        )
     }
 
     override suspend fun updateFolder(folderId: Long, name: String): Result<Unit> = runSuspendCatching {
         folderService.updateFolder(
             folderId = folderId,
             requestBody = UpdateFolderRequest(name = name),
-        ).data
+        )
     }
 }

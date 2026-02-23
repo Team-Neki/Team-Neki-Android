@@ -1,5 +1,8 @@
 package com.neki.android.app.main
 
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,8 +32,12 @@ import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.map.api.MapNavKey
+import com.neki.android.feature.mypage.api.MyPageNavKey
+import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
 import com.neki.android.feature.photo_upload.api.QRScanResult
+import com.neki.android.feature.pose.api.PoseNavKey
 import timber.log.Timber
 
 @Composable
@@ -74,6 +81,7 @@ fun MainRoute(
             MainSideEffect.OpenGallery -> photoPicker.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
             )
+
             is MainSideEffect.NavigateToUploadAlbumWithGallery -> navigateToUploadAlbumWithGallery(sideEffect.uriStrings)
             is MainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
             is MainSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
@@ -110,23 +118,36 @@ fun MainScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .then(
+                when (currentKey) {
+                    PhotoUploadNavKey.QRScan -> Modifier
+                    else -> Modifier.navigationBarsPadding()
+                },
+            ),
         bottomBar = {
-            BottomNavigationBar(
-                visible = shouldShowBottomBar,
-                currentTab = currentTopLevelKey,
-                currentKey = currentKey,
-                onTabSelected = { onTabSelected(it.navKey) },
-                onClickFab = { onIntent(MainIntent.ClickAddPhotoFab) },
-            )
+            if (shouldShowBottomBar) {
+                BottomNavigationBar(
+                    currentTab = currentTopLevelKey,
+                    currentKey = currentKey,
+                    onTabSelected = { onTabSelected(it.navKey) },
+                    onClickFab = { onIntent(MainIntent.ClickAddPhotoFab) },
+                )
+            }
         },
     ) { innerPadding ->
         NavDisplay(
             modifier = Modifier.padding(
-                if (currentKey == MapNavKey.Map) PaddingValues(bottom = innerPadding.calculateBottomPadding()) else innerPadding,
+                when (currentKey) {
+                    ArchiveNavKey.Archive, PoseNavKey.PoseMain, MyPageNavKey.MyPage -> innerPadding
+                    is PoseNavKey.RandomPose, MapNavKey.Map -> PaddingValues(bottom = innerPadding.calculateBottomPadding())
+                    PhotoUploadNavKey.QRScan -> PaddingValues.Zero
+                    else -> PaddingValues(top = innerPadding.calculateTopPadding())
+                },
             ),
             entries = entries,
             onBack = onBack,
+            transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
+            popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
         )
     }
 

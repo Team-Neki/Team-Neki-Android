@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import androidx.paging.map
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,11 +53,16 @@ internal class PoseViewModel @Inject constructor(
         originalPagingData,
         updatedBookmarks,
     ) { pagingData, bookmarks ->
-        pagingData.map { pose ->
-            bookmarks[pose.id]?.let { isBookmarked ->
-                pose.copy(isBookmarked = isBookmarked)
-            } ?: pose
-        }
+        val isBookmarkOnly = _isBookmarkOnly.value
+        pagingData
+            .map { pose ->
+                bookmarks[pose.id]?.let { isBookmarked ->
+                    pose.copy(isBookmarked = isBookmarked)
+                } ?: pose
+            }
+            .let { data ->
+                if (isBookmarkOnly) data.filter { it.isBookmarked } else data
+            }
     }
 
     val store: MviIntentStore<PoseState, PoseIntent, PoseEffect> =
@@ -74,7 +82,7 @@ internal class PoseViewModel @Inject constructor(
             PoseIntent.EnterPoseScreen -> Unit
             PoseIntent.ClickAlarmIcon -> postSideEffect(PoseEffect.NavigateToNotification)
             PoseIntent.ClickPeopleCountChip -> reduce { copy(isShowPeopleCountBottomSheet = true) }
-            is PoseIntent.ClickPeopleCountSheetItem -> handlePeopleCountSheetItem(intent, state, reduce)
+            is PoseIntent.ClickPeopleCountSheetItem -> handlePeopleCountSheetItem(intent, state, reduce, postSideEffect)
             PoseIntent.DismissPeopleCountBottomSheet -> reduce { copy(isShowPeopleCountBottomSheet = false) }
             PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
             PoseIntent.ClickBookmarkChip -> {
@@ -87,6 +95,7 @@ internal class PoseViewModel @Inject constructor(
                         selectedPeopleCount = null,
                     )
                 }
+                postSideEffect(PoseEffect.ScrollToTop)
             }
 
             is PoseIntent.ClickPoseItem -> {
@@ -106,6 +115,19 @@ internal class PoseViewModel @Inject constructor(
                 postSideEffect(PoseEffect.NavigateToRandomPose(selectedCount))
             }
 
+            is PoseIntent.ClickBookmarkIcon -> {
+                val pose = intent.pose
+                val newBookmarked = !pose.isBookmarked
+                updatedBookmarks.update { it + (pose.id to newBookmarked) }
+                viewModelScope.launch {
+                    poseRepository.updateBookmark(pose.id, newBookmarked)
+                        .onFailure { e ->
+                            Timber.e(e)
+                            updatedBookmarks.update { it + (pose.id to pose.isBookmarked) }
+                        }
+                }
+            }
+
             is PoseIntent.BookmarkChanged -> {
                 updatedBookmarks.update { it + (intent.poseId to intent.isBookmarked) }
             }
@@ -116,6 +138,7 @@ internal class PoseViewModel @Inject constructor(
         intent: PoseIntent.ClickPeopleCountSheetItem,
         state: PoseState,
         reduce: (PoseState.() -> PoseState) -> Unit,
+        postSideEffect: (PoseEffect) -> Unit,
     ) {
         _isBookmarkOnly.value = false
         if (intent.peopleCount == state.selectedPeopleCount) {
@@ -132,10 +155,11 @@ internal class PoseViewModel @Inject constructor(
             reduce {
                 copy(
                     isShowBookmarkedPose = false,
-                    selectedPeopleCount = intent.peopleCount.takeIf { it != state.selectedPeopleCount },
+                    selectedPeopleCount = intent.peopleCount,
                     isShowPeopleCountBottomSheet = false,
                 )
             }
         }
+        postSideEffect(PoseEffect.ScrollToTop)
     }
 }

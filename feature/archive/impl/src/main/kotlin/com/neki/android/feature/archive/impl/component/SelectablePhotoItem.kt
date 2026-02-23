@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.PhotoComponent
@@ -30,6 +31,7 @@ internal fun SelectablePhotoItem(
     isSelectMode: Boolean = false,
     onClickItem: (Photo) -> Unit = {},
     onClickSelect: (Photo) -> Unit = {},
+    onClickFavorite: (Photo) -> Unit = {},
 ) {
     Box(
         modifier = modifier,
@@ -52,17 +54,22 @@ internal fun SelectablePhotoItem(
             )
         }
 
-        if (photo.isFavorite) {
-            Icon(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 10.dp, end = 10.dp)
-                    .size(20.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_heart_filled),
-                contentDescription = null,
-                tint = NekiTheme.colorScheme.white,
-            )
-        }
+        Icon(
+            modifier = Modifier
+                .then(
+                    if (!isSelectMode) Modifier.noRippleClickableSingle { onClickFavorite(photo) }
+                    else Modifier,
+                )
+                .align(Alignment.TopEnd)
+                .padding(10.dp)
+                .size(20.dp),
+            imageVector = ImageVector.vectorResource(
+                if (photo.isFavorite) R.drawable.icon_favorite_filled
+                else R.drawable.icon_favorite_stroked_alpha_filled,
+            ),
+            contentDescription = null,
+            tint = NekiTheme.colorScheme.white,
+        )
 
         if (isSelectMode) {
             SelectionCheckbox(

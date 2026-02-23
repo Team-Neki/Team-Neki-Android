@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,20 +26,22 @@ internal fun SplashBackground(
         modifier = modifier,
     ) {
         GradientBackground()
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 133.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp),
-        ) {
-            WhiteNekiAppLogo(
-                modifier = Modifier.size(width = 73.89.dp, height = 80.41.dp),
-            )
-            Image(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_splash_text),
-                contentDescription = null,
-            )
+        Column {
+            Box(modifier = Modifier.weight(177f))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(32.dp),
+            ) {
+                WhiteNekiAppLogo(
+                    modifier = Modifier.size(width = 73.89.dp, height = 80.41.dp),
+                )
+                Image(
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_splash_text),
+                    contentDescription = null,
+                )
+            }
+            Box(modifier = Modifier.weight(427f))
         }
     }
 }

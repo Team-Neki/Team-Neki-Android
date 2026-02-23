@@ -51,8 +51,8 @@ class PoseDetailViewModel @AssistedInject constructor(
                                 Timber.d("updateBookmark success")
                                 store.onIntent(PoseDetailIntent.BookmarkCommitted(newBookmark))
                             }
-                            .onFailure { error ->
-                                Timber.e(error, "updateBookmark failed")
+                            .onFailure { e ->
+                                Timber.e(e, "updateBookmark failed")
                                 store.onIntent(PoseDetailIntent.RevertBookmark(committedBookmark))
                             }
                     }
@@ -69,22 +69,26 @@ class PoseDetailViewModel @AssistedInject constructor(
         when (intent) {
             PoseDetailIntent.EnterPoseDetailScreen -> fetchPoseData(reduce)
             PoseDetailIntent.ClickBackIcon -> postSideEffect(PoseDetailSideEffect.NavigateBack)
-            PoseDetailIntent.ClickBookmarkIcon -> handleBookmarkToggle(state, reduce)
+            PoseDetailIntent.ClickBookmarkIcon -> handleBookmarkToggle(state, reduce, postSideEffect)
             is PoseDetailIntent.BookmarkCommitted -> {
                 reduce { copy(committedBookmark = intent.newBookmark) }
-                postSideEffect(PoseDetailSideEffect.NotifyBookmarkChanged(id, intent.newBookmark))
             }
-            is PoseDetailIntent.RevertBookmark -> reduce { copy(pose = pose.copy(isBookmarked = intent.originalBookmark)) }
+            is PoseDetailIntent.RevertBookmark -> {
+                reduce { copy(pose = pose.copy(isBookmarked = intent.originalBookmark)) }
+                postSideEffect(PoseDetailSideEffect.NotifyBookmarkChanged(id, intent.originalBookmark))
+            }
         }
     }
 
     private fun handleBookmarkToggle(
         state: PoseDetailState,
         reduce: (PoseDetailState.() -> PoseDetailState) -> Unit,
+        postSideEffect: (PoseDetailSideEffect) -> Unit,
     ) {
         val newBookmarkStatus = !state.pose.isBookmarked
         viewModelScope.launch { bookmarkRequests.emit(newBookmarkStatus) }
         reduce { copy(pose = pose.copy(isBookmarked = newBookmarkStatus)) }
+        postSideEffect(PoseDetailSideEffect.NotifyBookmarkChanged(id, newBookmarkStatus))
     }
 
     private fun fetchPoseData(reduce: (PoseDetailState.() -> PoseDetailState) -> Unit) {
@@ -93,8 +97,8 @@ class PoseDetailViewModel @AssistedInject constructor(
                 .onSuccess { data ->
                     reduce { copy(pose = data, committedBookmark = data.isBookmarked) }
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                 }
         }
     }

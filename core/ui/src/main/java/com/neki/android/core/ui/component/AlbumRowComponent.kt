@@ -132,7 +132,7 @@ private fun FavoriteAlbumThumbnail(
 
             Icon(
                 modifier = Modifier.size(20.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_heart_filled),
+                imageVector = ImageVector.vectorResource(R.drawable.icon_favorite_filled),
                 contentDescription = null,
                 tint = NekiTheme.colorScheme.white,
             )

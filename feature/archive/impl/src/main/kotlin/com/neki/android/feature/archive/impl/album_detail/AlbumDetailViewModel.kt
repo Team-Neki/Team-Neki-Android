@@ -65,6 +65,9 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     photo.copy(isFavorite = isFavorite)
                 } ?: photo
             }
+            .let { data ->
+                if (isFavoriteAlbum) data.filter { it.isFavorite } else data
+            }
     }
 
     val store: MviIntentStore<AlbumDetailState, AlbumDetailIntent, AlbumDetailSideEffect> =
@@ -144,6 +147,19 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 deletedPhotoIds.update { it + intent.photoIds.toSet() }
             }
 
+            is AlbumDetailIntent.ClickFavoriteIcon -> {
+                val photo = intent.photo
+                val newFavorite = !photo.isFavorite
+                updatedFavorites.update { it + (photo.id to newFavorite) }
+                viewModelScope.launch {
+                    photoRepository.updateFavorite(photo.id, newFavorite)
+                        .onFailure { e ->
+                            Timber.e(e)
+                            updatedFavorites.update { it + (photo.id to photo.isFavorite) }
+                        }
+                }
+            }
+
             is AlbumDetailIntent.FavoriteChanged -> {
                 updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
             }
@@ -204,8 +220,8 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 reduce { copy(isLoading = false) }
                 postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("새로운 사진을 추가했어요"))
-            }.onFailure { error ->
-                Timber.e(error)
+            }.onFailure { e ->
+                Timber.e(e)
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
                 reduce { copy(isLoading = false) }
             }
@@ -306,8 +322,8 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                     reduce {
                         copy(
                             isShowDeleteDialog = false,
@@ -348,8 +364,8 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                     reduce {
                         copy(
                             isShowDeleteBottomSheet = false,

@@ -120,8 +120,8 @@ internal class MyPageViewModel @Inject constructor(
                     )
                 }
             }
-            .onFailure {
-                Timber.e(it)
+            .onFailure { e ->
+                Timber.e(e)
                 reduce { copy(isLoading = false) }
             }
     }
@@ -165,8 +165,8 @@ internal class MyPageViewModel @Inject constructor(
                     postSideEffect(MyPageEffect.NavigateBack)
                 }
             }
-            .onFailure {
-                Timber.e(it)
+            .onFailure { e ->
+                Timber.e(e)
                 reduce {
                     copy(
                         isLoading = false,
@@ -194,8 +194,8 @@ internal class MyPageViewModel @Inject constructor(
                 reduce { copy(isLoading = false) }
                 postSideEffect(MyPageEffect.UnlinkWithKakao)
             }
-            .onFailure {
-                Timber.e(it)
+            .onFailure { e ->
+                Timber.e(e)
                 reduce { copy(isLoading = false) }
             }
     }

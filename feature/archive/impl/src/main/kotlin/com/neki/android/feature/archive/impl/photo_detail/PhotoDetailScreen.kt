@@ -18,6 +18,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.LoadingDialog
+import timber.log.Timber
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
@@ -44,8 +45,9 @@ internal fun PhotoDetailRoute(
                     .onSuccess {
                         nekiToast.showToast(text = "사진을 갤러리에 다운로드했어요")
                     }
-                    .onFailure {
+                    .onFailure { e ->
                         nekiToast.showToast(text = "다운로드에 실패했어요")
+                        Timber.e(e)
                     }
             }
         }

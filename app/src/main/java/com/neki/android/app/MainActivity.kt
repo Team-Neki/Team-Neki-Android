@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
                         when (rootNavigationState.currentRootKey) {
                             is RootNavKey.Auth -> {
                                 AuthScreen(
+                                    currentKey = authNavigator.state.currentKey,
                                     entries = authNavigator.state.toEntries(
                                         entryProvider = entryProvider {
                                             authEntryProvider(rootNavigator, authNavigator).invoke(this)

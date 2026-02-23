@@ -8,6 +8,8 @@ interface UserRepository {
     suspend fun setRandomPoseVisited()
     val hasShownInfoToolTip: Flow<Boolean>
     suspend fun setInfoToolTipShown()
+    val hasShownQRInfoToolTip: Flow<Boolean>
+    suspend fun setQRInfoToolTipShown()
 
     suspend fun getUserInfo(): Result<UserInfo>
     suspend fun updateUserInfo(nickname: String): Result<Unit>

@@ -72,8 +72,8 @@ class TermViewModel @Inject constructor(
                 .onSuccess { terms ->
                     reduce { copy(isLoading = false, terms = terms.toImmutableList()) }
                 }
-                .onFailure { error ->
-                    Timber.e(error)
+                .onFailure { e ->
+                    Timber.e(e)
                     reduce { copy(isLoading = false) }
                 }
         }
@@ -91,8 +91,8 @@ class TermViewModel @Inject constructor(
                 authRepository.setCompletedOnboarding(true)
                 postSideEffect(TermSideEffect.NavigateToMain)
             }
-            .onFailure { exception ->
-                Timber.e(exception)
+            .onFailure { e ->
+                Timber.e(e)
                 postSideEffect(TermSideEffect.ShowToastMessage("약관 동의에 실패했습니다. 다시 시도해주세요."))
             }
         reduce { copy(isLoading = false) }

@@ -108,8 +108,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                         copy(committedBookmarks = committedBookmarks + (poseId to newBookmarkStatus))
                     }
                 }
-                .onFailure { error ->
-                    Timber.e(error, "updateBookmark failed for poseId: $poseId")
+                .onFailure { e ->
+                    Timber.e(e, "updateBookmark failed for poseId: $poseId")
                     reduce {
                         copy(
                             poseList = poseList.map { pose ->
@@ -167,11 +167,11 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                             committedBookmarks = committedBookmarks + (pose.id to pose.isBookmarked),
                         )
                     }
-                }.onFailure { error ->
-                    if (error is NoMorePoseException && error.code == NO_MORE_RANDOM_POSE) {
+                }.onFailure { e ->
+                    if (e is NoMorePoseException && e.code == NO_MORE_RANDOM_POSE) {
                         reduce { copy(hasNewPose = false) }
                         postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
-                    } else Timber.e(error)
+                    } else Timber.e(e)
                 }
             }
         }
@@ -222,10 +222,10 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                         currentIndex = 0,
                     )
                 }
-            }.onFailure { error ->
+            }.onFailure { e ->
                 reduce { copy(isLoading = false) }
                 postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
-                Timber.e(error)
+                Timber.e(e)
             }
         }
     }

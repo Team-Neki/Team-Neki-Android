@@ -98,8 +98,8 @@ class AllAlbumViewModel @Inject constructor(
             .onSuccess { data ->
                 reduce { copy(favoriteAlbum = data) }
             }
-            .onFailure { error ->
-                Timber.e(error)
+            .onFailure { e ->
+                Timber.e(e)
             }
     }
 
@@ -108,8 +108,8 @@ class AllAlbumViewModel @Inject constructor(
             .onSuccess { data ->
                 reduce { copy(albums = data.toImmutableList()) }
             }
-            .onFailure { error ->
-                Timber.e(error)
+            .onFailure { e ->
+                Timber.e(e)
             }
     }
 
@@ -179,9 +179,9 @@ class AllAlbumViewModel @Inject constructor(
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
                 }
-                .onFailure { error ->
+                .onFailure { e ->
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
-                    Timber.e(error)
+                    Timber.e(e)
                 }
             reduce { copy(isShowAddAlbumBottomSheet = false, albumNameTextState = TextFieldState()) }
         }
@@ -201,8 +201,8 @@ class AllAlbumViewModel @Inject constructor(
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))
                 }
-                .onFailure { error ->
-                    Timber.e(error, "사진 삭제 실패")
+                .onFailure { e ->
+                    Timber.e(e, "사진 삭제 실패")
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 삭제에 실패했어요"))
                 }
             reduce {

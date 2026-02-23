@@ -56,6 +56,7 @@ import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 internal fun AllPhotoRoute(
@@ -90,8 +91,9 @@ internal fun AllPhotoRoute(
                     .onSuccess {
                         nekiToast.showToast(text = "사진을 갤러리에 다운로드했어요")
                     }
-                    .onFailure {
+                    .onFailure { e ->
                         nekiToast.showToast(text = "다운로드에 실패했어요")
+                        Timber.e(e)
                     }
             }
         }
@@ -124,7 +126,9 @@ internal fun AllPhotoScreen(
     }
 
     if (isEmpty) {
-        EmptyAllPhotoContent()
+        EmptyAllPhotoContent(
+            onBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
+        )
     } else {
         AllPhotoContent(
             uiState = uiState,
@@ -209,6 +213,7 @@ private fun AllPhotoContent(
                             isSelectMode = uiState.selectMode == SelectMode.SELECTING,
                             onClickItem = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
                             onClickSelect = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
+                            onClickFavorite = { onIntent(AllPhotoIntent.ClickFavoriteIcon(photo)) },
                         )
                     }
                 }
@@ -260,7 +265,7 @@ private fun EmptyAllPhotoContent(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
 ) {
-    Column(
+    Box(
         modifier = modifier.fillMaxSize(),
     ) {
         BackTitleTopBar(
@@ -268,6 +273,7 @@ private fun EmptyAllPhotoContent(
             onBack = onBack,
         )
         EmptyPhotoContent(
+            modifier = Modifier.align(Alignment.Center),
             emptyText = "아직 등록된 사진이 없어요\n찍은 네컷을 네키에 저장해보세요!",
         )
     }

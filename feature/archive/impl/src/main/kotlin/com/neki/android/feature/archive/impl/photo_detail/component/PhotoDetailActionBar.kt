@@ -26,10 +26,11 @@ internal fun PhotoDetailActionBar(
     onClickDelete: () -> Unit = {},
 ) {
     NekiBothSidesActionBar(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(20.dp),
         startContent = {
             Row(
-                modifier = Modifier.padding(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Icon(
@@ -46,8 +47,8 @@ internal fun PhotoDetailActionBar(
                         .size(28.dp)
                         .noRippleClickable { onClickFavorite() },
                     imageVector = ImageVector.vectorResource(
-                        if (isFavorite) R.drawable.icon_heart_filled
-                        else R.drawable.icon_heart_stroked,
+                        if (isFavorite) R.drawable.icon_favorite_filled
+                        else R.drawable.icon_favorite_stroked,
                     ),
                     contentDescription = null,
                     tint = if (isFavorite) NekiTheme.colorScheme.primary400
@@ -58,7 +59,6 @@ internal fun PhotoDetailActionBar(
         endContent = {
             Icon(
                 modifier = Modifier
-                    .padding(20.dp)
                     .size(28.dp)
                     .noRippleClickable { onClickDelete() },
                 imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
