@@ -171,9 +171,8 @@ internal object PhotoBoothClusterer {
             letterSpacing = ClustererConst.CLUSTER_LETTER_SPACING
         }
 
-        val textHeight = textPaint.descent() - textPaint.ascent()
         val textX = shadowPadding + backgroundSize / 2
-        val textY = shadowPadding + backgroundSize / 2 + (textHeight / 2 - textPaint.descent())
+        val textY = shadowPadding + backgroundSize / 2 - (textPaint.ascent() + textPaint.descent()) / 2
         val text = if (count > 99) "99+" else count.toString()
 
         canvas.apply {
