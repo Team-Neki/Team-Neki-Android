@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.photo_detail.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,9 +27,7 @@ internal fun PhotoDetailActionBar(
     NekiBothSidesActionBar(
         modifier = modifier.fillMaxWidth(),
         startContent = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
+            Row {
                 NekiIconButton(
                     modifier = Modifier.padding(8.dp),
                     onClick = onClickDownload,
