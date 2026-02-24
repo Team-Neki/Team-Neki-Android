@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -24,11 +25,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
+import com.naver.maps.map.clustering.Clusterer
 import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.CameraUpdateReason
+import com.naver.maps.map.compose.DisposableMapEffect
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
 import com.naver.maps.map.compose.LocationTrackingMode
 import com.naver.maps.map.compose.MapProperties
@@ -36,6 +40,8 @@ import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
+import com.neki.android.feature.map.impl.cluster.PhotoBoothClusterItem
+import com.neki.android.feature.map.impl.cluster.PhotoBoothClusterer
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
@@ -46,7 +52,6 @@ import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailContent
-import com.neki.android.feature.map.impl.component.PhotoBoothMarker
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.DirectionHelper
@@ -177,6 +182,20 @@ fun MapRoute(
             }
 
             is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
+
+            is MapEffect.ZoomToClusterBounds -> {
+                scope.launch {
+                    val bounds = LatLngBounds(
+                        LatLng(sideEffect.southWest.latitude, sideEffect.southWest.longitude),
+                        LatLng(sideEffect.northEast.latitude, sideEffect.northEast.longitude),
+                    )
+                    cameraPositionState.animate(
+                        update = CameraUpdate.fitBounds(bounds, 100),
+                        animation = CameraAnimation.Easing,
+                        durationMs = MapConst.DEFAULT_CAMERA_ANIMATION_DURATIONS_MS,
+                    )
+                }
+            }
         }
     }
 
@@ -198,6 +217,7 @@ fun MapScreen(
         position = CameraPosition(LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE), MapConst.DEFAULT_ZOOM_LEVEL)
     },
 ) {
+    val context = LocalContext.current
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
             locationTrackingMode = locationTrackingMode,
@@ -209,6 +229,20 @@ fun MapScreen(
             isLocationButtonEnabled = false,
             isZoomControlEnabled = false,
         )
+    }
+
+    var clusterer by remember { mutableStateOf<Clusterer<PhotoBoothClusterItem>?>(null) }
+    val currentBrandImageCache by rememberUpdatedState(uiState.brandImageCache)
+
+    // 마커 데이터 변경 시 클러스터 업데이트
+    LaunchedEffect(uiState.mapMarkers, clusterer) {
+        clusterer?.let { clusterManager ->
+            clusterManager.clear()
+            val clusterItemsMap = uiState.mapMarkers
+                .filter { it.isCheckedBrand }
+                .associate { PhotoBoothClusterItem(it) to it }
+            clusterManager.addAll(clusterItemsMap)
+        }
     }
 
     Box(
@@ -225,14 +259,30 @@ fun MapScreen(
                 onIntent(MapIntent.UpdateCurrentLocation(LocLatLng(location.latitude, location.longitude)))
             },
         ) {
-            uiState.mapMarkers.filter { it.isCheckedBrand }.forEach { photoBooth ->
-                PhotoBoothMarker(
-                    photoBooth = photoBooth,
-                    cachedBitmap = uiState.brandImageCache[photoBooth.imageUrl],
-                    onClick = {
+            DisposableMapEffect(Unit) { naverMap ->
+                clusterer = PhotoBoothClusterer.create(
+                    context = context,
+                    naverMap = naverMap,
+                    onClusterClick = { bounds ->
+                        onIntent(
+                            MapIntent.ClickClusterMarker(
+                                southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                                northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                            ),
+                        )
+                    },
+                    onLeafMarkerClick = { photoBooth ->
                         onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
                     },
+                    getBrandImage = { imageUrl ->
+                        currentBrandImageCache[imageUrl]
+                    },
                 )
+
+                onDispose {
+                    clusterer?.map = null
+                    clusterer = null
+                }
             }
         }
 
