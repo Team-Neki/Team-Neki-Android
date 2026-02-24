@@ -52,6 +52,15 @@ internal fun PhotoDetailRoute(
         }
     }
 
+    LaunchedEffect(uiState.currentIndex) {
+        if (pagerState.currentPage != uiState.currentIndex) {
+            pagerState.animateScrollToPage(
+                page = uiState.currentIndex,
+                animationSpec = tween(durationMillis = 300),
+            )
+        }
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PhotoDetailSideEffect.NavigateBack -> navigateBack()
@@ -66,13 +75,6 @@ internal fun PhotoDetailRoute(
                         nekiToast.showToast(text = "다운로드에 실패했어요")
                         Timber.e(e)
                     }
-            }
-
-            is PhotoDetailSideEffect.ScrollToPage -> {
-                pagerState.animateScrollToPage(
-                    page = sideEffect.index,
-                    animationSpec = tween(durationMillis = 300),
-                )
             }
         }
     }
@@ -119,7 +121,7 @@ internal fun PhotoDetailScreen(
                             .weight(1f)
                             .fillMaxHeight()
                             .noRippleClickableSingle {
-                                if (pagerState.currentPage > 0) {
+                                if (!pagerState.isScrollInProgress && pagerState.currentPage > 0) {
                                     onIntent(PhotoDetailIntent.PageChanged(pagerState.currentPage - 1))
                                 }
                             },
@@ -129,7 +131,7 @@ internal fun PhotoDetailScreen(
                             .weight(1f)
                             .fillMaxHeight()
                             .noRippleClickableSingle {
-                                if (pagerState.currentPage < uiState.photos.lastIndex) {
+                                if (!pagerState.isScrollInProgress && pagerState.currentPage < uiState.photos.lastIndex) {
                                     onIntent(PhotoDetailIntent.PageChanged(pagerState.currentPage + 1))
                                 }
                             },

@@ -37,5 +37,4 @@ sealed interface PhotoDetailSideEffect {
     data class NotifyPhotoUpdated(val result: ArchiveResult) : PhotoDetailSideEffect
     data class ShowToastMessage(val message: String) : PhotoDetailSideEffect
     data class DownloadImage(val imageUrl: String) : PhotoDetailSideEffect
-    data class ScrollToPage(val index: Int) : PhotoDetailSideEffect
 }

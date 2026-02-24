@@ -94,13 +94,12 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 val clampedIndex = intent.index.coerceIn(0, state.photos.lastIndex)
                 if (clampedIndex != state.currentIndex) {
                     reduce { copy(currentIndex = clampedIndex) }
-                    postSideEffect(PhotoDetailSideEffect.ScrollToPage(clampedIndex))
-                }
-                if (clampedIndex >= state.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
-                    loadMorePhotos(reduce)
-                }
-                if (clampedIndex == state.photos.lastIndex && !hasNext && !isLoadingMore) {
-                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("마지막 사진이에요"))
+                    if (clampedIndex >= state.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
+                        loadMorePhotos(reduce)
+                    }
+                    if (clampedIndex == state.photos.lastIndex && !hasNext && !isLoadingMore) {
+                        postSideEffect(PhotoDetailSideEffect.ShowToastMessage("마지막 사진이에요"))
+                    }
                 }
             }
 
@@ -209,6 +208,6 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     companion object {
         private const val PAGE_SIZE = 5
-        private const val PRELOAD_THRESHOLD = 2
+        private const val PRELOAD_THRESHOLD = 3
     }
 }
