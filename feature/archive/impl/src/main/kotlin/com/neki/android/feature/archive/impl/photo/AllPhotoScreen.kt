@@ -62,7 +62,7 @@ import timber.log.Timber
 internal fun AllPhotoRoute(
     viewModel: AllPhotoViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToPhotoDetail: (Photo) -> Unit,
+    navigateToPhotoDetail: (List<Photo>, Int) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -81,7 +81,9 @@ internal fun AllPhotoRoute(
                 lazyState.scrollToItem(0)
             }
 
-            is AllPhotoSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
+            is AllPhotoSideEffect.NavigateToPhotoDetail -> {
+                navigateToPhotoDetail(pagingItems.itemSnapshotList.items, sideEffect.index)
+            }
             is AllPhotoSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)
             }
@@ -211,8 +213,8 @@ private fun AllPhotoContent(
                             photo = photo,
                             isSelected = isSelected,
                             isSelectMode = uiState.selectMode == SelectMode.SELECTING,
-                            onClickItem = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
-                            onClickSelect = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
+                            onClickItem = { onIntent(AllPhotoIntent.ClickPhotoItem(photo, index)) },
+                            onClickSelect = { onIntent(AllPhotoIntent.ClickPhotoItem(photo, index)) },
                             onClickFavorite = { onIntent(AllPhotoIntent.ClickFavoriteIcon(photo)) },
                         )
                     }

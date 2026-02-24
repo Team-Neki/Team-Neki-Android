@@ -45,7 +45,7 @@ sealed interface AlbumDetailIntent {
     data object DismissOptionPopup : AlbumDetailIntent
 
     // Photo Intent
-    data class ClickPhotoItem(val photo: Photo) : AlbumDetailIntent
+    data class ClickPhotoItem(val photo: Photo, val index: Int) : AlbumDetailIntent
 
     // ActionBar Intent
     data object ClickDownloadIcon : AlbumDetailIntent
@@ -78,7 +78,7 @@ sealed interface AlbumDetailIntent {
 
 sealed interface AlbumDetailSideEffect {
     data object NavigateBack : AlbumDetailSideEffect
-    data class NavigateToPhotoDetail(val photo: Photo) : AlbumDetailSideEffect
+    data class NavigateToPhotoDetail(val photo: Photo, val index: Int) : AlbumDetailSideEffect
     data class ShowToastMessage(val message: String) : AlbumDetailSideEffect
     data class DownloadImages(val imageUrls: List<String>) : AlbumDetailSideEffect
     data object OpenGallery : AlbumDetailSideEffect

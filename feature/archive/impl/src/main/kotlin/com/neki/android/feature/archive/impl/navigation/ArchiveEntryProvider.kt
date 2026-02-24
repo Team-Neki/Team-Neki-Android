@@ -144,7 +144,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
     entry<ArchiveNavKey.PhotoDetail> { key ->
         PhotoDetailRoute(
             viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
-                creationCallback = { factory -> factory.create(key.photo) },
+                creationCallback = { factory -> factory.create(key.photos, key.initialIndex) },
             ),
             navigateBack = navigator::goBack,
         )

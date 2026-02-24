@@ -7,6 +7,8 @@ data class PhotoDetailState(
     val isLoading: Boolean = false,
     val committedFavorite: Boolean = false,
     val photo: Photo = Photo(),
+    val photos: List<Photo> = emptyList(),
+    val currentIndex: Int = 0,
     val isShowDeleteDialog: Boolean = false,
 )
 

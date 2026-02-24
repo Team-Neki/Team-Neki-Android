@@ -22,15 +22,22 @@ import timber.log.Timber
 @OptIn(FlowPreview::class)
 @HiltViewModel(assistedFactory = PhotoDetailViewModel.Factory::class)
 class PhotoDetailViewModel @AssistedInject constructor(
-    @Assisted private val photo: Photo,
+    @Assisted private val photos: List<Photo>,
+    @Assisted private val initialIndex: Int,
     private val photoRepository: PhotoRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
+    private val photo = photos[initialIndex]
     private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
-            initialState = PhotoDetailState(photo = photo, committedFavorite = photo.isFavorite),
+            initialState = PhotoDetailState(
+                photo = photo,
+                committedFavorite = photo.isFavorite,
+                photos = photos,
+                currentIndex = initialIndex,
+            ),
             onIntent = ::onIntent,
         )
 
@@ -57,7 +64,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(photo: Photo): PhotoDetailViewModel
+        fun create(photos: List<Photo>, initialIndex: Int): PhotoDetailViewModel
     }
 
     private fun onIntent(

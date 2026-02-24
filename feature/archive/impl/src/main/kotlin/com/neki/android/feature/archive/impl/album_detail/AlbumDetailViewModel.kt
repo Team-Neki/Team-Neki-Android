@@ -125,7 +125,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 )
             }
 
-            is AlbumDetailIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, state, reduce, postSideEffect)
+            is AlbumDetailIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, intent.index, state, reduce, postSideEffect)
 
             AlbumDetailIntent.ClickDownloadIcon -> handleDownload(state, postSideEffect)
             AlbumDetailIntent.ClickDeleteIcon -> handleDeleteIconClick(state, reduce, postSideEffect)
@@ -246,13 +246,14 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
     private fun handlePhotoClick(
         photo: Photo,
+        index: Int,
         state: AlbumDetailState,
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
         when (state.selectMode) {
             SelectMode.DEFAULT -> {
-                postSideEffect(AlbumDetailSideEffect.NavigateToPhotoDetail(photo))
+                postSideEffect(AlbumDetailSideEffect.NavigateToPhotoDetail(photo, index))
             }
 
             SelectMode.SELECTING -> {

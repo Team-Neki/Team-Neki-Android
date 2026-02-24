@@ -61,7 +61,7 @@ import timber.log.Timber
 internal fun AlbumDetailRoute(
     viewModel: AlbumDetailViewModel,
     navigateBack: () -> Unit,
-    navigateToPhotoDetail: (Photo) -> Unit,
+    navigateToPhotoDetail: (List<Photo>, Int) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -78,7 +78,9 @@ internal fun AlbumDetailRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             AlbumDetailSideEffect.NavigateBack -> navigateBack()
-            is AlbumDetailSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
+            is AlbumDetailSideEffect.NavigateToPhotoDetail -> {
+                navigateToPhotoDetail(pagingItems.itemSnapshotList.items, sideEffect.index)
+            }
             is AlbumDetailSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)
             }
@@ -251,8 +253,8 @@ internal fun AlbumDetailContent(
                             photo = photo,
                             isSelected = isSelected,
                             isSelectMode = uiState.selectMode == SelectMode.SELECTING,
-                            onClickItem = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
-                            onClickSelect = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo)) },
+                            onClickItem = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo, index)) },
+                            onClickSelect = { onIntent(AlbumDetailIntent.ClickPhotoItem(photo, index)) },
                             onClickFavorite = { onIntent(AlbumDetailIntent.ClickFavoriteIcon(photo)) },
                         )
                     }

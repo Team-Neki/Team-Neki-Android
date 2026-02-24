@@ -24,7 +24,7 @@ sealed interface ArchiveNavKey : NavKey {
     ) : ArchiveNavKey
 
     @Serializable
-    data class PhotoDetail(val photo: Photo) : ArchiveNavKey
+    data class PhotoDetail(val photos: List<Photo>, val initialIndex: Int) : ArchiveNavKey
 }
 
 fun MainNavigator.navigateToArchive() {
@@ -43,6 +43,6 @@ fun MainNavigator.navigateToAlbumDetail(id: Long, title: String = "", isFavorite
     navigate(ArchiveNavKey.AlbumDetail(isFavorite, title, id))
 }
 
-fun MainNavigator.navigateToPhotoDetail(photo: Photo) {
-    navigate(ArchiveNavKey.PhotoDetail(photo))
+fun MainNavigator.navigateToPhotoDetail(photos: List<Photo>, initialIndex: Int) {
+    navigate(ArchiveNavKey.PhotoDetail(photos, initialIndex))
 }
