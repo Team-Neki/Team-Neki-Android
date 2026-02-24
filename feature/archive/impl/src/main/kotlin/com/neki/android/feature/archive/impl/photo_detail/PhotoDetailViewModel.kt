@@ -99,6 +99,9 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 if (clampedIndex >= state.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
                     loadMorePhotos(reduce)
                 }
+                if (clampedIndex == state.photos.lastIndex && !hasNext && !isLoadingMore) {
+                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("마지막 사진이에요"))
+                }
             }
 
             // ActionBar Intent
