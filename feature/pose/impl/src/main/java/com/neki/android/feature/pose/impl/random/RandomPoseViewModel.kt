@@ -143,8 +143,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
-        // 마지막 인덱스에 도달
-        if (state.currentIndex >= state.poseList.lastIndex) {
+        // 마지막 인덱스 + 더 이상 새 포즈 없음이 확정된 경우에만 토스트
+        if (state.currentIndex >= state.poseList.lastIndex && !state.hasNewPose) {
             postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
             return
         }
@@ -157,7 +157,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             viewModelScope.launch {
                 poseRepository.getSingleRandomPose(
                     headCount = peopleCount,
-                    excludeIds = state.randomPoseIds,
+                    excludeIds = store.uiState.value.randomPoseIds, // 최신 값을 사용하기 위해 store 로 접근
                 ).onSuccess { pose ->
                     reduce {
                         copy(
@@ -168,7 +168,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                 }.onFailure { e ->
                     if (e is NoMorePoseException && e.code == NO_MORE_RANDOM_POSE) {
                         reduce { copy(hasNewPose = false) }
-                        postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
                     } else Timber.e(e)
                 }
             }
