@@ -96,7 +96,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
             is PhotoDetailIntent.PageChanged -> {
                 reduce { copy(currentIndex = intent.index) }
-                preloadIfNeeded(intent.index, state, reduce)
+                preloadIfNeeded(intent.index, reduce)
             }
 
             // ActionBar Intent
@@ -167,10 +167,10 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     private fun preloadIfNeeded(
         currentIndex: Int,
-        state: PhotoDetailState,
         reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
     ) {
-        if (currentIndex >= state.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
+        val latestState = store.uiState.value
+        if (currentIndex >= latestState.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
             loadMorePhotos(reduce)
         }
     }
