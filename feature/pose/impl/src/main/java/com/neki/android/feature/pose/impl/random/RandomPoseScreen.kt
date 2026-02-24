@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -40,15 +41,19 @@ internal fun RandomPoseRoute(
     val nekiToast = remember { NekiToast(context) }
     val pagerState = rememberPagerState { uiState.poseList.size }
 
+    LaunchedEffect(uiState.currentIndex) {
+        if (pagerState.currentPage != uiState.currentIndex) {
+            pagerState.animateScrollToPage(
+                page = uiState.currentIndex,
+                animationSpec = tween(durationMillis = 500),
+            )
+        }
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             RandomPoseEffect.NavigateBack -> navigateBack()
             is RandomPoseEffect.NavigateToDetail -> navigateToPoseDetail(sideEffect.poseId)
-            is RandomPoseEffect.SwipePoseImage -> pagerState.animateScrollToPage(
-                page = sideEffect.index,
-                animationSpec = tween(durationMillis = 500),
-            )
-
             is RandomPoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
         }
     }
@@ -90,8 +95,16 @@ internal fun RandomPoseScreen(
                     .weight(1f),
                 poseList = uiState.poseList,
                 pagerState = pagerState,
-                onLeftSwipe = { onIntent(RandomPoseIntent.ClickLeftSwipe) },
-                onRightSwipe = { onIntent(RandomPoseIntent.ClickRightSwipe) },
+                onLeftSwipe = {
+                    if (!pagerState.isScrollInProgress) {
+                        onIntent(RandomPoseIntent.ClickLeftSwipe)
+                    }
+                },
+                onRightSwipe = {
+                    if (!pagerState.isScrollInProgress) {
+                        onIntent(RandomPoseIntent.ClickRightSwipe)
+                    }
+                },
             )
 
             uiState.currentPose?.let { pose ->

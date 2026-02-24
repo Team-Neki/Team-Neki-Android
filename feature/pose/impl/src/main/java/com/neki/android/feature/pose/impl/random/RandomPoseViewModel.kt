@@ -133,7 +133,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         if (state.hasPrevious) {
             val previousIndex = state.currentIndex - 1
             reduce { copy(currentIndex = previousIndex) }
-            postSideEffect(RandomPoseEffect.SwipePoseImage(previousIndex))
         } else {
             postSideEffect(RandomPoseEffect.ShowToast("첫번째 포즈입니다."))
         }
@@ -152,7 +151,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
         val nextIndex = state.currentIndex + 1
         reduce { copy(currentIndex = nextIndex) }
-        postSideEffect(RandomPoseEffect.SwipePoseImage(nextIndex))
 
         // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
         if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
