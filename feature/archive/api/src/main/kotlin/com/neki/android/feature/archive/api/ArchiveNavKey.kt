@@ -52,21 +52,7 @@ fun MainNavigator.navigateToAlbumDetail(id: Long, title: String = "", isFavorite
 }
 
 fun MainNavigator.navigateToPhotoDetail(
-    photos: List<Photo>,
-    initialIndex: Int,
-    hasNext: Boolean = false,
-    folderId: Long? = null,
-    sortOrder: SortOrder = SortOrder.DESC,
-    isFavoriteOnly: Boolean = false,
+    photoDetail: ArchiveNavKey.PhotoDetail,
 ) {
-    navigate(
-        ArchiveNavKey.PhotoDetail(
-            photos = photos,
-            initialIndex = initialIndex,
-            hasNext = hasNext,
-            folderId = folderId,
-            sortOrder = sortOrder,
-            isFavoriteOnly = isFavoriteOnly,
-        ),
-    )
+    navigate(photoDetail)
 }

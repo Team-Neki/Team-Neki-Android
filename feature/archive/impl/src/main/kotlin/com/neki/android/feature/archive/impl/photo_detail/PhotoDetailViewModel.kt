@@ -4,10 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.dataapi.repository.PhotoRepository
-import com.neki.android.core.model.Photo
-import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.archive.api.ArchiveResult
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -23,25 +22,21 @@ import timber.log.Timber
 @OptIn(FlowPreview::class)
 @HiltViewModel(assistedFactory = PhotoDetailViewModel.Factory::class)
 class PhotoDetailViewModel @AssistedInject constructor(
-    @Assisted private val photos: List<Photo>,
-    @Assisted private val initialIndex: Int,
-    @Assisted("hasNext") private var hasNext: Boolean,
-    @Assisted private val folderId: Long?,
-    @Assisted private val sortOrder: SortOrder,
-    @Assisted("isFavoriteOnly") private val isFavoriteOnly: Boolean,
+    @Assisted private val key: ArchiveNavKey.PhotoDetail,
     private val photoRepository: PhotoRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
     private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
-    private val committedFavorites = photos.associate { it.id to it.isFavorite }.toMutableMap()
-    private var nextPage: Int = photos.size / PAGE_SIZE
+    private val committedFavorites = key.photos.associate { it.id to it.isFavorite }.toMutableMap()
+    private var hasNext: Boolean = key.hasNext
+    private var nextPage: Int = key.photos.size / PAGE_SIZE
     private var isLoadingMore: Boolean = false
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
             initialState = PhotoDetailState(
-                photos = photos,
-                currentIndex = initialIndex,
+                photos = key.photos,
+                currentIndex = key.initialIndex,
             ),
             onIntent = ::onIntent,
         )
@@ -69,14 +64,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(
-            photos: List<Photo>,
-            initialIndex: Int,
-            @Assisted("hasNext") hasNext: Boolean,
-            folderId: Long?,
-            sortOrder: SortOrder,
-            @Assisted("isFavoriteOnly") isFavoriteOnly: Boolean,
-        ): PhotoDetailViewModel
+        fun create(key: ArchiveNavKey.PhotoDetail): PhotoDetailViewModel
     }
 
     private fun onIntent(
@@ -174,10 +162,10 @@ class PhotoDetailViewModel @AssistedInject constructor(
     ) {
         isLoadingMore = true
         viewModelScope.launch {
-            val result = if (isFavoriteOnly) {
-                photoRepository.getFavoritePhotosPage(nextPage, PAGE_SIZE, sortOrder)
+            val result = if (key.isFavoriteOnly) {
+                photoRepository.getFavoritePhotosPage(nextPage, PAGE_SIZE, key.sortOrder)
             } else {
-                photoRepository.getPhotosPage(folderId, nextPage, PAGE_SIZE, sortOrder)
+                photoRepository.getPhotosPage(key.folderId, nextPage, PAGE_SIZE, key.sortOrder)
             }
             result
                 .onSuccess { page ->
