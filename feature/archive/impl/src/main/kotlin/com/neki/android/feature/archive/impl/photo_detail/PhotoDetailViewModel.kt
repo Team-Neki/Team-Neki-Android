@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.archive.api.ArchiveResult
@@ -24,12 +25,18 @@ import timber.log.Timber
 class PhotoDetailViewModel @AssistedInject constructor(
     @Assisted private val photos: List<Photo>,
     @Assisted private val initialIndex: Int,
+    @Assisted("hasNext") private var hasNext: Boolean,
+    @Assisted private val folderId: Long?,
+    @Assisted private val sortOrder: SortOrder,
+    @Assisted("isFavoriteOnly") private val isFavoriteOnly: Boolean,
     private val photoRepository: PhotoRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
     private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
     private val committedFavorites = photos.associate { it.id to it.isFavorite }.toMutableMap()
+    private var nextPage: Int = photos.size / PAGE_SIZE
+    private var isLoadingMore: Boolean = false
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
             initialState = PhotoDetailState(
@@ -62,7 +69,14 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(photos: List<Photo>, initialIndex: Int): PhotoDetailViewModel
+        fun create(
+            photos: List<Photo>,
+            initialIndex: Int,
+            @Assisted("hasNext") hasNext: Boolean,
+            folderId: Long?,
+            sortOrder: SortOrder,
+            @Assisted("isFavoriteOnly") isFavoriteOnly: Boolean,
+        ): PhotoDetailViewModel
     }
 
     private fun onIntent(
@@ -81,6 +95,9 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 if (clampedIndex != state.currentIndex) {
                     reduce { copy(currentIndex = clampedIndex) }
                     postSideEffect(PhotoDetailSideEffect.ScrollToPage(clampedIndex))
+                }
+                if (clampedIndex >= state.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
+                    loadMorePhotos(reduce)
                 }
             }
 
@@ -150,6 +167,30 @@ class PhotoDetailViewModel @AssistedInject constructor(
         }
     }
 
+    private fun loadMorePhotos(
+        reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
+    ) {
+        isLoadingMore = true
+        viewModelScope.launch {
+            val result = if (isFavoriteOnly) {
+                photoRepository.getFavoritePhotosPage(nextPage, PAGE_SIZE, sortOrder)
+            } else {
+                photoRepository.getPhotosPage(folderId, nextPage, PAGE_SIZE, sortOrder)
+            }
+            result
+                .onSuccess { page ->
+                    reduce { copy(photos = photos + page.photos) }
+                    hasNext = page.hasNext
+                    nextPage++
+                    page.photos.forEach { committedFavorites[it.id] = it.isFavorite }
+                }
+                .onFailure { e ->
+                    Timber.e(e, "loadMorePhotos failed")
+                }
+            isLoadingMore = false
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
 
@@ -161,5 +202,10 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 photoRepository.updateFavorite(currentPhoto.id, currentPhoto.isFavorite)
             }
         }
+    }
+
+    companion object {
+        private const val PAGE_SIZE = 5
+        private const val PRELOAD_THRESHOLD = 2
     }
 }

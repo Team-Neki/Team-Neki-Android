@@ -15,15 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
@@ -37,8 +33,6 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable

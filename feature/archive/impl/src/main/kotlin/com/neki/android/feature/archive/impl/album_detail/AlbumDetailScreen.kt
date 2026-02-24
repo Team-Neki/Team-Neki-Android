@@ -35,7 +35,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -61,7 +63,7 @@ import timber.log.Timber
 internal fun AlbumDetailRoute(
     viewModel: AlbumDetailViewModel,
     navigateBack: () -> Unit,
-    navigateToPhotoDetail: (List<Photo>, Int) -> Unit,
+    navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -79,7 +81,16 @@ internal fun AlbumDetailRoute(
         when (sideEffect) {
             AlbumDetailSideEffect.NavigateBack -> navigateBack()
             is AlbumDetailSideEffect.NavigateToPhotoDetail -> {
-                navigateToPhotoDetail(pagingItems.itemSnapshotList.items, sideEffect.index)
+                navigateToPhotoDetail(
+                    ArchiveNavKey.PhotoDetail(
+                        photos = pagingItems.itemSnapshotList.items,
+                        initialIndex = sideEffect.index,
+                        hasNext = !pagingItems.loadState.append.endOfPaginationReached,
+                        folderId = if (uiState.isFavoriteAlbum) null else viewModel.albumId,
+                        sortOrder = SortOrder.DESC,
+                        isFavoriteOnly = uiState.isFavoriteAlbum,
+                    ),
+                )
             }
             is AlbumDetailSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)

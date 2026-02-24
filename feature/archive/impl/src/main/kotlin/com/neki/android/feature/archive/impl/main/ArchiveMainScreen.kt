@@ -34,6 +34,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
@@ -60,7 +61,7 @@ internal fun ArchiveMainRoute(
     navigateToFavoriteAlbum: (Long) -> Unit,
     navigateToAlbumDetail: (Long, String) -> Unit,
     navigateToAllPhoto: () -> Unit,
-    navigateToPhotoDetail: (List<Photo>, Int) -> Unit,
+    navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -83,7 +84,9 @@ internal fun ArchiveMainRoute(
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
             is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
-            is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photos, sideEffect.index)
+            is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(
+                ArchiveNavKey.PhotoDetail(photos = sideEffect.photos, initialIndex = sideEffect.index),
+            )
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
             ArchiveMainSideEffect.OpenGallery -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             is ArchiveMainSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)

@@ -38,7 +38,9 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
@@ -62,7 +64,7 @@ import timber.log.Timber
 internal fun AllPhotoRoute(
     viewModel: AllPhotoViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToPhotoDetail: (List<Photo>, Int) -> Unit,
+    navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -82,7 +84,18 @@ internal fun AllPhotoRoute(
             }
 
             is AllPhotoSideEffect.NavigateToPhotoDetail -> {
-                navigateToPhotoDetail(pagingItems.itemSnapshotList.items, sideEffect.index)
+                navigateToPhotoDetail(
+                    ArchiveNavKey.PhotoDetail(
+                        photos = pagingItems.itemSnapshotList.items,
+                        initialIndex = sideEffect.index,
+                        hasNext = !pagingItems.loadState.append.endOfPaginationReached,
+                        sortOrder = when (uiState.selectedPhotoFilter) {
+                            PhotoFilter.NEWEST -> SortOrder.DESC
+                            PhotoFilter.OLDEST -> SortOrder.ASC
+                        },
+                        isFavoriteOnly = uiState.isFavoriteChipSelected,
+                    ),
+                )
             }
             is AllPhotoSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)

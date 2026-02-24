@@ -12,7 +12,6 @@ import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.archive.api.navigateToAllAlbum
 import com.neki.android.feature.archive.api.navigateToAllPhoto
-import com.neki.android.feature.archive.api.navigateToPhotoDetail
 import com.neki.android.feature.archive.impl.album.AllAlbumRoute
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailIntent
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailRoute
@@ -77,7 +76,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                 navigator.navigateToAlbumDetail(id = id, title = title, isFavorite = false)
             },
             navigateToAllPhoto = navigator::navigateToAllPhoto,
-            navigateToPhotoDetail = navigator::navigateToPhotoDetail,
+            navigateToPhotoDetail = { key -> navigator.navigate(key) },
         )
     }
 
@@ -100,7 +99,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         AllPhotoRoute(
             viewModel = viewModel,
             navigateBack = navigator::goBack,
-            navigateToPhotoDetail = navigator::navigateToPhotoDetail,
+            navigateToPhotoDetail = { key -> navigator.navigate(key) },
         )
     }
 
@@ -137,14 +136,23 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         AlbumDetailRoute(
             viewModel = viewModel,
             navigateBack = navigator::goBack,
-            navigateToPhotoDetail = navigator::navigateToPhotoDetail,
+            navigateToPhotoDetail = { key -> navigator.navigate(key) },
         )
     }
 
     entry<ArchiveNavKey.PhotoDetail> { key ->
         PhotoDetailRoute(
             viewModel = hiltViewModel<PhotoDetailViewModel, PhotoDetailViewModel.Factory>(
-                creationCallback = { factory -> factory.create(key.photos, key.initialIndex) },
+                creationCallback = { factory ->
+                    factory.create(
+                        key.photos,
+                        key.initialIndex,
+                        key.hasNext,
+                        key.folderId,
+                        key.sortOrder,
+                        key.isFavoriteOnly,
+                    )
+                },
             ),
             navigateBack = navigator::goBack,
         )

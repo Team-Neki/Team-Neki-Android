@@ -12,6 +12,7 @@ import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.PhotoPage
 import com.neki.android.core.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -70,6 +71,25 @@ class PhotoRepositoryImpl @Inject constructor(
         sortOrder: SortOrder,
     ): Result<List<Photo>> = runSuspendCatching {
         photoService.getFavoritePhotos(page, size, sortOrder.name).data.toModels()
+    }
+
+    override suspend fun getPhotosPage(
+        folderId: Long?,
+        page: Int,
+        size: Int,
+        sortOrder: SortOrder,
+    ): Result<PhotoPage> = runSuspendCatching {
+        val response = photoService.getPhotos(folderId, page, size, sortOrder.name).data
+        PhotoPage(photos = response.toModels(), hasNext = response.hasNext)
+    }
+
+    override suspend fun getFavoritePhotosPage(
+        page: Int,
+        size: Int,
+        sortOrder: SortOrder,
+    ): Result<PhotoPage> = runSuspendCatching {
+        val response = photoService.getFavoritePhotos(page, size, sortOrder.name).data
+        PhotoPage(photos = response.toModels(), hasNext = response.hasNext)
     }
 
     override suspend fun getFavoriteSummary(): Result<AlbumPreview> = runSuspendCatching {
