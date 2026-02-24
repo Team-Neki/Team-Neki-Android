@@ -12,6 +12,7 @@ import android.text.TextPaint
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.withClip
@@ -295,17 +296,27 @@ internal object PhotoBoothClusterer {
                 )
             }
         } else {
-            // placeholder 이미지
-            val placeholderPaint = Paint().apply {
-                isAntiAlias = true
-                color = ClustererConst.LEAF_PLACEHOLDER_COLOR.toColorInt()
+            // brandImage가 null인 경우 empty 마커 노출
+            val drawable = ContextCompat.getDrawable(context, DesignSystemR.drawable.icon_photo_booth_empty)
+            drawable?.let {
+                val imagePath = Path().apply {
+                    addRoundRect(
+                        RectF(imageLeft, imageTop, imageRight, imageBottom),
+                        imageRadius,
+                        imageRadius,
+                        Path.Direction.CW,
+                    )
+                }
+                canvas.withClip(imagePath) {
+                    it.setBounds(
+                        imageLeft.toInt(),
+                        imageTop.toInt(),
+                        imageRight.toInt(),
+                        imageBottom.toInt(),
+                    )
+                    it.draw(this)
+                }
             }
-            canvas.drawRoundRect(
-                RectF(imageLeft, imageTop, imageRight, imageBottom),
-                imageRadius,
-                imageRadius,
-                placeholderPaint,
-            )
         }
 
         return OverlayImage.fromBitmap(bitmap)

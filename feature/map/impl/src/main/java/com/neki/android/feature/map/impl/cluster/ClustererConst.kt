@@ -44,7 +44,6 @@ internal object ClustererConst {
     // 개별 마커(Leaf) 색상
     const val LEAF_FOCUSED_GRADIENT_START = "#616575" // 선택된 마커 gray600 (그라데이션 시작)
     const val LEAF_FOCUSED_GRADIENT_END = "#202227" // 선택된 마커 gray900 (그라데이션 끝)
-    const val LEAF_PLACEHOLDER_COLOR = "#EEEEEE" // 플레이스홀더 색상
 
     // 공통
     const val SHADOW_PADDING = 4f // 그림자 패딩 (px)
