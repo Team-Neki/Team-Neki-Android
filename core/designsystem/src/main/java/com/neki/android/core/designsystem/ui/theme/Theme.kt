@@ -21,6 +21,10 @@ fun ProvideTypographyAndColor(
     CompositionLocalProvider(
         LocalTypography provides typography,
         LocalColorScheme provides colors,
+        LocalDensity provides Density(
+            density = LocalDensity.current.density,
+            fontScale = 1f,
+        ),
         content = content,
     )
 }
@@ -37,23 +41,16 @@ fun NekiTheme(
         }
     }
 
-    CompositionLocalProvider(
-        LocalDensity provides Density(
-            density = LocalDensity.current.density,
-            fontScale = 1f,
-        ),
+    ProvideTypographyAndColor(
+        typography = defaultNekiTypography,
+        colors = defaultNekiColors,
     ) {
-        ProvideTypographyAndColor(
-            typography = defaultNekiTypography,
-            colors = defaultNekiColors,
-        ) {
-            MaterialTheme(
-                colorScheme = lightColorScheme(
-                    background = NekiTheme.colorScheme.white,
-                ),
-                content = content,
-            )
-        }
+        MaterialTheme(
+            colorScheme = lightColorScheme(
+                background = NekiTheme.colorScheme.white,
+            ),
+            content = content,
+        )
     }
 }
 
