@@ -3,9 +3,11 @@ package com.neki.android.feature.map.impl.cluster
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.graphics.Shader
 import android.text.TextPaint
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -61,7 +63,7 @@ internal object PhotoBoothClusterer {
                 object : DefaultClusterMarkerUpdater() {
                     override fun updateClusterMarker(info: ClusterMarkerInfo, marker: Marker) {
                         val count = info.size
-                        val cacheKey = if (count > 99) 100 else count
+                        val cacheKey = if (count > 99) ClustererConst.CLUSTER_COUNT_THRESHOLD else count
                         val icon = clusterIconCache.getOrPut(cacheKey) {
                             createClusterIcon(context, count)
                         }
@@ -115,8 +117,8 @@ internal object PhotoBoothClusterer {
     private fun createClusterIcon(context: Context, count: Int): OverlayImage {
         val density = context.resources.displayMetrics.density
 
-        // 배경 크기 (고정 54dp)
-        val shadowPadding = 4 * density
+        // 배경 크기
+        val shadowPadding = ClustererConst.SHADOW_PADDING * density
         val backgroundSize = ClustererConst.CLUSTER_BOX_SIZE * density
         val totalSize = (backgroundSize + shadowPadding * 2).toInt()
 
@@ -136,14 +138,14 @@ internal object PhotoBoothClusterer {
             )
         }
 
-        // 배경 Paint (NekiColors.primary400: #FF5647)
+        // 배경 Paint
         val backgroundPaint = Paint().apply {
             isAntiAlias = true
-            color = "#FF5647".toColorInt()
+            color = ClustererConst.CLUSTER_BACKGROUND_COLOR.toColorInt()
             style = Paint.Style.FILL
         }
 
-        // 테두리 Paint (흰색 2px)
+        // 테두리 Paint
         val strokePaint = Paint().apply {
             isAntiAlias = true
             color = Color.WHITE
@@ -151,7 +153,7 @@ internal object PhotoBoothClusterer {
             this.strokeWidth = ClustererConst.CLUSTER_STROKE_WIDTH * density
         }
 
-        // 배경 영역 (정사각형 54dp)
+        // 배경 영역
         val backgroundRect = RectF(
             shadowPadding,
             shadowPadding,
@@ -161,7 +163,7 @@ internal object PhotoBoothClusterer {
 
         val cornerRadius = ClustererConst.CLUSTER_CORNER_RADIUS * density
 
-        // 텍스트 크기 및 Paint 설정 (title20SemiBold 스타일)
+        // 텍스트 크기 및 Paint 설정
         val textPaint = TextPaint().apply {
             color = Color.WHITE
             textSize = ClustererConst.CLUSTER_TEXT_SIZE * density
@@ -192,11 +194,11 @@ internal object PhotoBoothClusterer {
         isFocused: Boolean,
     ): OverlayImage {
         val density = context.resources.displayMetrics.density
-        val imageSize = if (isFocused) 60 else 50
-        val padding = if (isFocused) 6 else 2
-        val cornerRadius = if (isFocused) 26 else 20
-        val triangleHeight = 10
-        val shadowPadding = 4
+        val imageSize = if (isFocused) ClustererConst.LEAF_FOCUSED_IMAGE_SIZE else ClustererConst.LEAF_NORMAL_IMAGE_SIZE
+        val padding = if (isFocused) ClustererConst.LEAF_FOCUSED_PADDING else ClustererConst.LEAF_NORMAL_PADDING
+        val cornerRadius = if (isFocused) ClustererConst.LEAF_FOCUSED_CORNER_RADIUS else ClustererConst.LEAF_NORMAL_CORNER_RADIUS
+        val triangleHeight = ClustererConst.LEAF_TRIANGLE_HEIGHT
+        val shadowPadding = ClustererConst.SHADOW_PADDING
 
         val bodyWidth = imageSize + padding * 2
         val bodyHeight = imageSize + padding * 2
@@ -221,13 +223,6 @@ internal object PhotoBoothClusterer {
             )
         }
 
-        // 배경 사각형 (둥근 모서리)
-        val backgroundPaint = Paint().apply {
-            isAntiAlias = true
-            color = if (isFocused) "#333333".toColorInt() else Color.WHITE
-            style = Paint.Style.FILL
-        }
-
         val bodyRect = RectF(
             offsetX,
             offsetY,
@@ -235,9 +230,28 @@ internal object PhotoBoothClusterer {
             offsetY + bodyHeight * density,
         )
 
+        // 배경 사각형 (둥근 모서리)
+        val backgroundPaint = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.FILL
+            if (isFocused) {
+                shader = LinearGradient(
+                    0f,
+                    offsetY,
+                    0f,
+                    offsetY + bodyHeight * density,
+                    ClustererConst.LEAF_FOCUSED_GRADIENT_START.toColorInt(),
+                    ClustererConst.LEAF_FOCUSED_GRADIENT_END.toColorInt(),
+                    Shader.TileMode.CLAMP,
+                )
+            } else {
+                color = Color.WHITE
+            }
+        }
+
         // 삼각형 꼬리
         val trianglePath = Path().apply {
-            val triangleWidth = 12 * density
+            val triangleWidth = ClustererConst.LEAF_TRIANGLE_WIDTH * density
             val startX = offsetX + (bodyWidth * density - triangleWidth) / 2
             val topY = offsetY + bodyHeight * density - 1
             moveTo(startX, topY)
@@ -257,7 +271,7 @@ internal object PhotoBoothClusterer {
         val imageTop = offsetY + padding * density
         val imageRight = imageLeft + imageSize * density
         val imageBottom = imageTop + imageSize * density
-        val imageRadius = (if (isFocused) 21 else 18) * density
+        val imageRadius = (if (isFocused) ClustererConst.LEAF_FOCUSED_IMAGE_RADIUS else ClustererConst.LEAF_NORMAL_IMAGE_RADIUS) * density
 
         if (brandImage != null) {
             val imagePaint = Paint().apply { isAntiAlias = true }
@@ -281,10 +295,10 @@ internal object PhotoBoothClusterer {
                 )
             }
         } else {
-            // placeholder 이미지 (회색 박스)
+            // placeholder 이미지
             val placeholderPaint = Paint().apply {
                 isAntiAlias = true
-                color = "#EEEEEE".toColorInt()
+                color = ClustererConst.LEAF_PLACEHOLDER_COLOR.toColorInt()
             }
             canvas.drawRoundRect(
                 RectF(imageLeft, imageTop, imageRight, imageBottom),
