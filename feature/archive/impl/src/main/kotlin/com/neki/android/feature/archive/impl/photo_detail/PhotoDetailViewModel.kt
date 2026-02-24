@@ -78,17 +78,25 @@ class PhotoDetailViewModel @AssistedInject constructor(
             PhotoDetailIntent.ClickBackIcon -> postSideEffect(PhotoDetailSideEffect.NavigateBack)
 
             // Pager Intent
-            is PhotoDetailIntent.PageChanged -> {
-                val clampedIndex = intent.index.coerceIn(0, state.photos.lastIndex)
-                if (clampedIndex != state.currentIndex) {
-                    reduce { copy(currentIndex = clampedIndex) }
-                    if (clampedIndex >= state.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
-                        loadMorePhotos(reduce)
-                    }
-                    if (clampedIndex == state.photos.lastIndex && !hasNext && !isLoadingMore) {
-                        postSideEffect(PhotoDetailSideEffect.ShowToastMessage("마지막 사진이에요"))
-                    }
+            PhotoDetailIntent.ClickLeftPhoto -> {
+                if (state.currentIndex > 0) {
+                    postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentIndex - 1))
+                } else {
+                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("첫번째 사진이에요"))
                 }
+            }
+
+            PhotoDetailIntent.ClickRightPhoto -> {
+                if (state.currentIndex < state.photos.lastIndex) {
+                    postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentIndex + 1))
+                } else if (!hasNext) {
+                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("마지막 사진이에요"))
+                }
+            }
+
+            is PhotoDetailIntent.PageChanged -> {
+                reduce { copy(currentIndex = intent.index) }
+                preloadIfNeeded(intent.index, state, reduce)
             }
 
             // ActionBar Intent
@@ -154,6 +162,16 @@ class PhotoDetailViewModel @AssistedInject constructor(
                     reduce { copy(isLoading = false) }
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진 삭제에 실패했어요"))
                 }
+        }
+    }
+
+    private fun preloadIfNeeded(
+        currentIndex: Int,
+        state: PhotoDetailState,
+        reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
+    ) {
+        if (currentIndex >= state.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
+            loadMorePhotos(reduce)
         }
     }
 

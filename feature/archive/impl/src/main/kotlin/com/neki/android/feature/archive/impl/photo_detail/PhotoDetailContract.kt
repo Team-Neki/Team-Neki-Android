@@ -17,6 +17,8 @@ sealed interface PhotoDetailIntent {
     data object ClickBackIcon : PhotoDetailIntent
 
     // Pager Intent
+    data object ClickLeftPhoto : PhotoDetailIntent
+    data object ClickRightPhoto : PhotoDetailIntent
     data class PageChanged(val index: Int) : PhotoDetailIntent
 
     // ActionBar Intent
@@ -37,4 +39,5 @@ sealed interface PhotoDetailSideEffect {
     data class NotifyPhotoUpdated(val result: ArchiveResult) : PhotoDetailSideEffect
     data class ShowToastMessage(val message: String) : PhotoDetailSideEffect
     data class DownloadImage(val imageUrl: String) : PhotoDetailSideEffect
+    data class AnimateToPage(val index: Int) : PhotoDetailSideEffect
 }

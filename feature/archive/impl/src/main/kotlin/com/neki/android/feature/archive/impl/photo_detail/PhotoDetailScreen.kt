@@ -1,6 +1,6 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,10 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.DevicePreview
@@ -45,19 +47,11 @@ internal fun PhotoDetailRoute(
     val nekiToast = remember { NekiToast(context) }
     val resultEventBus = LocalResultEventBus.current
     val pagerState = rememberPagerState(initialPage = uiState.currentIndex) { uiState.photos.size }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.settledPage }.collect { page ->
             viewModel.store.onIntent(PhotoDetailIntent.PageChanged(page))
-        }
-    }
-
-    LaunchedEffect(uiState.currentIndex) {
-        if (pagerState.currentPage != uiState.currentIndex) {
-            pagerState.animateScrollToPage(
-                page = uiState.currentIndex,
-                animationSpec = tween(durationMillis = 300),
-            )
         }
     }
 
@@ -75,6 +69,12 @@ internal fun PhotoDetailRoute(
                         nekiToast.showToast(text = "다운로드에 실패했어요")
                         Timber.e(e)
                     }
+            }
+            is PhotoDetailSideEffect.AnimateToPage -> coroutineScope.launch {
+                pagerState.animateScrollToPage(
+                    page = sideEffect.index,
+                    animationSpec = spring(),
+                )
             }
         }
     }
@@ -121,8 +121,8 @@ internal fun PhotoDetailScreen(
                             .weight(1f)
                             .fillMaxHeight()
                             .noRippleClickableSingle {
-                                if (!pagerState.isScrollInProgress && pagerState.currentPage > 0) {
-                                    onIntent(PhotoDetailIntent.PageChanged(pagerState.currentPage - 1))
+                                if (!pagerState.isScrollInProgress) {
+                                    onIntent(PhotoDetailIntent.ClickLeftPhoto)
                                 }
                             },
                     )
@@ -131,8 +131,8 @@ internal fun PhotoDetailScreen(
                             .weight(1f)
                             .fillMaxHeight()
                             .noRippleClickableSingle {
-                                if (!pagerState.isScrollInProgress && pagerState.currentPage < uiState.photos.lastIndex) {
-                                    onIntent(PhotoDetailIntent.PageChanged(pagerState.currentPage + 1))
+                                if (!pagerState.isScrollInProgress) {
+                                    onIntent(PhotoDetailIntent.ClickRightPhoto)
                                 }
                             },
                     )
