@@ -1,6 +1,6 @@
 package com.neki.android.feature.pose.impl.random
 
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,9 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
@@ -40,13 +43,11 @@ internal fun RandomPoseRoute(
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
     val pagerState = rememberPagerState { uiState.poseList.size }
+    val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(uiState.currentIndex) {
-        if (pagerState.currentPage != uiState.currentIndex) {
-            pagerState.animateScrollToPage(
-                page = uiState.currentIndex,
-                animationSpec = tween(durationMillis = 500),
-            )
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { page ->
+            viewModel.store.onIntent(RandomPoseIntent.PageChanged(page))
         }
     }
 
@@ -55,6 +56,12 @@ internal fun RandomPoseRoute(
             RandomPoseEffect.NavigateBack -> navigateBack()
             is RandomPoseEffect.NavigateToDetail -> navigateToPoseDetail(sideEffect.poseId)
             is RandomPoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
+            is RandomPoseEffect.AnimateToPage -> coroutineScope.launch {
+                pagerState.animateScrollToPage(
+                    page = sideEffect.index,
+                    animationSpec = spring(),
+                )
+            }
         }
     }
 

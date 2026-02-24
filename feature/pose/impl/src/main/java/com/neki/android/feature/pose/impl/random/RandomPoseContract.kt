@@ -34,6 +34,7 @@ sealed interface RandomPoseIntent {
     data object ClickBookmarkIcon : RandomPoseIntent
     data object ClickLeftSwipe : RandomPoseIntent
     data object ClickRightSwipe : RandomPoseIntent
+    data class PageChanged(val index: Int) : RandomPoseIntent
     data class BookmarkChanged(val poseId: Long, val isBookmarked: Boolean) : RandomPoseIntent
 }
 
@@ -41,4 +42,5 @@ sealed interface RandomPoseEffect {
     data object NavigateBack : RandomPoseEffect
     data class NavigateToDetail(val poseId: Long) : RandomPoseEffect
     data class ShowToast(val message: String) : RandomPoseEffect
+    data class AnimateToPage(val index: Int) : RandomPoseEffect
 }

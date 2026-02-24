@@ -55,8 +55,27 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialData(state, reduce, postSideEffect)
 
             // 튜토리얼
-            RandomPoseIntent.ClickLeftSwipe -> handleMovePrevious(state, reduce, postSideEffect)
-            RandomPoseIntent.ClickRightSwipe -> handleMoveNext(state, reduce, postSideEffect)
+            RandomPoseIntent.ClickLeftSwipe -> {
+                if (state.hasPrevious) {
+                    postSideEffect(RandomPoseEffect.AnimateToPage(state.currentIndex - 1))
+                } else {
+                    postSideEffect(RandomPoseEffect.ShowToast("첫번째 포즈입니다."))
+                }
+            }
+
+            RandomPoseIntent.ClickRightSwipe -> {
+                if (state.currentIndex < state.poseList.lastIndex) {
+                    postSideEffect(RandomPoseEffect.AnimateToPage(state.currentIndex + 1))
+                } else if (!state.hasNewPose) {
+                    postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
+                }
+            }
+
+            is RandomPoseIntent.PageChanged -> {
+                reduce { copy(currentIndex = intent.index) }
+                prefetchIfNeeded(intent.index, state, reduce, postSideEffect)
+            }
+
             RandomPoseIntent.ClickStartRandomPose -> reduce { copy(isShowTutorial = false) }
 
             // 기본화면
@@ -125,39 +144,17 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         }
     }
 
-    private fun handleMovePrevious(
+    private fun prefetchIfNeeded(
+        currentIndex: Int,
         state: RandomPoseUiState,
         reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
-        if (state.hasPrevious) {
-            val previousIndex = state.currentIndex - 1
-            reduce { copy(currentIndex = previousIndex) }
-        } else {
-            postSideEffect(RandomPoseEffect.ShowToast("첫번째 포즈입니다."))
-        }
-    }
-
-    private fun handleMoveNext(
-        state: RandomPoseUiState,
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
-        postSideEffect: (RandomPoseEffect) -> Unit,
-    ) {
-        // 마지막 인덱스 + 더 이상 새 포즈 없음이 확정된 경우에만 토스트
-        if (state.currentIndex >= state.poseList.lastIndex && !state.hasNewPose) {
-            postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
-            return
-        }
-
-        val nextIndex = state.currentIndex + 1
-        reduce { copy(currentIndex = nextIndex) }
-
-        // 여분 포즈가 POSE_PREFETCH_THRESHOLD 이하이면 다음 포즈 미리 캐싱
-        if (state.poseList.lastIndex - nextIndex < PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
+        if (state.poseList.lastIndex - currentIndex < PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
             viewModelScope.launch {
                 poseRepository.getSingleRandomPose(
                     headCount = peopleCount,
-                    excludeIds = store.uiState.value.randomPoseIds, // 최신 값을 사용하기 위해 store 로 접근
+                    excludeIds = store.uiState.value.randomPoseIds,
                 ).onSuccess { pose ->
                     reduce {
                         copy(
