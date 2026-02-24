@@ -1,29 +1,45 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.DevicePreview
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.LoadingDialog
-import timber.log.Timber
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 internal fun PhotoDetailRoute(
@@ -34,6 +50,13 @@ internal fun PhotoDetailRoute(
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
     val resultEventBus = LocalResultEventBus.current
+    val pagerState = rememberPagerState(initialPage = uiState.currentIndex) { uiState.photos.size }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { page ->
+            viewModel.store.onIntent(PhotoDetailIntent.PageChanged(page))
+        }
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -50,12 +73,20 @@ internal fun PhotoDetailRoute(
                         Timber.e(e)
                     }
             }
+
+            is PhotoDetailSideEffect.ScrollToPage -> {
+                pagerState.animateScrollToPage(
+                    page = sideEffect.index,
+                    animationSpec = tween(durationMillis = 300),
+                )
+            }
         }
     }
 
     PhotoDetailScreen(
         uiState = uiState,
         onIntent = viewModel.store::onIntent,
+        pagerState = pagerState,
     )
 }
 
@@ -63,6 +94,7 @@ internal fun PhotoDetailRoute(
 internal fun PhotoDetailScreen(
     uiState: PhotoDetailState = PhotoDetailState(),
     onIntent: (PhotoDetailIntent) -> Unit = {},
+    pagerState: PagerState = rememberPagerState { uiState.photos.size },
 ) {
     Column(
         modifier = Modifier
@@ -74,14 +106,43 @@ internal fun PhotoDetailScreen(
             onBack = { onIntent(PhotoDetailIntent.ClickBackIcon) },
         )
 
-        AsyncImage(
+        HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            model = uiState.photo.imageUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-        )
+            state = pagerState,
+        ) { index ->
+            Box {
+                AsyncImage(
+                    modifier = Modifier.fillMaxSize(),
+                    model = uiState.photos.getOrNull(index)?.imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                )
+                Row(modifier = Modifier.matchParentSize()) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .noRippleClickableSingle {
+                                if (pagerState.currentPage > 0) {
+                                    onIntent(PhotoDetailIntent.PageChanged(pagerState.currentPage - 1))
+                                }
+                            },
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .noRippleClickableSingle {
+                                if (pagerState.currentPage < uiState.photos.lastIndex) {
+                                    onIntent(PhotoDetailIntent.PageChanged(pagerState.currentPage + 1))
+                                }
+                            },
+                    )
+                }
+            }
+        }
 
         PhotoDetailActionBar(
             isFavorite = uiState.photo.isFavorite,
@@ -110,11 +171,13 @@ private fun PhotoDetailScreenPreview() {
     NekiTheme {
         PhotoDetailScreen(
             uiState = PhotoDetailState(
-                photo = Photo(
-                    id = 1,
-                    imageUrl = "https://picsum.photos/400/400",
-                    isFavorite = false,
-                    date = "2025-12-26",
+                photos = listOf(
+                    Photo(
+                        id = 1,
+                        imageUrl = "https://picsum.photos/400/400",
+                        isFavorite = false,
+                        date = "2025-12-26",
+                    ),
                 ),
             ),
         )
@@ -127,11 +190,13 @@ private fun PhotoDetailScreenFavoritePreview() {
     NekiTheme {
         PhotoDetailScreen(
             uiState = PhotoDetailState(
-                photo = Photo(
-                    id = 1,
-                    imageUrl = "https://picsum.photos/400/400",
-                    isFavorite = true,
-                    date = "2025-12-26",
+                photos = listOf(
+                    Photo(
+                        id = 1,
+                        imageUrl = "https://picsum.photos/400/400",
+                        isFavorite = true,
+                        date = "2025-12-26",
+                    ),
                 ),
             ),
         )

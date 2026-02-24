@@ -28,13 +28,11 @@ class PhotoDetailViewModel @AssistedInject constructor(
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
-    private val photo = photos[initialIndex]
-    private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
+    private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
+    private val committedFavorites = photos.associate { it.id to it.isFavorite }.toMutableMap()
     val store: MviIntentStore<PhotoDetailState, PhotoDetailIntent, PhotoDetailSideEffect> =
         mviIntentStore(
             initialState = PhotoDetailState(
-                photo = photo,
-                committedFavorite = photo.isFavorite,
                 photos = photos,
                 currentIndex = initialIndex,
             ),
@@ -45,17 +43,17 @@ class PhotoDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             favoriteRequests
                 .debounce(500)
-                .collect { newFavorite ->
-                    val committedFavorite = store.uiState.value.committedFavorite
+                .collect { (photoId, newFavorite) ->
+                    val committedFavorite = committedFavorites[photoId] ?: return@collect
                     if (committedFavorite != newFavorite) {
-                        photoRepository.updateFavorite(photo.id, newFavorite)
+                        photoRepository.updateFavorite(photoId, newFavorite)
                             .onSuccess {
                                 Timber.d("updateFavorite success")
-                                store.onIntent(PhotoDetailIntent.FavoriteCommitted(newFavorite))
+                                store.onIntent(PhotoDetailIntent.FavoriteCommitted(photoId, newFavorite))
                             }
                             .onFailure { e ->
                                 Timber.e(e, "updateFavorite failed")
-                                store.onIntent(PhotoDetailIntent.RevertFavorite(committedFavorite))
+                                store.onIntent(PhotoDetailIntent.RevertFavorite(photoId, committedFavorite))
                             }
                     }
                 }
@@ -77,15 +75,33 @@ class PhotoDetailViewModel @AssistedInject constructor(
             // TopBar Intent
             PhotoDetailIntent.ClickBackIcon -> postSideEffect(PhotoDetailSideEffect.NavigateBack)
 
+            // Pager Intent
+            is PhotoDetailIntent.PageChanged -> {
+                val clampedIndex = intent.index.coerceIn(0, state.photos.lastIndex)
+                if (clampedIndex != state.currentIndex) {
+                    reduce { copy(currentIndex = clampedIndex) }
+                    postSideEffect(PhotoDetailSideEffect.ScrollToPage(clampedIndex))
+                }
+            }
+
             // ActionBar Intent
             PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce)
             is PhotoDetailIntent.FavoriteCommitted -> {
-                reduce { copy(committedFavorite = intent.newFavorite) }
-                postSideEffect(PhotoDetailSideEffect.NotifyPhotoUpdated(ArchiveResult.FavoriteChanged(photo.id, intent.newFavorite)))
+                committedFavorites[intent.photoId] = intent.newFavorite
+                postSideEffect(PhotoDetailSideEffect.NotifyPhotoUpdated(ArchiveResult.FavoriteChanged(intent.photoId, intent.newFavorite)))
             }
 
-            is PhotoDetailIntent.RevertFavorite -> reduce { copy(photo = photo.copy(isFavorite = intent.originalFavorite)) }
+            is PhotoDetailIntent.RevertFavorite -> {
+                reduce {
+                    copy(
+                        photos = photos.map { p ->
+                            if (p.id == intent.photoId) p.copy(isFavorite = intent.originalFavorite) else p
+                        },
+                    )
+                }
+            }
+
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
 
             // Delete Dialog Intent
@@ -99,10 +115,15 @@ class PhotoDetailViewModel @AssistedInject constructor(
         state: PhotoDetailState,
         reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
     ) {
-        val newFavoriteStatus = !state.photo.isFavorite
-        viewModelScope.launch { favoriteRequests.emit(newFavoriteStatus) }
+        val currentPhoto = state.photo
+        val newFavoriteStatus = !currentPhoto.isFavorite
+        viewModelScope.launch { favoriteRequests.emit(currentPhoto.id to newFavoriteStatus) }
         reduce {
-            copy(photo = state.photo.copy(isFavorite = newFavoriteStatus))
+            copy(
+                photos = photos.map { p ->
+                    if (p.id == currentPhoto.id) p.copy(isFavorite = newFavoriteStatus) else p
+                },
+            )
         }
     }
 
@@ -117,7 +138,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             photoRepository.deletePhoto(state.photo.id)
                 .onSuccess {
                     reduce { copy(isLoading = false) }
-                    postSideEffect(PhotoDetailSideEffect.NotifyPhotoUpdated(ArchiveResult.PhotoDeleted(photo.id)))
+                    postSideEffect(PhotoDetailSideEffect.NotifyPhotoUpdated(ArchiveResult.PhotoDeleted(state.photo.id)))
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
                     postSideEffect(PhotoDetailSideEffect.NavigateBack)
                 }
@@ -132,12 +153,12 @@ class PhotoDetailViewModel @AssistedInject constructor(
     override fun onCleared() {
         super.onCleared()
 
-        val currentFavorite = store.uiState.value.photo.isFavorite
-        val committedFavorite = store.uiState.value.committedFavorite
-
-        if (currentFavorite != committedFavorite) {
+        val state = store.uiState.value
+        val currentPhoto = state.photo
+        val committedFavorite = committedFavorites[currentPhoto.id] ?: return
+        if (currentPhoto.isFavorite != committedFavorite) {
             applicationScope.launch {
-                photoRepository.updateFavorite(photo.id, currentFavorite)
+                photoRepository.updateFavorite(currentPhoto.id, currentPhoto.isFavorite)
             }
         }
     }
