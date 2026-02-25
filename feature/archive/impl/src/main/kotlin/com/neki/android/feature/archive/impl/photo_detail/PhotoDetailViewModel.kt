@@ -180,22 +180,25 @@ class PhotoDetailViewModel @AssistedInject constructor(
     ) {
         isLoadingMore = true
         viewModelScope.launch {
-            val result = if (key.isFavoriteOnly) {
-                photoRepository.getFavoritePhotosPage(nextPage, PAGE_SIZE, key.sortOrder)
-            } else {
-                photoRepository.getPhotosPage(key.folderId, nextPage, PAGE_SIZE, key.sortOrder)
+            try {
+                val result = if (key.isFavoriteOnly) {
+                    photoRepository.getFavoritePhotosPage(nextPage, PAGE_SIZE, key.sortOrder)
+                } else {
+                    photoRepository.getPhotosPage(key.folderId, nextPage, PAGE_SIZE, key.sortOrder)
+                }
+                result
+                    .onSuccess { page ->
+                        reduce { copy(photos = photos + page.photos) }
+                        hasNext = page.hasNext
+                        nextPage++
+                        page.photos.forEach { committedFavorites[it.id] = it.isFavorite }
+                    }
+                    .onFailure { e ->
+                        Timber.e(e, "loadMorePhotos failed")
+                    }
+            } finally {
+                isLoadingMore = false
             }
-            result
-                .onSuccess { page ->
-                    reduce { copy(photos = photos + page.photos) }
-                    hasNext = page.hasNext
-                    nextPage++
-                    page.photos.forEach { committedFavorites[it.id] = it.isFavorite }
-                }
-                .onFailure { e ->
-                    Timber.e(e, "loadMorePhotos failed")
-                }
-            isLoadingMore = false
         }
     }
 
