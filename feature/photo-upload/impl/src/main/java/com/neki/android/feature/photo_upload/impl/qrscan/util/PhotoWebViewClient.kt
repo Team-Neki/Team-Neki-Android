@@ -48,6 +48,12 @@ class PhotoWebViewClient(
                 Timber.d("포토그레이 이미지")
                 onImageUrlDetected(url)
             }
+
+            // 모노맨션
+            url.contains(BuildConfig.MONO_MANSION_IMAGE_URL) && url.endsWith(BuildConfig.MONO_MANSION_IMAGE_URL_MIME_TYPE) -> {
+                Timber.d("모노맨션 이미지")
+                onImageUrlDetected(url)
+            }
         }
 
         return super.shouldInterceptRequest(view, request)

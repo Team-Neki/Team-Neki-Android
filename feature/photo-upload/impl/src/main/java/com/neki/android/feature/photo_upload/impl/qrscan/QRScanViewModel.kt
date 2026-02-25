@@ -113,10 +113,11 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
             url.contains(BuildConfig.LIFE_FOUR_CUT_URL) ||
             url.contains(BuildConfig.PHOTO_SIGNATURE_URL) ||
             url.contains(BuildConfig.HARU_FILM_URL) ||
-            url.contains(BuildConfig.PHOTO_GRAY_URL)
+            url.contains(BuildConfig.PHOTO_GRAY_URL) ||
+            url.contains(BuildConfig.MONO_MANSION_URL)
     }
 
     private fun isShouldFirstDownloadBrand(url: String): Boolean {
-        return false
+        return url.contains(BuildConfig.MONO_MANSION_URL)
     }
 }

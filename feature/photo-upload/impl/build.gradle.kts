@@ -41,6 +41,10 @@ android {
         buildConfigField("String", "PHOTO_GRAY_URL", properties["PHOTO_GRAY_URL"].toString())
         buildConfigField("String", "PHOTO_GRAY_IMAGE_URL", properties["PHOTO_GRAY_IMAGE_URL"].toString())
         buildConfigField("String", "PHOTO_GRAY_IMAGE_URL_MIME_TYPE", properties["PHOTO_GRAY_IMAGE_URL_MIME_TYPE"].toString())
+
+        buildConfigField("String", "MONO_MANSION_URL", properties["MONO_MANSION_URL"].toString())
+        buildConfigField("String", "MONO_MANSION_IMAGE_URL", properties["MONO_MANSION_IMAGE_URL"].toString())
+        buildConfigField("String", "MONO_MANSION_IMAGE_URL_MIME_TYPE", properties["MONO_MANSION_IMAGE_URL_MIME_TYPE"].toString())
     }
 }
 
