@@ -228,6 +228,7 @@ fun MapScreen(
         MapUiSettings(
             isLocationButtonEnabled = false,
             isZoomControlEnabled = false,
+            isCompassEnabled = false,
         )
     }
 
