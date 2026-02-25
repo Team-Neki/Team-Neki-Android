@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.actionbar.NekiBothSidesActionBar
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
+import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -34,36 +34,36 @@ internal fun PhotoActionBar(
         exit = shrinkVertically(shrinkTowards = Alignment.Top),
     ) {
         NekiBothSidesActionBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+            modifier = Modifier.fillMaxWidth(),
             startContent = {
-                Icon(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .noRippleClickableSingle(
-                            enabled = isEnabled,
-                            onClick = onClickDownload,
-                        ),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_download),
-                    contentDescription = null,
-                    tint = if (isEnabled) NekiTheme.colorScheme.gray700
-                    else NekiTheme.colorScheme.gray200,
-                )
+                NekiIconButton(
+                    modifier = Modifier.padding(8.dp),
+                    enabled = isEnabled,
+                    onClick = onClickDownload,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(28.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_download),
+                        contentDescription = null,
+                        tint = if (isEnabled) NekiTheme.colorScheme.gray700
+                        else NekiTheme.colorScheme.gray200,
+                    )
+                }
             },
             endContent = {
-                Icon(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .noRippleClickableSingle(
-                            enabled = isEnabled,
-                            onClick = onClickDelete,
-                        ),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
-                    contentDescription = null,
-                    tint = if (isEnabled) NekiTheme.colorScheme.gray700
-                    else NekiTheme.colorScheme.gray200,
-                )
+                NekiIconButton(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = onClickDelete,
+                    enabled = isEnabled,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(28.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
+                        contentDescription = null,
+                        tint = if (isEnabled) NekiTheme.colorScheme.gray700
+                        else NekiTheme.colorScheme.gray200,
+                    )
+                }
             },
         )
     }

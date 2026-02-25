@@ -1,6 +1,7 @@
 package com.neki.android.feature.archive.impl.main
 
 import android.net.Uri
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.FolderRepository
@@ -21,7 +22,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import androidx.compose.foundation.text.input.TextFieldState
 import javax.inject.Inject
 
 private const val DEFAULT_PHOTOS_SIZE = 20
@@ -97,7 +97,7 @@ class ArchiveMainViewModel @Inject constructor(
 
             // Photo Intent
             ArchiveMainIntent.ClickAllPhotoText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllPhoto)
-            is ArchiveMainIntent.ClickPhotoItem -> postSideEffect(ArchiveMainSideEffect.NavigateToPhotoDetail(intent.photo))
+            is ArchiveMainIntent.ClickPhotoItem -> postSideEffect(ArchiveMainSideEffect.NavigateToPhotoDetail(state.recentPhotos, intent.index))
             is ArchiveMainIntent.ClickFavoriteIcon -> handleFavoriteToggle(intent.photo, reduce)
 
             // Add Album BottomSheet Intent

@@ -85,6 +85,7 @@ class MapViewModel @Inject constructor(
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, state.shouldShowInfoTooltip, reduce)
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
+            is MapIntent.ClickClusterMarker -> postSideEffect(MapEffect.ZoomToClusterBounds(intent.southWest, intent.northEast))
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
             MapIntent.ClickDirectionIcon -> {
                 if (LocationPermissionManager.isGrantedLocationPermission(context)) {
@@ -361,7 +362,7 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        val checkedBrandIds = state.brands.filter { it.isChecked }.map { it.id }
+        val checkedBrandNames = state.brands.filter { it.isChecked }.map { it.name }
 
         // 좌상단 -> 우상단 -> 우하단 -> 좌하단 -> 좌상단 (닫힌 다각형)
         val coordinates = listOf(
@@ -377,7 +378,7 @@ class MapViewModel @Inject constructor(
 
             mapRepository.getPhotoBoothsByPolygon(
                 coordinates = coordinates,
-                brandIds = checkedBrandIds,
+                brandIds = emptyList(),
             ).onSuccess { photoBooths ->
                 reduce {
                     copy(
@@ -387,6 +388,7 @@ class MapViewModel @Inject constructor(
                                 imageUrl = brands.find {
                                     it.name == photoBooth.brandName
                                 }?.imageUrl.orEmpty(),
+                                isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
                             )
                         }.toImmutableList(),
                     )

@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.photo_detail.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.actionbar.NekiBothSidesActionBar
-import com.neki.android.core.designsystem.modifier.noRippleClickable
+import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -26,45 +25,49 @@ internal fun PhotoDetailActionBar(
     onClickDelete: () -> Unit = {},
 ) {
     NekiBothSidesActionBar(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(20.dp),
+        modifier = modifier.fillMaxWidth(),
         startContent = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .noRippleClickable { onClickDownload() },
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_download),
-                    contentDescription = null,
-                    tint = NekiTheme.colorScheme.gray700,
-                )
-
-                Icon(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .noRippleClickable { onClickFavorite() },
-                    imageVector = ImageVector.vectorResource(
-                        if (isFavorite) R.drawable.icon_favorite_filled
-                        else R.drawable.icon_favorite_stroked,
-                    ),
-                    contentDescription = null,
-                    tint = if (isFavorite) NekiTheme.colorScheme.primary400
-                    else NekiTheme.colorScheme.gray700,
-                )
+            Row {
+                NekiIconButton(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = onClickDownload,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(28.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_download),
+                        contentDescription = null,
+                        tint = NekiTheme.colorScheme.gray700,
+                    )
+                }
+                NekiIconButton(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = onClickFavorite,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(28.dp),
+                        imageVector = ImageVector.vectorResource(
+                            if (isFavorite) R.drawable.icon_favorite_filled
+                            else R.drawable.icon_favorite_stroked,
+                        ),
+                        contentDescription = null,
+                        tint = if (isFavorite) NekiTheme.colorScheme.primary400
+                        else NekiTheme.colorScheme.gray700,
+                    )
+                }
             }
         },
         endContent = {
-            Icon(
-                modifier = Modifier
-                    .size(28.dp)
-                    .noRippleClickable { onClickDelete() },
-                imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
-                contentDescription = null,
-                tint = NekiTheme.colorScheme.gray700,
-            )
+            NekiIconButton(
+                modifier = Modifier.padding(8.dp),
+                onClick = onClickDelete,
+            ) {
+                Icon(
+                    modifier = Modifier.size(28.dp),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
+                    contentDescription = null,
+                    tint = NekiTheme.colorScheme.gray700,
+                )
+            }
         },
     )
 }

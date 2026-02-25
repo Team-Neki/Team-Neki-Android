@@ -38,7 +38,9 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
+import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
@@ -62,7 +64,7 @@ import timber.log.Timber
 internal fun AllPhotoRoute(
     viewModel: AllPhotoViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToPhotoDetail: (Photo) -> Unit,
+    navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -81,7 +83,20 @@ internal fun AllPhotoRoute(
                 lazyState.scrollToItem(0)
             }
 
-            is AllPhotoSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
+            is AllPhotoSideEffect.NavigateToPhotoDetail -> {
+                navigateToPhotoDetail(
+                    ArchiveNavKey.PhotoDetail(
+                        photos = pagingItems.itemSnapshotList.items,
+                        initialIndex = sideEffect.index,
+                        hasNext = !pagingItems.loadState.append.endOfPaginationReached,
+                        sortOrder = when (uiState.selectedPhotoFilter) {
+                            PhotoFilter.NEWEST -> SortOrder.DESC
+                            PhotoFilter.OLDEST -> SortOrder.ASC
+                        },
+                        isFavoriteOnly = uiState.isFavoriteChipSelected,
+                    ),
+                )
+            }
             is AllPhotoSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)
             }
@@ -211,8 +226,8 @@ private fun AllPhotoContent(
                             photo = photo,
                             isSelected = isSelected,
                             isSelectMode = uiState.selectMode == SelectMode.SELECTING,
-                            onClickItem = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
-                            onClickSelect = { onIntent(AllPhotoIntent.ClickPhotoItem(photo)) },
+                            onClickItem = { onIntent(AllPhotoIntent.ClickPhotoItem(photo, index)) },
+                            onClickSelect = { onIntent(AllPhotoIntent.ClickPhotoItem(photo, index)) },
                             onClickFavorite = { onIntent(AllPhotoIntent.ClickFavoriteIcon(photo)) },
                         )
                     }
