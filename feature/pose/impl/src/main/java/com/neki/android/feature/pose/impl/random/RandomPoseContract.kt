@@ -7,16 +7,16 @@ import kotlinx.collections.immutable.persistentListOf
 data class RandomPoseState(
     val isLoading: Boolean = false,
     val isShowTutorial: Boolean = true,
-    val currentIndex: Int = 0,
+    val currentPage: Int = 0,
     val poseList: ImmutableList<Pose> = persistentListOf(),
     val committedBookmarks: Map<Long, Boolean> = emptyMap(),
     val hasNewPose: Boolean = true,
 ) {
+    val currentIndex: Int
+        get() = if (poseList.isEmpty()) 0 else currentPage % poseList.size
+
     val currentPose: Pose?
         get() = poseList.getOrNull(currentIndex)
-
-    val hasPrevious: Boolean
-        get() = currentIndex > 0
 
     val randomPoseIds: Set<Long>
         get() = poseList.map { it.id }.toSet()
@@ -34,7 +34,7 @@ sealed interface RandomPoseIntent {
     data object ClickBookmarkIcon : RandomPoseIntent
     data object ClickLeftSwipe : RandomPoseIntent
     data object ClickRightSwipe : RandomPoseIntent
-    data class PageChanged(val index: Int) : RandomPoseIntent
+    data class PageChanged(val page: Int) : RandomPoseIntent
     data class BookmarkChanged(val poseId: Long, val isBookmarked: Boolean) : RandomPoseIntent
 }
 

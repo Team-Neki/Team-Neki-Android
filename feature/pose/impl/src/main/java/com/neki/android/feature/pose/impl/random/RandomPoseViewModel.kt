@@ -56,26 +56,18 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
             // 튜토리얼
             RandomPoseIntent.ClickLeftSwipe -> {
-                if (state.hasPrevious) {
-                    postSideEffect(RandomPoseEffect.AnimateToPage(state.currentIndex - 1))
-                } else {
-                    postSideEffect(RandomPoseEffect.ShowToast("첫번째 포즈입니다."))
+                if (state.currentPage > 0) {
+                    postSideEffect(RandomPoseEffect.AnimateToPage(state.currentPage - 1))
                 }
             }
 
             RandomPoseIntent.ClickRightSwipe -> {
-                if (state.currentIndex < state.poseList.lastIndex) {
-                    postSideEffect(RandomPoseEffect.AnimateToPage(state.currentIndex + 1))
-                } else if (!state.hasNewPose) {
-                    postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
-                } else {
-                    postSideEffect(RandomPoseEffect.ShowToast("새로운 포즈를 불러오고 있어요"))
-                }
+                postSideEffect(RandomPoseEffect.AnimateToPage(state.currentPage + 1))
             }
 
             is RandomPoseIntent.PageChanged -> {
-                reduce { copy(currentIndex = intent.index) }
-                prefetchIfNeeded(intent.index, state, reduce, postSideEffect)
+                reduce { copy(currentPage = intent.page) }
+                prefetchIfNeeded(reduce)
             }
 
             RandomPoseIntent.ClickStartRandomPose -> reduce { copy(isShowTutorial = false) }
@@ -147,13 +139,11 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     }
 
     private fun prefetchIfNeeded(
-        currentIndex: Int,
-        state: RandomPoseState,
         reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
-        postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
+        val state = store.uiState.value
         if (state.poseList.isEmpty()) return
-        if (state.poseList.lastIndex - currentIndex < PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
+        if (state.currentIndex >= state.poseList.size - PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
             viewModelScope.launch {
                 poseRepository.getSingleRandomPose(
                     headCount = peopleCount,
@@ -216,7 +206,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                         isLoading = false,
                         poseList = data.toImmutableList(),
                         committedBookmarks = data.associate { it.id to it.isBookmarked },
-                        currentIndex = 0,
+                        currentPage = 0,
                     )
                 }
             }.onFailure { e ->
