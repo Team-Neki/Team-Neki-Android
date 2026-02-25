@@ -68,6 +68,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     postSideEffect(RandomPoseEffect.AnimateToPage(state.currentIndex + 1))
                 } else if (!state.hasNewPose) {
                     postSideEffect(RandomPoseEffect.ShowToast("모든 포즈를 불러왔어요"))
+                } else {
+                    postSideEffect(RandomPoseEffect.ShowToast("새로운 포즈를 불러오고 있어요"))
                 }
             }
 

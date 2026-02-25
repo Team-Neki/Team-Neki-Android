@@ -91,6 +91,8 @@ class PhotoDetailViewModel @AssistedInject constructor(
                     postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentIndex + 1))
                 } else if (!hasNext) {
                     postSideEffect(PhotoDetailSideEffect.ShowToastMessage("마지막 사진이에요"))
+                } else {
+                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("새로운 사진을 불러오고 있어요"))
                 }
             }
 
