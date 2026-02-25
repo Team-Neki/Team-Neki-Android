@@ -29,6 +29,22 @@ android {
         buildConfigField("String", "LIFE_FOUR_CUT_URL", properties["LIFE_FOUR_CUT_URL"].toString())
         buildConfigField("String", "LIFE_FOUR_CUT_IMAGE_URL", properties["LIFE_FOUR_CUT_IMAGE_URL"].toString())
         buildConfigField("String", "LIFE_FOUR_CUT_IMAGE_URL_MIME_TYPE", properties["LIFE_FOUR_CUT_IMAGE_URL_MIME_TYPE"].toString())
+
+        buildConfigField("String", "PHOTO_SIGNATURE_URL", properties["PHOTO_SIGNATURE_URL"].toString())
+        buildConfigField("String", "PHOTO_SIGNATURE_IMAGE_URL", properties["PHOTO_SIGNATURE_IMAGE_URL"].toString())
+        buildConfigField("String", "PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE", properties["PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE"].toString())
+
+        buildConfigField("String", "HARU_FILM_URL", properties["HARU_FILM_URL"].toString())
+        buildConfigField("String", "HARU_FILM_IMAGE_URL", properties["HARU_FILM_IMAGE_URL"].toString())
+        buildConfigField("String", "HARU_FILM_IMAGE_URL_MIME_TYPE", properties["HARU_FILM_IMAGE_URL_MIME_TYPE"].toString())
+
+        buildConfigField("String", "PHOTO_GRAY_URL", properties["PHOTO_GRAY_URL"].toString())
+        buildConfigField("String", "PHOTO_GRAY_IMAGE_URL", properties["PHOTO_GRAY_IMAGE_URL"].toString())
+        buildConfigField("String", "PHOTO_GRAY_IMAGE_URL_MIME_TYPE", properties["PHOTO_GRAY_IMAGE_URL_MIME_TYPE"].toString())
+
+        buildConfigField("String", "MONO_MANSION_URL", properties["MONO_MANSION_URL"].toString())
+        buildConfigField("String", "MONO_MANSION_IMAGE_URL", properties["MONO_MANSION_IMAGE_URL"].toString())
+        buildConfigField("String", "MONO_MANSION_IMAGE_URL_MIME_TYPE", properties["MONO_MANSION_IMAGE_URL_MIME_TYPE"].toString())
     }
 }
 

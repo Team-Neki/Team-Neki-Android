@@ -20,14 +20,38 @@ class PhotoWebViewClient(
 
         when {
             // 포토이즘
-            url.startsWith(BuildConfig.PHOTOISM_IMAGE_URL) && url.endsWith(BuildConfig.PHOTOISM_IMAGE_URL_MIME_TYPE) -> {
+            url.contains(BuildConfig.PHOTOISM_IMAGE_URL) && url.endsWith(BuildConfig.PHOTOISM_IMAGE_URL_MIME_TYPE) -> {
                 Timber.d("포토이즘 이미지")
                 onImageUrlDetected(url)
             }
 
             // 인생네컷
-            url.startsWith(BuildConfig.LIFE_FOUR_CUT_IMAGE_URL) && url.endsWith(BuildConfig.LIFE_FOUR_CUT_IMAGE_URL_MIME_TYPE) -> {
+            url.contains(BuildConfig.LIFE_FOUR_CUT_IMAGE_URL) && url.endsWith(BuildConfig.LIFE_FOUR_CUT_IMAGE_URL_MIME_TYPE) -> {
                 Timber.d("인생네컷 이미지")
+                onImageUrlDetected(url)
+            }
+
+            // 포토시그니처
+            url.contains(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL) && url.endsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE) -> {
+                Timber.d("포토시그니처 이미지")
+                onImageUrlDetected(url)
+            }
+
+            // 하루필름
+            url.contains(BuildConfig.HARU_FILM_IMAGE_URL) && url.endsWith(BuildConfig.HARU_FILM_IMAGE_URL_MIME_TYPE) -> {
+                Timber.d("하루필름 이미지")
+                onImageUrlDetected(url)
+            }
+
+            // 포토그레이
+            url.contains(BuildConfig.PHOTO_GRAY_IMAGE_URL) && url.endsWith(BuildConfig.PHOTO_GRAY_IMAGE_URL_MIME_TYPE) -> {
+                Timber.d("포토그레이 이미지")
+                onImageUrlDetected(url)
+            }
+
+            // 모노맨션
+            url.contains(BuildConfig.MONO_MANSION_IMAGE_URL) && url.endsWith(BuildConfig.MONO_MANSION_IMAGE_URL_MIME_TYPE) -> {
+                Timber.d("모노맨션 이미지")
                 onImageUrlDetected(url)
             }
         }
