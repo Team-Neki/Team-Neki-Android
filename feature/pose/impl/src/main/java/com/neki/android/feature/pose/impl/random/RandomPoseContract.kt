@@ -6,7 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class RandomPoseState(
     val isLoading: Boolean = false,
-    val isShowTutorial: Boolean = true,
+    val isShowTutorial: Boolean = false,
     val currentPage: Int = 0,
     val poseList: ImmutableList<Pose> = persistentListOf(),
     val committedBookmarks: Map<Long, Boolean> = emptyMap(),
