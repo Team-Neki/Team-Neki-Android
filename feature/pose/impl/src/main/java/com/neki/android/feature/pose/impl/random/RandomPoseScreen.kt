@@ -1,6 +1,6 @@
 package com.neki.android.feature.pose.impl.random
 
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,11 +10,15 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
@@ -39,17 +43,25 @@ internal fun RandomPoseRoute(
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
     val pagerState = rememberPagerState { uiState.poseList.size }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { page ->
+            viewModel.store.onIntent(RandomPoseIntent.PageChanged(page))
+        }
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             RandomPoseEffect.NavigateBack -> navigateBack()
             is RandomPoseEffect.NavigateToDetail -> navigateToPoseDetail(sideEffect.poseId)
-            is RandomPoseEffect.SwipePoseImage -> pagerState.animateScrollToPage(
-                page = sideEffect.index,
-                animationSpec = tween(durationMillis = 500),
-            )
-
             is RandomPoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
+            is RandomPoseEffect.AnimateToPage -> coroutineScope.launch {
+                pagerState.animateScrollToPage(
+                    page = sideEffect.index,
+                    animationSpec = spring(),
+                )
+            }
         }
     }
 
@@ -62,7 +74,7 @@ internal fun RandomPoseRoute(
 
 @Composable
 internal fun RandomPoseScreen(
-    uiState: RandomPoseUiState = RandomPoseUiState(),
+    uiState: RandomPoseState = RandomPoseState(),
     onIntent: (RandomPoseIntent) -> Unit = {},
     pagerState: PagerState = rememberPagerState { uiState.poseList.size },
 ) {
@@ -90,8 +102,16 @@ internal fun RandomPoseScreen(
                     .weight(1f),
                 poseList = uiState.poseList,
                 pagerState = pagerState,
-                onLeftSwipe = { onIntent(RandomPoseIntent.ClickLeftSwipe) },
-                onRightSwipe = { onIntent(RandomPoseIntent.ClickRightSwipe) },
+                onLeftSwipe = {
+                    if (!pagerState.isScrollInProgress) {
+                        onIntent(RandomPoseIntent.ClickLeftSwipe)
+                    }
+                },
+                onRightSwipe = {
+                    if (!pagerState.isScrollInProgress) {
+                        onIntent(RandomPoseIntent.ClickRightSwipe)
+                    }
+                },
             )
 
             uiState.currentPose?.let { pose ->
@@ -119,7 +139,7 @@ internal fun RandomPoseScreen(
 private fun RandomPoseScreenPreview() {
     NekiTheme {
         RandomPoseScreen(
-            uiState = RandomPoseUiState(isShowTutorial = false),
+            uiState = RandomPoseState(isShowTutorial = false),
         )
     }
 }
@@ -129,7 +149,7 @@ private fun RandomPoseScreenPreview() {
 private fun RandomPoseScreenTutorialPreview() {
     NekiTheme {
         RandomPoseScreen(
-            uiState = RandomPoseUiState(isShowTutorial = true),
+            uiState = RandomPoseState(isShowTutorial = true),
         )
     }
 }

@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -35,6 +34,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.AddAlbumBottomSheet
@@ -61,7 +61,7 @@ internal fun ArchiveMainRoute(
     navigateToFavoriteAlbum: (Long) -> Unit,
     navigateToAlbumDetail: (Long, String) -> Unit,
     navigateToAllPhoto: () -> Unit,
-    navigateToPhotoDetail: (Photo) -> Unit,
+    navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -84,7 +84,9 @@ internal fun ArchiveMainRoute(
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
             is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
             ArchiveMainSideEffect.NavigateToAllPhoto -> navigateToAllPhoto()
-            is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(sideEffect.photo)
+            is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(
+                ArchiveNavKey.PhotoDetail(photos = sideEffect.photos, initialIndex = sideEffect.index),
+            )
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
             ArchiveMainSideEffect.OpenGallery -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             is ArchiveMainSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
@@ -123,7 +125,7 @@ internal fun ArchiveMainScreen(
                 onClickFavoriteAlbum = { onIntent(ArchiveMainIntent.ClickFavoriteAlbum) },
                 onClickAlbumItem = { onIntent(ArchiveMainIntent.ClickAlbumItem(it.id, it.title)) },
                 onClickShowAllPhoto = { onIntent(ArchiveMainIntent.ClickAllPhotoText) },
-                onClickPhotoItem = { photo -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo)) },
+                onClickPhotoItem = { photo, index -> onIntent(ArchiveMainIntent.ClickPhotoItem(photo, index)) },
                 onClickFavorite = { photo -> onIntent(ArchiveMainIntent.ClickFavoriteIcon(photo)) },
                 onClickAddAlbum = { onIntent(ArchiveMainIntent.ClickAddAlbum) },
             )
@@ -186,7 +188,7 @@ private fun ArchiveMainContent(
     onClickFavoriteAlbum: () -> Unit,
     onClickAlbumItem: (AlbumPreview) -> Unit,
     onClickShowAllPhoto: () -> Unit,
-    onClickPhotoItem: (Photo) -> Unit,
+    onClickPhotoItem: (Photo, Int) -> Unit,
     onClickFavorite: (Photo) -> Unit,
     onClickAddAlbum: () -> Unit,
     modifier: Modifier = Modifier,
@@ -245,12 +247,13 @@ private fun ArchiveMainContent(
         }
 
         items(
-            uiState.recentPhotos,
-            key = { photo -> photo.id },
-        ) { photo ->
+            count = uiState.recentPhotos.size,
+            key = { index -> uiState.recentPhotos[index].id },
+        ) { index ->
+            val photo = uiState.recentPhotos[index]
             ArchiveMainPhotoItem(
                 photo = photo,
-                onClickItem = onClickPhotoItem,
+                onClickItem = { onClickPhotoItem(it, index) },
                 onClickFavorite = onClickFavorite,
             )
         }

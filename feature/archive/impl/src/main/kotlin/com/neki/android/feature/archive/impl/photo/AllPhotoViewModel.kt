@@ -104,7 +104,7 @@ class AllPhotoViewModel @Inject constructor(
             is AllPhotoIntent.ClickFilterPopupRow -> handleFilterRow(intent.filter, reduce, postSideEffect)
 
             // Photo Intent
-            is AllPhotoIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, state, reduce, postSideEffect)
+            is AllPhotoIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, intent.index, state, reduce, postSideEffect)
             AllPhotoIntent.ClickDownloadIcon -> downloadSelectedPhotos(state, postSideEffect)
             AllPhotoIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
             AllPhotoIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
@@ -178,13 +178,14 @@ class AllPhotoViewModel @Inject constructor(
 
     private fun handlePhotoClick(
         photo: Photo,
+        index: Int,
         state: AllPhotoState,
         reduce: (AllPhotoState.() -> AllPhotoState) -> Unit,
         postSideEffect: (AllPhotoSideEffect) -> Unit,
     ) {
         when (state.selectMode) {
             SelectMode.DEFAULT -> {
-                postSideEffect(AllPhotoSideEffect.NavigateToPhotoDetail(photo))
+                postSideEffect(AllPhotoSideEffect.NavigateToPhotoDetail(photo, index))
             }
 
             SelectMode.SELECTING -> {

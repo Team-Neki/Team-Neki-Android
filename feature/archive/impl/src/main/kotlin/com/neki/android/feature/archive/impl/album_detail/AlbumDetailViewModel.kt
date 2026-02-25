@@ -30,7 +30,7 @@ import timber.log.Timber
 
 @HiltViewModel(assistedFactory = AlbumDetailViewModel.Factory::class)
 class AlbumDetailViewModel @AssistedInject constructor(
-    @Assisted private val id: Long,
+    @Assisted val albumId: Long,
     @Assisted private val title: String,
     @Assisted private val isFavoriteAlbum: Boolean,
     private val photoRepository: PhotoRepository,
@@ -40,7 +40,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(id: Long, title: String, isFavoriteAlbum: Boolean): AlbumDetailViewModel
+        fun create(albumId: Long, title: String, isFavoriteAlbum: Boolean): AlbumDetailViewModel
     }
 
     private val deletedPhotoIds = MutableStateFlow<Set<Long>>(emptySet())
@@ -50,7 +50,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
         if (isFavoriteAlbum) {
             photoRepository.getFavoritePhotosFlow()
         } else {
-            photoRepository.getPhotosFlow(id)
+            photoRepository.getPhotosFlow(albumId)
         }.cachedIn(viewModelScope)
 
     val photoPagingData: Flow<PagingData<Photo>> = combine(
@@ -125,7 +125,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 )
             }
 
-            is AlbumDetailIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, state, reduce, postSideEffect)
+            is AlbumDetailIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, intent.index, state, reduce, postSideEffect)
 
             AlbumDetailIntent.ClickDownloadIcon -> handleDownload(state, postSideEffect)
             AlbumDetailIntent.ClickDeleteIcon -> handleDeleteIconClick(state, reduce, postSideEffect)
@@ -185,7 +185,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val newName = state.renameAlbumTextState.text.trim().toString()
             folderRepository.updateFolder(
-                folderId = id,
+                folderId = albumId,
                 name = newName,
             ).onSuccess {
                 reduce {
@@ -214,7 +214,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
             uploadMultiplePhotoUseCase(
                 imageUris = imageUris,
-                folderId = id.takeUnless { isFavoriteAlbum },
+                folderId = albumId.takeUnless { isFavoriteAlbum },
                 favorite = isFavoriteAlbum,
             ).onSuccess {
                 reduce { copy(isLoading = false) }
@@ -246,13 +246,14 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
     private fun handlePhotoClick(
         photo: Photo,
+        index: Int,
         state: AlbumDetailState,
         reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
         when (state.selectMode) {
             SelectMode.DEFAULT -> {
-                postSideEffect(AlbumDetailSideEffect.NavigateToPhotoDetail(photo))
+                postSideEffect(AlbumDetailSideEffect.NavigateToPhotoDetail(photo, index))
             }
 
             SelectMode.SELECTING -> {
@@ -346,7 +347,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
             reduce { copy(isLoading = true) }
 
             val result = when (state.selectedDeleteOption) {
-                PhotoDeleteOption.REMOVE_FROM_ALBUM -> folderRepository.removePhotosFromFolder(id, selectedPhotoIds)
+                PhotoDeleteOption.REMOVE_FROM_ALBUM -> folderRepository.removePhotosFromFolder(albumId, selectedPhotoIds)
                 PhotoDeleteOption.REMOVE_FROM_ALL -> photoRepository.deletePhoto(photoIds = selectedPhotoIds)
             }
 

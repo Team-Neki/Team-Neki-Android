@@ -48,7 +48,7 @@ sealed interface ArchiveMainIntent {
 
     // Photo Intent
     data object ClickAllPhotoText : ArchiveMainIntent
-    data class ClickPhotoItem(val photo: Photo) : ArchiveMainIntent
+    data class ClickPhotoItem(val photo: Photo, val index: Int) : ArchiveMainIntent
     data class ClickFavoriteIcon(val photo: Photo) : ArchiveMainIntent
 
     // Add Album BottomSheet Intent
@@ -68,7 +68,7 @@ sealed interface ArchiveMainSideEffect {
     data class NavigateToFavoriteAlbum(val albumId: Long) : ArchiveMainSideEffect
     data class NavigateToAlbumDetail(val albumId: Long, val title: String) : ArchiveMainSideEffect
     data object NavigateToAllPhoto : ArchiveMainSideEffect
-    data class NavigateToPhotoDetail(val photo: Photo) : ArchiveMainSideEffect
+    data class NavigateToPhotoDetail(val photos: List<Photo>, val index: Int) : ArchiveMainSideEffect
 
     data object ScrollToTop : ArchiveMainSideEffect
     data object OpenGallery : ArchiveMainSideEffect
