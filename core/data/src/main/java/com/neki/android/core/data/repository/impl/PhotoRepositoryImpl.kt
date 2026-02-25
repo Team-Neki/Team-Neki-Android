@@ -65,14 +65,6 @@ class PhotoRepositoryImpl @Inject constructor(
         photoService.updateFavorite(photoId, favorite)
     }
 
-    override suspend fun getFavoritePhotos(
-        page: Int,
-        size: Int,
-        sortOrder: SortOrder,
-    ): Result<List<Photo>> = runSuspendCatching {
-        photoService.getFavoritePhotos(page, size, sortOrder.name).data.toModels()
-    }
-
     override suspend fun getPhotosPage(
         folderId: Long?,
         page: Int,

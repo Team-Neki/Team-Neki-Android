@@ -25,12 +25,6 @@ interface PhotoRepository {
 
     suspend fun updateFavorite(photoId: Long, favorite: Boolean): Result<Unit>
 
-    suspend fun getFavoritePhotos(
-        page: Int = 0,
-        size: Int = 20,
-        sortOrder: SortOrder = SortOrder.DESC,
-    ): Result<List<Photo>>
-
     suspend fun getPhotosPage(
         folderId: Long? = null,
         page: Int = 0,
