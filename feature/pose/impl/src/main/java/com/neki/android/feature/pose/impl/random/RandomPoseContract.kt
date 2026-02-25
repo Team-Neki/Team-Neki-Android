@@ -4,7 +4,7 @@ import com.neki.android.core.model.Pose
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-data class RandomPoseUiState(
+data class RandomPoseState(
     val isLoading: Boolean = false,
     val isShowTutorial: Boolean = true,
     val currentIndex: Int = 0,

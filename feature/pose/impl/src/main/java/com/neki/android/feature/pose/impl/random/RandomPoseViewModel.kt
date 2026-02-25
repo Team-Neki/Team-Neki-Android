@@ -38,17 +38,17 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         fun create(peopleCount: PeopleCount): RandomPoseViewModel
     }
 
-    val store: MviIntentStore<RandomPoseUiState, RandomPoseIntent, RandomPoseEffect> =
+    val store: MviIntentStore<RandomPoseState, RandomPoseIntent, RandomPoseEffect> =
         mviIntentStore(
-            initialState = RandomPoseUiState(),
+            initialState = RandomPoseState(),
             onIntent = ::onIntent,
             initialFetchData = { store.onIntent(RandomPoseIntent.EnterRandomPoseScreen) },
         )
 
     private fun onIntent(
         intent: RandomPoseIntent,
-        state: RandomPoseUiState,
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        state: RandomPoseState,
+        reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         when (intent) {
@@ -98,7 +98,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     private fun handleBookmarkToggle(
         poseId: Long,
         newBookmarkStatus: Boolean,
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
     ) {
         // UI 즉시 업데이트
         reduce {
@@ -146,8 +146,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
     private fun prefetchIfNeeded(
         currentIndex: Int,
-        state: RandomPoseUiState,
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        state: RandomPoseState,
+        reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         if (state.poseList.lastIndex - currentIndex < PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
@@ -172,8 +172,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     }
 
     private fun fetchInitialData(
-        state: RandomPoseUiState,
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        state: RandomPoseState,
+        reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         checkFirstVisit(reduce)
@@ -181,7 +181,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     }
 
     private fun checkFirstVisit(
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
     ) {
         viewModelScope.launch {
             if (!userRepository.hasVisitedRandomPose.first()) {
@@ -193,8 +193,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     }
 
     private fun fetchInitialPoses(
-        state: RandomPoseUiState,
-        reduce: (RandomPoseUiState.() -> RandomPoseUiState) -> Unit,
+        state: RandomPoseState,
+        reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         if (state.poseList.isNotEmpty()) return

@@ -74,7 +74,7 @@ internal fun RandomPoseRoute(
 
 @Composable
 internal fun RandomPoseScreen(
-    uiState: RandomPoseUiState = RandomPoseUiState(),
+    uiState: RandomPoseState = RandomPoseState(),
     onIntent: (RandomPoseIntent) -> Unit = {},
     pagerState: PagerState = rememberPagerState { uiState.poseList.size },
 ) {
@@ -139,7 +139,7 @@ internal fun RandomPoseScreen(
 private fun RandomPoseScreenPreview() {
     NekiTheme {
         RandomPoseScreen(
-            uiState = RandomPoseUiState(isShowTutorial = false),
+            uiState = RandomPoseState(isShowTutorial = false),
         )
     }
 }
@@ -149,7 +149,7 @@ private fun RandomPoseScreenPreview() {
 private fun RandomPoseScreenTutorialPreview() {
     NekiTheme {
         RandomPoseScreen(
-            uiState = RandomPoseUiState(isShowTutorial = true),
+            uiState = RandomPoseState(isShowTutorial = true),
         )
     }
 }
