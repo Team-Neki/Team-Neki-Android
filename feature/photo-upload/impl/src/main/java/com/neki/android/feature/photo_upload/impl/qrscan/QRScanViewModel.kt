@@ -110,7 +110,10 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
 
     private fun isSupportedBrand(url: String): Boolean {
         return url.startsWith(BuildConfig.PHOTOISM_URL) ||
-            url.startsWith(BuildConfig.LIFE_FOUR_CUT_URL)
+            url.startsWith(BuildConfig.LIFE_FOUR_CUT_URL) ||
+            url.startsWith(BuildConfig.PHOTO_SIGNATURE_URL) ||
+            url.startsWith(BuildConfig.HARU_FILM_URL) ||
+            url.startsWith(BuildConfig.PHOTO_GRAY_URL)
     }
 
     private fun isShouldFirstDownloadBrand(url: String): Boolean {

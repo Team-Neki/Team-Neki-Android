@@ -30,6 +30,24 @@ class PhotoWebViewClient(
                 Timber.d("인생네컷 이미지")
                 onImageUrlDetected(url)
             }
+
+            // 포토시그니처
+            url.startsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL) && url.endsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE) -> {
+                Timber.d("포토시그니처 이미지")
+                onImageUrlDetected(url)
+            }
+
+            // 하루필름
+            url.startsWith(BuildConfig.HARU_FILM_IMAGE_URL) && url.endsWith(BuildConfig.HARU_FILM_IMAGE_URL_MIME_TYPE) -> {
+                Timber.d("하루필름 이미지")
+                onImageUrlDetected(url)
+            }
+
+            // 포토그레이
+            url.startsWith(BuildConfig.PHOTO_GRAY_IMAGE_URL) && url.endsWith(BuildConfig.PHOTO_GRAY_IMAGE_URL_MIME_TYPE) -> {
+                Timber.d("포토그레이 이미지")
+                onImageUrlDetected(url)
+            }
         }
 
         return super.shouldInterceptRequest(view, request)
