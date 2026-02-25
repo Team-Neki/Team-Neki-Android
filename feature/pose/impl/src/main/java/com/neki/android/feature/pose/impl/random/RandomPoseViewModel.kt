@@ -150,6 +150,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
+        if (state.poseList.isEmpty()) return
         if (state.poseList.lastIndex - currentIndex < PoseConst.POSE_PREFETCH_THRESHOLD && state.hasNewPose) {
             viewModelScope.launch {
                 poseRepository.getSingleRandomPose(
