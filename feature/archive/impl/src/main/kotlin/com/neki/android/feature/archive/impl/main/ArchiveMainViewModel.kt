@@ -52,7 +52,7 @@ class ArchiveMainViewModel @Inject constructor(
         if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
-            ArchiveMainIntent.RefreshArchiveMainScreen -> fetchInitialData(reduce)
+            ArchiveMainIntent.RefreshArchiveMainPhotos -> viewModelScope.launch { fetchPhotos(reduce) }
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
