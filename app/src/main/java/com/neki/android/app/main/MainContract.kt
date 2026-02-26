@@ -30,4 +30,5 @@ sealed interface MainSideEffect {
     data class NavigateToUploadAlbumWithGallery(val uriStrings: List<String>) : MainSideEffect
     data class NavigateToUploadAlbumWithQRScan(val imageUrl: String) : MainSideEffect
     data class ShowToast(val message: String) : MainSideEffect
+    data object RefreshArchive : MainSideEffect
 }

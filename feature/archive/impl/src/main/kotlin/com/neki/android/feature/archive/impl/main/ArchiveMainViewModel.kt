@@ -151,7 +151,7 @@ class ArchiveMainViewModel @Inject constructor(
     }
 
     private suspend fun fetchPhotos(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit, size: Int = DEFAULT_PHOTOS_SIZE) {
-        photoRepository.getPhotos()
+        photoRepository.getPhotos(size = size)
             .onSuccess { data ->
                 reduce { copy(recentPhotos = data.toImmutableList()) }
             }
@@ -209,7 +209,7 @@ class ArchiveMainViewModel @Inject constructor(
             uploadSinglePhotoUseCase(
                 imageUrl = imageUrl,
             ).onSuccess {
-                fetchPhotos(reduce, 1) // 가장 최신 데이터 가져오기
+                fetchPhotos(reduce) // 가장 최신 데이터 가져오기
                 onSuccess()
             }.onFailure { e ->
                 Timber.e(e)

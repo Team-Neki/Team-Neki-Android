@@ -60,8 +60,13 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                 }
             }
         }
-        ResultEffect<ArchiveResult>(resultBus) {
-            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)
+        ResultEffect<ArchiveResult>(resultBus) { result ->
+            when (result) {
+                is ArchiveResult.FavoriteChanged,
+                is ArchiveResult.PhotoDeleted,
+                ArchiveResult.PhotoUploaded,
+                    -> viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)
+            }
         }
 
         ArchiveMainRoute(
@@ -94,6 +99,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                 is ArchiveResult.PhotoDeleted -> {
                     viewModel.store.onIntent(AllPhotoIntent.PhotoDeleted(result.photoId))
                 }
+
+                else -> {}
             }
         }
 
@@ -131,6 +138,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                 is ArchiveResult.PhotoDeleted -> {
                     viewModel.store.onIntent(AlbumDetailIntent.PhotoDeleted(result.photoId))
                 }
+
+                else -> {}
             }
         }
 
