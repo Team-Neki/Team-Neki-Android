@@ -1,20 +1,15 @@
 package com.neki.android.feature.archive.impl.main
 
-import android.net.Uri
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.dataapi.repository.UserRepository
-import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
-import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.Photo
-import com.neki.android.core.model.UploadType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -28,8 +23,6 @@ private const val DEFAULT_PHOTOS_SIZE = 20
 
 @HiltViewModel
 class ArchiveMainViewModel @Inject constructor(
-    private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
-    private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
     private val userRepository: UserRepository,
@@ -63,30 +56,6 @@ class ArchiveMainViewModel @Inject constructor(
             }
 
             ArchiveMainIntent.ClickQRScanIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
-
-            is ArchiveMainIntent.SelectGalleryImage -> reduce {
-                copy(
-                    isShowSelectWithAlbumDialog = true,
-                    selectedUris = intent.uris.toImmutableList(),
-                )
-            }
-
-            ArchiveMainIntent.DismissSelectWithAlbumDialog -> reduce { copy(isShowSelectWithAlbumDialog = false) }
-            ArchiveMainIntent.ClickUploadWithAlbumRow -> {
-                reduce {
-                    copy(
-                        isShowSelectWithAlbumDialog = false,
-                        scannedImageUrl = null,
-                        selectedUris = persistentListOf(),
-                    )
-                }
-                if (state.scannedImageUrl == null)
-                    postSideEffect(ArchiveMainSideEffect.NavigateToUploadAlbumWithGallery(state.selectedUris.map { it.toString() }))
-                else postSideEffect(ArchiveMainSideEffect.NavigateToUploadAlbumWithQRScan(state.scannedImageUrl))
-            }
-
-            ArchiveMainIntent.ClickUploadWithoutAlbumRow -> uploadWithoutAlbum(state, reduce, postSideEffect)
-
             ArchiveMainIntent.ClickNotificationIcon -> {}
 
             // Album Intent
@@ -103,16 +72,6 @@ class ArchiveMainViewModel @Inject constructor(
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
             ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(state.albumNameTextState.text.trim().toString(), reduce, postSideEffect)
-
-            // Result
-            is ArchiveMainIntent.QRCodeScanned -> reduce {
-                copy(
-                    scannedImageUrl = intent.imageUrl,
-                    isShowSelectWithAlbumDialog = true,
-                )
-            }
-
-            ArchiveMainIntent.ReceiveOpenGalleryResult -> postSideEffect(ArchiveMainSideEffect.OpenGallery)
         }
     }
 
@@ -168,77 +127,6 @@ class ArchiveMainViewModel @Inject constructor(
             .onFailure { e ->
                 Timber.e(e)
             }
-    }
-
-    private fun uploadWithoutAlbum(
-        state: ArchiveMainState,
-        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
-        postSideEffect: (ArchiveMainSideEffect) -> Unit,
-    ) {
-        reduce { copy(isShowSelectWithAlbumDialog = false) }
-        val onSuccessSideEffect = {
-            reduce { copy(isLoading = false) }
-            postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지를 추가했어요"))
-        }
-        if (state.uploadType == UploadType.QR_CODE) {
-            uploadSingleImage(
-                imageUrl = state.scannedImageUrl ?: return,
-                reduce = reduce,
-                postSideEffect = postSideEffect,
-                onSuccess = onSuccessSideEffect,
-            )
-        } else {
-            uploadMultipleImages(
-                imageUris = state.selectedUris,
-                reduce = reduce,
-                postSideEffect = postSideEffect,
-                onSuccess = onSuccessSideEffect,
-            )
-        }
-    }
-
-    private fun uploadSingleImage(
-        imageUrl: String,
-        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
-        postSideEffect: (ArchiveMainSideEffect) -> Unit,
-        onSuccess: () -> Unit,
-    ) {
-        viewModelScope.launch {
-            reduce { copy(isLoading = true) }
-
-            uploadSinglePhotoUseCase(
-                imageUrl = imageUrl,
-            ).onSuccess {
-                fetchPhotos(reduce) // 가장 최신 데이터 가져오기
-                onSuccess()
-            }.onFailure { e ->
-                Timber.e(e)
-                postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
-                reduce { copy(isLoading = false) }
-            }
-        }
-    }
-
-    private fun uploadMultipleImages(
-        imageUris: List<Uri>,
-        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
-        postSideEffect: (ArchiveMainSideEffect) -> Unit,
-        onSuccess: () -> Unit,
-    ) {
-        viewModelScope.launch {
-            reduce { copy(isLoading = true) }
-
-            uploadMultiplePhotoUseCase(
-                imageUris = imageUris,
-            ).onSuccess {
-                fetchPhotos(reduce)
-                onSuccess()
-            }.onFailure { e ->
-                Timber.e(e)
-                postSideEffect(ArchiveMainSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
-                reduce { copy(isLoading = false) }
-            }
-        }
     }
 
     private fun handleFavoriteToggle(

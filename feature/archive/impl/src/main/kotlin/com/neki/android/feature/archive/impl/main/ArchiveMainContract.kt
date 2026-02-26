@@ -1,10 +1,8 @@
 package com.neki.android.feature.archive.impl.main
 
-import android.net.Uri
 import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
-import com.neki.android.core.model.UploadType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -14,15 +12,9 @@ data class ArchiveMainState(
     val favoriteAlbum: AlbumPreview = AlbumPreview(title = "즐겨찾는사진"),
     val albums: ImmutableList<AlbumPreview> = persistentListOf(),
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
-    val scannedImageUrl: String? = null,
-    val selectedUris: ImmutableList<Uri> = persistentListOf(),
-    val isShowSelectWithAlbumDialog: Boolean = false,
     val isShowAddAlbumBottomSheet: Boolean = false,
     val albumNameTextState: TextFieldState = TextFieldState(),
-) {
-    val uploadType: UploadType
-        get() = if (scannedImageUrl != null) UploadType.QR_CODE else UploadType.GALLERY
-}
+)
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent
@@ -33,11 +25,6 @@ sealed interface ArchiveMainIntent {
     // TopBar Intent
     data object DismissToolTipPopup : ArchiveMainIntent
     data object ClickQRScanIcon : ArchiveMainIntent
-
-    data class SelectGalleryImage(val uris: List<Uri>) : ArchiveMainIntent
-    data object DismissSelectWithAlbumDialog : ArchiveMainIntent
-    data object ClickUploadWithAlbumRow : ArchiveMainIntent
-    data object ClickUploadWithoutAlbumRow : ArchiveMainIntent
     data object ClickNotificationIcon : ArchiveMainIntent
 
     // Album Intent
@@ -54,16 +41,10 @@ sealed interface ArchiveMainIntent {
     // Add Album BottomSheet Intent
     data object DismissAddAlbumBottomSheet : ArchiveMainIntent
     data object ClickAddAlbumButton : ArchiveMainIntent
-
-    // Result
-    data class QRCodeScanned(val imageUrl: String) : ArchiveMainIntent
-    data object ReceiveOpenGalleryResult : ArchiveMainIntent
 }
 
 sealed interface ArchiveMainSideEffect {
     data object NavigateToQRScan : ArchiveMainSideEffect
-    data class NavigateToUploadAlbumWithGallery(val uriStrings: List<String>) : ArchiveMainSideEffect
-    data class NavigateToUploadAlbumWithQRScan(val imageUrl: String) : ArchiveMainSideEffect
     data object NavigateToAllAlbum : ArchiveMainSideEffect
     data class NavigateToFavoriteAlbum(val albumId: Long) : ArchiveMainSideEffect
     data class NavigateToAlbumDetail(val albumId: Long, val title: String) : ArchiveMainSideEffect
@@ -71,6 +52,5 @@ sealed interface ArchiveMainSideEffect {
     data class NavigateToPhotoDetail(val photos: List<Photo>, val index: Int) : ArchiveMainSideEffect
 
     data object ScrollToTop : ArchiveMainSideEffect
-    data object OpenGallery : ArchiveMainSideEffect
     data class ShowToastMessage(val message: String) : ArchiveMainSideEffect
 }

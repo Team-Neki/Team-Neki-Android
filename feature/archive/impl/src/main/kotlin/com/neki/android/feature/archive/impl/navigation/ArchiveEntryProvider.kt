@@ -25,9 +25,7 @@ import com.neki.android.feature.archive.impl.photo.AllPhotoRoute
 import com.neki.android.feature.archive.impl.photo.AllPhotoViewModel
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
-import com.neki.android.feature.photo_upload.api.QRScanResult
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
-import com.neki.android.feature.photo_upload.api.navigateToUploadAlbum
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,31 +47,16 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
     entry<ArchiveNavKey.Archive> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<ArchiveMainViewModel>()
-        ResultEffect<QRScanResult>(resultBus) { result ->
-            when (result) {
-                is QRScanResult.QRCodeScanned -> {
-                    viewModel.store.onIntent(ArchiveMainIntent.QRCodeScanned(result.imageUrl))
-                }
-
-                QRScanResult.OpenGallery -> {
-                    viewModel.store.onIntent(ArchiveMainIntent.ReceiveOpenGalleryResult)
-                }
-            }
-        }
         ResultEffect<ArchiveResult>(resultBus) { result ->
             when (result) {
-                is ArchiveResult.FavoriteChanged,
-                is ArchiveResult.PhotoDeleted,
-                ArchiveResult.PhotoUploaded,
-                    -> viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainPhotos)
+                is ArchiveResult.FavoriteChanged, is ArchiveResult.PhotoDeleted, ArchiveResult.PhotoUploaded ->
+                    viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainPhotos)
             }
         }
 
         ArchiveMainRoute(
             viewModel = viewModel,
             navigateToQRScan = navigator::navigateToQRScan,
-            navigateToUploadAlbumWithGallery = navigator::navigateToUploadAlbum,
-            navigateToUploadAlbumWithQRScan = navigator::navigateToUploadAlbum,
             navigateToAllAlbum = navigator::navigateToAllAlbum,
             navigateToFavoriteAlbum = { id ->
                 navigator.navigateToAlbumDetail(id = id, isFavorite = true)
