@@ -36,7 +36,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
         mviIntentStore(
             initialState = PhotoDetailState(
                 photos = key.photos,
-                currentIndex = key.initialIndex,
+                currentPage = key.initialIndex,
             ),
             onIntent = ::onIntent,
         )
@@ -79,26 +79,16 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
             // Pager Intent
             PhotoDetailIntent.ClickLeftPhoto -> {
-                if (state.currentIndex > 0) {
-                    postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentIndex - 1))
-                } else {
-                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("첫번째 사진이에요"))
+                if (state.currentPage > 0) {
+                    postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentPage - 1))
                 }
             }
 
-            PhotoDetailIntent.ClickRightPhoto -> {
-                if (state.currentIndex < state.photos.lastIndex) {
-                    postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentIndex + 1))
-                } else if (!hasNext) {
-                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("마지막 사진이에요"))
-                } else {
-                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("새로운 사진을 불러오고 있어요"))
-                }
-            }
+            PhotoDetailIntent.ClickRightPhoto -> postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentPage + 1))
 
             is PhotoDetailIntent.PageChanged -> {
-                reduce { copy(currentIndex = intent.index) }
-                preloadIfNeeded(intent.index, reduce)
+                reduce { copy(currentPage = intent.page) }
+                preloadIfNeeded(reduce)
             }
 
             // ActionBar Intent
@@ -168,11 +158,10 @@ class PhotoDetailViewModel @AssistedInject constructor(
     }
 
     private fun preloadIfNeeded(
-        currentIndex: Int,
         reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
     ) {
         val latestState = store.uiState.value
-        if (currentIndex >= latestState.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
+        if (latestState.currentIndex >= latestState.photos.size - PRELOAD_THRESHOLD && hasNext && !isLoadingMore) {
             loadMorePhotos(reduce)
         }
     }
@@ -219,6 +208,6 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     companion object {
         private const val PAGE_SIZE = 5
-        private const val PRELOAD_THRESHOLD = 3
+        private const val PRELOAD_THRESHOLD = 5
     }
 }

@@ -20,7 +20,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.DevicePreview
@@ -35,6 +34,7 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable
@@ -46,7 +46,7 @@ internal fun PhotoDetailRoute(
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
     val resultEventBus = LocalResultEventBus.current
-    val pagerState = rememberPagerState(initialPage = uiState.currentIndex) { uiState.photos.size }
+    val pagerState = rememberPagerState(initialPage = uiState.currentPage) { Int.MAX_VALUE }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState) {
@@ -70,6 +70,7 @@ internal fun PhotoDetailRoute(
                         Timber.e(e)
                     }
             }
+
             is PhotoDetailSideEffect.AnimateToPage -> coroutineScope.launch {
                 pagerState.animateScrollToPage(
                     page = sideEffect.index,
@@ -90,7 +91,7 @@ internal fun PhotoDetailRoute(
 internal fun PhotoDetailScreen(
     uiState: PhotoDetailState = PhotoDetailState(),
     onIntent: (PhotoDetailIntent) -> Unit = {},
-    pagerState: PagerState = rememberPagerState { uiState.photos.size },
+    pagerState: PagerState = rememberPagerState { Int.MAX_VALUE },
 ) {
     Column(
         modifier = Modifier
@@ -107,7 +108,9 @@ internal fun PhotoDetailScreen(
                 .fillMaxWidth()
                 .weight(1f),
             state = pagerState,
-        ) { index ->
+            beyondViewportPageCount = 1,
+        ) { page ->
+            val index = if (uiState.photos.isEmpty()) 0 else page % uiState.photos.size
             Box {
                 AsyncImage(
                     modifier = Modifier.fillMaxSize(),

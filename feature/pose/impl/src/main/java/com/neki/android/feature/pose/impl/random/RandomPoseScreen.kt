@@ -42,7 +42,7 @@ internal fun RandomPoseRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
-    val pagerState = rememberPagerState { uiState.poseList.size }
+    val pagerState = rememberPagerState(initialPage = uiState.currentPage) { Int.MAX_VALUE }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState) {
@@ -76,7 +76,7 @@ internal fun RandomPoseRoute(
 internal fun RandomPoseScreen(
     uiState: RandomPoseState = RandomPoseState(),
     onIntent: (RandomPoseIntent) -> Unit = {},
-    pagerState: PagerState = rememberPagerState { uiState.poseList.size },
+    pagerState: PagerState = rememberPagerState { Int.MAX_VALUE },
 ) {
     val hazeState = rememberHazeState()
 
