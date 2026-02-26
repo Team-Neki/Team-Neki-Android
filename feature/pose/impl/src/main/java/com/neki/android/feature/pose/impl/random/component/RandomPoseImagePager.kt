@@ -41,7 +41,7 @@ internal fun RandomPoseImagePager(
     ) { page ->
         val index = if (poseList.isEmpty()) 0 else page % poseList.size
         RandomPoseImage(
-            pose = poseList[index],
+            pose = poseList.getOrElse(index) { Pose() },
             onLeftSwipe = onLeftSwipe,
             onRightSwipe = onRightSwipe,
         )
