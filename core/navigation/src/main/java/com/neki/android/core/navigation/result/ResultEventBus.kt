@@ -37,7 +37,7 @@ object LocalResultEventBus {
 // https://github.com/android/nav3-recipes/blob/main/app/src/main/java/com/example/nav3recipes/results/event/README.md
 @Stable
 class ResultEventBus {
-    val channelMap: MutableMap<String, Channel<Any?>> = mutableStateMapOf()
+    val channelMap = mutableStateMapOf<String, Channel<Any?>>()
 
     inline fun <reified T> getResultFlow(resultKey: String = T::class.toString()) =
         channelMap[resultKey]?.receiveAsFlow()
