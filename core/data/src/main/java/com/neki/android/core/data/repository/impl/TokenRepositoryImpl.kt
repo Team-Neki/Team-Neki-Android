@@ -5,8 +5,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.neki.android.core.common.crypto.CryptoManager
-import com.neki.android.core.dataapi.auth.AuthCacheManager
 import com.neki.android.core.dataapi.repository.TokenRepository
+import dagger.Lazy
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import com.neki.android.core.data.local.di.TokenDataStore
@@ -14,7 +17,7 @@ import javax.inject.Inject
 
 class TokenRepositoryImpl @Inject constructor(
     @TokenDataStore private val dataStore: DataStore<Preferences>,
-    private val authCacheManager: AuthCacheManager,
+    private val httpClient: Lazy<HttpClient>,
 ) : TokenRepository {
 
     companion object {
@@ -30,7 +33,6 @@ class TokenRepositoryImpl @Inject constructor(
             preferences[ACCESS_TOKEN] = CryptoManager.encrypt(accessToken)
             preferences[REFRESH_TOKEN] = CryptoManager.encrypt(refreshToken)
         }
-        authCacheManager.invalidateTokenCache()
     }
 
     override fun hasTokens(): Flow<Boolean> {
@@ -54,11 +56,11 @@ class TokenRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun clearTokens() {
+    override suspend fun clearTokensWithAuthCache() {
+        httpClient.get().authProvider<BearerAuthProvider>()?.clearToken()
         dataStore.edit { preferences ->
             preferences.remove(ACCESS_TOKEN)
             preferences.remove(REFRESH_TOKEN)
         }
-        authCacheManager.invalidateTokenCache()
     }
 }
