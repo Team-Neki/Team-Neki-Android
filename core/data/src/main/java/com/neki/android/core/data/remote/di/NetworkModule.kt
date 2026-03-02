@@ -72,7 +72,6 @@ internal object NetworkModule {
 
             install(Auth) {
                 bearer {
-                    // 개발: 캐시 비활성화 (토큰 만료 짧음), 상용: 캐시 활성화 (성능)
                     cacheTokens = !BuildConfig.DEBUG
 
                     loadTokens {
