@@ -3,7 +3,6 @@ package com.neki.android.core.navigation.result
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ProvidedValue
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateMapOf
 import kotlinx.coroutines.channels.BufferOverflow
@@ -35,7 +34,6 @@ object LocalResultEventBus {
  * It provides a solution for event based results.
  */
 // https://github.com/android/nav3-recipes/blob/main/app/src/main/java/com/example/nav3recipes/results/event/README.md
-@Stable
 class ResultEventBus {
     val channelMap = mutableStateMapOf<String, Channel<Any?>>()
 
