@@ -1,12 +1,17 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.component
 
+import android.provider.SyncStateContract.Helpers.update
 import android.webkit.WebView
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.DialogProperties
 import com.neki.android.core.ui.component.LoadingDialog
@@ -35,9 +40,10 @@ internal fun PhotoWebViewContent(
                 settings.loadWithOverviewMode = true
                 settings.useWideViewPort = true
 
-                webViewClient = PhotoWebViewClient { photoImageUrl ->
+                webViewClient = PhotoWebViewClient(
+                    onPageFinished = { isLoading = false },
+                ) { photoImageUrl ->
                     onDetectImageUrl(photoImageUrl)
-                    isLoading = false
                 }
 
                 loadUrl(scannedUrl)
@@ -48,6 +54,10 @@ internal fun PhotoWebViewContent(
                 webView.loadUrl(scannedUrl)
             }
         },
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding(),
     )
 
     if (isLoading) {
