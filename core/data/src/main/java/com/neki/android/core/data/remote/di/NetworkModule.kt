@@ -105,7 +105,7 @@ internal object NetworkModule {
                                 )
                             } catch (e: Exception) {
                                 Timber.e(e)
-                                tokenRepository.clearTokens()
+                                tokenRepository.clearTokensWithAuthCache()
                                 authEventManager.emitTokenExpired()
                                 null
                             }
