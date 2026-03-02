@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.mutableStateMapOf
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.BUFFERED
@@ -34,7 +35,7 @@ object LocalResultEventBus {
  */
 // https://github.com/android/nav3-recipes/blob/main/app/src/main/java/com/example/nav3recipes/results/event/README.md
 class ResultEventBus {
-    val channelMap: MutableMap<String, Channel<Any?>> = mutableMapOf()
+    val channelMap = mutableStateMapOf<String, Channel<Any?>>()
 
     inline fun <reified T> getResultFlow(resultKey: String = T::class.toString()) =
         channelMap[resultKey]?.receiveAsFlow()

@@ -104,6 +104,7 @@ class MainViewModel @Inject constructor(
                 .onSuccess {
                     reduce { copy(isLoading = false, scannedImageUrl = null) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
+                    postSideEffect(MainSideEffect.RefreshArchive)
                 }
                 .onFailure { e ->
                     Timber.e(e)
@@ -125,6 +126,7 @@ class MainViewModel @Inject constructor(
                 .onSuccess {
                     reduce { copy(isLoading = false, selectedUris = persistentListOf()) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
+                    postSideEffect(MainSideEffect.RefreshArchive)
                 }
                 .onFailure { e ->
                     Timber.e(e)

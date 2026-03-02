@@ -33,6 +33,7 @@ import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.api.ArchiveNavKey
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.map.api.MapNavKey
 import com.neki.android.feature.mypage.api.MyPageNavKey
 import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
@@ -85,6 +86,7 @@ fun MainRoute(
             is MainSideEffect.NavigateToUploadAlbumWithGallery -> navigateToUploadAlbumWithGallery(sideEffect.uriStrings)
             is MainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
             is MainSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
+            MainSideEffect.RefreshArchive -> resultBus.sendResult<ArchiveResult>(result = ArchiveResult.PhotoUploaded)
         }
     }
 
