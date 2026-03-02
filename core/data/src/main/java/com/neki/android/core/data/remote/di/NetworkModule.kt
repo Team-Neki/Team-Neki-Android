@@ -89,6 +89,8 @@ internal object NetworkModule {
 
             install(Auth) {
                 bearer {
+                    cacheTokens = false
+
                     loadTokens {
                         if (tokenRepository.hasTokens().first()) {
                             BearerTokens(
