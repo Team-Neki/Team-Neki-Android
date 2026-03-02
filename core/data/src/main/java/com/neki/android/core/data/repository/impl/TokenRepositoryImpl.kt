@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.neki.android.core.common.crypto.CryptoManager
-import com.neki.android.core.dataapi.auth.AuthCacheManager
 import com.neki.android.core.dataapi.repository.TokenRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -14,7 +13,6 @@ import javax.inject.Inject
 
 class TokenRepositoryImpl @Inject constructor(
     @TokenDataStore private val dataStore: DataStore<Preferences>,
-    private val authCacheManager: AuthCacheManager,
 ) : TokenRepository {
 
     companion object {
@@ -30,7 +28,6 @@ class TokenRepositoryImpl @Inject constructor(
             preferences[ACCESS_TOKEN] = CryptoManager.encrypt(accessToken)
             preferences[REFRESH_TOKEN] = CryptoManager.encrypt(refreshToken)
         }
-        authCacheManager.invalidateTokenCache()
     }
 
     override fun hasTokens(): Flow<Boolean> {
@@ -59,6 +56,5 @@ class TokenRepositoryImpl @Inject constructor(
             preferences.remove(ACCESS_TOKEN)
             preferences.remove(REFRESH_TOKEN)
         }
-        authCacheManager.invalidateTokenCache()
     }
 }
