@@ -53,7 +53,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
             when (result) {
                 is ArchiveResult.FavoriteChanged, is ArchiveResult.PhotoDeleted,
                 ArchiveResult.PhotoUploaded, ArchiveResult.AlbumChanged ->
-                    viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainPhotos)
+                    viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
             }
         }
 
