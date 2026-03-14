@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
+import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.AlbumRowComponent
 import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
 import com.neki.android.core.ui.component.FavoriteAlbumRowComponent
@@ -41,6 +42,7 @@ internal fun AllAlbumRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
+    val resultEventBus = LocalResultEventBus.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -49,6 +51,9 @@ internal fun AllAlbumRoute(
             is AllAlbumSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
             is AllAlbumSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)
+            }
+            is AllAlbumSideEffect.NotifyArchiveResult -> {
+                resultEventBus.sendResult(result = sideEffect.result, allowDuplicate = false)
             }
         }
     }

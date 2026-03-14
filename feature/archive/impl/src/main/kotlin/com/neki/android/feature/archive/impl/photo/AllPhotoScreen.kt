@@ -39,6 +39,7 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
+import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -72,6 +73,7 @@ internal fun AllPhotoRoute(
     val lazyState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
     val nekiToast = remember { NekiToast(context) }
+    val resultEventBus = LocalResultEventBus.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -110,6 +112,10 @@ internal fun AllPhotoRoute(
                         nekiToast.showToast(text = "다운로드에 실패했어요")
                         Timber.e(e)
                     }
+            }
+
+            is AllPhotoSideEffect.NotifyArchiveResult -> {
+                resultEventBus.sendResult(result = sideEffect.result, allowDuplicate = false)
             }
         }
     }

@@ -14,6 +14,7 @@ import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -196,6 +197,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     )
                 }
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("앨범 이름을 변경했어요"))
+                postSideEffect(AlbumDetailSideEffect.NotifyArchiveResult(ArchiveResult.AlbumChanged))
             }.onFailure { e ->
                 Timber.e(e)
                 reduce { copy(isLoading = false) }
@@ -220,6 +222,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 reduce { copy(isLoading = false) }
                 postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("새로운 사진을 추가했어요"))
+                postSideEffect(AlbumDetailSideEffect.NotifyArchiveResult(ArchiveResult.PhotoUploaded))
             }.onFailure { e ->
                 Timber.e(e)
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
@@ -322,6 +325,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                         )
                     }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
+                    postSideEffect(AlbumDetailSideEffect.NotifyArchiveResult(ArchiveResult.PhotoDeleted(selectedPhotoIds)))
                 }
                 .onFailure { e ->
                     Timber.e(e)
@@ -364,6 +368,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                         )
                     }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
+                    postSideEffect(AlbumDetailSideEffect.NotifyArchiveResult(ArchiveResult.PhotoDeleted(selectedPhotoIds)))
                 }
                 .onFailure { e ->
                     Timber.e(e)

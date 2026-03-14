@@ -13,7 +13,9 @@ import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.archive.api.navigateToAllAlbum
 import com.neki.android.feature.archive.api.navigateToAllPhoto
 import com.neki.android.feature.archive.api.navigateToPhotoDetail
+import com.neki.android.feature.archive.impl.album.AllAlbumIntent
 import com.neki.android.feature.archive.impl.album.AllAlbumRoute
+import com.neki.android.feature.archive.impl.album.AllAlbumViewModel
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailIntent
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailRoute
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailViewModel
@@ -49,7 +51,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         val viewModel = hiltViewModel<ArchiveMainViewModel>()
         ResultEffect<ArchiveResult>(resultBus) { result ->
             when (result) {
-                is ArchiveResult.FavoriteChanged, is ArchiveResult.PhotoDeleted, ArchiveResult.PhotoUploaded ->
+                is ArchiveResult.FavoriteChanged, is ArchiveResult.PhotoDeleted,
+                ArchiveResult.PhotoUploaded, ArchiveResult.AlbumChanged ->
                     viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainPhotos)
             }
         }
@@ -95,7 +98,19 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
     }
 
     entry<ArchiveNavKey.AllAlbum> {
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<AllAlbumViewModel>()
+
+        ResultEffect<ArchiveResult>(resultBus) { result ->
+            when (result) {
+                is ArchiveResult.FavoriteChanged, is ArchiveResult.PhotoDeleted,
+                ArchiveResult.PhotoUploaded, ArchiveResult.AlbumChanged ->
+                    viewModel.store.onIntent(AllAlbumIntent.RefreshAlbums)
+            }
+        }
+
         AllAlbumRoute(
+            viewModel = viewModel,
             navigateBack = navigator::goBack,
             navigateToFavoriteAlbum = { id ->
                 navigator.navigateToAlbumDetail(id = id, isFavorite = true)

@@ -7,6 +7,7 @@ import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -76,6 +77,9 @@ class AllAlbumViewModel @Inject constructor(
             AllAlbumIntent.DismissDeleteAlbumBottomSheet -> reduce { copy(isShowDeleteAlbumBottomSheet = false) }
             is AllAlbumIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AllAlbumIntent.ClickDeleteConfirmButton -> handleDeleteConfirm(state, reduce, postSideEffect)
+
+            // Result Intent
+            AllAlbumIntent.RefreshAlbums -> fetchInitialData(reduce)
         }
     }
 
@@ -200,6 +204,7 @@ class AllAlbumViewModel @Inject constructor(
                 .onSuccess {
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))
+                    postSideEffect(AllAlbumSideEffect.NotifyArchiveResult(ArchiveResult.AlbumChanged))
                 }
                 .onFailure { e ->
                     Timber.e(e, "사진 삭제 실패")

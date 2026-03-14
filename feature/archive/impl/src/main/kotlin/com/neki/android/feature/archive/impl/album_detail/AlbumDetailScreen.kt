@@ -36,6 +36,7 @@ import androidx.paging.compose.itemKey
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
+import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.component.LoadingDialog
@@ -69,6 +70,7 @@ internal fun AlbumDetailRoute(
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
+    val resultEventBus = LocalResultEventBus.current
     val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
         if (uris.isNotEmpty()) {
             viewModel.store.onIntent(AlbumDetailIntent.SelectGalleryImage(uris))
@@ -109,6 +111,10 @@ internal fun AlbumDetailRoute(
 
             AlbumDetailSideEffect.OpenGallery -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             AlbumDetailSideEffect.RefreshPhotos -> pagingItems.refresh()
+
+            is AlbumDetailSideEffect.NotifyArchiveResult -> {
+                resultEventBus.sendResult(result = sideEffect.result, allowDuplicate = false)
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.neki.android.feature.archive.impl.album_detail
 import android.net.Uri
 import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.Photo
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -83,4 +84,5 @@ sealed interface AlbumDetailSideEffect {
     data class DownloadImages(val imageUrls: List<String>) : AlbumDetailSideEffect
     data object OpenGallery : AlbumDetailSideEffect
     data object RefreshPhotos : AlbumDetailSideEffect
+    data class NotifyArchiveResult(val result: ArchiveResult) : AlbumDetailSideEffect
 }

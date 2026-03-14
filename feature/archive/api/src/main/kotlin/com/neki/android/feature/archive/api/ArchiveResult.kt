@@ -8,4 +8,6 @@ sealed interface ArchiveResult {
     data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : ArchiveResult
 
     data object PhotoUploaded : ArchiveResult
+
+    data object AlbumChanged : ArchiveResult
 }

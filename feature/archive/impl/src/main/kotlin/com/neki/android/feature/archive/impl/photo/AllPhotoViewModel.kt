@@ -11,6 +11,7 @@ import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -241,6 +242,7 @@ class AllPhotoViewModel @Inject constructor(
                         )
                     }
                     postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 삭제했어요"))
+                    postSideEffect(AllPhotoSideEffect.NotifyArchiveResult(ArchiveResult.PhotoDeleted(selectedPhotoIds)))
                 }
                 .onFailure { e ->
                     Timber.e(e)

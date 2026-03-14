@@ -1,6 +1,7 @@
 package com.neki.android.feature.archive.impl.photo
 
 import com.neki.android.core.model.Photo
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -55,4 +56,5 @@ sealed interface AllPhotoSideEffect {
     data class NavigateToPhotoDetail(val photo: Photo, val index: Int) : AllPhotoSideEffect
     data class ShowToastMessage(val message: String) : AllPhotoSideEffect
     data class DownloadImages(val imageUrls: List<String>) : AllPhotoSideEffect
+    data class NotifyArchiveResult(val result: ArchiveResult) : AllPhotoSideEffect
 }
