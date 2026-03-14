@@ -182,6 +182,7 @@ class AllAlbumViewModel @Inject constructor(
                 .onSuccess {
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
+                    postSideEffect(AllAlbumSideEffect.NotifyArchiveResult(ArchiveResult.AlbumChanged))
                 }
                 .onFailure { e ->
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))

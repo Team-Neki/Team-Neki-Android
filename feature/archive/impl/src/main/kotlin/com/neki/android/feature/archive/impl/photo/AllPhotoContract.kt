@@ -48,6 +48,7 @@ sealed interface AllPhotoIntent {
     data class PhotoDeleted(val photoIds: List<Long>) : AllPhotoIntent
     data class ClickFavoriteIcon(val photo: Photo) : AllPhotoIntent
     data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : AllPhotoIntent
+    data object RefreshPhotos : AllPhotoIntent
 }
 
 sealed interface AllPhotoSideEffect {
@@ -57,4 +58,5 @@ sealed interface AllPhotoSideEffect {
     data class ShowToastMessage(val message: String) : AllPhotoSideEffect
     data class DownloadImages(val imageUrls: List<String>) : AllPhotoSideEffect
     data class NotifyArchiveResult(val result: ArchiveResult) : AllPhotoSideEffect
+    data object RefreshPhotos : AllPhotoSideEffect
 }

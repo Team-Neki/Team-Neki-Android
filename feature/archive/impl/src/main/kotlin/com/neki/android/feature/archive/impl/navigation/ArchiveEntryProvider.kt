@@ -86,6 +86,10 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                     viewModel.store.onIntent(AllPhotoIntent.PhotoDeleted(result.photoId))
                 }
 
+                ArchiveResult.PhotoUploaded -> {
+                    viewModel.store.onIntent(AllPhotoIntent.RefreshPhotos)
+                }
+
                 else -> {}
             }
         }

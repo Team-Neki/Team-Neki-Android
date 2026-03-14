@@ -117,6 +117,8 @@ internal fun AllPhotoRoute(
             is AllPhotoSideEffect.NotifyArchiveResult -> {
                 resultEventBus.sendResult(result = sideEffect.result, allowDuplicate = false)
             }
+
+            AllPhotoSideEffect.RefreshPhotos -> pagingItems.refresh()
         }
     }
 

@@ -121,6 +121,13 @@ class AllPhotoViewModel @Inject constructor(
                 updatedFavorites.update { it + (photo.id to newFavorite) }
                 viewModelScope.launch {
                     photoRepository.updateFavorite(photo.id, newFavorite)
+                        .onSuccess {
+                            postSideEffect(
+                                AllPhotoSideEffect.NotifyArchiveResult(
+                                    ArchiveResult.FavoriteChanged(photo.id, newFavorite),
+                                ),
+                            )
+                        }
                         .onFailure { e ->
                             Timber.e(e)
                             updatedFavorites.update { it + (photo.id to photo.isFavorite) }
@@ -132,6 +139,8 @@ class AllPhotoViewModel @Inject constructor(
             is AllPhotoIntent.FavoriteChanged -> {
                 updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
             }
+
+            AllPhotoIntent.RefreshPhotos -> postSideEffect(AllPhotoSideEffect.RefreshPhotos)
         }
     }
 
