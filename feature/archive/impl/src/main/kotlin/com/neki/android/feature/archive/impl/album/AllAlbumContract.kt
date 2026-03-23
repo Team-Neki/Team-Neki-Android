@@ -2,7 +2,6 @@ package com.neki.android.feature.archive.impl.album
 
 import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.AlbumPreview
-import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -64,5 +63,5 @@ sealed interface AllAlbumSideEffect {
     data class NavigateToFavoriteAlbum(val albumId: Long) : AllAlbumSideEffect
     data class NavigateToAlbumDetail(val albumId: Long, val title: String) : AllAlbumSideEffect
     data class ShowToastMessage(val message: String) : AllAlbumSideEffect
-    data class NotifyArchiveResult(val result: ArchiveResult) : AllAlbumSideEffect
+    data object NotifyResult : AllAlbumSideEffect
 }

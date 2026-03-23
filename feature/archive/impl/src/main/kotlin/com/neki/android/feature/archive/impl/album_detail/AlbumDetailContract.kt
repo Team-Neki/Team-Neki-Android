@@ -3,7 +3,6 @@ package com.neki.android.feature.archive.impl.album_detail
 import android.net.Uri
 import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.Photo
-import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -72,9 +71,8 @@ sealed interface AlbumDetailIntent {
     data object ClickRenameBottomSheetConfirmButton : AlbumDetailIntent
 
     // Result Intent
-    data class PhotoDeleted(val photoIds: List<Long>) : AlbumDetailIntent
+    data object RefreshPhotos : AlbumDetailIntent
     data class ClickFavoriteIcon(val photo: Photo) : AlbumDetailIntent
-    data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : AlbumDetailIntent
 }
 
 sealed interface AlbumDetailSideEffect {
@@ -84,5 +82,5 @@ sealed interface AlbumDetailSideEffect {
     data class DownloadImages(val imageUrls: List<String>) : AlbumDetailSideEffect
     data object OpenGallery : AlbumDetailSideEffect
     data object RefreshPhotos : AlbumDetailSideEffect
-    data class NotifyArchiveResult(val result: ArchiveResult) : AlbumDetailSideEffect
+    data object NotifyResult : AlbumDetailSideEffect
 }

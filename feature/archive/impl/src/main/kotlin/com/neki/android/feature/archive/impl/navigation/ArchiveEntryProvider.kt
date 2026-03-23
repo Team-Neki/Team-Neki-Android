@@ -7,8 +7,12 @@ import com.neki.android.core.navigation.main.EntryProviderInstaller
 import com.neki.android.core.navigation.main.MainNavigator
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
+import com.neki.android.feature.archive.api.AlbumDetailResult
+import com.neki.android.feature.archive.api.AllAlbumResult
+import com.neki.android.feature.archive.api.AllPhotoResult
 import com.neki.android.feature.archive.api.ArchiveNavKey
-import com.neki.android.feature.archive.api.ArchiveResult
+import com.neki.android.feature.archive.api.PhotoDetailResult
+import com.neki.android.feature.archive.api.PhotoUploadedResult
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.archive.api.navigateToAllAlbum
 import com.neki.android.feature.archive.api.navigateToAllPhoto
@@ -49,12 +53,21 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
     entry<ArchiveNavKey.Archive> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<ArchiveMainViewModel>()
-        ResultEffect<ArchiveResult>(resultBus) { result ->
-            when (result) {
-                is ArchiveResult.FavoriteChanged, is ArchiveResult.PhotoDeleted,
-                ArchiveResult.PhotoUploaded, ArchiveResult.AlbumChanged ->
-                    viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
-            }
+
+        ResultEffect<PhotoDetailResult>(resultBus) {
+            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
+        }
+        ResultEffect<AlbumDetailResult>(resultBus) {
+            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
+        }
+        ResultEffect<AllPhotoResult>(resultBus) {
+            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
+        }
+        ResultEffect<AllAlbumResult>(resultBus) {
+            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
+        }
+        ResultEffect<PhotoUploadedResult>(resultBus) {
+            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
         }
 
         ArchiveMainRoute(
@@ -76,22 +89,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<AllPhotoViewModel>()
 
-        ResultEffect<ArchiveResult>(resultBus) { result ->
-            when (result) {
-                is ArchiveResult.FavoriteChanged -> {
-                    viewModel.store.onIntent(AllPhotoIntent.FavoriteChanged(result.photoId, result.isFavorite))
-                }
-
-                is ArchiveResult.PhotoDeleted -> {
-                    viewModel.store.onIntent(AllPhotoIntent.PhotoDeleted(result.photoId))
-                }
-
-                ArchiveResult.PhotoUploaded -> {
-                    viewModel.store.onIntent(AllPhotoIntent.RefreshPhotos)
-                }
-
-                else -> {}
-            }
+        ResultEffect<PhotoDetailResult>(resultBus) {
+            viewModel.store.onIntent(AllPhotoIntent.RefreshPhotos)
         }
 
         AllPhotoRoute(
@@ -105,12 +104,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<AllAlbumViewModel>()
 
-        ResultEffect<ArchiveResult>(resultBus) { result ->
-            when (result) {
-                is ArchiveResult.FavoriteChanged, is ArchiveResult.PhotoDeleted,
-                ArchiveResult.PhotoUploaded, ArchiveResult.AlbumChanged ->
-                    viewModel.store.onIntent(AllAlbumIntent.RefreshAlbums)
-            }
+        ResultEffect<AlbumDetailResult>(resultBus) {
+            viewModel.store.onIntent(AllAlbumIntent.RefreshAlbums)
         }
 
         AllAlbumRoute(
@@ -131,18 +126,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
             creationCallback = { factory -> factory.create(key.albumId, key.title, key.isFavorite) },
         )
 
-        ResultEffect<ArchiveResult>(resultBus) { result ->
-            when (result) {
-                is ArchiveResult.FavoriteChanged -> {
-                    viewModel.store.onIntent(AlbumDetailIntent.FavoriteChanged(result.photoId, result.isFavorite))
-                }
-
-                is ArchiveResult.PhotoDeleted -> {
-                    viewModel.store.onIntent(AlbumDetailIntent.PhotoDeleted(result.photoId))
-                }
-
-                else -> {}
-            }
+        ResultEffect<PhotoDetailResult>(resultBus) {
+            viewModel.store.onIntent(AlbumDetailIntent.RefreshPhotos)
         }
 
         AlbumDetailRoute(

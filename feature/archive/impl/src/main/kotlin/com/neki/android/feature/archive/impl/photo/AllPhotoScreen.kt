@@ -40,6 +40,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.navigation.result.LocalResultEventBus
+import com.neki.android.feature.archive.api.AllPhotoResult
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -114,8 +115,8 @@ internal fun AllPhotoRoute(
                     }
             }
 
-            is AllPhotoSideEffect.NotifyArchiveResult -> {
-                resultEventBus.sendResult(result = sideEffect.result, allowDuplicate = false)
+            AllPhotoSideEffect.NotifyResult -> {
+                resultEventBus.sendResult(result = AllPhotoResult, allowDuplicate = false)
             }
 
             AllPhotoSideEffect.RefreshPhotos -> pagingItems.refresh()

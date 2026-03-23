@@ -1,7 +1,6 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
 import com.neki.android.core.model.Photo
-import com.neki.android.feature.archive.api.ArchiveResult
 
 data class PhotoDetailState(
     val isLoading: Boolean = false,
@@ -37,7 +36,7 @@ sealed interface PhotoDetailIntent {
 
 sealed interface PhotoDetailSideEffect {
     data object NavigateBack : PhotoDetailSideEffect
-    data class NotifyPhotoUpdated(val result: ArchiveResult) : PhotoDetailSideEffect
+    data object NotifyPhotoUpdated : PhotoDetailSideEffect
     data class ShowToastMessage(val message: String) : PhotoDetailSideEffect
     data class DownloadImage(val imageUrl: String) : PhotoDetailSideEffect
     data class AnimateToPage(val index: Int) : PhotoDetailSideEffect

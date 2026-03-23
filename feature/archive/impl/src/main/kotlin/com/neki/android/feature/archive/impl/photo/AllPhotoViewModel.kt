@@ -11,7 +11,6 @@ import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -112,9 +111,6 @@ class AllPhotoViewModel @Inject constructor(
             AllPhotoIntent.ClickDeleteDialogConfirmButton -> deleteSelectedPhotos(state, reduce, postSideEffect)
 
             // Result Intent
-            is AllPhotoIntent.PhotoDeleted -> {
-                deletedPhotoIds.update { it + intent.photoIds.toSet() }
-            }
             is AllPhotoIntent.ClickFavoriteIcon -> {
                 val photo = intent.photo
                 val newFavorite = !photo.isFavorite
@@ -122,11 +118,7 @@ class AllPhotoViewModel @Inject constructor(
                 viewModelScope.launch {
                     photoRepository.updateFavorite(photo.id, newFavorite)
                         .onSuccess {
-                            postSideEffect(
-                                AllPhotoSideEffect.NotifyArchiveResult(
-                                    ArchiveResult.FavoriteChanged(photo.id, newFavorite),
-                                ),
-                            )
+                            postSideEffect(AllPhotoSideEffect.NotifyResult)
                         }
                         .onFailure { e ->
                             Timber.e(e)
@@ -136,11 +128,11 @@ class AllPhotoViewModel @Inject constructor(
                 }
             }
 
-            is AllPhotoIntent.FavoriteChanged -> {
-                updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
+            AllPhotoIntent.RefreshPhotos -> {
+                deletedPhotoIds.value = emptySet()
+                updatedFavorites.value = emptyMap()
+                postSideEffect(AllPhotoSideEffect.RefreshPhotos)
             }
-
-            AllPhotoIntent.RefreshPhotos -> postSideEffect(AllPhotoSideEffect.RefreshPhotos)
         }
     }
 
@@ -251,7 +243,7 @@ class AllPhotoViewModel @Inject constructor(
                         )
                     }
                     postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 삭제했어요"))
-                    postSideEffect(AllPhotoSideEffect.NotifyArchiveResult(ArchiveResult.PhotoDeleted(selectedPhotoIds)))
+                    postSideEffect(AllPhotoSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     Timber.e(e)

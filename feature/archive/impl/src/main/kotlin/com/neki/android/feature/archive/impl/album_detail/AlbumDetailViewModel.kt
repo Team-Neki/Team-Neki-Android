@@ -14,7 +14,6 @@ import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -144,8 +143,10 @@ class AlbumDetailViewModel @AssistedInject constructor(
             is AlbumDetailIntent.SelectGalleryImage -> uploadMultipleImages(intent.uris, reduce, postSideEffect)
 
             // Result Intent
-            is AlbumDetailIntent.PhotoDeleted -> {
-                deletedPhotoIds.update { it + intent.photoIds.toSet() }
+            AlbumDetailIntent.RefreshPhotos -> {
+                deletedPhotoIds.value = emptySet()
+                updatedFavorites.value = emptyMap()
+                postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
             }
 
             is AlbumDetailIntent.ClickFavoriteIcon -> {
@@ -159,10 +160,6 @@ class AlbumDetailViewModel @AssistedInject constructor(
                             updatedFavorites.update { it + (photo.id to photo.isFavorite) }
                         }
                 }
-            }
-
-            is AlbumDetailIntent.FavoriteChanged -> {
-                updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
             }
 
             AlbumDetailIntent.DismissRenameBottomSheet -> reduce {
@@ -197,7 +194,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     )
                 }
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("앨범 이름을 변경했어요"))
-                postSideEffect(AlbumDetailSideEffect.NotifyArchiveResult(ArchiveResult.AlbumChanged))
+                postSideEffect(AlbumDetailSideEffect.NotifyResult)
             }.onFailure { e ->
                 Timber.e(e)
                 reduce { copy(isLoading = false) }
@@ -222,7 +219,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 reduce { copy(isLoading = false) }
                 postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("새로운 사진을 추가했어요"))
-                postSideEffect(AlbumDetailSideEffect.NotifyArchiveResult(ArchiveResult.PhotoUploaded))
+                postSideEffect(AlbumDetailSideEffect.NotifyResult)
             }.onFailure { e ->
                 Timber.e(e)
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
@@ -325,7 +322,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                         )
                     }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
-                    postSideEffect(AlbumDetailSideEffect.NotifyArchiveResult(ArchiveResult.PhotoDeleted(selectedPhotoIds)))
+                    postSideEffect(AlbumDetailSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     Timber.e(e)
@@ -368,7 +365,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                         )
                     }
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 삭제했어요"))
-                    postSideEffect(AlbumDetailSideEffect.NotifyArchiveResult(ArchiveResult.PhotoDeleted(selectedPhotoIds)))
+                    postSideEffect(AlbumDetailSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     Timber.e(e)

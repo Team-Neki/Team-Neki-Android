@@ -28,6 +28,7 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.navigation.result.LocalResultEventBus
+import com.neki.android.feature.archive.api.PhotoDetailResult
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -58,7 +59,7 @@ internal fun PhotoDetailRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PhotoDetailSideEffect.NavigateBack -> navigateBack()
-            is PhotoDetailSideEffect.NotifyPhotoUpdated -> resultEventBus.sendResult(result = sideEffect.result, allowDuplicate = false)
+            PhotoDetailSideEffect.NotifyPhotoUpdated -> resultEventBus.sendResult(result = PhotoDetailResult, allowDuplicate = false)
             is PhotoDetailSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
             is PhotoDetailSideEffect.DownloadImage -> {
                 ImageDownloader.downloadImage(context, sideEffect.imageUrl)

@@ -7,7 +7,6 @@ import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
@@ -182,7 +181,7 @@ class AllAlbumViewModel @Inject constructor(
                 .onSuccess {
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
-                    postSideEffect(AllAlbumSideEffect.NotifyArchiveResult(ArchiveResult.AlbumChanged))
+                    postSideEffect(AllAlbumSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
@@ -205,7 +204,7 @@ class AllAlbumViewModel @Inject constructor(
                 .onSuccess {
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))
-                    postSideEffect(AllAlbumSideEffect.NotifyArchiveResult(ArchiveResult.AlbumChanged))
+                    postSideEffect(AllAlbumSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     Timber.e(e, "사진 삭제 실패")
