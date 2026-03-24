@@ -32,10 +32,13 @@ class ArchiveMainViewModel @Inject constructor(
         mviIntentStore(
             initialState = ArchiveMainState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(ArchiveMainIntent.EnterArchiveMainScreen) },
         )
-
     private var fetchJob: Job? = null
+
+    init {
+        store.onIntent(ArchiveMainIntent.EnterArchiveMainScreen)
+    }
+
     private fun onIntent(
         intent: ArchiveMainIntent,
         state: ArchiveMainState,

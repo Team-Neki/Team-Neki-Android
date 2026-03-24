@@ -42,8 +42,11 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         mviIntentStore(
             initialState = RandomPoseState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(RandomPoseIntent.EnterRandomPoseScreen) },
         )
+
+    init {
+        store.onIntent(RandomPoseIntent.EnterRandomPoseScreen)
+    }
 
     private fun onIntent(
         intent: RandomPoseIntent,

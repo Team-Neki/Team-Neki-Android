@@ -44,8 +44,11 @@ class UploadAlbumViewModel @AssistedInject constructor(
                 selectedUris = uriStrings.map { it.toUri() }.toImmutableList(),
             ),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(UploadAlbumIntent.EnterUploadAlbumScreen) },
         )
+
+    init {
+        store.onIntent(UploadAlbumIntent.EnterUploadAlbumScreen)
+    }
 
     private fun onIntent(
         intent: UploadAlbumIntent,
