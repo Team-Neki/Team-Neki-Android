@@ -210,6 +210,11 @@ internal fun QRScannerContent(
             buttonText = "사진 다운로드하러가기",
             onDismissRequest = { onIntent(QRScanIntent.DismissShouldDownloadDialog) },
             onClick = { onIntent(QRScanIntent.ClickGoDownload) },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+            ),
         )
     }
 
@@ -222,6 +227,11 @@ internal fun QRScannerContent(
             onDismissRequest = { onIntent(QRScanIntent.DismissUnSupportedBrandDialog) },
             onButtonClick = { onIntent(QRScanIntent.ClickUploadGallery) },
             onTextButtonClick = { onIntent(QRScanIntent.ClickProposeBrand) },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+            ),
         )
     }
 }
