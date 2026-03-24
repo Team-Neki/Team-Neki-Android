@@ -6,6 +6,7 @@ import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.qualifier.UploadHttpClient
+import com.neki.android.core.data.remote.qualifier.WebhookHttpClient
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.TokenRepository
 import dagger.Module
@@ -141,6 +142,23 @@ internal object NetworkModule {
             }
 
             expectSuccess = true
+        }
+    }
+
+    @WebhookHttpClient
+    @Provides
+    @Singleton
+    fun provideWebhookHttpClient(): HttpClient {
+        return HttpClient(Android) {
+            install(DefaultRequest) {
+                url(BuildConfig.DISCORD_QR_WEBHOOK_URL)
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+            }
+
+            install(HttpTimeout) {
+                connectTimeoutMillis = TIME_OUT
+                requestTimeoutMillis = TIME_OUT
+            }
         }
     }
 
