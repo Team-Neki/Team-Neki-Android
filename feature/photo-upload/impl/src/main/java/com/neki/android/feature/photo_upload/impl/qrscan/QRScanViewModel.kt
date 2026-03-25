@@ -2,23 +2,21 @@ package com.neki.android.feature.photo_upload.impl.qrscan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.dataapi.repository.DiscordWebhookRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.photo_upload.impl.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 internal class QRScanViewModel @Inject constructor(
     private val discordWebhookRepository: DiscordWebhookRepository,
+    @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
-
-    private val logScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private var webViewEnteredUrl: String? = null
     private var imageDetected: Boolean = false
@@ -134,7 +132,7 @@ internal class QRScanViewModel @Inject constructor(
         super.onCleared()
         val url = webViewEnteredUrl
         if (url != null && !imageDetected && !isDownloadRequiredBrand) {
-            logScope.launch {
+            applicationScope.launch {
                 discordWebhookRepository.logWebViewExitWithoutImage(url)
             }
         }

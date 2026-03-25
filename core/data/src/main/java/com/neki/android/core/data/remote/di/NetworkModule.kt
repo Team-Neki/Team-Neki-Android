@@ -155,6 +155,16 @@ internal object NetworkModule {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
             }
 
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Timber.tag(TAG_REST_API).d(message)
+                    }
+                }
+
+                level = LogLevel.BODY
+            }
+
             install(HttpTimeout) {
                 connectTimeoutMillis = TIME_OUT
                 requestTimeoutMillis = TIME_OUT
