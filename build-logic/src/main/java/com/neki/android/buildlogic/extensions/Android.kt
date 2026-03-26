@@ -3,9 +3,9 @@ package com.neki.android.buildlogic.extensions
 import com.android.build.api.dsl.CommonExtension
 import com.neki.android.buildlogic.const.BuildConst
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 internal fun Project.configureAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
@@ -22,18 +22,14 @@ internal fun Project.configureAndroid(
             targetCompatibility = BuildConst.JAVA_VERSION
         }
 
-        configureAndroidOptions {
-            jvmTarget = BuildConst.JDK_VERSION.toString()
-        }
-
         dependencies {
             add("detektPlugins", libs.findLibrary("detekt.formatting").get())
         }
     }
-}
 
-internal fun CommonExtension<*, *, *, *, *, *>.configureAndroidOptions(
-    block: KotlinJvmOptions.() -> Unit,
-) {
-    (this as ExtensionAware).extensions.configure("kotlinOptions", block)
+    extensions.configure<KotlinAndroidProjectExtension>("kotlin") {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.fromTarget(BuildConst.JDK_VERSION.toString()))
+        }
+    }
 }

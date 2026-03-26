@@ -38,9 +38,10 @@ internal fun RandomPoseImagePager(
         state = pagerState,
         beyondViewportPageCount = PoseConst.POSE_PREFETCH_THRESHOLD,
         userScrollEnabled = true,
-    ) { index ->
+    ) { page ->
+        val index = if (poseList.isEmpty()) 0 else page % poseList.size
         RandomPoseImage(
-            pose = poseList[index],
+            pose = poseList.getOrElse(index) { Pose() },
             onLeftSwipe = onLeftSwipe,
             onRightSwipe = onRightSwipe,
         )

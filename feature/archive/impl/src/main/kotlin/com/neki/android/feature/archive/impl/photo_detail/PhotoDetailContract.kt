@@ -6,9 +6,10 @@ import com.neki.android.feature.archive.api.ArchiveResult
 data class PhotoDetailState(
     val isLoading: Boolean = false,
     val photos: List<Photo> = emptyList(),
-    val currentIndex: Int = 0,
+    val currentPage: Int = 0,
     val isShowDeleteDialog: Boolean = false,
 ) {
+    val currentIndex get() = if (photos.isEmpty()) 0 else currentPage % photos.size
     val photo: Photo get() = photos.getOrElse(currentIndex) { Photo() }
 }
 
@@ -19,7 +20,7 @@ sealed interface PhotoDetailIntent {
     // Pager Intent
     data object ClickLeftPhoto : PhotoDetailIntent
     data object ClickRightPhoto : PhotoDetailIntent
-    data class PageChanged(val index: Int) : PhotoDetailIntent
+    data class PageChanged(val page: Int) : PhotoDetailIntent
 
     // ActionBar Intent
     data object ClickDownloadIcon : PhotoDetailIntent

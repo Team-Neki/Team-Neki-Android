@@ -49,6 +49,10 @@ jobs:
         run: |
           echo '${{ secrets.GOOGLE_SERVICES_DEBUG }}' > ./app/src/debug/google-services.json
 
+      - name: Generate network_security_config.xml
+        run: |
+          echo '${{ secrets.NETWORK_SECURITY_CONFIG }}' > ./app/src/main/res/xml/network_security_config.xml
+
       - name: Code style checks
         run: |
           ./gradlew detekt --continue

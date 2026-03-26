@@ -34,6 +34,8 @@ render.experimental.xml
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+# App specific network security config
+app/src/main/res/xml/network_security_config.xml
 
 # Android Profiling
 *.hprof

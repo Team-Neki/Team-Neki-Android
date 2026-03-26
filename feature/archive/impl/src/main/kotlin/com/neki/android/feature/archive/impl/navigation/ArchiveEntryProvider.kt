@@ -25,9 +25,7 @@ import com.neki.android.feature.archive.impl.photo.AllPhotoRoute
 import com.neki.android.feature.archive.impl.photo.AllPhotoViewModel
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
-import com.neki.android.feature.photo_upload.api.QRScanResult
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
-import com.neki.android.feature.photo_upload.api.navigateToUploadAlbum
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,26 +47,16 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
     entry<ArchiveNavKey.Archive> {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<ArchiveMainViewModel>()
-        ResultEffect<QRScanResult>(resultBus) { result ->
+        ResultEffect<ArchiveResult>(resultBus) { result ->
             when (result) {
-                is QRScanResult.QRCodeScanned -> {
-                    viewModel.store.onIntent(ArchiveMainIntent.QRCodeScanned(result.imageUrl))
-                }
-
-                QRScanResult.OpenGallery -> {
-                    viewModel.store.onIntent(ArchiveMainIntent.ReceiveOpenGalleryResult)
-                }
+                is ArchiveResult.FavoriteChanged, is ArchiveResult.PhotoDeleted, ArchiveResult.PhotoUploaded ->
+                    viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainPhotos)
             }
-        }
-        ResultEffect<ArchiveResult>(resultBus) {
-            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMainScreen)
         }
 
         ArchiveMainRoute(
             viewModel = viewModel,
             navigateToQRScan = navigator::navigateToQRScan,
-            navigateToUploadAlbumWithGallery = navigator::navigateToUploadAlbum,
-            navigateToUploadAlbumWithQRScan = navigator::navigateToUploadAlbum,
             navigateToAllAlbum = navigator::navigateToAllAlbum,
             navigateToFavoriteAlbum = { id ->
                 navigator.navigateToAlbumDetail(id = id, isFavorite = true)
@@ -94,6 +82,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                 is ArchiveResult.PhotoDeleted -> {
                     viewModel.store.onIntent(AllPhotoIntent.PhotoDeleted(result.photoId))
                 }
+
+                else -> {}
             }
         }
 
@@ -131,6 +121,8 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                 is ArchiveResult.PhotoDeleted -> {
                     viewModel.store.onIntent(AlbumDetailIntent.PhotoDeleted(result.photoId))
                 }
+
+                else -> {}
             }
         }
 

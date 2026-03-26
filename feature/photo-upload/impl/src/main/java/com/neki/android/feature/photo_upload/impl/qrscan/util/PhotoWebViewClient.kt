@@ -8,6 +8,7 @@ import com.neki.android.feature.photo_upload.impl.BuildConfig
 import timber.log.Timber
 
 class PhotoWebViewClient(
+    private val onPageFinished: () -> Unit,
     private val onImageUrlDetected: (String) -> Unit,
 ) : WebViewClient() {
 
@@ -57,5 +58,10 @@ class PhotoWebViewClient(
         }
 
         return super.shouldInterceptRequest(view, request)
+    }
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+        onPageFinished()
     }
 }

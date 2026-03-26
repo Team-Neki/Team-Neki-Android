@@ -2,6 +2,7 @@ package com.neki.android.core.data.repository.di
 
 import com.neki.android.core.data.auth.AuthEventManagerImpl
 import com.neki.android.core.data.repository.impl.AuthRepositoryImpl
+import com.neki.android.core.data.repository.impl.DiscordWebhookRepositoryImpl
 import com.neki.android.core.data.repository.impl.MediaUploadRepositoryImpl
 import com.neki.android.core.data.repository.impl.FolderRepositoryImpl
 import com.neki.android.core.data.repository.impl.MapRepositoryImpl
@@ -11,6 +12,7 @@ import com.neki.android.core.data.repository.impl.TermRepositoryImpl
 import com.neki.android.core.data.repository.impl.TokenRepositoryImpl
 import com.neki.android.core.data.repository.impl.UserRepositoryImpl
 import com.neki.android.core.dataapi.auth.AuthEventManager
+import com.neki.android.core.dataapi.repository.DiscordWebhookRepository
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
@@ -89,4 +91,10 @@ internal interface RepositoryModule {
     fun bindTermRepositoryImpl(
         termRepositoryImpl: TermRepositoryImpl,
     ): TermRepository
+
+    @Binds
+    @Singleton
+    fun bindDiscordWebhookRepositoryImpl(
+        discordWebhookRepositoryImpl: DiscordWebhookRepositoryImpl,
+    ): DiscordWebhookRepository
 }

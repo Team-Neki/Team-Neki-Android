@@ -10,5 +10,5 @@ interface TokenRepository {
     fun hasTokens(): Flow<Boolean>
     fun getAccessToken(): Flow<String>
     fun getRefreshToken(): Flow<String>
-    suspend fun clearTokens()
+    suspend fun clearTokensWithAuthCache()
 }
