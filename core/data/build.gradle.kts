@@ -21,6 +21,10 @@ android {
         buildConfig = true
     }
 
+    defaultConfig {
+        buildConfigField("String", "DISCORD_QR_WEBHOOK_URL", properties["DISCORD_QR_WEBHOOK_URL"].toString())
+    }
+
     buildTypes {
         debug {
             buildConfigField("String", "BASE_URL", properties["DEV_BASE_URL"].toString())

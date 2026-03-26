@@ -1,14 +1,26 @@
 package com.neki.android.feature.photo_upload.impl.qrscan
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.common.coroutine.di.ApplicationScope
+import com.neki.android.core.dataapi.repository.DiscordWebhookRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.photo_upload.impl.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class QRScanViewModel @Inject constructor() : ViewModel() {
+internal class QRScanViewModel @Inject constructor(
+    private val discordWebhookRepository: DiscordWebhookRepository,
+    @ApplicationScope private val applicationScope: CoroutineScope,
+) : ViewModel() {
+
+    private var webViewEnteredUrl: String? = null
+    private var imageDetected: Boolean = false
+    private var isDownloadRequiredBrand: Boolean = false
 
     val store: MviIntentStore<QRScanState, QRScanIntent, QRScanSideEffect> =
         mviIntentStore(
@@ -68,6 +80,7 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
 
                 if (isSupportedBrand(scannedUrl)) {
                     if (isShouldFirstDownloadBrand(scannedUrl)) {
+                        isDownloadRequiredBrand = true
                         reduce {
                             copy(
                                 scannedUrl = intent.scannedUrl,
@@ -75,6 +88,7 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                             )
                         }
                     } else {
+                        webViewEnteredUrl = scannedUrl
                         reduce {
                             copy(
                                 scannedUrl = intent.scannedUrl,
@@ -83,6 +97,9 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                         }
                     }
                 } else {
+                    viewModelScope.launch {
+                        discordWebhookRepository.logUnsupportedBrandQR(scannedUrl)
+                    }
                     reduce { copy(isUnSupportedBrandDialogShown = true) }
                 }
             }
@@ -92,7 +109,10 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
                 postSideEffect(QRScanSideEffect.ShowToast("QR코드를 인식하지 못했습니다."))
             }
 
-            is QRScanIntent.DetectImageUrl -> postSideEffect(QRScanSideEffect.SetQRScannedResult(intent.imageUrl))
+            is QRScanIntent.DetectImageUrl -> {
+                imageDetected = true
+                postSideEffect(QRScanSideEffect.SetQRScannedResult(intent.imageUrl))
+            }
 
             QRScanIntent.DismissShouldDownloadDialog -> reduce { copy(isDownloadNeededDialogShown = false) }
             QRScanIntent.ClickGoDownload -> reduce {
@@ -105,6 +125,16 @@ internal class QRScanViewModel @Inject constructor() : ViewModel() {
             QRScanIntent.DismissUnSupportedBrandDialog -> reduce { copy(isUnSupportedBrandDialogShown = false) }
             QRScanIntent.ClickUploadGallery -> postSideEffect(QRScanSideEffect.SetOpenGalleryResult)
             QRScanIntent.ClickProposeBrand -> postSideEffect(QRScanSideEffect.OpenBrandProposalUrl)
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        val url = webViewEnteredUrl
+        if (url != null && !imageDetected && !isDownloadRequiredBrand) {
+            applicationScope.launch {
+                discordWebhookRepository.logWebViewExitWithoutImage(url)
+            }
         }
     }
 
