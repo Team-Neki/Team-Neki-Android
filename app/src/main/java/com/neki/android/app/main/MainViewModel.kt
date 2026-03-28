@@ -44,6 +44,7 @@ class MainViewModel @Inject constructor(
                 postSideEffect(MainSideEffect.OpenGallery)
             }
             is MainIntent.SelectGalleryImage -> reduce { copy(isShowSelectWithAlbumDialog = true, selectedUris = intent.uris.toImmutableList()) }
+            is MainIntent.ShareImageReceived -> reduce { copy(isShowSelectWithAlbumDialog = true, selectedUris = intent.uris.toImmutableList()) }
             is MainIntent.QRCodeScanned -> reduce { copy(scannedImageUrl = intent.imageUrl, isShowSelectWithAlbumDialog = true) }
             MainIntent.DismissSelectWithAlbumDialog -> reduce {
                 copy(

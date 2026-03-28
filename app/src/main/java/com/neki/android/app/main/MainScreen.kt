@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +33,9 @@ import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
+import androidx.core.net.toUri
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.map.api.MapNavKey
@@ -52,6 +56,8 @@ fun MainRoute(
     navigateToQRScan: () -> Unit,
     navigateToUploadAlbumWithGallery: (List<String>) -> Unit,
     navigateToUploadAlbumWithQRScan: (String) -> Unit,
+    pendingShareUriStrings: ImmutableList<String> = persistentListOf(),
+    onShareUrisConsumed: () -> Unit = {},
     viewModel: MainViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
@@ -66,6 +72,13 @@ fun MainRoute(
             viewModel.store.onIntent(MainIntent.SelectGalleryImage(uris))
         } else {
             Timber.d("No media selected")
+        }
+    }
+
+    LaunchedEffect(pendingShareUriStrings) {
+        if (pendingShareUriStrings.isNotEmpty()) {
+            viewModel.store.onIntent(MainIntent.ShareImageReceived(pendingShareUriStrings.map { it.toUri() }))
+            onShareUrisConsumed()
         }
     }
 

@@ -18,6 +18,7 @@ sealed interface MainIntent {
     data object ClickQRScan : MainIntent
     data object ClickGalleryUpload : MainIntent
     data class SelectGalleryImage(val uris: List<Uri>) : MainIntent
+    data class ShareImageReceived(val uris: List<Uri>) : MainIntent
     data class QRCodeScanned(val imageUrl: String) : MainIntent
     data object DismissSelectWithAlbumDialog : MainIntent
     data object ClickUploadWithAlbum : MainIntent
