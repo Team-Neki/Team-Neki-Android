@@ -166,7 +166,7 @@ fun MainScreen(
         )
     }
 
-    if (uiState.isLoading) {
+    if (uiState.isLoading && !uiState.isShowSelectWithAlbumDialog) {
         LoadingDialog()
     }
 
