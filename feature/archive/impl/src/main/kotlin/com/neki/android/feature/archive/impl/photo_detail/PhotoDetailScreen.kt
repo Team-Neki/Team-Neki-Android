@@ -18,10 +18,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import net.engawapg.lib.zoomable.ScrollGesturePropagation
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
@@ -107,39 +111,49 @@ internal fun PhotoDetailScreen(
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .clipToBounds(),
             state = pagerState,
             beyondViewportPageCount = 1,
         ) { page ->
             val index = if (uiState.photos.isEmpty()) 0 else page % uiState.photos.size
+            val zoomState = rememberZoomState()
             Box {
                 AsyncImage(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .zoomable(
+                            zoomState = zoomState,
+                            scrollGesturePropagation = ScrollGesturePropagation.NotZoomed,
+                        ),
                     model = uiState.photos.getOrNull(index)?.imageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
+                    onSuccess = { state -> zoomState.setContentSize(state.painter.intrinsicSize) },
                 )
-                Row(modifier = Modifier.matchParentSize()) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .noRippleClickableSingle {
-                                if (!pagerState.isScrollInProgress) {
-                                    onIntent(PhotoDetailIntent.ClickLeftPhoto)
-                                }
-                            },
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .noRippleClickableSingle {
-                                if (!pagerState.isScrollInProgress) {
-                                    onIntent(PhotoDetailIntent.ClickRightPhoto)
-                                }
-                            },
-                    )
+                if (zoomState.scale <= 1f) {
+                    Row(modifier = Modifier.matchParentSize()) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .noRippleClickableSingle {
+                                    if (!pagerState.isScrollInProgress) {
+                                        onIntent(PhotoDetailIntent.ClickLeftPhoto)
+                                    }
+                                },
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .noRippleClickableSingle {
+                                    if (!pagerState.isScrollInProgress) {
+                                        onIntent(PhotoDetailIntent.ClickRightPhoto)
+                                    }
+                                },
+                        )
+                    }
                 }
             }
         }
