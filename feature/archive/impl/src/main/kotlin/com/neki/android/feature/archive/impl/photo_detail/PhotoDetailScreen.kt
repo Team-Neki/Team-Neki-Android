@@ -4,8 +4,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
@@ -14,32 +12,35 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import net.engawapg.lib.zoomable.ScrollGesturePropagation
-import net.engawapg.lib.zoomable.rememberZoomState
-import net.engawapg.lib.zoomable.zoomable
 import com.neki.android.core.designsystem.DevicePreview
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.navigation.result.LocalResultEventBus
-import com.neki.android.feature.archive.api.PhotoDetailResult
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.archive.api.PhotoDetailResult
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.coroutines.launch
+import net.engawapg.lib.zoomable.ScrollGesturePropagation
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 import timber.log.Timber
 
 @Composable
@@ -118,43 +119,30 @@ internal fun PhotoDetailScreen(
         ) { page ->
             val index = if (uiState.photos.isEmpty()) 0 else page % uiState.photos.size
             val zoomState = rememberZoomState()
-            Box {
+            var contentWidth by remember { mutableIntStateOf(0) }
+            Box(modifier = Modifier.clipToBounds()) {
                 AsyncImage(
                     modifier = Modifier
                         .fillMaxSize()
+                        .onSizeChanged { contentWidth = it.width }
                         .zoomable(
                             zoomState = zoomState,
-                            scrollGesturePropagation = ScrollGesturePropagation.NotZoomed,
+                            scrollGesturePropagation = ScrollGesturePropagation.ContentEdge,
+                            onTap = { position: Offset ->
+                                if (!pagerState.isScrollInProgress && contentWidth > 0 && zoomState.scale <= 1f) {
+                                    if (position.x < contentWidth / 2) {
+                                        onIntent(PhotoDetailIntent.ClickLeftPhoto)
+                                    } else {
+                                        onIntent(PhotoDetailIntent.ClickRightPhoto)
+                                    }
+                                }
+                            },
                         ),
                     model = uiState.photos.getOrNull(index)?.imageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     onSuccess = { state -> zoomState.setContentSize(state.painter.intrinsicSize) },
                 )
-                if (zoomState.scale <= 1f) {
-                    Row(modifier = Modifier.matchParentSize()) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .noRippleClickableSingle {
-                                    if (!pagerState.isScrollInProgress) {
-                                        onIntent(PhotoDetailIntent.ClickLeftPhoto)
-                                    }
-                                },
-                        )
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .noRippleClickableSingle {
-                                    if (!pagerState.isScrollInProgress) {
-                                        onIntent(PhotoDetailIntent.ClickRightPhoto)
-                                    }
-                                },
-                        )
-                    }
-                }
             }
         }
 
