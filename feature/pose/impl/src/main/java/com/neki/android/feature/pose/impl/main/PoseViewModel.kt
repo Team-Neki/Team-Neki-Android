@@ -81,6 +81,7 @@ internal class PoseViewModel @Inject constructor(
             // Pose Main
             PoseIntent.EnterPoseScreen -> Unit
             PoseIntent.ClickAlarmIcon -> postSideEffect(PoseEffect.NavigateToNotification)
+            PoseIntent.ClickQRScanIcon -> postSideEffect(PoseEffect.NavigateToQRScan)
             PoseIntent.ClickPeopleCountChip -> reduce { copy(isShowPeopleCountBottomSheet = true) }
             is PoseIntent.ClickPeopleCountSheetItem -> handlePeopleCountSheetItem(intent, state, reduce, postSideEffect)
             PoseIntent.DismissPeopleCountBottomSheet -> reduce { copy(isShowPeopleCountBottomSheet = false) }

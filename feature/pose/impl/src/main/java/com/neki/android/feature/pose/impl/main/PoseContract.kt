@@ -18,6 +18,7 @@ data class PoseState(
 sealed interface PoseIntent {
     data object EnterPoseScreen : PoseIntent
     data object ClickAlarmIcon : PoseIntent
+    data object ClickQRScanIcon : PoseIntent
     data object ClickPeopleCountChip : PoseIntent
     data object DismissPeopleCountBottomSheet : PoseIntent
     data object DismissRandomPosePeopleCountBottomSheet : PoseIntent
@@ -33,6 +34,7 @@ sealed interface PoseIntent {
 
 sealed interface PoseEffect {
     data object NavigateToNotification : PoseEffect
+    data object NavigateToQRScan : PoseEffect
     data class NavigateToRandomPose(val peopleCount: PeopleCount) : PoseEffect
     data class NavigateToPoseDetail(val poseId: Long) : PoseEffect
     data class ShowToast(val message: String) : PoseEffect
