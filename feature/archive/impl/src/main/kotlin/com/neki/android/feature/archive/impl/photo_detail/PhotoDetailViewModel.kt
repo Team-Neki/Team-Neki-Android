@@ -75,7 +75,12 @@ class PhotoDetailViewModel @AssistedInject constructor(
     ) {
         when (intent) {
             // TopBar Intent
-            PhotoDetailIntent.ClickBackIcon -> postSideEffect(PhotoDetailSideEffect.NavigateBack)
+            PhotoDetailIntent.ClickBackIcon -> {
+                if (state.memo != state.photo.memo) {
+                    saveMemo(state, reduce, postSideEffect)
+                }
+                postSideEffect(PhotoDetailSideEffect.NavigateBack)
+            }
 
             // Pager Intent
             PhotoDetailIntent.ClickLeftPhoto -> {
@@ -92,7 +97,6 @@ class PhotoDetailViewModel @AssistedInject constructor(
                     copy(
                         currentPage = intent.page,
                         memo = photos.getOrNull(newIndex)?.memo.orEmpty(),
-                        memoMode = if (memoMode == MemoMode.Preview) MemoMode.Preview else MemoMode.Closed,
                     )
                 }
                 preloadIfNeeded(reduce)
@@ -117,16 +121,40 @@ class PhotoDetailViewModel @AssistedInject constructor(
             }
 
             // Memo Intent
+            is PhotoDetailIntent.MemoTextChanged -> reduce { copy(memo = intent.text) }
             PhotoDetailIntent.ClickMemoIcon -> reduce {
-                copy(memoMode = if (memoMode == MemoMode.Closed) MemoMode.Preview else MemoMode.Closed)
+                val photoId = photo.id
+                val current = memoModeOf(photoId)
+                val newMode = if (current == MemoMode.Closed) MemoMode.Preview else MemoMode.Closed
+                copy(memoModes = memoModes + (photoId to newMode))
             }
-            PhotoDetailIntent.ClickMemoMore -> reduce { copy(memoMode = MemoMode.Expanded) }
-            PhotoDetailIntent.ClickMemoFold -> reduce { copy(memoMode = MemoMode.Preview) }
-            PhotoDetailIntent.ClickMemoText -> reduce { copy(memoMode = MemoMode.Editing) }
-            PhotoDetailIntent.ClickMemoCancel -> reduce { copy(memoMode = MemoMode.Preview) }
+            PhotoDetailIntent.ClickMemoMore -> reduce {
+                copy(memoModes = memoModes + (photo.id to MemoMode.Expanded))
+            }
+            PhotoDetailIntent.ClickMemoText -> reduce {
+                copy(memoModes = memoModes + (photo.id to MemoMode.Editing))
+            }
+            PhotoDetailIntent.ClickMemoFold -> reduce {
+                copy(
+                    memo = photo.memo,
+                    memoModes = memoModes + (photo.id to MemoMode.Preview),
+                )
+            }
+            PhotoDetailIntent.ClickMemoCancel -> reduce {
+                copy(
+                    memo = photo.memo,
+                    memoModes = memoModes + (photo.id to MemoMode.Preview),
+                )
+            }
             is PhotoDetailIntent.ClickMemoDone -> {
-                reduce { copy(memo = intent.memo, memoMode = MemoMode.Preview) }
-                // TODO: 메모 저장 API 호출
+                val photoId = state.photo.id
+                reduce {
+                    copy(
+                        memo = intent.memo,
+                        memoModes = memoModes + (photoId to MemoMode.Preview),
+                    )
+                }
+                saveMemo(state.copy(memo = intent.memo), reduce, postSideEffect)
             }
 
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
@@ -135,6 +163,39 @@ class PhotoDetailViewModel @AssistedInject constructor(
             PhotoDetailIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
             PhotoDetailIntent.ClickDeleteDialogCancelButton -> reduce { copy(isShowDeleteDialog = false) }
             PhotoDetailIntent.ClickDeleteDialogConfirmButton -> handleDelete(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun saveMemo(
+        state: PhotoDetailState,
+        reduce: (PhotoDetailState.() -> PhotoDetailState) -> Unit,
+        postSideEffect: (PhotoDetailSideEffect) -> Unit,
+    ) {
+        val photoId = state.photo.id
+        val newMemo = state.memo
+        val oldMemo = state.photo.memo
+        if (newMemo == oldMemo) return
+        reduce {
+            copy(
+                photos = photos.map { p ->
+                    if (p.id == photoId) p.copy(memo = newMemo) else p
+                },
+            )
+        }
+        viewModelScope.launch {
+            photoRepository.updateMemo(photoId, newMemo)
+                .onFailure { e ->
+                    Timber.e(e, "updateMemo failed")
+                    reduce {
+                        copy(
+                            memo = oldMemo,
+                            photos = photos.map { p ->
+                                if (p.id == photoId) p.copy(memo = oldMemo) else p
+                            },
+                        )
+                    }
+                    postSideEffect(PhotoDetailSideEffect.ShowToastMessage("메모 저장에 실패했어요"))
+                }
         }
     }
 

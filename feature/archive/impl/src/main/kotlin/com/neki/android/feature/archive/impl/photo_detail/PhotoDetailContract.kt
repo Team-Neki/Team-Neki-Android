@@ -14,11 +14,13 @@ data class PhotoDetailState(
     val photos: List<Photo> = emptyList(),
     val currentPage: Int = 0,
     val isShowDeleteDialog: Boolean = false,
-    val memoMode: MemoMode = MemoMode.Closed,
     val memo: String = "",
+    val memoModes: Map<Long, MemoMode> = emptyMap(),
 ) {
     val currentIndex get() = if (photos.isEmpty()) 0 else currentPage % photos.size
     val photo: Photo get() = photos.getOrElse(currentIndex) { Photo() }
+    val currentMemoMode: MemoMode get() = memoModes[photo.id] ?: MemoMode.Closed
+    fun memoModeOf(photoId: Long): MemoMode = memoModes[photoId] ?: MemoMode.Closed
 }
 
 sealed interface PhotoDetailIntent {
@@ -39,6 +41,7 @@ sealed interface PhotoDetailIntent {
     data object ClickMemoMore : PhotoDetailIntent
     data object ClickMemoText : PhotoDetailIntent
     data object ClickMemoFold : PhotoDetailIntent
+    data class MemoTextChanged(val text: String) : PhotoDetailIntent
     data object ClickMemoCancel : PhotoDetailIntent
     data class ClickMemoDone(val memo: String) : PhotoDetailIntent
     data object ClickDeleteIcon : PhotoDetailIntent
