@@ -2,11 +2,20 @@ package com.neki.android.feature.archive.impl.photo_detail
 
 import com.neki.android.core.model.Photo
 
+enum class MemoMode {
+    Closed,
+    Preview,
+    Expanded,
+    Editing,
+}
+
 data class PhotoDetailState(
     val isLoading: Boolean = false,
     val photos: List<Photo> = emptyList(),
     val currentPage: Int = 0,
     val isShowDeleteDialog: Boolean = false,
+    val memoMode: MemoMode = MemoMode.Closed,
+    val memo: String = "",
 ) {
     val currentIndex get() = if (photos.isEmpty()) 0 else currentPage % photos.size
     val photo: Photo get() = photos.getOrElse(currentIndex) { Photo() }
@@ -26,6 +35,12 @@ sealed interface PhotoDetailIntent {
     data object ClickFavoriteIcon : PhotoDetailIntent
     data class FavoriteCommitted(val photoId: Long, val newFavorite: Boolean) : PhotoDetailIntent
     data class RevertFavorite(val photoId: Long, val originalFavorite: Boolean) : PhotoDetailIntent
+    data object ClickMemoIcon : PhotoDetailIntent
+    data object ClickMemoMore : PhotoDetailIntent
+    data object ClickMemoText : PhotoDetailIntent
+    data object ClickMemoFold : PhotoDetailIntent
+    data object ClickMemoCancel : PhotoDetailIntent
+    data class ClickMemoDone(val memo: String) : PhotoDetailIntent
     data object ClickDeleteIcon : PhotoDetailIntent
 
     // Delete Dialog Intent

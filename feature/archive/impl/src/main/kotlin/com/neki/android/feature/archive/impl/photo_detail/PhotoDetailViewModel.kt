@@ -36,6 +36,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             initialState = PhotoDetailState(
                 photos = key.photos,
                 currentPage = key.initialIndex,
+                memo = key.photos.getOrNull(key.initialIndex)?.memo.orEmpty(),
             ),
             onIntent = ::onIntent,
         )
@@ -86,7 +87,14 @@ class PhotoDetailViewModel @AssistedInject constructor(
             PhotoDetailIntent.ClickRightPhoto -> postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentPage + 1))
 
             is PhotoDetailIntent.PageChanged -> {
-                reduce { copy(currentPage = intent.page) }
+                reduce {
+                    val newIndex = if (photos.isEmpty()) 0 else intent.page % photos.size
+                    copy(
+                        currentPage = intent.page,
+                        memo = photos.getOrNull(newIndex)?.memo.orEmpty(),
+                        memoMode = if (memoMode == MemoMode.Preview) MemoMode.Preview else MemoMode.Closed,
+                    )
+                }
                 preloadIfNeeded(reduce)
             }
 
@@ -106,6 +114,19 @@ class PhotoDetailViewModel @AssistedInject constructor(
                         },
                     )
                 }
+            }
+
+            // Memo Intent
+            PhotoDetailIntent.ClickMemoIcon -> reduce {
+                copy(memoMode = if (memoMode == MemoMode.Closed) MemoMode.Preview else MemoMode.Closed)
+            }
+            PhotoDetailIntent.ClickMemoMore -> reduce { copy(memoMode = MemoMode.Expanded) }
+            PhotoDetailIntent.ClickMemoFold -> reduce { copy(memoMode = MemoMode.Preview) }
+            PhotoDetailIntent.ClickMemoText -> reduce { copy(memoMode = MemoMode.Editing) }
+            PhotoDetailIntent.ClickMemoCancel -> reduce { copy(memoMode = MemoMode.Preview) }
+            is PhotoDetailIntent.ClickMemoDone -> {
+                reduce { copy(memo = intent.memo, memoMode = MemoMode.Preview) }
+                // TODO: 메모 저장 API 호출
             }
 
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }

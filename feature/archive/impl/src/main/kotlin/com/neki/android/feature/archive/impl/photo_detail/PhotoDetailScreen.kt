@@ -1,23 +1,34 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -94,60 +105,101 @@ internal fun PhotoDetailScreen(
     onIntent: (PhotoDetailIntent) -> Unit = {},
     pagerState: PagerState = rememberPagerState { Int.MAX_VALUE },
 ) {
-    Column(
+    val density = LocalDensity.current
+    var actionBarHeightPx by remember { mutableIntStateOf(0) }
+    val actionBarHeight = with(density) { actionBarHeightPx.toDp() }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white),
     ) {
-        BackTitleTopBar(
-            title = uiState.photo.date,
-            onBack = { onIntent(PhotoDetailIntent.ClickBackIcon) },
-        )
+        Column(modifier = Modifier.fillMaxSize()) {
+            BackTitleTopBar(
+                title = uiState.photo.date,
+                onBack = { onIntent(PhotoDetailIntent.ClickBackIcon) },
+            )
 
-        HorizontalPager(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            state = pagerState,
-            beyondViewportPageCount = 1,
-        ) { page ->
-            val index = if (uiState.photos.isEmpty()) 0 else page % uiState.photos.size
-            Box {
-                AsyncImage(
-                    modifier = Modifier.fillMaxSize(),
-                    model = uiState.photos.getOrNull(index)?.imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                )
-                Row(modifier = Modifier.matchParentSize()) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .noRippleClickableSingle {
-                                if (!pagerState.isScrollInProgress) {
-                                    onIntent(PhotoDetailIntent.ClickLeftPhoto)
-                                }
-                            },
+            val isMemoActive = uiState.memoMode == MemoMode.Expanded ||
+                uiState.memoMode == MemoMode.Editing
+
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                state = pagerState,
+                beyondViewportPageCount = 1,
+                userScrollEnabled = !isMemoActive,
+            ) { page ->
+                val index = if (uiState.photos.isEmpty()) 0 else page % uiState.photos.size
+                Box {
+                    AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
+                        model = uiState.photos.getOrNull(index)?.imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
                     )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .noRippleClickableSingle {
-                                if (!pagerState.isScrollInProgress) {
-                                    onIntent(PhotoDetailIntent.ClickRightPhoto)
-                                }
-                            },
-                    )
+                    if (!isMemoActive) {
+                        Row(modifier = Modifier.matchParentSize()) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .noRippleClickableSingle {
+                                        if (!pagerState.isScrollInProgress) {
+                                            onIntent(PhotoDetailIntent.ClickLeftPhoto)
+                                        }
+                                    },
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .noRippleClickableSingle {
+                                        if (!pagerState.isScrollInProgress) {
+                                            onIntent(PhotoDetailIntent.ClickRightPhoto)
+                                        }
+                                    },
+                            )
+                        }
+                    }
                 }
             }
+
+            Spacer(modifier = Modifier.height(actionBarHeight))
+        }
+
+        // Expanded/Editing 모드일 때 dim 오버레이
+        AnimatedVisibility(
+            visible = uiState.memoMode == MemoMode.Expanded || uiState.memoMode == MemoMode.Editing,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x80202227))
+                    .noRippleClickableSingle { onIntent(PhotoDetailIntent.ClickMemoFold) },
+            )
         }
 
         PhotoDetailActionBar(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .onSizeChanged {
+                    if (uiState.memoMode == MemoMode.Closed) actionBarHeightPx = it.height
+                },
             isFavorite = uiState.photo.isFavorite,
+            memo = uiState.memo,
+            memoMode = uiState.memoMode,
             onClickDownload = { onIntent(PhotoDetailIntent.ClickDownloadIcon) },
             onClickFavorite = { onIntent(PhotoDetailIntent.ClickFavoriteIcon) },
+            onClickMemo = { onIntent(PhotoDetailIntent.ClickMemoIcon) },
+            onClickMemoMore = { onIntent(PhotoDetailIntent.ClickMemoMore) },
+            onClickMemoText = { onIntent(PhotoDetailIntent.ClickMemoText) },
+            onClickMemoFold = { onIntent(PhotoDetailIntent.ClickMemoFold) },
+            onClickMemoCancel = { onIntent(PhotoDetailIntent.ClickMemoCancel) },
+            onClickMemoDone = { onIntent(PhotoDetailIntent.ClickMemoDone(it)) },
             onClickDelete = { onIntent(PhotoDetailIntent.ClickDeleteIcon) },
         )
     }
