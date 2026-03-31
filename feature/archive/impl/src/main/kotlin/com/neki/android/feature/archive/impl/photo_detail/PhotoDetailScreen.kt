@@ -1,6 +1,5 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -12,11 +11,16 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
@@ -92,6 +96,8 @@ internal fun PhotoDetailScreen(
 ) {
     val isMemoActive = uiState.currentMemoMode == MemoMode.Expanded ||
         uiState.currentMemoMode == MemoMode.Editing
+    val density = LocalDensity.current
+    var actionBarHeightDp by remember { mutableStateOf(0.dp) }
 
     Column(
         modifier = Modifier
@@ -121,6 +127,7 @@ internal fun PhotoDetailScreen(
                 imageUrl = photo?.imageUrl,
                 memo = pageMemo,
                 memoMode = pageMemoMode,
+                actionBarHeight = actionBarHeightDp,
                 isScrollInProgress = pagerState.isScrollInProgress,
                 isTapEnabled = pageMemoMode != MemoMode.Expanded && pageMemoMode != MemoMode.Editing,
                 onClickLeft = { onIntent(PhotoDetailIntent.ClickLeftPhoto) },
@@ -134,8 +141,11 @@ internal fun PhotoDetailScreen(
             )
         }
 
-        AnimatedVisibility(visible = uiState.currentMemoMode != MemoMode.Editing) {
+        if (uiState.currentMemoMode != MemoMode.Editing) {
             PhotoDetailActionBar(
+                modifier = Modifier.onSizeChanged { size ->
+                    actionBarHeightDp = with(density) { size.height.toDp() }
+                },
                 isFavorite = uiState.photo.isFavorite,
                 onClickDownload = { onIntent(PhotoDetailIntent.ClickDownloadIcon) },
                 onClickFavorite = { onIntent(PhotoDetailIntent.ClickFavoriteIcon) },

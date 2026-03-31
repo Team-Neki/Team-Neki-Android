@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.feature.archive.impl.photo_detail.MemoMode
@@ -25,6 +28,7 @@ internal fun PhotoDetailImageItem(
     imageUrl: String?,
     memo: String,
     memoMode: MemoMode,
+    actionBarHeight: Dp = 0.dp,
     isScrollInProgress: Boolean,
     isTapEnabled: Boolean,
     onClickLeft: () -> Unit,
@@ -37,10 +41,15 @@ internal fun PhotoDetailImageItem(
     onMemoTextChanged: (String) -> Unit,
 ) {
     val isMemoActive = memoMode == MemoMode.Expanded || memoMode == MemoMode.Editing
+    val bottomPadding = if (memoMode == MemoMode.Editing) actionBarHeight else 0.dp
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
         AsyncImage(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = bottomPadding),
             model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.Fit,
