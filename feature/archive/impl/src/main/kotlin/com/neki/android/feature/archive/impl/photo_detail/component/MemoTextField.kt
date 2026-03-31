@@ -72,9 +72,11 @@ internal fun MemoTextField(
         previousMemoMode = memoMode
     }
 
-    LaunchedEffect(memoState) {
-        snapshotFlow { memoState.text.toString() }
-            .collect { text -> onMemoTextChanged(text) }
+    LaunchedEffect(memoState, memoMode) {
+        if (memoMode == MemoMode.Editing) {
+            snapshotFlow { memoState.text.toString() }
+                .collect { text -> onMemoTextChanged(text) }
+        }
     }
 
     Column(
