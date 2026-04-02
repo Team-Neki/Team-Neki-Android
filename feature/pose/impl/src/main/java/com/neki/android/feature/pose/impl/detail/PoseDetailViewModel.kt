@@ -36,10 +36,10 @@ class PoseDetailViewModel @AssistedInject constructor(
         mviIntentStore(
             initialState = PoseDetailState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(PoseDetailIntent.EnterPoseDetailScreen) },
         )
 
     init {
+        store.onIntent(PoseDetailIntent.EnterPoseDetailScreen)
         viewModelScope.launch {
             bookmarkRequests
                 .debounce(500)

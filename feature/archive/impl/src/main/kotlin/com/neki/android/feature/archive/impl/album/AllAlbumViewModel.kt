@@ -28,8 +28,11 @@ class AllAlbumViewModel @Inject constructor(
         mviIntentStore(
             initialState = AllAlbumState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(AllAlbumIntent.EnterAllAlbumScreen) },
         )
+
+    init {
+        store.onIntent(AllAlbumIntent.EnterAllAlbumScreen)
+    }
 
     private fun onIntent(
         intent: AllAlbumIntent,

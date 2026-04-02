@@ -29,8 +29,11 @@ internal class MyPageViewModel @Inject constructor(
         mviIntentStore(
             initialState = MyPageState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(MyPageIntent.EnterMypageScreen) },
         )
+
+    init {
+        store.onIntent(MyPageIntent.EnterMypageScreen)
+    }
 
     private fun onIntent(
         intent: MyPageIntent,

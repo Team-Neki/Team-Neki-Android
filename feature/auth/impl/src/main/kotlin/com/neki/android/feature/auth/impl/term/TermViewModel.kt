@@ -22,8 +22,11 @@ class TermViewModel @Inject constructor(
         mviIntentStore(
             initialState = TermState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(TermIntent.EnterTermScreen) },
         )
+
+    init {
+        store.onIntent(TermIntent.EnterTermScreen)
+    }
 
     private fun onIntent(
         intent: TermIntent,
