@@ -1,5 +1,6 @@
 package com.neki.android.app
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
@@ -8,7 +9,10 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.entryProvider
 import com.neki.android.app.main.MainRoute
@@ -29,9 +33,29 @@ import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.auth.impl.navigation.authEntryProvider
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import com.neki.android.feature.photo_upload.api.navigateToUploadAlbum
+import android.net.Uri
+import androidx.core.content.IntentCompat
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private fun Intent.extractShareUriStrings(): ImmutableList<String> {
+    val uris: List<Uri> = when (action) {
+        Intent.ACTION_SEND -> {
+            IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java)
+                ?.let { listOf(it) } ?: emptyList()
+        }
+        Intent.ACTION_SEND_MULTIPLE -> {
+            IntentCompat.getParcelableArrayListExtra(this, Intent.EXTRA_STREAM, Uri::class.java)
+                ?: emptyList()
+        }
+        else -> emptyList()
+    }
+    return uris.map { it.toString() }.toImmutableList()
+}
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -54,8 +78,12 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var authEventManager: AuthEventManager
 
+    private var pendingShareUriStrings by mutableStateOf<ImmutableList<String>>(persistentListOf())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        pendingShareUriStrings = intent.extractShareUriStrings()
 
         enableEdgeToEdge(
             navigationBarStyle = SystemBarStyle.auto(
@@ -97,6 +125,8 @@ class MainActivity : ComponentActivity() {
                                     navigateToQRScan = mainNavigator::navigateToQRScan,
                                     navigateToUploadAlbumWithGallery = mainNavigator::navigateToUploadAlbum,
                                     navigateToUploadAlbumWithQRScan = mainNavigator::navigateToUploadAlbum,
+                                    pendingShareUriStrings = pendingShareUriStrings,
+                                    onShareUrisConsumed = { pendingShareUriStrings = persistentListOf() },
                                 )
                             }
                         }
@@ -105,6 +135,14 @@ class MainActivity : ComponentActivity() {
             }
         }
         observeAuthEvents()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val uriStrings = intent.extractShareUriStrings()
+        if (uriStrings.isNotEmpty()) {
+            pendingShareUriStrings = uriStrings
+        }
     }
 
     private fun observeAuthEvents() {
