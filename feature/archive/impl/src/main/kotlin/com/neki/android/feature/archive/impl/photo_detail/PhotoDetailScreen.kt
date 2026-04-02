@@ -120,7 +120,7 @@ internal fun PhotoDetailScreen(
             val index = if (uiState.photos.isEmpty()) 0 else page % uiState.photos.size
             val zoomState = rememberZoomState()
             var contentWidth by remember { mutableIntStateOf(0) }
-            Box(modifier = Modifier.clipToBounds()) {
+            Box {
                 AsyncImage(
                     modifier = Modifier
                         .fillMaxSize()
