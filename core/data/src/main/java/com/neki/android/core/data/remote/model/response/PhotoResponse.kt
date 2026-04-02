@@ -20,7 +20,7 @@ data class PhotoResponse(
         @SerialName("width") val width: Int? = null,
         @SerialName("height") val height: Int? = null,
         @SerialName("createdAt") val createdAt: String,
-        @SerialName("memo") val memo: String? = null, // TODO: API에 memo 필드 추가 후 nullable 제거
+        @SerialName("memo") val memo: String? = null,
     ) {
         internal fun toModel() = Photo(
             id = photoId,
