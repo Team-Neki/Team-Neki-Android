@@ -2,7 +2,6 @@ package com.neki.android.feature.archive.impl.photo_detail
 
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,7 +51,9 @@ internal fun PhotoDetailRoute(
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
     val resultEventBus = LocalResultEventBus.current
-    val pagerState = rememberPagerState(initialPage = uiState.currentPage) { Int.MAX_VALUE }
+    val pagerState = rememberPagerState(initialPage = uiState.currentPage) {
+        uiState.photos.size.coerceAtLeast(1)
+    }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState) {
@@ -97,7 +98,7 @@ internal fun PhotoDetailRoute(
 internal fun PhotoDetailScreen(
     uiState: PhotoDetailState = PhotoDetailState(),
     onIntent: (PhotoDetailIntent) -> Unit = {},
-    pagerState: PagerState = rememberPagerState { Int.MAX_VALUE },
+    pagerState: PagerState = rememberPagerState { uiState.photos.size.coerceAtLeast(1) },
 ) {
     Column(
         modifier = Modifier
@@ -117,33 +118,31 @@ internal fun PhotoDetailScreen(
             state = pagerState,
             beyondViewportPageCount = 1,
         ) { page ->
-            val index = if (uiState.photos.isEmpty()) 0 else page % uiState.photos.size
+            val index = if (uiState.photos.isEmpty()) 0 else page.coerceIn(0, uiState.photos.lastIndex)
             val zoomState = rememberZoomState()
             var contentWidth by remember { mutableIntStateOf(0) }
-            Box {
-                AsyncImage(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .onSizeChanged { contentWidth = it.width }
-                        .zoomable(
-                            zoomState = zoomState,
-                            scrollGesturePropagation = ScrollGesturePropagation.ContentEdge,
-                            onTap = { position: Offset ->
-                                if (!pagerState.isScrollInProgress && contentWidth > 0 && zoomState.scale <= 1f) {
-                                    if (position.x < contentWidth / 2) {
-                                        onIntent(PhotoDetailIntent.ClickLeftPhoto)
-                                    } else {
-                                        onIntent(PhotoDetailIntent.ClickRightPhoto)
-                                    }
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { contentWidth = it.width }
+                    .zoomable(
+                        zoomState = zoomState,
+                        scrollGesturePropagation = ScrollGesturePropagation.ContentEdge,
+                        onTap = { position: Offset ->
+                            if (!pagerState.isScrollInProgress && contentWidth > 0 && zoomState.scale <= 1f) {
+                                if (position.x < contentWidth / 2) {
+                                    onIntent(PhotoDetailIntent.ClickLeftPhoto)
+                                } else {
+                                    onIntent(PhotoDetailIntent.ClickRightPhoto)
                                 }
-                            },
-                        ),
-                    model = uiState.photos.getOrNull(index)?.imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    onSuccess = { state -> zoomState.setContentSize(state.painter.intrinsicSize) },
-                )
-            }
+                            }
+                        },
+                    ),
+                model = uiState.photos.getOrNull(index)?.imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                onSuccess = { state -> zoomState.setContentSize(state.painter.intrinsicSize) },
+            )
         }
 
         PhotoDetailActionBar(
