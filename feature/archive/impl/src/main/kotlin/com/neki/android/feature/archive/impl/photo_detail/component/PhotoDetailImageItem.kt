@@ -8,10 +8,14 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,7 +98,12 @@ internal fun PhotoDetailImageItem(
         AnimatedVisibility(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .imePadding(),
+                .then(
+                    if (memoMode == MemoMode.Editing) Modifier.imePadding()
+                    else Modifier.windowInsetsPadding(
+                        WindowInsets.ime.exclude(WindowInsets(bottom = actionBarHeight)),
+                    ),
+                ),
             visible = memoMode != MemoMode.Closed,
             enter = expandVertically(expandFrom = Alignment.Top),
             exit = shrinkVertically(shrinkTowards = Alignment.Top),
