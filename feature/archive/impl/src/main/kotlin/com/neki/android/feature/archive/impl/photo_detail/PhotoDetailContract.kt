@@ -8,7 +8,7 @@ data class PhotoDetailState(
     val currentPage: Int = 0,
     val isShowDeleteDialog: Boolean = false,
 ) {
-    val currentIndex get() = if (photos.isEmpty()) 0 else currentPage % photos.size
+    val currentIndex get() = if (photos.isEmpty()) 0 else currentPage.coerceIn(0, photos.lastIndex)
     val photo: Photo get() = photos.getOrElse(currentIndex) { Photo() }
 }
 

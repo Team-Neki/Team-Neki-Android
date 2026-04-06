@@ -83,7 +83,11 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 }
             }
 
-            PhotoDetailIntent.ClickRightPhoto -> postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentPage + 1))
+            PhotoDetailIntent.ClickRightPhoto -> {
+                if (state.currentPage < state.photos.lastIndex) {
+                    postSideEffect(PhotoDetailSideEffect.AnimateToPage(state.currentPage + 1))
+                }
+            }
 
             is PhotoDetailIntent.PageChanged -> {
                 reduce { copy(currentPage = intent.page) }
