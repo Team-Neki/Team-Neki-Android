@@ -223,20 +223,25 @@ private fun MemoEditingContent(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 text = "$charCount/100",
                 style = NekiTheme.typography.caption12Regular,
                 color = NekiTheme.colorScheme.gray300,
             )
-            Text(
-                text = "전체 지우기",
-                modifier = Modifier.noRippleClickableSingle {
-                    memoState.edit { replace(0, length, "") }
-                },
-                style = NekiTheme.typography.caption12Medium,
-                color = NekiTheme.colorScheme.gray200,
-            )
+            NekiTextButton(
+                onClick = { memoState.edit { replace(0, length, "") } },
+                contentPadding = PaddingValues(10.dp),
+            ) {
+                Text(
+                    text = "전체 지우기",
+                    style = NekiTheme.typography.caption12Medium,
+                    color = NekiTheme.colorScheme.gray200,
+                )
+            }
         }
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
