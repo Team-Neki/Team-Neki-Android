@@ -7,25 +7,32 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.feature.archive.impl.photo_detail.MemoMode
+import net.engawapg.lib.zoomable.ScrollGesturePropagation
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 
 @Composable
 internal fun PhotoDetailImageItem(
@@ -46,6 +53,8 @@ internal fun PhotoDetailImageItem(
 ) {
     val isMemoActive = memoMode == MemoMode.Expanded || memoMode == MemoMode.Editing
     val bottomPadding = if (memoMode == MemoMode.Editing) actionBarHeight else 0.dp
+    val zoomState = rememberZoomState()
+    var contentWidth by remember { mutableIntStateOf(0) }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -53,32 +62,30 @@ internal fun PhotoDetailImageItem(
         AsyncImage(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = bottomPadding),
+                .padding(bottom = bottomPadding)
+                .onSizeChanged { contentWidth = it.width }
+                .zoomable(
+                    zoomState = zoomState,
+                    scrollGesturePropagation = ScrollGesturePropagation.ContentEdge,
+                    onTap = { position: Offset ->
+                        if (
+                            isScrollInProgress && contentWidth > 0 &&
+                            zoomState.scale <= 1f &&
+                            isTapEnabled
+                        ) {
+                            if (position.x < contentWidth / 2) {
+                                onClickLeft()
+                            } else {
+                                onClickRight()
+                            }
+                        }
+                    },
+                ),
             model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.Fit,
+            onSuccess = { state -> zoomState.setContentSize(state.painter.intrinsicSize) },
         )
-
-        if (isTapEnabled) {
-            Row(modifier = Modifier.matchParentSize()) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .noRippleClickableSingle {
-                            if (!isScrollInProgress) onClickLeft()
-                        },
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .noRippleClickableSingle {
-                            if (!isScrollInProgress) onClickRight()
-                        },
-                )
-            }
-        }
 
         // dim 오버레이
         AnimatedVisibility(
