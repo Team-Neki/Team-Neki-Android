@@ -1,17 +1,20 @@
 package com.neki.android.feature.pose.impl.detail
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -66,15 +69,23 @@ internal fun PoseDetailScreen(
             title = "포즈 상세",
             onBack = { onIntent(PoseDetailIntent.ClickBackIcon) },
         )
-        AsyncImage(
-            model = uiState.pose.poseImageUrl,
-            contentDescription = null,
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            contentScale = ContentScale.Fit,
-            alignment = Alignment.Center,
-        )
+                .weight(1f)
+                .clipToBounds(),
+        ) {
+            val zoomState = rememberZoomState()
+            AsyncImage(
+                model = uiState.pose.poseImageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zoomable(zoomState),
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.Center,
+                onSuccess = { state -> zoomState.setContentSize(state.painter.intrinsicSize) },
+            )
+        }
         PoseActionBar(
             isBookmarked = uiState.pose.isBookmarked,
             onClickBookmark = { onIntent(PoseDetailIntent.ClickBookmarkIcon) },

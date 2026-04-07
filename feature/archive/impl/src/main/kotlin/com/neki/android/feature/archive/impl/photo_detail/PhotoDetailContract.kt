@@ -19,7 +19,7 @@ data class PhotoDetailState(
     val memo: String = "",
     val memoModes: ImmutableMap<Long, MemoMode> = persistentMapOf(),
 ) {
-    val currentIndex get() = if (photos.isEmpty()) 0 else currentPage % photos.size
+    val currentIndex get() = if (photos.isEmpty()) 0 else currentPage.coerceIn(0, photos.lastIndex)
     val photo: Photo get() = photos.getOrElse(currentIndex) { Photo() }
     val currentMemoMode: MemoMode get() = memoModes[photo.id] ?: MemoMode.Closed
     fun memoModeOf(photoId: Long): MemoMode = memoModes[photoId] ?: MemoMode.Closed
