@@ -107,7 +107,7 @@ internal fun MemoTextField(
                     start = 16.dp,
                     end = 16.dp,
                     top = 20.dp,
-                    bottom = if (memoMode == MemoMode.Editing) 0.dp else 20.dp,
+                    bottom = if (memoMode == MemoMode.Editing) 8.dp else 20.dp,
                 ),
         ) {
             when (memoMode) {
@@ -212,9 +212,9 @@ private fun MemoEditingContent(
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester),
-        textStyle = NekiTheme.typography.body16Medium,
+        textStyle = NekiTheme.typography.body16Medium.copy(color = NekiTheme.colorScheme.gray700),
         inputTransformation = InputTransformation.maxLength(100),
-        cursorBrush = SolidColor(NekiTheme.colorScheme.gray900),
+        cursorBrush = SolidColor(NekiTheme.colorScheme.gray800),
         decorator = { innerTextField -> innerTextField() },
     )
     Spacer(modifier = Modifier.height(8.dp))
