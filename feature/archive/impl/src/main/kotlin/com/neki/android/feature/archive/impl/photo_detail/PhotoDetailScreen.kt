@@ -11,19 +11,18 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -35,11 +34,9 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.api.PhotoDetailResult
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
+import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailImageItem
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.coroutines.launch
-import net.engawapg.lib.zoomable.ScrollGesturePropagation
-import net.engawapg.lib.zoomable.rememberZoomState
-import net.engawapg.lib.zoomable.zoomable
 import timber.log.Timber
 
 @Composable
@@ -100,6 +97,11 @@ internal fun PhotoDetailScreen(
     onIntent: (PhotoDetailIntent) -> Unit = {},
     pagerState: PagerState = rememberPagerState { uiState.photos.size.coerceAtLeast(1) },
 ) {
+    val isMemoActive = uiState.currentMemoMode == MemoMode.Expanded ||
+        uiState.currentMemoMode == MemoMode.Editing
+    val density = LocalDensity.current
+    var actionBarHeightDp by remember { mutableStateOf(0.dp) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -117,40 +119,45 @@ internal fun PhotoDetailScreen(
                 .clipToBounds(),
             state = pagerState,
             beyondViewportPageCount = 1,
+            userScrollEnabled = !isMemoActive,
         ) { page ->
             val index = if (uiState.photos.isEmpty()) 0 else page.coerceIn(0, uiState.photos.lastIndex)
-            val zoomState = rememberZoomState()
-            var contentWidth by remember { mutableIntStateOf(0) }
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onSizeChanged { contentWidth = it.width }
-                    .zoomable(
-                        zoomState = zoomState,
-                        scrollGesturePropagation = ScrollGesturePropagation.ContentEdge,
-                        onTap = { position: Offset ->
-                            if (!pagerState.isScrollInProgress && contentWidth > 0 && zoomState.scale <= 1f) {
-                                if (position.x < contentWidth / 2) {
-                                    onIntent(PhotoDetailIntent.ClickLeftPhoto)
-                                } else {
-                                    onIntent(PhotoDetailIntent.ClickRightPhoto)
-                                }
-                            }
-                        },
-                    ),
-                model = uiState.photos.getOrNull(index)?.imageUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                onSuccess = { state -> zoomState.setContentSize(state.painter.intrinsicSize) },
+
+            val photo = uiState.photos.getOrNull(index)
+            val pageMemoMode = uiState.memoModeOf(photo?.id ?: 0L)
+            val pageMemo = if (index == uiState.currentIndex) uiState.memo
+            else photo?.memo.orEmpty()
+
+            PhotoDetailImageItem(
+                imageUrl = photo?.imageUrl,
+                memo = pageMemo,
+                memoMode = pageMemoMode,
+                actionBarHeight = actionBarHeightDp,
+                isScrollInProgress = pagerState.isScrollInProgress,
+                isTapEnabled = pageMemoMode != MemoMode.Expanded && pageMemoMode != MemoMode.Editing,
+                onClickLeft = { onIntent(PhotoDetailIntent.ClickLeftPhoto) },
+                onClickRight = { onIntent(PhotoDetailIntent.ClickRightPhoto) },
+                onClickMemoMore = { onIntent(PhotoDetailIntent.ClickMemoMore) },
+                onClickMemoText = { onIntent(PhotoDetailIntent.ClickMemoText) },
+                onClickMemoFold = { onIntent(PhotoDetailIntent.ClickMemoFold) },
+                onClickMemoCancel = { onIntent(PhotoDetailIntent.ClickMemoCancel) },
+                onClickMemoDone = { onIntent(PhotoDetailIntent.ClickMemoDone(it)) },
+                onMemoTextChanged = { onIntent(PhotoDetailIntent.MemoTextChanged(it)) },
             )
         }
 
-        PhotoDetailActionBar(
-            isFavorite = uiState.photo.isFavorite,
-            onClickDownload = { onIntent(PhotoDetailIntent.ClickDownloadIcon) },
-            onClickFavorite = { onIntent(PhotoDetailIntent.ClickFavoriteIcon) },
-            onClickDelete = { onIntent(PhotoDetailIntent.ClickDeleteIcon) },
-        )
+        if (uiState.currentMemoMode != MemoMode.Editing) {
+            PhotoDetailActionBar(
+                modifier = Modifier.onSizeChanged { size ->
+                    actionBarHeightDp = with(density) { size.height.toDp() }
+                },
+                isFavorite = uiState.photo.isFavorite,
+                onClickDownload = { onIntent(PhotoDetailIntent.ClickDownloadIcon) },
+                onClickFavorite = { onIntent(PhotoDetailIntent.ClickFavoriteIcon) },
+                onClickMemo = { onIntent(PhotoDetailIntent.ClickMemoIcon) },
+                onClickDelete = { onIntent(PhotoDetailIntent.ClickDeleteIcon) },
+            )
+        }
     }
 
     if (uiState.isShowDeleteDialog) {
