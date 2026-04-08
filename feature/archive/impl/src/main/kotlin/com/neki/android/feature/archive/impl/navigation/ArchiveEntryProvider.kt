@@ -91,6 +91,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
 
         ResultEffect<PhotoDetailResult>(resultBus) {
             viewModel.store.onIntent(AllPhotoIntent.RefreshPhotos)
+            resultBus.sendResult(result = AllPhotoResult, allowDuplicate = false)
         }
 
         AllPhotoRoute(
@@ -106,6 +107,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
 
         ResultEffect<AlbumDetailResult>(resultBus) {
             viewModel.store.onIntent(AllAlbumIntent.RefreshAlbums)
+            resultBus.sendResult(result = AllAlbumResult, allowDuplicate = false)
         }
 
         AllAlbumRoute(
@@ -128,6 +130,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
 
         ResultEffect<PhotoDetailResult>(resultBus) {
             viewModel.store.onIntent(AlbumDetailIntent.RefreshPhotos)
+            resultBus.sendResult(result = AlbumDetailResult, allowDuplicate = false)
         }
 
         AlbumDetailRoute(
