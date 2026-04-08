@@ -11,8 +11,8 @@ import com.neki.android.feature.archive.api.AlbumDetailResult
 import com.neki.android.feature.archive.api.AllAlbumResult
 import com.neki.android.feature.archive.api.AllPhotoResult
 import com.neki.android.feature.archive.api.ArchiveNavKey
+import com.neki.android.feature.archive.api.ArchiveResult
 import com.neki.android.feature.archive.api.PhotoDetailResult
-import com.neki.android.feature.archive.api.PhotoUploadedResult
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.archive.api.navigateToAllAlbum
 import com.neki.android.feature.archive.api.navigateToAllPhoto
@@ -54,19 +54,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<ArchiveMainViewModel>()
 
-        ResultEffect<PhotoDetailResult>(resultBus) {
-            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
-        }
-        ResultEffect<AlbumDetailResult>(resultBus) {
-            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
-        }
-        ResultEffect<AllPhotoResult>(resultBus) {
-            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
-        }
-        ResultEffect<AllAlbumResult>(resultBus) {
-            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
-        }
-        ResultEffect<PhotoUploadedResult>(resultBus) {
+        ResultEffect<ArchiveResult>(resultBus) {
             viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
         }
 
