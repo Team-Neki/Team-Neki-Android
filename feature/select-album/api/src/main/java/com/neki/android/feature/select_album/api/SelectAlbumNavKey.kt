@@ -4,7 +4,6 @@ import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.main.MainNavigator
 import kotlinx.serialization.Serializable
 
-
 sealed interface SelectAlbumNavKey : NavKey {
 
     @Serializable
