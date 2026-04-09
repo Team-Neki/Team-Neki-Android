@@ -136,7 +136,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         AlbumDetailRoute(
             viewModel = viewModel,
             navigateBack = navigator::goBack,
-            navigateToPhotoDetail = { key -> navigator.navigate(key) },
+            navigateToPhotoDetail = navigator::navigateToPhotoDetail,
         )
     }
 
