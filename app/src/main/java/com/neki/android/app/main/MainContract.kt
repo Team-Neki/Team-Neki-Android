@@ -1,6 +1,7 @@
 package com.neki.android.app.main
 
 import android.net.Uri
+import com.neki.android.core.model.AlbumPreview
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -23,13 +24,14 @@ sealed interface MainIntent {
     data object DismissSelectWithAlbumDialog : MainIntent
     data object ClickUploadWithAlbum : MainIntent
     data object ClickUploadWithoutAlbum : MainIntent
+    data class AlbumSelected(val selectedAlbums: List<AlbumPreview>) : MainIntent
 }
 
 sealed interface MainSideEffect {
     data object NavigateToQRScan : MainSideEffect
     data object OpenGallery : MainSideEffect
-    data class NavigateToUploadAlbumWithGallery(val uriStrings: List<String>) : MainSideEffect
-    data class NavigateToUploadAlbumWithQRScan(val imageUrl: String) : MainSideEffect
+    data class NavigateToSelectAlbum(val photoCount: Int) : MainSideEffect
+    data class NavigateToAlbumDetail(val albumId: Long, val title: String) : MainSideEffect
     data class ShowToast(val message: String) : MainSideEffect
     data object RefreshArchive : MainSideEffect
 }

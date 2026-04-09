@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,58 +55,47 @@ class MainViewModel @Inject constructor(
                 )
             }
             MainIntent.ClickUploadWithAlbum -> {
-                reduce {
-                    copy(
-                        isShowSelectWithAlbumDialog = false,
-                        scannedImageUrl = null,
-                        selectedUris = persistentListOf(),
-                    )
-                }
+                val photoCount = if (state.scannedImageUrl != null) 1 else state.selectedUris.size
+                reduce { copy(isShowSelectWithAlbumDialog = false) }
+                postSideEffect(MainSideEffect.NavigateToSelectAlbum(photoCount))
+            }
+            MainIntent.ClickUploadWithoutAlbum -> {
+                reduce { copy(isShowSelectWithAlbumDialog = false) }
                 if (state.scannedImageUrl != null) {
-                    postSideEffect(MainSideEffect.NavigateToUploadAlbumWithQRScan(state.scannedImageUrl))
+                    uploadSingleImage(state.scannedImageUrl, reduce = reduce, postSideEffect = postSideEffect)
                 } else {
-                    postSideEffect(MainSideEffect.NavigateToUploadAlbumWithGallery(state.selectedUris.map { it.toString() }))
+                    uploadMultipleImages(state.selectedUris, reduce = reduce, postSideEffect = postSideEffect)
                 }
             }
-            MainIntent.ClickUploadWithoutAlbum -> uploadWithoutAlbum(state, reduce, postSideEffect)
-        }
-    }
-
-    private fun uploadWithoutAlbum(
-        state: MainState,
-        reduce: (MainState.() -> MainState) -> Unit,
-        postSideEffect: (MainSideEffect) -> Unit,
-    ) {
-        reduce { copy(isShowSelectWithAlbumDialog = false) }
-
-        if (state.scannedImageUrl != null) {
-            uploadSingleImage(
-                imageUrl = state.scannedImageUrl,
-                reduce = reduce,
-                postSideEffect = postSideEffect,
-            )
-        } else {
-            uploadMultipleImages(
-                imageUris = state.selectedUris,
-                reduce = reduce,
-                postSideEffect = postSideEffect,
-            )
+            is MainIntent.AlbumSelected -> {
+                val album = intent.selectedAlbums.firstOrNull() ?: return
+                if (state.scannedImageUrl != null) {
+                    uploadSingleImage(state.scannedImageUrl, album, reduce, postSideEffect)
+                } else {
+                    uploadMultipleImages(state.selectedUris, album, reduce, postSideEffect)
+                }
+            }
         }
     }
 
     private fun uploadSingleImage(
         imageUrl: String,
+        album: AlbumPreview? = null,
         reduce: (MainState.() -> MainState) -> Unit,
         postSideEffect: (MainSideEffect) -> Unit,
     ) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            uploadSinglePhotoUseCase(imageUrl = imageUrl)
+            uploadSinglePhotoUseCase(imageUrl = imageUrl, folderId = album?.id)
                 .onSuccess {
                     reduce { copy(isLoading = false, scannedImageUrl = null) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
-                    postSideEffect(MainSideEffect.RefreshArchive)
+                    if (album != null) {
+                        postSideEffect(MainSideEffect.NavigateToAlbumDetail(album.id, album.title))
+                    } else {
+                        postSideEffect(MainSideEffect.RefreshArchive)
+                    }
                 }
                 .onFailure { e ->
                     Timber.e(e)
@@ -117,17 +107,22 @@ class MainViewModel @Inject constructor(
 
     private fun uploadMultipleImages(
         imageUris: List<Uri>,
+        album: AlbumPreview? = null,
         reduce: (MainState.() -> MainState) -> Unit,
         postSideEffect: (MainSideEffect) -> Unit,
     ) {
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            uploadMultiplePhotoUseCase(imageUris = imageUris)
+            uploadMultiplePhotoUseCase(imageUris = imageUris, folderId = album?.id)
                 .onSuccess {
                     reduce { copy(isLoading = false, selectedUris = persistentListOf()) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
-                    postSideEffect(MainSideEffect.RefreshArchive)
+                    if (album != null) {
+                        postSideEffect(MainSideEffect.NavigateToAlbumDetail(album.id, album.title))
+                    } else {
+                        postSideEffect(MainSideEffect.RefreshArchive)
+                    }
                 }
                 .onFailure { e ->
                     Timber.e(e)

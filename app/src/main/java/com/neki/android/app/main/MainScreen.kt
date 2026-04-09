@@ -43,6 +43,7 @@ import com.neki.android.feature.mypage.api.MyPageNavKey
 import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
 import com.neki.android.feature.photo_upload.api.QRScanResult
 import com.neki.android.feature.pose.api.PoseNavKey
+import com.neki.android.feature.select_album.api.SelectAlbumResult
 import timber.log.Timber
 
 @Composable
@@ -54,8 +55,8 @@ fun MainRoute(
     onTabSelected: (NavKey) -> Unit,
     onBack: () -> Unit,
     navigateToQRScan: () -> Unit,
-    navigateToUploadAlbumWithGallery: (List<String>) -> Unit,
-    navigateToUploadAlbumWithQRScan: (String) -> Unit,
+    navigateToSelectAlbum: (Int) -> Unit,
+    navigateToAlbumDetail: (Long, String) -> Unit,
     pendingShareUriStrings: ImmutableList<String> = persistentListOf(),
     onShareUrisConsumed: () -> Unit = {},
     viewModel: MainViewModel = hiltViewModel(),
@@ -89,15 +90,18 @@ fun MainRoute(
         }
     }
 
+    ResultEffect<SelectAlbumResult>(resultBus) { result ->
+        viewModel.store.onIntent(MainIntent.AlbumSelected(result.selectedAlbums))
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             MainSideEffect.NavigateToQRScan -> navigateToQRScan()
             MainSideEffect.OpenGallery -> photoPicker.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
             )
-
-            is MainSideEffect.NavigateToUploadAlbumWithGallery -> navigateToUploadAlbumWithGallery(sideEffect.uriStrings)
-            is MainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
+            is MainSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.photoCount)
+            is MainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
             is MainSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             MainSideEffect.RefreshArchive -> resultBus.sendResult(result = PhotoUploadedResult, allowDuplicate = false)
         }
