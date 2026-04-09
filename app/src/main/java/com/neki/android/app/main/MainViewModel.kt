@@ -93,9 +93,8 @@ class MainViewModel @Inject constructor(
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
                     if (album != null) {
                         postSideEffect(MainSideEffect.NavigateToAlbumDetail(album.id, album.title))
-                    } else {
-                        postSideEffect(MainSideEffect.RefreshArchive)
                     }
+                    postSideEffect(MainSideEffect.RefreshArchive)
                 }
                 .onFailure { e ->
                     Timber.e(e)
@@ -120,9 +119,8 @@ class MainViewModel @Inject constructor(
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
                     if (album != null) {
                         postSideEffect(MainSideEffect.NavigateToAlbumDetail(album.id, album.title))
-                    } else {
-                        postSideEffect(MainSideEffect.RefreshArchive)
                     }
+                    postSideEffect(MainSideEffect.RefreshArchive)
                 }
                 .onFailure { e ->
                     Timber.e(e)
