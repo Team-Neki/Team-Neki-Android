@@ -79,6 +79,9 @@ class AllAlbumViewModel @Inject constructor(
             AllAlbumIntent.DismissDeleteAlbumBottomSheet -> reduce { copy(isShowDeleteAlbumBottomSheet = false) }
             is AllAlbumIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AllAlbumIntent.ClickDeleteConfirmButton -> handleDeleteConfirm(state, reduce, postSideEffect)
+
+            // Result Intent
+            AllAlbumIntent.RefreshAlbums -> fetchInitialData(reduce)
         }
     }
 
@@ -181,6 +184,7 @@ class AllAlbumViewModel @Inject constructor(
                 .onSuccess {
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
+                    postSideEffect(AllAlbumSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
@@ -203,6 +207,7 @@ class AllAlbumViewModel @Inject constructor(
                 .onSuccess {
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))
+                    postSideEffect(AllAlbumSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     Timber.e(e, "사진 삭제 실패")

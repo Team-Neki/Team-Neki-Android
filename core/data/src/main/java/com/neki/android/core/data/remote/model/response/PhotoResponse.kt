@@ -20,6 +20,7 @@ data class PhotoResponse(
         @SerialName("width") val width: Int? = null,
         @SerialName("height") val height: Int? = null,
         @SerialName("createdAt") val createdAt: String,
+        @SerialName("memo") val memo: String? = null,
     ) {
         internal fun toModel() = Photo(
             id = photoId,
@@ -29,6 +30,7 @@ data class PhotoResponse(
             height = height,
             date = createdAt.toFormattedDate(),
             contentType = ContentType.fromString(contentType),
+            memo = memo.orEmpty(),
         )
     }
 

@@ -1,11 +1,11 @@
 package com.neki.android.feature.archive.impl.photo_detail.component
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -22,14 +22,17 @@ internal fun PhotoDetailActionBar(
     modifier: Modifier = Modifier,
     onClickDownload: () -> Unit = {},
     onClickFavorite: () -> Unit = {},
+    onClickMemo: () -> Unit = {},
     onClickDelete: () -> Unit = {},
 ) {
     NekiBothSidesActionBar(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         startContent = {
-            Row {
+            Row(
+                modifier = Modifier.padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 NekiIconButton(
-                    modifier = Modifier.padding(8.dp),
                     onClick = onClickDownload,
                 ) {
                     Icon(
@@ -40,7 +43,6 @@ internal fun PhotoDetailActionBar(
                     )
                 }
                 NekiIconButton(
-                    modifier = Modifier.padding(8.dp),
                     onClick = onClickFavorite,
                 ) {
                     Icon(
@@ -52,6 +54,16 @@ internal fun PhotoDetailActionBar(
                         contentDescription = null,
                         tint = if (isFavorite) NekiTheme.colorScheme.primary400
                         else NekiTheme.colorScheme.gray700,
+                    )
+                }
+                NekiIconButton(
+                    onClick = onClickMemo,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(28.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_memo),
+                        contentDescription = null,
+                        tint = NekiTheme.colorScheme.gray700,
                     )
                 }
             }
@@ -74,7 +86,7 @@ internal fun PhotoDetailActionBar(
 
 @ComponentPreview
 @Composable
-private fun PhotoDetailActionBarNotFavoritePreview() {
+private fun PhotoDetailActionBarClosedPreview() {
     NekiTheme {
         PhotoDetailActionBar(
             isFavorite = false,
@@ -84,7 +96,7 @@ private fun PhotoDetailActionBarNotFavoritePreview() {
 
 @ComponentPreview
 @Composable
-private fun PhotoDetailActionBarFavoritePreview() {
+private fun PhotoDetailActionBarMemoActivePreview() {
     NekiTheme {
         PhotoDetailActionBar(
             isFavorite = true,

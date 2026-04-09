@@ -18,7 +18,7 @@ data class ArchiveMainState(
 
 sealed interface ArchiveMainIntent {
     data object EnterArchiveMainScreen : ArchiveMainIntent
-    data object RefreshArchiveMainPhotos : ArchiveMainIntent
+    data object RefreshArchiveMain : ArchiveMainIntent
     data object ClickScreen : ArchiveMainIntent
     data object ClickGoToTopButton : ArchiveMainIntent
 

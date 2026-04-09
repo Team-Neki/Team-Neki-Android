@@ -65,6 +65,10 @@ class PhotoRepositoryImpl @Inject constructor(
         photoService.updateFavorite(photoId, favorite)
     }
 
+    override suspend fun updateMemo(photoId: Long, memo: String): Result<Unit> = runSuspendCatching {
+        photoService.updateMemo(photoId, memo)
+    }
+
     override suspend fun getPhotosPage(
         folderId: Long?,
         page: Int,

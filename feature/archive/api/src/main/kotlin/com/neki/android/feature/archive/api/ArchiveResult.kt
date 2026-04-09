@@ -1,11 +1,13 @@
 package com.neki.android.feature.archive.api
 
-sealed interface ArchiveResult {
-    data class PhotoDeleted(val photoId: List<Long>) : ArchiveResult {
-        constructor(photoId: Long) : this(listOf(photoId))
-    }
+sealed interface ArchiveResult
 
-    data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : ArchiveResult
+data object PhotoDetailResult : ArchiveResult
 
-    data object PhotoUploaded : ArchiveResult
-}
+data object AlbumDetailResult : ArchiveResult
+
+data object AllPhotoResult : ArchiveResult
+
+data object AllAlbumResult : ArchiveResult
+
+data object PhotoUploadedResult : ArchiveResult

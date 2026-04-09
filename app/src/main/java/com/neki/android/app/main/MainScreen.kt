@@ -37,7 +37,7 @@ import androidx.core.net.toUri
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import com.neki.android.feature.archive.api.ArchiveNavKey
-import com.neki.android.feature.archive.api.ArchiveResult
+import com.neki.android.feature.archive.api.PhotoUploadedResult
 import com.neki.android.feature.map.api.MapNavKey
 import com.neki.android.feature.mypage.api.MyPageNavKey
 import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
@@ -99,7 +99,7 @@ fun MainRoute(
             is MainSideEffect.NavigateToUploadAlbumWithGallery -> navigateToUploadAlbumWithGallery(sideEffect.uriStrings)
             is MainSideEffect.NavigateToUploadAlbumWithQRScan -> navigateToUploadAlbumWithQRScan(sideEffect.imageUrl)
             is MainSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
-            MainSideEffect.RefreshArchive -> resultBus.sendResult<ArchiveResult>(result = ArchiveResult.PhotoUploaded)
+            MainSideEffect.RefreshArchive -> resultBus.sendResult(result = PhotoUploadedResult, allowDuplicate = false)
         }
     }
 

@@ -71,9 +71,8 @@ sealed interface AlbumDetailIntent {
     data object ClickRenameBottomSheetConfirmButton : AlbumDetailIntent
 
     // Result Intent
-    data class PhotoDeleted(val photoIds: List<Long>) : AlbumDetailIntent
+    data object RefreshPhotos : AlbumDetailIntent
     data class ClickFavoriteIcon(val photo: Photo) : AlbumDetailIntent
-    data class FavoriteChanged(val photoId: Long, val isFavorite: Boolean) : AlbumDetailIntent
 }
 
 sealed interface AlbumDetailSideEffect {
@@ -83,4 +82,5 @@ sealed interface AlbumDetailSideEffect {
     data class DownloadImages(val imageUrls: List<String>) : AlbumDetailSideEffect
     data object OpenGallery : AlbumDetailSideEffect
     data object RefreshPhotos : AlbumDetailSideEffect
+    data object NotifyResult : AlbumDetailSideEffect
 }

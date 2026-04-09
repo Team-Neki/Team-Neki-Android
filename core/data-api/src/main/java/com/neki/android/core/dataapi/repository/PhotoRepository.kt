@@ -25,6 +25,8 @@ interface PhotoRepository {
 
     suspend fun updateFavorite(photoId: Long, favorite: Boolean): Result<Unit>
 
+    suspend fun updateMemo(photoId: Long, memo: String): Result<Unit>
+
     suspend fun getPhotosPage(
         folderId: Long? = null,
         page: Int = 0,
