@@ -155,6 +155,9 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 updatedFavorites.update { it + (photo.id to newFavorite) }
                 viewModelScope.launch {
                     photoRepository.updateFavorite(photo.id, newFavorite)
+                        .onSuccess {
+                            postSideEffect(AlbumDetailSideEffect.NotifyResult)
+                        }
                         .onFailure { e ->
                             Timber.e(e)
                             updatedFavorites.update { it + (photo.id to photo.isFavorite) }
