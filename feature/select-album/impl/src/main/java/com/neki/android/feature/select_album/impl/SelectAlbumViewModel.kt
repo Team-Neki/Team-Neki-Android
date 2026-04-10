@@ -31,11 +31,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(
-            title: String,
-            multiSelect: Boolean,
-            photoCount: Int,
-        ): SelectAlbumViewModel
+        fun create(title: String, multiSelect: Boolean, photoCount: Int): SelectAlbumViewModel
     }
 
     val store: MviIntentStore<SelectAlbumState, SelectAlbumIntent, SelectAlbumSideEffect> =
