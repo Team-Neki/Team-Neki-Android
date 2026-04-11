@@ -1,13 +1,17 @@
 package com.neki.android.feature.select_album.impl
 
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
+import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.select_album.api.SelectAlbumAction
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -24,14 +28,21 @@ import timber.log.Timber
 class SelectAlbumViewModel @AssistedInject constructor(
     @Assisted private val title: String,
     @Assisted private val multiSelect: Boolean,
-    @Assisted private val photoCount: Int,
+    @Assisted private val action: SelectAlbumAction,
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
+    private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
+    private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(title: String, multiSelect: Boolean, photoCount: Int): SelectAlbumViewModel
+        fun create(title: String, multiSelect: Boolean, action: SelectAlbumAction): SelectAlbumViewModel
+    }
+
+    private val photoCount: Int = when (action) {
+        is SelectAlbumAction.UploadFromQR -> 1
+        is SelectAlbumAction.UploadFromGallery -> action.imageUriStrings.size
     }
 
     val store: MviIntentStore<SelectAlbumState, SelectAlbumIntent, SelectAlbumSideEffect> =
@@ -55,7 +66,9 @@ class SelectAlbumViewModel @AssistedInject constructor(
             SelectAlbumIntent.EnterSelectAlbumScreen -> fetchInitialData(reduce)
             SelectAlbumIntent.ClickBackIcon -> postSideEffect(SelectAlbumSideEffect.NavigateBack)
             SelectAlbumIntent.ClickConfirmButton -> {
-                postSideEffect(SelectAlbumSideEffect.SendResult(state.selectedAlbums.toList()))
+                if (state.isUploading) return
+                val album = state.selectedAlbums.firstOrNull() ?: return
+                performUpload(album, reduce, postSideEffect)
             }
             is SelectAlbumIntent.ClickAlbumItem -> handleAlbumClick(intent.album, state, reduce)
             SelectAlbumIntent.ClickCreateAlbumButton -> reduce {
@@ -67,6 +80,40 @@ class SelectAlbumViewModel @AssistedInject constructor(
                 reduce = reduce,
                 postSideEffect = postSideEffect,
             )
+        }
+    }
+
+    private fun performUpload(
+        album: AlbumPreview,
+        reduce: (SelectAlbumState.() -> SelectAlbumState) -> Unit,
+        postSideEffect: (SelectAlbumSideEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isUploading = true) }
+
+            val result = when (action) {
+                is SelectAlbumAction.UploadFromQR -> {
+                    uploadSinglePhotoUseCase(imageUrl = action.imageUrl, folderId = album.id)
+                }
+                is SelectAlbumAction.UploadFromGallery -> {
+                    uploadMultiplePhotoUseCase(
+                        imageUris = action.imageUriStrings.map { it.toUri() },
+                        folderId = album.id,
+                    )
+                }
+            }
+
+            result
+                .onSuccess {
+                    reduce { copy(isUploading = false) }
+                    postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
+                    postSideEffect(SelectAlbumSideEffect.SendUploadResult(album))
+                }
+                .onFailure { e ->
+                    Timber.e(e)
+                    reduce { copy(isUploading = false) }
+                    postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
+                }
         }
     }
 

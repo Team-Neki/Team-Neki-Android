@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class SelectAlbumState(
     val isLoading: Boolean = false,
+    val isUploading: Boolean = false,
     val title: String = "",
     val photoCount: Int = 0,
     val multiSelect: Boolean = false,
@@ -18,7 +19,7 @@ data class SelectAlbumState(
     val albumNameTextState: TextFieldState = TextFieldState(),
 ) {
     val isConfirmEnabled: Boolean
-        get() = selectedAlbums.isNotEmpty()
+        get() = selectedAlbums.isNotEmpty() && !isUploading
 }
 
 sealed interface SelectAlbumIntent {
@@ -36,6 +37,6 @@ sealed interface SelectAlbumIntent {
 
 sealed interface SelectAlbumSideEffect {
     data object NavigateBack : SelectAlbumSideEffect
-    data class SendResult(val selectedAlbums: List<AlbumPreview>) : SelectAlbumSideEffect
+    data class SendUploadResult(val album: AlbumPreview) : SelectAlbumSideEffect
     data class ShowToastMessage(val message: String) : SelectAlbumSideEffect
 }
