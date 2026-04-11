@@ -10,14 +10,14 @@ sealed interface SelectAlbumNavKey : NavKey {
     data class SelectAlbum(
         val title: String = "모든 앨범",
         val multiSelect: Boolean = true,
-        val photoCount: Int,
+        val action: SelectAlbumAction,
     ) : SelectAlbumNavKey
 }
 
 fun MainNavigator.navigateToSelectAlbum(
-    photoCount: Int,
+    action: SelectAlbumAction,
     title: String = "모든 앨범",
     multiSelect: Boolean = true,
 ) {
-    navigate(SelectAlbumNavKey.SelectAlbum(title, multiSelect, photoCount))
+    navigate(SelectAlbumNavKey.SelectAlbum(title, multiSelect, action))
 }
