@@ -67,6 +67,7 @@ internal fun AllPhotoRoute(
     viewModel: AllPhotoViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
     navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
+    navigateToSelectAlbum: (List<Long>) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -120,6 +121,8 @@ internal fun AllPhotoRoute(
             }
 
             AllPhotoSideEffect.RefreshPhotos -> pagingItems.refresh()
+
+            is AllPhotoSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.photoIds)
         }
     }
 
@@ -279,6 +282,7 @@ private fun AllPhotoContent(
             visible = uiState.selectMode == SelectMode.SELECTING,
             isEnabled = uiState.selectedPhotos.isNotEmpty(),
             onClickDownload = { onIntent(AllPhotoIntent.ClickDownloadIcon) },
+            onClickCopy = { onIntent(AllPhotoIntent.ClickCopyIcon) },
             onClickDelete = { onIntent(AllPhotoIntent.ClickDeleteIcon) },
         )
     }
