@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.main.EntryProviderInstaller
 import com.neki.android.core.navigation.main.MainNavigator
+import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.select_album.api.SelectAlbumNavKey
 import com.neki.android.feature.select_album.impl.SelectAlbumRoute
 import com.neki.android.feature.select_album.impl.SelectAlbumViewModel
@@ -30,10 +31,11 @@ private fun EntryProviderScope<NavKey>.selectAlbumEntry(navigator: MainNavigator
         SelectAlbumRoute(
             viewModel = hiltViewModel<SelectAlbumViewModel, SelectAlbumViewModel.Factory>(
                 creationCallback = { factory ->
-                    factory.create(key.title, key.multiSelect, key.photoCount)
+                    factory.create(key.title, key.multiSelect, key.action)
                 },
             ),
             navigateBack = navigator::goBack,
+            navigateToAlbumDetail = { id, title -> navigator.navigateToAlbumDetail(id, title) },
         )
     }
 }

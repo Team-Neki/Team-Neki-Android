@@ -37,10 +37,8 @@ import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.ui.component.AlbumRowComponent
 import com.neki.android.core.ui.component.FavoriteAlbumRowComponent
 import com.neki.android.core.ui.component.LoadingDialog
-import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import com.neki.android.feature.select_album.api.SelectAlbumResult
 import kotlinx.collections.immutable.persistentListOf
 
 private const val ALBUM_NAME_MAX_LENGTH = 10
@@ -50,21 +48,18 @@ private const val ALBUM_NAME_MAX_LENGTH = 10
 internal fun SelectAlbumRoute(
     viewModel: SelectAlbumViewModel,
     navigateBack: () -> Unit,
+    navigateToAlbumDetail: (Long, String) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
-    val resultEventBus = LocalResultEventBus.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             SelectAlbumSideEffect.NavigateBack -> navigateBack()
-            is SelectAlbumSideEffect.SendResult -> {
-                resultEventBus.sendResult(
-                    result = SelectAlbumResult(selectedAlbums = sideEffect.selectedAlbums),
-                    allowDuplicate = false,
-                )
+            is SelectAlbumSideEffect.SendUploadResult -> {
                 navigateBack()
+                navigateToAlbumDetail(sideEffect.album.id, sideEffect.album.title)
             }
             is SelectAlbumSideEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
         }
@@ -122,7 +117,7 @@ internal fun SelectAlbumScreen(
         }
     }
 
-    if (uiState.isLoading) {
+    if (uiState.isLoading || uiState.isUploading) {
         LoadingDialog()
     }
 

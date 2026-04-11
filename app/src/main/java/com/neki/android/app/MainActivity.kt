@@ -31,7 +31,6 @@ import com.neki.android.core.navigation.root.RootNavigationState
 import com.neki.android.core.navigation.root.RootNavigator
 import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.auth.impl.navigation.authEntryProvider
-import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import com.neki.android.feature.select_album.api.navigateToSelectAlbum
 import android.net.Uri
@@ -124,8 +123,7 @@ class MainActivity : ComponentActivity() {
                                     onTabSelected = { mainNavigator.navigate(it) },
                                     onBack = { mainNavigator.goBack() },
                                     navigateToQRScan = mainNavigator::navigateToQRScan,
-                                    navigateToSelectAlbum = { photoCount -> mainNavigator.navigateToSelectAlbum(photoCount) },
-                                    navigateToAlbumDetail = { id, title -> mainNavigator.navigateToAlbumDetail(id = id, title = title) },
+                                    navigateToSelectAlbum = { action -> mainNavigator.navigateToSelectAlbum(action) },
                                     pendingShareUriStrings = pendingShareUriStrings,
                                     onShareUrisConsumed = { pendingShareUriStrings = persistentListOf() },
                                 )

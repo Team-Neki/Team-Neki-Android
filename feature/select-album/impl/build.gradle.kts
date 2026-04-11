@@ -8,4 +8,5 @@ android {
 
 dependencies {
     implementation(projects.feature.selectAlbum.api)
+    implementation(projects.feature.archive.api)
 }
