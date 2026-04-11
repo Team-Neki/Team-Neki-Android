@@ -19,15 +19,19 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
-import com.neki.android.core.designsystem.topbar.BackTitleTopBar
+import com.neki.android.core.designsystem.topbar.BackTitleOptionTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.navigation.result.LocalResultEventBus
+import com.neki.android.core.ui.component.DropdownPopup
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -36,6 +40,7 @@ import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailImageItem
 import com.neki.android.feature.archive.impl.util.ImageDownloader
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -43,6 +48,7 @@ import timber.log.Timber
 internal fun PhotoDetailRoute(
     viewModel: PhotoDetailViewModel,
     navigateBack: () -> Unit,
+    navigateToSelectAlbum: (Long) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -81,6 +87,7 @@ internal fun PhotoDetailRoute(
                     animationSpec = spring(),
                 )
             }
+            is PhotoDetailSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.photoId)
         }
     }
 
@@ -107,9 +114,10 @@ internal fun PhotoDetailScreen(
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white),
     ) {
-        BackTitleTopBar(
+        BackTitleOptionTopBar(
             title = uiState.photo.date,
             onBack = { onIntent(PhotoDetailIntent.ClickBackIcon) },
+            onClickIcon = { onIntent(PhotoDetailIntent.ClickOptionIcon) },
         )
 
         HorizontalPager(
@@ -158,6 +166,22 @@ internal fun PhotoDetailScreen(
                 onClickDelete = { onIntent(PhotoDetailIntent.ClickDeleteIcon) },
             )
         }
+    }
+
+    if (uiState.isShowOptionPopup) {
+        val density = LocalDensity.current
+        val popupOffsetX = with(density) { (-20).dp.toPx().toInt() }
+        val popupOffsetY = with(density) { 54.dp.toPx().toInt() }
+
+        DropdownPopup(
+            items = persistentListOf("앨범에 추가"),
+            onSelect = { onIntent(PhotoDetailIntent.ClickAddToAlbumOption) },
+            onDismissRequest = { onIntent(PhotoDetailIntent.DismissOptionPopup) },
+            itemLabel = { it },
+            modifier = Modifier.width(120.dp),
+            offset = IntOffset(x = popupOffsetX, y = popupOffsetY),
+            alignment = Alignment.TopEnd,
+        )
     }
 
     if (uiState.isShowDeleteDialog) {

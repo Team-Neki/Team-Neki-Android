@@ -79,6 +79,12 @@ class PhotoDetailViewModel @AssistedInject constructor(
             PhotoDetailIntent.ClickBackIcon -> {
                 postSideEffect(PhotoDetailSideEffect.NavigateBack)
             }
+            PhotoDetailIntent.ClickOptionIcon -> reduce { copy(isShowOptionPopup = true) }
+            PhotoDetailIntent.DismissOptionPopup -> reduce { copy(isShowOptionPopup = false) }
+            PhotoDetailIntent.ClickAddToAlbumOption -> {
+                reduce { copy(isShowOptionPopup = false) }
+                postSideEffect(PhotoDetailSideEffect.NavigateToSelectAlbum(state.photo.id))
+            }
 
             // Pager Intent
             PhotoDetailIntent.ClickLeftPhoto -> {
