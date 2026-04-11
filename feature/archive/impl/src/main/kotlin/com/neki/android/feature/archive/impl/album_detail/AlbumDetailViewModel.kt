@@ -136,9 +136,11 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
                     return
                 }
-                postSideEffect(AlbumDetailSideEffect.NavigateToSelectAlbum(
-                    SelectAlbumAction.CopyPhotos(photoIds = photoIds, sourceFolderId = albumId)
-                ))
+                postSideEffect(
+                    AlbumDetailSideEffect.NavigateToSelectAlbum(
+                        SelectAlbumAction.CopyPhotos(photoIds = photoIds, sourceFolderId = albumId),
+                    ),
+                )
             }
             AlbumDetailIntent.ClickMoveIcon -> {
                 val photoIds = state.selectedPhotos.map { it.id }
@@ -146,9 +148,11 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
                     return
                 }
-                postSideEffect(AlbumDetailSideEffect.NavigateToSelectAlbum(
-                    SelectAlbumAction.MovePhotos(photoIds = photoIds, showActionToast = false)
-                ))
+                postSideEffect(
+                    AlbumDetailSideEffect.NavigateToSelectAlbum(
+                        SelectAlbumAction.MovePhotos(photoIds = photoIds, showActionToast = false),
+                    ),
+                )
             }
             AlbumDetailIntent.ClickDeleteIcon -> handleDeleteIconClick(state, reduce, postSideEffect)
 

@@ -126,7 +126,8 @@ class SelectAlbumViewModel @AssistedInject constructor(
                     reduce { copy(isUploading = false) }
                     when (action) {
                         is SelectAlbumAction.UploadFromQR,
-                        is SelectAlbumAction.UploadFromGallery -> {
+                        is SelectAlbumAction.UploadFromGallery,
+                        -> {
                             postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
                             postSideEffect(SelectAlbumSideEffect.SendUploadResult(albums.first()))
                         }
