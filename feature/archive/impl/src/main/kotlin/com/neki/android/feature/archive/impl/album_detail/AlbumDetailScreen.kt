@@ -45,6 +45,7 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailTopBar
 import com.neki.android.feature.archive.impl.album_detail.component.RenameAlbumBottomSheet
+import com.neki.android.feature.archive.impl.album.AlbumDeleteOption
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.EmptyAlbumContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
@@ -56,6 +57,7 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOU
 import com.neki.android.feature.archive.impl.model.SelectMode
 import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
+import com.neki.android.feature.select_album.api.SelectAlbumAction
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.flowOf
@@ -66,6 +68,7 @@ internal fun AlbumDetailRoute(
     viewModel: AlbumDetailViewModel,
     navigateBack: () -> Unit,
     navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
+    navigateToSelectAlbum: (SelectAlbumAction) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -116,6 +119,8 @@ internal fun AlbumDetailRoute(
             AlbumDetailSideEffect.NotifyResult -> {
                 resultEventBus.sendResult(result = AlbumDetailResult, allowDuplicate = false)
             }
+
+            is AlbumDetailSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.action)
         }
     }
 
@@ -161,6 +166,7 @@ internal fun AlbumDetailScreen(
             onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectOption) },
             onClickAddPhoto = { onIntent(AlbumDetailIntent.ClickAddPhotoOption) },
             onClickRenameAlbum = { onIntent(AlbumDetailIntent.ClickRenameAlbumOption) },
+            onClickDeleteAlbum = { onIntent(AlbumDetailIntent.ClickDeleteAlbumOption) },
             onClickCancel = { onIntent(AlbumDetailIntent.ClickCancelButton) },
             onDismissPopup = { onIntent(AlbumDetailIntent.DismissOptionPopup) },
         )
@@ -225,6 +231,20 @@ internal fun AlbumDetailScreen(
             isError = errorMessage != null,
             errorMessage = errorMessage,
             isConfirmEnabled = isNameChanged,
+        )
+    }
+
+    if (uiState.isShowDeleteAlbumBottomSheet) {
+        DoubleButtonOptionBottomSheet(
+            title = "앨범을 삭제하시겠어요?",
+            options = AlbumDeleteOption.entries.toImmutableList(),
+            selectedOption = uiState.selectedAlbumDeleteOption,
+            primaryButtonText = "삭제하기",
+            secondaryButtonText = "취소",
+            onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteAlbumBottomSheet) },
+            onClickSecondaryButton = { onIntent(AlbumDetailIntent.DismissDeleteAlbumBottomSheet) },
+            onClickPrimaryButton = { onIntent(AlbumDetailIntent.ClickDeleteAlbumConfirmButton) },
+            onOptionSelect = { onIntent(AlbumDetailIntent.SelectAlbumDeleteOption(it)) },
         )
     }
 }
@@ -299,6 +319,8 @@ internal fun AlbumDetailContent(
             visible = uiState.selectMode == SelectMode.SELECTING,
             isEnabled = uiState.selectedPhotos.isNotEmpty(),
             onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
+            onClickCopy = if (!uiState.isFavoriteAlbum) { { onIntent(AlbumDetailIntent.ClickCopyIcon) } } else null,
+            onClickMove = if (!uiState.isFavoriteAlbum) { { onIntent(AlbumDetailIntent.ClickMoveIcon) } } else null,
             onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
         )
     }

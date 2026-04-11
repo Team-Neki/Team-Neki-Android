@@ -14,7 +14,9 @@ import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.archive.impl.album.AlbumDeleteOption
 import com.neki.android.feature.archive.impl.model.SelectMode
+import com.neki.android.feature.select_album.api.SelectAlbumAction
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -128,6 +130,26 @@ class AlbumDetailViewModel @AssistedInject constructor(
             is AlbumDetailIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, intent.index, state, reduce, postSideEffect)
 
             AlbumDetailIntent.ClickDownloadIcon -> handleDownload(state, postSideEffect)
+            AlbumDetailIntent.ClickCopyIcon -> {
+                val photoIds = state.selectedPhotos.map { it.id }
+                if (photoIds.isEmpty()) {
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
+                    return
+                }
+                postSideEffect(AlbumDetailSideEffect.NavigateToSelectAlbum(
+                    SelectAlbumAction.CopyPhotos(photoIds = photoIds, sourceFolderId = albumId)
+                ))
+            }
+            AlbumDetailIntent.ClickMoveIcon -> {
+                val photoIds = state.selectedPhotos.map { it.id }
+                if (photoIds.isEmpty()) {
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
+                    return
+                }
+                postSideEffect(AlbumDetailSideEffect.NavigateToSelectAlbum(
+                    SelectAlbumAction.MovePhotos(photoIds = photoIds, showActionToast = false)
+                ))
+            }
             AlbumDetailIntent.ClickDeleteIcon -> handleDeleteIconClick(state, reduce, postSideEffect)
 
             AlbumDetailIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
@@ -174,6 +196,40 @@ class AlbumDetailViewModel @AssistedInject constructor(
             }
 
             AlbumDetailIntent.ClickRenameBottomSheetConfirmButton -> handleRenameAlbum(state, reduce, postSideEffect)
+
+            AlbumDetailIntent.ClickDeleteAlbumOption -> {
+                reduce { copy(isShowOptionPopup = false, isShowDeleteAlbumBottomSheet = true) }
+            }
+            AlbumDetailIntent.DismissDeleteAlbumBottomSheet -> {
+                reduce { copy(isShowDeleteAlbumBottomSheet = false) }
+            }
+            is AlbumDetailIntent.SelectAlbumDeleteOption -> {
+                reduce { copy(selectedAlbumDeleteOption = intent.option) }
+            }
+            AlbumDetailIntent.ClickDeleteAlbumConfirmButton -> handleDeleteAlbum(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun handleDeleteAlbum(
+        state: AlbumDetailState,
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            val deletePhotos = state.selectedAlbumDeleteOption == AlbumDeleteOption.DELETE_WITH_PHOTOS
+            folderRepository.deleteFolder(id = listOf(albumId), deletePhotos = deletePhotos)
+                .onSuccess {
+                    reduce { copy(isLoading = false, isShowDeleteAlbumBottomSheet = false) }
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("앨범을 삭제했어요"))
+                    postSideEffect(AlbumDetailSideEffect.NotifyResult)
+                    postSideEffect(AlbumDetailSideEffect.NavigateBack)
+                }
+                .onFailure { e ->
+                    Timber.e(e)
+                    reduce { copy(isLoading = false, isShowDeleteAlbumBottomSheet = false) }
+                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("앨범 삭제에 실패했어요"))
+                }
         }
     }
 

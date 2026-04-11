@@ -3,7 +3,9 @@ package com.neki.android.feature.archive.impl.album_detail
 import android.net.Uri
 import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.Photo
+import com.neki.android.feature.archive.impl.album.AlbumDeleteOption
 import com.neki.android.feature.archive.impl.model.SelectMode
+import com.neki.android.feature.select_album.api.SelectAlbumAction
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -21,6 +23,9 @@ data class AlbumDetailState(
 
     val renameAlbumTextState: TextFieldState = TextFieldState(),
     val isShowRenameAlbumBottomSheet: Boolean = false,
+
+    val isShowDeleteAlbumBottomSheet: Boolean = false,
+    val selectedAlbumDeleteOption: AlbumDeleteOption = AlbumDeleteOption.DELETE_WITH_PHOTOS,
 )
 
 enum class PhotoDeleteOption(val label: String) {
@@ -49,6 +54,8 @@ sealed interface AlbumDetailIntent {
 
     // ActionBar Intent
     data object ClickDownloadIcon : AlbumDetailIntent
+    data object ClickCopyIcon : AlbumDetailIntent
+    data object ClickMoveIcon : AlbumDetailIntent
     data object ClickDeleteIcon : AlbumDetailIntent
 
     // Delete Dialog Intent (for Favorite Album)
@@ -70,6 +77,12 @@ sealed interface AlbumDetailIntent {
     data object ClickRenameBottomSheetCancelButton : AlbumDetailIntent
     data object ClickRenameBottomSheetConfirmButton : AlbumDetailIntent
 
+    // Delete Album BottomSheet Intent
+    data object ClickDeleteAlbumOption : AlbumDetailIntent
+    data object DismissDeleteAlbumBottomSheet : AlbumDetailIntent
+    data class SelectAlbumDeleteOption(val option: AlbumDeleteOption) : AlbumDetailIntent
+    data object ClickDeleteAlbumConfirmButton : AlbumDetailIntent
+
     // Result Intent
     data object RefreshPhotos : AlbumDetailIntent
     data class ClickFavoriteIcon(val photo: Photo) : AlbumDetailIntent
@@ -83,4 +96,5 @@ sealed interface AlbumDetailSideEffect {
     data object OpenGallery : AlbumDetailSideEffect
     data object RefreshPhotos : AlbumDetailSideEffect
     data object NotifyResult : AlbumDetailSideEffect
+    data class NavigateToSelectAlbum(val action: SelectAlbumAction) : AlbumDetailSideEffect
 }

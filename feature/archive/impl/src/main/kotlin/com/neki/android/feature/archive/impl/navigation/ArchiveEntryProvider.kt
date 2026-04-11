@@ -12,6 +12,7 @@ import com.neki.android.feature.archive.api.AllAlbumResult
 import com.neki.android.feature.archive.api.AllPhotoResult
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.archive.api.PhotoDetailResult
+import com.neki.android.feature.archive.api.PhotoMovedResult
 import com.neki.android.feature.archive.api.PhotoUploadedResult
 import com.neki.android.feature.archive.api.navigateToAlbumDetail
 import com.neki.android.feature.archive.api.navigateToAllAlbum
@@ -32,6 +33,8 @@ import com.neki.android.feature.archive.impl.photo.AllPhotoViewModel
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
+import com.neki.android.feature.select_album.api.SelectAlbumAction
+import com.neki.android.feature.select_album.api.navigateToSelectAlbum
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -98,6 +101,13 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
             viewModel = viewModel,
             navigateBack = navigator::goBack,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
+            navigateToSelectAlbum = { photoIds ->
+                navigator.navigateToSelectAlbum(
+                    action = SelectAlbumAction.CopyPhotos(photoIds = photoIds),
+                    title = "앨범에 추가",
+                    multiSelect = true,
+                )
+            },
         )
     }
 
@@ -132,11 +142,21 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
             viewModel.store.onIntent(AlbumDetailIntent.RefreshPhotos)
             resultBus.sendResult(result = AlbumDetailResult, allowDuplicate = false)
         }
+        ResultEffect<PhotoMovedResult>(resultBus) {
+            viewModel.store.onIntent(AlbumDetailIntent.RefreshPhotos)
+        }
 
         AlbumDetailRoute(
             viewModel = viewModel,
             navigateBack = navigator::goBack,
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
+            navigateToSelectAlbum = { action ->
+                navigator.navigateToSelectAlbum(
+                    action = action,
+                    title = "앨범에 추가",
+                    multiSelect = true,
+                )
+            },
         )
     }
 
@@ -148,6 +168,13 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
                 },
             ),
             navigateBack = navigator::goBack,
+            navigateToSelectAlbum = { photoId ->
+                navigator.navigateToSelectAlbum(
+                    action = SelectAlbumAction.MovePhotos(listOf(photoId), showActionToast = true),
+                    title = "모든 앨범",
+                    multiSelect = false,
+                )
+            },
         )
     }
 }
