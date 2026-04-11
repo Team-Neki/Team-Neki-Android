@@ -14,4 +14,16 @@ sealed interface SelectAlbumAction {
     data class UploadFromGallery(
         val imageUriStrings: List<String>,
     ) : SelectAlbumAction
+
+    @Serializable
+    data class MovePhotos(
+        val photoIds: List<Long>,
+        val showActionToast: Boolean = false,
+    ) : SelectAlbumAction
+
+    @Serializable
+    data class CopyPhotos(
+        val photoIds: List<Long>,
+        val sourceFolderId: Long? = null,
+    ) : SelectAlbumAction
 }

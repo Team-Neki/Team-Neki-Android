@@ -38,5 +38,7 @@ sealed interface SelectAlbumIntent {
 sealed interface SelectAlbumSideEffect {
     data object NavigateBack : SelectAlbumSideEffect
     data class SendUploadResult(val album: AlbumPreview) : SelectAlbumSideEffect
+    data class ShowActionToast(val message: String, val album: AlbumPreview) : SelectAlbumSideEffect
+    data object SendPhotoMovedResult : SelectAlbumSideEffect
     data class ShowToastMessage(val message: String) : SelectAlbumSideEffect
 }

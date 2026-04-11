@@ -11,3 +11,5 @@ data object AllPhotoResult : ArchiveResult
 data object AllAlbumResult : ArchiveResult
 
 data object PhotoUploadedResult : ArchiveResult
+
+data object PhotoMovedResult : ArchiveResult
