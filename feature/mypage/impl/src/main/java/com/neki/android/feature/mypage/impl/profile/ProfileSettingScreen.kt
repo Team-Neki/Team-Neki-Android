@@ -76,6 +76,7 @@ fun ProfileSettingScreen(
             nickname = uiState.userInfo.nickname,
             profileImage = uiState.userInfo.profileImageUrl,
             onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
+            onClickCameraIcon = { onIntent(MyPageIntent.ClickEditIcon) },
         )
         SectionTitleText(text = "서비스 정보 및 지원")
         SectionItem(

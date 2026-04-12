@@ -1,6 +1,8 @@
 package com.neki.android.feature.mypage.impl.profile.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -32,21 +34,41 @@ internal fun SettingProfileImage(
     profileImage: String = "",
     imageSize: Dp = 142.dp,
     onClickEdit: () -> Unit,
+    onClickCameraIcon: () -> Unit,
 ) {
     Column(
         modifier = Modifier.padding(top = 20.dp, bottom = 27.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(imageSize)
-                .clip(CircleShape),
-            model = profileImage.ifEmpty { R.drawable.image_profile_empty },
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            placeholder = painterResource(R.drawable.image_profile_empty),
-            error = painterResource(R.drawable.image_profile_empty),
-        )
+        Box {
+            AsyncImage(
+                modifier = Modifier
+                    .size(imageSize)
+                    .clip(CircleShape),
+                model = profileImage.ifEmpty { R.drawable.image_profile_empty },
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(R.drawable.image_profile_empty),
+                error = painterResource(R.drawable.image_profile_empty),
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .background(
+                        color = NekiTheme.colorScheme.gray700,
+                        shape = CircleShape,
+                    )
+                    .noRippleClickableSingle(onClick = onClickCameraIcon)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_camera_filled),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                )
+            }
+        }
         VerticalSpacer(16.dp)
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -74,6 +96,7 @@ private fun SettingProfileImagePreview() {
         SettingProfileImage(
             nickname = "네키네키",
             onClickEdit = {},
+            onClickCameraIcon = {},
         )
     }
 }
