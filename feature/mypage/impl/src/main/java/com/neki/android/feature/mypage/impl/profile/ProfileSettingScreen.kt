@@ -21,8 +21,8 @@ import com.neki.android.feature.mypage.impl.main.MyPageEffect
 import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
+import com.neki.android.feature.mypage.impl.profile.component.ProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileSettingTopBar
-import com.neki.android.feature.mypage.impl.profile.component.SettingProfileImage
 import timber.log.Timber
 
 @Composable
@@ -72,11 +72,11 @@ fun ProfileSettingScreen(
         ProfileSettingTopBar(
             onBack = { onIntent(MyPageIntent.ClickBackIcon) },
         )
-        SettingProfileImage(
+        ProfileImage(
+            profileImage = uiState.userInfo.profileImageUrl.ifEmpty { null },
             nickname = uiState.userInfo.nickname,
-            profileImage = uiState.userInfo.profileImageUrl,
-            onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
             onClickCameraIcon = { onIntent(MyPageIntent.ClickEditIcon) },
+            onClickEdit = { onIntent(MyPageIntent.ClickEditIcon) },
         )
         SectionTitleText(text = "서비스 정보 및 지원")
         SectionItem(

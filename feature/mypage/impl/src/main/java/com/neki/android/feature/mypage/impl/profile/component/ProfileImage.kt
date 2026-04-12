@@ -17,9 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
@@ -29,23 +28,26 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.VerticalSpacer
 
 @Composable
-internal fun SettingProfileImage(
-    nickname: String,
-    profileImage: String = "",
-    imageSize: Dp = 142.dp,
-    onClickEdit: () -> Unit,
+internal fun ProfileImage(
+    profileImage: Any? = null,
+    nickname: String = "",
     onClickCameraIcon: () -> Unit,
+    onClickEdit: () -> Unit = {},
 ) {
     Column(
-        modifier = Modifier.padding(top = 20.dp, bottom = 27.dp),
+        modifier = Modifier
+            .padding(
+                top = 20.dp,
+                bottom = if (nickname.isNotEmpty()) 34.dp else 28.dp
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box {
             AsyncImage(
                 modifier = Modifier
-                    .size(imageSize)
+                    .size(142.dp)
                     .clip(CircleShape),
-                model = profileImage.ifEmpty { R.drawable.image_profile_empty },
+                model = profileImage ?: R.drawable.image_profile_empty,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.image_profile_empty),
@@ -69,33 +71,45 @@ internal fun SettingProfileImage(
                 )
             }
         }
-        VerticalSpacer(16.dp)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = nickname,
-                style = NekiTheme.typography.title20Medium,
-                color = NekiTheme.colorScheme.gray900,
-            )
-            Icon(
-                modifier = Modifier.noRippleClickableSingle(onClick = onClickEdit),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_edit),
-                contentDescription = null,
-                tint = Color.Unspecified,
-            )
+        if (nickname.isNotEmpty()) {
+            VerticalSpacer(16.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = nickname,
+                    style = NekiTheme.typography.title20Medium,
+                    color = NekiTheme.colorScheme.gray900,
+                )
+                Icon(
+                    modifier = Modifier.noRippleClickableSingle(onClick = onClickEdit),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_edit),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                )
+            }
         }
     }
 }
 
 @ComponentPreview
 @Composable
-private fun SettingProfileImagePreview() {
+private fun ProfileImageWithNicknamePreview() {
     NekiTheme {
-        SettingProfileImage(
+        ProfileImage(
             nickname = "네키네키",
+            onClickCameraIcon = {},
             onClickEdit = {},
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun ProfileImagePreview() {
+    NekiTheme {
+        ProfileImage(
             onClickCameraIcon = {},
         )
     }
