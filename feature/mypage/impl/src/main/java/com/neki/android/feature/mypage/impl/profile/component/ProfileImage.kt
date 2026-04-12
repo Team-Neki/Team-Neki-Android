@@ -38,7 +38,7 @@ internal fun ProfileImage(
         modifier = Modifier
             .padding(
                 top = 20.dp,
-                bottom = if (nickname.isNotEmpty()) 34.dp else 28.dp
+                bottom = if (nickname.isNotEmpty()) 34.dp else 28.dp,
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
