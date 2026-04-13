@@ -31,7 +31,6 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
-import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast

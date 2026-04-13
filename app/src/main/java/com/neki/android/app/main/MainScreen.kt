@@ -1,24 +1,25 @@
 package com.neki.android.app.main
 
-import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
@@ -26,16 +27,13 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import com.neki.android.app.main.component.AddPhotoBottomSheet
 import com.neki.android.app.main.component.AlbumUploadOption
-import com.neki.android.app.ui.BottomNavigationBar
 import com.neki.android.app.main.component.SelectWithAlbumDialog
+import com.neki.android.app.ui.BottomNavigationBar
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import androidx.core.net.toUri
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.archive.api.PhotoUploadedResult
 import com.neki.android.feature.map.api.MapNavKey
@@ -44,6 +42,8 @@ import com.neki.android.feature.photo_upload.api.PhotoUploadNavKey
 import com.neki.android.feature.photo_upload.api.QRScanResult
 import com.neki.android.feature.pose.api.PoseNavKey
 import com.neki.android.feature.select_album.api.SelectAlbumAction
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import timber.log.Timber
 
 @Composable
@@ -95,6 +95,7 @@ fun MainRoute(
             MainSideEffect.OpenGallery -> photoPicker.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
             )
+
             is MainSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.action)
             is MainSideEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             MainSideEffect.RefreshArchive -> resultBus.sendResult(result = PhotoUploadedResult, allowDuplicate = false)
@@ -127,7 +128,6 @@ fun MainScreen(
     val shouldShowBottomBar by remember(currentKey) {
         mutableStateOf(currentKey in topLevelKeys)
     }
-
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
