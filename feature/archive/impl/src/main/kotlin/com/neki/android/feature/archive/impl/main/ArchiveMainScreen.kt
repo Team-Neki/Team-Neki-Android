@@ -31,6 +31,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -70,6 +71,7 @@ internal fun ArchiveMainRoute(
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(
                 ArchiveNavKey.PhotoDetail(photos = sideEffect.photos, initialIndex = sideEffect.index),
             )
+
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
             is ArchiveMainSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
         }
@@ -198,6 +200,7 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
+                modifier = Modifier.padding(top = 12.dp),
                 title = "최근 사진",
                 textButtonTitle = "모든 사진",
                 onClickShowAllAlbum = onClickShowAllPhoto,

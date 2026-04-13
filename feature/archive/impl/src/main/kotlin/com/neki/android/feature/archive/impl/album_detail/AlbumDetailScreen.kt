@@ -55,7 +55,8 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOU
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_TOP_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
-import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
+import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailActionBar
+import com.neki.android.feature.archive.impl.album_detail.component.FavoriteAlbumActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import com.neki.android.feature.select_album.api.SelectAlbumAction
 import kotlinx.collections.immutable.persistentListOf
@@ -315,14 +316,23 @@ internal fun AlbumDetailContent(
             }
         }
 
-        PhotoActionBar(
-            visible = uiState.selectMode == SelectMode.SELECTING,
-            isEnabled = uiState.selectedPhotos.isNotEmpty(),
-            onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
-            onClickCopy = if (!uiState.isFavoriteAlbum) { { onIntent(AlbumDetailIntent.ClickCopyIcon) } } else null,
-            onClickMove = if (!uiState.isFavoriteAlbum) { { onIntent(AlbumDetailIntent.ClickMoveIcon) } } else null,
-            onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
-        )
+        if (uiState.isFavoriteAlbum) {
+            FavoriteAlbumActionBar(
+                visible = uiState.selectMode == SelectMode.SELECTING,
+                isEnabled = uiState.selectedPhotos.isNotEmpty(),
+                onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
+                onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
+            )
+        } else {
+            AlbumDetailActionBar(
+                visible = uiState.selectMode == SelectMode.SELECTING,
+                isEnabled = uiState.selectedPhotos.isNotEmpty(),
+                onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
+                onClickCopy = { onIntent(AlbumDetailIntent.ClickCopyIcon) },
+                onClickMove = { onIntent(AlbumDetailIntent.ClickMoveIcon) },
+                onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
+            )
+        }
     }
 }
 

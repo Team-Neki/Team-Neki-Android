@@ -3,7 +3,9 @@ package com.neki.android.core.designsystem.actionbar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,54 +23,10 @@ import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
-fun NekiStartActionBar(
+fun NekiActionBar(
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Column(
-        modifier = modifier,
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            thickness = 1.dp,
-            color = NekiTheme.colorScheme.gray75,
-        )
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterStart,
-        ) {
-            content()
-        }
-    }
-}
-
-@Composable
-fun NekiEndActionBar(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Column(
-        modifier = modifier,
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            thickness = 1.dp,
-            color = NekiTheme.colorScheme.gray75,
-        )
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterEnd,
-        ) {
-            content()
-        }
-    }
-}
-
-@Composable
-fun NekiBothSidesActionBar(
-    modifier: Modifier = Modifier,
-    startContent: @Composable () -> Unit,
-    endContent: @Composable () -> Unit,
+    padding: PaddingValues = PaddingValues(),
+    content: @Composable RowScope.() -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -79,13 +37,96 @@ fun NekiBothSidesActionBar(
             color = NekiTheme.colorScheme.gray75,
         )
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(padding),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            startContent()
-            endContent()
+            content()
         }
+    }
+}
+
+@Composable
+fun NekiStartActionBar(
+    modifier: Modifier = Modifier,
+    padding: PaddingValues = PaddingValues(),
+    content: @Composable () -> Unit,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(),
+            thickness = 1.dp,
+            color = NekiTheme.colorScheme.gray75,
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(padding),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun NekiEndActionBar(
+    modifier: Modifier = Modifier,
+    padding: PaddingValues = PaddingValues(),
+    content: @Composable () -> Unit,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(),
+            thickness = 1.dp,
+            color = NekiTheme.colorScheme.gray75,
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(padding),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            content()
+        }
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun NekiActionBarPreview() {
+    NekiTheme {
+        NekiActionBar(
+            modifier = Modifier.fillMaxWidth(),
+            content = {
+                NekiIconButton(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {},
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
+                        contentDescription = null,
+                        tint = NekiTheme.colorScheme.gray900,
+                    )
+                }
+                NekiIconButton(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {},
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_bookmark_stroked),
+                        contentDescription = null,
+                        tint = NekiTheme.colorScheme.gray500,
+                    )
+                }
+            },
+        )
     }
 }
 
@@ -129,39 +170,5 @@ private fun NekiEndActionBarPreview() {
                 )
             }
         }
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun NekiBothSidesActionBarPreview() {
-    NekiTheme {
-        NekiBothSidesActionBar(
-            modifier = Modifier.fillMaxWidth(),
-            startContent = {
-                NekiIconButton(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {},
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
-                        contentDescription = null,
-                        tint = NekiTheme.colorScheme.gray900,
-                    )
-                }
-            },
-            endContent = {
-                NekiIconButton(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {},
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_bookmark_stroked),
-                        contentDescription = null,
-                        tint = NekiTheme.colorScheme.gray500,
-                    )
-                }
-            },
-        )
     }
 }

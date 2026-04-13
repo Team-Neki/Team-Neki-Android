@@ -23,7 +23,7 @@ private enum class FavoriteOptionItem(val label: String) {
 
 private enum class CustomOptionItem(val label: String) {
     SELECT("사진 선택"),
-    ADD_PHOTO("사진 추가"),
+    ADD_PHOTO("사진 가져오기"),
     RENAME_ALBUM("앨범 이름 변경"),
     DELETE_ALBUM("앨범 삭제"),
 }
