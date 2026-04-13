@@ -83,6 +83,8 @@ dependencies {
     implementation(projects.feature.mypage.impl)
     implementation(projects.feature.photoUpload.api)
     implementation(projects.feature.photoUpload.impl)
+    implementation(projects.feature.selectAlbum.api)
+    implementation(projects.feature.selectAlbum.impl)
 
     implementation(libs.timber)
 

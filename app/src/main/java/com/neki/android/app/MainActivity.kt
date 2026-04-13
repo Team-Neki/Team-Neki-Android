@@ -32,7 +32,7 @@ import com.neki.android.core.navigation.root.RootNavigator
 import com.neki.android.feature.auth.api.AuthNavKey
 import com.neki.android.feature.auth.impl.navigation.authEntryProvider
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
-import com.neki.android.feature.photo_upload.api.navigateToUploadAlbum
+import com.neki.android.feature.select_album.api.navigateToSelectAlbum
 import android.net.Uri
 import androidx.core.content.IntentCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -123,8 +123,7 @@ class MainActivity : ComponentActivity() {
                                     onTabSelected = { mainNavigator.navigate(it) },
                                     onBack = { mainNavigator.goBack() },
                                     navigateToQRScan = mainNavigator::navigateToQRScan,
-                                    navigateToUploadAlbumWithGallery = mainNavigator::navigateToUploadAlbum,
-                                    navigateToUploadAlbumWithQRScan = mainNavigator::navigateToUploadAlbum,
+                                    navigateToSelectAlbum = { action -> mainNavigator.navigateToSelectAlbum(action) },
                                     pendingShareUriStrings = pendingShareUriStrings,
                                     onShareUrisConsumed = { pendingShareUriStrings = persistentListOf() },
                                 )

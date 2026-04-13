@@ -7,6 +7,7 @@ import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.select_album.api.SelectAlbumAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -39,10 +40,12 @@ class MainViewModel @Inject constructor(
                 reduce { copy(isShowAddPhotoBottomSheet = false) }
                 postSideEffect(MainSideEffect.NavigateToQRScan)
             }
+
             MainIntent.ClickGalleryUpload -> {
                 reduce { copy(isShowAddPhotoBottomSheet = false) }
                 postSideEffect(MainSideEffect.OpenGallery)
             }
+
             is MainIntent.SelectGalleryImage -> reduce { copy(isShowSelectWithAlbumDialog = true, selectedUris = intent.uris.toImmutableList()) }
             is MainIntent.ShareImageReceived -> reduce { copy(isShowSelectWithAlbumDialog = true, selectedUris = intent.uris.toImmutableList()) }
             is MainIntent.QRCodeScanned -> reduce { copy(scannedImageUrl = intent.imageUrl, isShowSelectWithAlbumDialog = true) }
@@ -53,7 +56,15 @@ class MainViewModel @Inject constructor(
                     scannedImageUrl = null,
                 )
             }
+
             MainIntent.ClickUploadWithAlbum -> {
+                val action = if (state.scannedImageUrl != null) {
+                    SelectAlbumAction.UploadFromQR(imageUrl = state.scannedImageUrl)
+                } else {
+                    SelectAlbumAction.UploadFromGallery(
+                        imageUriStrings = state.selectedUris.map { it.toString() },
+                    )
+                }
                 reduce {
                     copy(
                         isShowSelectWithAlbumDialog = false,
@@ -61,35 +72,25 @@ class MainViewModel @Inject constructor(
                         selectedUris = persistentListOf(),
                     )
                 }
+                postSideEffect(MainSideEffect.NavigateToSelectAlbum(action))
+            }
+
+            MainIntent.ClickUploadWithoutAlbum -> {
+                reduce { copy(isShowSelectWithAlbumDialog = false) }
                 if (state.scannedImageUrl != null) {
-                    postSideEffect(MainSideEffect.NavigateToUploadAlbumWithQRScan(state.scannedImageUrl))
+                    uploadSingleImage(
+                        imageUrl = state.scannedImageUrl,
+                        reduce = reduce,
+                        postSideEffect = postSideEffect,
+                    )
                 } else {
-                    postSideEffect(MainSideEffect.NavigateToUploadAlbumWithGallery(state.selectedUris.map { it.toString() }))
+                    uploadMultipleImages(
+                        imageUris = state.selectedUris,
+                        reduce = reduce,
+                        postSideEffect = postSideEffect,
+                    )
                 }
             }
-            MainIntent.ClickUploadWithoutAlbum -> uploadWithoutAlbum(state, reduce, postSideEffect)
-        }
-    }
-
-    private fun uploadWithoutAlbum(
-        state: MainState,
-        reduce: (MainState.() -> MainState) -> Unit,
-        postSideEffect: (MainSideEffect) -> Unit,
-    ) {
-        reduce { copy(isShowSelectWithAlbumDialog = false) }
-
-        if (state.scannedImageUrl != null) {
-            uploadSingleImage(
-                imageUrl = state.scannedImageUrl,
-                reduce = reduce,
-                postSideEffect = postSideEffect,
-            )
-        } else {
-            uploadMultipleImages(
-                imageUris = state.selectedUris,
-                reduce = reduce,
-                postSideEffect = postSideEffect,
-            )
         }
     }
 
@@ -101,7 +102,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            uploadSinglePhotoUseCase(imageUrl = imageUrl)
+            uploadSinglePhotoUseCase(imageUrl = imageUrl, folderId = null)
                 .onSuccess {
                     reduce { copy(isLoading = false, scannedImageUrl = null) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
@@ -123,7 +124,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            uploadMultiplePhotoUseCase(imageUris = imageUris)
+            uploadMultiplePhotoUseCase(imageUris = imageUris, folderId = null)
                 .onSuccess {
                     reduce { copy(isLoading = false, selectedUris = persistentListOf()) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
