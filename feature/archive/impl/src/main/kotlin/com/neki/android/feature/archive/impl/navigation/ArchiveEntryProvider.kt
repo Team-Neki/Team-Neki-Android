@@ -155,6 +155,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         }
         ResultEffect<PhotoCopiedResult>(resultBus) {
             viewModel.store.onIntent(AlbumDetailIntent.ClickCancelButton)
+            viewModel.store.onIntent(AlbumDetailIntent.RefreshPhotos)
             resultBus.sendResult(result = AlbumDetailResult, allowDuplicate = false)
         }
 

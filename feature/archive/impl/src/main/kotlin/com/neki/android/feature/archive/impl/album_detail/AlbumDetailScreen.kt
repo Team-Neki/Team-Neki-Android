@@ -37,15 +37,19 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.navigation.result.LocalResultEventBus
-import com.neki.android.feature.archive.api.AlbumDetailResult
 import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
-import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
-import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailTopBar
-import com.neki.android.feature.archive.impl.album_detail.component.RenameAlbumBottomSheet
+import com.neki.android.feature.archive.api.AlbumDetailResult
+import com.neki.android.feature.archive.api.ArchiveNavKey
+import com.neki.android.feature.archive.api.PhotoCopiedResult
 import com.neki.android.feature.archive.impl.album.AlbumDeleteOption
+import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailActionBar
+import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailTopBar
+import com.neki.android.feature.archive.impl.album_detail.component.FavoriteAlbumActionBar
+import com.neki.android.feature.archive.impl.album_detail.component.ImportPhotoBottomSheet
+import com.neki.android.feature.archive.impl.album_detail.component.RenameAlbumBottomSheet
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.EmptyAlbumContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
@@ -55,8 +59,6 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOU
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_TOP_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
-import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailActionBar
-import com.neki.android.feature.archive.impl.album_detail.component.FavoriteAlbumActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import com.neki.android.feature.select_album.api.SelectAlbumAction
 import kotlinx.collections.immutable.persistentListOf
@@ -64,6 +66,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AlbumDetailRoute(
     viewModel: AlbumDetailViewModel,
@@ -122,6 +125,12 @@ internal fun AlbumDetailRoute(
             }
 
             is AlbumDetailSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.action)
+            is AlbumDetailSideEffect.PhotoImported -> {
+                resultEventBus.sendResult(
+                    result = PhotoCopiedResult(albumIds = listOf(sideEffect.albumId)),
+                )
+                viewModel.store.onIntent(AlbumDetailIntent.RefreshPhotos)
+            }
         }
     }
 
@@ -246,6 +255,13 @@ internal fun AlbumDetailScreen(
             onClickSecondaryButton = { onIntent(AlbumDetailIntent.DismissDeleteAlbumBottomSheet) },
             onClickPrimaryButton = { onIntent(AlbumDetailIntent.ClickDeleteAlbumConfirmButton) },
             onOptionSelect = { onIntent(AlbumDetailIntent.SelectAlbumDeleteOption(it)) },
+        )
+    }
+
+    if (uiState.isShowImportPhotoBottomSheet) {
+        ImportPhotoBottomSheet(
+            uiState = uiState.importPhotoState,
+            onIntent = onIntent,
         )
     }
 }

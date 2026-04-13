@@ -11,6 +11,7 @@ import androidx.paging.map
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
+import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -23,6 +24,9 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableSet
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -88,10 +92,6 @@ class AlbumDetailViewModel @AssistedInject constructor(
         postSideEffect: (AlbumDetailSideEffect) -> Unit,
     ) {
         when (intent) {
-            AlbumDetailIntent.EnterAlbumDetailScreen -> {
-                // Paging이 자동으로 처리
-            }
-
             AlbumDetailIntent.ClickBackIcon -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.OnBackPressed -> handleBackClick(state, reduce, postSideEffect)
             AlbumDetailIntent.ClickOptionIcon -> reduce { copy(isShowOptionPopup = true) }
@@ -107,8 +107,43 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
             AlbumDetailIntent.ClickAddPhotoOption -> {
                 reduce { copy(isShowOptionPopup = false) }
-                postSideEffect(AlbumDetailSideEffect.OpenGallery)
+                if (isFavoriteAlbum) {
+                    postSideEffect(AlbumDetailSideEffect.OpenGallery)
+                } else {
+                    reduce { copy(isShowImportPhotoBottomSheet = true, importPhotoState = ImportPhotoState(currentAlbumId = albumId)) }
+                    loadImportAlbumsAndPhotos(reduce)
+                }
             }
+
+            AlbumDetailIntent.DismissImportPhotoBottomSheet -> {
+                reduce { copy(isShowImportPhotoBottomSheet = false, importPhotoState = ImportPhotoState()) }
+            }
+
+            is AlbumDetailIntent.SelectImportAlbum -> {
+                reduce { copy(importPhotoState = importPhotoState.copy(selectedAlbumId = intent.albumId, isShowAlbumDropdown = false)) }
+                loadImportPhotos(intent.albumId, reduce)
+            }
+
+            AlbumDetailIntent.ToggleImportAlbumDropdown -> {
+                reduce { copy(importPhotoState = importPhotoState.copy(isShowAlbumDropdown = !importPhotoState.isShowAlbumDropdown)) }
+            }
+
+            AlbumDetailIntent.DismissImportAlbumDropdown -> {
+                reduce { copy(importPhotoState = importPhotoState.copy(isShowAlbumDropdown = false)) }
+            }
+
+            is AlbumDetailIntent.ToggleImportPhoto -> {
+                reduce {
+                    val newIds = if (intent.photoId in importPhotoState.selectedPhotoIds) {
+                        importPhotoState.selectedPhotoIds - intent.photoId
+                    } else {
+                        importPhotoState.selectedPhotoIds + intent.photoId
+                    }
+                    copy(importPhotoState = importPhotoState.copy(selectedPhotoIds = newIds.toImmutableSet()))
+                }
+            }
+
+            AlbumDetailIntent.ConfirmImport -> handleConfirmImport(state, reduce, postSideEffect)
 
             AlbumDetailIntent.ClickRenameAlbumOption -> {
                 reduce {
@@ -142,6 +177,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     ),
                 )
             }
+
             AlbumDetailIntent.ClickMoveIcon -> {
                 val photoIds = state.selectedPhotos.map { it.id }
                 if (photoIds.isEmpty()) {
@@ -157,6 +193,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     ),
                 )
             }
+
             AlbumDetailIntent.ClickDeleteIcon -> handleDeleteIconClick(state, reduce, postSideEffect)
 
             AlbumDetailIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
@@ -207,13 +244,65 @@ class AlbumDetailViewModel @AssistedInject constructor(
             AlbumDetailIntent.ClickDeleteAlbumOption -> {
                 reduce { copy(isShowOptionPopup = false, isShowDeleteAlbumBottomSheet = true) }
             }
+
             AlbumDetailIntent.DismissDeleteAlbumBottomSheet -> {
                 reduce { copy(isShowDeleteAlbumBottomSheet = false) }
             }
+
             is AlbumDetailIntent.SelectAlbumDeleteOption -> {
                 reduce { copy(selectedAlbumDeleteOption = intent.option) }
             }
+
             AlbumDetailIntent.ClickDeleteAlbumConfirmButton -> handleDeleteAlbum(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun loadImportAlbumsAndPhotos(reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit) {
+        viewModelScope.launch {
+            var loadedAlbums: List<AlbumPreview> = emptyList()
+            awaitAll(
+                async { folderRepository.getFolders().onSuccess { albums -> loadedAlbums = albums } },
+                async {
+                    photoRepository.getPhotos(folderId = null).onSuccess { photos ->
+                        reduce { copy(importPhotoState = importPhotoState.copy(photos = photos.toImmutableList())) }
+                    }
+                },
+            )
+            val options = buildList {
+                add(AlbumFilterOption(null, "전체사진", loadedAlbums.sumOf { it.photoCount }))
+                addAll(loadedAlbums.map { AlbumFilterOption(it.id, it.title, it.photoCount) })
+            }.toImmutableList()
+            reduce { copy(importPhotoState = importPhotoState.copy(allAlbumOptions = options)) }
+        }
+    }
+
+    private fun loadImportPhotos(albumId: Long?, reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit) {
+        viewModelScope.launch {
+            photoRepository.getPhotos(folderId = albumId).onSuccess { photos ->
+                reduce { copy(importPhotoState = importPhotoState.copy(photos = photos.toImmutableList())) }
+            }
+        }
+    }
+
+    private fun handleConfirmImport(
+        state: AlbumDetailState,
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(importPhotoState = importPhotoState.copy(isLoading = true)) }
+            folderRepository.copyPhotos(
+                photoIds = state.importPhotoState.selectedPhotoIds.toList(),
+                targetFolderIds = listOf(albumId),
+            ).onSuccess {
+                reduce { copy(isShowImportPhotoBottomSheet = false, importPhotoState = ImportPhotoState()) }
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
+                postSideEffect(AlbumDetailSideEffect.PhotoImported(albumId))
+            }.onFailure { e ->
+                Timber.e(e)
+                reduce { copy(importPhotoState = importPhotoState.copy(isLoading = false)) }
+                postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진 가져오기에 실패했어요"))
+            }
         }
     }
 
