@@ -120,10 +120,12 @@ internal fun SelectAlbumScreen(
                 key = { album -> album.id },
             ) { album ->
                 val isSelected = uiState.selectedAlbums.any { it.id == album.id }
+                val isDisabled = album.id == uiState.disabledAlbumId
                 AlbumRowComponent(
                     album = album,
                     isSelectable = true,
                     isSelected = isSelected,
+                    isDisabled = isDisabled,
                     onClick = { onIntent(SelectAlbumIntent.ClickAlbumItem(album)) },
                 )
             }

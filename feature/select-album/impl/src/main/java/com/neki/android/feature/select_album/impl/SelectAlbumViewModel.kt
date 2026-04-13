@@ -54,6 +54,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
                 title = title,
                 multiSelect = multiSelect,
                 photoCount = photoCount,
+                disabledAlbumId = if (action is SelectAlbumAction.MovePhotos) action.sourceFolderId else null,
             ),
             onIntent = ::onIntent,
             initialFetchData = { store.onIntent(SelectAlbumIntent.EnterSelectAlbumScreen) },

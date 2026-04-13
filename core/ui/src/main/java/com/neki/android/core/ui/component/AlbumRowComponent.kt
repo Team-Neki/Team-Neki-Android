@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -59,11 +60,12 @@ fun AlbumRowComponent(
     modifier: Modifier = Modifier,
     isSelectable: Boolean = false,
     isSelected: Boolean = false,
+    isDisabled: Boolean = false,
     onClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
-            .noRippleClickable(onClick = onClick)
+            .noRippleClickable(onClick = if (isDisabled) ({}) else onClick)
             .fillMaxWidth()
             .padding(vertical = 10.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -72,12 +74,15 @@ fun AlbumRowComponent(
         AlbumThumbnail(
             isEmpty = album.photoCount == 0,
             thumbnailUrl = album.thumbnailUrl,
+            modifier = if (isDisabled) Modifier.alpha(0.3f) else Modifier,
         )
 
         AlbumInfo(
             modifier = Modifier.weight(1f),
             title = album.title,
             photoCount = album.photoCount,
+            titleColor = if (isDisabled) NekiTheme.colorScheme.gray300 else NekiTheme.colorScheme.gray900,
+            countColor = if (isDisabled) NekiTheme.colorScheme.gray200 else NekiTheme.colorScheme.gray500,
         )
 
         if (isSelectable) {
@@ -148,7 +153,7 @@ private fun AlbumThumbnail(
 ) {
     if (isEmpty || thumbnailUrl == null) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .size(72.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(NekiTheme.colorScheme.gray50),
@@ -182,6 +187,8 @@ private fun AlbumInfo(
     title: String,
     photoCount: Int,
     modifier: Modifier = Modifier,
+    titleColor: Color = NekiTheme.colorScheme.gray900,
+    countColor: Color = NekiTheme.colorScheme.gray500,
 ) {
     Column(
         modifier = modifier,
@@ -190,13 +197,13 @@ private fun AlbumInfo(
         Text(
             text = title,
             style = NekiTheme.typography.body16SemiBold,
-            color = NekiTheme.colorScheme.gray900,
+            color = titleColor,
         )
 
         Text(
             text = "${photoCount}장",
             style = NekiTheme.typography.caption12Medium,
-            color = NekiTheme.colorScheme.gray500,
+            color = countColor,
         )
     }
 }

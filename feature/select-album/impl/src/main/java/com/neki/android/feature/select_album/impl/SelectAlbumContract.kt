@@ -17,6 +17,7 @@ data class SelectAlbumState(
     val selectedAlbums: PersistentList<AlbumPreview> = persistentListOf(),
     val isShowAddAlbumBottomSheet: Boolean = false,
     val albumNameTextState: TextFieldState = TextFieldState(),
+    val disabledAlbumId: Long? = null,
 ) {
     val isConfirmEnabled: Boolean
         get() = selectedAlbums.isNotEmpty() && !isUploading
