@@ -18,12 +18,11 @@ sealed interface SelectAlbumAction {
     @Serializable
     data class MovePhotos(
         val photoIds: List<Long>,
-        val showActionToast: Boolean = false,
+        val sourceFolderId: Long,
     ) : SelectAlbumAction
 
     @Serializable
     data class CopyPhotos(
         val photoIds: List<Long>,
-        val sourceFolderId: Long? = null,
     ) : SelectAlbumAction
 }

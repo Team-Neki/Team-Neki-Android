@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CopyPhotosRequest(
-    @SerialName("sourceFolderId") val sourceFolderId: Long?,
     @SerialName("photoIds") val photoIds: List<Long>,
     @SerialName("targetFolderIds") val targetFolderIds: List<Long>,
 )

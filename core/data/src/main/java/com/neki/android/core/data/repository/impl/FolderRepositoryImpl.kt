@@ -46,15 +46,15 @@ class FolderRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun movePhotos(photoIds: List<Long>, targetFolderIds: List<Long>): Result<Unit> = runSuspendCatching {
+    override suspend fun movePhotos(sourceFolderId: Long, photoIds: List<Long>, targetFolderIds: List<Long>): Result<Unit> = runSuspendCatching {
         folderService.movePhotos(
-            requestBody = MovePhotosRequest(photoIds = photoIds, targetFolderIds = targetFolderIds),
+            requestBody = MovePhotosRequest(sourceFolderId = sourceFolderId, photoIds = photoIds, targetFolderIds = targetFolderIds),
         )
     }
 
-    override suspend fun copyPhotos(sourceFolderId: Long?, photoIds: List<Long>, targetFolderIds: List<Long>): Result<Unit> = runSuspendCatching {
+    override suspend fun copyPhotos(photoIds: List<Long>, targetFolderIds: List<Long>): Result<Unit> = runSuspendCatching {
         folderService.copyPhotos(
-            requestBody = CopyPhotosRequest(sourceFolderId = sourceFolderId, photoIds = photoIds, targetFolderIds = targetFolderIds),
+            requestBody = CopyPhotosRequest(photoIds = photoIds, targetFolderIds = targetFolderIds),
         )
     }
 }

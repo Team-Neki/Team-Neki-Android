@@ -138,7 +138,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 }
                 postSideEffect(
                     AlbumDetailSideEffect.NavigateToSelectAlbum(
-                        SelectAlbumAction.CopyPhotos(photoIds = photoIds, sourceFolderId = albumId),
+                        SelectAlbumAction.CopyPhotos(photoIds = photoIds),
                     ),
                 )
             }
@@ -150,7 +150,10 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 }
                 postSideEffect(
                     AlbumDetailSideEffect.NavigateToSelectAlbum(
-                        SelectAlbumAction.MovePhotos(photoIds = photoIds, showActionToast = false),
+                        SelectAlbumAction.MovePhotos(
+                            photoIds = photoIds,
+                            sourceFolderId = albumId,
+                        ),
                     ),
                 )
             }

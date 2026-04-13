@@ -17,7 +17,7 @@ sealed interface SelectAlbumNavKey : NavKey {
 fun MainNavigator.navigateToSelectAlbum(
     action: SelectAlbumAction,
     title: String = "모든 앨범",
-    multiSelect: Boolean = true,
+    multiSelect: Boolean = false,
 ) {
     navigate(SelectAlbumNavKey.SelectAlbum(title, multiSelect, action))
 }
