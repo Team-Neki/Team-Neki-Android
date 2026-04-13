@@ -1,4 +1,4 @@
-package com.neki.android.feature.select_album.impl
+package com.neki.android.feature.select_album.impl.component
 
 import androidx.compose.runtime.Composable
 import com.neki.android.core.designsystem.DevicePreview

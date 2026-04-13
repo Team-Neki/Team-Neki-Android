@@ -39,6 +39,7 @@ import com.neki.android.core.ui.component.FavoriteAlbumRowComponent
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.select_album.impl.component.SelectAlbumTopBar
 import kotlinx.collections.immutable.persistentListOf
 
 private const val ALBUM_NAME_MAX_LENGTH = 10
@@ -61,6 +62,7 @@ internal fun SelectAlbumRoute(
                 navigateBack()
                 navigateToAlbumDetail(sideEffect.album.id, sideEffect.album.title)
             }
+
             is SelectAlbumSideEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
         }
     }
