@@ -8,8 +8,8 @@ sealed interface SelectAlbumNavKey : NavKey {
 
     @Serializable
     data class SelectAlbum(
-        val title: String = "모든 앨범",
-        val multiSelect: Boolean = true,
+        val title: String,
+        val multiSelect: Boolean,
         val action: SelectAlbumAction,
     ) : SelectAlbumNavKey
 }
