@@ -66,7 +66,6 @@ class SelectAlbumViewModel @AssistedInject constructor(
             SelectAlbumIntent.EnterSelectAlbumScreen -> fetchInitialData(reduce)
             SelectAlbumIntent.ClickBackIcon -> postSideEffect(SelectAlbumSideEffect.NavigateBack)
             SelectAlbumIntent.ClickConfirmButton -> {
-                if (state.isUploading) return
                 val album = state.selectedAlbums.firstOrNull() ?: return
                 performUpload(album, reduce, postSideEffect)
             }
