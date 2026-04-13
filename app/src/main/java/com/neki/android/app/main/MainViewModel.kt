@@ -40,10 +40,12 @@ class MainViewModel @Inject constructor(
                 reduce { copy(isShowAddPhotoBottomSheet = false) }
                 postSideEffect(MainSideEffect.NavigateToQRScan)
             }
+
             MainIntent.ClickGalleryUpload -> {
                 reduce { copy(isShowAddPhotoBottomSheet = false) }
                 postSideEffect(MainSideEffect.OpenGallery)
             }
+
             is MainIntent.SelectGalleryImage -> reduce { copy(isShowSelectWithAlbumDialog = true, selectedUris = intent.uris.toImmutableList()) }
             is MainIntent.ShareImageReceived -> reduce { copy(isShowSelectWithAlbumDialog = true, selectedUris = intent.uris.toImmutableList()) }
             is MainIntent.QRCodeScanned -> reduce { copy(scannedImageUrl = intent.imageUrl, isShowSelectWithAlbumDialog = true) }
@@ -54,6 +56,7 @@ class MainViewModel @Inject constructor(
                     scannedImageUrl = null,
                 )
             }
+
             MainIntent.ClickUploadWithAlbum -> {
                 val action = if (state.scannedImageUrl != null) {
                     SelectAlbumAction.UploadFromQR(imageUrl = state.scannedImageUrl)
@@ -71,12 +74,21 @@ class MainViewModel @Inject constructor(
                 }
                 postSideEffect(MainSideEffect.NavigateToSelectAlbum(action))
             }
+
             MainIntent.ClickUploadWithoutAlbum -> {
                 reduce { copy(isShowSelectWithAlbumDialog = false) }
                 if (state.scannedImageUrl != null) {
-                    uploadSingleImage(state.scannedImageUrl, reduce = reduce, postSideEffect = postSideEffect)
+                    uploadSingleImage(
+                        imageUrl = state.scannedImageUrl,
+                        reduce = reduce,
+                        postSideEffect = postSideEffect,
+                    )
                 } else {
-                    uploadMultipleImages(state.selectedUris, reduce = reduce, postSideEffect = postSideEffect)
+                    uploadMultipleImages(
+                        imageUris = state.selectedUris,
+                        reduce = reduce,
+                        postSideEffect = postSideEffect,
+                    )
                 }
             }
         }
