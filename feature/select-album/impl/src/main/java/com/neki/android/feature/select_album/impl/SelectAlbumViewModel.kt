@@ -74,10 +74,12 @@ class SelectAlbumViewModel @AssistedInject constructor(
                 if (albums.isEmpty()) return
                 performAction(albums, reduce, postSideEffect)
             }
+
             is SelectAlbumIntent.ClickAlbumItem -> handleAlbumClick(intent.album, state, reduce)
             SelectAlbumIntent.ClickCreateAlbumButton -> reduce {
                 copy(isShowAddAlbumBottomSheet = true, albumNameTextState = TextFieldState())
             }
+
             SelectAlbumIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
             SelectAlbumIntent.ClickAddAlbumConfirmButton -> handleAddAlbum(
                 albumName = state.albumNameTextState.text.toString(),
@@ -100,57 +102,54 @@ class SelectAlbumViewModel @AssistedInject constructor(
                 is SelectAlbumAction.UploadFromQR -> {
                     uploadSinglePhotoUseCase(imageUrl = action.imageUrl, folderId = albums.first().id)
                 }
+
                 is SelectAlbumAction.UploadFromGallery -> {
                     uploadMultiplePhotoUseCase(
                         imageUris = action.imageUriStrings.map { it.toUri() },
                         folderId = albums.first().id,
                     )
                 }
+
                 is SelectAlbumAction.MovePhotos -> {
                     folderRepository.movePhotos(
+                        sourceFolderId = action.sourceFolderId,
                         photoIds = action.photoIds,
                         targetFolderIds = targetFolderIds,
                     )
                 }
+
                 is SelectAlbumAction.CopyPhotos -> {
                     folderRepository.copyPhotos(
-                        sourceFolderId = action.sourceFolderId,
                         photoIds = action.photoIds,
                         targetFolderIds = targetFolderIds,
                     )
                 }
             }
 
-            result
-                .onSuccess {
-                    reduce { copy(isUploading = false) }
-                    when (action) {
-                        is SelectAlbumAction.UploadFromQR,
-                        is SelectAlbumAction.UploadFromGallery,
-                        -> {
-                            postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
-                            postSideEffect(SelectAlbumSideEffect.SendUploadResult(albums.first()))
-                        }
-                        is SelectAlbumAction.MovePhotos -> {
-                            if (action.showActionToast) {
-                                postSideEffect(SelectAlbumSideEffect.ShowActionToast("앨범에 추가했어요", albums.first()))
-                            } else {
-                                postSideEffect(SelectAlbumSideEffect.ShowToastMessage("앨범으로 이동했어요"))
-                                postSideEffect(SelectAlbumSideEffect.NavigateBack)
-                                postSideEffect(SelectAlbumSideEffect.SendPhotoMovedResult)
-                            }
-                        }
-                        is SelectAlbumAction.CopyPhotos -> {
-                            postSideEffect(SelectAlbumSideEffect.ShowToastMessage("앨범에 복제했어요"))
-                            postSideEffect(SelectAlbumSideEffect.NavigateBack)
-                        }
+            result.onSuccess {
+                reduce { copy(isUploading = false) }
+                when (action) {
+                    is SelectAlbumAction.UploadFromQR, is SelectAlbumAction.UploadFromGallery -> {
+                        postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
+                        postSideEffect(SelectAlbumSideEffect.SendUploadResult(albums.first()))
+                    }
+
+                    is SelectAlbumAction.MovePhotos -> {
+                        postSideEffect(SelectAlbumSideEffect.SendPhotoMovedResult)
+                        postSideEffect(SelectAlbumSideEffect.NavigateBack)
+                    }
+
+                    is SelectAlbumAction.CopyPhotos -> {
+                        postSideEffect(SelectAlbumSideEffect.SendPhotoCopiedResult(targetFolderIds))
+                        postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
+                        postSideEffect(SelectAlbumSideEffect.NavigateBack)
                     }
                 }
-                .onFailure { e ->
-                    Timber.e(e)
-                    reduce { copy(isUploading = false) }
-                    postSideEffect(SelectAlbumSideEffect.ShowToastMessage("작업에 실패했어요"))
-                }
+            }.onFailure { e ->
+                Timber.e(e)
+                reduce { copy(isUploading = false) }
+                postSideEffect(SelectAlbumSideEffect.ShowToastMessage("작업에 실패했어요"))
+            }
         }
     }
 
