@@ -52,6 +52,8 @@ sealed interface PhotoDetailIntent {
     data class ClickMemoDone(val memo: String) : PhotoDetailIntent
     data object ClickDeleteIcon : PhotoDetailIntent
 
+    data class PhotoCopied(val albumId: Long) : PhotoDetailIntent
+
     // Delete Dialog Intent
     data object DismissDeleteDialog : PhotoDetailIntent
     data object ClickDeleteDialogCancelButton : PhotoDetailIntent
@@ -65,4 +67,5 @@ sealed interface PhotoDetailSideEffect {
     data class DownloadImage(val imageUrl: String) : PhotoDetailSideEffect
     data class AnimateToPage(val index: Int) : PhotoDetailSideEffect
     data class NavigateToSelectAlbum(val photoId: Long) : PhotoDetailSideEffect
+    data class ShowActionToast(val albumId: Long) : PhotoDetailSideEffect
 }

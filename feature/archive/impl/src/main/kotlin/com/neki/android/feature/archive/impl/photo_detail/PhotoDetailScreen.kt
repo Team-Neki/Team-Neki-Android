@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleOptionTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.designsystem.R as DesignR
 import com.neki.android.core.model.Photo
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.DropdownPopup
@@ -49,6 +50,7 @@ internal fun PhotoDetailRoute(
     viewModel: PhotoDetailViewModel,
     navigateBack: () -> Unit,
     navigateToSelectAlbum: (Long) -> Unit,
+    navigateToAlbumDetail: (Long, String) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -88,6 +90,12 @@ internal fun PhotoDetailRoute(
                 )
             }
             is PhotoDetailSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.photoId)
+            is PhotoDetailSideEffect.ShowActionToast -> nekiToast.showActionToast(
+                iconRes = DesignR.drawable.icon_checkbox_on,
+                text = "사진을 앨범에 추가했어요",
+                buttonText = "앨범으로",
+                onClickActionButton = { navigateToAlbumDetail(sideEffect.albumId, "") },
+            )
         }
     }
 
