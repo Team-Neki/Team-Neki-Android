@@ -20,6 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -98,33 +101,61 @@ internal fun ImportPhotoBottomSheet(
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
-                LazyVerticalGrid(
-                    modifier = Modifier.fillMaxSize(),
-                    columns = GridCells.Fixed(3),
-                    contentPadding = PaddingValues(2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    items(uiState.photos, key = { it.id }) { photo ->
-                        ImportPhotoGridItem(
-                            photo = photo,
-                            isSelected = photo.id in uiState.selectedPhotoIds,
-                            onToggleSelect = { onIntent(AlbumDetailIntent.ToggleImportPhoto(photo.id)) },
+                if (uiState.photos.isEmpty()) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .background(
+                                    color = NekiTheme.colorScheme.gray200,
+                                    shape = RoundedCornerShape(8.dp),
+                                ),
+                        )
+                        Text(
+                            text = "아직 등록된 사진이 없어요",
+                            style = NekiTheme.typography.body16Medium,
+                            color = NekiTheme.colorScheme.gray500,
+                        )
+                    }
+                } else {
+                    val gridState = rememberLazyGridState()
+                    val isAtBottom by remember { derivedStateOf { !gridState.canScrollForward } }
+
+                    LazyVerticalGrid(
+                        state = gridState,
+                        modifier = Modifier.fillMaxSize(),
+                        columns = GridCells.Fixed(3),
+                        contentPadding = PaddingValues(2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        items(uiState.photos, key = { it.id }) { photo ->
+                            ImportPhotoGridItem(
+                                photo = photo,
+                                isSelected = photo.id in uiState.selectedPhotoIds,
+                                onToggleSelect = { onIntent(AlbumDetailIntent.ToggleImportPhoto(photo.id)) },
+                            )
+                        }
+                    }
+
+                    if (!isAtBottom) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(197.dp)
+                                .align(Alignment.BottomCenter)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(Color.Transparent, NekiTheme.colorScheme.white),
+                                    ),
+                                ),
                         )
                     }
                 }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(197.dp)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, NekiTheme.colorScheme.white),
-                            ),
-                        ),
-                )
             }
 
             NekiButton(
