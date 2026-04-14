@@ -189,7 +189,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
             navigateBack = navigator::goBack,
             navigateToSelectAlbum = { photoId ->
                 navigator.navigateToSelectAlbum(
-                    action = SelectAlbumAction.CopyPhotos(listOf(photoId)),
+                    action = SelectAlbumAction.CopyPhotos(listOf(photoId), false),
                     title = "모든 앨범",
                     multiSelect = false,
                 )

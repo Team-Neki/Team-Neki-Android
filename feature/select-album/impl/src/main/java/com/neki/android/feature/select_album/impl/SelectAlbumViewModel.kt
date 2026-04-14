@@ -136,13 +136,16 @@ class SelectAlbumViewModel @AssistedInject constructor(
                     }
 
                     is SelectAlbumAction.MovePhotos -> {
+                        postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 이동했어요"))
                         postSideEffect(SelectAlbumSideEffect.SendPhotoMovedResult)
                         postSideEffect(SelectAlbumSideEffect.NavigateBack)
                     }
 
                     is SelectAlbumAction.CopyPhotos -> {
+                        if (action.withShowToast) {
+                            postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
+                        }
                         postSideEffect(SelectAlbumSideEffect.SendPhotoCopiedResult(targetFolderIds))
-                        postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
                         postSideEffect(SelectAlbumSideEffect.NavigateBack)
                     }
                 }
