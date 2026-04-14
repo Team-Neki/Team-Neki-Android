@@ -89,6 +89,7 @@ internal fun PhotoDetailRoute(
                     animationSpec = spring(),
                 )
             }
+
             is PhotoDetailSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.photoId)
             is PhotoDetailSideEffect.ShowActionToast -> nekiToast.showActionToast(
                 iconRes = DesignR.drawable.icon_checkbox_on,

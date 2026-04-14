@@ -105,15 +105,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 }
             }
 
-            AlbumDetailIntent.ClickAddPhotoOption -> {
-                reduce { copy(isShowOptionPopup = false) }
-                if (isFavoriteAlbum) {
-                    postSideEffect(AlbumDetailSideEffect.OpenGallery)
-                } else {
-                    reduce { copy(isShowImportPhotoBottomSheet = true, importPhotoState = ImportPhotoState(currentAlbumId = albumId)) }
-                    loadImportAlbumsAndPhotos(reduce)
-                }
-            }
+            AlbumDetailIntent.ClickAddPhotoOption -> handleAddPhoto(reduce, postSideEffect)
 
             AlbumDetailIntent.DismissImportPhotoBottomSheet -> {
                 reduce { copy(isShowImportPhotoBottomSheet = false, importPhotoState = ImportPhotoState()) }
@@ -132,16 +124,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 reduce { copy(importPhotoState = importPhotoState.copy(isShowAlbumDropdown = false)) }
             }
 
-            is AlbumDetailIntent.ToggleImportPhoto -> {
-                reduce {
-                    val newIds = if (intent.photoId in importPhotoState.selectedPhotoIds) {
-                        importPhotoState.selectedPhotoIds - intent.photoId
-                    } else {
-                        importPhotoState.selectedPhotoIds + intent.photoId
-                    }
-                    copy(importPhotoState = importPhotoState.copy(selectedPhotoIds = newIds.toImmutableSet()))
-                }
-            }
+            is AlbumDetailIntent.ToggleImportPhoto -> handleToggleImportPhoto(intent.photoId, reduce)
 
             AlbumDetailIntent.ConfirmImport -> handleConfirmImport(state, reduce, postSideEffect)
 
@@ -165,34 +148,8 @@ class AlbumDetailViewModel @AssistedInject constructor(
             is AlbumDetailIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, intent.index, state, reduce, postSideEffect)
 
             AlbumDetailIntent.ClickDownloadIcon -> handleDownload(state, postSideEffect)
-            AlbumDetailIntent.ClickCopyIcon -> {
-                val photoIds = state.selectedPhotos.map { it.id }
-                if (photoIds.isEmpty()) {
-                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
-                    return
-                }
-                postSideEffect(
-                    AlbumDetailSideEffect.NavigateToSelectAlbum(
-                        SelectAlbumAction.CopyPhotos(photoIds = photoIds),
-                    ),
-                )
-            }
-
-            AlbumDetailIntent.ClickMoveIcon -> {
-                val photoIds = state.selectedPhotos.map { it.id }
-                if (photoIds.isEmpty()) {
-                    postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
-                    return
-                }
-                postSideEffect(
-                    AlbumDetailSideEffect.NavigateToSelectAlbum(
-                        SelectAlbumAction.MovePhotos(
-                            photoIds = photoIds,
-                            sourceFolderId = albumId,
-                        ),
-                    ),
-                )
-            }
+            AlbumDetailIntent.ClickCopyIcon -> handleCopyIcon(state, postSideEffect)
+            AlbumDetailIntent.ClickMoveIcon -> handleMoveIcon(state, postSideEffect)
 
             AlbumDetailIntent.ClickDeleteIcon -> handleDeleteIconClick(state, reduce, postSideEffect)
 
@@ -215,21 +172,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
             }
 
-            is AlbumDetailIntent.ClickFavoriteIcon -> {
-                val photo = intent.photo
-                val newFavorite = !photo.isFavorite
-                updatedFavorites.update { it + (photo.id to newFavorite) }
-                viewModelScope.launch {
-                    photoRepository.updateFavorite(photo.id, newFavorite)
-                        .onSuccess {
-                            postSideEffect(AlbumDetailSideEffect.NotifyResult)
-                        }
-                        .onFailure { e ->
-                            Timber.e(e)
-                            updatedFavorites.update { it + (photo.id to photo.isFavorite) }
-                        }
-                }
-            }
+            is AlbumDetailIntent.ClickFavoriteIcon -> handleFavoriteIcon(intent.photo, postSideEffect)
 
             AlbumDetailIntent.DismissRenameBottomSheet -> reduce {
                 copy(isShowRenameAlbumBottomSheet = false, renameAlbumTextState = TextFieldState())
@@ -254,6 +197,86 @@ class AlbumDetailViewModel @AssistedInject constructor(
             }
 
             AlbumDetailIntent.ClickDeleteAlbumConfirmButton -> handleDeleteAlbum(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun handleAddPhoto(
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        reduce { copy(isShowOptionPopup = false) }
+        if (isFavoriteAlbum) {
+            postSideEffect(AlbumDetailSideEffect.OpenGallery)
+        } else {
+            reduce { copy(isShowImportPhotoBottomSheet = true, importPhotoState = ImportPhotoState(currentAlbumId = albumId)) }
+            loadImportAlbumsAndPhotos(reduce)
+        }
+    }
+
+    private fun handleToggleImportPhoto(
+        photoId: Long,
+        reduce: (AlbumDetailState.() -> AlbumDetailState) -> Unit,
+    ) {
+        reduce {
+            val newIds = if (photoId in importPhotoState.selectedPhotoIds) {
+                importPhotoState.selectedPhotoIds - photoId
+            } else {
+                importPhotoState.selectedPhotoIds + photoId
+            }
+            copy(importPhotoState = importPhotoState.copy(selectedPhotoIds = newIds.toImmutableSet()))
+        }
+    }
+
+    private fun handleCopyIcon(
+        state: AlbumDetailState,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        val photoIds = state.selectedPhotos.map { it.id }
+        if (photoIds.isEmpty()) {
+            postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
+            return
+        }
+        postSideEffect(
+            AlbumDetailSideEffect.NavigateToSelectAlbum(
+                SelectAlbumAction.CopyPhotos(photoIds = photoIds),
+            ),
+        )
+    }
+
+    private fun handleMoveIcon(
+        state: AlbumDetailState,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        val photoIds = state.selectedPhotos.map { it.id }
+        if (photoIds.isEmpty()) {
+            postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 선택해주세요."))
+            return
+        }
+        postSideEffect(
+            AlbumDetailSideEffect.NavigateToSelectAlbum(
+                SelectAlbumAction.MovePhotos(
+                    photoIds = photoIds,
+                    sourceFolderId = albumId,
+                ),
+            ),
+        )
+    }
+
+    private fun handleFavoriteIcon(
+        photo: Photo,
+        postSideEffect: (AlbumDetailSideEffect) -> Unit,
+    ) {
+        val newFavorite = !photo.isFavorite
+        updatedFavorites.update { it + (photo.id to newFavorite) }
+        viewModelScope.launch {
+            photoRepository.updateFavorite(photo.id, newFavorite)
+                .onSuccess {
+                    postSideEffect(AlbumDetailSideEffect.NotifyResult)
+                }
+                .onFailure { e ->
+                    Timber.e(e)
+                    updatedFavorites.update { it + (photo.id to photo.isFavorite) }
+                }
         }
     }
 
