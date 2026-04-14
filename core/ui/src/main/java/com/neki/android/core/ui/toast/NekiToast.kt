@@ -75,7 +75,7 @@ class NekiToast(
     }
 
     fun showActionToast(
-        @DrawableRes iconRes: Int,
+        @DrawableRes iconRes: Int = R.drawable.icon_checkbox_on,
         text: String,
         buttonText: String,
         onClickActionButton: () -> Unit,
