@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
@@ -32,6 +33,7 @@ fun <T> DropdownPopup(
     itemLabel: (T) -> String,
     modifier: Modifier = Modifier,
     disabledIndex: ImmutableList<Int>? = null,
+    itemTextColor: ((T) -> Color)? = null,
     offset: IntOffset = IntOffset.Zero,
     alignment: Alignment = Alignment.TopStart,
 ) {
@@ -63,8 +65,11 @@ fun <T> DropdownPopup(
                         .padding(horizontal = 12.dp, vertical = 5.dp),
                     text = itemLabel(item),
                     style = NekiTheme.typography.body16Medium,
-                    color = if (isDisabled) NekiTheme.colorScheme.gray200
-                    else NekiTheme.colorScheme.gray900,
+                    color = when {
+                        isDisabled -> NekiTheme.colorScheme.gray200
+                        itemTextColor != null -> itemTextColor(item)
+                        else -> NekiTheme.colorScheme.gray900
+                    },
                 )
             }
         }

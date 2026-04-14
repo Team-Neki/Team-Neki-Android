@@ -71,6 +71,8 @@ internal fun AlbumDetailTopBar(
         val density = LocalDensity.current
         val popupOffsetX = with(density) { (-20).dp.toPx().toInt() }
         val popupOffsetY = with(density) { 54.dp.toPx().toInt() }
+        val deleteColor = NekiTheme.colorScheme.primary600
+        val normalColor = NekiTheme.colorScheme.gray900
 
         if (isFavoriteAlbum) {
             DropdownPopup(
@@ -102,6 +104,10 @@ internal fun AlbumDetailTopBar(
                 },
                 onDismissRequest = onDismissPopup,
                 itemLabel = { it.label },
+                itemTextColor = { item ->
+                    if (item == CustomOptionItem.DELETE_ALBUM) deleteColor
+                    else normalColor
+                },
                 modifier = Modifier.width(120.dp),
                 offset = IntOffset(x = popupOffsetX, y = popupOffsetY),
                 alignment = Alignment.TopEnd,
