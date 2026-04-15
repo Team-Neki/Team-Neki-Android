@@ -100,11 +100,11 @@ class NekiToast(
     }
 
     fun showActionToast(
-        @DrawableRes iconRes: Int = R.drawable.icon_checkbox_on,
         text: String,
         buttonText: String,
-        onClickActionButton: () -> Unit,
+        @DrawableRes iconRes: Int = R.drawable.icon_checkbox_on,
         duration: Int = Toast.LENGTH_SHORT,
+        onClickActionButton: () -> Unit,
     ) {
         makeToast(duration = duration) { dismiss ->
             NekiActionToast(
