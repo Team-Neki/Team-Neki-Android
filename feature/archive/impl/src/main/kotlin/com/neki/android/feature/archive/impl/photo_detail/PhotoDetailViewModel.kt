@@ -172,7 +172,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             }
 
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
-            is PhotoDetailIntent.PhotoCopied -> postSideEffect(PhotoDetailSideEffect.ShowActionToast(intent.albumId))
+            is PhotoDetailIntent.PhotoCopied -> postSideEffect(PhotoDetailSideEffect.ShowActionToast(intent.albumId, intent.albumTitle))
 
             // Delete Dialog Intent
             PhotoDetailIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }

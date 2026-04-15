@@ -180,7 +180,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         )
 
         ResultEffect<PhotoCopiedResult>(resultBus) { result ->
-            viewModel.store.onIntent(PhotoDetailIntent.PhotoCopied(result.albumIds.first()))
+            viewModel.store.onIntent(PhotoDetailIntent.PhotoCopied(result.albumIds.first(), result.albumTitles.firstOrNull().orEmpty()))
             resultBus.sendResult(result = PhotoDetailResult, allowDuplicate = false)
         }
 

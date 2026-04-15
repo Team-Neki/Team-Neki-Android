@@ -145,7 +145,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
                         if (action.withShowToast) {
                             postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
                         }
-                        postSideEffect(SelectAlbumSideEffect.SendPhotoCopiedResult(targetFolderIds))
+                        postSideEffect(SelectAlbumSideEffect.SendPhotoCopiedResult(targetFolderIds, albums.map { it.title }))
                         postSideEffect(SelectAlbumSideEffect.NavigateBack)
                     }
                 }

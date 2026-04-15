@@ -14,4 +14,4 @@ data object PhotoUploadedResult : ArchiveResult
 
 data object PhotoMovedResult : ArchiveResult
 
-data class PhotoCopiedResult(val albumIds: List<Long>) : ArchiveResult
+data class PhotoCopiedResult(val albumIds: List<Long>, val albumTitles: List<String>) : ArchiveResult

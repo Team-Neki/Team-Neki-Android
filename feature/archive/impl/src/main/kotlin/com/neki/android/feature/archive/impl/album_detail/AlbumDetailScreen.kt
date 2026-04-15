@@ -127,7 +127,7 @@ internal fun AlbumDetailRoute(
             is AlbumDetailSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.action)
             is AlbumDetailSideEffect.PhotoImported -> {
                 resultEventBus.sendResult(
-                    result = PhotoCopiedResult(albumIds = listOf(sideEffect.albumId)),
+                    result = PhotoCopiedResult(albumIds = listOf(sideEffect.albumId), albumTitles = emptyList()),
                 )
                 viewModel.store.onIntent(AlbumDetailIntent.RefreshPhotos)
             }

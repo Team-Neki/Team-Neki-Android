@@ -91,12 +91,10 @@ internal fun PhotoDetailRoute(
             }
 
             is PhotoDetailSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.photoId)
-            // TODO: 액션 버튼 기능 구현
-            is PhotoDetailSideEffect.ShowActionToast -> nekiToast.showToast(
-                iconRes = DesignR.drawable.icon_checkbox_on,
+            is PhotoDetailSideEffect.ShowActionToast -> nekiToast.showActionToast(
                 text = "사진을 앨범에 추가했어요",
-//                buttonText = "앨범으로",
-//                onClickActionButton = { navigateToAlbumDetail(sideEffect.albumId, "") },
+                buttonText = "앨범으로",
+                onClickActionButton = { navigateToAlbumDetail(sideEffect.albumId, sideEffect.albumTitle) },
             )
         }
     }
