@@ -80,7 +80,7 @@ private fun AddPhotoBottomSheetContent(
                 onClick = onClickQRScan,
             )
             AddPhotoOptionButton(
-                iconRes = R.drawable.icon_copy_photo,
+                iconRes = R.drawable.icon_add_photo_gallery,
                 label = "갤러리에서 추가",
                 onClick = onClickGallery,
             )
