@@ -29,7 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.topbar.BackTitleOptionTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.designsystem.R as DesignR
 import com.neki.android.core.model.Photo
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.DropdownPopup
