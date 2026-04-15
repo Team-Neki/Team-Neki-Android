@@ -73,6 +73,7 @@ class NekiToast(
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT,
         ).apply {
+            windowAnimations = android.R.style.Animation_Toast
             gravity = Gravity.BOTTOM or Gravity.FILL_HORIZONTAL
             y = (28 * Resources.getSystem().displayMetrics.density).toInt()
         }
