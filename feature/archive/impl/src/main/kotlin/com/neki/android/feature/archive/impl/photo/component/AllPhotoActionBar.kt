@@ -22,7 +22,6 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.actionbar.NekiActionBar
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.archive.impl.R
 import com.neki.android.core.designsystem.R as DesignR
 
 @Composable
@@ -52,7 +51,7 @@ internal fun AllPhotoActionBar(
                 modifier = Modifier.width(48.dp),
             )
             ActionBarItem(
-                iconRes = R.drawable.icon_copy_photo,
+                iconRes = DesignR.drawable.icon_copy_photo,
                 label = "사진 복제",
                 isEnabled = isEnabled,
                 onClick = onClickCopy,
