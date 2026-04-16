@@ -108,10 +108,6 @@ class AllPhotoViewModel @Inject constructor(
             AllPhotoIntent.ClickDownloadIcon -> downloadSelectedPhotos(state, postSideEffect)
             AllPhotoIntent.ClickCopyIcon -> {
                 val photoIds = state.selectedPhotos.map { it.id }
-                if (photoIds.isEmpty()) {
-                    postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 선택해주세요."))
-                    return
-                }
                 postSideEffect(AllPhotoSideEffect.NavigateToSelectAlbum(photoIds))
             }
             AllPhotoIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
