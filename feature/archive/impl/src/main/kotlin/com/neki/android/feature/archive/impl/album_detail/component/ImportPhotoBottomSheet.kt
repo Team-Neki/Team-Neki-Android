@@ -6,23 +6,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +26,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +35,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,24 +61,16 @@ internal fun ImportPhotoBottomSheet(
     uiState: ImportPhotoState,
     onIntent: (AlbumDetailIntent) -> Unit,
 ) {
-    val configuration = LocalConfiguration.current
-    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val navigationBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
-    val sheetHeight = remember {
-        configuration.screenHeightDp.dp - statusBarHeight - navigationBarHeight
-    }
-
     ModalBottomSheet(
+        modifier = Modifier.statusBarsPadding(),
         onDismissRequest = { onIntent(AlbumDetailIntent.DismissImportPhotoBottomSheet) },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         dragHandle = { BottomSheetDragHandle() },
         containerColor = NekiTheme.colorScheme.white,
-        contentWindowInsets = { WindowInsets() },
     ) {
         Column(
             modifier = Modifier
-                .height(sheetHeight)
+                .fillMaxHeight()
                 .navigationBarsPadding()
                 .fillMaxWidth(),
         ) {
@@ -160,9 +149,9 @@ internal fun ImportPhotoBottomSheet(
 
             NekiButton(
                 modifier = Modifier
-                    .width(335.dp)
+                    .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
-                    .padding(vertical = 16.dp),
+                    .padding(bottom = 28.dp, start = 20.dp, end = 20.dp),
                 enabled = uiState.selectedPhotoIds.isNotEmpty(),
                 onClick = { onIntent(AlbumDetailIntent.ConfirmImport) },
                 shape = RoundedCornerShape(12.dp),
