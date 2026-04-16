@@ -3,7 +3,6 @@ package com.neki.android.feature.archive.impl.album_detail.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -39,7 +38,6 @@ internal fun FavoriteAlbumActionBar(
                 NekiIconButton(
                     enabled = isEnabled,
                     onClick = onClickDownload,
-                    contentPadding = PaddingValues(20.dp),
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),
@@ -52,7 +50,6 @@ internal fun FavoriteAlbumActionBar(
                 NekiIconButton(
                     enabled = isEnabled,
                     onClick = onClickDelete,
-                    contentPadding = PaddingValues(20.dp),
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),
