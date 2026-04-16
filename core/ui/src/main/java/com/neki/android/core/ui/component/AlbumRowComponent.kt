@@ -81,8 +81,7 @@ fun AlbumRowComponent(
             modifier = Modifier.weight(1f),
             title = album.title,
             photoCount = album.photoCount,
-            titleColor = if (isDisabled) NekiTheme.colorScheme.gray300 else NekiTheme.colorScheme.gray900,
-            countColor = if (isDisabled) NekiTheme.colorScheme.gray200 else NekiTheme.colorScheme.gray500,
+            isDisabled = isDisabled,
         )
 
         if (isSelectable) {
@@ -187,8 +186,7 @@ private fun AlbumInfo(
     title: String,
     photoCount: Int,
     modifier: Modifier = Modifier,
-    titleColor: Color = NekiTheme.colorScheme.gray900,
-    countColor: Color = NekiTheme.colorScheme.gray500,
+    isDisabled: Boolean = false,
 ) {
     Column(
         modifier = modifier,
@@ -197,13 +195,13 @@ private fun AlbumInfo(
         Text(
             text = title,
             style = NekiTheme.typography.body16SemiBold,
-            color = titleColor,
+            color = if (isDisabled) NekiTheme.colorScheme.gray300 else NekiTheme.colorScheme.gray900,
         )
 
         Text(
             text = "${photoCount}장",
             style = NekiTheme.typography.caption12Medium,
-            color = countColor,
+            color = if (isDisabled) NekiTheme.colorScheme.gray200 else NekiTheme.colorScheme.gray500,
         )
     }
 }
