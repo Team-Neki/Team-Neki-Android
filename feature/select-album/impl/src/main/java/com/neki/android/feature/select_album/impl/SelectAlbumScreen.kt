@@ -71,7 +71,7 @@ internal fun SelectAlbumRoute(
             }
 
             is SelectAlbumSideEffect.SendPhotoCopiedResult -> {
-                resultEventBus.sendResult(result = PhotoCopiedResult(sideEffect.albumIds, sideEffect.albumTitles), allowDuplicate = false)
+                resultEventBus.sendResult(result = PhotoCopiedResult(sideEffect.albumIds, sideEffect.albumTitle), allowDuplicate = false)
             }
 
             is SelectAlbumSideEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)

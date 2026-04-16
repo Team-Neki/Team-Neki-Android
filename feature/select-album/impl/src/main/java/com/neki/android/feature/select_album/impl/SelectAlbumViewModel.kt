@@ -8,7 +8,6 @@ import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
-import kotlinx.collections.immutable.ImmutableList
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -17,6 +16,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -70,9 +70,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
             SelectAlbumIntent.EnterSelectAlbumScreen -> fetchInitialData(reduce)
             SelectAlbumIntent.ClickBackIcon -> postSideEffect(SelectAlbumSideEffect.NavigateBack)
             SelectAlbumIntent.ClickConfirmButton -> {
-                if (state.isUploading) return
                 val albums = state.selectedAlbums
-                if (albums.isEmpty()) return
                 performAction(albums, reduce, postSideEffect)
             }
 
@@ -145,7 +143,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
                         if (action.withShowToast) {
                             postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
                         }
-                        postSideEffect(SelectAlbumSideEffect.SendPhotoCopiedResult(targetFolderIds, albums.map { it.title }))
+                        postSideEffect(SelectAlbumSideEffect.SendPhotoCopiedResult(targetFolderIds, albums.first().title))
                         postSideEffect(SelectAlbumSideEffect.NavigateBack)
                     }
                 }
