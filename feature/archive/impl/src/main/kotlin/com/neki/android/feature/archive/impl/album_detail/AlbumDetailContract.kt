@@ -15,7 +15,6 @@ data class AlbumFilterOption(val id: Long?, val title: String, val photoCount: I
 
 data class ImportPhotoState(
     val isLoading: Boolean = false,
-    val photos: ImmutableList<Photo> = persistentListOf(),
     val selectedAlbumId: Long? = null,
     val selectedPhotoIds: ImmutableSet<Long> = persistentSetOf(),
     val isShowAlbumDropdown: Boolean = false,

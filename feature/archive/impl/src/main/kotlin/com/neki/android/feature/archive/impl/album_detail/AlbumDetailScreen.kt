@@ -63,6 +63,7 @@ import com.neki.android.feature.archive.impl.util.ImageDownloader
 import com.neki.android.feature.select_album.api.SelectAlbumAction
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
 
@@ -137,6 +138,7 @@ internal fun AlbumDetailRoute(
     AlbumDetailScreen(
         uiState = uiState,
         pagingItems = pagingItems,
+        importPhotoPagingData = viewModel.importPhotoPagingData,
         onIntent = viewModel.store::onIntent,
     )
 }
@@ -146,6 +148,7 @@ internal fun AlbumDetailRoute(
 internal fun AlbumDetailScreen(
     uiState: AlbumDetailState,
     pagingItems: LazyPagingItems<Photo>,
+    importPhotoPagingData: Flow<PagingData<Photo>>,
     onIntent: (AlbumDetailIntent) -> Unit = {},
 ) {
     val lazyState = rememberLazyStaggeredGridState()
@@ -259,8 +262,10 @@ internal fun AlbumDetailScreen(
     }
 
     if (uiState.isShowImportPhotoBottomSheet) {
+        val importPagingItems = importPhotoPagingData.collectAsLazyPagingItems()
         ImportPhotoBottomSheet(
             uiState = uiState.importPhotoState,
+            pagingItems = importPagingItems,
             onIntent = onIntent,
         )
     }
@@ -373,6 +378,7 @@ private fun AlbumDetailScreenPreview() {
                 title = "앨범 상세",
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }
@@ -389,6 +395,7 @@ private fun AlbumDetailScreenEmptyPreview() {
                 title = "빈 앨범",
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }
@@ -415,6 +422,7 @@ private fun AlbumDetailScreenFavoritePreview() {
                 isFavoriteAlbum = true,
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }
@@ -442,6 +450,7 @@ private fun AlbumDetailScreenSelectModePreview() {
                 selectedPhotos = persistentListOf(photos[0], photos[2], photos[4]),
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }
@@ -468,6 +477,7 @@ private fun AlbumDetailScreenOptionPopupPreview() {
                 isShowOptionPopup = true,
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }

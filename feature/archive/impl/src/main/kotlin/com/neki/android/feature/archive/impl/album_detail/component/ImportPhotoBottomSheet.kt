@@ -17,10 +17,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -50,6 +52,7 @@ import com.neki.android.core.designsystem.button.NekiTextButton
 import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.Photo
 import com.neki.android.feature.archive.impl.album_detail.AlbumDetailIntent
 import com.neki.android.feature.archive.impl.album_detail.AlbumFilterOption
 import com.neki.android.feature.archive.impl.album_detail.ImportPhotoState
@@ -59,8 +62,12 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 internal fun ImportPhotoBottomSheet(
     uiState: ImportPhotoState,
+    pagingItems: LazyPagingItems<Photo>,
     onIntent: (AlbumDetailIntent) -> Unit,
 ) {
+    val isEmpty by remember {
+        derivedStateOf { pagingItems.itemCount == 0 && pagingItems.loadState.refresh is LoadState.NotLoading }
+    }
     ModalBottomSheet(
         modifier = Modifier.statusBarsPadding(),
         onDismissRequest = { onIntent(AlbumDetailIntent.DismissImportPhotoBottomSheet) },
@@ -90,7 +97,7 @@ internal fun ImportPhotoBottomSheet(
                     .weight(1f)
                     .fillMaxWidth(),
             ) {
-                if (uiState.photos.isEmpty()) {
+                if (isEmpty) {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -122,7 +129,11 @@ internal fun ImportPhotoBottomSheet(
                         horizontalArrangement = Arrangement.spacedBy(2.dp),
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
-                        items(uiState.photos, key = { it.id }) { photo ->
+                        items(
+                            count = pagingItems.itemCount,
+                            key = pagingItems.itemKey { it.id },
+                        ) { index ->
+                            val photo = pagingItems[index] ?: return@items
                             ImportPhotoGridItem(
                                 photo = photo,
                                 isSelected = photo.id in uiState.selectedPhotoIds,
