@@ -31,14 +31,16 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.NekiTextFieldBottomSheet
 import com.neki.android.core.designsystem.modifier.dashStroke
 import com.neki.android.core.designsystem.modifier.noRippleClickable
-
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
+import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.AlbumRowComponent
 import com.neki.android.core.ui.component.FavoriteAlbumRowComponent
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.archive.api.PhotoCopiedResult
+import com.neki.android.feature.archive.api.PhotoMovedResult
 import com.neki.android.feature.select_album.impl.component.SelectAlbumTopBar
 import kotlinx.collections.immutable.persistentListOf
 
@@ -54,6 +56,7 @@ internal fun SelectAlbumRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val nekiToast = remember { NekiToast(context) }
+    val resultEventBus = LocalResultEventBus.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -61,6 +64,14 @@ internal fun SelectAlbumRoute(
             is SelectAlbumSideEffect.SendUploadResult -> {
                 navigateBack()
                 navigateToAlbumDetail(sideEffect.album.id, sideEffect.album.title)
+            }
+
+            SelectAlbumSideEffect.SendPhotoMovedResult -> {
+                resultEventBus.sendResult(result = PhotoMovedResult, allowDuplicate = false)
+            }
+
+            is SelectAlbumSideEffect.SendPhotoCopiedResult -> {
+                resultEventBus.sendResult(result = PhotoCopiedResult(sideEffect.albumIds, sideEffect.albumTitle), allowDuplicate = false)
             }
 
             is SelectAlbumSideEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
@@ -109,10 +120,12 @@ internal fun SelectAlbumScreen(
                 key = { album -> album.id },
             ) { album ->
                 val isSelected = uiState.selectedAlbums.any { it.id == album.id }
+                val isDisabled = album.id == uiState.disabledAlbumId
                 AlbumRowComponent(
                     album = album,
                     isSelectable = true,
                     isSelected = isSelected,
+                    isDisabled = isDisabled,
                     onClick = { onIntent(SelectAlbumIntent.ClickAlbumItem(album)) },
                 )
             }

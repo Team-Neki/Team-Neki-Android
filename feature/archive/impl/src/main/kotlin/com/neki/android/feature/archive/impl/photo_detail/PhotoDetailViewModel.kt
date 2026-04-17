@@ -80,6 +80,13 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 postSideEffect(PhotoDetailSideEffect.NavigateBack)
             }
 
+            PhotoDetailIntent.ClickOptionIcon -> reduce { copy(isShowOptionPopup = true) }
+            PhotoDetailIntent.DismissOptionPopup -> reduce { copy(isShowOptionPopup = false) }
+            PhotoDetailIntent.ClickAddToAlbumOption -> {
+                reduce { copy(isShowOptionPopup = false) }
+                postSideEffect(PhotoDetailSideEffect.NavigateToSelectAlbum(state.photo.id))
+            }
+
             // Pager Intent
             PhotoDetailIntent.ClickLeftPhoto -> {
                 if (state.currentPage > 0) {
@@ -130,24 +137,29 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 val newMode = if (current == MemoMode.Closed) MemoMode.Preview else MemoMode.Closed
                 copy(memoModes = (memoModes + (photoId to newMode)).toImmutableMap())
             }
+
             PhotoDetailIntent.ClickMemoMore -> reduce {
                 copy(memoModes = (memoModes + (photo.id to MemoMode.Expanded)).toImmutableMap())
             }
+
             PhotoDetailIntent.ClickMemoText -> reduce {
                 copy(memoModes = (memoModes + (photo.id to MemoMode.Editing)).toImmutableMap())
             }
+
             PhotoDetailIntent.ClickMemoFold -> reduce {
                 copy(
                     memo = photo.memo,
                     memoModes = (memoModes + (photo.id to MemoMode.Preview)).toImmutableMap(),
                 )
             }
+
             PhotoDetailIntent.ClickMemoCancel -> reduce {
                 copy(
                     memo = photo.memo,
                     memoModes = (memoModes + (photo.id to MemoMode.Preview)).toImmutableMap(),
                 )
             }
+
             is PhotoDetailIntent.ClickMemoDone -> {
                 val photoId = state.photo.id
                 reduce {
@@ -160,6 +172,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
             }
 
             PhotoDetailIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
+            is PhotoDetailIntent.PhotoCopied -> postSideEffect(PhotoDetailSideEffect.ShowActionToast(intent.albumId, intent.albumTitle))
 
             // Delete Dialog Intent
             PhotoDetailIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }

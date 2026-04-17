@@ -23,8 +23,9 @@ private enum class FavoriteOptionItem(val label: String) {
 
 private enum class CustomOptionItem(val label: String) {
     SELECT("사진 선택"),
-    ADD_PHOTO("사진 추가"),
+    ADD_PHOTO("사진 가져오기"),
     RENAME_ALBUM("앨범 이름 변경"),
+    DELETE_ALBUM("앨범 삭제"),
 }
 
 @Composable
@@ -40,6 +41,7 @@ internal fun AlbumDetailTopBar(
     onClickSelect: () -> Unit = {},
     onClickAddPhoto: () -> Unit = {},
     onClickRenameAlbum: () -> Unit = {},
+    onClickDeleteAlbum: () -> Unit = {},
     onClickCancel: () -> Unit = {},
     onDismissPopup: () -> Unit = {},
 ) {
@@ -69,6 +71,8 @@ internal fun AlbumDetailTopBar(
         val density = LocalDensity.current
         val popupOffsetX = with(density) { (-20).dp.toPx().toInt() }
         val popupOffsetY = with(density) { 54.dp.toPx().toInt() }
+        val deleteColor = NekiTheme.colorScheme.primary600
+        val normalColor = NekiTheme.colorScheme.gray900
 
         if (isFavoriteAlbum) {
             DropdownPopup(
@@ -95,10 +99,15 @@ internal fun AlbumDetailTopBar(
                         CustomOptionItem.SELECT -> onClickSelect()
                         CustomOptionItem.ADD_PHOTO -> onClickAddPhoto()
                         CustomOptionItem.RENAME_ALBUM -> onClickRenameAlbum()
+                        CustomOptionItem.DELETE_ALBUM -> onClickDeleteAlbum()
                     }
                 },
                 onDismissRequest = onDismissPopup,
                 itemLabel = { it.label },
+                itemTextColor = { item ->
+                    if (item == CustomOptionItem.DELETE_ALBUM) deleteColor
+                    else normalColor
+                },
                 modifier = Modifier.width(120.dp),
                 offset = IntOffset(x = popupOffsetX, y = popupOffsetY),
                 alignment = Alignment.TopEnd,

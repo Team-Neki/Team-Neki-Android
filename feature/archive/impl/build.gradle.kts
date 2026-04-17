@@ -9,6 +9,7 @@ android {
 dependencies {
     implementation(projects.feature.archive.api)
     implementation(projects.feature.photoUpload.api)
+    implementation(projects.feature.selectAlbum.api)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.paging.compose)

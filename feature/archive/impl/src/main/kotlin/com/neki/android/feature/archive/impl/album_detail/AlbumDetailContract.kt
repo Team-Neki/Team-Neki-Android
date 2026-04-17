@@ -3,9 +3,27 @@ package com.neki.android.feature.archive.impl.album_detail
 import android.net.Uri
 import androidx.compose.foundation.text.input.TextFieldState
 import com.neki.android.core.model.Photo
+import com.neki.android.feature.archive.impl.album.AlbumDeleteOption
 import com.neki.android.feature.archive.impl.model.SelectMode
+import com.neki.android.feature.select_album.api.SelectAlbumAction
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
+
+data class AlbumFilterOption(val id: Long?, val title: String, val photoCount: Int)
+
+data class ImportPhotoState(
+    val isLoading: Boolean = false,
+    val selectedAlbumId: Long? = null,
+    val selectedPhotoIds: ImmutableSet<Long> = persistentSetOf(),
+    val isShowAlbumDropdown: Boolean = false,
+    val allAlbumOptions: ImmutableList<AlbumFilterOption> = persistentListOf(),
+    val currentAlbumId: Long? = null,
+) {
+    val selectedAlbumOption: AlbumFilterOption?
+        get() = allAlbumOptions.find { it.id == selectedAlbumId } ?: allAlbumOptions.firstOrNull()
+}
 
 data class AlbumDetailState(
     val isLoading: Boolean = false,
@@ -21,6 +39,12 @@ data class AlbumDetailState(
 
     val renameAlbumTextState: TextFieldState = TextFieldState(),
     val isShowRenameAlbumBottomSheet: Boolean = false,
+
+    val isShowDeleteAlbumBottomSheet: Boolean = false,
+    val selectedAlbumDeleteOption: AlbumDeleteOption = AlbumDeleteOption.DELETE_WITH_PHOTOS,
+
+    val isShowImportPhotoBottomSheet: Boolean = false,
+    val importPhotoState: ImportPhotoState = ImportPhotoState(),
 )
 
 enum class PhotoDeleteOption(val label: String) {
@@ -32,8 +56,6 @@ enum class PhotoDeleteOption(val label: String) {
 }
 
 sealed interface AlbumDetailIntent {
-    data object EnterAlbumDetailScreen : AlbumDetailIntent
-
     // TopBar Intent
     data object ClickBackIcon : AlbumDetailIntent
     data object OnBackPressed : AlbumDetailIntent
@@ -49,6 +71,8 @@ sealed interface AlbumDetailIntent {
 
     // ActionBar Intent
     data object ClickDownloadIcon : AlbumDetailIntent
+    data object ClickCopyIcon : AlbumDetailIntent
+    data object ClickMoveIcon : AlbumDetailIntent
     data object ClickDeleteIcon : AlbumDetailIntent
 
     // Delete Dialog Intent (for Favorite Album)
@@ -70,9 +94,23 @@ sealed interface AlbumDetailIntent {
     data object ClickRenameBottomSheetCancelButton : AlbumDetailIntent
     data object ClickRenameBottomSheetConfirmButton : AlbumDetailIntent
 
+    // Delete Album BottomSheet Intent
+    data object ClickDeleteAlbumOption : AlbumDetailIntent
+    data object DismissDeleteAlbumBottomSheet : AlbumDetailIntent
+    data class SelectAlbumDeleteOption(val option: AlbumDeleteOption) : AlbumDetailIntent
+    data object ClickDeleteAlbumConfirmButton : AlbumDetailIntent
+
     // Result Intent
     data object RefreshPhotos : AlbumDetailIntent
     data class ClickFavoriteIcon(val photo: Photo) : AlbumDetailIntent
+
+    // ImportPhoto BottomSheet
+    data object DismissImportPhotoBottomSheet : AlbumDetailIntent
+    data class SelectImportAlbum(val albumId: Long?) : AlbumDetailIntent
+    data object ConfirmImport : AlbumDetailIntent
+    data class ToggleImportPhoto(val photoId: Long) : AlbumDetailIntent
+    data object ToggleImportAlbumDropdown : AlbumDetailIntent
+    data object DismissImportAlbumDropdown : AlbumDetailIntent
 }
 
 sealed interface AlbumDetailSideEffect {
@@ -83,4 +121,6 @@ sealed interface AlbumDetailSideEffect {
     data object OpenGallery : AlbumDetailSideEffect
     data object RefreshPhotos : AlbumDetailSideEffect
     data object NotifyResult : AlbumDetailSideEffect
+    data class NavigateToSelectAlbum(val action: SelectAlbumAction) : AlbumDetailSideEffect
+    data class PhotoImported(val albumId: Long) : AlbumDetailSideEffect
 }
