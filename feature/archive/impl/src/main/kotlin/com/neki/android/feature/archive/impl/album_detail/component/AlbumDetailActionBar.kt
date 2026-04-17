@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -20,10 +19,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.actionbar.NekiActionBar
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.designsystem.R as DesignR
 
 @Composable
 internal fun AlbumDetailActionBar(
@@ -46,28 +45,28 @@ internal fun AlbumDetailActionBar(
             padding = PaddingValues(top = 8.dp, bottom = 10.dp, start = 20.dp, end = 20.dp),
         ) {
             ActionBarItem(
-                iconRes = DesignR.drawable.icon_download,
+                iconRes = R.drawable.icon_download,
                 label = "다운로드",
                 isEnabled = isEnabled,
                 onClick = onClickDownload,
                 modifier = Modifier.width(48.dp),
             )
             ActionBarItem(
-                iconRes = DesignR.drawable.icon_copy_photo,
+                iconRes = R.drawable.icon_copy_photo,
                 label = "사진 복제",
                 isEnabled = isEnabled,
                 onClick = onClickCopy,
                 modifier = Modifier.width(48.dp),
             )
             ActionBarItem(
-                iconRes = DesignR.drawable.icon_move_photo,
+                iconRes = R.drawable.icon_move_photo,
                 label = "사진 이동",
                 isEnabled = isEnabled,
                 onClick = onClickMove,
                 modifier = Modifier.width(48.dp),
             )
             ActionBarItem(
-                iconRes = DesignR.drawable.icon_trash,
+                iconRes = R.drawable.icon_trash,
                 label = "삭제",
                 isEnabled = isEnabled,
                 onClick = onClickDelete,
