@@ -70,6 +70,7 @@ internal fun ArchiveMainRoute(
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(
                 ArchiveNavKey.PhotoDetail(photos = sideEffect.photos, initialIndex = sideEffect.index),
             )
+
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
             is ArchiveMainSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
         }
@@ -198,6 +199,7 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
+                modifier = Modifier.padding(top = 12.dp),
                 title = "최근 사진",
                 textButtonTitle = "모든 사진",
                 onClickShowAllAlbum = onClickShowAllPhoto,

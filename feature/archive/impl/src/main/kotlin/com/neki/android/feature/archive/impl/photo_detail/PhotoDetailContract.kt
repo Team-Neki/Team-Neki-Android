@@ -16,6 +16,7 @@ data class PhotoDetailState(
     val photos: List<Photo> = emptyList(),
     val currentPage: Int = 0,
     val isShowDeleteDialog: Boolean = false,
+    val isShowOptionPopup: Boolean = false,
     val memo: String = "",
     val memoModes: ImmutableMap<Long, MemoMode> = persistentMapOf(),
 ) {
@@ -28,6 +29,9 @@ data class PhotoDetailState(
 sealed interface PhotoDetailIntent {
     // TopBar Intent
     data object ClickBackIcon : PhotoDetailIntent
+    data object ClickOptionIcon : PhotoDetailIntent
+    data object DismissOptionPopup : PhotoDetailIntent
+    data object ClickAddToAlbumOption : PhotoDetailIntent
 
     // Pager Intent
     data object ClickLeftPhoto : PhotoDetailIntent
@@ -48,6 +52,8 @@ sealed interface PhotoDetailIntent {
     data class ClickMemoDone(val memo: String) : PhotoDetailIntent
     data object ClickDeleteIcon : PhotoDetailIntent
 
+    data class PhotoCopied(val albumId: Long, val albumTitle: String) : PhotoDetailIntent
+
     // Delete Dialog Intent
     data object DismissDeleteDialog : PhotoDetailIntent
     data object ClickDeleteDialogCancelButton : PhotoDetailIntent
@@ -60,4 +66,6 @@ sealed interface PhotoDetailSideEffect {
     data class ShowToastMessage(val message: String) : PhotoDetailSideEffect
     data class DownloadImage(val imageUrl: String) : PhotoDetailSideEffect
     data class AnimateToPage(val index: Int) : PhotoDetailSideEffect
+    data class NavigateToSelectAlbum(val photoId: Long) : PhotoDetailSideEffect
+    data class ShowActionToast(val albumId: Long, val albumTitle: String) : PhotoDetailSideEffect
 }

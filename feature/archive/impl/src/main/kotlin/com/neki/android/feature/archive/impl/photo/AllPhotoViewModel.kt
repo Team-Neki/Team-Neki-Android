@@ -106,6 +106,10 @@ class AllPhotoViewModel @Inject constructor(
             // Photo Intent
             is AllPhotoIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, intent.index, state, reduce, postSideEffect)
             AllPhotoIntent.ClickDownloadIcon -> downloadSelectedPhotos(state, postSideEffect)
+            AllPhotoIntent.ClickCopyIcon -> {
+                val photoIds = state.selectedPhotos.map { it.id }
+                postSideEffect(AllPhotoSideEffect.NavigateToSelectAlbum(photoIds))
+            }
             AllPhotoIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
             AllPhotoIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
             AllPhotoIntent.ClickDeleteDialogConfirmButton -> deleteSelectedPhotos(state, reduce, postSideEffect)

@@ -37,13 +37,18 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.navigation.result.LocalResultEventBus
-import com.neki.android.feature.archive.api.AlbumDetailResult
 import com.neki.android.core.ui.component.DoubleButtonOptionBottomSheet
-import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.archive.api.AlbumDetailResult
+import com.neki.android.feature.archive.api.ArchiveNavKey
+import com.neki.android.feature.archive.api.PhotoCopiedResult
+import com.neki.android.feature.archive.impl.album.AlbumDeleteOption
+import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailActionBar
 import com.neki.android.feature.archive.impl.album_detail.component.AlbumDetailTopBar
+import com.neki.android.feature.archive.impl.album_detail.component.FavoriteAlbumActionBar
+import com.neki.android.feature.archive.impl.album_detail.component.ImportPhotoBottomSheet
 import com.neki.android.feature.archive.impl.album_detail.component.RenameAlbumBottomSheet
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.EmptyAlbumContent
@@ -54,18 +59,21 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOU
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_TOP_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
-import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
+import com.neki.android.feature.select_album.api.SelectAlbumAction
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AlbumDetailRoute(
     viewModel: AlbumDetailViewModel,
     navigateBack: () -> Unit,
     navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
+    navigateToSelectAlbum: (SelectAlbumAction) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -116,12 +124,21 @@ internal fun AlbumDetailRoute(
             AlbumDetailSideEffect.NotifyResult -> {
                 resultEventBus.sendResult(result = AlbumDetailResult, allowDuplicate = false)
             }
+
+            is AlbumDetailSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.action)
+            is AlbumDetailSideEffect.PhotoImported -> {
+                resultEventBus.sendResult(
+                    result = PhotoCopiedResult(albumIds = listOf(sideEffect.albumId), albumTitle = ""),
+                )
+                viewModel.store.onIntent(AlbumDetailIntent.RefreshPhotos)
+            }
         }
     }
 
     AlbumDetailScreen(
         uiState = uiState,
         pagingItems = pagingItems,
+        importPhotoPagingData = viewModel.importPhotoPagingData,
         onIntent = viewModel.store::onIntent,
     )
 }
@@ -131,6 +148,7 @@ internal fun AlbumDetailRoute(
 internal fun AlbumDetailScreen(
     uiState: AlbumDetailState,
     pagingItems: LazyPagingItems<Photo>,
+    importPhotoPagingData: Flow<PagingData<Photo>>,
     onIntent: (AlbumDetailIntent) -> Unit = {},
 ) {
     val lazyState = rememberLazyStaggeredGridState()
@@ -161,6 +179,7 @@ internal fun AlbumDetailScreen(
             onClickSelect = { onIntent(AlbumDetailIntent.ClickSelectOption) },
             onClickAddPhoto = { onIntent(AlbumDetailIntent.ClickAddPhotoOption) },
             onClickRenameAlbum = { onIntent(AlbumDetailIntent.ClickRenameAlbumOption) },
+            onClickDeleteAlbum = { onIntent(AlbumDetailIntent.ClickDeleteAlbumOption) },
             onClickCancel = { onIntent(AlbumDetailIntent.ClickCancelButton) },
             onDismissPopup = { onIntent(AlbumDetailIntent.DismissOptionPopup) },
         )
@@ -225,6 +244,29 @@ internal fun AlbumDetailScreen(
             isError = errorMessage != null,
             errorMessage = errorMessage,
             isConfirmEnabled = isNameChanged,
+        )
+    }
+
+    if (uiState.isShowDeleteAlbumBottomSheet) {
+        DoubleButtonOptionBottomSheet(
+            title = "앨범을 삭제하시겠어요?",
+            options = AlbumDeleteOption.entries.toImmutableList(),
+            selectedOption = uiState.selectedAlbumDeleteOption,
+            primaryButtonText = "삭제하기",
+            secondaryButtonText = "취소",
+            onDismissRequest = { onIntent(AlbumDetailIntent.DismissDeleteAlbumBottomSheet) },
+            onClickSecondaryButton = { onIntent(AlbumDetailIntent.DismissDeleteAlbumBottomSheet) },
+            onClickPrimaryButton = { onIntent(AlbumDetailIntent.ClickDeleteAlbumConfirmButton) },
+            onOptionSelect = { onIntent(AlbumDetailIntent.SelectAlbumDeleteOption(it)) },
+        )
+    }
+
+    if (uiState.isShowImportPhotoBottomSheet) {
+        val importPagingItems = importPhotoPagingData.collectAsLazyPagingItems()
+        ImportPhotoBottomSheet(
+            uiState = uiState.importPhotoState,
+            pagingItems = importPagingItems,
+            onIntent = onIntent,
         )
     }
 }
@@ -295,12 +337,23 @@ internal fun AlbumDetailContent(
             }
         }
 
-        PhotoActionBar(
-            visible = uiState.selectMode == SelectMode.SELECTING,
-            isEnabled = uiState.selectedPhotos.isNotEmpty(),
-            onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
-            onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
-        )
+        if (uiState.isFavoriteAlbum) {
+            FavoriteAlbumActionBar(
+                visible = uiState.selectMode == SelectMode.SELECTING,
+                isEnabled = uiState.selectedPhotos.isNotEmpty(),
+                onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
+                onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
+            )
+        } else {
+            AlbumDetailActionBar(
+                visible = uiState.selectMode == SelectMode.SELECTING,
+                isEnabled = uiState.selectedPhotos.isNotEmpty(),
+                onClickDownload = { onIntent(AlbumDetailIntent.ClickDownloadIcon) },
+                onClickCopy = { onIntent(AlbumDetailIntent.ClickCopyIcon) },
+                onClickMove = { onIntent(AlbumDetailIntent.ClickMoveIcon) },
+                onClickDelete = { onIntent(AlbumDetailIntent.ClickDeleteIcon) },
+            )
+        }
     }
 }
 
@@ -325,6 +378,7 @@ private fun AlbumDetailScreenPreview() {
                 title = "앨범 상세",
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }
@@ -341,6 +395,7 @@ private fun AlbumDetailScreenEmptyPreview() {
                 title = "빈 앨범",
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }
@@ -367,6 +422,7 @@ private fun AlbumDetailScreenFavoritePreview() {
                 isFavoriteAlbum = true,
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }
@@ -394,6 +450,7 @@ private fun AlbumDetailScreenSelectModePreview() {
                 selectedPhotos = persistentListOf(photos[0], photos[2], photos[4]),
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }
@@ -420,6 +477,7 @@ private fun AlbumDetailScreenOptionPopupPreview() {
                 isShowOptionPopup = true,
             ),
             pagingItems = pagingItems,
+            importPhotoPagingData = flowOf(PagingData.from(emptyList<Photo>())),
         )
     }
 }

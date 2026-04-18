@@ -16,6 +16,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -43,6 +44,8 @@ class SelectAlbumViewModel @AssistedInject constructor(
     private val photoCount: Int = when (action) {
         is SelectAlbumAction.UploadFromQR -> 1
         is SelectAlbumAction.UploadFromGallery -> action.imageUriStrings.size
+        is SelectAlbumAction.MovePhotos -> action.photoIds.size
+        is SelectAlbumAction.CopyPhotos -> action.photoIds.size
     }
 
     val store: MviIntentStore<SelectAlbumState, SelectAlbumIntent, SelectAlbumSideEffect> =
@@ -51,6 +54,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
                 title = title,
                 multiSelect = multiSelect,
                 photoCount = photoCount,
+                disabledAlbumId = if (action is SelectAlbumAction.MovePhotos) action.sourceFolderId else null,
             ),
             onIntent = ::onIntent,
             initialFetchData = { store.onIntent(SelectAlbumIntent.EnterSelectAlbumScreen) },
@@ -66,13 +70,15 @@ class SelectAlbumViewModel @AssistedInject constructor(
             SelectAlbumIntent.EnterSelectAlbumScreen -> fetchInitialData(reduce)
             SelectAlbumIntent.ClickBackIcon -> postSideEffect(SelectAlbumSideEffect.NavigateBack)
             SelectAlbumIntent.ClickConfirmButton -> {
-                val album = state.selectedAlbums.firstOrNull() ?: return
-                performUpload(album, reduce, postSideEffect)
+                val albums = state.selectedAlbums
+                performAction(albums, reduce, postSideEffect)
             }
+
             is SelectAlbumIntent.ClickAlbumItem -> handleAlbumClick(intent.album, state, reduce)
             SelectAlbumIntent.ClickCreateAlbumButton -> reduce {
                 copy(isShowAddAlbumBottomSheet = true, albumNameTextState = TextFieldState())
             }
+
             SelectAlbumIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
             SelectAlbumIntent.ClickAddAlbumConfirmButton -> handleAddAlbum(
                 albumName = state.albumNameTextState.text.toString(),
@@ -82,37 +88,70 @@ class SelectAlbumViewModel @AssistedInject constructor(
         }
     }
 
-    private fun performUpload(
-        album: AlbumPreview,
+    private fun performAction(
+        albums: ImmutableList<AlbumPreview>,
         reduce: (SelectAlbumState.() -> SelectAlbumState) -> Unit,
         postSideEffect: (SelectAlbumSideEffect) -> Unit,
     ) {
         viewModelScope.launch {
             reduce { copy(isUploading = true) }
 
+            val targetFolderIds = albums.map { it.id }
             val result = when (action) {
                 is SelectAlbumAction.UploadFromQR -> {
-                    uploadSinglePhotoUseCase(imageUrl = action.imageUrl, folderId = album.id)
+                    uploadSinglePhotoUseCase(imageUrl = action.imageUrl, folderId = albums.first().id)
                 }
+
                 is SelectAlbumAction.UploadFromGallery -> {
                     uploadMultiplePhotoUseCase(
                         imageUris = action.imageUriStrings.map { it.toUri() },
-                        folderId = album.id,
+                        folderId = albums.first().id,
+                    )
+                }
+
+                is SelectAlbumAction.MovePhotos -> {
+                    folderRepository.movePhotos(
+                        sourceFolderId = action.sourceFolderId,
+                        photoIds = action.photoIds,
+                        targetFolderIds = targetFolderIds,
+                    )
+                }
+
+                is SelectAlbumAction.CopyPhotos -> {
+                    folderRepository.copyPhotos(
+                        photoIds = action.photoIds,
+                        targetFolderIds = targetFolderIds,
                     )
                 }
             }
 
-            result
-                .onSuccess {
-                    reduce { copy(isUploading = false) }
-                    postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
-                    postSideEffect(SelectAlbumSideEffect.SendUploadResult(album))
+            result.onSuccess {
+                reduce { copy(isUploading = false) }
+                when (action) {
+                    is SelectAlbumAction.UploadFromQR, is SelectAlbumAction.UploadFromGallery -> {
+                        postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
+                        postSideEffect(SelectAlbumSideEffect.SendUploadResult(albums.first()))
+                    }
+
+                    is SelectAlbumAction.MovePhotos -> {
+                        postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 이동했어요"))
+                        postSideEffect(SelectAlbumSideEffect.SendPhotoMovedResult)
+                        postSideEffect(SelectAlbumSideEffect.NavigateBack)
+                    }
+
+                    is SelectAlbumAction.CopyPhotos -> {
+                        if (action.withShowToast) {
+                            postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
+                        }
+                        postSideEffect(SelectAlbumSideEffect.SendPhotoCopiedResult(targetFolderIds, albums.first().title))
+                        postSideEffect(SelectAlbumSideEffect.NavigateBack)
+                    }
                 }
-                .onFailure { e ->
-                    Timber.e(e)
-                    reduce { copy(isUploading = false) }
-                    postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지 업로드에 실패했어요"))
-                }
+            }.onFailure { e ->
+                Timber.e(e)
+                reduce { copy(isUploading = false) }
+                postSideEffect(SelectAlbumSideEffect.ShowToastMessage("작업에 실패했어요"))
+            }
         }
     }
 

@@ -17,6 +17,7 @@ data class SelectAlbumState(
     val selectedAlbums: PersistentList<AlbumPreview> = persistentListOf(),
     val isShowAddAlbumBottomSheet: Boolean = false,
     val albumNameTextState: TextFieldState = TextFieldState(),
+    val disabledAlbumId: Long? = null,
 ) {
     val isConfirmEnabled: Boolean
         get() = selectedAlbums.isNotEmpty() && !isUploading
@@ -38,5 +39,7 @@ sealed interface SelectAlbumIntent {
 sealed interface SelectAlbumSideEffect {
     data object NavigateBack : SelectAlbumSideEffect
     data class SendUploadResult(val album: AlbumPreview) : SelectAlbumSideEffect
+    data object SendPhotoMovedResult : SelectAlbumSideEffect
+    data class SendPhotoCopiedResult(val albumIds: List<Long>, val albumTitle: String) : SelectAlbumSideEffect
     data class ShowToastMessage(val message: String) : SelectAlbumSideEffect
 }

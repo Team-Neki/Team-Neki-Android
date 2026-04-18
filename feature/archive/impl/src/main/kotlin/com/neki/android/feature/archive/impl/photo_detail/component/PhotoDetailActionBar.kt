@@ -12,7 +12,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.actionbar.NekiBothSidesActionBar
+import com.neki.android.core.designsystem.actionbar.NekiActionBar
 import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
@@ -25,9 +25,9 @@ internal fun PhotoDetailActionBar(
     onClickMemo: () -> Unit = {},
     onClickDelete: () -> Unit = {},
 ) {
-    NekiBothSidesActionBar(
+    NekiActionBar(
         modifier = modifier,
-        startContent = {
+        content = {
             Row(
                 modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -67,8 +67,6 @@ internal fun PhotoDetailActionBar(
                     )
                 }
             }
-        },
-        endContent = {
             NekiIconButton(
                 modifier = Modifier.padding(8.dp),
                 onClick = onClickDelete,
