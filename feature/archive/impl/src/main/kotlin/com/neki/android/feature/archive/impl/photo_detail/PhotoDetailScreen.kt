@@ -111,8 +111,8 @@ internal fun PhotoDetailScreen(
     onIntent: (PhotoDetailIntent) -> Unit = {},
     pagerState: PagerState = rememberPagerState { uiState.photos.size.coerceAtLeast(1) },
 ) {
-    val isMemoActive = uiState.currentMemoMode == MemoMode.Expanded ||
-        uiState.currentMemoMode == MemoMode.Editing
+    val isMemoActive = uiState.memoMode == MemoMode.Expanded ||
+        uiState.memoMode == MemoMode.Editing
     val density = LocalDensity.current
     var actionBarHeightDp by remember { mutableStateOf(0.dp) }
 
@@ -139,17 +139,16 @@ internal fun PhotoDetailScreen(
             val index = if (uiState.photos.isEmpty()) 0 else page.coerceIn(0, uiState.photos.lastIndex)
 
             val photo = uiState.photos.getOrNull(index)
-            val pageMemoMode = uiState.memoModeOf(photo?.id ?: 0L)
             val pageMemo = if (index == uiState.currentIndex) uiState.memo
             else photo?.memo.orEmpty()
 
             PhotoDetailImageItem(
                 imageUrl = photo?.imageUrl,
                 memo = pageMemo,
-                memoMode = pageMemoMode,
+                memoMode = uiState.memoMode,
                 actionBarHeight = actionBarHeightDp,
                 isScrollInProgress = pagerState.isScrollInProgress,
-                isTapEnabled = pageMemoMode != MemoMode.Expanded && pageMemoMode != MemoMode.Editing,
+                isTapEnabled = !isMemoActive,
                 onClickLeft = { onIntent(PhotoDetailIntent.ClickLeftPhoto) },
                 onClickRight = { onIntent(PhotoDetailIntent.ClickRightPhoto) },
                 onClickMemoMore = { onIntent(PhotoDetailIntent.ClickMemoMore) },
@@ -161,7 +160,7 @@ internal fun PhotoDetailScreen(
             )
         }
 
-        if (uiState.currentMemoMode != MemoMode.Editing) {
+        if (uiState.memoMode != MemoMode.Editing) {
             PhotoDetailActionBar(
                 modifier = Modifier.onSizeChanged { size ->
                     actionBarHeightDp = with(density) { size.height.toDp() }

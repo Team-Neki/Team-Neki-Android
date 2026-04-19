@@ -1,8 +1,6 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
 import com.neki.android.core.model.Photo
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentMapOf
 
 enum class MemoMode {
     Closed,
@@ -18,12 +16,10 @@ data class PhotoDetailState(
     val isShowDeleteDialog: Boolean = false,
     val isShowOptionPopup: Boolean = false,
     val memo: String = "",
-    val memoModes: ImmutableMap<Long, MemoMode> = persistentMapOf(),
+    val memoMode: MemoMode = MemoMode.Closed,
 ) {
     val currentIndex get() = if (photos.isEmpty()) 0 else currentPage.coerceIn(0, photos.lastIndex)
     val photo: Photo get() = photos.getOrElse(currentIndex) { Photo() }
-    val currentMemoMode: MemoMode get() = memoModes[photo.id] ?: MemoMode.Closed
-    fun memoModeOf(photoId: Long): MemoMode = memoModes[photoId] ?: MemoMode.Closed
 }
 
 sealed interface PhotoDetailIntent {
