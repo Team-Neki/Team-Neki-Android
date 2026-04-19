@@ -117,6 +117,19 @@ internal class QRScanViewModel @Inject constructor(
                 postSideEffect(QRScanSideEffect.SetQRScannedResult(intent.imageUrl))
             }
 
+            QRScanIntent.WebViewError -> {
+                webViewEnteredUrl = null
+                imageDetected = false
+                isDownloadRequiredBrand = false
+                reduce {
+                    copy(
+                        viewType = QRScanViewType.QR_SCAN,
+                        scannedUrl = null,
+                    )
+                }
+                postSideEffect(QRScanSideEffect.ShowToast("만료되었거나 유효하지 않은 QR코드입니다."))
+            }
+
             QRScanIntent.DismissShouldDownloadDialog -> reduce { copy(isDownloadNeededDialogShown = false) }
             QRScanIntent.ClickGoDownload -> reduce {
                 copy(
