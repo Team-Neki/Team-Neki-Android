@@ -248,7 +248,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
         }
         postSideEffect(
             AlbumDetailSideEffect.NavigateToSelectAlbum(
-                SelectAlbumAction.CopyPhotos(photoIds = photoIds),
+                SelectAlbumAction.CopyPhotos(photoIds = photoIds, fromPhotoDetail = false),
             ),
         )
     }

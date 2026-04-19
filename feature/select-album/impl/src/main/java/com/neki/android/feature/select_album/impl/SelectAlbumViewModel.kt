@@ -154,13 +154,11 @@ class SelectAlbumViewModel @AssistedInject constructor(
                     }
 
                     is SelectAlbumAction.CopyPhotos -> {
-                        analyticsLogger.log(ArchiveAnalyticsEvent.PhotoCopy)
-                        if (action.photoIds.size == 1) {
+                        if (action.fromPhotoDetail) {
                             analyticsLogger.log(ArchiveAnalyticsEvent.AlbumAddFromDetail(albumCount = albums.size))
                         } else {
+                            analyticsLogger.log(ArchiveAnalyticsEvent.PhotoCopy)
                             analyticsLogger.log(ArchiveAnalyticsEvent.AlbumAddFromMulti(photoCount = action.photoIds.size, albumCount = albums.size))
-                        }
-                        if (action.withShowToast) {
                             postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
                         }
                         postSideEffect(SelectAlbumSideEffect.SendPhotoCopiedResult(targetFolderIds, albums.first().title))
