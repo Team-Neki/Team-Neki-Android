@@ -2,8 +2,7 @@ package com.neki.android.feature.auth.impl.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository

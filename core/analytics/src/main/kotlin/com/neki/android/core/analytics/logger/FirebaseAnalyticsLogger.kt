@@ -2,7 +2,7 @@ package com.neki.android.core.analytics.logger
 
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.neki.android.core.analytics.AnalyticsEvent
+import com.neki.android.core.analytics.event.AnalyticsEvent
 import javax.inject.Inject
 
 internal class FirebaseAnalyticsLogger @Inject constructor(

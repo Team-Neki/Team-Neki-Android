@@ -2,8 +2,8 @@ package com.neki.android.feature.auth.impl.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.event.GlobalAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
@@ -103,7 +103,7 @@ class SplashViewModel @Inject constructor(
                 authRepository.updateAccessToken(
                     refreshToken = tokenRepository.getRefreshToken().first(),
                 ).onSuccess {
-                    analyticsLogger.log(AnalyticsEvent.AppOpen)
+                    analyticsLogger.log(GlobalAnalyticsEvent.AppOpen)
                     tokenRepository.saveTokens(it.accessToken, it.refreshToken)
                     postSideEffect(SplashSideEffect.NavigateToMain)
                 }.onFailure { e ->

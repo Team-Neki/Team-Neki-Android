@@ -6,8 +6,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.event.PoseAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
@@ -75,7 +75,7 @@ internal class PoseViewModel @Inject constructor(
         )
 
     fun logPoseView() {
-        analyticsLogger.log(AnalyticsEvent.Pose.PoseView)
+        analyticsLogger.log(PoseAnalyticsEvent.PoseView)
     }
 
     private fun onIntent(
@@ -94,7 +94,7 @@ internal class PoseViewModel @Inject constructor(
             PoseIntent.DismissPeopleCountBottomSheet -> reduce { copy(isShowPeopleCountBottomSheet = false) }
             PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
             PoseIntent.ClickBookmarkChip -> {
-                analyticsLogger.log(AnalyticsEvent.Pose.PoseBookmarkFilter)
+                analyticsLogger.log(PoseAnalyticsEvent.PoseBookmarkFilter)
                 val newValue = !state.isShowBookmarkedPose
                 _isBookmarkOnly.value = newValue
                 _headCountFilter.value = null
@@ -125,7 +125,7 @@ internal class PoseViewModel @Inject constructor(
             }
 
             is PoseIntent.ClickBookmarkIcon -> {
-                analyticsLogger.log(AnalyticsEvent.Pose.PoseBookmark)
+                analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
                 val pose = intent.pose
                 val newBookmarked = !pose.isBookmarked
                 updatedBookmarks.update { it + (pose.id to newBookmarked) }
@@ -161,7 +161,7 @@ internal class PoseViewModel @Inject constructor(
                 )
             }
         } else {
-            analyticsLogger.log(AnalyticsEvent.Pose.PoseFilterToggle(peopleCount = intent.peopleCount.value))
+            analyticsLogger.log(PoseAnalyticsEvent.PoseFilterToggle(peopleCount = intent.peopleCount.value))
             _headCountFilter.value = intent.peopleCount
             reduce {
                 copy(

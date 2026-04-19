@@ -8,8 +8,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
@@ -313,7 +313,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 photoIds = state.importPhotoState.selectedPhotoIds.toList(),
                 targetFolderIds = listOf(albumId),
             ).onSuccess {
-                analyticsLogger.log(AnalyticsEvent.Archive.PhotoCopy)
+                analyticsLogger.log(ArchiveAnalyticsEvent.PhotoCopy)
                 reduce { copy(isShowImportPhotoBottomSheet = false, importPhotoState = ImportPhotoState()) }
                 _importAlbumFilter.value = null
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))

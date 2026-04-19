@@ -2,8 +2,8 @@ package com.neki.android.feature.pose.impl.random
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.event.PoseAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.common.exception.ApiErrorCode.NO_MORE_RANDOM_POSE
 import com.neki.android.core.common.exception.NoMorePoseException
@@ -60,7 +60,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     ) {
         when (intent) {
             RandomPoseIntent.EnterRandomPoseScreen -> {
-                analyticsLogger.log(AnalyticsEvent.Pose.PoseRandomStart)
+                analyticsLogger.log(PoseAnalyticsEvent.PoseRandomStart)
                 fetchInitialData(state, reduce, postSideEffect)
             }
 
@@ -92,7 +92,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             }
 
             RandomPoseIntent.ClickBookmarkIcon -> {
-                analyticsLogger.log(AnalyticsEvent.Pose.PoseBookmark)
+                analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
                 val currentPost = state.currentPose ?: return
                 handleBookmarkToggle(currentPost.id, !currentPost.isBookmarked, reduce)
             }
@@ -232,7 +232,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         super.onCleared()
 
         val state = store.uiState.value
-        analyticsLogger.log(AnalyticsEvent.Pose.PoseRandomSessionEnd(totalSwipeCount = totalSwipeCount))
+        analyticsLogger.log(PoseAnalyticsEvent.PoseRandomSessionEnd(totalSwipeCount = totalSwipeCount))
 
         state.poseList.forEach { pose ->
             val currentBookmark = pose.isBookmarked

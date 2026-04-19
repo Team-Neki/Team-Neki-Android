@@ -2,8 +2,8 @@ package com.neki.android.feature.pose.impl.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.event.PoseAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.ui.MviIntentStore
@@ -88,7 +88,7 @@ class PoseDetailViewModel @AssistedInject constructor(
         reduce: (PoseDetailState.() -> PoseDetailState) -> Unit,
         postSideEffect: (PoseDetailSideEffect) -> Unit,
     ) {
-        analyticsLogger.log(AnalyticsEvent.Pose.PoseBookmark)
+        analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
         val newBookmarkStatus = !state.pose.isBookmarked
         viewModelScope.launch { bookmarkRequests.emit(newBookmarkStatus) }
         reduce { copy(pose = pose.copy(isBookmarked = newBookmarkStatus)) }

@@ -3,8 +3,8 @@ package com.neki.android.feature.archive.impl.main
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -43,7 +43,7 @@ class ArchiveMainViewModel @Inject constructor(
     }
 
     fun logArchivingView() {
-        analyticsLogger.log(AnalyticsEvent.Archive.ArchivingView)
+        analyticsLogger.log(ArchiveAnalyticsEvent.ArchivingView)
     }
 
     private fun onIntent(
@@ -180,7 +180,7 @@ class ArchiveMainViewModel @Inject constructor(
         viewModelScope.launch {
             folderRepository.createFolder(name = albumName)
                 .onSuccess {
-                    analyticsLogger.log(AnalyticsEvent.Archive.AlbumCreate)
+                    analyticsLogger.log(ArchiveAnalyticsEvent.AlbumCreate)
                     fetchFolders(reduce)
                     postSideEffect(ArchiveMainSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
                 }

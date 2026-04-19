@@ -9,8 +9,8 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.event.MapAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -50,7 +50,7 @@ class MapViewModel @Inject constructor(
     )
 
     fun logMapView() {
-        analyticsLogger.log(AnalyticsEvent.FourCutMap.MapView)
+        analyticsLogger.log(MapAnalyticsEvent.MapView)
     }
 
     private fun onIntent(
@@ -76,7 +76,7 @@ class MapViewModel @Inject constructor(
             MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false, isVisibleRefreshButton = true) }
             is MapIntent.ClickRefreshButton -> {
                 analyticsLogger.log(
-                    AnalyticsEvent.FourCutMap.MapReSearch(
+                    MapAnalyticsEvent.MapReSearch(
                         hasFilter = state.brands.any { it.isChecked },
                         regionChanged = isRegionChanged(intent.center, intent.zoomLevel),
                     )
@@ -203,7 +203,7 @@ class MapViewModel @Inject constructor(
             }
             val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
             analyticsLogger.log(
-                AnalyticsEvent.FourCutMap.MapBrandFilterToggle(
+                MapAnalyticsEvent.MapBrandFilterToggle(
                     action = if (clickedBrand.isChecked) "deselect" else "select",
                     selectedCount = updatedBrands.count { it.isChecked },
                     brandName = clickedBrand.name,
@@ -231,7 +231,7 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         analyticsLogger.log(
-            AnalyticsEvent.FourCutMap.BoothSelect(
+            MapAnalyticsEvent.BoothSelect(
                 entryPoint = "bottom_sheet",
                 brandName = photoBooth.brandName
             )
@@ -262,7 +262,7 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         analyticsLogger.log(
-            AnalyticsEvent.FourCutMap.MapRouteClick(
+            MapAnalyticsEvent.MapRouteClick(
                 mapType = when (app) {
                     DirectionApp.KAKAO_MAP -> "kakao_map"
                     DirectionApp.NAVER_MAP -> "naver_map"
@@ -296,7 +296,7 @@ class MapViewModel @Inject constructor(
             it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
         }?.let { booth ->
             analyticsLogger.log(
-                AnalyticsEvent.FourCutMap.BoothSelect(
+                MapAnalyticsEvent.BoothSelect(
                     entryPoint = "map",
                     brandName = booth.brandName
                 )

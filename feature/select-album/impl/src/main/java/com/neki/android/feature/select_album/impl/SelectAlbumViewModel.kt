@@ -4,8 +4,8 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neki.android.core.analytics.AnalyticsEvent
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
@@ -133,7 +133,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
                 when (action) {
                     is SelectAlbumAction.UploadFromQR, is SelectAlbumAction.UploadFromGallery -> {
                         analyticsLogger.log(
-                            AnalyticsEvent.Archive.PhotoUpload(
+                            ArchiveAnalyticsEvent.PhotoUpload(
                                 method = when (action) {
                                     is SelectAlbumAction.UploadFromQR -> "qr"
                                     is SelectAlbumAction.UploadFromGallery -> "gallery"
@@ -147,18 +147,18 @@ class SelectAlbumViewModel @AssistedInject constructor(
                     }
 
                     is SelectAlbumAction.MovePhotos -> {
-                        analyticsLogger.log(AnalyticsEvent.Archive.PhotoMove)
+                        analyticsLogger.log(ArchiveAnalyticsEvent.PhotoMove)
                         postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 이동했어요"))
                         postSideEffect(SelectAlbumSideEffect.SendPhotoMovedResult)
                         postSideEffect(SelectAlbumSideEffect.NavigateBack)
                     }
 
                     is SelectAlbumAction.CopyPhotos -> {
-                        analyticsLogger.log(AnalyticsEvent.Archive.PhotoCopy)
+                        analyticsLogger.log(ArchiveAnalyticsEvent.PhotoCopy)
                         if (action.photoIds.size == 1) {
-                            analyticsLogger.log(AnalyticsEvent.Archive.AlbumAddFromDetail(albumCount = albums.size))
+                            analyticsLogger.log(ArchiveAnalyticsEvent.AlbumAddFromDetail(albumCount = albums.size))
                         } else {
-                            analyticsLogger.log(AnalyticsEvent.Archive.AlbumAddFromMulti(photoCount = action.photoIds.size, albumCount = albums.size))
+                            analyticsLogger.log(ArchiveAnalyticsEvent.AlbumAddFromMulti(photoCount = action.photoIds.size, albumCount = albums.size))
                         }
                         if (action.withShowToast) {
                             postSideEffect(SelectAlbumSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))
@@ -231,7 +231,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
         viewModelScope.launch {
             folderRepository.createFolder(name = albumName)
                 .onSuccess {
-                    analyticsLogger.log(AnalyticsEvent.Archive.AlbumCreate)
+                    analyticsLogger.log(ArchiveAnalyticsEvent.AlbumCreate)
                     fetchFolders(reduce)
                     reduce {
                         copy(

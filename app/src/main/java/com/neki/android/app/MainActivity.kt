@@ -35,7 +35,7 @@ import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import com.neki.android.feature.select_album.api.navigateToSelectAlbum
 import android.net.Uri
 import androidx.core.content.IntentCompat
-import com.neki.android.core.analytics.AnalyticsLogger
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
