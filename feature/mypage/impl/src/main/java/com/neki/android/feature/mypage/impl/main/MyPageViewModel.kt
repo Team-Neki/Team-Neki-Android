@@ -197,7 +197,6 @@ internal class MyPageViewModel @Inject constructor(
         authRepository.withdrawAccount()
             .onSuccess {
                 analyticsLogger.log(MypageAnalyticsEvent.Withdraw)
-                analyticsLogger.resetAnalytics()
                 tokenRepository.clearTokensWithAuthCache()
                 authRepository.setCompletedOnboarding(false)
                 reduce { copy(isLoading = false) }

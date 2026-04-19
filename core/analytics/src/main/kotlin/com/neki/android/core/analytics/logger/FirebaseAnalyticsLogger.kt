@@ -33,7 +33,4 @@ internal class FirebaseAnalyticsLogger @Inject constructor(
         firebaseAnalytics.setUserProperty(key, value)
     }
 
-    override fun resetAnalytics() {
-        firebaseAnalytics.resetAnalyticsData()
-    }
 }
