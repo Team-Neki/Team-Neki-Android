@@ -21,6 +21,7 @@ internal class QRScanViewModel @Inject constructor(
     private var webViewEnteredUrl: String? = null
     private var imageDetected: Boolean = false
     private var isDownloadRequiredBrand: Boolean = false
+    private val loggedUnsupportedUrls = mutableSetOf<String>()
 
     val store: MviIntentStore<QRScanState, QRScanIntent, QRScanSideEffect> =
         mviIntentStore(
@@ -97,8 +98,10 @@ internal class QRScanViewModel @Inject constructor(
                         }
                     }
                 } else {
-                    viewModelScope.launch {
-                        discordWebhookRepository.logUnsupportedBrandQR(scannedUrl)
+                    if (loggedUnsupportedUrls.add(scannedUrl)) {
+                        viewModelScope.launch {
+                            discordWebhookRepository.logUnsupportedBrandQR(scannedUrl)
+                        }
                     }
                     reduce { copy(isUnSupportedBrandDialogShown = true) }
                 }
