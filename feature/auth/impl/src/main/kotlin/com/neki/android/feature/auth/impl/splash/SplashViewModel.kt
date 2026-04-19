@@ -46,6 +46,7 @@ class SplashViewModel @Inject constructor(
         reduce: (SplashState.() -> SplashState) -> Unit,
         postSideEffect: (SplashSideEffect) -> Unit,
     ) {
+        analyticsLogger.setUserProperty("app_version", currentAppVersion)
         viewModelScope.launch {
             authRepository.getAppVersion()
                 .onSuccess { appVersion ->
