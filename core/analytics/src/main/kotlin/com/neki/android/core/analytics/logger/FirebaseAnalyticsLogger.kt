@@ -32,5 +32,4 @@ internal class FirebaseAnalyticsLogger @Inject constructor(
     override fun setUserProperty(key: String, value: String) {
         firebaseAnalytics.setUserProperty(key, value)
     }
-
 }
