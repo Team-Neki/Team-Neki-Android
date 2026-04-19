@@ -35,6 +35,7 @@ import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import com.neki.android.feature.select_album.api.navigateToSelectAlbum
 import android.net.Uri
 import androidx.core.content.IntentCompat
+import com.neki.android.core.analytics.AnalyticsLogger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -78,12 +79,18 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var authEventManager: AuthEventManager
 
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
+
     private var pendingShareUriStrings by mutableStateOf<ImmutableList<String>>(persistentListOf())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         pendingShareUriStrings = intent.extractShareUriStrings()
+
+        analyticsLogger.setUserProperty("platform", "android")
+        analyticsLogger.setUserProperty("app_version", BuildConfig.VERSION_NAME)
 
         enableEdgeToEdge(
             navigationBarStyle = SystemBarStyle.auto(

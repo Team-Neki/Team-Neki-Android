@@ -2,6 +2,8 @@ package com.neki.android.feature.archive.impl.photo_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.AnalyticsEvent
+import com.neki.android.core.analytics.AnalyticsLogger
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.ui.MviIntentStore
@@ -25,6 +27,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
     @Assisted private val key: ArchiveNavKey.PhotoDetail,
     private val photoRepository: PhotoRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
@@ -43,6 +46,8 @@ class PhotoDetailViewModel @AssistedInject constructor(
         )
 
     init {
+        analyticsLogger.log(AnalyticsEvent.Archive.PhotoDetailView)
+
         viewModelScope.launch {
             favoriteRequests
                 .debounce(500)
@@ -200,6 +205,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             photoRepository.updateMemo(photoId, newMemo)
                 .onSuccess {
+                    analyticsLogger.log(AnalyticsEvent.Archive.PhotoMemoCreate)
                     postSideEffect(PhotoDetailSideEffect.NotifyPhotoUpdated)
                 }
                 .onFailure { e ->

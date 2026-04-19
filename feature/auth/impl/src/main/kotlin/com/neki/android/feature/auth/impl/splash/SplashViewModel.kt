@@ -2,6 +2,8 @@ package com.neki.android.feature.auth.impl.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.AnalyticsEvent
+import com.neki.android.core.analytics.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.ui.MviIntentStore
@@ -17,6 +19,7 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     val store: MviIntentStore<SplashState, SplashIntent, SplashSideEffect> =
@@ -100,6 +103,7 @@ class SplashViewModel @Inject constructor(
                 authRepository.updateAccessToken(
                     refreshToken = tokenRepository.getRefreshToken().first(),
                 ).onSuccess {
+                    analyticsLogger.log(AnalyticsEvent.AppOpen)
                     tokenRepository.saveTokens(it.accessToken, it.refreshToken)
                     postSideEffect(SplashSideEffect.NavigateToMain)
                 }.onFailure { e ->

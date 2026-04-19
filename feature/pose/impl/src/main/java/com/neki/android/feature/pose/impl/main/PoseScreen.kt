@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,6 +57,10 @@ internal fun PoseRoute(
     val nekiToast = remember { NekiToast(context) }
     val lazyState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        viewModel.logPoseView()
+    }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {

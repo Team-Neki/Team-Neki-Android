@@ -34,7 +34,7 @@ sealed interface MapIntent {
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickClusterMarker(val southWest: LocLatLng, val northEast: LocLatLng) : MapIntent
-    data class ClickRefreshButton(val mapBounds: MapBounds) : MapIntent
+    data class ClickRefreshButton(val mapBounds: MapBounds, val center: LocLatLng, val zoomLevel: Double) : MapIntent
     data object ClickDirectionIcon : MapIntent
     data object GestureOnMap : MapIntent
 

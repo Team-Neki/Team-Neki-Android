@@ -9,6 +9,8 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.toBitmap
+import com.neki.android.core.analytics.AnalyticsEvent
+import com.neki.android.core.analytics.AnalyticsLogger
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -37,12 +39,19 @@ class MapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val mapRepository: MapRepository,
     private val userRepository: UserRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
+
+    private var lastSearchCenter: LocLatLng? = null
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
         onIntent = ::onIntent,
         initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
     )
+
+    fun logMapView() {
+        analyticsLogger.log(AnalyticsEvent.FourCutMap.MapView)
+    }
 
     private fun onIntent(
         intent: MapIntent,
@@ -53,7 +62,9 @@ class MapViewModel @Inject constructor(
         when (intent) {
             MapIntent.EnterMapScreen -> fetchInitialData(reduce)
             is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
-            is MapIntent.LoadPhotoBoothsByBounds -> loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+            is MapIntent.LoadPhotoBoothsByBounds -> {
+                loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+            }
             MapIntent.ClickCurrentLocationIcon -> {
                 if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                     moveCurrentLocation(state, reduce, postSideEffect)
@@ -64,6 +75,13 @@ class MapViewModel @Inject constructor(
 
             MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false, isVisibleRefreshButton = true) }
             is MapIntent.ClickRefreshButton -> {
+                analyticsLogger.log(
+                    AnalyticsEvent.FourCutMap.MapReSearch(
+                        hasFilter = state.brands.any { it.isChecked },
+                        regionChanged = isRegionChanged(intent.center, intent.zoomLevel),
+                    )
+                )
+                lastSearchCenter = intent.center
                 reduce { copy(isVisibleRefreshButton = false) }
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
@@ -84,7 +102,7 @@ class MapViewModel @Inject constructor(
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
             is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, state.shouldShowInfoTooltip, reduce)
-            is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, reduce, postSideEffect)
+            is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, state, reduce, postSideEffect)
             is MapIntent.ClickClusterMarker -> postSideEffect(MapEffect.ZoomToClusterBounds(intent.southWest, intent.northEast))
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
             MapIntent.ClickDirectionIcon -> {
@@ -184,7 +202,13 @@ class MapViewModel @Inject constructor(
                 }
             }
             val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
-
+            analyticsLogger.log(
+                AnalyticsEvent.FourCutMap.MapBrandFilterToggle(
+                    action = if (clickedBrand.isChecked) "deselect" else "select",
+                    selectedCount = updatedBrands.count { it.isChecked },
+                    brandName = clickedBrand.name,
+                ),
+            )
             copy(
                 brands = updatedBrands.toImmutableList(),
                 mapMarkers = mapMarkers.map { photoBooth ->
@@ -206,6 +230,12 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
+        analyticsLogger.log(
+            AnalyticsEvent.FourCutMap.BoothSelect(
+                entryPoint = "bottom_sheet",
+                brandName = photoBooth.brandName
+            )
+        )
         reduce {
             val isAlreadyInMarkers = mapMarkers.any {
                 it.latitude == photoBooth.latitude && it.longitude == photoBooth.longitude
@@ -231,6 +261,15 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
+        analyticsLogger.log(
+            AnalyticsEvent.FourCutMap.MapRouteClick(
+                mapType = when (app) {
+                    DirectionApp.KAKAO_MAP -> "kakao_map"
+                    DirectionApp.NAVER_MAP -> "naver_map"
+                    DirectionApp.GOOGLE_MAP -> "google_map"
+                },
+            )
+        )
         reduce { copy(isShowDirectionBottomSheet = false) }
         if (state.currentLocLatLng == null) {
             postSideEffect(MapEffect.ShowToastMessage("현재 위치를 가져올 수 없습니다."))
@@ -249,9 +288,20 @@ class MapViewModel @Inject constructor(
 
     private fun handleClickPhotoBoothMarker(
         locLatLng: LocLatLng,
+        state: MapState,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
+        state.mapMarkers.find {
+            it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
+        }?.let { booth ->
+            analyticsLogger.log(
+                AnalyticsEvent.FourCutMap.BoothSelect(
+                    entryPoint = "map",
+                    brandName = booth.brandName
+                )
+            )
+        }
         reduce {
             val updatedMarkers = mapMarkers.map { marker ->
                 val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
@@ -354,6 +404,18 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun isRegionChanged(currentCenter: LocLatLng, zoomLevel: Double): Boolean {
+        val prev = lastSearchCenter ?: return false
+        val distance = calculateDistance(prev.latitude, prev.longitude, currentCenter.latitude, currentCenter.longitude)
+        val threshold = when {
+            zoomLevel >= 18 -> 300
+            zoomLevel >= 16 -> 500
+            zoomLevel >= 14 -> 700
+            else -> 1000
+        }
+        return distance >= threshold
     }
 
     private fun loadPhotoBoothsByPolygon(

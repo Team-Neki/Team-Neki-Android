@@ -2,6 +2,8 @@ package com.neki.android.feature.auth.impl.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.AnalyticsEvent
+import com.neki.android.core.analytics.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -17,6 +19,7 @@ class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val tokenRepository: TokenRepository,
     private val userRepository: UserRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
     val store: MviIntentStore<LoginState, LoginIntent, LoginSideEffect> =
         mviIntentStore(
@@ -63,6 +66,7 @@ class LoginViewModel @Inject constructor(
     ) {
         userRepository.getUserInfo()
             .onSuccess { userInfo ->
+                analyticsLogger.setUserId(userInfo.id.toString())
                 if (userInfo.isRequiredTermsAgreed) {
                     authRepository.setCompletedOnboarding(true)
                     postSideEffect(LoginSideEffect.NavigateToMain)
