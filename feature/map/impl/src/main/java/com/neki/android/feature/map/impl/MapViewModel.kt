@@ -89,7 +89,7 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoTooltip = true) }
             MapIntent.DismissInfoTooltip -> reduce { copy(isShowInfoTooltip = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
-            is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, reduce)
+            is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, state, reduce)
             is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent.photoBooth, reduce, postSideEffect)
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
@@ -191,24 +191,25 @@ class MapViewModel @Inject constructor(
 
     private fun handleClickBrand(
         clickedBrand: Brand,
+        state: MapState,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
-        reduce {
-            val updatedBrands = brands.map { brand ->
-                if (brand == clickedBrand) {
-                    brand.copy(isChecked = !brand.isChecked)
-                } else {
-                    brand
-                }
+        val updatedBrands = state.brands.map { brand ->
+            if (brand == clickedBrand) {
+                brand.copy(isChecked = !brand.isChecked)
+            } else {
+                brand
             }
+        }
+        analyticsLogger.log(
+            MapAnalyticsEvent.MapBrandFilterToggle(
+                action = if (clickedBrand.isChecked) "deselect" else "select",
+                selectedCount = updatedBrands.count { it.isChecked },
+                brandName = clickedBrand.name,
+            ),
+        )
+        reduce {
             val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
-            analyticsLogger.log(
-                MapAnalyticsEvent.MapBrandFilterToggle(
-                    action = if (clickedBrand.isChecked) "deselect" else "select",
-                    selectedCount = updatedBrands.count { it.isChecked },
-                    brandName = clickedBrand.name,
-                ),
-            )
             copy(
                 brands = updatedBrands.toImmutableList(),
                 mapMarkers = mapMarkers.map { photoBooth ->
