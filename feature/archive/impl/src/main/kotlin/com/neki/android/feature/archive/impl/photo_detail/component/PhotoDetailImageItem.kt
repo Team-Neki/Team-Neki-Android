@@ -1,35 +1,17 @@
 package com.neki.android.feature.archive.impl.photo_detail.component
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
-import com.neki.android.feature.archive.impl.photo_detail.MemoMode
 import net.engawapg.lib.zoomable.ScrollGesturePropagation
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
@@ -37,22 +19,11 @@ import net.engawapg.lib.zoomable.zoomable
 @Composable
 internal fun PhotoDetailImageItem(
     imageUrl: String?,
-    memo: String,
-    memoMode: MemoMode,
-    actionBarHeight: Dp = 0.dp,
     isScrollInProgress: Boolean,
     isTapEnabled: Boolean,
     onClickLeft: () -> Unit,
     onClickRight: () -> Unit,
-    onClickMemoMore: () -> Unit,
-    onClickMemoText: () -> Unit,
-    onClickMemoFold: () -> Unit,
-    onClickMemoCancel: () -> Unit,
-    onClickMemoDone: (String) -> Unit,
-    onMemoTextChanged: (String) -> Unit,
 ) {
-    val isMemoActive = memoMode == MemoMode.Expanded || memoMode == MemoMode.Editing
-    val bottomPadding = if (memoMode == MemoMode.Editing) actionBarHeight else 0.dp
     val zoomState = rememberZoomState()
     var contentWidth by remember { mutableIntStateOf(0) }
 
@@ -62,7 +33,6 @@ internal fun PhotoDetailImageItem(
         AsyncImage(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = bottomPadding)
                 .onSizeChanged { contentWidth = it.width }
                 .zoomable(
                     zoomState = zoomState,
@@ -86,45 +56,5 @@ internal fun PhotoDetailImageItem(
             contentScale = ContentScale.Fit,
             onSuccess = { state -> zoomState.setContentSize(state.painter.intrinsicSize) },
         )
-
-        // dim 오버레이
-        AnimatedVisibility(
-            visible = isMemoActive,
-            enter = fadeIn(),
-            exit = fadeOut(),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x80202227))
-                    .noRippleClickableSingle { onClickMemoFold() },
-            )
-        }
-
-        // 메모 텍스트 영역
-        AnimatedVisibility(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .then(
-                    if (memoMode == MemoMode.Editing) Modifier.imePadding()
-                    else Modifier.windowInsetsPadding(
-                        WindowInsets.ime.exclude(WindowInsets(bottom = actionBarHeight)),
-                    ),
-                ),
-            visible = memoMode != MemoMode.Closed,
-            enter = expandVertically(expandFrom = Alignment.Top),
-            exit = shrinkVertically(shrinkTowards = Alignment.Top),
-        ) {
-            MemoTextField(
-                memo = memo,
-                memoMode = memoMode,
-                onClickMemoMore = onClickMemoMore,
-                onClickMemoText = onClickMemoText,
-                onClickMemoFold = onClickMemoFold,
-                onClickMemoCancel = onClickMemoCancel,
-                onClickMemoDone = onClickMemoDone,
-                onMemoTextChanged = onMemoTextChanged,
-            )
-        }
     }
 }
