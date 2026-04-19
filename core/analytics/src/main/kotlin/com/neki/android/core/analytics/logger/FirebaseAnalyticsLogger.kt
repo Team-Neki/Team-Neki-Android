@@ -11,7 +11,16 @@ internal class FirebaseAnalyticsLogger @Inject constructor(
 
     override fun log(event: AnalyticsEvent) {
         val bundle = Bundle().apply {
-            event.params.forEach { (key, value) -> putString(key, value) }
+            event.params.forEach { (key, value) ->
+                when (value) {
+                    is String -> putString(key, value)
+                    is Int -> putInt(key, value)
+                    is Long -> putLong(key, value)
+                    is Double -> putDouble(key, value)
+                    is Boolean -> putBoolean(key, value)
+                    else -> putString(key, value.toString())
+                }
+            }
         }
         firebaseAnalytics.logEvent(event.name, bundle)
     }

@@ -10,7 +10,7 @@ sealed interface ArchiveAnalyticsEvent : AnalyticsEvent {
         override val name = "photo_upload"
         override val params = mapOf(
             "method" to method,
-            "count" to count.toString(),
+            "count" to count,
         )
     }
 
@@ -20,14 +20,14 @@ sealed interface ArchiveAnalyticsEvent : AnalyticsEvent {
 
     data class AlbumAddFromDetail(val albumCount: Int) : ArchiveAnalyticsEvent {
         override val name = "album_add_from_detail"
-        override val params = mapOf("album_count" to albumCount.toString())
+        override val params = mapOf("album_count" to albumCount)
     }
 
     data class AlbumAddFromMulti(val photoCount: Int, val albumCount: Int) : ArchiveAnalyticsEvent {
         override val name = "album_add_from_multi"
         override val params = mapOf(
-            "photo_count" to photoCount.toString(),
-            "album_count" to albumCount.toString(),
+            "photo_count" to photoCount,
+            "album_count" to albumCount,
         )
     }
 

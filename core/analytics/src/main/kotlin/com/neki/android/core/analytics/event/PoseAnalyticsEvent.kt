@@ -12,12 +12,12 @@ sealed interface PoseAnalyticsEvent : AnalyticsEvent {
 
     data class PoseRandomSessionEnd(val totalSwipeCount: Int) : PoseAnalyticsEvent {
         override val name = "pose_random_session_end"
-        override val params = mapOf("total_swipe_count" to totalSwipeCount.toString())
+        override val params = mapOf("total_swipe_count" to totalSwipeCount)
     }
 
     data class PoseFilterToggle(val peopleCount: Int) : PoseAnalyticsEvent {
         override val name = "pose_filter_toggle"
-        override val params = mapOf("people_count" to peopleCount.toString())
+        override val params = mapOf("people_count" to peopleCount)
     }
 
     data object PoseBookmarkFilter : PoseAnalyticsEvent {

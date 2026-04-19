@@ -9,8 +9,8 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
     data class MapReSearch(val hasFilter: Boolean, val regionChanged: Boolean) : MapAnalyticsEvent {
         override val name = "map_re_search"
         override val params = mapOf(
-            "has_filter" to hasFilter.toString(),
-            "region_changed" to regionChanged.toString(),
+            "has_filter" to hasFilter,
+            "region_changed" to regionChanged,
         )
     }
 
@@ -22,7 +22,7 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
         override val name = "map_brand_filter_toggle"
         override val params = mapOf(
             "action" to action,
-            "selected_count" to selectedCount.toString(),
+            "selected_count" to selectedCount,
             "brand_name" to brandName,
         )
     }
