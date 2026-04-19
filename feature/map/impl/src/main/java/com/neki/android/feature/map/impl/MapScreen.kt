@@ -222,6 +222,7 @@ fun MapScreen(
         MapProperties(
             locationTrackingMode = locationTrackingMode,
             minZoom = MapConst.MIN_ZOOM_LEVEL,
+            maxZoom = MapConst.MAX_ZOOM_LEVEL,
         )
     }
     val mapUiSettings = remember {
