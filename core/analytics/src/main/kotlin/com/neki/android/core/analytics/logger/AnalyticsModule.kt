@@ -1,4 +1,4 @@
-package com.neki.android.core.analytics
+package com.neki.android.core.analytics.logger
 
 import android.content.Context
 import com.google.firebase.analytics.FirebaseAnalytics

@@ -1,4 +1,6 @@
-package com.neki.android.core.analytics
+package com.neki.android.core.analytics.logger
+
+import com.neki.android.core.analytics.AnalyticsEvent
 
 interface AnalyticsLogger {
     fun log(event: AnalyticsEvent)
