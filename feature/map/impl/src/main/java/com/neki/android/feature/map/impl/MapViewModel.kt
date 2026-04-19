@@ -79,7 +79,7 @@ class MapViewModel @Inject constructor(
                     MapAnalyticsEvent.MapReSearch(
                         hasFilter = state.brands.any { it.isChecked },
                         regionChanged = isRegionChanged(intent.center, intent.zoomLevel),
-                    )
+                    ),
                 )
                 lastSearchCenter = intent.center
                 reduce { copy(isVisibleRefreshButton = false) }
@@ -233,8 +233,8 @@ class MapViewModel @Inject constructor(
         analyticsLogger.log(
             MapAnalyticsEvent.BoothSelect(
                 entryPoint = "bottom_sheet",
-                brandName = photoBooth.brandName
-            )
+                brandName = photoBooth.brandName,
+            ),
         )
         reduce {
             val isAlreadyInMarkers = mapMarkers.any {
@@ -268,7 +268,7 @@ class MapViewModel @Inject constructor(
                     DirectionApp.NAVER_MAP -> "naver_map"
                     DirectionApp.GOOGLE_MAP -> "google_map"
                 },
-            )
+            ),
         )
         reduce { copy(isShowDirectionBottomSheet = false) }
         if (state.currentLocLatLng == null) {
@@ -298,8 +298,8 @@ class MapViewModel @Inject constructor(
             analyticsLogger.log(
                 MapAnalyticsEvent.BoothSelect(
                     entryPoint = "map",
-                    brandName = booth.brandName
-                )
+                    brandName = booth.brandName,
+                ),
             )
         }
         reduce {

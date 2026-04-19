@@ -138,8 +138,8 @@ class SelectAlbumViewModel @AssistedInject constructor(
                                     is SelectAlbumAction.UploadFromQR -> "qr"
                                     is SelectAlbumAction.UploadFromGallery -> "gallery"
                                 },
-                                count = photoCount
-                            )
+                                count = photoCount,
+                            ),
                         )
 
                         postSideEffect(SelectAlbumSideEffect.ShowToastMessage("이미지를 추가했어요"))
