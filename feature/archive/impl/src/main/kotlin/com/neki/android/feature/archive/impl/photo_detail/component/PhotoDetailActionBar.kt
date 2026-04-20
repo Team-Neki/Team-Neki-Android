@@ -19,6 +19,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 internal fun PhotoDetailActionBar(
     isFavorite: Boolean,
+    hasMemo: Boolean,
     modifier: Modifier = Modifier,
     onClickDownload: () -> Unit = {},
     onClickFavorite: () -> Unit = {},
@@ -61,7 +62,10 @@ internal fun PhotoDetailActionBar(
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_memo),
+                        imageVector = ImageVector.vectorResource(
+                            if (hasMemo) R.drawable.icon_memo_filled
+                            else R.drawable.icon_memo_stroked,
+                        ),
                         contentDescription = null,
                         tint = NekiTheme.colorScheme.gray700,
                     )
@@ -88,6 +92,7 @@ private fun PhotoDetailActionBarClosedPreview() {
     NekiTheme {
         PhotoDetailActionBar(
             isFavorite = false,
+            hasMemo = false,
         )
     }
 }
@@ -98,6 +103,7 @@ private fun PhotoDetailActionBarMemoActivePreview() {
     NekiTheme {
         PhotoDetailActionBar(
             isFavorite = true,
+            hasMemo = true,
         )
     }
 }

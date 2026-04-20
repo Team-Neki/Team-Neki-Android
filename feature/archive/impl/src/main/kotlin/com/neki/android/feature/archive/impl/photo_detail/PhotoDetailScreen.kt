@@ -167,6 +167,7 @@ internal fun PhotoDetailScreen(
                     actionBarHeightDp = with(density) { size.height.toDp() }
                 },
                 isFavorite = uiState.photo.isFavorite,
+                hasMemo = uiState.photo.memo.isNotEmpty(),
                 onClickDownload = { onIntent(PhotoDetailIntent.ClickDownloadIcon) },
                 onClickFavorite = { onIntent(PhotoDetailIntent.ClickFavoriteIcon) },
                 onClickMemo = { onIntent(PhotoDetailIntent.ClickMemoIcon) },
