@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -216,7 +217,9 @@ private fun PhotoDetailPagerArea(
 
     Box(modifier = modifier) {
         HorizontalPager(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = if (uiState.memoMode == MemoMode.Editing) actionBarHeightDp else 0.dp),
             state = pagerState,
             beyondViewportPageCount = 1,
             userScrollEnabled = !isMemoActive,
