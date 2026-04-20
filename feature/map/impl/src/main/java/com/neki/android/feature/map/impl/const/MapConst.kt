@@ -6,8 +6,9 @@ internal object MapConst {
     internal const val DEFAULT_LONGITUDE = 127.027610
 
     // 기본 줌 레벨
-    internal const val DEFAULT_ZOOM_LEVEL = 17.0
+    internal const val DEFAULT_ZOOM_LEVEL = 14.0
     internal const val MIN_ZOOM_LEVEL = 12.0
+    internal const val MAX_ZOOM_LEVEL = 20.0
 
     internal const val DEFAULT_CAMERA_ANIMATION_DURATIONS_MS = 800
 

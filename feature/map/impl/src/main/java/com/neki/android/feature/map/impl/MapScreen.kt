@@ -68,6 +68,10 @@ fun MapRoute(
     val scope = rememberCoroutineScope()
     val nekiToast = remember { NekiToast(context) }
 
+    LaunchedEffect(Unit) {
+        viewModel.logMapView()
+    }
+
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(
@@ -222,6 +226,7 @@ fun MapScreen(
         MapProperties(
             locationTrackingMode = locationTrackingMode,
             minZoom = MapConst.MIN_ZOOM_LEVEL,
+            maxZoom = MapConst.MAX_ZOOM_LEVEL,
         )
     }
     val mapUiSettings = remember {
@@ -311,12 +316,17 @@ fun MapScreen(
                     cameraPositionState.contentBounds?.let { bounds ->
                         onIntent(
                             MapIntent.ClickRefreshButton(
-                                MapBounds(
+                                mapBounds = MapBounds(
                                     southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
                                     northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
                                     northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
                                     southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
                                 ),
+                                center = LocLatLng(
+                                    cameraPositionState.position.target.latitude,
+                                    cameraPositionState.position.target.longitude,
+                                ),
+                                zoomLevel = cameraPositionState.position.zoom,
                             ),
                         )
                     }

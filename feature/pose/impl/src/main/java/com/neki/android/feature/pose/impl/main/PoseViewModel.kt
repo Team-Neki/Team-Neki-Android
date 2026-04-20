@@ -6,6 +6,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
+import com.neki.android.core.analytics.event.PoseAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
@@ -26,6 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class PoseViewModel @Inject constructor(
     private val poseRepository: PoseRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     private val _headCountFilter = MutableStateFlow<PeopleCount?>(null)
@@ -71,6 +74,10 @@ internal class PoseViewModel @Inject constructor(
             onIntent = ::onIntent,
         )
 
+    fun logPoseView() {
+        analyticsLogger.log(PoseAnalyticsEvent.PoseView)
+    }
+
     private fun onIntent(
         intent: PoseIntent,
         state: PoseState,
@@ -79,7 +86,7 @@ internal class PoseViewModel @Inject constructor(
     ) {
         when (intent) {
             // Pose Main
-            PoseIntent.EnterPoseScreen -> Unit
+            PoseIntent.EnterPoseScreen -> {}
             PoseIntent.ClickAlarmIcon -> postSideEffect(PoseEffect.NavigateToNotification)
             PoseIntent.ClickQRScanIcon -> postSideEffect(PoseEffect.NavigateToQRScan)
             PoseIntent.ClickPeopleCountChip -> reduce { copy(isShowPeopleCountBottomSheet = true) }
@@ -87,6 +94,7 @@ internal class PoseViewModel @Inject constructor(
             PoseIntent.DismissPeopleCountBottomSheet -> reduce { copy(isShowPeopleCountBottomSheet = false) }
             PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
             PoseIntent.ClickBookmarkChip -> {
+                analyticsLogger.log(PoseAnalyticsEvent.PoseBookmarkFilter)
                 val newValue = !state.isShowBookmarkedPose
                 _isBookmarkOnly.value = newValue
                 _headCountFilter.value = null
@@ -117,6 +125,7 @@ internal class PoseViewModel @Inject constructor(
             }
 
             is PoseIntent.ClickBookmarkIcon -> {
+                analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
                 val pose = intent.pose
                 val newBookmarked = !pose.isBookmarked
                 updatedBookmarks.update { it + (pose.id to newBookmarked) }
@@ -152,6 +161,7 @@ internal class PoseViewModel @Inject constructor(
                 )
             }
         } else {
+            analyticsLogger.log(PoseAnalyticsEvent.PoseFilterToggle(peopleCount = intent.peopleCount.value))
             _headCountFilter.value = intent.peopleCount
             reduce {
                 copy(

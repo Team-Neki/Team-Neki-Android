@@ -2,6 +2,8 @@ package com.neki.android.feature.archive.impl.album
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.AlbumPreview
@@ -22,6 +24,7 @@ import javax.inject.Inject
 class AllAlbumViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     val store: MviIntentStore<AllAlbumState, AllAlbumIntent, AllAlbumSideEffect> =
@@ -182,6 +185,7 @@ class AllAlbumViewModel @Inject constructor(
         viewModelScope.launch {
             folderRepository.createFolder(name = albumName)
                 .onSuccess {
+                    analyticsLogger.log(ArchiveAnalyticsEvent.AlbumCreate)
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
                     postSideEffect(AllAlbumSideEffect.NotifyResult)

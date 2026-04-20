@@ -24,6 +24,6 @@ sealed interface SelectAlbumAction {
     @Serializable
     data class CopyPhotos(
         val photoIds: List<Long>,
-        val withShowToast: Boolean = true,
+        val fromPhotoDetail: Boolean,
     ) : SelectAlbumAction
 }

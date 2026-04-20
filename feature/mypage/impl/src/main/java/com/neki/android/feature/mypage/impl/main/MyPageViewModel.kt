@@ -2,6 +2,8 @@ package com.neki.android.feature.mypage.impl.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.event.MypageAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -23,6 +25,7 @@ internal class MyPageViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
     private val tokenRepository: TokenRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     val store: MviIntentStore<MyPageState, MyPageIntent, MyPageEffect> =
@@ -181,6 +184,7 @@ internal class MyPageViewModel @Inject constructor(
     }
 
     private fun logout(postSideEffect: (MyPageEffect) -> Unit) = viewModelScope.launch {
+        analyticsLogger.log(MypageAnalyticsEvent.Logout)
         tokenRepository.clearTokensWithAuthCache()
         postSideEffect(MyPageEffect.LogoutWithKakao)
     }
@@ -192,6 +196,7 @@ internal class MyPageViewModel @Inject constructor(
         reduce { copy(isLoading = true) }
         authRepository.withdrawAccount()
             .onSuccess {
+                analyticsLogger.log(MypageAnalyticsEvent.Withdraw)
                 tokenRepository.clearTokensWithAuthCache()
                 authRepository.setCompletedOnboarding(false)
                 reduce { copy(isLoading = false) }

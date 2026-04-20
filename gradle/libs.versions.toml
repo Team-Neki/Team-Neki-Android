@@ -49,6 +49,7 @@ firebaseCrashlyticsPlugin = "3.0.6"
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "cameraX" }
+guava = { module = "com.google.guava:guava", version = "33.4.8-android" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

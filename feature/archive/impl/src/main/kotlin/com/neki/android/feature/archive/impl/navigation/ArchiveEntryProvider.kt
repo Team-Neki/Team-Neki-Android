@@ -109,7 +109,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
             navigateToPhotoDetail = navigator::navigateToPhotoDetail,
             navigateToSelectAlbum = { photoIds ->
                 navigator.navigateToSelectAlbum(
-                    action = SelectAlbumAction.CopyPhotos(photoIds = photoIds),
+                    action = SelectAlbumAction.CopyPhotos(photoIds = photoIds, fromPhotoDetail = false),
                     title = "앨범에 추가",
                     multiSelect = true,
                 )
@@ -189,7 +189,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
             navigateBack = navigator::goBack,
             navigateToSelectAlbum = { photoId ->
                 navigator.navigateToSelectAlbum(
-                    action = SelectAlbumAction.CopyPhotos(listOf(photoId), false),
+                    action = SelectAlbumAction.CopyPhotos(photoIds = listOf(photoId), fromPhotoDetail = true),
                     title = "모든 앨범",
                     multiSelect = false,
                 )

@@ -2,6 +2,8 @@ package com.neki.android.feature.pose.impl.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.event.PoseAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.ui.MviIntentStore
@@ -23,6 +25,7 @@ class PoseDetailViewModel @AssistedInject constructor(
     @Assisted private val id: Long,
     private val poseRepository: PoseRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     private val bookmarkRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
@@ -85,6 +88,7 @@ class PoseDetailViewModel @AssistedInject constructor(
         reduce: (PoseDetailState.() -> PoseDetailState) -> Unit,
         postSideEffect: (PoseDetailSideEffect) -> Unit,
     ) {
+        analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
         val newBookmarkStatus = !state.pose.isBookmarked
         viewModelScope.launch { bookmarkRequests.emit(newBookmarkStatus) }
         reduce { copy(pose = pose.copy(isBookmarked = newBookmarkStatus)) }
