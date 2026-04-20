@@ -1,10 +1,23 @@
 package com.neki.android.feature.archive.impl.photo_detail
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -16,17 +29,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
+import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.topbar.BackTitleOptionTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
@@ -37,10 +52,12 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.api.PhotoDetailResult
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
+import com.neki.android.feature.archive.impl.photo_detail.component.MemoTextField
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailActionBar
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailImageItem
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -64,6 +81,14 @@ internal fun PhotoDetailRoute(
         snapshotFlow { pagerState.settledPage }.collect { page ->
             viewModel.store.onIntent(PhotoDetailIntent.PageChanged(page))
         }
+    }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.isScrollInProgress }
+            .filter { it }
+            .collect {
+                viewModel.store.onIntent(PhotoDetailIntent.PageScrollStarted)
+            }
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
@@ -111,8 +136,6 @@ internal fun PhotoDetailScreen(
     onIntent: (PhotoDetailIntent) -> Unit = {},
     pagerState: PagerState = rememberPagerState { uiState.photos.size.coerceAtLeast(1) },
 ) {
-    val isMemoActive = uiState.currentMemoMode == MemoMode.Expanded ||
-        uiState.currentMemoMode == MemoMode.Editing
     val density = LocalDensity.current
     var actionBarHeightDp by remember { mutableStateOf(0.dp) }
 
@@ -127,46 +150,24 @@ internal fun PhotoDetailScreen(
             onClickIcon = { onIntent(PhotoDetailIntent.ClickOptionIcon) },
         )
 
-        HorizontalPager(
+        PhotoDetailPagerArea(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .clipToBounds(),
-            state = pagerState,
-            beyondViewportPageCount = 1,
-            userScrollEnabled = !isMemoActive,
-        ) { page ->
-            val index = if (uiState.photos.isEmpty()) 0 else page.coerceIn(0, uiState.photos.lastIndex)
+            uiState = uiState,
+            actionBarHeightDp = actionBarHeightDp,
+            pagerState = pagerState,
+            onIntent = onIntent,
+        )
 
-            val photo = uiState.photos.getOrNull(index)
-            val pageMemoMode = uiState.memoModeOf(photo?.id ?: 0L)
-            val pageMemo = if (index == uiState.currentIndex) uiState.memo
-            else photo?.memo.orEmpty()
-
-            PhotoDetailImageItem(
-                imageUrl = photo?.imageUrl,
-                memo = pageMemo,
-                memoMode = pageMemoMode,
-                actionBarHeight = actionBarHeightDp,
-                isScrollInProgress = pagerState.isScrollInProgress,
-                isTapEnabled = pageMemoMode != MemoMode.Expanded && pageMemoMode != MemoMode.Editing,
-                onClickLeft = { onIntent(PhotoDetailIntent.ClickLeftPhoto) },
-                onClickRight = { onIntent(PhotoDetailIntent.ClickRightPhoto) },
-                onClickMemoMore = { onIntent(PhotoDetailIntent.ClickMemoMore) },
-                onClickMemoText = { onIntent(PhotoDetailIntent.ClickMemoText) },
-                onClickMemoFold = { onIntent(PhotoDetailIntent.ClickMemoFold) },
-                onClickMemoCancel = { onIntent(PhotoDetailIntent.ClickMemoCancel) },
-                onClickMemoDone = { onIntent(PhotoDetailIntent.ClickMemoDone(it)) },
-                onMemoTextChanged = { onIntent(PhotoDetailIntent.MemoTextChanged(it)) },
-            )
-        }
-
-        if (uiState.currentMemoMode != MemoMode.Editing) {
+        if (uiState.memoMode != MemoMode.Editing) {
             PhotoDetailActionBar(
                 modifier = Modifier.onSizeChanged { size ->
                     actionBarHeightDp = with(density) { size.height.toDp() }
                 },
                 isFavorite = uiState.photo.isFavorite,
+                hasMemo = uiState.photo.memo.isNotEmpty(),
                 onClickDownload = { onIntent(PhotoDetailIntent.ClickDownloadIcon) },
                 onClickFavorite = { onIntent(PhotoDetailIntent.ClickFavoriteIcon) },
                 onClickMemo = { onIntent(PhotoDetailIntent.ClickMemoIcon) },
@@ -201,6 +202,78 @@ internal fun PhotoDetailScreen(
 
     if (uiState.isLoading) {
         LoadingDialog()
+    }
+}
+
+@Composable
+private fun PhotoDetailPagerArea(
+    modifier: Modifier,
+    uiState: PhotoDetailState,
+    actionBarHeightDp: Dp,
+    pagerState: PagerState,
+    onIntent: (PhotoDetailIntent) -> Unit,
+) {
+    val isMemoActive = uiState.memoMode == MemoMode.Expanded ||
+        uiState.memoMode == MemoMode.Editing
+
+    Box(modifier = modifier) {
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = if (uiState.memoMode == MemoMode.Editing) actionBarHeightDp else 0.dp),
+            state = pagerState,
+            beyondViewportPageCount = 1,
+            userScrollEnabled = !isMemoActive,
+        ) { page ->
+            val index = if (uiState.photos.isEmpty()) 0 else page.coerceIn(0, uiState.photos.lastIndex)
+            val photo = uiState.photos.getOrNull(index)
+
+            PhotoDetailImageItem(
+                imageUrl = photo?.imageUrl,
+                isScrollInProgress = pagerState.isScrollInProgress,
+                isTapEnabled = !isMemoActive,
+                onClickLeft = { onIntent(PhotoDetailIntent.ClickLeftPhoto) },
+                onClickRight = { onIntent(PhotoDetailIntent.ClickRightPhoto) },
+            )
+        }
+
+        AnimatedVisibility(
+            visible = isMemoActive,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x80202227))
+                    .noRippleClickableSingle { onIntent(PhotoDetailIntent.ClickMemoFold) },
+            )
+        }
+
+        AnimatedVisibility(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .then(
+                    if (uiState.memoMode == MemoMode.Editing) Modifier.imePadding()
+                    else Modifier.windowInsetsPadding(
+                        WindowInsets.ime.exclude(WindowInsets(bottom = actionBarHeightDp)),
+                    ),
+                ),
+            visible = uiState.memoMode != MemoMode.Closed,
+            enter = expandVertically(expandFrom = Alignment.Top),
+            exit = shrinkVertically(shrinkTowards = Alignment.Top),
+        ) {
+            MemoTextField(
+                memo = uiState.memo,
+                memoMode = uiState.memoMode,
+                onClickMemoMore = { onIntent(PhotoDetailIntent.ClickMemoMore) },
+                onClickMemoText = { onIntent(PhotoDetailIntent.ClickMemoText) },
+                onClickMemoFold = { onIntent(PhotoDetailIntent.ClickMemoFold) },
+                onClickMemoCancel = { onIntent(PhotoDetailIntent.ClickMemoCancel) },
+                onClickMemoDone = { onIntent(PhotoDetailIntent.ClickMemoDone(it)) },
+                onMemoTextChanged = { onIntent(PhotoDetailIntent.MemoTextChanged(it)) },
+            )
+        }
     }
 }
 

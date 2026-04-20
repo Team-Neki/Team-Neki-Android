@@ -13,7 +13,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -116,6 +115,8 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 preloadIfNeeded(reduce)
             }
 
+            PhotoDetailIntent.PageScrollStarted -> reduce { copy(memoMode = MemoMode.Closed) }
+
             // ActionBar Intent
             PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce)
@@ -137,40 +138,36 @@ class PhotoDetailViewModel @AssistedInject constructor(
             // Memo Intent
             is PhotoDetailIntent.MemoTextChanged -> reduce { copy(memo = intent.text) }
             PhotoDetailIntent.ClickMemoIcon -> reduce {
-                val photoId = photo.id
-                val current = memoModeOf(photoId)
-                val newMode = if (current == MemoMode.Closed) MemoMode.Preview else MemoMode.Closed
-                copy(memoModes = (memoModes + (photoId to newMode)).toImmutableMap())
+                copy(memoMode = if (memoMode == MemoMode.Closed) MemoMode.Preview else MemoMode.Closed)
             }
 
             PhotoDetailIntent.ClickMemoMore -> reduce {
-                copy(memoModes = (memoModes + (photo.id to MemoMode.Expanded)).toImmutableMap())
+                copy(memoMode = MemoMode.Expanded)
             }
 
             PhotoDetailIntent.ClickMemoText -> reduce {
-                copy(memoModes = (memoModes + (photo.id to MemoMode.Editing)).toImmutableMap())
+                copy(memoMode = MemoMode.Editing)
             }
 
             PhotoDetailIntent.ClickMemoFold -> reduce {
                 copy(
                     memo = photo.memo,
-                    memoModes = (memoModes + (photo.id to MemoMode.Preview)).toImmutableMap(),
+                    memoMode = MemoMode.Preview,
                 )
             }
 
             PhotoDetailIntent.ClickMemoCancel -> reduce {
                 copy(
                     memo = photo.memo,
-                    memoModes = (memoModes + (photo.id to MemoMode.Preview)).toImmutableMap(),
+                    memoMode = MemoMode.Preview,
                 )
             }
 
             is PhotoDetailIntent.ClickMemoDone -> {
-                val photoId = state.photo.id
                 reduce {
                     copy(
                         memo = intent.memo,
-                        memoModes = (memoModes + (photoId to MemoMode.Preview)).toImmutableMap(),
+                        memoMode = MemoMode.Preview,
                     )
                 }
                 saveMemo(state.copy(memo = intent.memo), reduce, postSideEffect)
