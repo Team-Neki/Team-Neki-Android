@@ -1,6 +1,5 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.component
 
-import android.provider.SyncStateContract.Helpers.update
 import android.webkit.WebView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -21,6 +20,7 @@ import com.neki.android.feature.photo_upload.impl.qrscan.util.PhotoWebViewClient
 internal fun PhotoWebViewContent(
     scannedUrl: String,
     onDetectImageUrl: (String) -> Unit,
+    onPageError: () -> Unit,
 ) {
     val webView = remember { mutableStateOf<WebView?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -42,6 +42,10 @@ internal fun PhotoWebViewContent(
 
                 webViewClient = PhotoWebViewClient(
                     onPageFinished = { isLoading = false },
+                    onPageError = {
+                        isLoading = false
+                        onPageError()
+                    },
                 ) { photoImageUrl ->
                     onDetectImageUrl(photoImageUrl)
                 }

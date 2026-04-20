@@ -21,6 +21,7 @@ internal class QRScanViewModel @Inject constructor(
     private var webViewEnteredUrl: String? = null
     private var imageDetected: Boolean = false
     private var isDownloadRequiredBrand: Boolean = false
+    private val loggedUnsupportedUrls = mutableSetOf<String>()
 
     val store: MviIntentStore<QRScanState, QRScanIntent, QRScanSideEffect> =
         mviIntentStore(
@@ -97,8 +98,10 @@ internal class QRScanViewModel @Inject constructor(
                         }
                     }
                 } else {
-                    viewModelScope.launch {
-                        discordWebhookRepository.logUnsupportedBrandQR(scannedUrl)
+                    if (loggedUnsupportedUrls.add(scannedUrl)) {
+                        viewModelScope.launch {
+                            discordWebhookRepository.logUnsupportedBrandQR(scannedUrl)
+                        }
                     }
                     reduce { copy(isUnSupportedBrandDialogShown = true) }
                 }
@@ -112,6 +115,19 @@ internal class QRScanViewModel @Inject constructor(
             is QRScanIntent.DetectImageUrl -> {
                 imageDetected = true
                 postSideEffect(QRScanSideEffect.SetQRScannedResult(intent.imageUrl))
+            }
+
+            QRScanIntent.WebViewError -> {
+                webViewEnteredUrl = null
+                imageDetected = false
+                isDownloadRequiredBrand = false
+                reduce {
+                    copy(
+                        viewType = QRScanViewType.QR_SCAN,
+                        scannedUrl = null,
+                    )
+                }
+                postSideEffect(QRScanSideEffect.ShowToast("만료되었거나 유효하지 않은 QR코드입니다."))
             }
 
             QRScanIntent.DismissShouldDownloadDialog -> reduce { copy(isDownloadNeededDialogShown = false) }

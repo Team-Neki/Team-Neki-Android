@@ -103,6 +103,7 @@ internal fun QRScanScreen(
                 PhotoWebViewContent(
                     scannedUrl = uiState.scannedUrl,
                     onDetectImageUrl = { imageUrl -> onIntent(QRScanIntent.DetectImageUrl(imageUrl)) },
+                    onPageError = { onIntent(QRScanIntent.WebViewError) },
                 )
             else {
                 LaunchedEffect(Unit) {

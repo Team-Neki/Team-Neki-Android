@@ -1,5 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.util
 
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -9,6 +10,7 @@ import timber.log.Timber
 
 class PhotoWebViewClient(
     private val onPageFinished: () -> Unit,
+    private val onPageError: () -> Unit,
     private val onImageUrlDetected: (String) -> Unit,
 ) : WebViewClient() {
 
@@ -63,5 +65,29 @@ class PhotoWebViewClient(
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
         onPageFinished()
+    }
+
+    override fun onReceivedError(
+        view: WebView?,
+        request: WebResourceRequest?,
+        error: WebResourceError?,
+    ) {
+        super.onReceivedError(view, request, error)
+        if (request?.isForMainFrame == true) {
+            Timber.e("WebView main frame error: ${error?.description}")
+            onPageError()
+        }
+    }
+
+    override fun onReceivedHttpError(
+        view: WebView?,
+        request: WebResourceRequest?,
+        errorResponse: WebResourceResponse?,
+    ) {
+        super.onReceivedHttpError(view, request, errorResponse)
+        if (request?.isForMainFrame == true) {
+            Timber.e("WebView main frame HTTP error: ${errorResponse?.statusCode}")
+            onPageError()
+        }
     }
 }
