@@ -56,6 +56,7 @@ import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailA
 import com.neki.android.feature.archive.impl.photo_detail.component.PhotoDetailImageItem
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -79,6 +80,14 @@ internal fun PhotoDetailRoute(
         snapshotFlow { pagerState.settledPage }.collect { page ->
             viewModel.store.onIntent(PhotoDetailIntent.PageChanged(page))
         }
+    }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.isScrollInProgress }
+            .filter { it }
+            .collect {
+                viewModel.store.onIntent(PhotoDetailIntent.PageScrollStarted)
+            }
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->

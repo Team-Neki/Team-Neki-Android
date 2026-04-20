@@ -110,6 +110,8 @@ class PhotoDetailViewModel @AssistedInject constructor(
                 preloadIfNeeded(reduce)
             }
 
+            PhotoDetailIntent.PageScrollStarted -> reduce { copy(memoMode = MemoMode.Closed) }
+
             // ActionBar Intent
             PhotoDetailIntent.ClickDownloadIcon -> postSideEffect(PhotoDetailSideEffect.DownloadImage(state.photo.imageUrl))
             PhotoDetailIntent.ClickFavoriteIcon -> handleFavoriteToggle(state, reduce)

@@ -33,6 +33,7 @@ sealed interface PhotoDetailIntent {
     data object ClickLeftPhoto : PhotoDetailIntent
     data object ClickRightPhoto : PhotoDetailIntent
     data class PageChanged(val page: Int) : PhotoDetailIntent
+    data object PageScrollStarted : PhotoDetailIntent
 
     // ActionBar Intent
     data object ClickDownloadIcon : PhotoDetailIntent
