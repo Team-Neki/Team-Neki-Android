@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.feature.map.impl.const.DirectionApp
+import com.neki.android.feature.map.impl.const.MapConst
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -63,6 +64,7 @@ sealed interface MapEffect {
     data class MoveCameraToPosition(
         val locLatLng: LocLatLng,
         val isRequiredLoadPhotoBooths: Boolean = false,
+        val zoomLevel: Double = MapConst.DEFAULT_ZOOM_LEVEL,
     ) : MapEffect
     data class ZoomToClusterBounds(
         val southWest: LocLatLng,

@@ -7,6 +7,7 @@ internal object MapConst {
 
     // 기본 줌 레벨
     internal const val DEFAULT_ZOOM_LEVEL = 14.0
+    internal const val MARKER_SELECTED_ZOOM_LEVEL = 18.0
     internal const val MIN_ZOOM_LEVEL = 12.0
     internal const val MAX_ZOOM_LEVEL = 20.0
 

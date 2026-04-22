@@ -141,7 +141,7 @@ fun MapRoute(
                     cameraPositionState.animate(
                         update = CameraUpdate.scrollAndZoomTo(
                             LatLng(sideEffect.locLatLng.latitude, sideEffect.locLatLng.longitude),
-                            MapConst.DEFAULT_ZOOM_LEVEL,
+                            sideEffect.zoomLevel,
                         ),
                         animation = CameraAnimation.Easing,
                         durationMs = MapConst.DEFAULT_CAMERA_ANIMATION_DURATIONS_MS,
