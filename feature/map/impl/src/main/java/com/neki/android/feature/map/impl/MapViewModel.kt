@@ -258,7 +258,8 @@ class MapViewModel @Inject constructor(
         postSideEffect(
             MapEffect.MoveCameraToPosition(
                 locLatLng = LocLatLng(photoBooth.latitude, photoBooth.longitude),
-                zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL)
+                zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
+            ),
         )
     }
 
