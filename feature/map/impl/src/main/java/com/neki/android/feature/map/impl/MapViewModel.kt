@@ -138,7 +138,7 @@ class MapViewModel @Inject constructor(
                     // 위치 조회 실패 시 강남역으로 카메라 이동
                     postSideEffect(
                         MapEffect.MoveCameraToPosition(
-                            LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
+                            locLatLng = LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
                             isRequiredLoadPhotoBooths = true,
                             zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
                         ),
@@ -183,7 +183,7 @@ class MapViewModel @Inject constructor(
             reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
             postSideEffect(
                 MapEffect.MoveCameraToPosition(
-                    LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
+                    locLatLng = LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
                     isRequiredLoadPhotoBooths = true,
                     zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
                 ),
