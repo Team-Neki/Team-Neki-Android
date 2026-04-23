@@ -131,14 +131,14 @@ class MapViewModel @Inject constructor(
             LocationHelper.getCurrentLocation(context)
                 .onSuccess { location ->
                     reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
-                    postSideEffect(MapEffect.MoveCameraToPosition(locLatLng = location, isRequiredLoadPhotoBooths = true))
+                    postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true))
                 }
                 .onFailure { e ->
                     Timber.e(e)
                     // 위치 조회 실패 시 강남역으로 카메라 이동
                     postSideEffect(
                         MapEffect.MoveCameraToPosition(
-                            locLatLng = LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
+                            LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
                             isRequiredLoadPhotoBooths = true,
                         ),
                     )
@@ -182,7 +182,7 @@ class MapViewModel @Inject constructor(
             reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
             postSideEffect(
                 MapEffect.MoveCameraToPosition(
-                    locLatLng = LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
+                    LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
                     isRequiredLoadPhotoBooths = true,
                 ),
             )
