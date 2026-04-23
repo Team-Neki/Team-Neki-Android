@@ -131,14 +131,14 @@ class MapViewModel @Inject constructor(
             LocationHelper.getCurrentLocation(context)
                 .onSuccess { location ->
                     reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
-                    postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true))
+                    postSideEffect(MapEffect.MoveCameraToPosition(locLatLng = location, isRequiredLoadPhotoBooths = true))
                 }
                 .onFailure { e ->
                     Timber.e(e)
                     // 위치 조회 실패 시 강남역으로 카메라 이동
                     postSideEffect(
                         MapEffect.MoveCameraToPosition(
-                            LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
+                            locLatLng = LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
                             isRequiredLoadPhotoBooths = true,
                         ),
                     )
@@ -182,7 +182,7 @@ class MapViewModel @Inject constructor(
             reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
             postSideEffect(
                 MapEffect.MoveCameraToPosition(
-                    LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
+                    locLatLng = LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
                     isRequiredLoadPhotoBooths = true,
                 ),
             )
@@ -253,7 +253,7 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(photoBooth.latitude, photoBooth.longitude), zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng = LocLatLng(photoBooth.latitude, photoBooth.longitude), zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
     }
 
     private fun handleClickDirectionItem(
@@ -320,14 +320,14 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng = locLatLng, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
     }
 
     private fun handleClickPhotoBoothCard(
         locLatLng: LocLatLng,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng = locLatLng, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
     }
 
     private fun fetchInitialData(reduce: (MapState.() -> MapState) -> Unit) {
