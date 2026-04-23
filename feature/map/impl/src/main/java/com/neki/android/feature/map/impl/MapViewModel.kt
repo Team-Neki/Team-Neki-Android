@@ -131,7 +131,13 @@ class MapViewModel @Inject constructor(
             LocationHelper.getCurrentLocation(context)
                 .onSuccess { location ->
                     reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
-                    postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
+                    postSideEffect(
+                        MapEffect.MoveCameraToPosition(
+                            locLatLng = location,
+                            isRequiredLoadPhotoBooths = true,
+                            zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
+                        ),
+                    )
                 }
                 .onFailure { e ->
                     Timber.e(e)
