@@ -320,7 +320,7 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng))
     }
 
     private fun handleClickPhotoBoothCard(
