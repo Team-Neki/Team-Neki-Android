@@ -237,6 +237,7 @@ class MapViewModel @Inject constructor(
                 brandName = photoBooth.brandName,
             ),
         )
+
         reduce {
             val isAlreadyInMarkers = mapMarkers.any {
                 it.latitude == photoBooth.latitude && it.longitude == photoBooth.longitude
@@ -253,7 +254,12 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng = LocLatLng(photoBooth.latitude, photoBooth.longitude), zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
+
+        postSideEffect(
+            MapEffect.MoveCameraToPosition(
+                locLatLng = LocLatLng(photoBooth.latitude, photoBooth.longitude),
+                zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL)
+        )
     }
 
     private fun handleClickDirectionItem(
