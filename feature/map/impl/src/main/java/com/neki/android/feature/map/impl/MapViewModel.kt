@@ -131,7 +131,7 @@ class MapViewModel @Inject constructor(
             LocationHelper.getCurrentLocation(context)
                 .onSuccess { location ->
                     reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
-                    postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true))
+                    postSideEffect(MapEffect.MoveCameraToPosition(location, isRequiredLoadPhotoBooths = true, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
                 }
                 .onFailure { e ->
                     Timber.e(e)
@@ -140,6 +140,7 @@ class MapViewModel @Inject constructor(
                         MapEffect.MoveCameraToPosition(
                             LocLatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
                             isRequiredLoadPhotoBooths = true,
+                            zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
                         ),
                     )
                 }
@@ -184,6 +185,7 @@ class MapViewModel @Inject constructor(
                 MapEffect.MoveCameraToPosition(
                     LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
                     isRequiredLoadPhotoBooths = true,
+                    zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
                 ),
             )
         }
