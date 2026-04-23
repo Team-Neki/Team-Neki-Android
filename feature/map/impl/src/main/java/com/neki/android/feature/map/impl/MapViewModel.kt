@@ -253,7 +253,7 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers.toImmutableList(),
             )
         }
-        postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
+        postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(photoBooth.latitude, photoBooth.longitude), zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
     }
 
     private fun handleClickDirectionItem(
@@ -327,7 +327,7 @@ class MapViewModel @Inject constructor(
         locLatLng: LocLatLng,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng))
+        postSideEffect(MapEffect.MoveCameraToPosition(locLatLng, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
     }
 
     private fun fetchInitialData(reduce: (MapState.() -> MapState) -> Unit) {
