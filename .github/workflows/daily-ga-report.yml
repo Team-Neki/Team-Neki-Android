@@ -2,7 +2,7 @@ name: GA4 Daily Report
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 매일 09:00 KST
+    - cron: '0 1 * * *'  # 매일 10:00 KST
   workflow_dispatch:
 
 jobs:
