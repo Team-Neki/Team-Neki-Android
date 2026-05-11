@@ -94,53 +94,61 @@ def main():
     gallery = upload.get("gallery", 0)
     qr = upload.get("qr", 0)
 
-    def field(name, lines):
-        return {"name": name, "value": "\n".join(lines) or "없음", "inline": False}
+    def lines_to_value(lines):
+        return "\n".join(lines) or "없음"
 
-    map_lines = [
-        f"진입 {ev.get('map_view', 0)}회 ({us.get('map_view', 0)}명)",
-        f"재검색 {ev.get('map_re_search', 0)}회",
-        f"브랜드 필터 {ev.get('map_brand_filter_toggle', 0)}회",
+    map_desc = "\n".join([
+        f"진입 **{ev.get('map_view', 0)}회** ({us.get('map_view', 0)}명)",
+        f"재검색 **{ev.get('map_re_search', 0)}회**",
+        f"브랜드 필터 **{ev.get('map_brand_filter_toggle', 0)}회**",
     ] + brand_lines + [
-        f"부스 선택 {ev.get('booth_select', 0)}회 ({us.get('booth_select', 0)}명)",
-        f"길찾기 {ev.get('map_route_click', 0)}회",
-    ]
+        f"부스 선택 **{ev.get('booth_select', 0)}회** ({us.get('booth_select', 0)}명)",
+        f"길찾기 **{ev.get('map_route_click', 0)}회**",
+    ])
 
-    pose_lines = [
-        f"진입 {ev.get('pose_view', 0)}회 ({us.get('pose_view', 0)}명)",
-        f"필터 토글 {ev.get('pose_filter_toggle', 0)}회",
-        f"랜덤 시작 {ev.get('pose_random_start', 0)}회",
-        f"북마크 {ev.get('pose_bookmark', 0)}회",
-    ]
+    pose_desc = "\n".join([
+        f"진입 **{ev.get('pose_view', 0)}회** ({us.get('pose_view', 0)}명)",
+        f"필터 토글 **{ev.get('pose_filter_toggle', 0)}회**",
+        f"랜덤 시작 **{ev.get('pose_random_start', 0)}회**",
+        f"북마크 **{ev.get('pose_bookmark', 0)}회**",
+    ])
 
-    archive_lines = [
-        f"진입 {ev.get('archiving_view', 0)}회 ({us.get('archiving_view', 0)}명)",
-        f"사진 상세 {ev.get('photo_detail_view', 0)}회",
-        f"메모 작성 {ev.get('photo_memo_create', 0)}회",
-        f"앨범 생성 {ev.get('album_create', 0)}회",
-    ]
+    archive_desc = "\n".join([
+        f"진입 **{ev.get('archiving_view', 0)}회** ({us.get('archiving_view', 0)}명)",
+        f"사진 상세 **{ev.get('photo_detail_view', 0)}회**",
+        f"메모 작성 **{ev.get('photo_memo_create', 0)}회**",
+        f"앨범 생성 **{ev.get('album_create', 0)}회**",
+        f"업로드  갤러리 **{gallery}회**  |  QR **{qr}회**",
+    ])
 
-    upload_lines = [
-        f"갤러리 {gallery}회  |  QR {qr}회",
+    embeds = [
+        {
+            "title": f"📊 GA4 일간 리포트 · {yesterday}",
+            "description": f"👥 DAU **{dau}명**  |  신규 **{new_users}명**",
+            "color": 0x5865F2,
+        },
+        {
+            "title": "🗺 지도",
+            "description": map_desc,
+            "color": 0x57F287,
+        },
+        {
+            "title": "🧘 포즈",
+            "description": pose_desc,
+            "color": 0xFEE75C,
+        },
+        {
+            "title": "📦 아카이브",
+            "description": archive_desc,
+            "color": 0xEB459E,
+            "footer": {"text": "neki · GA4 자동 리포트"},
+        },
     ]
-
-    embed = {
-        "title": f"📊 GA4 일간 리포트 · {yesterday}",
-        "color": 0x5865F2,
-        "fields": [
-            {"name": "👥 DAU", "value": f"**{dau}명** (신규 {new_users}명)", "inline": False},
-            field("🗺 지도", map_lines),
-            field("🧘 포즈", pose_lines),
-            field("📦 아카이브", archive_lines),
-            field("📤 사진 업로드", upload_lines),
-        ],
-        "footer": {"text": "neki · GA4 자동 리포트"},
-    }
 
     payload = {
         "username": "네키 GA 봇",
         "avatar_url": "https://i.ifh.cc/PbdkGM.jpg",
-        "embeds": [embed],
+        "embeds": embeds,
     }
 
     resp = requests.post(DISCORD_WEBHOOK_URL, json=payload)
