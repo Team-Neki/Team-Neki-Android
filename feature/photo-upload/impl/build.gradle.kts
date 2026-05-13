@@ -30,9 +30,13 @@ android {
         buildConfigField("String", "LIFE_FOUR_CUT_IMAGE_URL", properties["LIFE_FOUR_CUT_IMAGE_URL"].toString())
         buildConfigField("String", "LIFE_FOUR_CUT_IMAGE_URL_MIME_TYPE", properties["LIFE_FOUR_CUT_IMAGE_URL_MIME_TYPE"].toString())
 
-        buildConfigField("String", "PHOTO_SIGNATURE_URL", properties["PHOTO_SIGNATURE_URL"].toString())
-        buildConfigField("String", "PHOTO_SIGNATURE_IMAGE_URL", properties["PHOTO_SIGNATURE_IMAGE_URL"].toString())
-        buildConfigField("String", "PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE", properties["PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE"].toString())
+        buildConfigField("String", "PHOTO_SIGNATURE_URL_1", properties["PHOTO_SIGNATURE_URL_1"].toString())
+        buildConfigField("String", "PHOTO_SIGNATURE_IMAGE_URL_1", properties["PHOTO_SIGNATURE_IMAGE_URL_1"].toString())
+        buildConfigField("String", "PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE_1", properties["PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE_1"].toString())
+
+        buildConfigField("String", "PHOTO_SIGNATURE_URL_2", properties["PHOTO_SIGNATURE_URL_2"].toString())
+        buildConfigField("String", "PHOTO_SIGNATURE_IMAGE_URL_2", properties["PHOTO_SIGNATURE_IMAGE_URL_2"].toString())
+        buildConfigField("String", "PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE_2", properties["PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE_2"].toString())
 
         buildConfigField("String", "HARU_FILM_URL", properties["HARU_FILM_URL"].toString())
         buildConfigField("String", "HARU_FILM_IMAGE_URL", properties["HARU_FILM_IMAGE_URL"].toString())
