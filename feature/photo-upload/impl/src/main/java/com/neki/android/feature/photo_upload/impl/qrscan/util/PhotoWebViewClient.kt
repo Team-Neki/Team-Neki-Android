@@ -35,7 +35,13 @@ class PhotoWebViewClient(
             }
 
             // 포토시그니처
-            url.contains(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL) && url.endsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE) -> {
+            url.contains(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_1) && url.endsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE_1) -> {
+                Timber.d("포토시그니처 이미지")
+                onImageUrlDetected(url)
+            }
+
+            // 포토시그니처
+            url.contains(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_2) && url.endsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE_2) -> {
                 Timber.d("포토시그니처 이미지")
                 onImageUrlDetected(url)
             }
