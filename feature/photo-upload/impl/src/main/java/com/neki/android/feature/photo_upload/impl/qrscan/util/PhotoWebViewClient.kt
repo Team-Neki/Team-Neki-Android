@@ -1,5 +1,6 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.util
 
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -9,6 +10,7 @@ import timber.log.Timber
 
 class PhotoWebViewClient(
     private val onPageFinished: () -> Unit,
+    private val onPageError: () -> Unit,
     private val onImageUrlDetected: (String) -> Unit,
 ) : WebViewClient() {
 
@@ -33,7 +35,13 @@ class PhotoWebViewClient(
             }
 
             // 포토시그니처
-            url.contains(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL) && url.endsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE) -> {
+            url.contains(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_1) && url.endsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE_1) -> {
+                Timber.d("포토시그니처 이미지")
+                onImageUrlDetected(url)
+            }
+
+            // 포토시그니처
+            url.contains(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_2) && url.endsWith(BuildConfig.PHOTO_SIGNATURE_IMAGE_URL_MIME_TYPE_2) -> {
                 Timber.d("포토시그니처 이미지")
                 onImageUrlDetected(url)
             }
@@ -51,7 +59,8 @@ class PhotoWebViewClient(
             }
 
             // 모노맨션
-            url.contains(BuildConfig.MONO_MANSION_IMAGE_URL) && url.endsWith(BuildConfig.MONO_MANSION_IMAGE_URL_MIME_TYPE) -> {
+            url.contains(BuildConfig.MONO_MANSION_IMAGE_URL, ignoreCase = true) &&
+                url.endsWith(BuildConfig.MONO_MANSION_IMAGE_URL_MIME_TYPE, ignoreCase = true) -> {
                 Timber.d("모노맨션 이미지")
                 onImageUrlDetected(url)
             }
@@ -63,5 +72,29 @@ class PhotoWebViewClient(
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
         onPageFinished()
+    }
+
+    override fun onReceivedError(
+        view: WebView?,
+        request: WebResourceRequest?,
+        error: WebResourceError?,
+    ) {
+        super.onReceivedError(view, request, error)
+        if (request?.isForMainFrame == true) {
+            Timber.e("WebView main frame error: ${error?.description}")
+            onPageError()
+        }
+    }
+
+    override fun onReceivedHttpError(
+        view: WebView?,
+        request: WebResourceRequest?,
+        errorResponse: WebResourceResponse?,
+    ) {
+        super.onReceivedHttpError(view, request, errorResponse)
+        if (request?.isForMainFrame == true) {
+            Timber.e("WebView main frame HTTP error: ${errorResponse?.statusCode}")
+            onPageError()
+        }
     }
 }

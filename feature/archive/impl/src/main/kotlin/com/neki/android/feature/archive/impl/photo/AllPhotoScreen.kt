@@ -39,10 +39,12 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
+import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.ui.component.LoadingDialog
-import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
+import com.neki.android.feature.archive.api.AllPhotoResult
+import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.feature.archive.impl.component.DeletePhotoDialog
 import com.neki.android.feature.archive.impl.component.EmptyPhotoContent
 import com.neki.android.feature.archive.impl.component.SelectablePhotoItem
@@ -51,9 +53,9 @@ import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRAY_LAYOU
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_HORIZONTAL_PADDING
 import com.neki.android.feature.archive.impl.const.ArchiveConst.PHOTO_GRID_LAYOUT_TOP_PADDING
 import com.neki.android.feature.archive.impl.model.SelectMode
+import com.neki.android.feature.archive.impl.photo.component.AllPhotoActionBar
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoFilterBar
 import com.neki.android.feature.archive.impl.photo.component.AllPhotoTopBar
-import com.neki.android.feature.archive.impl.photo.component.PhotoActionBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
@@ -65,6 +67,7 @@ internal fun AllPhotoRoute(
     viewModel: AllPhotoViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
     navigateToPhotoDetail: (ArchiveNavKey.PhotoDetail) -> Unit,
+    navigateToSelectAlbum: (List<Long>) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.photoPagingData.collectAsLazyPagingItems()
@@ -72,6 +75,7 @@ internal fun AllPhotoRoute(
     val lazyState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
     val nekiToast = remember { NekiToast(context) }
+    val resultEventBus = LocalResultEventBus.current
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
@@ -97,6 +101,7 @@ internal fun AllPhotoRoute(
                     ),
                 )
             }
+
             is AllPhotoSideEffect.ShowToastMessage -> {
                 nekiToast.showToast(text = sideEffect.message)
             }
@@ -111,6 +116,14 @@ internal fun AllPhotoRoute(
                         Timber.e(e)
                     }
             }
+
+            AllPhotoSideEffect.NotifyResult -> {
+                resultEventBus.sendResult(result = AllPhotoResult, allowDuplicate = false)
+            }
+
+            AllPhotoSideEffect.RefreshPhotos -> pagingItems.refresh()
+
+            is AllPhotoSideEffect.NavigateToSelectAlbum -> navigateToSelectAlbum(sideEffect.photoIds)
         }
     }
 
@@ -266,10 +279,11 @@ private fun AllPhotoContent(
             )
         }
 
-        PhotoActionBar(
+        AllPhotoActionBar(
             visible = uiState.selectMode == SelectMode.SELECTING,
             isEnabled = uiState.selectedPhotos.isNotEmpty(),
             onClickDownload = { onIntent(AllPhotoIntent.ClickDownloadIcon) },
+            onClickCopy = { onIntent(AllPhotoIntent.ClickCopyIcon) },
             onClickDelete = { onIntent(AllPhotoIntent.ClickDeleteIcon) },
         )
     }

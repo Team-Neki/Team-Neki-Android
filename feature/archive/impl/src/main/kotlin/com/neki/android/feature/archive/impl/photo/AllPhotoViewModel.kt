@@ -106,20 +106,24 @@ class AllPhotoViewModel @Inject constructor(
             // Photo Intent
             is AllPhotoIntent.ClickPhotoItem -> handlePhotoClick(intent.photo, intent.index, state, reduce, postSideEffect)
             AllPhotoIntent.ClickDownloadIcon -> downloadSelectedPhotos(state, postSideEffect)
+            AllPhotoIntent.ClickCopyIcon -> {
+                val photoIds = state.selectedPhotos.map { it.id }
+                postSideEffect(AllPhotoSideEffect.NavigateToSelectAlbum(photoIds))
+            }
             AllPhotoIntent.ClickDeleteIcon -> reduce { copy(isShowDeleteDialog = true) }
             AllPhotoIntent.DismissDeleteDialog -> reduce { copy(isShowDeleteDialog = false) }
             AllPhotoIntent.ClickDeleteDialogConfirmButton -> deleteSelectedPhotos(state, reduce, postSideEffect)
 
             // Result Intent
-            is AllPhotoIntent.PhotoDeleted -> {
-                deletedPhotoIds.update { it + intent.photoIds.toSet() }
-            }
             is AllPhotoIntent.ClickFavoriteIcon -> {
                 val photo = intent.photo
                 val newFavorite = !photo.isFavorite
                 updatedFavorites.update { it + (photo.id to newFavorite) }
                 viewModelScope.launch {
                     photoRepository.updateFavorite(photo.id, newFavorite)
+                        .onSuccess {
+                            postSideEffect(AllPhotoSideEffect.NotifyResult)
+                        }
                         .onFailure { e ->
                             Timber.e(e)
                             updatedFavorites.update { it + (photo.id to photo.isFavorite) }
@@ -128,8 +132,10 @@ class AllPhotoViewModel @Inject constructor(
                 }
             }
 
-            is AllPhotoIntent.FavoriteChanged -> {
-                updatedFavorites.update { it + (intent.photoId to intent.isFavorite) }
+            AllPhotoIntent.RefreshPhotos -> {
+                deletedPhotoIds.value = emptySet()
+                updatedFavorites.value = emptyMap()
+                postSideEffect(AllPhotoSideEffect.RefreshPhotos)
             }
         }
     }
@@ -241,6 +247,7 @@ class AllPhotoViewModel @Inject constructor(
                         )
                     }
                     postSideEffect(AllPhotoSideEffect.ShowToastMessage("사진을 삭제했어요"))
+                    postSideEffect(AllPhotoSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     Timber.e(e)

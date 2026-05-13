@@ -9,6 +9,7 @@ import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.feature.pose.api.PoseNavKey
 import com.neki.android.feature.pose.api.PoseResult
+import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import com.neki.android.feature.pose.api.navigateToPoseDetail
 import com.neki.android.feature.pose.api.navigateToRandomPose
 import com.neki.android.feature.pose.impl.detail.PoseDetailRoute
@@ -54,6 +55,7 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: MainNavigator) {
             navigateToPoseDetail = navigator::navigateToPoseDetail,
             navigateToRandomPose = navigator::navigateToRandomPose,
             navigateToNotification = {},
+            navigateToQRScan = navigator::navigateToQRScan,
         )
     }
 

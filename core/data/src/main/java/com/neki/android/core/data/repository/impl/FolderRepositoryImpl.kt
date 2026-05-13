@@ -1,9 +1,11 @@
 package com.neki.android.core.data.repository.impl
 
 import com.neki.android.core.data.remote.api.FolderService
+import com.neki.android.core.data.remote.model.request.CopyPhotosRequest
 import com.neki.android.core.data.remote.model.request.CreateFolderRequest
 import com.neki.android.core.data.remote.model.request.DeleteFolderRequest
 import com.neki.android.core.data.remote.model.request.DeletePhotoRequest
+import com.neki.android.core.data.remote.model.request.MovePhotosRequest
 import com.neki.android.core.data.remote.model.request.UpdateFolderRequest
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.FolderRepository
@@ -41,6 +43,18 @@ class FolderRepositoryImpl @Inject constructor(
         folderService.updateFolder(
             folderId = folderId,
             requestBody = UpdateFolderRequest(name = name),
+        )
+    }
+
+    override suspend fun movePhotos(sourceFolderId: Long, photoIds: List<Long>, targetFolderIds: List<Long>): Result<Unit> = runSuspendCatching {
+        folderService.movePhotos(
+            requestBody = MovePhotosRequest(sourceFolderId = sourceFolderId, photoIds = photoIds, targetFolderIds = targetFolderIds),
+        )
+    }
+
+    override suspend fun copyPhotos(photoIds: List<Long>, targetFolderIds: List<Long>): Result<Unit> = runSuspendCatching {
+        folderService.copyPhotos(
+            requestBody = CopyPhotosRequest(photoIds = photoIds, targetFolderIds = targetFolderIds),
         )
     }
 }

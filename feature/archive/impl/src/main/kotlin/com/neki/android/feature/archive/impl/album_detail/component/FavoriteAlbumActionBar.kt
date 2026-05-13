@@ -1,10 +1,9 @@
-package com.neki.android.feature.archive.impl.photo.component
+package com.neki.android.feature.archive.impl.album_detail.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -14,13 +13,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
-import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.actionbar.NekiBothSidesActionBar
+import com.neki.android.core.designsystem.actionbar.NekiActionBar
 import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.designsystem.R as DesignR
 
 @Composable
-internal fun PhotoActionBar(
+internal fun FavoriteAlbumActionBar(
     visible: Boolean,
     isEnabled: Boolean,
     modifier: Modifier = Modifier,
@@ -33,32 +32,28 @@ internal fun PhotoActionBar(
         enter = expandVertically(expandFrom = Alignment.Top),
         exit = shrinkVertically(shrinkTowards = Alignment.Top),
     ) {
-        NekiBothSidesActionBar(
+        NekiActionBar(
             modifier = Modifier.fillMaxWidth(),
-            startContent = {
+            content = {
                 NekiIconButton(
-                    modifier = Modifier.padding(8.dp),
                     enabled = isEnabled,
                     onClick = onClickDownload,
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_download),
+                        imageVector = ImageVector.vectorResource(DesignR.drawable.icon_download),
                         contentDescription = null,
                         tint = if (isEnabled) NekiTheme.colorScheme.gray700
                         else NekiTheme.colorScheme.gray200,
                     )
                 }
-            },
-            endContent = {
                 NekiIconButton(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = onClickDelete,
                     enabled = isEnabled,
+                    onClick = onClickDelete,
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.icon_trash),
+                        imageVector = ImageVector.vectorResource(DesignR.drawable.icon_trash),
                         contentDescription = null,
                         tint = if (isEnabled) NekiTheme.colorScheme.gray700
                         else NekiTheme.colorScheme.gray200,
@@ -71,22 +66,8 @@ internal fun PhotoActionBar(
 
 @ComponentPreview
 @Composable
-private fun PhotoActionBarEnabledPreview() {
+private fun FavoriteAlbumActionBarEnabledPreview() {
     NekiTheme {
-        PhotoActionBar(
-            visible = true,
-            isEnabled = true,
-        )
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun PhotoActionBarDisabledPreview() {
-    NekiTheme {
-        PhotoActionBar(
-            visible = true,
-            isEnabled = false,
-        )
+        FavoriteAlbumActionBar(visible = true, isEnabled = true)
     }
 }

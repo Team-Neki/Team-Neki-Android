@@ -13,4 +13,5 @@ data class Photo(
     val width: Int? = null,
     val height: Int? = null,
     val contentType: ContentType = ContentType.JPEG,
+    val memo: String = "",
 )

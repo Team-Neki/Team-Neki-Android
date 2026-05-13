@@ -53,6 +53,9 @@ sealed interface AllAlbumIntent {
     data object DismissDeleteAlbumBottomSheet : AllAlbumIntent
     data class SelectDeleteOption(val option: AlbumDeleteOption) : AllAlbumIntent
     data object ClickDeleteConfirmButton : AllAlbumIntent
+
+    // Result Intent
+    data object RefreshAlbums : AllAlbumIntent
 }
 
 sealed interface AllAlbumSideEffect {
@@ -60,4 +63,5 @@ sealed interface AllAlbumSideEffect {
     data class NavigateToFavoriteAlbum(val albumId: Long) : AllAlbumSideEffect
     data class NavigateToAlbumDetail(val albumId: Long, val title: String) : AllAlbumSideEffect
     data class ShowToastMessage(val message: String) : AllAlbumSideEffect
+    data object NotifyResult : AllAlbumSideEffect
 }
