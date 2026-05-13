@@ -59,7 +59,8 @@ class PhotoWebViewClient(
             }
 
             // 모노맨션
-            url.contains(BuildConfig.MONO_MANSION_IMAGE_URL) && url.endsWith(BuildConfig.MONO_MANSION_IMAGE_URL_MIME_TYPE) -> {
+            url.contains(BuildConfig.MONO_MANSION_IMAGE_URL, ignoreCase = true) &&
+                url.endsWith(BuildConfig.MONO_MANSION_IMAGE_URL_MIME_TYPE, ignoreCase = true) -> {
                 Timber.d("모노맨션 이미지")
                 onImageUrlDetected(url)
             }
