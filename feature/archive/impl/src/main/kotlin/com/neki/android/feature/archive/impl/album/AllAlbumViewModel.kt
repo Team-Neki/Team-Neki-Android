@@ -2,6 +2,8 @@ package com.neki.android.feature.archive.impl.album
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.model.AlbumPreview
@@ -22,14 +24,18 @@ import javax.inject.Inject
 class AllAlbumViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     val store: MviIntentStore<AllAlbumState, AllAlbumIntent, AllAlbumSideEffect> =
         mviIntentStore(
             initialState = AllAlbumState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(AllAlbumIntent.EnterAllAlbumScreen) },
         )
+
+    init {
+        store.onIntent(AllAlbumIntent.EnterAllAlbumScreen)
+    }
 
     private fun onIntent(
         intent: AllAlbumIntent,
@@ -76,6 +82,9 @@ class AllAlbumViewModel @Inject constructor(
             AllAlbumIntent.DismissDeleteAlbumBottomSheet -> reduce { copy(isShowDeleteAlbumBottomSheet = false) }
             is AllAlbumIntent.SelectDeleteOption -> reduce { copy(selectedDeleteOption = intent.option) }
             AllAlbumIntent.ClickDeleteConfirmButton -> handleDeleteConfirm(state, reduce, postSideEffect)
+
+            // Result Intent
+            AllAlbumIntent.RefreshAlbums -> fetchInitialData(reduce)
         }
     }
 
@@ -176,8 +185,10 @@ class AllAlbumViewModel @Inject constructor(
         viewModelScope.launch {
             folderRepository.createFolder(name = albumName)
                 .onSuccess {
+                    analyticsLogger.log(ArchiveAnalyticsEvent.AlbumCreate)
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
+                    postSideEffect(AllAlbumSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범 추가에 실패했어요"))
@@ -200,6 +211,7 @@ class AllAlbumViewModel @Inject constructor(
                 .onSuccess {
                     fetchFolders(reduce)
                     postSideEffect(AllAlbumSideEffect.ShowToastMessage("앨범을 삭제했어요"))
+                    postSideEffect(AllAlbumSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     Timber.e(e, "사진 삭제 실패")

@@ -8,7 +8,9 @@ android {
 
 dependencies {
     implementation(projects.feature.pose.api)
+    implementation(projects.feature.photoUpload.api)
 
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.paging.compose)
+    implementation(libs.zoomable)
 }

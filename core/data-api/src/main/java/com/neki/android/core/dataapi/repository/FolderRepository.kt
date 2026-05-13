@@ -8,4 +8,6 @@ interface FolderRepository {
     suspend fun deleteFolder(id: List<Long>, deletePhotos: Boolean): Result<Unit>
     suspend fun removePhotosFromFolder(folderId: Long, photoIds: List<Long>): Result<Unit>
     suspend fun updateFolder(folderId: Long, name: String): Result<Unit>
+    suspend fun movePhotos(sourceFolderId: Long, photoIds: List<Long>, targetFolderIds: List<Long>): Result<Unit>
+    suspend fun copyPhotos(photoIds: List<Long>, targetFolderIds: List<Long>): Result<Unit>
 }

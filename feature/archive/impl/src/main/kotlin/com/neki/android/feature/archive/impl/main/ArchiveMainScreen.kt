@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -60,6 +61,10 @@ internal fun ArchiveMainRoute(
     val lazyState = rememberLazyStaggeredGridState()
     val nekiToast = remember { NekiToast(context) }
 
+    LaunchedEffect(Unit) {
+        viewModel.logArchivingView()
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             ArchiveMainSideEffect.NavigateToQRScan -> navigateToQRScan()
@@ -70,6 +75,7 @@ internal fun ArchiveMainRoute(
             is ArchiveMainSideEffect.NavigateToPhotoDetail -> navigateToPhotoDetail(
                 ArchiveNavKey.PhotoDetail(photos = sideEffect.photos, initialIndex = sideEffect.index),
             )
+
             ArchiveMainSideEffect.ScrollToTop -> lazyState.animateScrollToItem(0)
             is ArchiveMainSideEffect.ShowToastMessage -> nekiToast.showToast(text = sideEffect.message)
         }
@@ -198,6 +204,7 @@ private fun ArchiveMainContent(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             ArchiveMainTitleRow(
+                modifier = Modifier.padding(top = 12.dp),
                 title = "최근 사진",
                 textButtonTitle = "모든 사진",
                 onClickShowAllAlbum = onClickShowAllPhoto,

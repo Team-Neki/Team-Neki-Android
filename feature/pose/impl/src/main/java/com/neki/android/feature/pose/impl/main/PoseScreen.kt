@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,6 +49,7 @@ internal fun PoseRoute(
     navigateToPoseDetail: (Long) -> Unit,
     navigateToRandomPose: (PeopleCount) -> Unit,
     navigateToNotification: () -> Unit,
+    navigateToQRScan: () -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val posePagingItems = viewModel.posePagingData.collectAsLazyPagingItems()
@@ -56,9 +58,14 @@ internal fun PoseRoute(
     val lazyState = rememberLazyStaggeredGridState()
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit) {
+        viewModel.logPoseView()
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PoseEffect.NavigateToNotification -> navigateToNotification()
+            PoseEffect.NavigateToQRScan -> navigateToQRScan()
             is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
             is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.poseId)
             is PoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
@@ -100,6 +107,7 @@ fun PoseScreen(
             isBookmarkSelected = uiState.isShowBookmarkedPose,
             posePagingItems = posePagingItems,
             lazyState = lazyState,
+            onClickQRCodeIcon = { onIntent(PoseIntent.ClickQRScanIcon) },
 //            onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickBookmark = { onIntent(PoseIntent.ClickBookmarkChip) },
@@ -144,6 +152,7 @@ fun PoseContent(
     isBookmarkSelected: Boolean,
     posePagingItems: LazyPagingItems<Pose>,
     lazyState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+    onClickQRCodeIcon: () -> Unit = {},
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
     onClickPoseItem: (Pose) -> Unit = {},
@@ -161,7 +170,7 @@ fun PoseContent(
     Column(
         modifier = modifier.fillMaxSize(),
     ) {
-        PoseTopBar()
+        PoseTopBar(onClickQRCodeIcon = onClickQRCodeIcon)
         Box(
             modifier = Modifier
                 .fillMaxWidth()

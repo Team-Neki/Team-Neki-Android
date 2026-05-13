@@ -35,7 +35,7 @@ import com.neki.android.feature.mypage.impl.main.MyPageIntent
 import com.neki.android.feature.mypage.impl.main.MyPageState
 import com.neki.android.feature.mypage.impl.main.MyPageViewModel
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
-import com.neki.android.feature.mypage.impl.profile.component.EditProfileImage
+import com.neki.android.feature.mypage.impl.profile.component.ProfileImage
 import com.neki.android.feature.mypage.impl.profile.component.ProfileEditTopBar
 import com.neki.android.feature.mypage.impl.profile.component.SelectProfileImageDialog
 import com.neki.android.feature.mypage.impl.profile.component.ProfileImageOption
@@ -76,7 +76,7 @@ fun EditProfileScreen(
     onIntent: (MyPageIntent) -> Unit = {},
 ) {
     var displayProfileImage by remember {
-        mutableStateOf<Any?>(uiState.userInfo.profileImageUrl)
+        mutableStateOf<Any>(uiState.userInfo.profileImageUrl)
     }
 
     LaunchedEffect(uiState.profileImageState) {
@@ -108,7 +108,7 @@ fun EditProfileScreen(
                 onIntent(MyPageIntent.ClickEditComplete(nickname = textFieldState.text.toString()))
             },
         )
-        EditProfileImage(
+        ProfileImage(
             profileImage = displayProfileImage,
             onClickCameraIcon = { onIntent(MyPageIntent.ClickCameraIcon) },
         )

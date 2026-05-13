@@ -1,8 +1,10 @@
 package com.neki.android.core.data.remote.api
 
+import com.neki.android.core.data.remote.model.request.CopyPhotosRequest
 import com.neki.android.core.data.remote.model.request.CreateFolderRequest
 import com.neki.android.core.data.remote.model.request.DeleteFolderRequest
 import com.neki.android.core.data.remote.model.request.DeletePhotoRequest
+import com.neki.android.core.data.remote.model.request.MovePhotosRequest
 import com.neki.android.core.data.remote.model.request.UpdateFolderRequest
 import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
@@ -51,5 +53,15 @@ class FolderService @Inject constructor(
         return client.patch("/api/folders/$folderId") {
             setBody(requestBody)
         }.body()
+    }
+
+    // 사진 이동
+    suspend fun movePhotos(requestBody: MovePhotosRequest): BasicNullableResponse<Unit> {
+        return client.patch("/api/folders/photos/move") { setBody(requestBody) }.body()
+    }
+
+    // 사진 복제
+    suspend fun copyPhotos(requestBody: CopyPhotosRequest): BasicNullableResponse<Unit> {
+        return client.post("/api/folders/photos/copy") { setBody(requestBody) }.body()
     }
 }

@@ -3,6 +3,8 @@ package com.neki.android.feature.archive.impl.main
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -26,16 +28,24 @@ class ArchiveMainViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
     private val userRepository: UserRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     val store: MviIntentStore<ArchiveMainState, ArchiveMainIntent, ArchiveMainSideEffect> =
         mviIntentStore(
             initialState = ArchiveMainState(),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(ArchiveMainIntent.EnterArchiveMainScreen) },
         )
-
     private var fetchJob: Job? = null
+
+    init {
+        store.onIntent(ArchiveMainIntent.EnterArchiveMainScreen)
+    }
+
+    fun logArchivingView() {
+        analyticsLogger.log(ArchiveAnalyticsEvent.ArchivingView)
+    }
+
     private fun onIntent(
         intent: ArchiveMainIntent,
         state: ArchiveMainState,
@@ -45,7 +55,13 @@ class ArchiveMainViewModel @Inject constructor(
         if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
-            ArchiveMainIntent.RefreshArchiveMainPhotos -> viewModelScope.launch { fetchPhotos(reduce) }
+            ArchiveMainIntent.RefreshArchiveMain -> viewModelScope.launch {
+                awaitAll(
+                    async { fetchFavoriteSummary(reduce) },
+                    async { fetchPhotos(reduce) },
+                    async { fetchFolders(reduce) },
+                )
+            }
             ArchiveMainIntent.ClickScreen -> reduce { copy(isFirstEntered = false) }
             ArchiveMainIntent.ClickGoToTopButton -> postSideEffect(ArchiveMainSideEffect.ScrollToTop)
 
@@ -164,6 +180,7 @@ class ArchiveMainViewModel @Inject constructor(
         viewModelScope.launch {
             folderRepository.createFolder(name = albumName)
                 .onSuccess {
+                    analyticsLogger.log(ArchiveAnalyticsEvent.AlbumCreate)
                     fetchFolders(reduce)
                     postSideEffect(ArchiveMainSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))
                 }

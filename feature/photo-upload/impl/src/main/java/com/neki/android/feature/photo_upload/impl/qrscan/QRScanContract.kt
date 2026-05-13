@@ -34,6 +34,7 @@ sealed interface QRScanIntent {
     data class ScanQRCode(val scannedUrl: String) : QRScanIntent
     data class SetViewType(val viewType: QRScanViewType) : QRScanIntent
     data class DetectImageUrl(val imageUrl: String) : QRScanIntent
+    data object WebViewError : QRScanIntent
     data object DismissShouldDownloadDialog : QRScanIntent
     data object ClickGoDownload : QRScanIntent
     data object DismissUnSupportedBrandDialog : QRScanIntent
