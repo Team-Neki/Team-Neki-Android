@@ -2,7 +2,6 @@ package com.neki.android.feature.mypage.impl.main
 
 import com.neki.android.core.model.UserInfo
 import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
-import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 
 data class MyPageState(
@@ -13,12 +12,6 @@ data class MyPageState(
     val isShowLogoutDialog: Boolean = false,
     val isShowWithdrawDialog: Boolean = false,
     val isShowImageSelectDialog: Boolean = false,
-    // Permission
-    val isGrantedCamera: Boolean = false,
-    val isGrantedLocation: Boolean = false,
-    val isGrantedNotification: Boolean = false,
-    val isShowPermissionDialog: Boolean = false,
-    val clickedPermission: NekiPermission? = null,
 )
 
 sealed interface MyPageIntent {
@@ -46,13 +39,6 @@ sealed interface MyPageIntent {
     data object ClickWithdraw : MyPageIntent
     data object DismissWithdrawDialog : MyPageIntent
     data object ConfirmWithdraw : MyPageIntent
-
-    // Permission
-    data class ClickPermissionItem(val permission: NekiPermission) : MyPageIntent
-    data object DismissPermissionDialog : MyPageIntent
-    data object ConfirmPermissionDialog : MyPageIntent
-    data class UpdatePermissionState(val permission: NekiPermission, val isGranted: Boolean) : MyPageIntent
-    data class ShowPermissionDeniedDialog(val permission: NekiPermission) : MyPageIntent
 }
 
 sealed interface MyPageEffect {
@@ -62,8 +48,6 @@ sealed interface MyPageEffect {
     data object NavigateToPermission : MyPageEffect
     data class OpenExternalLink(val url: String) : MyPageEffect
     data object NavigateBack : MyPageEffect
-    data class MoveAppSettings(val permission: NekiPermission) : MyPageEffect
-    data class RequestPermission(val permission: NekiPermission) : MyPageEffect
     data object OpenOssLicenses : MyPageEffect
     data object LogoutWithKakao : MyPageEffect
     data object UnlinkWithKakao : MyPageEffect
