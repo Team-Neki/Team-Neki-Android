@@ -12,6 +12,8 @@ data class UserInfoResponse(
     @SerialName("profileImageUrl") val profileImageUrl: String = "",
     @SerialName("providerType") val providerType: String = "",
     @SerialName("agreeTerms") val agreeTerms: Boolean = false,
+    @SerialName("marketingTerm") val marketingTerm: Boolean = false,
+    @SerialName("pushAgreed") val pushAgreed: Boolean = false,
 ) {
     fun toModel() = UserInfo(
         id = userId,
@@ -19,5 +21,6 @@ data class UserInfoResponse(
         profileImageUrl = profileImageUrl,
         loginType = providerType,
         isRequiredTermsAgreed = agreeTerms,
+        isMarketingTermAgreed = marketingTerm,
     )
 }
