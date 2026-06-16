@@ -5,4 +5,5 @@ import com.neki.android.core.model.Term
 interface TermRepository {
     suspend fun getTerms(): Result<List<Term>>
     suspend fun agreeTerms(termIds: List<Long>): Result<Unit>
+    suspend fun updateTermAgreement(termId: Long, agreed: Boolean): Result<Unit>
 }
