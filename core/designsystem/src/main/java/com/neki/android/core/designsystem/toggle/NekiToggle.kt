@@ -20,8 +20,8 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 @Composable
 fun NekiToggle(
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    onCheckedChange: (Boolean) -> Unit = {},
 ) {
     val thumbOffset by animateDpAsState(
         targetValue = if (checked) 26.dp else 2.dp,
@@ -51,7 +51,7 @@ fun NekiToggle(
 @Composable
 private fun NekiToggleOnPreview() {
     NekiTheme {
-        NekiToggle(checked = true, onCheckedChange = {})
+        NekiToggle(checked = true)
     }
 }
 
@@ -59,6 +59,6 @@ private fun NekiToggleOnPreview() {
 @Composable
 private fun NekiToggleOffPreview() {
     NekiTheme {
-        NekiToggle(checked = false, onCheckedChange = {})
+        NekiToggle(checked = false)
     }
 }
