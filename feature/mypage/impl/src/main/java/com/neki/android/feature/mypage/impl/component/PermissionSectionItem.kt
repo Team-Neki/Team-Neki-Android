@@ -23,11 +23,12 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 internal fun PermissionSectionItem(
     type: String,
     subTitle: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     trailingContent: @Composable () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .noRippleClickableSingle(onClick = onClick)
             .padding(vertical = 12.dp, horizontal = 20.dp),
