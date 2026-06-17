@@ -84,7 +84,7 @@ fun DoubleButtonSubContentDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
                     .background(
                         color = NekiTheme.colorScheme.gray50,
                         shape = RoundedCornerShape(12.dp),
@@ -95,13 +95,14 @@ fun DoubleButtonSubContentDialog(
                         shape = RoundedCornerShape(12.dp),
                     )
                     .padding(16.dp),
+                contentAlignment = Alignment.Center
             ) {
                 subContent()
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 CTAButtonGray(
