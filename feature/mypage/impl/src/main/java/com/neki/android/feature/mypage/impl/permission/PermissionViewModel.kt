@@ -45,13 +45,12 @@ internal class PermissionViewModel @Inject constructor(
                     if (committed != newValue) {
                         termRepository.updateTermAgreement(TermConst.MARKETING_TERM_ID, newValue)
                             .onSuccess {
-                                store.onIntent(PermissionIntent.MarketingNotificationCommitted(newValue))
                                 val message = if (newValue) {
                                     "마케팅 알림 수신에 동의했어요."
                                 } else {
                                     "마케팅 알림 수신을 거부했어요.\n마이페이지에서 언제든지 변경할 수 있어요."
                                 }
-                                store.onIntent(PermissionIntent.ShowMarketingToast(message))
+                                store.onIntent(PermissionIntent.MarketingNotificationCommitted(newValue, message))
                             }
                             .onFailure { e ->
                                 Timber.e(e, "updateMarketingTerm failed")
@@ -101,14 +100,13 @@ internal class PermissionViewModel @Inject constructor(
                 viewModelScope.launch { marketingToggleRequests.emit(newValue) }
             }
 
-            is PermissionIntent.MarketingNotificationCommitted ->
+            is PermissionIntent.MarketingNotificationCommitted -> {
                 reduce { copy(committedMarketingNotification = intent.newValue) }
+                postSideEffect(PermissionEffect.ShowToast(intent.toastMessage))
+            }
 
             is PermissionIntent.RevertMarketingNotification ->
                 reduce { copy(userInfo = userInfo.copy(isMarketingTermAgreed = intent.originalValue)) }
-
-            is PermissionIntent.ShowMarketingToast ->
-                postSideEffect(PermissionEffect.ShowToast(intent.message))
         }
     }
 

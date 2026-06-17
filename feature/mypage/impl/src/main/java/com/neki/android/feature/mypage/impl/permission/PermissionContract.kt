@@ -25,9 +25,8 @@ sealed interface PermissionIntent {
     data class ShowPermissionDeniedDialog(val permission: NekiPermission) : PermissionIntent
 
     data object ToggleMarketingNotification : PermissionIntent
-    data class MarketingNotificationCommitted(val newValue: Boolean) : PermissionIntent
+    data class MarketingNotificationCommitted(val newValue: Boolean, val toastMessage: String) : PermissionIntent
     data class RevertMarketingNotification(val originalValue: Boolean) : PermissionIntent
-    data class ShowMarketingToast(val message: String) : PermissionIntent
 }
 
 sealed interface PermissionEffect {
