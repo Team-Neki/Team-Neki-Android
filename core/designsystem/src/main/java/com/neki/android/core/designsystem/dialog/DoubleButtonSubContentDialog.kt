@@ -95,7 +95,7 @@ fun DoubleButtonSubContentDialog(
                         shape = RoundedCornerShape(12.dp),
                     )
                     .padding(16.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 subContent()
             }
