@@ -175,7 +175,7 @@ fun PermissionScreen(
             subTitle = "이벤트, 혜택, 신규 기능 소식 등을 알려드려요.",
             trailingContent = {
                 NekiToggle(
-                    checked = uiState.userInfo.isMarketingTermAgreed,
+                    checked = uiState.isMarketingTermAgreed,
                     onCheckedChange = { onIntent(PermissionIntent.ToggleMarketingNotification) },
                 )
             },

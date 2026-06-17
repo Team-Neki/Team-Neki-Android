@@ -1,16 +1,15 @@
 package com.neki.android.feature.mypage.impl.permission
 
 import com.neki.android.core.common.permission.NekiPermission
-import com.neki.android.core.model.UserInfo
 
 data class PermissionState(
     val isLoading: Boolean = false,
-    val userInfo: UserInfo = UserInfo(),
-    val committedMarketingNotification: Boolean = false,
     val isGrantedCamera: Boolean = false,
     val isGrantedLocation: Boolean = false,
     val isGrantedNotification: Boolean = false,
     val isShowPermissionDialog: Boolean = false,
+    val isMarketingTermAgreed: Boolean = false,
+    val committedMarketingNotification: Boolean = false,
     val clickedPermission: NekiPermission? = null,
 )
 

@@ -95,8 +95,8 @@ internal class PermissionViewModel @Inject constructor(
                 reduce { copy(isShowPermissionDialog = true, clickedPermission = intent.permission) }
 
             PermissionIntent.ToggleMarketingNotification -> {
-                val newValue = !state.userInfo.isMarketingTermAgreed
-                reduce { copy(userInfo = userInfo.copy(isMarketingTermAgreed = newValue)) }
+                val newValue = !state.isMarketingTermAgreed
+                reduce { copy(isMarketingTermAgreed = newValue) }
                 viewModelScope.launch { marketingToggleRequests.emit(newValue) }
             }
 
@@ -106,7 +106,7 @@ internal class PermissionViewModel @Inject constructor(
             }
 
             is PermissionIntent.RevertMarketingNotification ->
-                reduce { copy(userInfo = userInfo.copy(isMarketingTermAgreed = intent.originalValue)) }
+                reduce { copy(isMarketingTermAgreed = intent.originalValue) }
         }
     }
 
@@ -118,7 +118,7 @@ internal class PermissionViewModel @Inject constructor(
                     reduce {
                         copy(
                             isLoading = false,
-                            userInfo = user,
+                            isMarketingTermAgreed = user.isMarketingTermAgreed,
                             committedMarketingNotification = user.isMarketingTermAgreed,
                         )
                     }
@@ -131,7 +131,7 @@ internal class PermissionViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        val current = store.uiState.value.userInfo.isMarketingTermAgreed
+        val current = store.uiState.value.isMarketingTermAgreed
         val committed = store.uiState.value.committedMarketingNotification
         if (current != committed) {
             applicationScope.launch {
