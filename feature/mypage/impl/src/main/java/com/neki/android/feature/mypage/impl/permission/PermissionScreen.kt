@@ -99,10 +99,6 @@ internal fun PermissionRoute(
         }
     }
 
-    viewModel.toastMessage.collectWithLifecycle { message ->
-        nekiToast.showToast(text = message)
-    }
-
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             PermissionEffect.NavigateBack -> navigateBack()

@@ -13,7 +13,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -28,9 +27,6 @@ internal class PermissionViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val marketingToggleRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
-
-    private val _toastMessage = MutableSharedFlow<String>(extraBufferCapacity = 8)
-    val toastMessage = _toastMessage.asSharedFlow()
 
     val store: MviIntentStore<PermissionState, PermissionIntent, PermissionEffect> =
         mviIntentStore(
@@ -55,7 +51,7 @@ internal class PermissionViewModel @Inject constructor(
                                 } else {
                                     "마케팅 알림 수신을 거부했어요.\n마이페이지에서 언제든지 변경할 수 있어요."
                                 }
-                                _toastMessage.emit(message)
+                                store.onIntent(PermissionIntent.ShowMarketingToast(message))
                             }
                             .onFailure { e ->
                                 Timber.e(e, "updateMarketingTerm failed")
@@ -110,6 +106,9 @@ internal class PermissionViewModel @Inject constructor(
 
             is PermissionIntent.RevertMarketingNotification ->
                 reduce { copy(userInfo = userInfo.copy(isMarketingTermAgreed = intent.originalValue)) }
+
+            is PermissionIntent.ShowMarketingToast ->
+                postSideEffect(PermissionEffect.ShowToast(intent.message))
         }
     }
 

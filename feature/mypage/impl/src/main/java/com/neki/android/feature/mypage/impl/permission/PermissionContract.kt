@@ -27,6 +27,7 @@ sealed interface PermissionIntent {
     data object ToggleMarketingNotification : PermissionIntent
     data class MarketingNotificationCommitted(val newValue: Boolean) : PermissionIntent
     data class RevertMarketingNotification(val originalValue: Boolean) : PermissionIntent
+    data class ShowMarketingToast(val message: String) : PermissionIntent
 }
 
 sealed interface PermissionEffect {
