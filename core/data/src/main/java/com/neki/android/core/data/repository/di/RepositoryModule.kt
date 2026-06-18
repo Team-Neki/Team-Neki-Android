@@ -3,6 +3,7 @@ package com.neki.android.core.data.repository.di
 import com.neki.android.core.data.auth.AuthEventManagerImpl
 import com.neki.android.core.data.repository.impl.AuthRepositoryImpl
 import com.neki.android.core.data.repository.impl.DiscordWebhookRepositoryImpl
+import com.neki.android.core.data.repository.impl.NotificationRepositoryImpl
 import com.neki.android.core.data.repository.impl.MediaUploadRepositoryImpl
 import com.neki.android.core.data.repository.impl.FolderRepositoryImpl
 import com.neki.android.core.data.repository.impl.MapRepositoryImpl
@@ -13,6 +14,7 @@ import com.neki.android.core.data.repository.impl.TokenRepositoryImpl
 import com.neki.android.core.data.repository.impl.UserRepositoryImpl
 import com.neki.android.core.dataapi.auth.AuthEventManager
 import com.neki.android.core.dataapi.repository.DiscordWebhookRepository
+import com.neki.android.core.dataapi.repository.NotificationRepository
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.MediaUploadRepository
@@ -97,4 +99,10 @@ internal interface RepositoryModule {
     fun bindDiscordWebhookRepositoryImpl(
         discordWebhookRepositoryImpl: DiscordWebhookRepositoryImpl,
     ): DiscordWebhookRepository
+
+    @Binds
+    @Singleton
+    fun bindNotificationRepositoryImpl(
+        notificationRepositoryImpl: NotificationRepositoryImpl,
+    ): NotificationRepository
 }
