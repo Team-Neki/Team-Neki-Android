@@ -85,11 +85,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 
             // 기본화면
             RandomPoseIntent.ClickCloseIcon -> postSideEffect(RandomPoseEffect.NavigateBack)
-            RandomPoseIntent.ClickGoToDetailIcon -> {
-                state.currentPose?.let { pose ->
-                    postSideEffect(RandomPoseEffect.NavigateToDetail(pose.id))
-                }
-            }
 
             RandomPoseIntent.ClickBookmarkIcon -> {
                 analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)

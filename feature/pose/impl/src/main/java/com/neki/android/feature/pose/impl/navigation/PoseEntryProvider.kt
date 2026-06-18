@@ -89,7 +89,6 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: MainNavigator) {
         RandomPoseRoute(
             viewModel = viewModel,
             navigateBack = navigator::goBack,
-            navigateToPoseDetail = navigator::navigateToPoseDetail,
         )
     }
 }

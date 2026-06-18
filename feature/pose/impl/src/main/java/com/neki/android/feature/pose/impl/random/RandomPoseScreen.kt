@@ -37,7 +37,6 @@ import dev.chrisbanes.haze.rememberHazeState
 internal fun RandomPoseRoute(
     viewModel: RandomPoseViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
-    navigateToPoseDetail: (Long) -> Unit,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -54,7 +53,6 @@ internal fun RandomPoseRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             RandomPoseEffect.NavigateBack -> navigateBack()
-            is RandomPoseEffect.NavigateToDetail -> navigateToPoseDetail(sideEffect.poseId)
             is RandomPoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             is RandomPoseEffect.AnimateToPage -> coroutineScope.launch {
                 pagerState.animateScrollToPage(
@@ -119,7 +117,6 @@ internal fun RandomPoseScreen(
                     modifier = Modifier.fillMaxWidth(),
                     isBookmarked = pose.isBookmarked,
                     onClickClose = { onIntent(RandomPoseIntent.ClickCloseIcon) },
-                    onClickGoToDetail = { onIntent(RandomPoseIntent.ClickGoToDetailIcon) },
                     onClickBookmark = { onIntent(RandomPoseIntent.ClickBookmarkIcon) },
                 )
             }
