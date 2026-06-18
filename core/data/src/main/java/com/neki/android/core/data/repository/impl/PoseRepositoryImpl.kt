@@ -12,6 +12,7 @@ import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
+import com.neki.android.core.model.PosePage
 import com.neki.android.core.model.SortOrder
 import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.flow.Flow
@@ -62,6 +63,34 @@ class PoseRepositoryImpl @Inject constructor(
                 )
             },
         ).flow
+    }
+
+    override suspend fun getPosesPage(
+        headCount: PeopleCount?,
+        page: Int,
+        size: Int,
+        sortOrder: SortOrder,
+    ): Result<PosePage> = runSuspendCatching {
+        val response = poseService.getPoses(
+            page = page,
+            size = size,
+            headCount = headCount?.name,
+            sortOrder = sortOrder.name,
+        ).data
+        PosePage(poses = response.toModels(), hasNext = response.hasNext)
+    }
+
+    override suspend fun getBookmarkedPosesPage(
+        page: Int,
+        size: Int,
+        sortOrder: SortOrder,
+    ): Result<PosePage> = runSuspendCatching {
+        val response = poseService.getBookmarkedPoses(
+            page = page,
+            size = size,
+            sortOrder = sortOrder.name,
+        ).data
+        PosePage(poses = response.toModels(), hasNext = response.hasNext)
     }
 
     override suspend fun getPose(poseId: Long): Result<Pose> = runSuspendCatching {

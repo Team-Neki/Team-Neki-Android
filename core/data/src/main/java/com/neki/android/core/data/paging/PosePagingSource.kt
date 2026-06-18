@@ -23,11 +23,12 @@ class PosePagingSource(
                 sortOrder = sortOrder.name,
             )
             val poses = response.data.toModels()
+            val hasNext = response.data.hasNext
 
             LoadResult.Page(
                 data = poses,
                 prevKey = if (page == 0) null else page - 1,
-                nextKey = if (poses.isEmpty()) null else page + 1,
+                nextKey = if (hasNext) page + 1 else null,
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

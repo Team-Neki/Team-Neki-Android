@@ -14,16 +14,18 @@ class BookmarkPosePagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Pose> {
         return try {
             val page = params.key ?: 0
-            val poses = poseService.getBookmarkedPoses(
+            val response = poseService.getBookmarkedPoses(
                 page = page,
                 size = params.loadSize,
                 sortOrder = sortOrder.name,
-            ).data.toModels()
+            )
+            val poses = response.data.toModels()
+            val hasNext = response.data.hasNext
 
             LoadResult.Page(
                 data = poses,
                 prevKey = if (page == 0) null else page - 1,
-                nextKey = if (poses.isEmpty()) null else page + 1,
+                nextKey = if (hasNext) page + 1 else null,
             )
         } catch (e: Exception) {
             LoadResult.Error(e)
