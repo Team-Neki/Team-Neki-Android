@@ -28,8 +28,8 @@ internal fun SectionTitleText(
                 bottom = paddingBottom,
             ),
         text = text,
-        style = NekiTheme.typography.body14Medium,
-        color = NekiTheme.colorScheme.gray400,
+        style = NekiTheme.typography.body14Regular,
+        color = NekiTheme.colorScheme.gray300,
     )
 }
 
