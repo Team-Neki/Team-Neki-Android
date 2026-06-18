@@ -2,6 +2,7 @@ package com.neki.android.feature.pose.impl.main
 
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
+import com.neki.android.feature.pose.api.PoseNavKey
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -23,7 +24,7 @@ sealed interface PoseIntent {
     data object DismissPeopleCountBottomSheet : PoseIntent
     data object DismissRandomPosePeopleCountBottomSheet : PoseIntent
     data object ClickBookmarkChip : PoseIntent
-    data class ClickPoseItem(val item: Pose) : PoseIntent
+    data class ClickPoseItem(val item: Pose, val index: Int) : PoseIntent
     data class ClickPeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseRecommendation : PoseIntent
     data class ClickRandomPosePeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
@@ -36,7 +37,7 @@ sealed interface PoseEffect {
     data object NavigateToNotification : PoseEffect
     data object NavigateToQRScan : PoseEffect
     data class NavigateToRandomPose(val peopleCount: PeopleCount) : PoseEffect
-    data class NavigateToPoseDetail(val poseId: Long) : PoseEffect
+    data class NavigateToPoseDetail(val poseDetail: PoseNavKey.PoseDetail) : PoseEffect
     data class ShowToast(val message: String) : PoseEffect
     data object ScrollToTop : PoseEffect
 }

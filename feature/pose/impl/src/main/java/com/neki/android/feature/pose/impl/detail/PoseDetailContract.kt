@@ -4,16 +4,21 @@ import com.neki.android.core.model.Pose
 
 data class PoseDetailState(
     val isLoading: Boolean = false,
-    val pose: Pose = Pose(),
-    val committedBookmark: Boolean = false,
-)
+    val poses: List<Pose> = emptyList(),
+    val currentPage: Int = 0,
+    val committedBookmarks: Map<Long, Boolean> = emptyMap(),
+) {
+    val currentIndex: Int get() = if (poses.isEmpty()) 0 else currentPage.coerceIn(0, poses.lastIndex)
+    val pose: Pose get() = poses.getOrElse(currentIndex) { Pose() }
+}
 
 sealed interface PoseDetailIntent {
     data object EnterPoseDetailScreen : PoseDetailIntent
     data object ClickBackIcon : PoseDetailIntent
+    data class PageChanged(val page: Int) : PoseDetailIntent
     data object ClickBookmarkIcon : PoseDetailIntent
-    data class BookmarkCommitted(val newBookmark: Boolean) : PoseDetailIntent
-    data class RevertBookmark(val originalBookmark: Boolean) : PoseDetailIntent
+    data class BookmarkCommitted(val poseId: Long, val newBookmark: Boolean) : PoseDetailIntent
+    data class RevertBookmark(val poseId: Long, val originalBookmark: Boolean) : PoseDetailIntent
 }
 
 sealed interface PoseDetailSideEffect {
