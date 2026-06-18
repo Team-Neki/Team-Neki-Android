@@ -1,12 +1,15 @@
 package com.neki.android.feature.archive.impl.main
 
+import android.content.Context
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.const.TermConst
+import com.neki.android.core.common.permission.NotificationPermissionManager
 import com.neki.android.core.dataapi.repository.FolderRepository
+import com.neki.android.core.dataapi.repository.NotificationRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.dataapi.repository.TermRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -14,6 +17,7 @@ import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -27,10 +31,12 @@ private const val DEFAULT_PHOTOS_SIZE = 20
 
 @HiltViewModel
 class ArchiveMainViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
     private val userRepository: UserRepository,
     private val termRepository: TermRepository,
+    private val notificationRepository: NotificationRepository,
     private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
@@ -57,7 +63,10 @@ class ArchiveMainViewModel @Inject constructor(
     ) {
         if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
         when (intent) {
-            ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
+            ArchiveMainIntent.EnterArchiveMainScreen -> {
+                fetchInitialData(reduce)
+                updateNotificationToken()
+            }
             ArchiveMainIntent.RefreshArchiveMain -> viewModelScope.launch {
                 awaitAll(
                     async { fetchFavoriteSummary(reduce) },
@@ -98,6 +107,15 @@ class ArchiveMainViewModel @Inject constructor(
                 reduce { copy(showMarketingAgreementDialog = false) }
                 agreeMarketingTerm(postSideEffect)
             }
+        }
+    }
+
+    private fun updateNotificationToken() {
+        viewModelScope.launch {
+            val token = notificationRepository.getPushToken() ?: return@launch
+            val pushAgreed = NotificationPermissionManager.isGrantedNotificationPermission(context)
+            notificationRepository.updateNotification(token, pushAgreed)
+                .onFailure { Timber.e(it, "Failed to update notification token") }
         }
     }
 
