@@ -17,6 +17,8 @@ data class PoseResponse(
         @SerialName("imageUrl") val imageUrl: String,
         @SerialName("scrap") val bookmark: Boolean,
         @SerialName("contentType") val contentType: String,
+        @SerialName("width") val width: Int? = null,
+        @SerialName("height") val height: Int? = null,
         @SerialName("createdAt") val createdAt: String,
     ) {
         internal fun toModel() = Pose(
@@ -24,6 +26,8 @@ data class PoseResponse(
             poseImageUrl = imageUrl,
             peopleCount = PeopleCount.entries.find { it.name == headCount }?.value ?: 1,
             isBookmarked = bookmark,
+            width = width,
+            height = height,
         )
     }
 
