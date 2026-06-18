@@ -14,6 +14,7 @@ data class ArchiveMainState(
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
     val isShowAddAlbumBottomSheet: Boolean = false,
     val albumNameTextState: TextFieldState = TextFieldState(),
+    val showMarketingAgreementDialog: Boolean = false,
 )
 
 sealed interface ArchiveMainIntent {
@@ -41,6 +42,10 @@ sealed interface ArchiveMainIntent {
     // Add Album BottomSheet Intent
     data object DismissAddAlbumBottomSheet : ArchiveMainIntent
     data object ClickAddAlbumButton : ArchiveMainIntent
+
+    // Marketing Agreement Dialog Intent
+    data object DismissMarketingAgreementDialog : ArchiveMainIntent
+    data object ConfirmMarketingAgreementDialog : ArchiveMainIntent
 }
 
 sealed interface ArchiveMainSideEffect {

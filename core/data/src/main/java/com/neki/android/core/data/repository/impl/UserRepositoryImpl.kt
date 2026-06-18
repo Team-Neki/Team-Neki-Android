@@ -3,6 +3,8 @@ package com.neki.android.core.data.repository.impl
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.neki.android.core.data.local.di.UserDataStore
 import com.neki.android.core.data.remote.api.UserService
@@ -52,6 +54,19 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    override val lastArchiveMarketingPopupTimestamp: Flow<Long> =
+        dataStore.data.map { it[LAST_ARCHIVE_MARKETING_POPUP_TIMESTAMP] ?: 0L }
+
+    override val archiveMarketingPopupShownCount: Flow<Int> =
+        dataStore.data.map { it[ARCHIVE_MARKETING_POPUP_SHOWN_COUNT] ?: 0 }
+
+    override suspend fun recordMarketingPopupShown() {
+        dataStore.edit {
+            it[LAST_ARCHIVE_MARKETING_POPUP_TIMESTAMP] = System.currentTimeMillis()
+            it[ARCHIVE_MARKETING_POPUP_SHOWN_COUNT] = (it[ARCHIVE_MARKETING_POPUP_SHOWN_COUNT] ?: 0) + 1
+        }
+    }
+
     override suspend fun getUserInfo(): Result<UserInfo> = runSuspendCatching {
         userService.getUserInfo().data.toModel()
     }
@@ -68,5 +83,8 @@ class UserRepositoryImpl @Inject constructor(
         private val HAS_VISITED_RANDOM_POSE = booleanPreferencesKey("is_first_visit_random_pose")
         private val HAS_SHOWN_INFO_TOOLTIP = booleanPreferencesKey("is_first_expand_bottom_sheet")
         private val HAS_SHOWN_QR_INFO_TOOLTIP = booleanPreferencesKey("is_first_visit_archive")
+        private val LAST_ARCHIVE_MARKETING_POPUP_TIMESTAMP =
+            longPreferencesKey("last_archive_marketing_popup_timestamp")
+        private val ARCHIVE_MARKETING_POPUP_SHOWN_COUNT = intPreferencesKey("archive_marketing_popup_shown_count")
     }
 }

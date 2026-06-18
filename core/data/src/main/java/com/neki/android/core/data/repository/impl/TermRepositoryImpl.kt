@@ -22,4 +22,11 @@ class TermRepositoryImpl @Inject constructor(
         )
         termService.agreeTerms(request)
     }
+
+    override suspend fun updateTermAgreement(termId: Long, agreed: Boolean): Result<Unit> = runSuspendCatching {
+        val request = TermAgreementsRequest(
+            agreements = listOf(TermAgreementsRequest.Agreement(termId = termId, agreed = agreed)),
+        )
+        termService.agreeTerms(request)
+    }
 }

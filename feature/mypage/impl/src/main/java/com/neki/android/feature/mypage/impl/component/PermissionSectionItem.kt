@@ -23,11 +23,12 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 internal fun PermissionSectionItem(
     type: String,
     subTitle: String,
-    isGranted: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    trailingContent: @Composable () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .noRippleClickableSingle(onClick = onClick)
             .padding(vertical = 12.dp, horizontal = 20.dp),
@@ -48,21 +49,7 @@ internal fun PermissionSectionItem(
                 style = NekiTheme.typography.body14Medium,
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = if (isGranted) "허용됨" else "허용안됨",
-                color = NekiTheme.colorScheme.gray500,
-                style = NekiTheme.typography.body14Medium,
-            )
-            Icon(
-                modifier = Modifier.size(16.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
-                tint = NekiTheme.colorScheme.gray300,
-                contentDescription = null,
-            )
-        }
+        trailingContent()
     }
 }
 
@@ -73,7 +60,21 @@ private fun PermissionSectionItemCameraPreview() {
         PermissionSectionItem(
             type = "카메라",
             subTitle = "QR 촬영에 필요해요.",
-            isGranted = true,
+            trailingContent = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "허용됨",
+                        color = NekiTheme.colorScheme.gray500,
+                        style = NekiTheme.typography.body14Medium,
+                    )
+                    Icon(
+                        modifier = Modifier.size(16.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
+                        tint = NekiTheme.colorScheme.gray300,
+                        contentDescription = null,
+                    )
+                }
+            },
         )
     }
 }
@@ -85,7 +86,21 @@ private fun PermissionSectionItemLocationPreview() {
         PermissionSectionItem(
             type = "위치",
             subTitle = "QR 촬영에 필요해요.",
-            isGranted = false,
+            trailingContent = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "허용안됨",
+                        color = NekiTheme.colorScheme.gray500,
+                        style = NekiTheme.typography.body14Medium,
+                    )
+                    Icon(
+                        modifier = Modifier.size(16.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_right),
+                        tint = NekiTheme.colorScheme.gray300,
+                        contentDescription = null,
+                    )
+                }
+            },
         )
     }
 }

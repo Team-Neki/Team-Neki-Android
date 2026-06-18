@@ -10,6 +10,9 @@ interface UserRepository {
     suspend fun setInfoToolTipShown()
     val hasShownQRInfoToolTip: Flow<Boolean>
     suspend fun setQRInfoToolTipShown()
+    val lastArchiveMarketingPopupTimestamp: Flow<Long>
+    val archiveMarketingPopupShownCount: Flow<Int>
+    suspend fun recordMarketingPopupShown()
 
     suspend fun getUserInfo(): Result<UserInfo>
     suspend fun updateUserInfo(nickname: String): Result<Unit>

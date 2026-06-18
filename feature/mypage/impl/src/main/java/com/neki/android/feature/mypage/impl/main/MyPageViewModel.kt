@@ -10,7 +10,6 @@ import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.domain.usecase.UploadProfileImageUseCase
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
-import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -47,6 +46,7 @@ internal class MyPageViewModel @Inject constructor(
         when (intent) {
             MyPageIntent.EnterMypageScreen -> fetchInitialData(reduce)
             is MyPageIntent.SetAppVersion -> reduce { copy(appVersion = intent.appVersion) }
+
             // MyPage Main
             MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.NavigateToNotification)
             MyPageIntent.ClickProfileCard -> postSideEffect(MyPageEffect.NavigateToProfile)
@@ -59,7 +59,6 @@ internal class MyPageViewModel @Inject constructor(
                 reduce { copy(profileImageState = EditProfileImageType.OriginalImageUrl(state.userInfo.profileImageUrl)) }
                 postSideEffect(MyPageEffect.NavigateBack)
             }
-
             MyPageIntent.ClickEditIcon -> postSideEffect(MyPageEffect.NavigateToEditProfile)
             MyPageIntent.ClickCameraIcon -> reduce { copy(isShowImageSelectDialog = true) }
             MyPageIntent.DismissImageSelectDialog -> reduce { copy(isShowImageSelectDialog = false) }
@@ -82,35 +81,6 @@ internal class MyPageViewModel @Inject constructor(
             MyPageIntent.ConfirmWithdraw -> {
                 reduce { copy(isShowWithdrawDialog = false) }
                 withdrawAccount(reduce, postSideEffect)
-            }
-
-            // Permission
-            is MyPageIntent.ClickPermissionItem -> {
-                postSideEffect(MyPageEffect.RequestPermission(intent.permission))
-            }
-
-            MyPageIntent.DismissPermissionDialog -> {
-                reduce { copy(isShowPermissionDialog = false, clickedPermission = null) }
-            }
-
-            MyPageIntent.ConfirmPermissionDialog -> {
-                val permission = state.clickedPermission
-                reduce { copy(isShowPermissionDialog = false, clickedPermission = null) }
-                if (permission != null) {
-                    postSideEffect(MyPageEffect.MoveAppSettings(permission))
-                }
-            }
-
-            is MyPageIntent.UpdatePermissionState -> {
-                when (intent.permission) {
-                    NekiPermission.CAMERA -> reduce { copy(isGrantedCamera = intent.isGranted) }
-                    NekiPermission.LOCATION -> reduce { copy(isGrantedLocation = intent.isGranted) }
-                    NekiPermission.NOTIFICATION -> reduce { copy(isGrantedNotification = intent.isGranted) }
-                }
-            }
-
-            is MyPageIntent.ShowPermissionDeniedDialog -> {
-                reduce { copy(isShowPermissionDialog = true, clickedPermission = intent.permission) }
             }
         }
     }
@@ -164,7 +134,6 @@ internal class MyPageViewModel @Inject constructor(
                         userInfo = user,
                     )
                 }
-
                 if (isProfileImageChanged) {
                     postSideEffect(MyPageEffect.PreloadImageAndNavigateBack(user.profileImageUrl))
                 } else {

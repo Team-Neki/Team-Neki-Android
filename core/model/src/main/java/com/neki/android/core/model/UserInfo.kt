@@ -9,4 +9,5 @@ data class UserInfo(
     val profileImageUrl: String = "",
     val loginType: String = "",
     val isRequiredTermsAgreed: Boolean = false,
+    val isMarketingTermAgreed: Boolean = false,
 )

@@ -44,6 +44,7 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
 import com.neki.android.feature.archive.impl.component.EmptyPhotoContent
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
+import com.neki.android.feature.archive.impl.main.component.MarketingAgreementDialog
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
@@ -129,6 +130,14 @@ internal fun ArchiveMainScreen(
 
     if (uiState.isLoading) {
         LoadingDialog()
+    }
+
+    if (uiState.showMarketingAgreementDialog) {
+        MarketingAgreementDialog(
+            onDismissRequest = { onIntent(ArchiveMainIntent.DismissMarketingAgreementDialog) },
+            onClickConfirm = { onIntent(ArchiveMainIntent.ConfirmMarketingAgreementDialog) },
+            onClickDismiss = { onIntent(ArchiveMainIntent.DismissMarketingAgreementDialog) },
+        )
     }
 
     if (uiState.isShowAddAlbumBottomSheet) {

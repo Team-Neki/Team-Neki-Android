@@ -32,19 +32,34 @@ class NekiToast(
     private val context: Context,
 ) {
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private var currentComposeView: ComposeView? = null
+    private var currentDismissJob: Job? = null
+
+    private fun dismissCurrent() {
+        currentDismissJob?.cancel()
+        currentComposeView?.let {
+            if (it.isAttachedToWindow) windowManager.removeView(it)
+        }
+        currentComposeView = null
+        currentDismissJob = null
+    }
 
     private fun makeToast(
         duration: Int = Toast.LENGTH_SHORT,
         toast: @Composable (dismiss: () -> Unit) -> Unit,
     ) {
         val activity = context as ComponentActivity
-        var dismissJob: Job? = null
+        dismissCurrent()
         lateinit var composeView: ComposeView
 
         fun dismiss() {
-            dismissJob?.cancel()
+            currentDismissJob?.cancel()
             if (composeView.isAttachedToWindow) {
                 windowManager.removeView(composeView)
+            }
+            if (currentComposeView === composeView) {
+                currentComposeView = null
+                currentDismissJob = null
             }
         }
 
@@ -78,9 +93,10 @@ class NekiToast(
             y = (28 * Resources.getSystem().displayMetrics.density).toInt()
         }
 
+        currentComposeView = composeView
         windowManager.addView(composeView, params)
 
-        dismissJob = activity.lifecycleScope.launch(Dispatchers.Main) {
+        currentDismissJob = activity.lifecycleScope.launch(Dispatchers.Main) {
             delay(if (duration == Toast.LENGTH_SHORT) 2500L else 3500L)
             dismiss()
         }

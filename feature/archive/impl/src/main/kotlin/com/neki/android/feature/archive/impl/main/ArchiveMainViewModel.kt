@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
+import com.neki.android.core.common.const.TermConst
 import com.neki.android.core.dataapi.repository.FolderRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.dataapi.repository.TermRepository
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
@@ -28,6 +30,7 @@ class ArchiveMainViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
     private val userRepository: UserRepository,
+    private val termRepository: TermRepository,
     private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
@@ -88,6 +91,13 @@ class ArchiveMainViewModel @Inject constructor(
             // Add Album BottomSheet Intent
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
             ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(state.albumNameTextState.text.trim().toString(), reduce, postSideEffect)
+
+            // Marketing Agreement Dialog Intent
+            ArchiveMainIntent.DismissMarketingAgreementDialog -> reduce { copy(showMarketingAgreementDialog = false) }
+            ArchiveMainIntent.ConfirmMarketingAgreementDialog -> {
+                reduce { copy(showMarketingAgreementDialog = false) }
+                agreeMarketingTerm(postSideEffect)
+            }
         }
     }
 
@@ -102,10 +112,29 @@ class ArchiveMainViewModel @Inject constructor(
                     async { fetchFavoriteSummary(reduce) },
                     async { fetchPhotos(reduce) },
                     async { fetchFolders(reduce) },
+                    async { checkMarketingPopup(reduce) },
                 )
             } finally {
                 reduce { copy(isLoading = false) }
             }
+        }
+    }
+
+    private suspend fun checkMarketingPopup(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
+        val userInfo = userRepository.getUserInfo().getOrNull() ?: return
+        if (userInfo.isMarketingTermAgreed) return
+
+        val shownCount = userRepository.archiveMarketingPopupShownCount.first()
+        if (shownCount >= 2) return
+
+        val lastTimestamp = userRepository.lastArchiveMarketingPopupTimestamp.first()
+        val isFirstTime = shownCount == 0
+        val isSevenDaysElapsed = (System.currentTimeMillis() - lastTimestamp) >= TermConst.MARKETING_POPUP_INTERVAL_MS
+        val shouldShow = isFirstTime || isSevenDaysElapsed
+
+        if (shouldShow) {
+            userRepository.recordMarketingPopupShown()
+            reduce { copy(showMarketingAgreementDialog = true) }
         }
     }
 
@@ -170,6 +199,18 @@ class ArchiveMainViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    private fun agreeMarketingTerm(
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+    ) = viewModelScope.launch {
+        termRepository.updateTermAgreement(termId = TermConst.MARKETING_TERM_ID, agreed = true)
+            .onSuccess {
+                postSideEffect(ArchiveMainSideEffect.ShowToastMessage("마케팅 알림 수신에 동의했어요."))
+            }
+            .onFailure { e ->
+                Timber.e(e)
+            }
     }
 
     private fun handleAddAlbum(

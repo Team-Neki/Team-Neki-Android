@@ -48,11 +48,7 @@ private fun EntryProviderScope<NavKey>.myPageEntry(
         )
     }
 
-    entry<MyPageNavKey.Permission>(
-        metadata = HiltSharedViewModelStoreNavEntryDecorator.parent(
-            MyPageNavKey.MyPage.toString(),
-        ),
-    ) {
+    entry<MyPageNavKey.Permission> {
         PermissionRoute(
             navigateBack = mainNavigator::goBack,
         )
