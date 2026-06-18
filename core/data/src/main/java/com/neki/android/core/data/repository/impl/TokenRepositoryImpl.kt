@@ -37,11 +37,11 @@ class TokenRepositoryImpl @Inject constructor(
 
     override fun hasTokens(): Flow<Boolean> {
         return dataStore.data.map { preferences ->
-            runCatching {
+            try {
                 val accessToken = preferences[ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) }
                 val refreshToken = preferences[REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) }
                 !accessToken.isNullOrBlank() && !refreshToken.isNullOrBlank()
-            }.getOrElse {
+            } catch (e: Exception) {
                 dataStore.edit { it.remove(ACCESS_TOKEN); it.remove(REFRESH_TOKEN) }
                 false
             }
