@@ -53,6 +53,14 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name=".NekiFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
             android:theme="@style/OssLicenses.Theme.OptOutEdgeToEdgeEnforcement" />
