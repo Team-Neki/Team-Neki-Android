@@ -53,6 +53,10 @@ class AuthRepositoryImpl @Inject constructor(
         ).data.toModel()
     }
 
+    override suspend fun logout(): Result<Unit> = runSuspendCatching {
+        authService.logout()
+    }
+
     override suspend fun withdrawAccount(): Result<Unit> = runSuspendCatching {
         authService.withdrawAccount()
     }
