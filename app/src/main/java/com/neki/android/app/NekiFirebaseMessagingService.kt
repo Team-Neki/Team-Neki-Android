@@ -47,6 +47,7 @@ class NekiFirebaseMessagingService : FirebaseMessagingService() {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()
