@@ -14,6 +14,7 @@ data class MainState(
 )
 
 sealed interface MainIntent {
+    data object EnterMainScreen : MainIntent
     data object ClickAddPhotoFab : MainIntent
     data object DismissAddPhotoBottomSheet : MainIntent
     data object ClickQRScan : MainIntent
