@@ -12,11 +12,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
@@ -36,8 +38,8 @@ import com.neki.android.feature.map.impl.util.formatDistance
 internal fun PhotoBoothDetailContent(
     photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
-    isCurrentLocation: Boolean = false,
-    onClickCurrentLocation: () -> Unit = {},
+    isFavorite: Boolean = false,
+    onClickFavorite: () -> Unit = {},
     onClickCloseCard: () -> Unit = {},
     onClickCard: () -> Unit = {},
     onClickDirection: () -> Unit = {},
@@ -53,9 +55,9 @@ internal fun PhotoBoothDetailContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            CurrentLocationButton(
-                isActiveCurrentLocation = isCurrentLocation,
-                onClick = onClickCurrentLocation,
+            PhotoBoothFavoriteButton(
+                isFavorite = isFavorite,
+                onClick = onClickFavorite,
             )
             CloseButton(onClick = onClickCloseCard)
         }
@@ -95,31 +97,41 @@ private fun PhotoBoothDetailCard(
             error = painterResource(R.drawable.icon_photo_booth_empty),
             contentDescription = null,
         )
-        HorizontalSpacer(16.dp)
+        HorizontalSpacer(12.dp)
         Column(
             modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            Text(
+                text = photoBooth.brandName,
+                color = NekiTheme.colorScheme.gray900,
+                style = NekiTheme.typography.title20SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
-                    text = photoBooth.brandName,
-                    color = NekiTheme.colorScheme.gray900,
-                    style = NekiTheme.typography.title20SemiBold,
-                )
-                HorizontalSpacer(6.dp)
-                Text(
+                    modifier = Modifier.weight(1f, fill = false),
                     text = photoBooth.branchName,
                     color = NekiTheme.colorScheme.gray600,
                     style = NekiTheme.typography.body14Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Box(
+                    modifier = Modifier
+                        .size(width = 1.dp, height = 10.dp)
+                        .background(color = NekiTheme.colorScheme.gray100)
+                )
+                Text(
+                    text = photoBooth.distance.formatDistance(),
+                    color = NekiTheme.colorScheme.gray700,
+                    style = NekiTheme.typography.body14SemiBold,
                 )
             }
-            VerticalSpacer(4.dp)
-            Text(
-                text = photoBooth.distance.formatDistance(),
-                color = NekiTheme.colorScheme.gray400,
-                style = NekiTheme.typography.body14Medium,
-            )
         }
         Box(
             modifier = Modifier
@@ -149,6 +161,20 @@ private fun PhotoBoothDetailCardPreview() {
                 brandName = "인생네컷",
                 branchName = "사당역점",
                 distance = 300,
+            ),
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun PhotoBoothDetailCardLongTextPreview() {
+    NekiTheme {
+        PhotoBoothDetailCard(
+            photoBooth = PhotoBooth(
+                brandName = "브랜드명이매우길어지는경우테스트용브랜드네임",
+                branchName = "지점명이매우길어지는경우테스트용지점네임",
+                distance = 1200,
             ),
         )
     }
