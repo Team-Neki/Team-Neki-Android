@@ -6,7 +6,6 @@ data class PoseDetailState(
     val isLoading: Boolean = false,
     val poses: List<Pose> = emptyList(),
     val currentPage: Int = 0,
-    val committedBookmarks: Map<Long, Boolean> = emptyMap(),
 ) {
     val currentIndex: Int get() = if (poses.isEmpty()) 0 else currentPage.coerceIn(0, poses.lastIndex)
     val pose: Pose get() = poses.getOrElse(currentIndex) { Pose() }

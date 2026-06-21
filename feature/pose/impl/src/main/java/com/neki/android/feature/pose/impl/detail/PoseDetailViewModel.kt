@@ -30,6 +30,7 @@ class PoseDetailViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val bookmarkRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
+    private val committedBookmarks = key.poses.associate { it.id to it.isBookmarked }.toMutableMap()
     private var hasNext: Boolean = key.hasNext
     private var nextPage: Int = key.poses.size / PAGE_SIZE
     private var isLoadingMore: Boolean = false
@@ -44,7 +45,6 @@ class PoseDetailViewModel @AssistedInject constructor(
             initialState = PoseDetailState(
                 poses = key.poses,
                 currentPage = key.initialIndex,
-                committedBookmarks = key.poses.associate { it.id to it.isBookmarked },
             ),
             onIntent = ::onIntent,
         )
@@ -55,7 +55,7 @@ class PoseDetailViewModel @AssistedInject constructor(
             bookmarkRequests
                 .debounce(500)
                 .collect { (poseId, newBookmark) ->
-                    val committedBookmark = store.uiState.value.committedBookmarks[poseId] ?: return@collect
+                    val committedBookmark = committedBookmarks[poseId] ?: return@collect
                     if (committedBookmark != newBookmark) {
                         poseRepository.updateBookmark(poseId, newBookmark)
                             .onSuccess {
@@ -90,7 +90,7 @@ class PoseDetailViewModel @AssistedInject constructor(
             }
             PoseDetailIntent.ClickBookmarkIcon -> handleBookmarkToggle(state, reduce, postSideEffect)
             is PoseDetailIntent.BookmarkCommitted -> {
-                reduce { copy(committedBookmarks = committedBookmarks + (intent.poseId to intent.newBookmark)) }
+                committedBookmarks[intent.poseId] = intent.newBookmark
             }
             is PoseDetailIntent.RevertBookmark -> {
                 reduce {
@@ -130,11 +130,11 @@ class PoseDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             poseRepository.getPose(poseId = key.poseId)
                 .onSuccess { data ->
+                    committedBookmarks[data.id] = data.isBookmarked
                     reduce {
                         copy(
                             poses = listOf(data),
                             currentPage = 0,
-                            committedBookmarks = mapOf(data.id to data.isBookmarked),
                         )
                     }
                 }
@@ -179,11 +179,11 @@ class PoseDetailViewModel @AssistedInject constructor(
                         reduce {
                             copy(
                                 poses = poses + page.poses,
-                                committedBookmarks = committedBookmarks + page.poses.associate { it.id to it.isBookmarked },
                             )
                         }
                         hasNext = page.hasNext
                         nextPage++
+                        page.poses.forEach { committedBookmarks[it.id] = it.isBookmarked }
                     }
                     .onFailure { e ->
                         Timber.e(e, "loadMorePoses failed")
@@ -199,7 +199,7 @@ class PoseDetailViewModel @AssistedInject constructor(
 
         val state = store.uiState.value
         state.poses.forEach { pose ->
-            val committedBookmark = state.committedBookmarks[pose.id]
+            val committedBookmark = committedBookmarks[pose.id]
             if (committedBookmark != null && pose.isBookmarked != committedBookmark) {
                 applicationScope.launch {
                     poseRepository.updateBookmark(pose.id, pose.isBookmarked)
