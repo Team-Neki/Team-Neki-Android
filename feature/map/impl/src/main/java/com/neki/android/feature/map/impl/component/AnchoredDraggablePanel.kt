@@ -297,7 +297,7 @@ internal fun AnchoredPanelContent(
                     contentDescription = null,
                 )
                 Text(
-                    text = "1km 이내에 가까운\n네컷 사진관이 없어요!",
+                    text = if (selectedTab == MapTab.NEARBY) "1km 이내에 가까운\n네컷 사진관이 없어요!" else "저장한 포토부스가\n없어요.",
                     color = NekiTheme.colorScheme.gray500,
                     style = NekiTheme.typography.body16Medium,
                     textAlign = TextAlign.Center,
