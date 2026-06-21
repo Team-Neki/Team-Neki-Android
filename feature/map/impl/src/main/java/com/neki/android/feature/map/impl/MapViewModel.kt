@@ -27,13 +27,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class MapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -43,11 +47,25 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
+    private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
+
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
         onIntent = ::onIntent,
         initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
     )
+
+    init {
+        viewModelScope.launch {
+            favoriteRequests
+                .debounce(FAVORITE_DEBOUNCE_MS)
+                .collect { newFavorite ->
+                    if (newFavorite) {
+                        store.onIntent(MapIntent.ShowToast("저장한 포토 부스에 추가됐어요!"))
+                    }
+                }
+        }
+    }
 
     fun logMapView() {
         analyticsLogger.log(MapAnalyticsEvent.MapView)
@@ -120,6 +138,16 @@ class MapViewModel @Inject constructor(
                 reduce { copy(isShowLocationPermissionDialog = false) }
                 postSideEffect(MapEffect.NavigateToAppSettings)
             }
+            MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
+            is MapIntent.ClickFavorite -> {
+                val newFavorite = !state.isFavorite
+                reduce { copy(isFavorite = newFavorite) }
+                if (intent.from == FavoriteFrom.DETAIL) {
+                    viewModelScope.launch { favoriteRequests.emit(newFavorite) }
+                }
+            }
+            is MapIntent.SelectTab -> reduce { copy(selectedTab = intent.tab) }
+            is MapIntent.ShowToast -> postSideEffect(MapEffect.ShowToastMessage(intent.message))
         }
     }
 
@@ -496,5 +524,9 @@ class MapViewModel @Inject constructor(
                 reduce { copy(dragLevel = dragLevel) }
             }
         }
+    }
+
+    companion object {
+        private const val FAVORITE_DEBOUNCE_MS = 300L
     }
 }
