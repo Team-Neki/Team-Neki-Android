@@ -24,6 +24,7 @@ import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +51,9 @@ class MapViewModel @Inject constructor(
     private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
-        initialState = MapState(),
+        initialState = MapState(
+            favoritePhotoBooths = DUMMY_FAVORITE_PHOTO_BOOTHS,
+        ),
         onIntent = ::onIntent,
         initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
     )
@@ -528,5 +531,12 @@ class MapViewModel @Inject constructor(
 
     companion object {
         private const val FAVORITE_DEBOUNCE_MS = 300L
+
+        // TODO: 실제 즐겨찾기 API 연동 전 임시 더미 데이터
+        val DUMMY_FAVORITE_PHOTO_BOOTHS = persistentListOf(
+            PhotoBooth(brandName = "인생네컷", branchName = "홍대점", distance = 120, latitude = 37.5563, longitude = 126.9236),
+            PhotoBooth(brandName = "포토이즘", branchName = "신촌점", distance = 340, latitude = 37.5596, longitude = 126.9370),
+            PhotoBooth(brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4979, longitude = 127.0276),
+        )
     }
 }

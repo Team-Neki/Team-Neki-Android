@@ -39,7 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
@@ -62,6 +64,7 @@ import kotlin.math.roundToInt
 internal fun AnchoredDraggablePanel(
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
+    favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
     selectedTab: MapTab = MapTab.NEARBY,
     isCurrentLocation: Boolean = false,
@@ -168,6 +171,7 @@ internal fun AnchoredDraggablePanel(
                 selectedTab = selectedTab,
                 brands = brands,
                 nearbyPhotoBooths = nearbyPhotoBooths,
+                favoritePhotoBooths = favoritePhotoBooths,
                 isShowInfoTooltip = isShowInfoTooltip,
                 onTabSelected = onTabSelected,
                 onClickInfoIcon = onClickInfoIcon,
@@ -186,6 +190,7 @@ internal fun AnchoredPanelContent(
     selectedTab: MapTab = MapTab.NEARBY,
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
+    favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     isShowInfoTooltip: Boolean = false,
     onTabSelected: (MapTab) -> Unit = {},
     onClickInfoIcon: () -> Unit = {},
@@ -261,9 +266,25 @@ internal fun AnchoredPanelContent(
                 onDismissTooltip = onDismissInfoTooltip,
             )
         }
-        VerticalSpacer(8.dp)
-        val filteredNearbyPhotoBooths = nearbyPhotoBooths.filter { it.isCheckedBrand }
-        if (filteredNearbyPhotoBooths.isEmpty()) {
+        VerticalSpacer(12.dp)
+        val displayPhotoBooths = when (selectedTab) {
+            MapTab.NEARBY -> nearbyPhotoBooths.filter { it.isCheckedBrand }
+            MapTab.FAVORITE -> favoritePhotoBooths
+        }
+        if (selectedTab == MapTab.FAVORITE) {
+            val body14MediumSpan = NekiTheme.typography.body14Medium.toSpanStyle().copy(color = NekiTheme.colorScheme.gray300)
+            val body14SemiBoldSpan = NekiTheme.typography.body14SemiBold.toSpanStyle().copy(color = NekiTheme.colorScheme.gray400)
+            Text(
+                modifier = Modifier
+                    .padding(start = 20.dp, bottom = 12.dp),
+                text = buildAnnotatedString {
+                    withStyle(body14MediumSpan) { append("저장한 포토부스 총 ") }
+                    withStyle(body14SemiBoldSpan) { append("${favoritePhotoBooths.size}") }
+                    withStyle(body14MediumSpan) { append("곳") }
+                },
+            )
+        }
+        if (displayPhotoBooths.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -290,7 +311,7 @@ internal fun AnchoredPanelContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(bottom = 128.dp),
             ) {
-                items(filteredNearbyPhotoBooths) { photoBooth ->
+                items(displayPhotoBooths) { photoBooth ->
                     HorizontalBrandItem(
                         photoBooth = photoBooth,
                         onClickItem = { onClickPhotoBooth(photoBooth) },
