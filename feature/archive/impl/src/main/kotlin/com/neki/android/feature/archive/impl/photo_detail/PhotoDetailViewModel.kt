@@ -298,11 +298,12 @@ class PhotoDetailViewModel @AssistedInject constructor(
     override fun onCleared() {
         super.onCleared()
         val state = store.uiState.value
-        val currentPhoto = state.photo
-        val committedFavorite = committedFavorites[currentPhoto.id] ?: return
-        if (currentPhoto.isFavorite != committedFavorite) {
-            applicationScope.launch {
-                photoRepository.updateFavorite(currentPhoto.id, currentPhoto.isFavorite)
+        state.photos.forEach { photo ->
+            val committedFavorite = committedFavorites[photo.id]
+            if (committedFavorite != null && photo.isFavorite != committedFavorite) {
+                applicationScope.launch {
+                    photoRepository.updateFavorite(photo.id, photo.isFavorite)
+                }
             }
         }
     }
