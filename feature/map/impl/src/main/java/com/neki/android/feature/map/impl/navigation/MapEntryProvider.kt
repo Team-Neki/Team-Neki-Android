@@ -5,7 +5,9 @@ import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.main.EntryProviderInstaller
 import com.neki.android.core.navigation.main.MainNavigator
 import com.neki.android.feature.map.api.MapNavKey
+import com.neki.android.feature.map.api.navigateToPhotoBoothOrderChange
 import com.neki.android.feature.map.impl.MapRoute
+import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeRoute
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,6 +27,14 @@ object MapEntryProviderModule {
 
 private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
     entry<MapNavKey.Map> {
-        MapRoute()
+        MapRoute(
+            navigateToPhotoBoothOrderChange = navigator::navigateToPhotoBoothOrderChange,
+        )
+    }
+
+    entry<MapNavKey.PhotoBoothOrderChange> {
+        PhotoBoothOrderChangeRoute(
+            navigateBack = navigator::goBack,
+        )
     }
 }
