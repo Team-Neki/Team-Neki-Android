@@ -61,6 +61,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
+    navigateToPhotoBoothOrderChange: () -> Unit = {},
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -187,6 +188,8 @@ fun MapRoute(
 
             is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
 
+            is MapEffect.NavigateToPhotoBoothOrderChange -> navigateToPhotoBoothOrderChange()
+
             is MapEffect.ZoomToClusterBounds -> {
                 scope.launch {
                     val bounds = LatLngBounds(
@@ -296,14 +299,19 @@ fun MapScreen(
             brands = uiState.brands,
             nearbyPhotoBooths = uiState.nearbyPhotoBooths,
             dragLevel = uiState.dragLevel,
+            selectedTab = uiState.selectedTab,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
+            onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
+            isFavorite = uiState.isFavorite,
             isShowInfoTooltip = uiState.isShowInfoTooltip,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
+            onClickFavorite = { onIntent(MapIntent.ClickFavorite(FavoriteFrom.PANEL)) },
             onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
             onDismissInfoTooltip = { onIntent(MapIntent.DismissInfoTooltip) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
+            onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
         )
 
         if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && uiState.isVisibleRefreshButton) {
@@ -346,8 +354,8 @@ fun MapScreen(
                 PhotoBoothDetailContent(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    isCurrentLocation = uiState.isCameraOnCurrentLocation,
-                    onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
+                    isFavorite = uiState.isFavorite,
+                    onClickFavorite = { onIntent(MapIntent.ClickFavorite(FavoriteFrom.DETAIL)) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
                         onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))
