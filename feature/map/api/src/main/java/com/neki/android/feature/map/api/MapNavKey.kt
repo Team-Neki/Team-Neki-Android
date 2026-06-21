@@ -8,8 +8,15 @@ sealed interface MapNavKey : NavKey {
 
     @Serializable
     data object Map : MapNavKey
+
+    @Serializable
+    data object PhotoBoothOrderChange : MapNavKey
 }
 
 fun MainNavigator.navigateToMap() {
     navigate(MapNavKey.Map)
+}
+
+fun MainNavigator.navigateToPhotoBoothOrderChange() {
+    navigate(MapNavKey.PhotoBoothOrderChange)
 }
