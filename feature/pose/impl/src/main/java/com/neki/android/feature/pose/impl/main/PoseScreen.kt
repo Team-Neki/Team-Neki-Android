@@ -31,6 +31,7 @@ import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
+import com.neki.android.feature.pose.api.PoseNavKey
 import com.neki.android.feature.pose.impl.main.component.PoseFilterBar
 import com.neki.android.feature.pose.impl.main.component.PeopleCountBottomSheet
 import com.neki.android.core.ui.component.LoadingDialog
@@ -46,7 +47,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun PoseRoute(
     viewModel: PoseViewModel = hiltViewModel(),
-    navigateToPoseDetail: (Long) -> Unit,
+    navigateToPoseDetail: (PoseNavKey.PoseDetail) -> Unit,
     navigateToRandomPose: (PeopleCount) -> Unit,
     navigateToNotification: () -> Unit,
     navigateToQRScan: () -> Unit,
@@ -67,7 +68,14 @@ internal fun PoseRoute(
             PoseEffect.NavigateToNotification -> navigateToNotification()
             PoseEffect.NavigateToQRScan -> navigateToQRScan()
             is PoseEffect.NavigateToRandomPose -> navigateToRandomPose(sideEffect.peopleCount)
-            is PoseEffect.NavigateToPoseDetail -> navigateToPoseDetail(sideEffect.poseId)
+            is PoseEffect.NavigateToPoseDetail -> {
+                navigateToPoseDetail(
+                    sideEffect.poseDetail.copy(
+                        poses = posePagingItems.itemSnapshotList.items,
+                        hasNext = !posePagingItems.loadState.append.endOfPaginationReached,
+                    ),
+                )
+            }
             is PoseEffect.ShowToast -> nekiToast.showToast(sideEffect.message)
             PoseEffect.ScrollToTop -> coroutineScope.launch {
                 snapshotFlow { posePagingItems.loadState.refresh }
@@ -111,7 +119,7 @@ fun PoseScreen(
 //            onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickBookmark = { onIntent(PoseIntent.ClickBookmarkChip) },
-            onClickPoseItem = { onIntent(PoseIntent.ClickPoseItem(it)) },
+            onClickPoseItem = { pose, index -> onIntent(PoseIntent.ClickPoseItem(pose, index)) },
             onClickBookmarkIcon = { onIntent(PoseIntent.ClickBookmarkIcon(it)) },
         )
 
@@ -155,7 +163,7 @@ fun PoseContent(
     onClickQRCodeIcon: () -> Unit = {},
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
-    onClickPoseItem: (Pose) -> Unit = {},
+    onClickPoseItem: (Pose, Int) -> Unit = { _, _ -> },
     onClickBookmarkIcon: (Pose) -> Unit = {},
 ) {
     val density = LocalDensity.current

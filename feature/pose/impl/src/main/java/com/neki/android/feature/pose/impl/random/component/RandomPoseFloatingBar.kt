@@ -32,7 +32,6 @@ internal fun RandomPoseFloatingBarContent(
     modifier: Modifier = Modifier,
     isBookmarked: Boolean = false,
     onClickClose: () -> Unit = {},
-    onClickGoToDetail: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
 ) {
     Box(
@@ -47,7 +46,6 @@ internal fun RandomPoseFloatingBarContent(
                 .padding(top = 38.dp, bottom = 34.dp),
             isBookmarked = isBookmarked,
             onClickClose = onClickClose,
-            onClickGoToDetail = onClickGoToDetail,
             onClickBookmark = onClickBookmark,
         )
     }
@@ -76,7 +74,6 @@ private fun RandomPoseFloatingBar(
     modifier: Modifier = Modifier,
     isBookmarked: Boolean = false,
     onClickClose: () -> Unit = {},
-    onClickGoToDetail: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
 ) {
     Row(
@@ -117,18 +114,6 @@ private fun RandomPoseFloatingBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            RandomPoseButton(
-                onClick = onClickGoToDetail,
-                backgroundColor = NekiTheme.colorScheme.primary400,
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_top_right),
-                    contentDescription = "상세 보기",
-                    tint = NekiTheme.colorScheme.white,
-                )
-            }
-
             RandomPoseButton(
                 onClick = onClickBookmark,
                 backgroundColor = NekiTheme.colorScheme.primary400,

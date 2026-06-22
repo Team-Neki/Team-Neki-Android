@@ -30,7 +30,6 @@ sealed interface RandomPoseIntent {
 
     // 기본화면
     data object ClickCloseIcon : RandomPoseIntent
-    data object ClickGoToDetailIcon : RandomPoseIntent
     data object ClickBookmarkIcon : RandomPoseIntent
     data object ClickLeftSwipe : RandomPoseIntent
     data object ClickRightSwipe : RandomPoseIntent
@@ -40,7 +39,6 @@ sealed interface RandomPoseIntent {
 
 sealed interface RandomPoseEffect {
     data object NavigateBack : RandomPoseEffect
-    data class NavigateToDetail(val poseId: Long) : RandomPoseEffect
     data class ShowToast(val message: String) : RandomPoseEffect
     data class AnimateToPage(val index: Int) : RandomPoseEffect
 }

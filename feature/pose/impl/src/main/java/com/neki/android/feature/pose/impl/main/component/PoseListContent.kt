@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -26,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
@@ -45,7 +49,7 @@ internal fun PoseListContent(
     modifier: Modifier = Modifier,
     posePagingItems: LazyPagingItems<Pose>,
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
-    onClickItem: (Pose) -> Unit = {},
+    onClickItem: (Pose, Int) -> Unit = { _, _ -> },
     onClickBookmark: (Pose) -> Unit = {},
 ) {
     LazyVerticalStaggeredGrid(
@@ -65,9 +69,24 @@ internal fun PoseListContent(
             posePagingItems[index]?.let { pose ->
                 PoseItem(
                     pose = pose,
-                    onClickItem = onClickItem,
+                    onClickItem = { onClickItem(pose, index) },
                     onClickBookmark = onClickBookmark,
                 )
+            }
+        }
+
+        if (posePagingItems.loadState.append is LoadState.Loading) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        color = NekiTheme.colorScheme.primary500,
+                    )
+                }
             }
         }
     }
@@ -80,7 +99,12 @@ private fun PoseItem(
     onClickItem: (Pose) -> Unit = {},
     onClickBookmark: (Pose) -> Unit = {},
 ) {
-    var aspectRatio by rememberSaveable { mutableFloatStateOf(0f) }
+    val hasSize = pose.width != null && pose.height != null
+    var aspectRatio by if (hasSize) {
+        remember { mutableFloatStateOf(pose.width!! / pose.height!!.toFloat()) }
+    } else {
+        rememberSaveable { mutableFloatStateOf(0f) }
+    }
 
     Box(
         modifier = modifier
@@ -98,9 +122,11 @@ private fun PoseItem(
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
             onSuccess = { state ->
-                val size = state.painter.intrinsicSize
-                if (size.width > 0f && size.height > 0f) {
-                    aspectRatio = size.width / size.height
+                if (!hasSize) {
+                    val size = state.painter.intrinsicSize
+                    if (size.width > 0f && size.height > 0f) {
+                        aspectRatio = size.width / size.height
+                    }
                 }
             },
         )

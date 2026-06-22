@@ -63,7 +63,7 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: MainNavigator) {
         PoseDetailRoute(
             viewModel = hiltViewModel<PoseDetailViewModel, PoseDetailViewModel.Factory>(
                 creationCallback = { factory ->
-                    factory.create(key.poseId)
+                    factory.create(key)
                 },
             ),
             navigateBack = navigator::goBack,
@@ -89,7 +89,6 @@ private fun EntryProviderScope<NavKey>.poseEntry(navigator: MainNavigator) {
         RandomPoseRoute(
             viewModel = viewModel,
             navigateBack = navigator::goBack,
-            navigateToPoseDetail = navigator::navigateToPoseDetail,
         )
     }
 }

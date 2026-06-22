@@ -14,6 +14,7 @@ import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.pose.api.PoseNavKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -108,7 +109,17 @@ internal class PoseViewModel @Inject constructor(
             }
 
             is PoseIntent.ClickPoseItem -> {
-                postSideEffect(PoseEffect.NavigateToPoseDetail(intent.item.id))
+                postSideEffect(
+                    PoseEffect.NavigateToPoseDetail(
+                        PoseNavKey.PoseDetail(
+                            poseId = intent.item.id,
+                            initialIndex = intent.index,
+                            headCount = state.selectedPeopleCount,
+                            sortOrder = SortOrder.DESC,
+                            isBookmarkOnly = state.isShowBookmarkedPose,
+                        ),
+                    ),
+                )
             }
 
             PoseIntent.ClickRandomPoseRecommendation -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = true) }

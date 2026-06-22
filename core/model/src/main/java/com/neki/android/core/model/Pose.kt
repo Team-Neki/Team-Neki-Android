@@ -10,4 +10,6 @@ data class Pose(
     val poseImageUrl: String = "",
     val isBookmarked: Boolean = false,
     val peopleCount: Int = 0,
+    val width: Int? = null,
+    val height: Int? = null,
 )
