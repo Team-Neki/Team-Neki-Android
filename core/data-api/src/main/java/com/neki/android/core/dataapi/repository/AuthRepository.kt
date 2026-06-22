@@ -11,6 +11,7 @@ interface AuthRepository {
 
     suspend fun loginWithKakao(idToken: String): Result<Auth>
     suspend fun updateAccessToken(refreshToken: String): Result<Auth>
+    suspend fun logout(): Result<Unit>
     suspend fun withdrawAccount(): Result<Unit>
 
     fun hasCompletedOnboarding(): Flow<Boolean>

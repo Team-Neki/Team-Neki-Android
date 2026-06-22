@@ -32,6 +32,11 @@ class AuthService @Inject constructor(
         return client.post("/api/auth/refresh") { setBody(requestBody) }.body()
     }
 
+    // 로그아웃
+    suspend fun logout(): BasicNullableResponse<Unit> {
+        return client.post("/api/users/logout").body()
+    }
+
     // 회원 탈퇴
     suspend fun withdrawAccount(): BasicNullableResponse<Unit> {
         return client.delete("/api/users/me").body()

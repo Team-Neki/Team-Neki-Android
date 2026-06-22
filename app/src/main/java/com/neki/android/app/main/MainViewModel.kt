@@ -1,14 +1,18 @@
 package com.neki.android.app.main
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.common.permission.NotificationPermissionManager
+import com.neki.android.core.dataapi.repository.NotificationRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.domain.usecase.UploadSinglePhotoUseCase
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.select_album.api.SelectAlbumAction
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
@@ -17,6 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val notificationRepository: NotificationRepository,
     private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
     private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
 ) : ViewModel() {
@@ -27,6 +33,10 @@ class MainViewModel @Inject constructor(
             onIntent = ::onIntent,
         )
 
+    init {
+        store.onIntent(MainIntent.EnterMainScreen)
+    }
+
     private fun onIntent(
         intent: MainIntent,
         state: MainState,
@@ -34,6 +44,7 @@ class MainViewModel @Inject constructor(
         postSideEffect: (MainSideEffect) -> Unit,
     ) {
         when (intent) {
+            MainIntent.EnterMainScreen -> updateNotificationToken()
             MainIntent.ClickAddPhotoFab -> reduce { copy(isShowAddPhotoBottomSheet = true) }
             MainIntent.DismissAddPhotoBottomSheet -> reduce { copy(isShowAddPhotoBottomSheet = false) }
             MainIntent.ClickQRScan -> {
@@ -91,6 +102,15 @@ class MainViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun updateNotificationToken() {
+        viewModelScope.launch {
+            val token = notificationRepository.getPushToken() ?: return@launch
+            val pushAgreed = NotificationPermissionManager.isGrantedNotificationPermission(context)
+            notificationRepository.updateNotification(token, pushAgreed)
+                .onFailure { Timber.e(it, "Failed to update notification token") }
         }
     }
 

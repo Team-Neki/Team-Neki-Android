@@ -71,10 +71,7 @@ internal class MyPageViewModel @Inject constructor(
 
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
-            MyPageIntent.ConfirmLogout -> {
-                reduce { copy(isShowLogoutDialog = false) }
-                logout(postSideEffect)
-            }
+            MyPageIntent.ConfirmLogout -> logout(reduce, postSideEffect)
 
             MyPageIntent.ClickWithdraw -> reduce { copy(isShowWithdrawDialog = true) }
             MyPageIntent.DismissWithdrawDialog -> reduce { copy(isShowWithdrawDialog = false) }
@@ -152,10 +149,18 @@ internal class MyPageViewModel @Inject constructor(
             }
     }
 
-    private fun logout(postSideEffect: (MyPageEffect) -> Unit) = viewModelScope.launch {
+    private fun logout(
+        reduce: (MyPageState.() -> MyPageState) -> Unit,
+        postSideEffect: (MyPageEffect) -> Unit,
+    ) = viewModelScope.launch {
         analyticsLogger.log(MypageAnalyticsEvent.Logout)
-        tokenRepository.clearTokensWithAuthCache()
-        postSideEffect(MyPageEffect.LogoutWithKakao)
+        authRepository.logout()
+            .onSuccess {
+                reduce { copy(isShowLogoutDialog = false) }
+                tokenRepository.clearTokensWithAuthCache()
+                postSideEffect(MyPageEffect.LogoutWithKakao)
+            }
+            .onFailure { Timber.e(it, "Failed to logout from server") }
     }
 
     private fun withdrawAccount(

@@ -37,22 +37,30 @@ class TokenRepositoryImpl @Inject constructor(
 
     override fun hasTokens(): Flow<Boolean> {
         return dataStore.data.map { preferences ->
-            val accessToken = preferences[ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) }
-            val refreshToken = preferences[REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) }
-
-            !accessToken.isNullOrBlank() && !refreshToken.isNullOrBlank()
+            try {
+                val accessToken = preferences[ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) }
+                val refreshToken = preferences[REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) }
+                !accessToken.isNullOrBlank() && !refreshToken.isNullOrBlank()
+            } catch (e: Exception) {
+                dataStore.edit { it.remove(ACCESS_TOKEN); it.remove(REFRESH_TOKEN) }
+                false
+            }
         }
     }
 
     override fun getAccessToken(): Flow<String> {
         return dataStore.data.map { preferences ->
-            preferences[ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) } ?: ""
+            runCatching {
+                preferences[ACCESS_TOKEN]?.let { CryptoManager.decrypt(it) } ?: ""
+            }.getOrElse { "" }
         }
     }
 
     override fun getRefreshToken(): Flow<String> {
         return dataStore.data.map { preferences ->
-            preferences[REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) } ?: ""
+            runCatching {
+                preferences[REFRESH_TOKEN]?.let { CryptoManager.decrypt(it) } ?: ""
+            }.getOrElse { "" }
         }
     }
 
