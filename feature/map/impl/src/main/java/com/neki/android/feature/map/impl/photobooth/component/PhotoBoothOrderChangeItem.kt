@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,18 +34,23 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 internal fun ReorderableCollectionItemScope.PhotoBoothOrderChangeItem(
     brand: Brand,
     isDragging: Boolean,
 ) {
+    val dragHandleInteractionSource = remember { MutableInteractionSource() }
+    val isDragHandleDragging by dragHandleInteractionSource.collectIsDraggedAsState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(if (isDragging) NekiTheme.colorScheme.gray50 else Color.White)
             .padding(horizontal = 20.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         AsyncImage(
             model = brand.imageUrl,
@@ -60,15 +66,14 @@ internal fun ReorderableCollectionItemScope.PhotoBoothOrderChangeItem(
             error = painterResource(R.drawable.icon_photo_booth_empty),
             contentDescription = null,
         )
-        HorizontalSpacer(12.dp)
         Text(
             text = brand.name,
             style = NekiTheme.typography.title18SemiBold,
             color = NekiTheme.colorScheme.gray900,
             modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        val dragHandleInteractionSource = remember { MutableInteractionSource() }
-        val isDragHandleDragging by dragHandleInteractionSource.collectIsDraggedAsState()
         Icon(
             modifier = Modifier
                 .draggableHandle(interactionSource = dragHandleInteractionSource)
