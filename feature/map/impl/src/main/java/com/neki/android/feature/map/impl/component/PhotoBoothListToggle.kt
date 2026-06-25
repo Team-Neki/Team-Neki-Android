@@ -32,7 +32,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.map.impl.MapTab
 
 @Composable
-internal fun MapTabToggle(
+internal fun PhotoBoothListToggle(
     selectedTab: MapTab,
     onTabSelected: (MapTab) -> Unit,
 ) {
@@ -98,9 +98,9 @@ internal fun MapTabToggle(
 
 @ComponentPreview
 @Composable
-private fun MapTabToggleNearbyPreview() {
+private fun PhotoBoothListToggleNearbyPreview() {
     NekiTheme {
-        MapTabToggle(
+        PhotoBoothListToggle(
             selectedTab = MapTab.NEARBY,
             onTabSelected = {},
         )
@@ -109,9 +109,9 @@ private fun MapTabToggleNearbyPreview() {
 
 @ComponentPreview
 @Composable
-private fun MapTabToggleFavoritePreview() {
+private fun PhotoBoothListToggleFavoritePreview() {
     NekiTheme {
-        MapTabToggle(
+        PhotoBoothListToggle(
             selectedTab = MapTab.FAVORITE,
             onTabSelected = {},
         )

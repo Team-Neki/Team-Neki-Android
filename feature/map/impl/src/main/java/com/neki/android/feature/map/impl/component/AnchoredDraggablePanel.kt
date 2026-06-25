@@ -238,7 +238,7 @@ internal fun AnchoredPanelContent(
         }
         VerticalSpacer(24.dp)
         Box(modifier = Modifier.padding(horizontal = 20.dp)) {
-            MapTabToggle(
+            PhotoBoothListToggle(
                 selectedTab = selectedTab,
                 onTabSelected = onTabSelected,
             )
