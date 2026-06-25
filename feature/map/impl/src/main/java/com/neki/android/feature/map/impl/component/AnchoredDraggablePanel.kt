@@ -309,7 +309,10 @@ internal fun AnchoredPanelContent(
                     .weight(1f)
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 128.dp),
+                contentPadding = PaddingValues(
+                    bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp +
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                ),
             ) {
                 items(displayPhotoBooths) { photoBooth ->
                     HorizontalBrandItem(
