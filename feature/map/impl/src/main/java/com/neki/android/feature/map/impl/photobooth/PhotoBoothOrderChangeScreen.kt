@@ -22,7 +22,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 internal fun PhotoBoothOrderChangeRoute(
-    viewModel: PhotoBoothOrderChangeViewModel = hiltViewModel(),
+    viewModel: PhotoBoothOrderChangeViewModel,
     navigateBack: () -> Unit = {},
 ) {
     val state by viewModel.store.uiState.collectAsStateWithLifecycle()

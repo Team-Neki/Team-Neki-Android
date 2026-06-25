@@ -1,25 +1,32 @@
 package com.neki.android.feature.map.impl.photobooth
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.neki.android.core.dataapi.repository.MapRepository
+import com.neki.android.core.model.Brand
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-internal class PhotoBoothOrderChangeViewModel @Inject constructor(
-    private val mapRepository: MapRepository,
+@HiltViewModel(assistedFactory = PhotoBoothOrderChangeViewModel.Factory::class)
+internal class PhotoBoothOrderChangeViewModel @AssistedInject constructor(
+    @Assisted private val originalBrandsOrder: ImmutableList<Brand>,
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(originalBrandsOrder: ImmutableList<Brand>): PhotoBoothOrderChangeViewModel
+    }
 
     val store: MviIntentStore<PhotoBoothOrderChangeState, PhotoBoothOrderChangeIntent, PhotoBoothOrderChangeSideEffect> =
         mviIntentStore(
-            initialState = PhotoBoothOrderChangeState(),
+            initialState = PhotoBoothOrderChangeState(
+                brands = originalBrandsOrder,
+            ),
             onIntent = ::onIntent,
-            initialFetchData = { store.onIntent(PhotoBoothOrderChangeIntent.LoadBrands) },
         )
 
     private fun onIntent(
@@ -29,20 +36,8 @@ internal class PhotoBoothOrderChangeViewModel @Inject constructor(
         postSideEffect: (PhotoBoothOrderChangeSideEffect) -> Unit,
     ) {
         when (intent) {
-            PhotoBoothOrderChangeIntent.LoadBrands -> loadBrands(reduce)
             is PhotoBoothOrderChangeIntent.ReorderBrand -> handleReorder(intent.from, intent.to, state, reduce)
             PhotoBoothOrderChangeIntent.ClickComplete -> postSideEffect(PhotoBoothOrderChangeSideEffect.NavigateBack)
-        }
-    }
-
-    private fun loadBrands(
-        reduce: (PhotoBoothOrderChangeState.() -> PhotoBoothOrderChangeState) -> Unit,
-    ) {
-        viewModelScope.launch {
-            mapRepository.getBrands().onSuccess { brands ->
-                val immutable = brands.toImmutableList()
-                reduce { copy(brands = immutable, initialBrands = immutable) }
-            }
         }
     }
 
@@ -58,7 +53,7 @@ internal class PhotoBoothOrderChangeViewModel @Inject constructor(
         reduce {
             copy(
                 brands = reordered,
-                isOrderChanged = reordered.map { it.id } != initialBrands.map { it.id },
+                isOrderChanged = reordered.map { it.id } != originalBrandsOrder.map { it.id },
             )
         }
     }

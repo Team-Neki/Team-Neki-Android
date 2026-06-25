@@ -6,12 +6,10 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class PhotoBoothOrderChangeState(
     val brands: ImmutableList<Brand> = persistentListOf(),
-    val initialBrands: ImmutableList<Brand> = persistentListOf(),
     val isOrderChanged: Boolean = false,
 )
 
 sealed interface PhotoBoothOrderChangeIntent {
-    data object LoadBrands : PhotoBoothOrderChangeIntent
     data class ReorderBrand(val from: Int, val to: Int) : PhotoBoothOrderChangeIntent
     data object ClickComplete : PhotoBoothOrderChangeIntent
 }
