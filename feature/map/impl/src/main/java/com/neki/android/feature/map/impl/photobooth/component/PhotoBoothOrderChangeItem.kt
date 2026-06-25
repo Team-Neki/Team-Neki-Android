@@ -27,14 +27,13 @@ import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.core.model.Brand
-import com.neki.android.core.ui.compose.HorizontalSpacer
-import sh.calvin.reorderable.ReorderableCollectionItemScope
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.text.style.TextOverflow
+import com.neki.android.core.model.Brand
+import sh.calvin.reorderable.ReorderableCollectionItemScope
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 internal fun ReorderableCollectionItemScope.PhotoBoothOrderChangeItem(
@@ -50,7 +49,7 @@ internal fun ReorderableCollectionItemScope.PhotoBoothOrderChangeItem(
             .background(if (isDragging) NekiTheme.colorScheme.gray50 else Color.White)
             .padding(horizontal = 20.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         AsyncImage(
             model = brand.imageUrl,

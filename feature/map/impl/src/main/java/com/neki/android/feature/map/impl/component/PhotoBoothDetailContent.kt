@@ -12,16 +12,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
@@ -31,7 +30,6 @@ import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.HorizontalSpacer
-import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.map.impl.util.formatDistance
 
 @Composable
@@ -100,7 +98,7 @@ private fun PhotoBoothDetailCard(
         HorizontalSpacer(12.dp)
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
                 text = photoBooth.brandName,
@@ -124,7 +122,7 @@ private fun PhotoBoothDetailCard(
                 Box(
                     modifier = Modifier
                         .size(width = 1.dp, height = 10.dp)
-                        .background(color = NekiTheme.colorScheme.gray100)
+                        .background(color = NekiTheme.colorScheme.gray100),
                 )
                 Text(
                     text = photoBooth.distance.formatDistance(),
