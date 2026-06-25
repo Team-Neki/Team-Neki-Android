@@ -22,8 +22,6 @@ data class MapState(
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
     val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
-    val shouldShowInfoTooltip: Boolean = false,
-    val isShowInfoTooltip: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
     val showFavoriteMarker: Boolean = false,
@@ -44,8 +42,6 @@ sealed interface MapIntent {
 
     // in 패널
     data object ClickCurrentLocationIcon : MapIntent
-    data object ClickInfoIcon : MapIntent
-    data object DismissInfoTooltip : MapIntent
     data object ClickToMapChip : MapIntent
     data class ClickVerticalBrand(val brand: Brand) : MapIntent
     data class ClickNearPhotoBooth(val photoBooth: PhotoBooth) : MapIntent

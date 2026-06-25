@@ -13,7 +13,6 @@ import com.neki.android.core.analytics.event.MapAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
-import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.MviIntentStore
@@ -33,7 +32,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -43,7 +41,6 @@ import javax.inject.Inject
 class MapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val mapRepository: MapRepository,
-    private val userRepository: UserRepository,
     private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
@@ -116,8 +113,6 @@ class MapViewModel @Inject constructor(
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
-            MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoTooltip = true) }
-            MapIntent.DismissInfoTooltip -> reduce { copy(isShowInfoTooltip = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, state, reduce)
             is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent.photoBooth, reduce, postSideEffect)
@@ -131,7 +126,7 @@ class MapViewModel @Inject constructor(
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
-            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, state.shouldShowInfoTooltip, reduce)
+            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, reduce)
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, state, reduce, postSideEffect)
             is MapIntent.ClickClusterMarker -> postSideEffect(MapEffect.ZoomToClusterBounds(intent.southWest, intent.northEast))
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
@@ -399,8 +394,7 @@ class MapViewModel @Inject constructor(
 
     private fun fetchInitialData(reduce: (MapState.() -> MapState) -> Unit) {
         viewModelScope.launch {
-            val hasShownInfoTooltip = userRepository.hasShownInfoToolTip.first()
-            reduce { copy(isLoading = true, shouldShowInfoTooltip = !hasShownInfoTooltip) }
+            reduce { copy(isLoading = true) }
 
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
@@ -533,20 +527,8 @@ class MapViewModel @Inject constructor(
 
     private fun handleChangeDragLevel(
         dragLevel: DragLevel,
-        shouldShowInfoTooltip: Boolean,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
-        viewModelScope.launch {
-            if (dragLevel == DragLevel.THIRD) {
-                if (shouldShowInfoTooltip) {
-                    reduce { copy(dragLevel = dragLevel, isShowInfoTooltip = true, shouldShowInfoTooltip = false) }
-                    userRepository.setInfoToolTipShown()
-                } else {
-                    reduce { copy(dragLevel = dragLevel) }
-                }
-            } else {
-                reduce { copy(dragLevel = dragLevel) }
-            }
-        }
+        reduce { copy(dragLevel = dragLevel) }
     }
 }

@@ -6,8 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface UserRepository {
     val hasVisitedRandomPose: Flow<Boolean>
     suspend fun setRandomPoseVisited()
-    val hasShownInfoToolTip: Flow<Boolean>
-    suspend fun setInfoToolTipShown()
     val hasShownQRInfoToolTip: Flow<Boolean>
     suspend fun setQRInfoToolTipShown()
     val lastArchiveMarketingPopupTimestamp: Flow<Long>

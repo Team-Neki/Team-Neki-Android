@@ -69,13 +69,10 @@ internal fun AnchoredDraggablePanel(
     selectedTab: MapTab = MapTab.NEARBY,
     isCurrentLocation: Boolean = false,
     showFavoriteMarker: Boolean = false,
-    isShowInfoTooltip: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onTabSelected: (MapTab) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickFavorite: () -> Unit = {},
-    onClickInfoIcon: () -> Unit = {},
-    onDismissInfoTooltip: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickNearPhotoBooth: (PhotoBooth) -> Unit = {},
     onClickEditBrandOrder: () -> Unit = {},
@@ -167,15 +164,11 @@ internal fun AnchoredDraggablePanel(
                 )
             }
             AnchoredPanelContent(
-                dragLevel = dragLevel,
                 selectedTab = selectedTab,
                 brands = brands,
                 nearbyPhotoBooths = nearbyPhotoBooths,
                 favoritePhotoBooths = favoritePhotoBooths,
-                isShowInfoTooltip = isShowInfoTooltip,
                 onTabSelected = onTabSelected,
-                onClickInfoIcon = onClickInfoIcon,
-                onDismissInfoTooltip = onDismissInfoTooltip,
                 onClickBrand = onClickBrand,
                 onClickPhotoBooth = onClickNearPhotoBooth,
                 onClickEditBrandOrder = onClickEditBrandOrder,
@@ -186,15 +179,11 @@ internal fun AnchoredDraggablePanel(
 
 @Composable
 internal fun AnchoredPanelContent(
-    dragLevel: DragLevel,
     selectedTab: MapTab = MapTab.NEARBY,
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
-    isShowInfoTooltip: Boolean = false,
     onTabSelected: (MapTab) -> Unit = {},
-    onClickInfoIcon: () -> Unit = {},
-    onDismissInfoTooltip: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickPhotoBooth: (PhotoBooth) -> Unit = {},
     onClickEditBrandOrder: () -> Unit = {},
@@ -248,22 +237,10 @@ internal fun AnchoredPanelContent(
             }
         }
         VerticalSpacer(24.dp)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        Box(modifier = Modifier.padding(horizontal = 20.dp)) {
             MapTabToggle(
                 selectedTab = selectedTab,
                 onTabSelected = onTabSelected,
-            )
-            InfoToolTip(
-                dragLevel = dragLevel,
-                isShowInfoTooltip = isShowInfoTooltip,
-                onClickInfoIcon = onClickInfoIcon,
-                onDismissTooltip = onDismissInfoTooltip,
             )
         }
         VerticalSpacer(12.dp)
@@ -330,7 +307,6 @@ internal fun AnchoredPanelContent(
 private fun AnchoredPanelContentPreview() {
     NekiTheme {
         AnchoredPanelContent(
-            dragLevel = DragLevel.FIRST,
             brands = persistentListOf(
                 Brand(isChecked = false, name = "인생네컷", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/LIFEFOURCUTS_LOGO_v1.png"),
                 Brand(isChecked = false, name = "포토그레이", imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOGRAY_LOGO_v1.png"),
