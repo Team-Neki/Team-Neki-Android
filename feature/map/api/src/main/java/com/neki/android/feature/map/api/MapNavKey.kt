@@ -21,4 +21,3 @@ fun MainNavigator.navigateToMap() {
 fun MainNavigator.navigateToPhotoBoothOrderChange(brands: List<Brand>) {
     navigate(MapNavKey.PhotoBoothOrderChange(brands))
 }
-
