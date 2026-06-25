@@ -50,14 +50,14 @@ class MapViewModel @Inject constructor(
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(
             favoritePhotoBooths = persistentListOf(
-                PhotoBooth(brandName = "인생네컷", branchName = "홍대점", distance = 120, latitude = 37.5563, longitude = 126.9236),
-                PhotoBooth(brandName = "인생네컷", branchName = "강남역점", distance = 450, latitude = 37.4979, longitude = 127.0276),
-                PhotoBooth(brandName = "포토이즘", branchName = "신촌점", distance = 340, latitude = 37.5596, longitude = 126.9370),
-                PhotoBooth(brandName = "포토이즘", branchName = "홍대입구점", distance = 560, latitude = 37.5572, longitude = 126.9263),
-                PhotoBooth(brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4956, longitude = 127.0302),
-                PhotoBooth(brandName = "포토그레이", branchName = "건대점", distance = 1200, latitude = 37.5407, longitude = 127.0698),
-                PhotoBooth(brandName = "포토그레이", branchName = "이대점", distance = 1540, latitude = 37.5565, longitude = 126.9454),
-                PhotoBooth(brandName = "하루필름", branchName = "신촌점", distance = 1800, latitude = 37.5594, longitude = 126.9368),
+                PhotoBooth(id = 1, brandName = "인생네컷", branchName = "홍대점", distance = 120, latitude = 37.5563, longitude = 126.9236),
+                PhotoBooth(id = 2, brandName = "인생네컷", branchName = "강남역점", distance = 450, latitude = 37.4979, longitude = 127.0276),
+                PhotoBooth(id = 3, brandName = "포토이즘", branchName = "신촌점", distance = 340, latitude = 37.5596, longitude = 126.9370),
+                PhotoBooth(id = 4, brandName = "포토이즘", branchName = "홍대입구점", distance = 560, latitude = 37.5572, longitude = 126.9263),
+                PhotoBooth(id = 5, brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4956, longitude = 127.0302),
+                PhotoBooth(id = 6, brandName = "포토그레이", branchName = "건대점", distance = 1200, latitude = 37.5407, longitude = 127.0698),
+                PhotoBooth(id = 7, brandName = "포토그레이", branchName = "이대점", distance = 1540, latitude = 37.5565, longitude = 126.9454),
+                PhotoBooth(id = 8, brandName = "하루필름", branchName = "신촌점", distance = 1800, latitude = 37.5594, longitude = 126.9368),
             ),
         ),
         onIntent = ::onIntent,
@@ -146,6 +146,13 @@ class MapViewModel @Inject constructor(
                 postSideEffect(MapEffect.NavigateToAppSettings)
             }
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
+            is MapIntent.ToggleBoothFavorite -> reduce {
+                val id = intent.photoBooth.id
+                copy(
+                    nearbyPhotoBooths = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = !it.favorite) else it }.toImmutableList(),
+                    favoritePhotoBooths = favoritePhotoBooths.map { if (it.id == id) it.copy(favorite = !it.favorite) else it }.toImmutableList(),
+                )
+            }
             is MapIntent.ClickFavorite -> {
                 val newFavorite = !state.showFavoriteMarker
                 reduce { copy(showFavoriteMarker = newFavorite) }

@@ -310,6 +310,7 @@ fun MapScreen(
             onClickFavorite = { onIntent(MapIntent.ClickFavorite(FavoriteFrom.PANEL)) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
+            onToggleBoothFavorite = { onIntent(MapIntent.ToggleBoothFavorite(it)) },
             onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
         )
 

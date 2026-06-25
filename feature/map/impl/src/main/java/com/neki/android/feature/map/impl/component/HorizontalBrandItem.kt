@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PhotoBooth
@@ -32,6 +33,8 @@ internal fun HorizontalBrandItem(
     photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
     onClickItem: () -> Unit = {},
+    onClickFavorite: () -> Unit = {},
+    extraInfo: @Composable (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -70,20 +73,13 @@ internal fun HorizontalBrandItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Box(
-                    modifier = Modifier
-                        .size(width = 1.dp, height = 10.dp)
-                        .background(color = NekiTheme.colorScheme.gray100),
-                )
-                Text(
-                    text = photoBooth.distance.formatDistance(),
-                    color = NekiTheme.colorScheme.gray700,
-                    style = NekiTheme.typography.body14SemiBold,
-                )
+                extraInfo?.invoke()
             }
         }
         Icon(
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier
+                .size(24.dp)
+                .noRippleClickable(onClick = onClickFavorite),
             imageVector = ImageVector.vectorResource(
                 if (photoBooth.favorite) R.drawable.icon_heart_filled else R.drawable.icon_heart_stroked,
             ),
@@ -93,9 +89,23 @@ internal fun HorizontalBrandItem(
     }
 }
 
+@Composable
+internal fun DistanceInfo(distance: Int) {
+    Box(
+        modifier = Modifier
+            .size(width = 1.dp, height = 10.dp)
+            .background(color = NekiTheme.colorScheme.gray100),
+    )
+    Text(
+        text = distance.formatDistance(),
+        color = NekiTheme.colorScheme.gray700,
+        style = NekiTheme.typography.body14SemiBold,
+    )
+}
+
 @ComponentPreview
 @Composable
-private fun HorizontalBrandItemPreview() {
+private fun HorizontalBrandItemNearbyPreview() {
     NekiTheme {
         HorizontalBrandItem(
             photoBooth = PhotoBooth(
@@ -103,13 +113,30 @@ private fun HorizontalBrandItemPreview() {
                 branchName = "사당역점",
                 distance = 320,
             ),
+            extraInfo = { DistanceInfo(320) },
         )
     }
 }
 
 @ComponentPreview
 @Composable
-private fun HorizontalBrandItemFavoritePreview() {
+private fun HorizontalBrandItemNearbyFavoritePreview() {
+    NekiTheme {
+        HorizontalBrandItem(
+            photoBooth = PhotoBooth(
+                brandName = "인생네컷",
+                branchName = "사당역점",
+                distance = 320,
+                favorite = true,
+            ),
+            extraInfo = { DistanceInfo(320) },
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun HorizontalBrandItemFavoriteTabPreview() {
     NekiTheme {
         HorizontalBrandItem(
             photoBooth = PhotoBooth(
@@ -132,6 +159,7 @@ private fun HorizontalBrandItemLongTextPreview() {
                 branchName = "지점명이매우길어지는경우테스트용지점네임",
                 distance = 1200,
             ),
+            extraInfo = { DistanceInfo(1200) },
         )
     }
 }
