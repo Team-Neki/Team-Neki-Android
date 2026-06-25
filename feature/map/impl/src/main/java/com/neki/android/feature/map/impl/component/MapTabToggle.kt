@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -76,11 +75,12 @@ internal fun MapTabToggle(
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     Icon(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .alpha(if (isSelected) 1f else 0.4f),
+                        modifier = Modifier.size(20.dp),
                         imageVector = ImageVector.vectorResource(
-                            if (tab == MapTab.NEARBY) R.drawable.icon_pin else R.drawable.icon_heart_gradient,
+                            when (tab) {
+                                MapTab.NEARBY -> if (isSelected) R.drawable.icon_tabbar_pin_on else R.drawable.icon_tabbar_pin_off
+                                MapTab.FAVORITE -> if (isSelected) R.drawable.icon_tabbar_favorite_on else R.drawable.icon_tabbar_favorite_off
+                            },
                         ),
                         contentDescription = null,
                         tint = Color.Unspecified,
