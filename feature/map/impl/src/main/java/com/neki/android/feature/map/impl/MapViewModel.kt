@@ -52,7 +52,11 @@ class MapViewModel @Inject constructor(
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(
-            favoritePhotoBooths = DUMMY_FAVORITE_PHOTO_BOOTHS,
+            favoritePhotoBooths = persistentListOf(
+                PhotoBooth(brandName = "인생네컷", branchName = "홍대점", distance = 120, latitude = 37.5563, longitude = 126.9236),
+                PhotoBooth(brandName = "포토이즘", branchName = "신촌점", distance = 340, latitude = 37.5596, longitude = 126.9370),
+                PhotoBooth(brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4979, longitude = 127.0276),
+            ),
         ),
         onIntent = ::onIntent,
         initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
@@ -61,7 +65,7 @@ class MapViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             favoriteRequests
-                .debounce(FAVORITE_DEBOUNCE_MS)
+                .debounce(300L)
                 .collect { newFavorite ->
                     if (newFavorite) {
                         store.onIntent(MapIntent.ShowToast("저장한 포토 부스에 추가됐어요!"))
@@ -527,16 +531,5 @@ class MapViewModel @Inject constructor(
                 reduce { copy(dragLevel = dragLevel) }
             }
         }
-    }
-
-    companion object {
-        private const val FAVORITE_DEBOUNCE_MS = 300L
-
-        // TODO: 실제 즐겨찾기 API 연동 전 임시 더미 데이터
-        val DUMMY_FAVORITE_PHOTO_BOOTHS = persistentListOf(
-            PhotoBooth(brandName = "인생네컷", branchName = "홍대점", distance = 120, latitude = 37.5563, longitude = 126.9236),
-            PhotoBooth(brandName = "포토이즘", branchName = "신촌점", distance = 340, latitude = 37.5596, longitude = 126.9370),
-            PhotoBooth(brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4979, longitude = 127.0276),
-        )
     }
 }
