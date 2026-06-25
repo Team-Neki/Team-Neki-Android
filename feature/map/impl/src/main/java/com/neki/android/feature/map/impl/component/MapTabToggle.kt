@@ -3,7 +3,6 @@ package com.neki.android.feature.map.impl.component
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import com.neki.android.core.designsystem.modifier.noRippleClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -29,6 +28,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.map.impl.MapTab
 
@@ -36,7 +36,6 @@ import com.neki.android.feature.map.impl.MapTab
 internal fun MapTabToggle(
     selectedTab: MapTab,
     onTabSelected: (MapTab) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val thumbFraction by animateFloatAsState(
         targetValue = if (selectedTab == MapTab.NEARBY) 0f else 1f,
@@ -45,7 +44,7 @@ internal fun MapTabToggle(
     )
 
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(NekiTheme.colorScheme.gray50)
@@ -104,7 +103,6 @@ private fun MapTabToggleNearbyPreview() {
         MapTabToggle(
             selectedTab = MapTab.NEARBY,
             onTabSelected = {},
-            modifier = Modifier.padding(16.dp),
         )
     }
 }
@@ -116,7 +114,6 @@ private fun MapTabToggleFavoritePreview() {
         MapTabToggle(
             selectedTab = MapTab.FAVORITE,
             onTabSelected = {},
-            modifier = Modifier.padding(16.dp),
         )
     }
 }

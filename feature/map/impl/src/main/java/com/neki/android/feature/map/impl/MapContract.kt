@@ -26,7 +26,7 @@ data class MapState(
     val isShowInfoTooltip: Boolean = false,
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
-    val isFavorite: Boolean = false,
+    val showFavoriteMarker: Boolean = false,
 )
 
 sealed interface MapIntent {

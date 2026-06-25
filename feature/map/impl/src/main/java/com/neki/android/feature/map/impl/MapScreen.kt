@@ -305,7 +305,7 @@ fun MapScreen(
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
-            isFavorite = uiState.isFavorite,
+            showFavoriteMarker = uiState.showFavoriteMarker,
             isShowInfoTooltip = uiState.isShowInfoTooltip,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
             onClickFavorite = { onIntent(MapIntent.ClickFavorite(FavoriteFrom.PANEL)) },
@@ -356,7 +356,7 @@ fun MapScreen(
                 PhotoBoothDetailContent(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    isFavorite = uiState.isFavorite,
+                    isFavorite = uiState.showFavoriteMarker,
                     onClickFavorite = { onIntent(MapIntent.ClickFavorite(FavoriteFrom.DETAIL)) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {

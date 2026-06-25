@@ -14,4 +14,5 @@ data class PhotoBooth(
     val latitude: Double = 0.0,
     val distance: Int = 0,
     val imageUrl: String = "",
+    val favorite: Boolean = false,
 )

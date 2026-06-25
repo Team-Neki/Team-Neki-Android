@@ -152,8 +152,8 @@ class MapViewModel @Inject constructor(
             }
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             is MapIntent.ClickFavorite -> {
-                val newFavorite = !state.isFavorite
-                reduce { copy(isFavorite = newFavorite) }
+                val newFavorite = !state.showFavoriteMarker
+                reduce { copy(showFavoriteMarker = newFavorite) }
                 if (intent.from == FavoriteFrom.DETAIL) {
                     viewModelScope.launch { favoriteRequests.emit(newFavorite) }
                 }

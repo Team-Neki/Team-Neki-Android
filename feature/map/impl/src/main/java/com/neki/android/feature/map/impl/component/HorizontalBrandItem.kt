@@ -31,7 +31,6 @@ import com.neki.android.feature.map.impl.util.formatDistance
 internal fun HorizontalBrandItem(
     photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
-    isFavorite: Boolean = false,
     onClickItem: () -> Unit = {},
 ) {
     Row(
@@ -86,10 +85,10 @@ internal fun HorizontalBrandItem(
         Icon(
             modifier = Modifier.size(24.dp),
             imageVector = ImageVector.vectorResource(
-                if (isFavorite) R.drawable.icon_heart_filled else R.drawable.icon_heart_stroked,
+                if (photoBooth.favorite) R.drawable.icon_heart_filled else R.drawable.icon_heart_stroked,
             ),
             contentDescription = null,
-            tint = if (isFavorite) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray100,
+            tint = if (photoBooth.favorite) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray100,
         )
     }
 }
@@ -117,8 +116,8 @@ private fun HorizontalBrandItemFavoritePreview() {
                 brandName = "인생네컷",
                 branchName = "사당역점",
                 distance = 320,
+                favorite = true,
             ),
-            isFavorite = true,
         )
     }
 }

@@ -68,7 +68,7 @@ internal fun AnchoredDraggablePanel(
     dragLevel: DragLevel = DragLevel.FIRST,
     selectedTab: MapTab = MapTab.NEARBY,
     isCurrentLocation: Boolean = false,
-    isFavorite: Boolean = false,
+    showFavoriteMarker: Boolean = false,
     isShowInfoTooltip: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onTabSelected: (MapTab) -> Unit = {},
@@ -158,7 +158,7 @@ internal fun AnchoredDraggablePanel(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PhotoBoothFavoriteButton(
-                    isFavorite = isFavorite,
+                    isFavorite = showFavoriteMarker,
                     onClick = onClickFavorite,
                 )
                 CurrentLocationButton(
