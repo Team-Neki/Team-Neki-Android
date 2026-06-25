@@ -54,6 +54,7 @@ import com.neki.android.feature.map.impl.component.MapRefreshChip
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailContent
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.core.model.Brand
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import kotlinx.coroutines.launch
 
@@ -61,7 +62,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
-    navigateToPhotoBoothOrderChange: () -> Unit = {},
+    navigateToPhotoBoothOrderChange: (List<Brand>) -> Unit = {},
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -188,7 +189,7 @@ fun MapRoute(
 
             is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
 
-            is MapEffect.NavigateToPhotoBoothOrderChange -> navigateToPhotoBoothOrderChange()
+            is MapEffect.NavigateToPhotoBoothOrderChange -> navigateToPhotoBoothOrderChange(uiState.brands)
 
             is MapEffect.ZoomToClusterBounds -> {
                 scope.launch {

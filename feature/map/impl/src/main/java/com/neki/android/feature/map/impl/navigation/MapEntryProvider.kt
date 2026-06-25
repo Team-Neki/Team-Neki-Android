@@ -6,13 +6,16 @@ import com.neki.android.core.navigation.main.EntryProviderInstaller
 import com.neki.android.core.navigation.main.MainNavigator
 import com.neki.android.feature.map.api.MapNavKey
 import com.neki.android.feature.map.api.navigateToPhotoBoothOrderChange
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.neki.android.feature.map.impl.MapRoute
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeRoute
+import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.multibindings.IntoSet
+import kotlinx.collections.immutable.toImmutableList
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
@@ -28,12 +31,18 @@ object MapEntryProviderModule {
 private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
     entry<MapNavKey.Map> {
         MapRoute(
-            navigateToPhotoBoothOrderChange = navigator::navigateToPhotoBoothOrderChange,
+            navigateToPhotoBoothOrderChange = { brands ->
+                navigator.navigateToPhotoBoothOrderChange(brands)
+            },
         )
     }
 
-    entry<MapNavKey.PhotoBoothOrderChange> {
+    entry<MapNavKey.PhotoBoothOrderChange> { key ->
+        val viewModel = hiltViewModel<PhotoBoothOrderChangeViewModel, PhotoBoothOrderChangeViewModel.Factory>(
+            creationCallback = { factory -> factory.create(key.brands.toImmutableList()) },
+        )
         PhotoBoothOrderChangeRoute(
+            viewModel = viewModel,
             navigateBack = navigator::goBack,
         )
     }
