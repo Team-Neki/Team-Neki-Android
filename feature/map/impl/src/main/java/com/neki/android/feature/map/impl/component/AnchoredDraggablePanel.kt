@@ -269,7 +269,7 @@ internal fun AnchoredPanelContent(
         VerticalSpacer(12.dp)
         val displayPhotoBooths = when (selectedTab) {
             MapTab.NEARBY -> nearbyPhotoBooths.filter { it.isCheckedBrand }
-            MapTab.FAVORITE -> favoritePhotoBooths
+            MapTab.FAVORITE -> favoritePhotoBooths.filter { it.isCheckedBrand }
         }
         if (selectedTab == MapTab.FAVORITE) {
             val body14MediumSpan = NekiTheme.typography.body14Medium.toSpanStyle().copy(color = NekiTheme.colorScheme.gray300)

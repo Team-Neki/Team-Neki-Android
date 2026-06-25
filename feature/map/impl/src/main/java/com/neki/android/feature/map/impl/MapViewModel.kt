@@ -54,8 +54,13 @@ class MapViewModel @Inject constructor(
         initialState = MapState(
             favoritePhotoBooths = persistentListOf(
                 PhotoBooth(brandName = "인생네컷", branchName = "홍대점", distance = 120, latitude = 37.5563, longitude = 126.9236),
+                PhotoBooth(brandName = "인생네컷", branchName = "강남역점", distance = 450, latitude = 37.4979, longitude = 127.0276),
                 PhotoBooth(brandName = "포토이즘", branchName = "신촌점", distance = 340, latitude = 37.5596, longitude = 126.9370),
-                PhotoBooth(brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4979, longitude = 127.0276),
+                PhotoBooth(brandName = "포토이즘", branchName = "홍대입구점", distance = 560, latitude = 37.5572, longitude = 126.9263),
+                PhotoBooth(brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4956, longitude = 127.0302),
+                PhotoBooth(brandName = "포토그레이", branchName = "건대점", distance = 1200, latitude = 37.5407, longitude = 127.0698),
+                PhotoBooth(brandName = "포토그레이", branchName = "이대점", distance = 1540, latitude = 37.5565, longitude = 126.9454),
+                PhotoBooth(brandName = "하루필름", branchName = "신촌점", distance = 1800, latitude = 37.5594, longitude = 126.9368),
             ),
         ),
         onIntent = ::onIntent,
@@ -153,7 +158,14 @@ class MapViewModel @Inject constructor(
                     viewModelScope.launch { favoriteRequests.emit(newFavorite) }
                 }
             }
-            is MapIntent.SelectTab -> reduce { copy(selectedTab = intent.tab) }
+            is MapIntent.SelectTab -> reduce {
+                copy(
+                    selectedTab = intent.tab,
+                    brands = brands.map { it.copy(isChecked = false) }.toImmutableList(),
+                    nearbyPhotoBooths = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
+                    favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
+                )
+            }
             is MapIntent.ShowToast -> postSideEffect(MapEffect.ShowToastMessage(intent.message))
         }
     }
@@ -261,6 +273,11 @@ class MapViewModel @Inject constructor(
                     )
                 }.toImmutableList(),
                 nearbyPhotoBooths = nearbyPhotoBooths.map { photoBooth ->
+                    photoBooth.copy(
+                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                    )
+                }.toImmutableList(),
+                favoritePhotoBooths = favoritePhotoBooths.map { photoBooth ->
                     photoBooth.copy(
                         isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
                     )
