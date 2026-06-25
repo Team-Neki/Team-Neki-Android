@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -151,8 +153,10 @@ internal fun AnchoredDraggablePanel(
         Column {
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(start = 20.dp, bottom = 8.dp)
-                    .alpha(alpha = if (dragLevel == DragLevel.THIRD) 0f else 1f),
+                    .alpha(alpha = if (dragLevel == DragLevel.THIRD) 0f else 1f)
+                    .pointerInput(Unit) { detectVerticalDragGestures { _, _ -> } },
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PhotoBoothFavoriteButton(
