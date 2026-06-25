@@ -72,7 +72,7 @@ internal fun PhotoBoothFavoriteButton(
     onClick: () -> Unit = {},
 ) {
     MapCircleButton(
-        iconRes = if (isFavorite) R.drawable.icon_heart_filled
+        iconRes = if (isFavorite) R.drawable.icon_heart_gradient
         else R.drawable.icon_heart_stroked,
         tint = Color.Unspecified,
         modifier = modifier,

@@ -81,7 +81,7 @@ internal fun MapTabToggle(
                             .size(20.dp)
                             .alpha(if (isSelected) 1f else 0.4f),
                         imageVector = ImageVector.vectorResource(
-                            if (tab == MapTab.NEARBY) R.drawable.icon_pin else R.drawable.icon_heart_filled,
+                            if (tab == MapTab.NEARBY) R.drawable.icon_pin else R.drawable.icon_heart_gradient,
                         ),
                         contentDescription = null,
                         tint = Color.Unspecified,
