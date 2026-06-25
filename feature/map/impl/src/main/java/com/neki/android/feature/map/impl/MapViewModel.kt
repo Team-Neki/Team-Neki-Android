@@ -153,13 +153,16 @@ class MapViewModel @Inject constructor(
                     viewModelScope.launch { favoriteRequests.emit(newFavorite) }
                 }
             }
-            is MapIntent.SelectTab -> reduce {
-                copy(
-                    selectedTab = intent.tab,
-                    brands = brands.map { it.copy(isChecked = false) }.toImmutableList(),
-                    nearbyPhotoBooths = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
-                    favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
-                )
+            is MapIntent.SelectTab -> {
+                if (intent.tab == state.selectedTab) return@onIntent
+                reduce {
+                    copy(
+                        selectedTab = intent.tab,
+                        brands = brands.map { it.copy(isChecked = false) }.toImmutableList(),
+                        nearbyPhotoBooths = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
+                        favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
+                    )
+                }
             }
             is MapIntent.ShowToast -> postSideEffect(MapEffect.ShowToastMessage(intent.message))
         }
