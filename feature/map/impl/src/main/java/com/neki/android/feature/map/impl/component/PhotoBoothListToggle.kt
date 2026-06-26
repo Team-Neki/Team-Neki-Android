@@ -86,7 +86,7 @@ internal fun PhotoBoothListToggle(
                         tint = Color.Unspecified,
                     )
                     Text(
-                        text = if (tab == MapTab.NEARBY) "가까운 브랜드" else "즐겨찾기",
+                        text = if (tab == MapTab.NEARBY) "가까운 포토 부스" else "저장한 포토 부스",
                         color = if (isSelected) NekiTheme.colorScheme.gray800 else NekiTheme.colorScheme.gray500,
                         style = if (isSelected) NekiTheme.typography.body14SemiBold else NekiTheme.typography.body14Medium,
                     )
