@@ -59,7 +59,7 @@ sealed interface MapIntent {
     data object ConfirmLocationPermissionDialog : MapIntent
 
     data object ClickEditBrandOrder : MapIntent
-    data class ClickFavorite(val from: FavoriteFrom) : MapIntent
+    data object ClickShowFavoriteIcon : MapIntent
     data class ToggleBoothFavorite(val photoBooth: PhotoBooth) : MapIntent
     data class SelectTab(val tab: MapTab) : MapIntent
     data class ShowToast(val message: String) : MapIntent
@@ -93,7 +93,6 @@ enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
 
 enum class MapTab { NEARBY, FAVORITE }
 
-enum class FavoriteFrom { PANEL, DETAIL }
 
 data class MapBounds(
     val southWest: LocLatLng,

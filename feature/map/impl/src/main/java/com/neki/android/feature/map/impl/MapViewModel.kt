@@ -45,7 +45,7 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
-    private val favoriteRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 64)
+    private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(
@@ -68,7 +68,7 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             favoriteRequests
                 .debounce(300L)
-                .collect { newFavorite ->
+                .collect { (_, newFavorite) ->
                     store.onIntent(
                         MapIntent.ShowToast(
                             message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
@@ -150,25 +150,18 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             is MapIntent.ToggleBoothFavorite -> {
                 val newFavorite = !intent.photoBooth.favorite
+                val id = intent.photoBooth.id
                 reduce {
-                    val id = intent.photoBooth.id
                     copy(
+                        mapMarkers = mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
                         nearbyPhotoBooths = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
                         favoritePhotoBooths = favoritePhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
                     )
                 }
-                postSideEffect(
-                    MapEffect.ShowToastMessage(
-                        message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
-                    ),
-                )
+                viewModelScope.launch { favoriteRequests.emit(id to newFavorite) }
             }
-            is MapIntent.ClickFavorite -> {
-                val newFavorite = !state.showFavoriteMarker
-                reduce { copy(showFavoriteMarker = newFavorite) }
-                if (intent.from == FavoriteFrom.DETAIL) {
-                    viewModelScope.launch { favoriteRequests.emit(newFavorite) }
-                }
+            MapIntent.ClickShowFavoriteIcon -> {
+                reduce { copy(showFavoriteMarker = !state.showFavoriteMarker) }
             }
             is MapIntent.SelectTab -> {
                 if (intent.tab == state.selectedTab) return@onIntent

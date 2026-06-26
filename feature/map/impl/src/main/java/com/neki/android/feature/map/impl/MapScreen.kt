@@ -307,7 +307,7 @@ fun MapScreen(
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
             showFavoriteMarker = uiState.showFavoriteMarker,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
-            onClickFavorite = { onIntent(MapIntent.ClickFavorite(FavoriteFrom.PANEL)) },
+            onClickFavorite = { onIntent(MapIntent.ClickShowFavoriteIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
             onToggleBoothFavorite = { onIntent(MapIntent.ToggleBoothFavorite(it)) },
@@ -354,8 +354,8 @@ fun MapScreen(
                 PhotoBoothDetailContent(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    isFavorite = uiState.showFavoriteMarker,
-                    onClickFavorite = { onIntent(MapIntent.ClickFavorite(FavoriteFrom.DETAIL)) },
+                    isFavorite = focusedPhotoBooth.favorite,
+                    onClickFavorite = { onIntent(MapIntent.ToggleBoothFavorite(focusedPhotoBooth)) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
                         onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))
