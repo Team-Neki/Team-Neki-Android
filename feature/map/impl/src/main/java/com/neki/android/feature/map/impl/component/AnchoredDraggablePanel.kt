@@ -263,7 +263,7 @@ internal fun AnchoredPanelContent(
                     .padding(start = 20.dp, bottom = 12.dp),
                 text = buildAnnotatedString {
                     withStyle(body14MediumSpan) { append("저장한 포토부스 총 ") }
-                    withStyle(body14SemiBoldSpan) { append("${favoritePhotoBooths.size}") }
+                    withStyle(body14SemiBoldSpan) { append("${displayPhotoBooths.size}") }
                     withStyle(body14MediumSpan) { append("곳") }
                 },
             )
