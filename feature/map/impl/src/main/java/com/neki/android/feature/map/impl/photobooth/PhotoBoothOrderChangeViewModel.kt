@@ -1,6 +1,8 @@
 package com.neki.android.feature.map.impl.photobooth
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
@@ -10,10 +12,13 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel(assistedFactory = PhotoBoothOrderChangeViewModel.Factory::class)
 internal class PhotoBoothOrderChangeViewModel @AssistedInject constructor(
     @Assisted private val originalBrandsOrder: ImmutableList<Brand>,
+    private val mapRepository: MapRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -37,7 +42,27 @@ internal class PhotoBoothOrderChangeViewModel @AssistedInject constructor(
     ) {
         when (intent) {
             is PhotoBoothOrderChangeIntent.ReorderBrand -> handleReorder(intent.from, intent.to, state, reduce)
-            PhotoBoothOrderChangeIntent.ClickComplete -> postSideEffect(PhotoBoothOrderChangeSideEffect.NavigateBack)
+            PhotoBoothOrderChangeIntent.ClickComplete -> handleClickComplete(state, reduce, postSideEffect)
+        }
+    }
+
+    private fun handleClickComplete(
+        state: PhotoBoothOrderChangeState,
+        reduce: (PhotoBoothOrderChangeState.() -> PhotoBoothOrderChangeState) -> Unit,
+        postSideEffect: (PhotoBoothOrderChangeSideEffect) -> Unit,
+    ) {
+        viewModelScope.launch {
+            reduce { copy(isLoading = true) }
+            mapRepository.saveBrandOrder(state.brands.map { it.id })
+                .onSuccess {
+                    reduce { copy(isLoading = false) }
+                    postSideEffect(PhotoBoothOrderChangeSideEffect.SendBrandsOrderChangeResult(state.brands))
+                    postSideEffect(PhotoBoothOrderChangeSideEffect.NavigateBack)
+                }
+                .onFailure { e ->
+                    Timber.e(e)
+                    reduce { copy(isLoading = false) }
+                }
         }
     }
 

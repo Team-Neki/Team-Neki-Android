@@ -149,6 +149,7 @@ class MapViewModel @Inject constructor(
                 postSideEffect(MapEffect.NavigateToAppSettings)
             }
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
+            is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
             is MapIntent.ToggleBoothFavorite -> {
                 val newFavorite = !intent.photoBooth.favorite
                 val id = intent.photoBooth.id

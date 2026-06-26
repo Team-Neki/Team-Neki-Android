@@ -60,6 +60,7 @@ sealed interface MapIntent {
     data object ConfirmLocationPermissionDialog : MapIntent
 
     data object ClickEditBrandOrder : MapIntent
+    data class UpdateBrandOrder(val orderedBrands: List<Brand>) : MapIntent
     data object ClickShowFavoriteIcon : MapIntent
     data class ToggleBoothFavorite(val photoBooth: PhotoBooth) : MapIntent
     data class SelectTab(val tab: MapTab) : MapIntent

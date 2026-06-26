@@ -8,12 +8,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.topbar.BackTitleTextButtonTopBar
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
+import com.neki.android.core.navigation.result.LocalResultEventBus
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.feature.map.api.MapResult
 import com.neki.android.feature.map.impl.photobooth.component.PhotoBoothOrderChangeItem
 import kotlinx.collections.immutable.persistentListOf
 import sh.calvin.reorderable.ReorderableItem
@@ -25,9 +29,16 @@ internal fun PhotoBoothOrderChangeRoute(
     navigateBack: () -> Unit = {},
 ) {
     val state by viewModel.store.uiState.collectAsStateWithLifecycle()
+    val resultBus = LocalResultEventBus.current
 
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
         when (effect) {
+            is PhotoBoothOrderChangeSideEffect.SendBrandsOrderChangeResult -> {
+                resultBus.sendResult<MapResult>(
+                    result = MapResult.BrandOrderChanged(orderedBrands = effect.orderedBrands),
+                    allowDuplicate = false,
+                )
+            }
             PhotoBoothOrderChangeSideEffect.NavigateBack -> navigateBack()
         }
     }
@@ -71,6 +82,15 @@ internal fun PhotoBoothOrderChangeScreen(
                 }
             }
         }
+    }
+
+    if (state.isLoading) {
+        LoadingDialog(
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            ),
+        )
     }
 }
 

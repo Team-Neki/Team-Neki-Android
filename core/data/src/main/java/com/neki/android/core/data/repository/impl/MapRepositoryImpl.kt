@@ -1,6 +1,7 @@
 package com.neki.android.core.data.repository.impl
 
 import com.neki.android.core.data.remote.api.MapService
+import com.neki.android.core.data.remote.model.request.BrandOrderChangeRequest
 import com.neki.android.core.data.remote.model.request.Coordinate
 import com.neki.android.core.data.remote.model.request.PhotoBoothPointRequest
 import com.neki.android.core.data.remote.model.request.PhotoBoothPolygonRequest
@@ -46,5 +47,11 @@ class MapRepositoryImpl @Inject constructor(
                 brandIds = brandIds,
             ),
         ).data.toModels()
+    }
+
+    override suspend fun saveBrandOrder(brandIds: List<Long>): Result<Unit> = runSuspendCatching {
+        mapService.saveBrandOrder(
+            request = BrandOrderChangeRequest(brandIds = brandIds),
+        )
     }
 }
