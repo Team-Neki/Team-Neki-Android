@@ -78,7 +78,7 @@ internal fun ReorderableCollectionItemScope.PhotoBoothOrderChangeItem(
                 .draggableHandle(interactionSource = dragHandleInteractionSource)
                 .size(24.dp),
             imageVector = ImageVector.vectorResource(R.drawable.icon_drag),
-            tint = if (isDragHandleDragging) NekiTheme.colorScheme.gray50 else Color.Unspecified,
+            tint = NekiTheme.colorScheme.gray200,
             contentDescription = null,
         )
     }

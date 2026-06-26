@@ -69,9 +69,11 @@ class MapViewModel @Inject constructor(
             favoriteRequests
                 .debounce(300L)
                 .collect { newFavorite ->
-                    if (newFavorite) {
-                        store.onIntent(MapIntent.ShowToast("저장한 포토 부스에 추가됐어요!"))
-                    }
+                    store.onIntent(
+                        MapIntent.ShowToast(
+                            message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
+                        ),
+                    )
                 }
         }
     }
@@ -146,11 +148,19 @@ class MapViewModel @Inject constructor(
                 postSideEffect(MapEffect.NavigateToAppSettings)
             }
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
-            is MapIntent.ToggleBoothFavorite -> reduce {
-                val id = intent.photoBooth.id
-                copy(
-                    nearbyPhotoBooths = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = !it.favorite) else it }.toImmutableList(),
-                    favoritePhotoBooths = favoritePhotoBooths.map { if (it.id == id) it.copy(favorite = !it.favorite) else it }.toImmutableList(),
+            is MapIntent.ToggleBoothFavorite -> {
+                val newFavorite = !intent.photoBooth.favorite
+                reduce {
+                    val id = intent.photoBooth.id
+                    copy(
+                        nearbyPhotoBooths = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
+                        favoritePhotoBooths = favoritePhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
+                    )
+                }
+                postSideEffect(
+                    MapEffect.ShowToastMessage(
+                        message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
+                    ),
                 )
             }
             is MapIntent.ClickFavorite -> {
