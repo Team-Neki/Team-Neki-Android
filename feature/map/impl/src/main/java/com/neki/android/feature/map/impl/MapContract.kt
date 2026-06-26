@@ -93,7 +93,6 @@ enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
 
 enum class MapTab { NEARBY, FAVORITE }
 
-
 data class MapBounds(
     val southWest: LocLatLng,
     val northWest: LocLatLng,

@@ -3,7 +3,6 @@ package com.neki.android.feature.map.impl.photobooth.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,7 +40,6 @@ internal fun ReorderableCollectionItemScope.PhotoBoothOrderChangeItem(
     isDragging: Boolean,
 ) {
     val dragHandleInteractionSource = remember { MutableInteractionSource() }
-    val isDragHandleDragging by dragHandleInteractionSource.collectIsDraggedAsState()
 
     Row(
         modifier = Modifier
