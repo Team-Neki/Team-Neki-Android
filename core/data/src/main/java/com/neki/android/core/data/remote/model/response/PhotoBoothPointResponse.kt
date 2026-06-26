@@ -17,6 +17,7 @@ data class PhotoBoothPointResponse(
         @SerialName("longitude") val longitude: Double,
         @SerialName("latitude") val latitude: Double,
         @SerialName("distance") val distance: Int,
+        @SerialName("favorite") val favorite: Boolean = false,
     ) {
         internal fun toModel(): PhotoBooth = PhotoBooth(
             id = id,
@@ -26,6 +27,7 @@ data class PhotoBoothPointResponse(
             longitude = longitude,
             latitude = latitude,
             distance = distance,
+            favorite = favorite,
         )
     }
 

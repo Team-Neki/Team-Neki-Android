@@ -16,6 +16,7 @@ data class PhotoBoothPolygonResponse(
         @SerialName("address") val address: String,
         @SerialName("longitude") val longitude: Double,
         @SerialName("latitude") val latitude: Double,
+        @SerialName("favorite") val favorite: Boolean = false,
     ) {
         internal fun toModel(): PhotoBooth = PhotoBooth(
             id = id,
@@ -24,6 +25,7 @@ data class PhotoBoothPolygonResponse(
             address = address,
             longitude = longitude,
             latitude = latitude,
+            favorite = favorite,
         )
     }
 
