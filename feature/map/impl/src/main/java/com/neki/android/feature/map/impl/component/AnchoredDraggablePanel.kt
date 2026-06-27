@@ -9,7 +9,6 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -144,19 +142,14 @@ internal fun AnchoredDraggablePanel(
                     currentOffset
                 }
                 IntOffset(0, constrainedOffset.roundToInt())
-            }
-            .anchoredDraggable(
-                state = state,
-                orientation = Orientation.Vertical,
-            ),
+            },
     ) {
         Column {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 20.dp, bottom = 8.dp)
-                    .alpha(alpha = if (dragLevel == DragLevel.THIRD) 0f else 1f)
-                    .pointerInput(Unit) { detectVerticalDragGestures { _, _ -> } },
+                    .alpha(alpha = if (dragLevel == DragLevel.THIRD) 0f else 1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PhotoBoothFavoriteButton(
@@ -169,6 +162,10 @@ internal fun AnchoredDraggablePanel(
                 )
             }
             AnchoredPanelContent(
+                modifier = Modifier.anchoredDraggable(
+                    state = state,
+                    orientation = Orientation.Vertical,
+                ),
                 selectedTab = selectedTab,
                 brands = brands,
                 nearbyPhotoBooths = nearbyPhotoBooths,
@@ -185,6 +182,7 @@ internal fun AnchoredDraggablePanel(
 
 @Composable
 internal fun AnchoredPanelContent(
+    modifier: Modifier = Modifier,
     selectedTab: MapTab = MapTab.NEARBY,
     brands: ImmutableList<Brand> = persistentListOf(),
     nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
@@ -196,7 +194,7 @@ internal fun AnchoredPanelContent(
     onClickEditBrandOrder: () -> Unit = {},
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .dropdownShadow(shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             .background(
