@@ -47,20 +47,10 @@ class MapViewModel @Inject constructor(
 
     private var lastSearchCenter: LocLatLng? = null
     private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
+    private val committedPhotoBooths = mutableMapOf<Long, PhotoBooth>()
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
-        initialState = MapState(
-            favoritePhotoBooths = persistentListOf(
-                PhotoBooth(id = 1, brandName = "인생네컷", branchName = "홍대점", distance = 120, latitude = 37.5563, longitude = 126.9236),
-                PhotoBooth(id = 2, brandName = "인생네컷", branchName = "강남역점", distance = 450, latitude = 37.4979, longitude = 127.0276),
-                PhotoBooth(id = 3, brandName = "포토이즘", branchName = "신촌점", distance = 340, latitude = 37.5596, longitude = 126.9370),
-                PhotoBooth(id = 4, brandName = "포토이즘", branchName = "홍대입구점", distance = 560, latitude = 37.5572, longitude = 126.9263),
-                PhotoBooth(id = 5, brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4956, longitude = 127.0302),
-                PhotoBooth(id = 6, brandName = "포토그레이", branchName = "건대점", distance = 1200, latitude = 37.5407, longitude = 127.0698),
-                PhotoBooth(id = 7, brandName = "포토그레이", branchName = "이대점", distance = 1540, latitude = 37.5565, longitude = 126.9454),
-                PhotoBooth(id = 8, brandName = "하루필름", branchName = "신촌점", distance = 1800, latitude = 37.5594, longitude = 126.9368),
-            ),
-        ),
+        initialState = MapState(),
         onIntent = ::onIntent,
         initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
     )
@@ -69,12 +59,23 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             favoriteRequests
                 .debounce(300L)
-                .collect { (_, newFavorite) ->
-                    store.onIntent(
-                        MapIntent.ShowToast(
-                            message = if (newFavorite) "저장한 포토부스에 추가됐어요!" else "저장한 포토부스에서 삭제됐어요!",
-                        ),
-                    )
+                .collect { (id, newFavorite) ->
+                    val committedBooth = committedPhotoBooths[id] ?: return@collect
+                    if (committedBooth.favorite == newFavorite) return@collect
+                    mapRepository.updatePhotoBoothFavorite(id, newFavorite)
+                        .onSuccess {
+                            committedPhotoBooths[id] = committedBooth.copy(favorite = newFavorite)
+                            store.onIntent(MapIntent.SyncFavoritePhotoBooth(id))
+                            store.onIntent(
+                                MapIntent.ShowToast(
+                                    message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
+                                ),
+                            )
+                        }
+                        .onFailure { e ->
+                            Timber.e(e)
+                            store.onIntent(MapIntent.RevertFavorite(id, committedBooth.favorite))
+                        }
                 }
         }
     }
@@ -150,9 +151,18 @@ class MapViewModel @Inject constructor(
             }
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
+            is MapIntent.SyncFavoritePhotoBooth -> handleSyncFavoritePhotoBooth(intent.id, reduce)
+            is MapIntent.RevertFavorite -> reduce {
+                copy(
+                    mapMarkers = mapMarkers.map { if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it }.toImmutableList(),
+                    nearbyPhotoBooths = nearbyPhotoBooths.map { if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it }.toImmutableList(),
+                    favoritePhotoBooths = favoritePhotoBooths.map { if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it }.toImmutableList(),
+                )
+            }
             is MapIntent.ToggleBoothFavorite -> {
                 val newFavorite = !intent.photoBooth.favorite
                 val id = intent.photoBooth.id
+                committedPhotoBooths.putIfAbsent(id, intent.photoBooth)
                 reduce {
                     val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
                     val updatedFavorite = favoritePhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
@@ -420,15 +430,51 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
-            mapRepository.getBrands()
+            val brandsDeferred = async { mapRepository.getBrands() }
+            val favoritesDeferred = async { mapRepository.getFavoritePhotoBooths() }
+
+            val brandsResult = brandsDeferred.await()
+            val favoritesResult = favoritesDeferred.await()
+
+            brandsResult
                 .onSuccess { loadedBrands ->
-                    reduce { copy(isLoading = false, brands = loadedBrands.toImmutableList()) }
+                    reduce { copy(brands = loadedBrands.toImmutableList()) }
                     cacheBrandImages(loadedBrands, reduce)
+
+                    favoritesResult.onSuccess { favoriteBooths ->
+                        committedPhotoBooths.putAll(favoriteBooths.associate { it.id to it.copy(favorite = true) })
+                        reduce {
+                            copy(
+                                favoritePhotoBooths = favoriteBooths.map { booth ->
+                                    booth.copy(
+                                        favorite = true,
+                                        imageUrl = loadedBrands.find { it.name == booth.brandName }?.imageUrl.orEmpty(),
+                                    )
+                                }.toImmutableList(),
+                            )
+                        }
+                    }.onFailure { Timber.e(it) }
                 }
                 .onFailure { e ->
                     Timber.e(e)
-                    reduce { copy(isLoading = false) }
                 }
+
+            reduce { copy(isLoading = false) }
+        }
+    }
+
+    private fun handleSyncFavoritePhotoBooth(
+        id: Long,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        val booth = committedPhotoBooths[id]?.takeIf { it.favorite } ?: return
+        reduce {
+            copy(
+                favoritePhotoBooths = buildList {
+                    addAll(favoritePhotoBooths)
+                    add(booth)
+                }.toImmutableList(),
+            )
         }
     }
 

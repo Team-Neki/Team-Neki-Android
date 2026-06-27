@@ -5,6 +5,7 @@ import com.neki.android.core.data.remote.model.request.BrandOrderChangeRequest
 import com.neki.android.core.data.remote.model.request.Coordinate
 import com.neki.android.core.data.remote.model.request.PhotoBoothPointRequest
 import com.neki.android.core.data.remote.model.request.PhotoBoothPolygonRequest
+import com.neki.android.core.data.remote.model.request.UpdateFavoriteRequest
 import com.neki.android.core.data.remote.model.response.toModels
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.MapRepository
@@ -52,6 +53,17 @@ class MapRepositoryImpl @Inject constructor(
     override suspend fun saveBrandOrder(brandIds: List<Long>): Result<Unit> = runSuspendCatching {
         mapService.saveBrandOrder(
             request = BrandOrderChangeRequest(brandIds = brandIds),
+        )
+    }
+
+    override suspend fun getFavoritePhotoBooths(): Result<List<PhotoBooth>> = runSuspendCatching {
+        mapService.getFavoritePhotoBooths().data.toModels()
+    }
+
+    override suspend fun updatePhotoBoothFavorite(locationId: Long, favorite: Boolean): Result<Unit> = runSuspendCatching {
+        mapService.updatePhotoBoothFavorite(
+            locationId = locationId,
+            request = UpdateFavoriteRequest(favorite = favorite),
         )
     }
 }
