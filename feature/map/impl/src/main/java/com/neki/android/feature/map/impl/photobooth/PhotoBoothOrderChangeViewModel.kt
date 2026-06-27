@@ -53,7 +53,7 @@ internal class PhotoBoothOrderChangeViewModel @AssistedInject constructor(
         reduce {
             copy(
                 brands = reordered,
-                isOrderChanged = reordered.map { it.id } != originalBrandsOrder.map { it.id },
+                isOrderChanged = reordered.indices.any { reordered[it].id != originalBrandsOrder[it].id },
             )
         }
     }
