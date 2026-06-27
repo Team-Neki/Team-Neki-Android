@@ -468,6 +468,7 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         val booth = committedPhotoBooths[id]?.takeIf { it.favorite } ?: return
+        if (store.uiState.value.favoritePhotoBooths.any { it.id == id }) return
         reduce {
             copy(
                 favoritePhotoBooths = buildList {
