@@ -26,6 +26,7 @@ import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PhotoBooth
+import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.feature.map.impl.util.formatDistance
 
 @Composable
@@ -41,7 +42,6 @@ internal fun HorizontalBrandItem(
             .fillMaxWidth()
             .noRippleClickableSingle(onClick = onClickItem),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         AsyncImage(
             modifier = Modifier
@@ -52,6 +52,7 @@ internal fun HorizontalBrandItem(
             error = painterResource(R.drawable.icon_photo_booth_empty),
             contentDescription = null,
         )
+        HorizontalSpacer(16.dp)
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -76,6 +77,7 @@ internal fun HorizontalBrandItem(
                 extraInfo?.invoke()
             }
         }
+        HorizontalSpacer(12.dp)
         Icon(
             modifier = Modifier
                 .size(24.dp)

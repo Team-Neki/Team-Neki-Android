@@ -71,7 +71,7 @@ class MapViewModel @Inject constructor(
                 .collect { (_, newFavorite) ->
                     store.onIntent(
                         MapIntent.ShowToast(
-                            message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
+                            message = if (newFavorite) "저장한 포토부스에 추가됐어요!" else "저장한 포토부스에서 삭제됐어요!",
                         ),
                     )
                 }
