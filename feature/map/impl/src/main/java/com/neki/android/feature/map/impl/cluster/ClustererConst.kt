@@ -45,6 +45,19 @@ internal object ClustererConst {
     const val LEAF_FOCUSED_GRADIENT_START = "#616575" // 선택된 마커 gray600 (그라데이션 시작)
     const val LEAF_FOCUSED_GRADIENT_END = "#202227" // 선택된 마커 gray900 (그라데이션 끝)
 
+    // 즐겨찾기 배지 (일반 상태)
+    const val FAVORITE_BADGE_SIZE = 24f       // 배지 원 지름 (dp)
+    const val FAVORITE_HEART_SIZE = 12f       // 하트 아이콘 크기 (dp)
+
+    // 즐겨찾기 배지 (포커스 상태)
+    const val FAVORITE_BADGE_FOCUSED_SIZE = 28f  // 배지 원 지름 (dp)
+    const val FAVORITE_HEART_FOCUSED_SIZE = 14f  // 하트 아이콘 크기 (dp)
+
+    // 즐겨찾기 배지 공통
+    const val FAVORITE_BADGE_STROKE_WIDTH = 1f   // 흰색 테두리 (dp)
+    const val FAVORITE_BADGE_COLOR = "#FF5647"   // primary400
+    const val FAVORITE_BADGE_OVERFLOW = 8f       // 마커 바깥으로 오버되는 거리 (dp)
+
     // 공통
     const val SHADOW_PADDING = 4f // 그림자 패딩 (px)
 }

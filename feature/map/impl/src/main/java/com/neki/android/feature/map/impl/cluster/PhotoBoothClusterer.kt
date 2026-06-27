@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.PointF
 import android.graphics.RectF
 import android.graphics.Shader
 import android.text.TextPaint
@@ -96,11 +97,12 @@ internal object PhotoBoothClusterer {
                         val brandImage = getBrandImage(photoBooth.imageUrl)
 
                         // 마커는 재사용되기 때문에 줌인/줌아웃 시 marker 속성 초기화
+                        val (markerIcon, markerAnchor) = createLeafMarkerIcon(context, brandImage, photoBooth.isFocused, photoBooth.favorite)
                         marker.apply {
-                            icon = createLeafMarkerIcon(context, brandImage, photoBooth.isFocused)
+                            icon = markerIcon
                             captionText = "${photoBooth.brandName}\n${photoBooth.branchName}"
                             subCaptionText = ""
-                            anchor = Marker.DEFAULT_ANCHOR
+                            anchor = markerAnchor
                             tag = photoBooth
                             onClickListener = Overlay.OnClickListener {
                                 onLeafMarkerClick(photoBooth)
@@ -188,12 +190,13 @@ internal object PhotoBoothClusterer {
         return OverlayImage.fromBitmap(bitmap)
     }
 
-    /** 개별 마커 아이콘 생성 **/
+    /** 개별 마커 아이콘 생성 — (OverlayImage, 앵커) 반환 **/
     private fun createLeafMarkerIcon(
         context: Context,
         brandImage: ImageBitmap?,
         isFocused: Boolean,
-    ): OverlayImage {
+        isFavorite: Boolean,
+    ): Pair<OverlayImage, PointF> {
         val density = context.resources.displayMetrics.density
         val imageSize = if (isFocused) ClustererConst.LEAF_FOCUSED_IMAGE_SIZE else ClustererConst.LEAF_NORMAL_IMAGE_SIZE
         val padding = if (isFocused) ClustererConst.LEAF_FOCUSED_PADDING else ClustererConst.LEAF_NORMAL_PADDING
@@ -203,14 +206,20 @@ internal object PhotoBoothClusterer {
 
         val bodyWidth = imageSize + padding * 2
         val bodyHeight = imageSize + padding * 2
-        val totalWidth = ((bodyWidth + shadowPadding * 2) * density).toInt()
-        val totalHeight = ((bodyHeight + triangleHeight + shadowPadding) * density).toInt()
+
+        val badgeRadius = (if (isFocused) ClustererConst.FAVORITE_BADGE_FOCUSED_SIZE else ClustererConst.FAVORITE_BADGE_SIZE) / 2
+        val badgeOverflow = ClustererConst.FAVORITE_BADGE_OVERFLOW
+        val extraSpace = if (isFavorite) (badgeOverflow + badgeRadius) else 0f
+
+        // 뱃지가 오른쪽으로 오버되므로 왼쪽에도 동일하게 추가해 비트맵 좌우 대칭 유지 → anchorX = 0.5
+        val totalWidth = ((bodyWidth + shadowPadding * 2 + extraSpace * 2) * density).toInt()
+        val totalHeight = ((bodyHeight + triangleHeight + shadowPadding + extraSpace) * density).toInt()
 
         val bitmap = createBitmap(totalWidth, totalHeight)
         val canvas = Canvas(bitmap)
 
-        val offsetX = shadowPadding * density
-        val offsetY = shadowPadding * density / 2
+        val offsetX = (shadowPadding + extraSpace) * density
+        val offsetY = shadowPadding * density / 2 + extraSpace * density
 
         // 그림자 Paint
         val shadowPaint = Paint().apply {
@@ -319,6 +328,49 @@ internal object PhotoBoothClusterer {
             }
         }
 
-        return OverlayImage.fromBitmap(bitmap)
+        if (isFavorite) drawFavoriteBadge(context, canvas, bodyRect, isFocused, density)
+
+        val anchorX = (offsetX + bodyWidth * density / 2) / totalWidth
+        val anchorY = (offsetY + bodyHeight * density + triangleHeight * density) / totalHeight
+        return Pair(OverlayImage.fromBitmap(bitmap), PointF(anchorX, anchorY))
+    }
+
+    private fun drawFavoriteBadge(
+        context: Context,
+        canvas: Canvas,
+        bodyRect: RectF,
+        isFocused: Boolean,
+        density: Float,
+    ) {
+        val badgeSize = (if (isFocused) ClustererConst.FAVORITE_BADGE_FOCUSED_SIZE else ClustererConst.FAVORITE_BADGE_SIZE) * density
+        val heartSize = (if (isFocused) ClustererConst.FAVORITE_HEART_FOCUSED_SIZE else ClustererConst.FAVORITE_HEART_SIZE) * density
+        val strokeWidth = ClustererConst.FAVORITE_BADGE_STROKE_WIDTH * density
+
+        val badgeOverflow = ClustererConst.FAVORITE_BADGE_OVERFLOW * density
+        val badgeCx = bodyRect.right - badgeSize / 2 + badgeOverflow
+        val badgeCy = bodyRect.top + badgeSize / 2 - badgeOverflow
+
+        canvas.drawCircle(badgeCx, badgeCy, badgeSize / 2, Paint().apply {
+            isAntiAlias = true
+            color = ClustererConst.FAVORITE_BADGE_COLOR.toColorInt()
+            style = Paint.Style.FILL
+        })
+
+        canvas.drawCircle(badgeCx, badgeCy, badgeSize / 2 - strokeWidth / 2, Paint().apply {
+            isAntiAlias = true
+            color = Color.WHITE
+            style = Paint.Style.STROKE
+            this.strokeWidth = strokeWidth
+        })
+
+        ContextCompat.getDrawable(context, DesignSystemR.drawable.icon_heart_filled)?.let {
+            it.setBounds(
+                (badgeCx - heartSize / 2).toInt(),
+                (badgeCy - heartSize / 2).toInt(),
+                (badgeCx + heartSize / 2).toInt(),
+                (badgeCy + heartSize / 2).toInt(),
+            )
+            it.draw(canvas)
+        }
     }
 }
