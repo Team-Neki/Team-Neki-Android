@@ -23,6 +23,7 @@ import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -152,10 +153,13 @@ class MapViewModel @Inject constructor(
                 val newFavorite = !intent.photoBooth.favorite
                 val id = intent.photoBooth.id
                 reduce {
+                    val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
+                    val updatedFavorite = favoritePhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
                     copy(
                         mapMarkers = mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
-                        nearbyPhotoBooths = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
-                        favoritePhotoBooths = favoritePhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
+                        nearbyPhotoBooths = updatedNearby,
+                        favoritePhotoBooths = updatedFavorite,
+                        displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
                     )
                 }
                 viewModelScope.launch { favoriteRequests.emit(id to newFavorite) }
@@ -166,11 +170,14 @@ class MapViewModel @Inject constructor(
             is MapIntent.SelectTab -> {
                 if (intent.tab == state.selectedTab) return@onIntent
                 reduce {
+                    val updatedNearby = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
+                    val updatedFavorite = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
                     copy(
                         selectedTab = intent.tab,
                         brands = brands.map { it.copy(isChecked = false) }.toImmutableList(),
-                        nearbyPhotoBooths = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
-                        favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
+                        nearbyPhotoBooths = updatedNearby,
+                        favoritePhotoBooths = updatedFavorite,
+                        displayPhotoBooths = displayPhotoBooths(intent.tab, updatedNearby, updatedFavorite),
                     )
                 }
             }
@@ -273,6 +280,16 @@ class MapViewModel @Inject constructor(
         )
         reduce {
             val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
+            val updatedNearby = nearbyPhotoBooths.map { photoBooth ->
+                photoBooth.copy(
+                    isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                )
+            }.toImmutableList()
+            val updatedFavorite = favoritePhotoBooths.map { photoBooth ->
+                photoBooth.copy(
+                    isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                )
+            }.toImmutableList()
             copy(
                 brands = updatedBrands.toImmutableList(),
                 mapMarkers = mapMarkers.map { photoBooth ->
@@ -280,16 +297,9 @@ class MapViewModel @Inject constructor(
                         isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
                     )
                 }.toImmutableList(),
-                nearbyPhotoBooths = nearbyPhotoBooths.map { photoBooth ->
-                    photoBooth.copy(
-                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
-                    )
-                }.toImmutableList(),
-                favoritePhotoBooths = favoritePhotoBooths.map { photoBooth ->
-                    photoBooth.copy(
-                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
-                    )
-                }.toImmutableList(),
+                nearbyPhotoBooths = updatedNearby,
+                favoritePhotoBooths = updatedFavorite,
+                displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
             )
         }
     }
@@ -467,14 +477,16 @@ class MapViewModel @Inject constructor(
                 brandIds = brandIds,
             ).onSuccess { photoBooths ->
                 reduce {
+                    val updatedNearby = photoBooths.map { photoBooth ->
+                        photoBooth.copy(
+                            imageUrl = brands.find {
+                                it.name == photoBooth.brandName
+                            }?.imageUrl.orEmpty(),
+                        )
+                    }.toImmutableList()
                     copy(
-                        nearbyPhotoBooths = photoBooths.map { photoBooth ->
-                            photoBooth.copy(
-                                imageUrl = brands.find {
-                                    it.name == photoBooth.brandName
-                                }?.imageUrl.orEmpty(),
-                            )
-                        }.toImmutableList(),
+                        nearbyPhotoBooths = updatedNearby,
+                        displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, favoritePhotoBooths),
                     )
                 }
             }
@@ -537,6 +549,15 @@ class MapViewModel @Inject constructor(
             }
         }
     }
+
+    private fun displayPhotoBooths(
+        selectedTab: MapTab,
+        nearbyPhotoBooths: ImmutableList<PhotoBooth>,
+        favoritePhotoBooths: ImmutableList<PhotoBooth>,
+    ): ImmutableList<PhotoBooth> = when (selectedTab) {
+        MapTab.NEARBY -> nearbyPhotoBooths.filter { it.isCheckedBrand }
+        MapTab.FAVORITE -> favoritePhotoBooths.filter { it.isCheckedBrand }
+    }.toImmutableList()
 
     private fun handleChangeDragLevel(
         dragLevel: DragLevel,

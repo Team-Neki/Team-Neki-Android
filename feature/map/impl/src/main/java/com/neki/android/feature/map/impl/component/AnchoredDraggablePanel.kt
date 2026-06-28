@@ -63,8 +63,7 @@ import kotlin.math.roundToInt
 @Composable
 internal fun AnchoredDraggablePanel(
     brands: ImmutableList<Brand> = persistentListOf(),
-    nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
-    favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
+    displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
     selectedTab: MapTab = MapTab.NEARBY,
     isCurrentLocation: Boolean = false,
@@ -168,8 +167,7 @@ internal fun AnchoredDraggablePanel(
                 ),
                 selectedTab = selectedTab,
                 brands = brands,
-                nearbyPhotoBooths = nearbyPhotoBooths,
-                favoritePhotoBooths = favoritePhotoBooths,
+                displayPhotoBooths = displayPhotoBooths,
                 onTabSelected = onTabSelected,
                 onClickBrand = onClickBrand,
                 onClickPhotoBooth = onClickNearPhotoBooth,
@@ -185,8 +183,7 @@ internal fun AnchoredPanelContent(
     modifier: Modifier = Modifier,
     selectedTab: MapTab = MapTab.NEARBY,
     brands: ImmutableList<Brand> = persistentListOf(),
-    nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
-    favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
+    displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     onTabSelected: (MapTab) -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickPhotoBooth: (PhotoBooth) -> Unit = {},
@@ -249,10 +246,6 @@ internal fun AnchoredPanelContent(
             )
         }
         VerticalSpacer(12.dp)
-        val displayPhotoBooths = when (selectedTab) {
-            MapTab.NEARBY -> nearbyPhotoBooths.filter { it.isCheckedBrand }
-            MapTab.FAVORITE -> favoritePhotoBooths.filter { it.isCheckedBrand }
-        }
         if (selectedTab == MapTab.FAVORITE) {
             val body14MediumSpan = NekiTheme.typography.body14Medium.toSpanStyle().copy(color = NekiTheme.colorScheme.gray300)
             val body14SemiBoldSpan = NekiTheme.typography.body14SemiBold.toSpanStyle().copy(color = NekiTheme.colorScheme.gray400)
@@ -332,7 +325,7 @@ private fun AnchoredPanelContentPreview() {
                     imageUrl = "https://dev-yapp.suitestudy.com:4641/file/image/logo/PHOTOSIGNATURE_LOGO_v1.png",
                 ),
             ),
-            nearbyPhotoBooths = persistentListOf(
+            displayPhotoBooths = persistentListOf(
                 PhotoBooth(
                     brandName = "인생네컷",
                     branchName = "가산디지털점",

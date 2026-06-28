@@ -298,8 +298,7 @@ fun MapScreen(
 
         AnchoredDraggablePanel(
             brands = uiState.brands,
-            nearbyPhotoBooths = uiState.nearbyPhotoBooths,
-            favoritePhotoBooths = uiState.favoritePhotoBooths,
+            displayPhotoBooths = uiState.displayPhotoBooths,
             dragLevel = uiState.dragLevel,
             selectedTab = uiState.selectedTab,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
