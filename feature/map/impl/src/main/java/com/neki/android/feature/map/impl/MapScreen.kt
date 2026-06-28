@@ -245,13 +245,18 @@ fun MapScreen(
     val currentBrandImageCache by rememberUpdatedState(uiState.brandImageCache)
 
     // 마커 데이터 변경 시 클러스터 업데이트
-    LaunchedEffect(uiState.mapMarkers, clusterer) {
+    LaunchedEffect(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoriteMarker, clusterer) {
         clusterer?.let { clusterManager ->
             clusterManager.clear()
-            val clusterItemsMap = uiState.mapMarkers
-                .filter { it.isCheckedBrand }
-                .associate { PhotoBoothClusterItem(it) to it }
-            clusterManager.addAll(clusterItemsMap)
+            val baseMarkers = uiState.mapMarkers.filter { it.isCheckedBrand }
+            val markers = if (uiState.showFavoriteMarker) {
+                val existingIds = uiState.mapMarkers.map { it.id }.toSet()
+                val extraFavorites = uiState.favoritePhotoBooths.filter { it.id !in existingIds }
+                (baseMarkers + extraFavorites).distinctBy { it.id }
+            } else {
+                baseMarkers
+            }
+            clusterManager.addAll(markers.associate { PhotoBoothClusterItem(it) to it })
         }
     }
 
@@ -306,7 +311,7 @@ fun MapScreen(
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
             showFavoriteMarker = uiState.showFavoriteMarker,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
-            onClickFavorite = { onIntent(MapIntent.ClickShowFavoriteIcon) },
+            onClickShowFavorite = { onIntent(MapIntent.ClickShowFavoriteIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
             onToggleBoothFavorite = { onIntent(MapIntent.ToggleBoothFavorite(it)) },

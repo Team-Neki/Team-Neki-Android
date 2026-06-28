@@ -176,7 +176,28 @@ class MapViewModel @Inject constructor(
                 viewModelScope.launch { favoriteRequests.emit(id to newFavorite) }
             }
             MapIntent.ClickShowFavoriteIcon -> {
-                reduce { copy(showFavoriteMarker = !state.showFavoriteMarker) }
+                val newShowFavorite = !state.showFavoriteMarker
+                reduce { copy(showFavoriteMarker = newShowFavorite) }
+                if (newShowFavorite) {
+                    viewModelScope.launch {
+                        reduce { copy(isLoading = true) }
+                        mapRepository.getFavoritePhotoBooths()
+                            .onSuccess { favoriteBooths ->
+                                reduce {
+                                    copy(
+                                        favoritePhotoBooths = favoriteBooths.map { booth ->
+                                            booth.copy(
+                                                favorite = true,
+                                                imageUrl = brands.find { it.name == booth.brandName }?.imageUrl.orEmpty(),
+                                            )
+                                        }.toImmutableList(),
+                                    )
+                                }
+                            }
+                            .onFailure { Timber.e(it) }
+                        reduce { copy(isLoading = false) }
+                    }
+                }
             }
             is MapIntent.SelectTab -> {
                 if (intent.tab == state.selectedTab) return@onIntent
@@ -389,9 +410,12 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        state.mapMarkers.find {
+        val clickedBooth = state.mapMarkers.find {
             it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
-        }?.let { booth ->
+        } ?: state.favoritePhotoBooths.find {
+            it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
+        }
+        clickedBooth?.let { booth ->
             analyticsLogger.log(
                 MapAnalyticsEvent.BoothSelect(
                     entryPoint = "map",
@@ -400,7 +424,18 @@ class MapViewModel @Inject constructor(
             )
         }
         reduce {
-            val updatedMarkers = mapMarkers.map { marker ->
+            val isInMapMarkers = mapMarkers.any {
+                it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
+            }
+            val baseMarkers = if (!isInMapMarkers) {
+                val favoriteMarker = favoritePhotoBooths.find {
+                    it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
+                }
+                if (favoriteMarker != null) (mapMarkers + favoriteMarker).toImmutableList() else mapMarkers
+            } else {
+                mapMarkers
+            }
+            val updatedMarkers = baseMarkers.map { marker ->
                 val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
                 if (isClicked) {
                     val distance = currentLocLatLng?.let { location ->

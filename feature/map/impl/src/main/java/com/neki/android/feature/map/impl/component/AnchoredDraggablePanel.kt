@@ -72,7 +72,7 @@ internal fun AnchoredDraggablePanel(
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onTabSelected: (MapTab) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
-    onClickFavorite: () -> Unit = {},
+    onClickShowFavorite: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickNearPhotoBooth: (PhotoBooth) -> Unit = {},
     onToggleBoothFavorite: (PhotoBooth) -> Unit = {},
@@ -160,7 +160,7 @@ internal fun AnchoredDraggablePanel(
             ) {
                 PhotoBoothFavoriteButton(
                     isFavorite = showFavoriteMarker,
-                    onClick = onClickFavorite,
+                    onClick = onClickShowFavorite,
                 )
                 CurrentLocationButton(
                     isActiveCurrentLocation = isCurrentLocation,
