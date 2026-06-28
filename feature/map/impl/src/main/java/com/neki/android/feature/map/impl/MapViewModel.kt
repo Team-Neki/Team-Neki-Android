@@ -24,7 +24,6 @@ import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
@@ -97,11 +96,8 @@ class MapViewModel @Inject constructor(
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
             MapIntent.ClickCurrentLocationIcon -> {
-                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                    moveCurrentLocation(state, reduce, postSideEffect)
-                } else {
-                    postSideEffect(MapEffect.LaunchLocationPermission)
-                }
+                if (LocationPermissionManager.isGrantedLocationPermission(context)) moveCurrentLocation(state, reduce, postSideEffect)
+                else postSideEffect(MapEffect.LaunchLocationPermission)
             }
 
             MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false, isVisibleRefreshButton = true) }
@@ -135,11 +131,13 @@ class MapViewModel @Inject constructor(
             is MapIntent.ClickClusterMarker -> postSideEffect(MapEffect.ZoomToClusterBounds(intent.southWest, intent.northEast))
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
             MapIntent.ClickDirectionIcon -> {
-                if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                    postSideEffect(MapEffect.OpenDirectionBottomSheet)
-                } else {
-                    postSideEffect(MapEffect.LaunchLocationPermission)
-                }
+                postSideEffect(
+                    if (LocationPermissionManager.isGrantedLocationPermission(context)) {
+                        MapEffect.OpenDirectionBottomSheet
+                    } else {
+                        MapEffect.LaunchLocationPermission
+                    },
+                )
             }
 
             MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.LaunchLocationPermission)
@@ -154,9 +152,15 @@ class MapViewModel @Inject constructor(
             is MapIntent.SyncFavoritePhotoBooth -> handleSyncFavoritePhotoBooth(intent.id, reduce)
             is MapIntent.RevertFavorite -> reduce {
                 copy(
-                    mapMarkers = mapMarkers.map { if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it }.toImmutableList(),
-                    nearbyPhotoBooths = nearbyPhotoBooths.map { if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it }.toImmutableList(),
-                    favoritePhotoBooths = favoritePhotoBooths.map { if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it }.toImmutableList(),
+                    mapMarkers = mapMarkers.map {
+                        if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it
+                    }.toImmutableList(),
+                    nearbyPhotoBooths = nearbyPhotoBooths.map {
+                        if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it
+                    }.toImmutableList(),
+                    favoritePhotoBooths = favoritePhotoBooths.map {
+                        if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it
+                    }.toImmutableList(),
                 )
             }
             is MapIntent.ToggleBoothFavorite -> {
@@ -175,30 +179,7 @@ class MapViewModel @Inject constructor(
                 }
                 viewModelScope.launch { favoriteRequests.emit(id to newFavorite) }
             }
-            MapIntent.ClickShowFavoriteIcon -> {
-                val newShowFavorite = !state.showFavoriteMarker
-                reduce { copy(showFavoriteMarker = newShowFavorite) }
-                if (newShowFavorite) {
-                    viewModelScope.launch {
-                        reduce { copy(isLoading = true) }
-                        mapRepository.getFavoritePhotoBooths()
-                            .onSuccess { favoriteBooths ->
-                                reduce {
-                                    copy(
-                                        favoritePhotoBooths = favoriteBooths.map { booth ->
-                                            booth.copy(
-                                                favorite = true,
-                                                imageUrl = brands.find { it.name == booth.brandName }?.imageUrl.orEmpty(),
-                                            )
-                                        }.toImmutableList(),
-                                    )
-                                }
-                            }
-                            .onFailure { Timber.e(it) }
-                        reduce { copy(isLoading = false) }
-                    }
-                }
-            }
+            MapIntent.ClickShowFavoriteIcon -> handleClickShowFavoriteIcon(state, reduce)
             is MapIntent.SelectTab -> {
                 if (intent.tab == state.selectedTab) return@onIntent
                 reduce {
@@ -333,6 +314,34 @@ class MapViewModel @Inject constructor(
                 favoritePhotoBooths = updatedFavorite,
                 displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
             )
+        }
+    }
+
+    private fun handleClickShowFavoriteIcon(
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        val newShowFavorite = !state.showFavoriteMarker
+        reduce { copy(showFavoriteMarker = newShowFavorite) }
+        if (newShowFavorite) {
+            viewModelScope.launch {
+                reduce { copy(isLoading = true) }
+                mapRepository.getFavoritePhotoBooths()
+                    .onSuccess { favoriteBooths ->
+                        reduce {
+                            copy(
+                                favoritePhotoBooths = favoriteBooths.map { booth ->
+                                    booth.copy(
+                                        favorite = true,
+                                        imageUrl = brands.find { it.name == booth.brandName }?.imageUrl.orEmpty(),
+                                    )
+                                }.toImmutableList(),
+                            )
+                        }
+                    }
+                    .onFailure { Timber.e(it) }
+                reduce { copy(isLoading = false) }
+            }
         }
     }
 

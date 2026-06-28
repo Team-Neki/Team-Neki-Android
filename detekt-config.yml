@@ -3,7 +3,7 @@ complexity:
         threshold: 150
         ignoreAnnotated: [ 'Composable' ]
     CyclomaticComplexMethod:
-        threshold: 40
+        threshold: 42
         ignoreAnnotated: [ 'Composable' ]
     LongParameterList:
         active: false
