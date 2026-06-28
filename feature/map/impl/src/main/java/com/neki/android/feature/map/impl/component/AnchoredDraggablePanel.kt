@@ -34,8 +34,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -129,6 +129,10 @@ internal fun AnchoredDraggablePanel(
         isProgrammaticTransition = false
     }
 
+    val buttonAreaHeightPx = with(density) { MapConst.PANEL_DRAG_LOCATION_HEIGHT.dp.toPx() }
+    val secondAnchorPx = screenHeightPx - centerPanelHeightPx
+    val thirdAnchorPx = screenHeightPx * 0.05f
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -143,12 +147,11 @@ internal fun AnchoredDraggablePanel(
                 IntOffset(0, constrainedOffset.roundToInt())
             },
     ) {
-        Column {
+        if (state.requireOffset() >= secondAnchorPx) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, bottom = 8.dp)
-                    .alpha(alpha = if (dragLevel == DragLevel.THIRD) 0f else 1f),
+                    .padding(start = 20.dp, bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PhotoBoothFavoriteButton(
@@ -160,21 +163,27 @@ internal fun AnchoredDraggablePanel(
                     onClick = onClickCurrentLocation,
                 )
             }
-            AnchoredPanelContent(
-                modifier = Modifier.anchoredDraggable(
+        }
+        AnchoredPanelContent(
+            modifier = Modifier
+                .graphicsLayer {
+                    val currentOffset = state.requireOffset()
+                    val ratio = ((currentOffset - thirdAnchorPx) / (secondAnchorPx - thirdAnchorPx)).coerceIn(0f, 1f)
+                    translationY = buttonAreaHeightPx * ratio
+                }
+                .anchoredDraggable(
                     state = state,
                     orientation = Orientation.Vertical,
                 ),
-                selectedTab = selectedTab,
-                brands = brands,
-                displayPhotoBooths = displayPhotoBooths,
-                onTabSelected = onTabSelected,
-                onClickBrand = onClickBrand,
-                onClickPhotoBooth = onClickNearPhotoBooth,
-                onToggleBoothFavorite = onToggleBoothFavorite,
-                onClickEditBrandOrder = onClickEditBrandOrder,
-            )
-        }
+            selectedTab = selectedTab,
+            brands = brands,
+            displayPhotoBooths = displayPhotoBooths,
+            onTabSelected = onTabSelected,
+            onClickBrand = onClickBrand,
+            onClickPhotoBooth = onClickNearPhotoBooth,
+            onToggleBoothFavorite = onToggleBoothFavorite,
+            onClickEditBrandOrder = onClickEditBrandOrder,
+        )
     }
 }
 
