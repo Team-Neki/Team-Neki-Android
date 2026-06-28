@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -84,6 +85,9 @@ internal fun AnchoredDraggablePanel(
     val navigationBarHeightPx = with(density) {
         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx()
     }
+    val statusBarHeightPx = with(density) {
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding().toPx()
+    }
     val bottomPanelHeightPx = with(density) {
         (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
             MapConst.PANEL_DRAG_LOCATION_HEIGHT +
@@ -100,7 +104,7 @@ internal fun AnchoredDraggablePanel(
         val anchors = DraggableAnchors {
             DragLevel.FIRST at screenHeightPx - bottomPanelHeightPx
             DragLevel.SECOND at screenHeightPx - centerPanelHeightPx
-            DragLevel.THIRD at screenHeightPx * 0.05f
+            DragLevel.THIRD at statusBarHeightPx
             DragLevel.INVISIBLE at screenHeightPx
         }
 
@@ -131,7 +135,7 @@ internal fun AnchoredDraggablePanel(
 
     val buttonAreaHeightPx = with(density) { MapConst.PANEL_DRAG_LOCATION_HEIGHT.dp.toPx() }
     val secondAnchorPx = screenHeightPx - centerPanelHeightPx
-    val thirdAnchorPx = screenHeightPx * 0.05f
+    val thirdAnchorPx = statusBarHeightPx
 
     Box(
         modifier = Modifier
