@@ -31,6 +31,8 @@ formatting:
         indentSize: 4
     ParameterListWrapping:
         active: false
+    PropertyWrapping:
+        maxLineLength: 150
     ArgumentListWrapping:
         indentSize: 4
         maxLineLength: 150

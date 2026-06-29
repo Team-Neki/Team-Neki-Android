@@ -14,7 +14,7 @@ internal object MapConst {
     internal const val DEFAULT_CAMERA_ANIMATION_DURATIONS_MS = 800
 
     internal const val BOTTOM_NAVIGATION_BAR_HEIGHT = 52
-    internal const val PANEL_DRAG_LOCATION_HEIGHT = 48
+    internal const val PANEL_DRAG_LOCATION_HEIGHT = 96
     internal const val PANEL_DRAG_LEVEL_FIRST_HEIGHT = 96
     internal const val PANEL_DRAG_LEVEL_SECOND_HEIGHT = 218
 }

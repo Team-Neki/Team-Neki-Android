@@ -13,7 +13,6 @@ import com.neki.android.core.analytics.event.MapAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
-import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.MviIntentStore
@@ -24,30 +23,61 @@ import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class MapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val mapRepository: MapRepository,
-    private val userRepository: UserRepository,
     private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
+    private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
+
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
-        initialState = MapState(),
+        initialState = MapState(
+            favoritePhotoBooths = persistentListOf(
+                PhotoBooth(id = 1, brandName = "인생네컷", branchName = "홍대점", distance = 120, latitude = 37.5563, longitude = 126.9236),
+                PhotoBooth(id = 2, brandName = "인생네컷", branchName = "강남역점", distance = 450, latitude = 37.4979, longitude = 127.0276),
+                PhotoBooth(id = 3, brandName = "포토이즘", branchName = "신촌점", distance = 340, latitude = 37.5596, longitude = 126.9370),
+                PhotoBooth(id = 4, brandName = "포토이즘", branchName = "홍대입구점", distance = 560, latitude = 37.5572, longitude = 126.9263),
+                PhotoBooth(id = 5, brandName = "하루필름", branchName = "강남점", distance = 870, latitude = 37.4956, longitude = 127.0302),
+                PhotoBooth(id = 6, brandName = "포토그레이", branchName = "건대점", distance = 1200, latitude = 37.5407, longitude = 127.0698),
+                PhotoBooth(id = 7, brandName = "포토그레이", branchName = "이대점", distance = 1540, latitude = 37.5565, longitude = 126.9454),
+                PhotoBooth(id = 8, brandName = "하루필름", branchName = "신촌점", distance = 1800, latitude = 37.5594, longitude = 126.9368),
+            ),
+        ),
         onIntent = ::onIntent,
         initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
     )
+
+    init {
+        viewModelScope.launch {
+            favoriteRequests
+                .debounce(300L)
+                .collect { (_, newFavorite) ->
+                    store.onIntent(
+                        MapIntent.ShowToast(
+                            message = if (newFavorite) "저장한 포토부스에 추가됐어요!" else "저장한 포토부스에서 삭제됐어요!",
+                        ),
+                    )
+                }
+        }
+    }
 
     fun logMapView() {
         analyticsLogger.log(MapAnalyticsEvent.MapView)
@@ -86,8 +116,6 @@ class MapViewModel @Inject constructor(
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
             is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
-            MapIntent.ClickInfoIcon -> reduce { copy(isShowInfoTooltip = true) }
-            MapIntent.DismissInfoTooltip -> reduce { copy(isShowInfoTooltip = false) }
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, state, reduce)
             is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent.photoBooth, reduce, postSideEffect)
@@ -101,7 +129,7 @@ class MapViewModel @Inject constructor(
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
             is MapIntent.ClickDirectionItem -> handleClickDirectionItem(state, intent.app, reduce, postSideEffect)
-            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, state.shouldShowInfoTooltip, reduce)
+            is MapIntent.ChangeDragLevel -> handleChangeDragLevel(intent.dragLevel, reduce)
             is MapIntent.ClickPhotoBoothMarker -> handleClickPhotoBoothMarker(intent.locLatLng, state, reduce, postSideEffect)
             is MapIntent.ClickClusterMarker -> postSideEffect(MapEffect.ZoomToClusterBounds(intent.southWest, intent.northEast))
             is MapIntent.ClickPhotoBoothCard -> handleClickPhotoBoothCard(intent.locLatLng, postSideEffect)
@@ -120,6 +148,40 @@ class MapViewModel @Inject constructor(
                 reduce { copy(isShowLocationPermissionDialog = false) }
                 postSideEffect(MapEffect.NavigateToAppSettings)
             }
+            MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
+            is MapIntent.ToggleBoothFavorite -> {
+                val newFavorite = !intent.photoBooth.favorite
+                val id = intent.photoBooth.id
+                reduce {
+                    val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
+                    val updatedFavorite = favoritePhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
+                    copy(
+                        mapMarkers = mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
+                        nearbyPhotoBooths = updatedNearby,
+                        favoritePhotoBooths = updatedFavorite,
+                        displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
+                    )
+                }
+                viewModelScope.launch { favoriteRequests.emit(id to newFavorite) }
+            }
+            MapIntent.ClickShowFavoriteIcon -> {
+                reduce { copy(showFavoriteMarker = !state.showFavoriteMarker) }
+            }
+            is MapIntent.SelectTab -> {
+                if (intent.tab == state.selectedTab) return@onIntent
+                reduce {
+                    val updatedNearby = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
+                    val updatedFavorite = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
+                    copy(
+                        selectedTab = intent.tab,
+                        brands = brands.map { it.copy(isChecked = false) }.toImmutableList(),
+                        nearbyPhotoBooths = updatedNearby,
+                        favoritePhotoBooths = updatedFavorite,
+                        displayPhotoBooths = displayPhotoBooths(intent.tab, updatedNearby, updatedFavorite),
+                    )
+                }
+            }
+            is MapIntent.ShowToast -> postSideEffect(MapEffect.ShowToastMessage(intent.message))
         }
     }
 
@@ -218,6 +280,16 @@ class MapViewModel @Inject constructor(
         )
         reduce {
             val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
+            val updatedNearby = nearbyPhotoBooths.map { photoBooth ->
+                photoBooth.copy(
+                    isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                )
+            }.toImmutableList()
+            val updatedFavorite = favoritePhotoBooths.map { photoBooth ->
+                photoBooth.copy(
+                    isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                )
+            }.toImmutableList()
             copy(
                 brands = updatedBrands.toImmutableList(),
                 mapMarkers = mapMarkers.map { photoBooth ->
@@ -225,11 +297,9 @@ class MapViewModel @Inject constructor(
                         isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
                     )
                 }.toImmutableList(),
-                nearbyPhotoBooths = nearbyPhotoBooths.map { photoBooth ->
-                    photoBooth.copy(
-                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
-                    )
-                }.toImmutableList(),
+                nearbyPhotoBooths = updatedNearby,
+                favoritePhotoBooths = updatedFavorite,
+                displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
             )
         }
     }
@@ -347,8 +417,7 @@ class MapViewModel @Inject constructor(
 
     private fun fetchInitialData(reduce: (MapState.() -> MapState) -> Unit) {
         viewModelScope.launch {
-            val hasShownInfoTooltip = userRepository.hasShownInfoToolTip.first()
-            reduce { copy(isLoading = true, shouldShowInfoTooltip = !hasShownInfoTooltip) }
+            reduce { copy(isLoading = true) }
 
             mapRepository.getBrands()
                 .onSuccess { loadedBrands ->
@@ -408,14 +477,16 @@ class MapViewModel @Inject constructor(
                 brandIds = brandIds,
             ).onSuccess { photoBooths ->
                 reduce {
+                    val updatedNearby = photoBooths.map { photoBooth ->
+                        photoBooth.copy(
+                            imageUrl = brands.find {
+                                it.name == photoBooth.brandName
+                            }?.imageUrl.orEmpty(),
+                        )
+                    }.toImmutableList()
                     copy(
-                        nearbyPhotoBooths = photoBooths.map { photoBooth ->
-                            photoBooth.copy(
-                                imageUrl = brands.find {
-                                    it.name == photoBooth.brandName
-                                }?.imageUrl.orEmpty(),
-                            )
-                        }.toImmutableList(),
+                        nearbyPhotoBooths = updatedNearby,
+                        displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, favoritePhotoBooths),
                     )
                 }
             }
@@ -479,22 +550,19 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    private fun displayPhotoBooths(
+        selectedTab: MapTab,
+        nearbyPhotoBooths: ImmutableList<PhotoBooth>,
+        favoritePhotoBooths: ImmutableList<PhotoBooth>,
+    ): ImmutableList<PhotoBooth> = when (selectedTab) {
+        MapTab.NEARBY -> nearbyPhotoBooths.filter { it.isCheckedBrand }
+        MapTab.FAVORITE -> favoritePhotoBooths.filter { it.isCheckedBrand }
+    }.toImmutableList()
+
     private fun handleChangeDragLevel(
         dragLevel: DragLevel,
-        shouldShowInfoTooltip: Boolean,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
-        viewModelScope.launch {
-            if (dragLevel == DragLevel.THIRD) {
-                if (shouldShowInfoTooltip) {
-                    reduce { copy(dragLevel = dragLevel, isShowInfoTooltip = true, shouldShowInfoTooltip = false) }
-                    userRepository.setInfoToolTipShown()
-                } else {
-                    reduce { copy(dragLevel = dragLevel) }
-                }
-            } else {
-                reduce { copy(dragLevel = dragLevel) }
-            }
-        }
+        reduce { copy(dragLevel = dragLevel) }
     }
 }

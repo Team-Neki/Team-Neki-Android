@@ -54,6 +54,7 @@ import com.neki.android.feature.map.impl.component.MapRefreshChip
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailContent
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.core.model.Brand
 import com.neki.android.feature.map.impl.util.DirectionHelper
 import kotlinx.coroutines.launch
 
@@ -61,6 +62,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
+    navigateToPhotoBoothOrderChange: (List<Brand>) -> Unit = {},
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -187,6 +189,8 @@ fun MapRoute(
 
             is MapEffect.ShowToastMessage -> nekiToast.showToast(sideEffect.message)
 
+            is MapEffect.NavigateToPhotoBoothOrderChange -> navigateToPhotoBoothOrderChange(uiState.brands)
+
             is MapEffect.ZoomToClusterBounds -> {
                 scope.launch {
                     val bounds = LatLngBounds(
@@ -294,16 +298,19 @@ fun MapScreen(
 
         AnchoredDraggablePanel(
             brands = uiState.brands,
-            nearbyPhotoBooths = uiState.nearbyPhotoBooths,
+            displayPhotoBooths = uiState.displayPhotoBooths,
             dragLevel = uiState.dragLevel,
+            selectedTab = uiState.selectedTab,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
+            onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
-            isShowInfoTooltip = uiState.isShowInfoTooltip,
+            showFavoriteMarker = uiState.showFavoriteMarker,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
-            onClickInfoIcon = { onIntent(MapIntent.ClickInfoIcon) },
-            onDismissInfoTooltip = { onIntent(MapIntent.DismissInfoTooltip) },
+            onClickFavorite = { onIntent(MapIntent.ClickShowFavoriteIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
+            onToggleBoothFavorite = { onIntent(MapIntent.ToggleBoothFavorite(it)) },
+            onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
         )
 
         if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && uiState.isVisibleRefreshButton) {
@@ -346,8 +353,8 @@ fun MapScreen(
                 PhotoBoothDetailContent(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    isCurrentLocation = uiState.isCameraOnCurrentLocation,
-                    onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
+                    isFavorite = focusedPhotoBooth.favorite,
+                    onClickFavorite = { onIntent(MapIntent.ToggleBoothFavorite(focusedPhotoBooth)) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
                         onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))

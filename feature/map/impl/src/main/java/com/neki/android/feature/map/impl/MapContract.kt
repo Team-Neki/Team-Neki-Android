@@ -16,14 +16,16 @@ data class MapState(
     val isCameraOnCurrentLocation: Boolean = false,
     val isVisibleRefreshButton: Boolean = false,
     val dragLevel: DragLevel = DragLevel.FIRST,
+    val selectedTab: MapTab = MapTab.NEARBY,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val brandImageCache: ImmutableMap<String, ImageBitmap> = persistentMapOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
     val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
-    val shouldShowInfoTooltip: Boolean = false,
-    val isShowInfoTooltip: Boolean = false,
+    val favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
+    val displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
+    val showFavoriteMarker: Boolean = false,
 )
 
 sealed interface MapIntent {
@@ -41,8 +43,6 @@ sealed interface MapIntent {
 
     // in 패널
     data object ClickCurrentLocationIcon : MapIntent
-    data object ClickInfoIcon : MapIntent
-    data object DismissInfoTooltip : MapIntent
     data object ClickToMapChip : MapIntent
     data class ClickVerticalBrand(val brand: Brand) : MapIntent
     data class ClickNearPhotoBooth(val photoBooth: PhotoBooth) : MapIntent
@@ -58,6 +58,12 @@ sealed interface MapIntent {
     data object ShowLocationPermissionDialog : MapIntent
     data object DismissLocationPermissionDialog : MapIntent
     data object ConfirmLocationPermissionDialog : MapIntent
+
+    data object ClickEditBrandOrder : MapIntent
+    data object ClickShowFavoriteIcon : MapIntent
+    data class ToggleBoothFavorite(val photoBooth: PhotoBooth) : MapIntent
+    data class SelectTab(val tab: MapTab) : MapIntent
+    data class ShowToast(val message: String) : MapIntent
 }
 
 sealed interface MapEffect {
@@ -81,9 +87,12 @@ sealed interface MapEffect {
 
     data object NavigateToAppSettings : MapEffect
     data object LaunchLocationPermission : MapEffect
+    data object NavigateToPhotoBoothOrderChange : MapEffect
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
+
+enum class MapTab { NEARBY, FAVORITE }
 
 data class MapBounds(
     val southWest: LocLatLng,

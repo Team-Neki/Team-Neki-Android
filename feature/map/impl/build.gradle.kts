@@ -15,4 +15,5 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.coil.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.reorderable)
 }

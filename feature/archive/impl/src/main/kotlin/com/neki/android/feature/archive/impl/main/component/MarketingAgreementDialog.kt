@@ -25,15 +25,12 @@ internal fun MarketingAgreementDialog(
         onClickPrimaryButton = onClickConfirm,
         onClickGrayButton = onClickDismiss,
         subContent = {
-            val highlightText = "마이페이지 > 권한 설정 > 알림 설정"
-            val fullText = "마케팅 정보 푸시 수신 동의 여부는 ${highlightText}에서 변경 가능해요."
             val annotatedText = buildAnnotatedString {
-                val highlightStart = fullText.indexOf(highlightText)
-                append(fullText.substring(0, highlightStart))
+                append("마케팅 정보 푸시 수신 동의 여부는 ")
                 withStyle(SpanStyle(color = NekiTheme.colorScheme.primary400)) {
-                    append(highlightText)
+                    append("마이페이지 > 권한 설정 > 알림 설정")
                 }
-                append(fullText.substring(highlightStart + highlightText.length))
+                append("에서 변경 가능해요.")
             }
             Text(
                 text = annotatedText,

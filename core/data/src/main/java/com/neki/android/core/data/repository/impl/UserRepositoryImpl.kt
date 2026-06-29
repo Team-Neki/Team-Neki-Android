@@ -32,17 +32,6 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override val hasShownInfoToolTip: Flow<Boolean> =
-        dataStore.data.map { preferences ->
-            preferences[HAS_SHOWN_INFO_TOOLTIP] ?: false
-        }
-
-    override suspend fun setInfoToolTipShown() {
-        dataStore.edit { preferences ->
-            preferences[HAS_SHOWN_INFO_TOOLTIP] = true
-        }
-    }
-
     override val hasShownQRInfoToolTip: Flow<Boolean> =
         dataStore.data.map { preferences ->
             preferences[HAS_SHOWN_QR_INFO_TOOLTIP] ?: false
@@ -81,7 +70,6 @@ class UserRepositoryImpl @Inject constructor(
 
     companion object {
         private val HAS_VISITED_RANDOM_POSE = booleanPreferencesKey("is_first_visit_random_pose")
-        private val HAS_SHOWN_INFO_TOOLTIP = booleanPreferencesKey("is_first_expand_bottom_sheet")
         private val HAS_SHOWN_QR_INFO_TOOLTIP = booleanPreferencesKey("is_first_visit_archive")
         private val LAST_ARCHIVE_MARKETING_POPUP_TIMESTAMP =
             longPreferencesKey("last_archive_marketing_popup_timestamp")

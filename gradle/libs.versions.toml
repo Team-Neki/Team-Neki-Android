@@ -41,6 +41,7 @@ lottie = "6.7.1"
 exifinterface = "1.4.2"
 ossLicensesLib = "17.2.1"
 ossLicensesPlugin = "0.10.7"
+reorderable = "2.5.1"
 firebaseBom = "34.9.0"
 googleServices = "4.4.4"
 firebaseCrashlyticsPlugin = "3.0.6"
@@ -132,6 +133,7 @@ android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", ve
 compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 [plugins]
 # Plugins defined by this project
