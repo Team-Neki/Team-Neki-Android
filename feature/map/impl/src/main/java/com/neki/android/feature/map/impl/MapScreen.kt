@@ -251,7 +251,7 @@ fun MapScreen(
             val baseMarkers = uiState.mapMarkers.filter { it.isCheckedBrand }
             val markers = if (uiState.showFavoriteMarker) {
                 val existingIds = uiState.mapMarkers.map { it.id }.toSet()
-                val extraFavorites = uiState.favoritePhotoBooths.filter { it.id !in existingIds }
+                val extraFavorites = uiState.favoritePhotoBooths.filter { it.id !in existingIds && it.isCheckedBrand }
                 (baseMarkers + extraFavorites).distinctBy { it.id }
             } else {
                 baseMarkers

@@ -514,11 +514,13 @@ class MapViewModel @Inject constructor(
         val booth = committedPhotoBooths[id]?.takeIf { it.favorite } ?: return
         if (store.uiState.value.favoritePhotoBooths.any { it.id == id }) return
         reduce {
+            val updatedFavorite = buildList {
+                addAll(favoritePhotoBooths)
+                add(booth)
+            }.toImmutableList()
             copy(
-                favoritePhotoBooths = buildList {
-                    addAll(favoritePhotoBooths)
-                    add(booth)
-                }.toImmutableList(),
+                favoritePhotoBooths = updatedFavorite,
+                displayPhotoBooths = displayPhotoBooths(selectedTab, nearbyPhotoBooths, updatedFavorite),
             )
         }
     }
