@@ -89,7 +89,10 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
                     dragLevel = DragLevel.SECOND,
-                    mapMarkers = mapMarkers.map { it.copy(isFocused = false) }.toImmutableList(),
+                    mapMarkers = mapMarkers
+                        .filter { polygonMarkerIds.contains(it.id) }
+                        .map { it.copy(isFocused = false) }
+                        .toImmutableList(),
                 )
             }
 
@@ -133,6 +136,7 @@ class MapViewModel @Inject constructor(
                     copy(
                         selectedTab = intent.tab,
                         brands = brands.map { it.copy(isChecked = false) }.toImmutableList(),
+                        mapMarkers = mapMarkers.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
                         nearbyPhotoBooths = updatedNearby,
                         favoritePhotoBooths = updatedFavorite,
                         displayPhotoBooths = displayPhotoBooths(intent.tab, updatedNearby, updatedFavorite),
@@ -181,7 +185,12 @@ class MapViewModel @Inject constructor(
                 !newFavorite -> favoritePhotoBooths.filter { it.id != id }.toImmutableList()
                 else -> favoritePhotoBooths
             }
-            val updatedMarkers = if (!newFavorite && !isPolygonMarker) {
+            val updatedMarkers = if (shouldCloseCard) {
+                mapMarkers
+                    .filter { polygonMarkerIds.contains(it.id) }
+                    .map { it.copy(isFocused = false) }
+                    .toImmutableList()
+            } else if (!newFavorite && !isPolygonMarker) {
                 mapMarkers.filter { it.id != id }.toImmutableList()
             } else {
                 mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
