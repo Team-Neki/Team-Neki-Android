@@ -62,9 +62,8 @@ sealed interface MapIntent {
     data object ClickEditBrandOrder : MapIntent
     data class UpdateBrandOrder(val orderedBrands: List<Brand>) : MapIntent
     data object ClickShowFavoriteIcon : MapIntent
-    data class SyncFavoritePhotoBooth(val id: Long) : MapIntent
-    data class RevertFavorite(val id: Long, val previousFavorite: Boolean) : MapIntent
     data class ToggleBoothFavorite(val photoBooth: PhotoBooth) : MapIntent
+    data class ToggleDetailFavorite(val photoBooth: PhotoBooth) : MapIntent
     data class SelectTab(val tab: MapTab) : MapIntent
     data class ShowToast(val message: String) : MapIntent
 }

@@ -41,8 +41,8 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
-    private val committedPhotoBooths = mutableMapOf<Long, PhotoBooth>()
     private var brandImageUrlCache = emptyMap<String, String>()
+    private var polygonMarkerIds = emptySet<Long>()
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),
@@ -120,46 +120,17 @@ class MapViewModel @Inject constructor(
             }
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
-            is MapIntent.SyncFavoritePhotoBooth -> handleSyncFavoritePhotoBooth(intent.id, reduce)
-            is MapIntent.RevertFavorite -> reduce {
-                val updatedNearby = nearbyPhotoBooths.map {
-                    if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it
-                }.toImmutableList()
-                val updatedFavorite = if (intent.previousFavorite) {
-                    favoritePhotoBooths.map {
-                        if (it.id == intent.id) it.copy(favorite = true) else it
-                    }.toImmutableList()
-                } else {
-                    favoritePhotoBooths.filter { it.id != intent.id }.toImmutableList()
-                }
-                copy(
-                    mapMarkers = mapMarkers.map {
-                        if (it.id == intent.id) it.copy(favorite = intent.previousFavorite) else it
-                    }.toImmutableList(),
-                    nearbyPhotoBooths = updatedNearby,
-                    favoritePhotoBooths = updatedFavorite,
-                    displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
-                )
-            }
             is MapIntent.ToggleBoothFavorite -> {
                 val newFavorite = !intent.photoBooth.favorite
                 val id = intent.photoBooth.id
-                committedPhotoBooths.putIfAbsent(id, intent.photoBooth)
-                reduce {
-                    val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
-                    val updatedFavorite = if (newFavorite) {
-                        favoritePhotoBooths
-                    } else {
-                        favoritePhotoBooths.filter { it.id != id }.toImmutableList()
-                    }
-                    copy(
-                        mapMarkers = mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
-                        nearbyPhotoBooths = updatedNearby,
-                        favoritePhotoBooths = updatedFavorite,
-                        displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
-                    )
-                }
-                updateFavorite(id, newFavorite)
+                reduce { updateFavoriteState(intent.photoBooth, newFavorite, id, closeCardIfNeeded = false) }
+                updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
+            }
+            is MapIntent.ToggleDetailFavorite -> {
+                val newFavorite = !intent.photoBooth.favorite
+                val id = intent.photoBooth.id
+                reduce { updateFavoriteState(intent.photoBooth, newFavorite, id, closeCardIfNeeded = true) }
+                updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
             }
             MapIntent.ClickShowFavoriteIcon -> reduce { copy(showFavoriteMarker = !state.showFavoriteMarker) }
             is MapIntent.SelectTab -> {
@@ -180,25 +151,52 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun updateFavorite(id: Long, newFavorite: Boolean) {
-        val committedBooth = committedPhotoBooths[id] ?: return
-        if (committedBooth.favorite == newFavorite) return
+    private fun updateFavorite(photoBooth: PhotoBooth) {
         viewModelScope.launch {
-            mapRepository.updatePhotoBoothFavorite(id, newFavorite)
+            mapRepository.updatePhotoBoothFavorite(photoBooth.id, photoBooth.favorite)
                 .onSuccess {
-                    committedPhotoBooths[id] = committedBooth.copy(favorite = newFavorite)
-                    store.onIntent(MapIntent.SyncFavoritePhotoBooth(id))
                     store.onIntent(
                         MapIntent.ShowToast(
-                            message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
+                            message = if (photoBooth.favorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
                         ),
                     )
                 }
-                .onFailure { e ->
-                    Timber.e(e)
-                    store.onIntent(MapIntent.RevertFavorite(id, committedBooth.favorite))
-                }
+                .onFailure { e -> Timber.e(e) }
         }
+    }
+
+    private fun MapState.updateFavoriteState(
+        photoBooth: PhotoBooth,
+        newFavorite: Boolean,
+        id: Long,
+        closeCardIfNeeded: Boolean,
+    ): MapState {
+        val isPolygonMarker = polygonMarkerIds.contains(id)
+        val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
+        val updatedFavorite = when {
+            newFavorite && favoritePhotoBooths.none { it.id == id } -> {
+                val booth = photoBooth.copy(
+                    favorite = true,
+                    imageUrl = brandImageUrlCache[photoBooth.brandName].orEmpty().ifEmpty { photoBooth.imageUrl },
+                )
+                (favoritePhotoBooths + booth).toImmutableList()
+            }
+            !newFavorite -> favoritePhotoBooths.filter { it.id != id }.toImmutableList()
+            else -> favoritePhotoBooths
+        }
+        val updatedMarkers = if (!newFavorite && !isPolygonMarker) {
+            mapMarkers.filter { it.id != id }.toImmutableList()
+        } else {
+            mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
+        }
+        val shouldCloseCard = closeCardIfNeeded && !newFavorite && !isPolygonMarker
+        return copy(
+            dragLevel = if (shouldCloseCard) DragLevel.SECOND else dragLevel,
+            mapMarkers = updatedMarkers,
+            nearbyPhotoBooths = updatedNearby,
+            favoritePhotoBooths = updatedFavorite,
+            displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
+        )
     }
 
     private fun getCurrentLocation(
@@ -415,7 +413,11 @@ class MapViewModel @Inject constructor(
                 val favoriteMarker = favoritePhotoBooths.find {
                     it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
                 }
-                if (favoriteMarker != null) (mapMarkers + favoriteMarker).toImmutableList() else mapMarkers
+                if (favoriteMarker != null) {
+                    (mapMarkers + favoriteMarker).toImmutableList()
+                } else {
+                    mapMarkers
+                }
             } else {
                 mapMarkers
             }
@@ -468,7 +470,6 @@ class MapViewModel @Inject constructor(
                                 imageUrl = brandImageUrlCache[booth.brandName].orEmpty(),
                             )
                         }
-                        committedPhotoBooths.putAll(mappedBooths.associate { it.id to it })
                         reduce {
                             copy(favoritePhotoBooths = mappedBooths.toImmutableList())
                         }
@@ -482,23 +483,6 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleSyncFavoritePhotoBooth(
-        id: Long,
-        reduce: (MapState.() -> MapState) -> Unit,
-    ) {
-        val booth = committedPhotoBooths[id]?.takeIf { it.favorite } ?: return
-        if (store.uiState.value.favoritePhotoBooths.any { it.id == id }) return
-        reduce {
-            val updatedFavorite = buildList {
-                addAll(favoritePhotoBooths)
-                add(booth)
-            }.toImmutableList()
-            copy(
-                favoritePhotoBooths = updatedFavorite,
-                displayPhotoBooths = displayPhotoBooths(selectedTab, nearbyPhotoBooths, updatedFavorite),
-            )
-        }
-    }
 
     private fun cacheBrandImages(
         brands: List<Brand>,
@@ -596,6 +580,7 @@ class MapViewModel @Inject constructor(
                 coordinates = coordinates,
                 brandIds = emptyList(),
             ).onSuccess { photoBooths ->
+                polygonMarkerIds = photoBooths.map { it.id }.toSet()
                 reduce {
                     copy(
                         isLoading = false,
