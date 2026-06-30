@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.buttonShadow
+import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 @Composable
@@ -36,7 +37,7 @@ private fun MapCircleButton(
                 shape = CircleShape,
                 color = NekiTheme.colorScheme.white,
             )
-            .clickable(onClick = onClick)
+            .clickableSingle(onClick = onClick)
             .padding(6.dp),
         contentAlignment = Alignment.Center,
     ) {

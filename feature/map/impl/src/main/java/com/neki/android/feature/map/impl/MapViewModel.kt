@@ -27,16 +27,12 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class)
 @HiltViewModel
 class MapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -45,7 +41,6 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
-    private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
     private val committedPhotoBooths = mutableMapOf<Long, PhotoBooth>()
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
@@ -53,31 +48,6 @@ class MapViewModel @Inject constructor(
         onIntent = ::onIntent,
         initialFetchData = { store.onIntent(MapIntent.EnterMapScreen) },
     )
-
-    init {
-        viewModelScope.launch {
-            favoriteRequests
-                .debounce(300L)
-                .collect { (id, newFavorite) ->
-                    val committedBooth = committedPhotoBooths[id] ?: return@collect
-                    if (committedBooth.favorite == newFavorite) return@collect
-                    mapRepository.updatePhotoBoothFavorite(id, newFavorite)
-                        .onSuccess {
-                            committedPhotoBooths[id] = committedBooth.copy(favorite = newFavorite)
-                            store.onIntent(MapIntent.SyncFavoritePhotoBooth(id))
-                            store.onIntent(
-                                MapIntent.ShowToast(
-                                    message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
-                                ),
-                            )
-                        }
-                        .onFailure { e ->
-                            Timber.e(e)
-                            store.onIntent(MapIntent.RevertFavorite(id, committedBooth.favorite))
-                        }
-                }
-        }
-    }
 
     fun logMapView() {
         analyticsLogger.log(MapAnalyticsEvent.MapView)
@@ -188,7 +158,7 @@ class MapViewModel @Inject constructor(
                         displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
                     )
                 }
-                viewModelScope.launch { favoriteRequests.emit(id to newFavorite) }
+                updateFavorite(id, newFavorite)
             }
             MapIntent.ClickShowFavoriteIcon -> reduce { copy(showFavoriteMarker = !state.showFavoriteMarker) }
             is MapIntent.SelectTab -> {
@@ -206,6 +176,27 @@ class MapViewModel @Inject constructor(
                 }
             }
             is MapIntent.ShowToast -> postSideEffect(MapEffect.ShowToastMessage(intent.message))
+        }
+    }
+
+    private fun updateFavorite(id: Long, newFavorite: Boolean) {
+        val committedBooth = committedPhotoBooths[id] ?: return
+        if (committedBooth.favorite == newFavorite) return
+        viewModelScope.launch {
+            mapRepository.updatePhotoBoothFavorite(id, newFavorite)
+                .onSuccess {
+                    committedPhotoBooths[id] = committedBooth.copy(favorite = newFavorite)
+                    store.onIntent(MapIntent.SyncFavoritePhotoBooth(id))
+                    store.onIntent(
+                        MapIntent.ShowToast(
+                            message = if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
+                        ),
+                    )
+                }
+                .onFailure { e ->
+                    Timber.e(e)
+                    store.onIntent(MapIntent.RevertFavorite(id, committedBooth.favorite))
+                }
         }
     }
 
@@ -469,16 +460,15 @@ class MapViewModel @Inject constructor(
                     cacheBrandImages(loadedBrands, reduce)
 
                     favoritesResult.onSuccess { favoriteBooths ->
-                        committedPhotoBooths.putAll(favoriteBooths.associate { it.id to it.copy(favorite = true) })
-                        reduce {
-                            copy(
-                                favoritePhotoBooths = favoriteBooths.map { booth ->
-                                    booth.copy(
-                                        favorite = true,
-                                        imageUrl = loadedBrands.find { it.name == booth.brandName }?.imageUrl.orEmpty(),
-                                    )
-                                }.toImmutableList(),
+                        val mappedBooths = favoriteBooths.map { booth ->
+                            booth.copy(
+                                favorite = true,
+                                imageUrl = loadedBrands.find { it.name == booth.brandName }?.imageUrl.orEmpty(),
                             )
+                        }
+                        committedPhotoBooths.putAll(mappedBooths.associate { it.id to it })
+                        reduce {
+                            copy(favoritePhotoBooths = mappedBooths.toImmutableList())
                         }
                     }.onFailure { Timber.e(it) }
                 }
