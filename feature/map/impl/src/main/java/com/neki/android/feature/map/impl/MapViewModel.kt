@@ -120,16 +120,9 @@ class MapViewModel @Inject constructor(
             }
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
-            is MapIntent.ToggleBoothFavorite -> {
+            is MapIntent.ClickBoothFavorite -> {
                 val newFavorite = !intent.photoBooth.favorite
-                val id = intent.photoBooth.id
-                reduce { updateFavoriteState(intent.photoBooth, newFavorite, id, closeCardIfNeeded = false) }
-                updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
-            }
-            is MapIntent.ToggleDetailFavorite -> {
-                val newFavorite = !intent.photoBooth.favorite
-                val id = intent.photoBooth.id
-                reduce { updateFavoriteState(intent.photoBooth, newFavorite, id, closeCardIfNeeded = true) }
+                toggleFavorite(intent.photoBooth, newFavorite, intent.closeCardIfNeeded, reduce)
                 updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
             }
             MapIntent.ClickShowFavoriteIcon -> reduce { copy(showFavoriteMarker = !state.showFavoriteMarker) }
@@ -165,38 +158,41 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun MapState.updateFavoriteState(
+    private fun toggleFavorite(
         photoBooth: PhotoBooth,
         newFavorite: Boolean,
-        id: Long,
         closeCardIfNeeded: Boolean,
-    ): MapState {
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        val id = photoBooth.id
         val isPolygonMarker = polygonMarkerIds.contains(id)
-        val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
-        val updatedFavorite = when {
-            newFavorite && favoritePhotoBooths.none { it.id == id } -> {
-                val booth = photoBooth.copy(
-                    favorite = true,
-                    imageUrl = brandImageUrlCache[photoBooth.brandName].orEmpty().ifEmpty { photoBooth.imageUrl },
-                )
-                (favoritePhotoBooths + booth).toImmutableList()
-            }
-            !newFavorite -> favoritePhotoBooths.filter { it.id != id }.toImmutableList()
-            else -> favoritePhotoBooths
-        }
-        val updatedMarkers = if (!newFavorite && !isPolygonMarker) {
-            mapMarkers.filter { it.id != id }.toImmutableList()
-        } else {
-            mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
-        }
         val shouldCloseCard = closeCardIfNeeded && !newFavorite && !isPolygonMarker
-        return copy(
-            dragLevel = if (shouldCloseCard) DragLevel.SECOND else dragLevel,
-            mapMarkers = updatedMarkers,
-            nearbyPhotoBooths = updatedNearby,
-            favoritePhotoBooths = updatedFavorite,
-            displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
-        )
+        reduce {
+            val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
+            val updatedFavorite = when {
+                newFavorite && favoritePhotoBooths.none { it.id == id } -> {
+                    val booth = photoBooth.copy(
+                        favorite = true,
+                        imageUrl = brandImageUrlCache[photoBooth.brandName].orEmpty().ifEmpty { photoBooth.imageUrl },
+                    )
+                    (favoritePhotoBooths + booth).toImmutableList()
+                }
+                !newFavorite -> favoritePhotoBooths.filter { it.id != id }.toImmutableList()
+                else -> favoritePhotoBooths
+            }
+            val updatedMarkers = if (!newFavorite && !isPolygonMarker) {
+                mapMarkers.filter { it.id != id }.toImmutableList()
+            } else {
+                mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
+            }
+            copy(
+                dragLevel = if (shouldCloseCard) DragLevel.SECOND else dragLevel,
+                mapMarkers = updatedMarkers,
+                nearbyPhotoBooths = updatedNearby,
+                favoritePhotoBooths = updatedFavorite,
+                displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
+            )
+        }
     }
 
     private fun getCurrentLocation(

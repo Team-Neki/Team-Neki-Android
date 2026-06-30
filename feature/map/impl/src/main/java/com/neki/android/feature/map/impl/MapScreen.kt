@@ -314,7 +314,7 @@ fun MapScreen(
             onClickShowFavorite = { onIntent(MapIntent.ClickShowFavoriteIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
-            onToggleBoothFavorite = { onIntent(MapIntent.ToggleBoothFavorite(it)) },
+            onClickBoothFavorite = { onIntent(MapIntent.ClickBoothFavorite(it)) },
             onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
         )
 
@@ -359,7 +359,7 @@ fun MapScreen(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
                     isFavorite = focusedPhotoBooth.favorite,
-                    onClickFavorite = { onIntent(MapIntent.ToggleDetailFavorite(focusedPhotoBooth)) },
+                    onClickFavorite = { onIntent(MapIntent.ClickBoothFavorite(focusedPhotoBooth, closeCardIfNeeded = true)) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
                         onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))
