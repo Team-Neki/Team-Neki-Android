@@ -479,7 +479,6 @@ class MapViewModel @Inject constructor(
         }
     }
 
-
     private fun cacheBrandImages(
         brands: List<Brand>,
         reduce: (MapState.() -> MapState) -> Unit,
