@@ -153,7 +153,9 @@ class MapViewModel @Inject constructor(
                         ),
                     )
                 }
-                .onFailure { e -> Timber.e(e) }
+                .onFailure { e ->
+                    Timber.e(e)
+                }
         }
     }
 
