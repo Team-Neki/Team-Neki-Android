@@ -41,7 +41,6 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
-    private var brandImageUrlCache = emptyMap<String, String>()
     private var polygonMarkerIds = emptySet<Long>()
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
@@ -173,7 +172,7 @@ class MapViewModel @Inject constructor(
                 newFavorite && favoritePhotoBooths.none { it.id == id } -> {
                     val booth = photoBooth.copy(
                         favorite = true,
-                        imageUrl = brandImageUrlCache[photoBooth.brandName].orEmpty().ifEmpty { photoBooth.imageUrl },
+                        imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty().ifEmpty { photoBooth.imageUrl },
                     )
                     (favoritePhotoBooths + booth).toImmutableList()
                 }
@@ -455,7 +454,6 @@ class MapViewModel @Inject constructor(
 
             brandsResult
                 .onSuccess { loadedBrands ->
-                    brandImageUrlCache = loadedBrands.associateBy({ it.name }, { it.imageUrl })
                     reduce { copy(brands = loadedBrands.toImmutableList()) }
                     cacheBrandImages(loadedBrands, reduce)
 
@@ -463,7 +461,7 @@ class MapViewModel @Inject constructor(
                         val mappedBooths = favoriteBooths.map { booth ->
                             booth.copy(
                                 favorite = true,
-                                imageUrl = brandImageUrlCache[booth.brandName].orEmpty(),
+                                imageUrl = loadedBrands.find { it.name == booth.brandName }?.imageUrl.orEmpty(),
                             )
                         }
                         reduce {
@@ -527,7 +525,7 @@ class MapViewModel @Inject constructor(
                 reduce {
                     val updatedNearby = photoBooths.map { photoBooth ->
                         photoBooth.copy(
-                            imageUrl = brandImageUrlCache[photoBooth.brandName].orEmpty(),
+                            imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
                         )
                     }.toImmutableList()
                     copy(
@@ -581,7 +579,7 @@ class MapViewModel @Inject constructor(
                         isLoading = false,
                         mapMarkers = photoBooths.map { photoBooth ->
                             photoBooth.copy(
-                                imageUrl = brandImageUrlCache[photoBooth.brandName].orEmpty(),
+                                imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
                                 isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
                             )
                         }.toImmutableList(),
