@@ -125,14 +125,14 @@ class MapViewModel @Inject constructor(
             }
             MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
-            is MapIntent.ClickBoothFavorite -> {
+            is MapIntent.ClickPhotoBoothFavorite -> {
                 val newFavorite = !intent.photoBooth.favorite
                 toggleFavorite(intent.photoBooth, newFavorite, reduce)
                 updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
             }
             MapIntent.ClickShowFavoriteIcon -> reduce {
                 copy(
-                    showFavoriteMarker = !state.showFavoriteMarker,
+                    showFavoritePhotoBooth = !state.showFavoritePhotoBooth,
                     favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isFocused = false) }.toImmutableList(),
                 )
             }

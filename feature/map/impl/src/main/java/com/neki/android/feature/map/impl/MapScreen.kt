@@ -245,11 +245,13 @@ fun MapScreen(
     val currentBrandImageCache by rememberUpdatedState(uiState.brandImageCache)
 
     // 마커 데이터 변경 시 클러스터 업데이트
-    LaunchedEffect(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoriteMarker, clusterer) {
+    LaunchedEffect(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoritePhotoBooth, clusterer) {
         clusterer?.let { clusterManager ->
             clusterManager.clear()
-            val markers = if (uiState.showFavoriteMarker) {
-                uiState.favoritePhotoBooths.filter { it.isCheckedBrand }
+            val markers = if (uiState.showFavoritePhotoBooth) {
+                val favoriteMarkers = uiState.favoritePhotoBooths.filter { it.isCheckedBrand }
+                val focusedNonFavorite = uiState.mapMarkers.filter { it.isFocused && !it.favorite }
+                (favoriteMarkers + focusedNonFavorite).distinctBy { it.id }
             } else {
                 uiState.mapMarkers.filter { it.isCheckedBrand }
             }
@@ -306,12 +308,12 @@ fun MapScreen(
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
-            showFavoriteMarker = uiState.showFavoriteMarker,
+            showFavoritePhotoBooth = uiState.showFavoritePhotoBooth,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
-            onClickShowFavorite = { onIntent(MapIntent.ClickShowFavoriteIcon) },
+            onClickShowFavoriteIcon = { onIntent(MapIntent.ClickShowFavoriteIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
-            onClickBoothFavorite = { onIntent(MapIntent.ClickBoothFavorite(it)) },
+            onClickBoothFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
             onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
         )
 
@@ -356,7 +358,7 @@ fun MapScreen(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
                     isFavorite = focusedPhotoBooth.favorite,
-                    onClickFavorite = { onIntent(MapIntent.ClickBoothFavorite(focusedPhotoBooth)) },
+                    onClickFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(focusedPhotoBooth)) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
                         onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))

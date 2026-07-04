@@ -25,7 +25,7 @@ data class MapState(
     val displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
-    val showFavoriteMarker: Boolean = false,
+    val showFavoritePhotoBooth: Boolean = false,
 )
 
 sealed interface MapIntent {
@@ -62,7 +62,7 @@ sealed interface MapIntent {
     data object ClickEditBrandOrder : MapIntent
     data class UpdateBrandOrder(val orderedBrands: List<Brand>) : MapIntent
     data object ClickShowFavoriteIcon : MapIntent
-    data class ClickBoothFavorite(val photoBooth: PhotoBooth) : MapIntent
+    data class ClickPhotoBoothFavorite(val photoBooth: PhotoBooth) : MapIntent
     data class SelectTab(val tab: MapTab) : MapIntent
     data class ShowToast(val message: String) : MapIntent
 }
