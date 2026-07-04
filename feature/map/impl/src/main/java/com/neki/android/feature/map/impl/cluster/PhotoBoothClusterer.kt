@@ -37,6 +37,8 @@ import com.neki.android.core.designsystem.R as DesignSystemR
 internal object PhotoBoothClusterer {
 
     private val clusterIconCache = mutableMapOf<Int, OverlayImage>()
+    private val leafIconCache = mutableMapOf<Triple<String, Boolean, Boolean>, Pair<OverlayImage, PointF>>()
+    private val leafMarkerMap = mutableMapOf<Long, Marker>()
 
     /**
      * @param getBrandImage 브랜드 이미지 캐시에서 이미지를 가져오는 함수
@@ -95,9 +97,13 @@ internal object PhotoBoothClusterer {
                     override fun updateLeafMarker(info: LeafMarkerInfo, marker: Marker) {
                         val photoBooth = (info.key as PhotoBoothClusterItem).photoBooth
                         val brandImage = getBrandImage(photoBooth.imageUrl)
+                        val cacheKey = Triple(photoBooth.imageUrl, photoBooth.isFocused, photoBooth.favorite)
 
                         // 마커는 재사용되기 때문에 줌인/줌아웃 시 marker 속성 초기화
-                        val (markerIcon, markerAnchor) = createLeafMarkerIcon(context, brandImage, photoBooth.isFocused, photoBooth.favorite)
+                        val (markerIcon, markerAnchor) = leafIconCache.getOrPut(cacheKey) {
+                            createLeafMarkerIcon(context, brandImage, photoBooth.isFocused, photoBooth.favorite)
+                        }
+                        leafMarkerMap[photoBooth.id] = marker
                         marker.apply {
                             icon = markerIcon
                             captionText = "${photoBooth.brandName}\n${photoBooth.branchName}"
@@ -114,6 +120,22 @@ internal object PhotoBoothClusterer {
             )
             .build()
             .apply { this.map = naverMap }
+    }
+
+    /** 특정 마커의 아이콘만 교체 — Clusterer add/remove 없이 깜빡임 없는 업데이트 **/
+    fun updateMarkerIcon(
+        context: Context,
+        photoBooth: PhotoBooth,
+        getBrandImage: (String) -> ImageBitmap?,
+    ) {
+        val marker = leafMarkerMap[photoBooth.id] ?: return
+        val cacheKey = Triple(photoBooth.imageUrl, photoBooth.isFocused, photoBooth.favorite)
+        val (markerIcon, markerAnchor) = leafIconCache.getOrPut(cacheKey) {
+            createLeafMarkerIcon(context, getBrandImage(photoBooth.imageUrl), photoBooth.isFocused, photoBooth.favorite)
+        }
+        marker.icon = markerIcon
+        marker.anchor = markerAnchor
+        marker.tag = photoBooth
     }
 
     /** 클러스터 마커 아이콘 생성 (둥근 사각형 배경 + 숫자) **/
