@@ -301,23 +301,14 @@ class MapViewModel @Inject constructor(
         )
         reduce {
             val checkedBrandNames = updatedBrands.filter { it.isChecked }.map { it.name }
-            val updatedNearby = nearbyPhotoBooths.map { photoBooth ->
-                photoBooth.copy(
-                    isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
-                )
-            }.toImmutableList()
-            val updatedFavorite = favoritePhotoBooths.map { photoBooth ->
-                photoBooth.copy(
-                    isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
-                )
-            }.toImmutableList()
+            val isCheckedBrand = { brandName: String ->
+                checkedBrandNames.isEmpty() || brandName in checkedBrandNames
+            }
+            val updatedNearby = nearbyPhotoBooths.map { it.copy(isCheckedBrand = isCheckedBrand(it.brandName)) }.toImmutableList()
+            val updatedFavorite = favoritePhotoBooths.map { it.copy(isCheckedBrand = isCheckedBrand(it.brandName)) }.toImmutableList()
             copy(
                 brands = updatedBrands.toImmutableList(),
-                mapMarkers = mapMarkers.map { photoBooth ->
-                    photoBooth.copy(
-                        isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
-                    )
-                }.toImmutableList(),
+                mapMarkers = mapMarkers.map { it.copy(isCheckedBrand = isCheckedBrand(it.brandName)) }.toImmutableList(),
                 nearbyPhotoBooths = updatedNearby,
                 favoritePhotoBooths = updatedFavorite,
                 displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
@@ -414,29 +405,25 @@ class MapViewModel @Inject constructor(
             )
         }
         reduce {
-            val isInMapMarkers = mapMarkers.any {
-                it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
+            val isClicked = { marker: PhotoBooth ->
+                marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
             }
-            val baseMarkers = if (!isInMapMarkers) {
-                val favoriteMarker = favoritePhotoBooths.find {
-                    it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
-                }
+            val baseMarkers = if (mapMarkers.none(isClicked)) {
+                val favoriteMarker = favoritePhotoBooths.find(isClicked)
                 if (favoriteMarker != null) (mapMarkers + favoriteMarker).toImmutableList() else mapMarkers
             } else {
                 mapMarkers
             }
-            val distance = currentLocLatLng?.let { location ->
-                calculateDistance(location.latitude, location.longitude, locLatLng.latitude, locLatLng.longitude)
+            val distance = currentLocLatLng?.let {
+                calculateDistance(it.latitude, it.longitude, locLatLng.latitude, locLatLng.longitude)
             } ?: 0
             copy(
                 dragLevel = DragLevel.INVISIBLE,
                 mapMarkers = baseMarkers.map { marker ->
-                    val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
-                    marker.copy(isFocused = isClicked, distance = if (isClicked) distance else marker.distance)
+                    marker.copy(isFocused = isClicked(marker), distance = if (isClicked(marker)) distance else marker.distance)
                 }.toImmutableList(),
                 favoritePhotoBooths = favoritePhotoBooths.map { marker ->
-                    val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
-                    marker.copy(isFocused = isClicked, distance = if (isClicked) distance else marker.distance)
+                    marker.copy(isFocused = isClicked(marker), distance = if (isClicked(marker)) distance else marker.distance)
                 }.toImmutableList(),
             )
         }
