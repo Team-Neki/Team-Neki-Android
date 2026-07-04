@@ -39,4 +39,37 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
         override val name = "map_route_click"
         override val params = mapOf("map_type" to mapType)
     }
+
+    data object BrandFilterManageView : MapAnalyticsEvent {
+        override val name = "brand_filter_manage_view"
+    }
+
+    data class FavoriteBoothView(val favoriteBoothCount: Int) : MapAnalyticsEvent {
+        override val name = "favorite_booth_view"
+        override val params = mapOf("favorite_booth_count" to favoriteBoothCount)
+    }
+
+    data class FavoriteBoothFilterToggle(val action: String, val favoriteBoothCount: Int) : MapAnalyticsEvent {
+        override val name = "favorite_booth_filter_toggle"
+        override val params = mapOf(
+            "action" to action,
+            "favorite_booth_count" to favoriteBoothCount,
+        )
+    }
+
+    data class BoothFavoriteAdd(val boothName: String, val brandName: String) : MapAnalyticsEvent {
+        override val name = "booth_favorite_add"
+        override val params = mapOf(
+            "booth_name" to boothName,
+            "brand_name" to brandName,
+        )
+    }
+
+    data class BoothFavoriteRemove(val boothName: String, val brandName: String) : MapAnalyticsEvent {
+        override val name = "booth_favorite_remove"
+        override val params = mapOf(
+            "booth_name" to boothName,
+            "brand_name" to brandName,
+        )
+    }
 }
