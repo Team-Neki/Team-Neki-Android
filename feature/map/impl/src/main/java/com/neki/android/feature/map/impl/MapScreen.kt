@@ -248,13 +248,10 @@ fun MapScreen(
     LaunchedEffect(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoriteMarker, clusterer) {
         clusterer?.let { clusterManager ->
             clusterManager.clear()
-            val baseMarkers = uiState.mapMarkers.filter { it.isCheckedBrand }
             val markers = if (uiState.showFavoriteMarker) {
-                val existingIds = uiState.mapMarkers.map { it.id }.toSet()
-                val extraFavorites = uiState.favoritePhotoBooths.filter { it.id !in existingIds && it.isCheckedBrand }
-                (baseMarkers + extraFavorites).distinctBy { it.id }
+                uiState.favoritePhotoBooths.filter { it.isCheckedBrand }
             } else {
-                baseMarkers
+                uiState.mapMarkers.filter { it.isCheckedBrand }
             }
             clusterManager.addAll(markers.associate { PhotoBoothClusterItem(it) to it })
         }
@@ -359,7 +356,7 @@ fun MapScreen(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
                     isFavorite = focusedPhotoBooth.favorite,
-                    onClickFavorite = { onIntent(MapIntent.ClickBoothFavorite(focusedPhotoBooth, closeCardIfNeeded = true)) },
+                    onClickFavorite = { onIntent(MapIntent.ClickBoothFavorite(focusedPhotoBooth)) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
                         onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))

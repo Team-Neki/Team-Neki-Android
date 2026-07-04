@@ -93,6 +93,9 @@ class MapViewModel @Inject constructor(
                         .filter { polygonMarkerIds.contains(it.id) }
                         .map { it.copy(isFocused = false) }
                         .toImmutableList(),
+                    favoritePhotoBooths = favoritePhotoBooths
+                        .map { it.copy(isFocused = false) }
+                        .toImmutableList(),
                 )
             }
 
@@ -124,10 +127,15 @@ class MapViewModel @Inject constructor(
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
             is MapIntent.ClickBoothFavorite -> {
                 val newFavorite = !intent.photoBooth.favorite
-                toggleFavorite(intent.photoBooth, newFavorite, intent.closeCardIfNeeded, reduce)
+                toggleFavorite(intent.photoBooth, newFavorite, reduce)
                 updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
             }
-            MapIntent.ClickShowFavoriteIcon -> reduce { copy(showFavoriteMarker = !state.showFavoriteMarker) }
+            MapIntent.ClickShowFavoriteIcon -> reduce {
+                copy(
+                    showFavoriteMarker = !state.showFavoriteMarker,
+                    favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isFocused = false) }.toImmutableList(),
+                )
+            }
             is MapIntent.SelectTab -> {
                 if (intent.tab == state.selectedTab) return@onIntent
                 reduce {
@@ -166,12 +174,10 @@ class MapViewModel @Inject constructor(
     private fun toggleFavorite(
         photoBooth: PhotoBooth,
         newFavorite: Boolean,
-        closeCardIfNeeded: Boolean,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
         val id = photoBooth.id
         val isPolygonMarker = polygonMarkerIds.contains(id)
-        val shouldCloseCard = closeCardIfNeeded && !newFavorite && !isPolygonMarker
         reduce {
             val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
             val updatedFavorite = when {
@@ -185,18 +191,13 @@ class MapViewModel @Inject constructor(
                 !newFavorite -> favoritePhotoBooths.filter { it.id != id }.toImmutableList()
                 else -> favoritePhotoBooths
             }
-            val updatedMarkers = if (shouldCloseCard) {
-                mapMarkers
-                    .filter { polygonMarkerIds.contains(it.id) }
-                    .map { it.copy(isFocused = false) }
-                    .toImmutableList()
-            } else if (!newFavorite && !isPolygonMarker) {
+            val isFocusedMarker = mapMarkers.any { it.id == id && it.isFocused }
+            val updatedMarkers = if (!newFavorite && !isPolygonMarker && !isFocusedMarker) {
                 mapMarkers.filter { it.id != id }.toImmutableList()
             } else {
                 mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
             }
             copy(
-                dragLevel = if (shouldCloseCard) DragLevel.SECOND else dragLevel,
                 mapMarkers = updatedMarkers,
                 nearbyPhotoBooths = updatedNearby,
                 favoritePhotoBooths = updatedFavorite,
@@ -341,15 +342,16 @@ class MapViewModel @Inject constructor(
                 it.latitude == photoBooth.latitude && it.longitude == photoBooth.longitude
             }
             val updatedMarkers = if (isAlreadyInMarkers) {
-                mapMarkers.map { marker ->
-                    marker.copy(isFocused = marker.id == photoBooth.id)
-                }
+                mapMarkers.map { marker -> marker.copy(isFocused = marker.id == photoBooth.id) }
             } else {
                 mapMarkers.map { it.copy(isFocused = false) } + photoBooth.copy(isFocused = true)
             }
             copy(
                 dragLevel = DragLevel.INVISIBLE,
                 mapMarkers = updatedMarkers.toImmutableList(),
+                favoritePhotoBooths = favoritePhotoBooths.map { marker ->
+                    marker.copy(isFocused = marker.id == photoBooth.id)
+                }.toImmutableList(),
             )
         }
 
@@ -419,28 +421,23 @@ class MapViewModel @Inject constructor(
                 val favoriteMarker = favoritePhotoBooths.find {
                     it.latitude == locLatLng.latitude && it.longitude == locLatLng.longitude
                 }
-                if (favoriteMarker != null) {
-                    (mapMarkers + favoriteMarker).toImmutableList()
-                } else {
-                    mapMarkers
-                }
+                if (favoriteMarker != null) (mapMarkers + favoriteMarker).toImmutableList() else mapMarkers
             } else {
                 mapMarkers
             }
-            val updatedMarkers = baseMarkers.map { marker ->
-                val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
-                if (isClicked) {
-                    val distance = currentLocLatLng?.let { location ->
-                        calculateDistance(location.latitude, location.longitude, marker.latitude, marker.longitude)
-                    } ?: 0
-                    marker.copy(isFocused = true, distance = distance)
-                } else {
-                    marker.copy(isFocused = false)
-                }
-            }
+            val distance = currentLocLatLng?.let { location ->
+                calculateDistance(location.latitude, location.longitude, locLatLng.latitude, locLatLng.longitude)
+            } ?: 0
             copy(
                 dragLevel = DragLevel.INVISIBLE,
-                mapMarkers = updatedMarkers.toImmutableList(),
+                mapMarkers = baseMarkers.map { marker ->
+                    val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
+                    marker.copy(isFocused = isClicked, distance = if (isClicked) distance else marker.distance)
+                }.toImmutableList(),
+                favoritePhotoBooths = favoritePhotoBooths.map { marker ->
+                    val isClicked = marker.latitude == locLatLng.latitude && marker.longitude == locLatLng.longitude
+                    marker.copy(isFocused = isClicked, distance = if (isClicked) distance else marker.distance)
+                }.toImmutableList(),
             )
         }
         postSideEffect(MapEffect.MoveCameraToPosition(locLatLng = locLatLng, zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL))
