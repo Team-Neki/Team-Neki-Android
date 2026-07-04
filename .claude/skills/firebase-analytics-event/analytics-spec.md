@@ -64,16 +64,6 @@
 | `booth_favorite_add` | 즐겨찾기 추가 완료 시 | `booth_name`: string (지점명), `brand_name`: string |
 | `booth_favorite_remove` | 즐겨찾기 해제 완료 시 | `booth_name`: string (지점명), `brand_name`: string |
 
-### region_changed 계산 로직
-
-- 기준: 직전 `map_re_search` 발생 시점의 지도 중심 좌표 vs 현재 재검색 시점의 중심 좌표
-- 줌 레벨별 임계값:
-  - zoom 18~20: 300m 이상
-  - zoom 16~17: 500m 이상
-  - zoom 14~15: 700m 이상
-  - zoom 12~13 이하: 1000m 이상
-- 첫 번째 재검색 시 `lastSearchCenter`가 없으므로 `false`
-
 ### 로깅 위치 (지도)
 
 | 이벤트 | ViewModel | 비고 |
