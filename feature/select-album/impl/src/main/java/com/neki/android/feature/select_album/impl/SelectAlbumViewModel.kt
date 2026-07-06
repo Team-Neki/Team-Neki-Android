@@ -71,7 +71,9 @@ class SelectAlbumViewModel @AssistedInject constructor(
     ) {
         when (intent) {
             SelectAlbumIntent.EnterSelectAlbumScreen -> fetchInitialData(reduce)
-            SelectAlbumIntent.ClickBackIcon -> postSideEffect(SelectAlbumSideEffect.NavigateBack)
+            SelectAlbumIntent.ClickBackIcon,
+            SelectAlbumIntent.OnBackPressed -> handleBack(state, postSideEffect)
+
             SelectAlbumIntent.ClickConfirmButton -> {
                 val albums = state.selectedAlbums
                 performAction(albums, reduce, postSideEffect)
@@ -89,6 +91,14 @@ class SelectAlbumViewModel @AssistedInject constructor(
                 postSideEffect = postSideEffect,
             )
         }
+    }
+
+    private fun handleBack(
+        state: SelectAlbumState,
+        postSideEffect: (SelectAlbumSideEffect) -> Unit,
+    ) {
+        if (state.hasCreatedAlbum) postSideEffect(SelectAlbumSideEffect.SendAlbumCreatedResult)
+        postSideEffect(SelectAlbumSideEffect.NavigateBack)
     }
 
     private fun performAction(
@@ -235,6 +245,7 @@ class SelectAlbumViewModel @AssistedInject constructor(
                         copy(
                             isShowAddAlbumBottomSheet = false,
                             albumNameTextState = TextFieldState(),
+                            hasCreatedAlbum = true,
                         )
                     }
                     postSideEffect(SelectAlbumSideEffect.ShowToastMessage("새로운 앨범을 추가했어요"))

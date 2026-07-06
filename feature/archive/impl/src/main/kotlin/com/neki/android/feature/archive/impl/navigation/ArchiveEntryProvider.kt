@@ -36,6 +36,7 @@ import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import com.neki.android.feature.select_album.api.SelectAlbumAction
+import com.neki.android.feature.select_album.api.SelectAlbumCreatedResult
 import com.neki.android.feature.select_album.api.navigateToSelectAlbum
 import dagger.Module
 import dagger.Provides
@@ -72,6 +73,9 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
             viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
         }
         ResultEffect<PhotoUploadedResult>(resultBus) {
+            viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
+        }
+        ResultEffect<SelectAlbumCreatedResult>(resultBus) {
             viewModel.store.onIntent(ArchiveMainIntent.RefreshArchiveMain)
         }
 
