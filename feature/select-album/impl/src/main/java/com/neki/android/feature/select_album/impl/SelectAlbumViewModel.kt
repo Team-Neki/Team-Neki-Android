@@ -72,7 +72,8 @@ class SelectAlbumViewModel @AssistedInject constructor(
         when (intent) {
             SelectAlbumIntent.EnterSelectAlbumScreen -> fetchInitialData(reduce)
             SelectAlbumIntent.ClickBackIcon,
-            SelectAlbumIntent.OnBackPressed -> handleBack(state, postSideEffect)
+            SelectAlbumIntent.OnBackPressed,
+            -> handleBack(state, postSideEffect)
 
             SelectAlbumIntent.ClickConfirmButton -> {
                 val albums = state.selectedAlbums
