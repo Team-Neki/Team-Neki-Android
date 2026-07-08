@@ -40,10 +40,6 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
         override val params = mapOf("map_type" to mapType)
     }
 
-    data object BrandFilterManageView : MapAnalyticsEvent {
-        override val name = "brand_filter_manage_view"
-    }
-
     data class FavoriteBoothView(val favoriteBoothCount: Int) : MapAnalyticsEvent {
         override val name = "favorite_booth_view"
         override val params = mapOf("favorite_booth_count" to favoriteBoothCount)

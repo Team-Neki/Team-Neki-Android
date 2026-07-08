@@ -124,7 +124,6 @@ class MapViewModel @Inject constructor(
                 postSideEffect(MapEffect.NavigateToAppSettings)
             }
             MapIntent.ClickEditBrandOrder -> {
-                analyticsLogger.log(MapAnalyticsEvent.BrandFilterManageView)
                 postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             }
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
