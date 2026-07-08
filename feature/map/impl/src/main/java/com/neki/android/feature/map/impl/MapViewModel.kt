@@ -130,6 +130,9 @@ class MapViewModel @Inject constructor(
                 toggleFavorite(intent.photoBooth, newFavorite, reduce)
                 updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
             }
+            is MapIntent.RevertFavoritePhotoBooth -> {
+                toggleFavorite(intent.photoBooth, intent.photoBooth.favorite, reduce)
+            }
             MapIntent.ClickShowFavoriteIcon -> reduce {
                 copy(
                     showFavoritePhotoBooth = !state.showFavoritePhotoBooth,
@@ -167,6 +170,7 @@ class MapViewModel @Inject constructor(
                 }
                 .onFailure { e ->
                     Timber.e(e)
+                    store.onIntent(MapIntent.RevertFavoritePhotoBooth(photoBooth.copy(favorite = !photoBooth.favorite)))
                 }
         }
     }
