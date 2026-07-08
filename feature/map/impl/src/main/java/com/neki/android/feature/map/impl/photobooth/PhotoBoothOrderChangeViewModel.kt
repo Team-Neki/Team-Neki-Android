@@ -2,6 +2,8 @@ package com.neki.android.feature.map.impl.photobooth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.event.MapAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.ui.MviIntentStore
@@ -19,6 +21,7 @@ import timber.log.Timber
 internal class PhotoBoothOrderChangeViewModel @AssistedInject constructor(
     @Assisted private val originalBrandsOrder: ImmutableList<Brand>,
     private val mapRepository: MapRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -55,6 +58,14 @@ internal class PhotoBoothOrderChangeViewModel @AssistedInject constructor(
             reduce { copy(isLoading = true) }
             mapRepository.saveBrandOrder(state.brands.map { it.id })
                 .onSuccess {
+                    analyticsLogger.log(
+                        MapAnalyticsEvent.BrandOrderSave(
+                            orderedBrandCount = state.brands.indices.count { state.brands[it].id != originalBrandsOrder[it].id },
+                            priorityBrand1 = state.brands.getOrNull(0)?.name.orEmpty(),
+                            priorityBrand2 = state.brands.getOrNull(1)?.name.orEmpty(),
+                            priorityBrand3 = state.brands.getOrNull(2)?.name.orEmpty(),
+                        ),
+                    )
                     reduce { copy(isLoading = false) }
                     postSideEffect(PhotoBoothOrderChangeSideEffect.SendBrandsOrderChangeResult(state.brands))
                     postSideEffect(PhotoBoothOrderChangeSideEffect.NavigateBack)
