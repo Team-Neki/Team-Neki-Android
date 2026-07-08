@@ -184,7 +184,7 @@ class MapViewModel @Inject constructor(
                 newFavorite && favoritePhotoBooths.none { it.id == id } -> {
                     val booth = photoBooth.copy(
                         favorite = true,
-                        imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty().ifEmpty { photoBooth.imageUrl },
+                        imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
                     )
                     (favoritePhotoBooths + booth).toImmutableList()
                 }
