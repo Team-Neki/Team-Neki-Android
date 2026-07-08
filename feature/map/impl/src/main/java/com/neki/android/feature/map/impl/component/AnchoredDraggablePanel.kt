@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -158,7 +160,7 @@ internal fun AnchoredDraggablePanel(
                     .padding(start = 20.dp, bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                PhotoBoothFavoriteButton(
+                ShowFavoritePhotoBoothButton(
                     isFavorite = showFavoritePhotoBooth,
                     onClick = onClickShowFavoriteIcon,
                 )
@@ -292,7 +294,18 @@ internal fun AnchoredPanelContent(
                 )
             }
         } else {
+            val listState = rememberLazyListState()
+            var favoriteListLoaded by remember(selectedTab) { mutableStateOf(false) }
+            LaunchedEffect(selectedTab) {
+                if (selectedTab == MapTab.FAVORITE) {
+                    snapshotFlow { listState.layoutInfo.totalItemsCount }
+                        .collect { count ->
+                            if (count > 0) favoriteListLoaded = true
+                        }
+                }
+            }
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 20.dp),
@@ -302,8 +315,17 @@ internal fun AnchoredPanelContent(
                         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                 ),
             ) {
-                items(displayPhotoBooths) { photoBooth ->
+                items(displayPhotoBooths, key = { it.id }) { photoBooth ->
                     HorizontalBrandItem(
+                        modifier = if (selectedTab == MapTab.FAVORITE && favoriteListLoaded) {
+                            Modifier.animateItem(
+                                fadeInSpec = null,
+                                placementSpec = tween(durationMillis = 800),
+                                fadeOutSpec = tween(durationMillis = 100),
+                            )
+                        } else {
+                            Modifier
+                        },
                         photoBooth = photoBooth,
                         onClickItem = { onClickPhotoBooth(photoBooth) },
                         onClickFavorite = { onClickBoothFavorite(photoBooth) },

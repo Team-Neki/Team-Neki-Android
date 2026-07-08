@@ -8,18 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -29,7 +24,6 @@ import com.neki.android.core.designsystem.modifier.cardShadow
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PhotoBooth
-import com.neki.android.core.ui.compose.HorizontalSpacer
 import com.neki.android.feature.map.impl.util.formatDistance
 
 @Composable
@@ -50,18 +44,15 @@ internal fun PhotoBoothDetailContent(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.End,
         ) {
-            PhotoBoothFavoriteButton(
-                isFavorite = isFavorite,
-                onClick = onClickFavorite,
-            )
             CloseButton(onClick = onClickCloseCard)
         }
         PhotoBoothDetailCard(
             photoBooth = photoBooth,
+            isFavorite = isFavorite,
             onClick = onClickCard,
+            onClickFavorite = onClickFavorite,
             onClickDirection = onClickDirection,
         )
     }
@@ -71,7 +62,9 @@ internal fun PhotoBoothDetailContent(
 private fun PhotoBoothDetailCard(
     photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
+    isFavorite: Boolean = false,
     onClick: () -> Unit = {},
+    onClickFavorite: () -> Unit = {},
     onClickDirection: () -> Unit = {},
 ) {
     Row(
@@ -83,19 +76,19 @@ private fun PhotoBoothDetailCard(
                 color = NekiTheme.colorScheme.white,
             )
             .noRippleClickableSingle(onClick = onClick)
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         AsyncImage(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
-                .size(64.dp),
+                .size(70.dp),
             model = photoBooth.imageUrl,
             placeholder = painterResource(R.drawable.icon_photo_booth_empty),
             error = painterResource(R.drawable.icon_photo_booth_empty),
             contentDescription = null,
         )
-        HorizontalSpacer(12.dp)
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -131,20 +124,15 @@ private fun PhotoBoothDetailCard(
                 )
             }
         }
-        Box(
-            modifier = Modifier
-                .background(
-                    shape = CircleShape,
-                    color = NekiTheme.colorScheme.gray900,
-                )
-                .noRippleClickableSingle(onClick = onClickDirection)
-                .padding(4.dp),
-            contentAlignment = Alignment.Center,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.icon_road),
-                contentDescription = null,
-                tint = Color.Unspecified,
+            CardFavoriteButton(
+                isFavorite = isFavorite,
+                onClick = onClickFavorite,
+            )
+            CardDirectionButton(
+                onClick = onClickDirection,
             )
         }
     }
