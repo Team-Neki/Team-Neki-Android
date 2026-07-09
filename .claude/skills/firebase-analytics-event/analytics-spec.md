@@ -4,7 +4,7 @@
 
 - 이벤트명: snake_case, `동사_객체` 형식
 - 트리거 원칙: 사용자 행동이 **완료된 시점** (버튼 클릭이 아닌 실제 데이터 반영 완료 시점)
-- 파라미터 타입: `FirebaseAnalyticsLogger`가 `putString`으로 전송하므로 모든 값은 `String`으로 변환
+- 파라미터 타입: `FirebaseAnalyticsLogger`가 지원하는 원시 타입(`Int`/`Long`/`Double`/`Boolean`/`String`)을 유지
 - 단순 클릭 이벤트 제외, 의미 있는 행동 중심으로 수집
 
 ### 공통 파라미터 (Firebase 자동 수집)
@@ -59,8 +59,9 @@
 | `booth_select` | 부스 클릭 시 | `entry_point`: `map`/`bottom_sheet`, `brand_name`: string |
 | `map_route_click` | 외부 지도 앱 선택 시 | `map_type`: `kakao_map`/`naver_map`/`google_map` |
 | `brand_filter_manage_view` | 브랜드 순서 편집 화면 진입 시 | - |
-| `favorite_booth_view` | 즐겨찾기 마커 표시 ON 시 | `favorite_booth_count`: int (즐겨찾기 수) |
-| `favorite_booth_filter_toggle` | 즐겨찾기 마커 표시 ON/OFF 시 | `action`: `on`/`off`, `favorite_booth_count`: int |
+| `favorite_booth_view` | 드래그 패널 '저장한 포토부스' 탭 선택 시 | `favorite_booth_count`: int (즐겨찾기 수) |
+| `favorite_booth_filter_on` | 즐겨찾기 마커 표시 ON 시 | `favorite_booth_count`: int |
+| `favorite_booth_filter_off` | 즐겨찾기 마커 표시 OFF 시 | - |
 | `booth_favorite_add` | 즐겨찾기 추가 완료 시 | `booth_name`: string (지점명), `brand_name`: string |
 | `booth_favorite_remove` | 즐겨찾기 해제 완료 시 | `booth_name`: string (지점명), `brand_name`: string |
 
@@ -74,8 +75,9 @@
 | `booth_select` | `MapViewModel.handleClickNearPhotoBooth()` (`bottom_sheet`), `handleClickPhotoBoothMarker()` (`map`) | |
 | `map_route_click` | `MapViewModel.handleClickDirectionItem()` | `when(app)`으로 analyticsName 구분 |
 | `brand_filter_manage_view` | `MapViewModel.onIntent` ClickEditBrandOrder | postSideEffect 직전 로깅 |
-| `favorite_booth_view` | `MapViewModel.onIntent` ClickShowFavoriteIcon | ON 전환 시만 로깅 (`newShowFavorite == true`) |
-| `favorite_booth_filter_toggle` | `MapViewModel.onIntent` ClickShowFavoriteIcon | ON/OFF 모두 로깅 |
+| `favorite_booth_view` | `MapViewModel.onIntent` SelectTab | `MapTab.FAVORITE` 선택 시 로깅 |
+| `favorite_booth_filter_on` | `MapViewModel.onIntent` ClickShowFavoriteIcon | ON 전환 시 로깅 |
+| `favorite_booth_filter_off` | `MapViewModel.onIntent` ClickShowFavoriteIcon | OFF 전환 시 로깅 |
 | `booth_favorite_add` | `MapViewModel.updateFavorite()` | API 성공 후 `photoBooth.favorite == true`일 때 |
 | `booth_favorite_remove` | `MapViewModel.updateFavorite()` | API 성공 후 `photoBooth.favorite == false`일 때 |
 

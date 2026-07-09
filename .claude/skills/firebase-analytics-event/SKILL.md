@@ -44,7 +44,7 @@ sealed interface ArchiveAnalyticsEvent : AnalyticsEvent {
         override val name = "photo_upload"
         override val params = mapOf(
             "method" to method,
-            "count" to count.toString(),  // 모든 값은 String으로 변환
+            "count" to count,
         )
     }
 }
@@ -53,8 +53,8 @@ sealed interface ArchiveAnalyticsEvent : AnalyticsEvent {
 ### 이벤트 네이밍 규칙
 - `name`: snake_case (예: `photo_upload`, `map_view`)
 - 파라미터 키: snake_case (예: `photo_count`, `brand_name`)
-- 모든 파라미터 값은 `String`으로 변환 (`toString()` 사용)
-- Boolean 파라미터도 `toString()` 사용 (예: `"true"`, `"false"`)
+- 파라미터 값은 Kotlin 원시 타입 그대로 사용 (`String`, `Int`, `Long`, `Double`, `Boolean`)
+- `FirebaseAnalyticsLogger`가 타입별로 `putString`/`putInt`/`putBoolean` 등을 자동으로 처리
 
 ### 피처별 파일
 | 피처 | 파일 | sealed interface |
@@ -164,7 +164,7 @@ reduce {
 
 ### 주요 결정사항
 
-- `FirebaseAnalyticsLogger`가 `putString`으로 전송 → 모든 파라미터 값은 `String` 변환
+- `FirebaseAnalyticsLogger`가 타입별 `putString`/`putInt`/`putLong`/`putDouble`/`putBoolean`으로 전송 → 파라미터 값은 Kotlin 원시 타입 그대로 사용
 - **탭 진입 이벤트** (`*_view`): ViewModel `init`의 `EnterScreen` intent와 분리, Route `LaunchedEffect(Unit)`에서 `log*View()` 함수 호출
 - **화면 진입 이벤트** (ViewModel 생성 시 1회): `init`에서 intent 호출 → 핸들러 내부에서 로깅
 - analytics 전용 카운터(`totalSwipeCount` 등)는 State가 아닌 ViewModel 필드로 관리
