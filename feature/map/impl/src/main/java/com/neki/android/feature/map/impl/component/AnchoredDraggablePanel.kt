@@ -68,14 +68,14 @@ internal fun AnchoredDraggablePanel(
     dragLevel: DragLevel = DragLevel.FIRST,
     selectedTab: MapTab = MapTab.NEARBY,
     isCurrentLocation: Boolean = false,
-    showFavoriteMarker: Boolean = false,
+    showFavoritePhotoBooth: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onTabSelected: (MapTab) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
-    onClickFavorite: () -> Unit = {},
+    onClickShowFavoriteIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickNearPhotoBooth: (PhotoBooth) -> Unit = {},
-    onToggleBoothFavorite: (PhotoBooth) -> Unit = {},
+    onClickBoothFavorite: (PhotoBooth) -> Unit = {},
     onClickEditBrandOrder: () -> Unit = {},
 ) {
     val density = LocalDensity.current
@@ -159,8 +159,8 @@ internal fun AnchoredDraggablePanel(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 PhotoBoothFavoriteButton(
-                    isFavorite = showFavoriteMarker,
-                    onClick = onClickFavorite,
+                    isFavorite = showFavoritePhotoBooth,
+                    onClick = onClickShowFavoriteIcon,
                 )
                 CurrentLocationButton(
                     isActiveCurrentLocation = isCurrentLocation,
@@ -185,7 +185,7 @@ internal fun AnchoredDraggablePanel(
             onTabSelected = onTabSelected,
             onClickBrand = onClickBrand,
             onClickPhotoBooth = onClickNearPhotoBooth,
-            onToggleBoothFavorite = onToggleBoothFavorite,
+            onClickBoothFavorite = onClickBoothFavorite,
             onClickEditBrandOrder = onClickEditBrandOrder,
         )
     }
@@ -200,7 +200,7 @@ internal fun AnchoredPanelContent(
     onTabSelected: (MapTab) -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickPhotoBooth: (PhotoBooth) -> Unit = {},
-    onToggleBoothFavorite: (PhotoBooth) -> Unit = {},
+    onClickBoothFavorite: (PhotoBooth) -> Unit = {},
     onClickEditBrandOrder: () -> Unit = {},
 ) {
     Column(
@@ -306,7 +306,7 @@ internal fun AnchoredPanelContent(
                     HorizontalBrandItem(
                         photoBooth = photoBooth,
                         onClickItem = { onClickPhotoBooth(photoBooth) },
-                        onClickFavorite = { onToggleBoothFavorite(photoBooth) },
+                        onClickFavorite = { onClickBoothFavorite(photoBooth) },
                         extraInfo = if (selectedTab == MapTab.NEARBY) {
                             { DistanceInfo(photoBooth.distance) }
                         } else null,

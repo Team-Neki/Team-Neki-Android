@@ -1,13 +1,18 @@
 package com.neki.android.feature.map.impl.navigation
 
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.navigation.main.EntryProviderInstaller
 import com.neki.android.core.navigation.main.MainNavigator
+import com.neki.android.core.navigation.result.LocalResultEventBus
+import com.neki.android.core.navigation.result.ResultEffect
+import com.neki.android.feature.map.api.MapResult
 import com.neki.android.feature.map.api.MapNavKey
 import com.neki.android.feature.map.api.navigateToPhotoBoothOrderChange
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.neki.android.feature.map.impl.MapIntent
 import com.neki.android.feature.map.impl.MapRoute
+import com.neki.android.feature.map.impl.MapViewModel
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeRoute
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeViewModel
 import dagger.Module
@@ -30,7 +35,17 @@ object MapEntryProviderModule {
 
 private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
     entry<MapNavKey.Map> {
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<MapViewModel>()
+
+        ResultEffect<MapResult>(resultBus) { result ->
+            when (result) {
+                is MapResult.BrandOrderChanged -> viewModel.store.onIntent(MapIntent.UpdateBrandOrder(result.orderedBrands))
+            }
+        }
+
         MapRoute(
+            viewModel = viewModel,
             navigateToPhotoBoothOrderChange = { brands ->
                 navigator.navigateToPhotoBoothOrderChange(brands)
             },

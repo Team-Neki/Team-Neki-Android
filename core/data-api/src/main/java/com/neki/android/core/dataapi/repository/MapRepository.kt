@@ -17,4 +17,10 @@ interface MapRepository {
         coordinates: List<Pair<Double, Double>>,
         brandIds: List<Long>,
     ): Result<List<PhotoBooth>>
+
+    suspend fun saveBrandOrder(brandIds: List<Long>): Result<Unit>
+
+    suspend fun getFavoritePhotoBooths(): Result<List<PhotoBooth>>
+
+    suspend fun updatePhotoBoothFavorite(locationId: Long, favorite: Boolean): Result<Unit>
 }

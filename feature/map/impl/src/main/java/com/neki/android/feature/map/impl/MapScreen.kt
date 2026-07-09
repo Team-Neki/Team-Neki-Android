@@ -40,6 +40,7 @@ import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
+import com.neki.android.core.model.PhotoBooth
 import com.neki.android.feature.map.impl.cluster.PhotoBoothClusterItem
 import com.neki.android.feature.map.impl.cluster.PhotoBoothClusterer
 import com.neki.android.core.common.permission.LocationPermissionManager
@@ -243,15 +244,32 @@ fun MapScreen(
 
     var clusterer by remember { mutableStateOf<Clusterer<PhotoBoothClusterItem>?>(null) }
     val currentBrandImageCache by rememberUpdatedState(uiState.brandImageCache)
+    var prevMarkerMap by remember { mutableStateOf<Map<Long, PhotoBooth>>(emptyMap()) }
 
-    // 마커 데이터 변경 시 클러스터 업데이트
-    LaunchedEffect(uiState.mapMarkers, clusterer) {
+    // 마커 데이터 변경 시 클러스터 증분 업데이트
+    LaunchedEffect(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoritePhotoBooth, clusterer) {
         clusterer?.let { clusterManager ->
-            clusterManager.clear()
-            val clusterItemsMap = uiState.mapMarkers
-                .filter { it.isCheckedBrand }
-                .associate { PhotoBoothClusterItem(it) to it }
-            clusterManager.addAll(clusterItemsMap)
+            val newMarkerMap = if (uiState.showFavoritePhotoBooth) {
+                val focusedNonFavorite = uiState.mapMarkers.filter { it.isFocused && !it.favorite }
+                (uiState.favoritePhotoBooths.filter { it.isCheckedBrand } + focusedNonFavorite)
+                    .distinctBy { it.id }
+            } else {
+                uiState.mapMarkers.filter { it.isCheckedBrand }
+            }.associateBy { it.id }
+
+            clusterManager.removeAll(
+                prevMarkerMap.filterKeys { it !in newMarkerMap }.values.map { PhotoBoothClusterItem(it) },
+            )
+            clusterManager.addAll(
+                newMarkerMap.filterKeys { it !in prevMarkerMap }.values.associateBy { PhotoBoothClusterItem(it) },
+            )
+            newMarkerMap.forEach { (id, booth) ->
+                val prev = prevMarkerMap[id] ?: return@forEach
+                if (prev.favorite != booth.favorite || prev.isFocused != booth.isFocused) {
+                    PhotoBoothClusterer.updateMarkerIcon(context, booth) { uiState.brandImageCache[it] }
+                }
+            }
+            prevMarkerMap = newMarkerMap
         }
     }
 
@@ -304,12 +322,12 @@ fun MapScreen(
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
-            showFavoriteMarker = uiState.showFavoriteMarker,
+            showFavoritePhotoBooth = uiState.showFavoritePhotoBooth,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
-            onClickFavorite = { onIntent(MapIntent.ClickShowFavoriteIcon) },
+            onClickShowFavoriteIcon = { onIntent(MapIntent.ClickShowFavoriteIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
             onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
-            onToggleBoothFavorite = { onIntent(MapIntent.ToggleBoothFavorite(it)) },
+            onClickBoothFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
             onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
         )
 
@@ -354,7 +372,7 @@ fun MapScreen(
                     photoBooth = focusedPhotoBooth,
                     modifier = Modifier.align(Alignment.BottomCenter),
                     isFavorite = focusedPhotoBooth.favorite,
-                    onClickFavorite = { onIntent(MapIntent.ToggleBoothFavorite(focusedPhotoBooth)) },
+                    onClickFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(focusedPhotoBooth)) },
                     onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
                     onClickCard = {
                         onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))

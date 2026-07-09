@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.modifier.noRippleClickable
+import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PhotoBooth
@@ -78,16 +78,18 @@ internal fun HorizontalBrandItem(
             }
         }
         HorizontalSpacer(12.dp)
-        Icon(
-            modifier = Modifier
-                .size(24.dp)
-                .noRippleClickable(onClick = onClickFavorite),
-            imageVector = ImageVector.vectorResource(
-                if (photoBooth.favorite) R.drawable.icon_heart_filled else R.drawable.icon_heart_stroked,
-            ),
-            contentDescription = null,
-            tint = if (photoBooth.favorite) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray100,
-        )
+        NekiIconButton(
+            onClick = onClickFavorite,
+            contentColor = if (photoBooth.favorite) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray100,
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                imageVector = ImageVector.vectorResource(
+                    if (photoBooth.favorite) R.drawable.icon_heart_filled else R.drawable.icon_heart_stroked,
+                ),
+                contentDescription = null,
+            )
+        }
     }
 }
 
