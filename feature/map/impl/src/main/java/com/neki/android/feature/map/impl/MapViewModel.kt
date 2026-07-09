@@ -138,14 +138,10 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickShowFavoriteIcon -> reduce {
                 val newShowFavorite = !state.showFavoritePhotoBooth
                 if (newShowFavorite) {
-                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothView(favoriteBoothCount = favoritePhotoBooths.size))
+                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOn(favoriteBoothCount = favoritePhotoBooths.size))
+                } else {
+                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOff(favoriteBoothCount = favoritePhotoBooths.size))
                 }
-                analyticsLogger.log(
-                    MapAnalyticsEvent.FavoriteBoothFilterToggle(
-                        action = if (newShowFavorite) "on" else "off",
-                        favoriteBoothCount = favoritePhotoBooths.size,
-                    ),
-                )
                 copy(
                     showFavoritePhotoBooth = newShowFavorite,
                     favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isFocused = false) }.toImmutableList(),
@@ -153,6 +149,9 @@ class MapViewModel @Inject constructor(
             }
             is MapIntent.SelectTab -> {
                 if (intent.tab == state.selectedTab) return@onIntent
+                if (intent.tab == MapTab.FAVORITE) {
+                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothView(favoriteBoothCount = state.favoritePhotoBooths.size))
+                }
                 reduce {
                     val updatedNearby = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
                     val updatedFavorite = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
