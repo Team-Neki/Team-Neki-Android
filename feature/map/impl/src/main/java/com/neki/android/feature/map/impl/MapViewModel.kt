@@ -140,7 +140,7 @@ class MapViewModel @Inject constructor(
                 if (newShowFavorite) {
                     analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOn(favoriteBoothCount = favoritePhotoBooths.size))
                 } else {
-                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOff(favoriteBoothCount = favoritePhotoBooths.size))
+                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOff)
                 }
                 copy(
                     showFavoritePhotoBooth = newShowFavorite,

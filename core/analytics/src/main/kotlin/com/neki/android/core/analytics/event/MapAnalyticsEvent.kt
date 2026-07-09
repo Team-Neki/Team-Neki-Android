@@ -63,9 +63,8 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
         override val params = mapOf("favorite_booth_count" to favoriteBoothCount)
     }
 
-    data class FavoriteBoothFilterOff(val favoriteBoothCount: Int) : MapAnalyticsEvent {
+    data object FavoriteBoothFilterOff : MapAnalyticsEvent {
         override val name = "favorite_booth_filter_off"
-        override val params = mapOf("favorite_booth_count" to favoriteBoothCount)
     }
 
     data class BoothFavoriteAdd(val boothName: String, val brandName: String) : MapAnalyticsEvent {
