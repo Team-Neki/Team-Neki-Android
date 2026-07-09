@@ -41,14 +41,12 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
     }
 
     data class BrandOrderSave(
-        val orderedBrandCount: Int,
         val priorityBrand1: String,
         val priorityBrand2: String,
         val priorityBrand3: String,
     ) : MapAnalyticsEvent {
         override val name = "brand_order_save"
         override val params = mapOf(
-            "ordered_brand_count" to orderedBrandCount,
             "priority_brand_1" to priorityBrand1,
             "priority_brand_2" to priorityBrand2,
             "priority_brand_3" to priorityBrand3,
@@ -60,12 +58,14 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
         override val params = mapOf("favorite_booth_count" to favoriteBoothCount)
     }
 
-    data class FavoriteBoothFilterToggle(val action: String, val favoriteBoothCount: Int) : MapAnalyticsEvent {
-        override val name = "favorite_booth_filter_toggle"
-        override val params = mapOf(
-            "action" to action,
-            "favorite_booth_count" to favoriteBoothCount,
-        )
+    data class FavoriteBoothFilterOn(val favoriteBoothCount: Int) : MapAnalyticsEvent {
+        override val name = "favorite_booth_filter_on"
+        override val params = mapOf("favorite_booth_count" to favoriteBoothCount)
+    }
+
+    data class FavoriteBoothFilterOff(val favoriteBoothCount: Int) : MapAnalyticsEvent {
+        override val name = "favorite_booth_filter_off"
+        override val params = mapOf("favorite_booth_count" to favoriteBoothCount)
     }
 
     data class BoothFavoriteAdd(val boothName: String, val brandName: String) : MapAnalyticsEvent {

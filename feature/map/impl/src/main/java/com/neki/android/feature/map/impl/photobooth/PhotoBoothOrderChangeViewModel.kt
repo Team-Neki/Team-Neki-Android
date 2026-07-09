@@ -60,7 +60,6 @@ internal class PhotoBoothOrderChangeViewModel @AssistedInject constructor(
                 .onSuccess {
                     analyticsLogger.log(
                         MapAnalyticsEvent.BrandOrderSave(
-                            orderedBrandCount = state.brands.indices.count { state.brands[it].id != originalBrandsOrder[it].id },
                             priorityBrand1 = state.brands.getOrNull(0)?.name.orEmpty(),
                             priorityBrand2 = state.brands.getOrNull(1)?.name.orEmpty(),
                             priorityBrand3 = state.brands.getOrNull(2)?.name.orEmpty(),
