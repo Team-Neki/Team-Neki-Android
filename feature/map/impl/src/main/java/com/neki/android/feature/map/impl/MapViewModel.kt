@@ -135,17 +135,19 @@ class MapViewModel @Inject constructor(
             is MapIntent.RevertFavoritePhotoBooth -> {
                 toggleFavorite(intent.photoBooth, intent.photoBooth.favorite, reduce)
             }
-            MapIntent.ClickShowFavoriteIcon -> reduce {
+            MapIntent.ClickShowFavoriteIcon -> {
                 val newShowFavorite = !state.showFavoritePhotoBooth
                 if (newShowFavorite) {
-                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOn(favoriteBoothCount = favoritePhotoBooths.size))
+                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOn(favoriteBoothCount = state.favoritePhotoBooths.size))
                 } else {
                     analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOff)
                 }
-                copy(
-                    showFavoritePhotoBooth = newShowFavorite,
-                    favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isFocused = false) }.toImmutableList(),
-                )
+                reduce {
+                    copy(
+                        showFavoritePhotoBooth = newShowFavorite,
+                        favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isFocused = false) }.toImmutableList(),
+                    )
+                }
             }
             is MapIntent.SelectTab -> {
                 if (intent.tab == state.selectedTab) return@onIntent
