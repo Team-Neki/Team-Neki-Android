@@ -132,6 +132,9 @@ class MapViewModel @Inject constructor(
                 toggleFavorite(intent.photoBooth, newFavorite, reduce)
                 updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
             }
+            is MapIntent.RevertFavoritePhotoBooth -> {
+                toggleFavorite(intent.photoBooth, intent.photoBooth.favorite, reduce)
+            }
             MapIntent.ClickShowFavoriteIcon -> reduce {
                 val newShowFavorite = !state.showFavoritePhotoBooth
                 if (newShowFavorite) {
@@ -194,6 +197,7 @@ class MapViewModel @Inject constructor(
                 }
                 .onFailure { e ->
                     Timber.e(e)
+                    store.onIntent(MapIntent.RevertFavoritePhotoBooth(photoBooth.copy(favorite = !photoBooth.favorite)))
                 }
         }
     }
@@ -211,7 +215,7 @@ class MapViewModel @Inject constructor(
                 newFavorite && favoritePhotoBooths.none { it.id == id } -> {
                     val booth = photoBooth.copy(
                         favorite = true,
-                        imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty().ifEmpty { photoBooth.imageUrl },
+                        imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
                     )
                     (favoritePhotoBooths + booth).toImmutableList()
                 }
@@ -356,19 +360,27 @@ class MapViewModel @Inject constructor(
         )
 
         reduce {
+            val distance = currentLocLatLng?.let {
+                calculateDistance(it.latitude, it.longitude, photoBooth.latitude, photoBooth.longitude)
+            } ?: 0
             val isAlreadyInMarkers = mapMarkers.any {
                 it.latitude == photoBooth.latitude && it.longitude == photoBooth.longitude
             }
             val updatedMarkers = if (isAlreadyInMarkers) {
-                mapMarkers.map { marker -> marker.copy(isFocused = marker.id == photoBooth.id) }
+                mapMarkers.map { marker ->
+                    marker.copy(
+                        isFocused = marker.id == photoBooth.id,
+                        distance = if (marker.id == photoBooth.id) distance else marker.distance,
+                    )
+                }
             } else {
-                mapMarkers.map { it.copy(isFocused = false) } + photoBooth.copy(isFocused = true)
+                mapMarkers.map { it.copy(isFocused = false) } + photoBooth.copy(isFocused = true, distance = distance)
             }
             copy(
                 dragLevel = DragLevel.INVISIBLE,
                 mapMarkers = updatedMarkers.toImmutableList(),
                 favoritePhotoBooths = favoritePhotoBooths.map { marker ->
-                    marker.copy(isFocused = marker.id == photoBooth.id)
+                    marker.copy(isFocused = marker.id == photoBooth.id, distance = if (marker.id == photoBooth.id) distance else marker.distance)
                 }.toImmutableList(),
             )
         }
