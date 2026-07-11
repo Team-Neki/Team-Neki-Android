@@ -36,10 +36,12 @@ class NekiFirebaseMessagingService : FirebaseMessagingService() {
     private fun showNotification(title: String, body: String) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+        val launchIntent = (packageManager.getLaunchIntentForPackage(packageName) ?: Intent())
+            .putExtra(EXTRA_FROM_NOTIFICATION, true)
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
-            packageManager.getLaunchIntentForPackage(packageName) ?: Intent(),
+            launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
@@ -58,5 +60,6 @@ class NekiFirebaseMessagingService : FirebaseMessagingService() {
     companion object {
         const val CHANNEL_ID = "neki_default_channel_id"
         const val CHANNEL_NAME = "Neki-Notification-Channel"
+        const val EXTRA_FROM_NOTIFICATION = "extra_from_notification"
     }
 }
