@@ -1,5 +1,6 @@
 package com.neki.android.feature.map.impl.component
 
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.Image
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -264,7 +266,7 @@ internal fun AnchoredPanelContent(
             val body14SemiBoldSpan = NekiTheme.typography.body14SemiBold.toSpanStyle().copy(color = NekiTheme.colorScheme.gray400)
             Text(
                 modifier = Modifier
-                    .padding(start = 20.dp, bottom = 12.dp),
+                    .padding(start = 20.dp),
                 text = buildAnnotatedString {
                     withStyle(body14MediumSpan) { append("저장한 포토부스 총 ") }
                     withStyle(body14SemiBoldSpan) { append("${displayPhotoBooths.size}") }
@@ -272,45 +274,56 @@ internal fun AnchoredPanelContent(
                 },
             )
         }
-        if (displayPhotoBooths.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 123.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.image_near_photo_booth_empty),
-                    contentDescription = null,
-                )
-                Text(
-                    text = if (selectedTab == MapTab.NEARBY) "1km 이내에 가까운\n네컷 사진관이 없어요!" else "저장한 포토부스가\n없어요.",
-                    color = NekiTheme.colorScheme.gray500,
-                    style = NekiTheme.typography.body16Medium,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(
-                    bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp +
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
-                ),
-            ) {
-                items(displayPhotoBooths) { photoBooth ->
-                    HorizontalBrandItem(
-                        photoBooth = photoBooth,
-                        onClickItem = { onClickPhotoBooth(photoBooth) },
-                        onClickFavorite = { onClickBoothFavorite(photoBooth) },
-                        extraInfo = if (selectedTab == MapTab.NEARBY) {
-                            { DistanceInfo(photoBooth.distance) }
-                        } else null,
+        key(selectedTab) {
+            if (displayPhotoBooths.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(top = 123.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.image_near_photo_booth_empty),
+                        contentDescription = null,
                     )
+                    Text(
+                        text = if (selectedTab == MapTab.NEARBY) "1km 이내에 가까운\n네컷 사진관이 없어요!" else "저장한 포토부스가\n없어요.",
+                        color = NekiTheme.colorScheme.gray500,
+                        style = NekiTheme.typography.body16Medium,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 12.dp,
+                        bottom = MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT.dp +
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                    ),
+                ) {
+                    items(displayPhotoBooths, key = { it.id }) { photoBooth ->
+                        HorizontalBrandItem(
+                            modifier = Modifier.animateItem(
+                                placementSpec = spring(
+                                    stiffness = 152f,
+                                    dampingRatio = 14.9f / (2f * kotlin.math.sqrt(152f * 1f)),
+                                ),
+                            ),
+                            photoBooth = photoBooth,
+                            onClickItem = { onClickPhotoBooth(photoBooth) },
+                            onClickFavorite = { onClickBoothFavorite(photoBooth) },
+                            extraInfo = if (selectedTab == MapTab.NEARBY) {
+                                { DistanceInfo(photoBooth.distance) }
+                            } else null,
+                        )
+                    }
                 }
             }
         }
