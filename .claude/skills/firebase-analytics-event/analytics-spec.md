@@ -58,7 +58,7 @@
 | `map_brand_filter_toggle` | 브랜드 필터 선택/해제 시 | `action`: `select`/`deselect`, `selected_count`: int (액션 후 기준), `brand_name`: string |
 | `booth_select` | 부스 클릭 시 | `entry_point`: `map`/`bottom_sheet`, `brand_name`: string |
 | `map_route_click` | 외부 지도 앱 선택 시 | `map_type`: `kakao_map`/`naver_map`/`google_map` |
-| `brand_filter_manage_view` | 브랜드 순서 편집 화면 진입 시 | - |
+| `brand_order_save` | 브랜드 순서 저장 완료 시 | `priority_brand_1`: string, `priority_brand_2`: string, `priority_brand_3`: string |
 | `favorite_booth_view` | 드래그 패널 '저장한 포토부스' 탭 선택 시 | `favorite_booth_count`: int (즐겨찾기 수) |
 | `favorite_booth_filter_on` | 즐겨찾기 마커 표시 ON 시 | `favorite_booth_count`: int |
 | `favorite_booth_filter_off` | 즐겨찾기 마커 표시 OFF 시 | - |
@@ -74,7 +74,7 @@
 | `map_brand_filter_toggle` | `MapViewModel.handleClickBrand()` | reduce 내부에서 updatedBrands 기준으로 로깅 |
 | `booth_select` | `MapViewModel.handleClickNearPhotoBooth()` (`bottom_sheet`), `handleClickPhotoBoothMarker()` (`map`) | |
 | `map_route_click` | `MapViewModel.handleClickDirectionItem()` | `when(app)`으로 analyticsName 구분 |
-| `brand_filter_manage_view` | `MapViewModel.onIntent` ClickEditBrandOrder | postSideEffect 직전 로깅 |
+| `brand_order_save` | `PhotoBoothOrderChangeViewModel.saveBrandOrder()` | `saveBrandOrder` API 성공 시 |
 | `favorite_booth_view` | `MapViewModel.onIntent` SelectTab | `MapTab.FAVORITE` 선택 시 로깅 |
 | `favorite_booth_filter_on` | `MapViewModel.onIntent` ClickShowFavoriteIcon | ON 전환 시 로깅 |
 | `favorite_booth_filter_off` | `MapViewModel.onIntent` ClickShowFavoriteIcon | OFF 전환 시 로깅 |
@@ -107,8 +107,18 @@
 
 ---
 
+## 마이페이지 이벤트
+
+| 이벤트명 | 트리거 시점 | 파라미터 |
+|---------|-----------|---------|
+| `mypage_logout` | 로그아웃 완료 시 | - |
+| `mypage_withdraw` | 회원 탈퇴 완료 시 | - |
+
+---
+
 ## 앱 전역 이벤트
 
 | 이벤트명 | 트리거 시점 | 로깅 위치 |
 |---------|-----------|---------|
 | `app_open` | 로그인/자동 로그인 완료 시 | `LoginViewModel.checkTermAgreementState()` (약관 동의 완료 유저만), `SplashViewModel.fetchAuthState()` (자동 로그인 성공 시) |
+| `notification_click` | 푸시 알림 클릭 후 앱 진입 시 | `MainActivity.onCreate()` (`savedInstanceState == null` 가드) |

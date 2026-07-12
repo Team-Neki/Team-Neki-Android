@@ -17,7 +17,8 @@ core/analytics/
     │   ├── ArchiveAnalyticsEvent.kt    ← 아카이브 이벤트
     │   ├── PoseAnalyticsEvent.kt       ← 포즈 이벤트
     │   ├── MapAnalyticsEvent.kt        ← 지도 이벤트
-    │   └── GlobalAnalyticsEvent.kt     ← 앱 전역 이벤트 (app_open)
+    │   ├── MypageAnalyticsEvent.kt     ← 마이페이지 이벤트
+    │   └── GlobalAnalyticsEvent.kt     ← 앱 전역 이벤트 (app_open, notification_click)
     └── logger/
         ├── AnalyticsLogger.kt          ← 인터페이스 (log, setUserId, setUserProperty)
         ├── FirebaseAnalyticsLogger.kt  ← Firebase 구현체
@@ -62,6 +63,7 @@ sealed interface ArchiveAnalyticsEvent : AnalyticsEvent {
 | 아카이브 | `ArchiveAnalyticsEvent.kt` | `ArchiveAnalyticsEvent` |
 | 포즈 | `PoseAnalyticsEvent.kt` | `PoseAnalyticsEvent` |
 | 네컷지도 | `MapAnalyticsEvent.kt` | `MapAnalyticsEvent` |
+| 마이페이지 | `MypageAnalyticsEvent.kt` | `MypageAnalyticsEvent` |
 | 앱 전역 | `GlobalAnalyticsEvent.kt` | `GlobalAnalyticsEvent` |
 
 새 피처라면 새로운 `*AnalyticsEvent.kt` 파일을 추가합니다.
