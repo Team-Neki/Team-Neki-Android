@@ -88,9 +88,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        pendingShareUriStrings = intent.extractShareUriStrings()
-        if (intent.getBooleanExtra(NekiFirebaseMessagingService.EXTRA_FROM_NOTIFICATION, false)) {
-            analyticsLogger.log(GlobalAnalyticsEvent.NotificationClick)
+        if (savedInstanceState == null) {
+            pendingShareUriStrings = intent.extractShareUriStrings()
+            if (intent.getBooleanExtra(NekiFirebaseMessagingService.EXTRA_FROM_NOTIFICATION, false)) {
+                analyticsLogger.log(GlobalAnalyticsEvent.NotificationClick)
+            }
         }
 
         enableEdgeToEdge(
