@@ -314,6 +314,12 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 targetFolderIds = listOf(albumId),
             ).onSuccess {
                 analyticsLogger.log(ArchiveAnalyticsEvent.PhotoCopy)
+                analyticsLogger.log(
+                    ArchiveAnalyticsEvent.PhotoAddToAlbum(
+                        photoCount = state.importPhotoState.selectedPhotoIds.size,
+                        albumCount = listOf(albumId).size,
+                    ),
+                )
                 reduce { copy(isShowImportPhotoBottomSheet = false, importPhotoState = ImportPhotoState()) }
                 _importAlbumFilter.value = null
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("사진을 앨범에 추가했어요"))

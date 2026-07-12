@@ -46,4 +46,12 @@ sealed interface ArchiveAnalyticsEvent : AnalyticsEvent {
     data object PhotoMemoCreate : ArchiveAnalyticsEvent {
         override val name = "photo_memo_create"
     }
+
+    data class PhotoAddToAlbum(val photoCount: Int, val albumCount: Int) : ArchiveAnalyticsEvent {
+        override val name = "photo_add_to_album"
+        override val params = mapOf(
+            "photo_count" to photoCount,
+            "album_count" to albumCount,
+        )
+    }
 }

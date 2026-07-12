@@ -35,6 +35,8 @@ import com.neki.android.feature.photo_upload.api.navigateToQRScan
 import com.neki.android.feature.select_album.api.navigateToSelectAlbum
 import android.net.Uri
 import androidx.core.content.IntentCompat
+import com.neki.android.core.analytics.event.GlobalAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -78,12 +80,20 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var authEventManager: AuthEventManager
 
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
+
     private var pendingShareUriStrings by mutableStateOf<ImmutableList<String>>(persistentListOf())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        pendingShareUriStrings = intent.extractShareUriStrings()
+        if (savedInstanceState == null) {
+            pendingShareUriStrings = intent.extractShareUriStrings()
+            if (intent.getBooleanExtra(NekiFirebaseMessagingService.EXTRA_FROM_NOTIFICATION, false)) {
+                analyticsLogger.log(GlobalAnalyticsEvent.NotificationClick)
+            }
+        }
 
         enableEdgeToEdge(
             navigationBarStyle = SystemBarStyle.auto(
@@ -138,6 +148,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (intent.getBooleanExtra(NekiFirebaseMessagingService.EXTRA_FROM_NOTIFICATION, false)) {
+            analyticsLogger.log(GlobalAnalyticsEvent.NotificationClick)
+        }
         val uriStrings = intent.extractShareUriStrings()
         if (uriStrings.isNotEmpty()) {
             pendingShareUriStrings = uriStrings

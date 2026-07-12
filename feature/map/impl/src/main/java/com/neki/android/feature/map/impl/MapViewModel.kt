@@ -123,7 +123,9 @@ class MapViewModel @Inject constructor(
                 reduce { copy(isShowLocationPermissionDialog = false) }
                 postSideEffect(MapEffect.NavigateToAppSettings)
             }
-            MapIntent.ClickEditBrandOrder -> postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
+            MapIntent.ClickEditBrandOrder -> {
+                postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
+            }
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
             is MapIntent.ClickPhotoBoothFavorite -> {
                 val newFavorite = !intent.photoBooth.favorite
@@ -133,14 +135,25 @@ class MapViewModel @Inject constructor(
             is MapIntent.RevertFavoritePhotoBooth -> {
                 toggleFavorite(intent.photoBooth, intent.photoBooth.favorite, reduce)
             }
-            MapIntent.ClickShowFavoriteIcon -> reduce {
-                copy(
-                    showFavoritePhotoBooth = !state.showFavoritePhotoBooth,
-                    favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isFocused = false) }.toImmutableList(),
-                )
+            MapIntent.ClickShowFavoriteIcon -> {
+                val newShowFavorite = !state.showFavoritePhotoBooth
+                if (newShowFavorite) {
+                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOn(favoriteBoothCount = state.favoritePhotoBooths.size))
+                } else {
+                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothFilterOff)
+                }
+                reduce {
+                    copy(
+                        showFavoritePhotoBooth = newShowFavorite,
+                        favoritePhotoBooths = favoritePhotoBooths.map { it.copy(isFocused = false) }.toImmutableList(),
+                    )
+                }
             }
             is MapIntent.SelectTab -> {
                 if (intent.tab == state.selectedTab) return@onIntent
+                if (intent.tab == MapTab.FAVORITE) {
+                    analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothView(favoriteBoothCount = state.favoritePhotoBooths.size))
+                }
                 reduce {
                     val updatedNearby = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
                     val updatedFavorite = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
@@ -162,6 +175,21 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             mapRepository.updatePhotoBoothFavorite(photoBooth.id, photoBooth.favorite)
                 .onSuccess {
+                    if (photoBooth.favorite) {
+                        analyticsLogger.log(
+                            MapAnalyticsEvent.BoothFavoriteAdd(
+                                boothName = photoBooth.branchName,
+                                brandName = photoBooth.brandName,
+                            ),
+                        )
+                    } else {
+                        analyticsLogger.log(
+                            MapAnalyticsEvent.BoothFavoriteRemove(
+                                boothName = photoBooth.branchName,
+                                brandName = photoBooth.brandName,
+                            ),
+                        )
+                    }
                     store.onIntent(
                         MapIntent.ShowToast(
                             message = if (photoBooth.favorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
