@@ -100,38 +100,6 @@ internal fun CloseButton(
     )
 }
 
-@ComponentPreview
-@Composable
-private fun CurrentLocationButtonOffPreview() {
-    NekiTheme {
-        CurrentLocationButton(isActiveCurrentLocation = false)
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun CurrentLocationButtonOnPreview() {
-    NekiTheme {
-        CurrentLocationButton(isActiveCurrentLocation = true)
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun ShowFavoritePhotoBoothButtonOffPreview() {
-    NekiTheme {
-        ShowFavoritePhotoBoothButton(isFavorite = false)
-    }
-}
-
-@ComponentPreview
-@Composable
-private fun ShowFavoritePhotoBoothButtonOnPreview() {
-    NekiTheme {
-        ShowFavoritePhotoBoothButton(isFavorite = true)
-    }
-}
-
 @Composable
 internal fun CardFavoriteButton(
     isFavorite: Boolean,
@@ -166,6 +134,38 @@ internal fun CardDirectionButton(
             .clip(CircleShape)
             .clickableSingle(onClick = onClick),
     )
+}
+
+@ComponentPreview
+@Composable
+private fun CurrentLocationButtonOffPreview() {
+    NekiTheme {
+        CurrentLocationButton(isActiveCurrentLocation = false)
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun CurrentLocationButtonOnPreview() {
+    NekiTheme {
+        CurrentLocationButton(isActiveCurrentLocation = true)
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun ShowFavoritePhotoBoothButtonOffPreview() {
+    NekiTheme {
+        ShowFavoritePhotoBoothButton(isFavorite = false)
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun ShowFavoritePhotoBoothButtonOnPreview() {
+    NekiTheme {
+        ShowFavoritePhotoBoothButton(isFavorite = true)
+    }
 }
 
 @ComponentPreview
