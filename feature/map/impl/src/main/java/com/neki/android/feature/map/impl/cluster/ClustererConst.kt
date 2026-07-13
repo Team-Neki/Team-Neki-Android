@@ -3,8 +3,8 @@ package com.neki.android.feature.map.impl.cluster
 internal object ClustererConst {
     // 클러스터링 설정
     const val MIN_CLUSTERING_ZOOM = 9 // 클러스터링 시작 줌 레벨
-    const val MAX_CLUSTERING_ZOOM = 16 // 클러스터링 종료 줌 레벨 (이 이상이면 개별 마커 표시)
-    const val MAX_SCREEN_DISTANCE = 200.0 // 클러스터로 묶이는 최대 화면 거리 (px)
+    const val MAX_CLUSTERING_ZOOM = 15 // 클러스터링 종료 줌 레벨 (이 이상이면 개별 마커 표시)
+    const val MAX_SCREEN_DISTANCE = 150.0 // 클러스터로 묶이는 최대 화면 거리 (px)
 
     // 클러스터 마커 스타일
     const val CLUSTER_TEXT_SIZE = 20f // title20SemiBold

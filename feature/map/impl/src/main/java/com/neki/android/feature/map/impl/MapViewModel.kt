@@ -616,6 +616,7 @@ class MapViewModel @Inject constructor(
                             photoBooth.copy(
                                 imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
                                 isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                                favorite = favoritePhotoBooths.any { it.id == photoBooth.id },
                             )
                         }.toImmutableList(),
                     )

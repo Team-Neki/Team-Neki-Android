@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
@@ -25,23 +26,15 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 private fun MapCircleButton(
     @DrawableRes iconRes: Int,
     tint: Color,
+    iconSize: Dp,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
 ) {
     Box(
-        modifier = modifier
-            .buttonShadow()
-            .clip(CircleShape)
-            .background(
-                shape = CircleShape,
-                color = NekiTheme.colorScheme.white,
-            )
-            .clickableSingle(onClick = onClick)
-            .padding(6.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(iconSize),
             imageVector = ImageVector.vectorResource(iconRes),
             contentDescription = null,
             tint = tint,
@@ -59,13 +52,18 @@ internal fun CurrentLocationButton(
         iconRes = R.drawable.icon_current_position,
         tint = if (isActiveCurrentLocation) NekiTheme.colorScheme.primary500
         else NekiTheme.colorScheme.gray800,
-        modifier = modifier,
-        onClick = onClick,
+        iconSize = 28.dp,
+        modifier = modifier
+            .buttonShadow()
+            .clip(CircleShape)
+            .background(shape = CircleShape, color = NekiTheme.colorScheme.white)
+            .clickableSingle(onClick = onClick)
+            .padding(6.dp),
     )
 }
 
 @Composable
-internal fun PhotoBoothFavoriteButton(
+internal fun ShowFavoritePhotoBoothButton(
     isFavorite: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
@@ -74,8 +72,67 @@ internal fun PhotoBoothFavoriteButton(
         iconRes = if (isFavorite) R.drawable.icon_heart_gradient
         else R.drawable.icon_heart_stroked,
         tint = Color.Unspecified,
-        modifier = modifier,
-        onClick = onClick,
+        iconSize = 28.dp,
+        modifier = modifier
+            .buttonShadow()
+            .clip(CircleShape)
+            .background(shape = CircleShape, color = NekiTheme.colorScheme.white)
+            .clickableSingle(onClick = onClick)
+            .padding(6.dp),
+    )
+}
+
+@Composable
+internal fun CloseButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) {
+    MapCircleButton(
+        iconRes = R.drawable.icon_close,
+        tint = NekiTheme.colorScheme.gray800,
+        iconSize = 24.dp,
+        modifier = modifier
+            .buttonShadow()
+            .clip(CircleShape)
+            .background(shape = CircleShape, color = NekiTheme.colorScheme.white)
+            .clickableSingle(onClick = onClick)
+            .padding(8.dp),
+    )
+}
+
+@Composable
+internal fun CardFavoriteButton(
+    isFavorite: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) {
+    MapCircleButton(
+        iconRes = if (isFavorite) R.drawable.icon_heart_gradient
+        else R.drawable.icon_heart_stroked,
+        tint = Color.Unspecified,
+        iconSize = 22.dp,
+        modifier = modifier
+            .size(32.dp)
+            .background(shape = CircleShape, color = NekiTheme.colorScheme.gray25)
+            .clip(CircleShape)
+            .clickableSingle(onClick = onClick),
+    )
+}
+
+@Composable
+internal fun CardDirectionButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) {
+    MapCircleButton(
+        iconRes = R.drawable.icon_road,
+        tint = Color.Unspecified,
+        iconSize = 22.dp,
+        modifier = modifier
+            .size(32.dp)
+            .background(shape = CircleShape, color = NekiTheme.colorScheme.gray900)
+            .clip(CircleShape)
+            .clickableSingle(onClick = onClick),
     )
 }
 
@@ -97,16 +154,48 @@ private fun CurrentLocationButtonOnPreview() {
 
 @ComponentPreview
 @Composable
-private fun PhotoBoothFavoriteButtonOffPreview() {
+private fun ShowFavoritePhotoBoothButtonOffPreview() {
     NekiTheme {
-        PhotoBoothFavoriteButton(isFavorite = false)
+        ShowFavoritePhotoBoothButton(isFavorite = false)
     }
 }
 
 @ComponentPreview
 @Composable
-private fun PhotoBoothFavoriteButtonOnPreview() {
+private fun ShowFavoritePhotoBoothButtonOnPreview() {
     NekiTheme {
-        PhotoBoothFavoriteButton(isFavorite = true)
+        ShowFavoritePhotoBoothButton(isFavorite = true)
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun CloseButtonPreview() {
+    NekiTheme {
+        CloseButton()
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun CardFavoriteButtonOffPreview() {
+    NekiTheme {
+        CardFavoriteButton(isFavorite = false)
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun CardFavoriteButtonOnPreview() {
+    NekiTheme {
+        CardFavoriteButton(isFavorite = true)
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun CardDirectionButtonPreview() {
+    NekiTheme {
+        CardDirectionButton()
     }
 }
