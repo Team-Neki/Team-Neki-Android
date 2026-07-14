@@ -160,7 +160,7 @@ internal fun AlbumDetailScreen(
         derivedStateOf { pagingItems.itemCount == 0 && pagingItems.loadState.refresh is LoadState.NotLoading }
     }
 
-    BackHandler(enabled = true) {
+    BackHandler {
         onIntent(AlbumDetailIntent.OnBackPressed)
     }
     Column(

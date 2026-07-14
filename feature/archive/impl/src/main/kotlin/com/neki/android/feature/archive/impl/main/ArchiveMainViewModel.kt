@@ -188,6 +188,9 @@ class ArchiveMainViewModel @Inject constructor(
         }
         viewModelScope.launch {
             photoRepository.updateFavorite(photo.id, newFavorite)
+                .onSuccess {
+                    fetchFavoriteSummary(reduce)
+                }
                 .onFailure { e ->
                     Timber.e(e)
                     reduce {
