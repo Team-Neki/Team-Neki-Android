@@ -149,7 +149,7 @@ internal fun AllPhotoScreen(
         derivedStateOf { pagingItems.itemCount == 0 && pagingItems.loadState.refresh is LoadState.NotLoading }
     }
 
-    BackHandler(enabled = true) {
+    BackHandler {
         onIntent(AllPhotoIntent.OnBackPressed)
     }
 

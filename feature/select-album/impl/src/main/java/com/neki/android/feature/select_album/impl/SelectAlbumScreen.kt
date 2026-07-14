@@ -98,7 +98,7 @@ internal fun SelectAlbumScreen(
     uiState: SelectAlbumState = SelectAlbumState(),
     onIntent: (SelectAlbumIntent) -> Unit = {},
 ) {
-    BackHandler(enabled = true) {
+    BackHandler {
         onIntent(SelectAlbumIntent.OnBackPressed)
     }
 

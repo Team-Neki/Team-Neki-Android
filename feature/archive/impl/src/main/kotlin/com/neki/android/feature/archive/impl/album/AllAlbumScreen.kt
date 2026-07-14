@@ -71,7 +71,7 @@ internal fun AllAlbumScreen(
     uiState: AllAlbumState = AllAlbumState(),
     onIntent: (AllAlbumIntent) -> Unit = {},
 ) {
-    BackHandler(enabled = true) {
+    BackHandler {
         onIntent(AllAlbumIntent.OnBackPressed)
     }
 
