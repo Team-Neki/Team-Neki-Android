@@ -14,4 +14,12 @@ internal data class PhotoBoothClusterItem(
         photoBooth.latitude,
         photoBooth.longitude,
     )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is PhotoBoothClusterItem) return false
+        return photoBooth.id == other.photoBooth.id
+    }
+
+    override fun hashCode(): Int = photoBooth.id.hashCode()
 }
