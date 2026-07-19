@@ -78,7 +78,7 @@ internal fun Int.formatDistance(): String {
 }
 
 /** 같은 좌표에 겹치는 마커를 삼각함수로 분산 배치 **/
-internal fun List<PhotoBooth>.toJitteredClusterItems(): Map<Long, PhotoBoothClusterItem> {
+internal fun Iterable<PhotoBooth>.toJitteredClusterItems(): Map<Long, PhotoBoothClusterItem> {
     val offsetRadius = 0.00005
     val coordinateFrequency = mutableMapOf<Pair<Double, Double>, Int>()
     return associate { booth ->
