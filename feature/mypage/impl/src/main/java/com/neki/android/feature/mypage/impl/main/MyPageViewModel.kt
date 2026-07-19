@@ -173,6 +173,7 @@ internal class MyPageViewModel @Inject constructor(
                 analyticsLogger.log(MypageAnalyticsEvent.Withdraw)
                 tokenRepository.clearTokensWithAuthCache()
                 authRepository.setCompletedOnboarding(false)
+                userRepository.clearMarketingPopupRecord()
                 reduce { copy(isLoading = false) }
                 postSideEffect(MyPageEffect.UnlinkWithKakao)
             }
