@@ -1,5 +1,6 @@
 package com.neki.android.feature.select_album.impl
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,8 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.archive.api.PhotoCopiedResult
 import com.neki.android.feature.archive.api.PhotoMovedResult
+import com.neki.android.feature.archive.api.PhotoUploadedResult
+import com.neki.android.feature.select_album.api.SelectAlbumCreatedResult
 import com.neki.android.feature.select_album.impl.component.SelectAlbumTopBar
 import kotlinx.collections.immutable.persistentListOf
 
@@ -62,8 +65,13 @@ internal fun SelectAlbumRoute(
         when (sideEffect) {
             SelectAlbumSideEffect.NavigateBack -> navigateBack()
             is SelectAlbumSideEffect.SendUploadResult -> {
+                resultEventBus.sendResult(result = PhotoUploadedResult, allowDuplicate = false)
                 navigateBack()
                 navigateToAlbumDetail(sideEffect.album.id, sideEffect.album.title)
+            }
+
+            SelectAlbumSideEffect.SendAlbumCreatedResult -> {
+                resultEventBus.sendResult(result = SelectAlbumCreatedResult, allowDuplicate = false)
             }
 
             SelectAlbumSideEffect.SendPhotoMovedResult -> {
@@ -90,6 +98,10 @@ internal fun SelectAlbumScreen(
     uiState: SelectAlbumState = SelectAlbumState(),
     onIntent: (SelectAlbumIntent) -> Unit = {},
 ) {
+    BackHandler {
+        onIntent(SelectAlbumIntent.OnBackPressed)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

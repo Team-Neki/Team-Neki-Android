@@ -155,19 +155,25 @@ internal class QRScanViewModel @Inject constructor(
     }
 
     private fun isSupportedBrand(url: String): Boolean {
-        return url.contains(BuildConfig.PHOTOISM_URL) ||
-            url.contains(BuildConfig.LIFE_FOUR_CUT_URL) ||
-            url.contains(BuildConfig.PHOTO_SIGNATURE_URL_1) ||
-            url.contains(BuildConfig.PHOTO_SIGNATURE_URL_2) ||
-            url.contains(BuildConfig.HARU_FILM_URL) ||
-            url.contains(BuildConfig.PHOTO_GRAY_URL) ||
-            url.contains(BuildConfig.MONO_MANSION_URL)
+        return url.containsConfiguredUrl(BuildConfig.PHOTOISM_URL) ||
+            url.containsConfiguredUrl(BuildConfig.LIFE_FOUR_CUT_URL) ||
+            url.containsConfiguredUrl(BuildConfig.PHOTO_SIGNATURE_URL_1) ||
+            url.containsConfiguredUrl(BuildConfig.PHOTO_SIGNATURE_URL_2) ||
+            url.containsConfiguredUrl(BuildConfig.HARU_FILM_URL) ||
+            url.containsConfiguredUrl(BuildConfig.PHOTO_GRAY_URL) ||
+            url.containsConfiguredUrl(BuildConfig.MONO_MANSION_URL)
     }
 
     private fun isShouldFirstDownloadBrand(url: String): Boolean {
-        return url.contains(BuildConfig.MONO_MANSION_URL) ||
-            url.contains(BuildConfig.PHOTO_GRAY_URL) ||
-            url.contains(BuildConfig.PHOTO_SIGNATURE_URL_1) ||
-            url.contains(BuildConfig.PHOTO_SIGNATURE_URL_2)
+        return url.containsConfiguredUrl(BuildConfig.MONO_MANSION_URL) ||
+            url.containsConfiguredUrl(BuildConfig.PHOTO_GRAY_URL) ||
+            url.containsConfiguredUrl(BuildConfig.PHOTO_SIGNATURE_URL_1) ||
+            url.containsConfiguredUrl(BuildConfig.PHOTO_SIGNATURE_URL_2)
+    }
+
+    private fun String.containsConfiguredUrl(configuredUrl: String?): Boolean {
+        if (configuredUrl.isNullOrBlank()) return false
+
+        return contains(configuredUrl)
     }
 }
