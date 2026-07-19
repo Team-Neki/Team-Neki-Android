@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -43,6 +44,7 @@ import com.neki.android.core.designsystem.button.NekiIconButton
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.designsystem.dialog.SingleButtonWithTextButtonAlertDialog
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.feature.photo_upload.impl.qrscan.QRScanIntent
 import com.neki.android.feature.photo_upload.impl.qrscan.const.QRScanConst
@@ -164,6 +166,17 @@ internal fun QRScannerContent(
                 }
             }
         }
+        Icon(
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(start = 8.dp)
+                .size(52.dp)
+                .noRippleClickable { onIntent(QRScanIntent.ClickCloseQRScan) }
+                .padding(12.dp),
+            imageVector = ImageVector.vectorResource(R.drawable.icon_close),
+            contentDescription = null,
+            tint = NekiTheme.colorScheme.white,
+        )
     }
 
     if (isPermissionRationaleDialogShown) {
