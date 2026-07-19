@@ -3,10 +3,10 @@ package com.neki.android.core.data.repository.impl
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.edit
+import com.neki.android.core.data.local.di.MarketingPopupDataStore
 import com.neki.android.core.data.local.di.UserDataStore
+import com.neki.android.core.data.local.model.MarketingPopupRecord
 import com.neki.android.core.data.remote.api.UserService
 import com.neki.android.core.data.remote.model.request.UpdateProfileImageRequest
 import com.neki.android.core.data.remote.model.request.UpdateUserInfoRequest
@@ -17,8 +17,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class UserRepositoryImpl @Inject constructor(
+internal class UserRepositoryImpl @Inject constructor(
     @UserDataStore private val dataStore: DataStore<Preferences>,
+    @MarketingPopupDataStore private val marketingPopupDataStore: DataStore<MarketingPopupRecord>,
     private val userService: UserService,
 ) : UserRepository {
     override val hasVisitedRandomPose: Flow<Boolean> =
@@ -43,17 +44,21 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override val lastArchiveMarketingPopupTimestamp: Flow<Long> =
-        dataStore.data.map { it[LAST_ARCHIVE_MARKETING_POPUP_TIMESTAMP] ?: 0L }
+    override val lastArchiveMarketingPopupTimestamp: Flow<Long> = marketingPopupDataStore.data.map { it.lastShownAt }
 
-    override val archiveMarketingPopupShownCount: Flow<Int> =
-        dataStore.data.map { it[ARCHIVE_MARKETING_POPUP_SHOWN_COUNT] ?: 0 }
+    override val archiveMarketingPopupShownCount: Flow<Int> = marketingPopupDataStore.data.map { it.shownCount }
 
     override suspend fun recordMarketingPopupShown() {
-        dataStore.edit {
-            it[LAST_ARCHIVE_MARKETING_POPUP_TIMESTAMP] = System.currentTimeMillis()
-            it[ARCHIVE_MARKETING_POPUP_SHOWN_COUNT] = (it[ARCHIVE_MARKETING_POPUP_SHOWN_COUNT] ?: 0) + 1
+        marketingPopupDataStore.updateData { current ->
+            current.copy(
+                lastShownAt = System.currentTimeMillis(),
+                shownCount = current.shownCount + 1,
+            )
         }
+    }
+
+    override suspend fun clearMarketingPopupRecord() {
+        marketingPopupDataStore.updateData { MarketingPopupRecord() }
     }
 
     override suspend fun getUserInfo(): Result<UserInfo> = runSuspendCatching {
@@ -71,8 +76,5 @@ class UserRepositoryImpl @Inject constructor(
     companion object {
         private val HAS_VISITED_RANDOM_POSE = booleanPreferencesKey("is_first_visit_random_pose")
         private val HAS_SHOWN_QR_INFO_TOOLTIP = booleanPreferencesKey("is_first_visit_archive")
-        private val LAST_ARCHIVE_MARKETING_POPUP_TIMESTAMP =
-            longPreferencesKey("last_archive_marketing_popup_timestamp")
-        private val ARCHIVE_MARKETING_POPUP_SHOWN_COUNT = intPreferencesKey("archive_marketing_popup_shown_count")
     }
 }
