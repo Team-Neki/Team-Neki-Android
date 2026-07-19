@@ -261,9 +261,10 @@ fun MapScreen(
             clusterManager.removeAll(
                 prevMarkerMap.filterKeys { it !in newMarkerMap }.values.map { PhotoBoothClusterItem(it) },
             )
+            val jitteredItemMap = newMarkerMap.values.toList().toJitteredClusterItems()
             clusterManager.addAll(
                 newMarkerMap.filterKeys { it !in prevMarkerMap }.values
-                    .map { newMarkerMap.values.toList().toJitteredClusterItems()[it.id] ?: PhotoBoothClusterItem(it) }
+                    .map { jitteredItemMap[it.id] ?: PhotoBoothClusterItem(it) }
                     .associateBy { it },
             )
             newMarkerMap.forEach { (id, booth) ->
