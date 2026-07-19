@@ -1,5 +1,6 @@
 package com.neki.android.core.data.local.serializer
 
+import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import com.neki.android.core.data.local.model.MarketingPopupRecord
 import kotlinx.serialization.SerializationException
@@ -18,7 +19,7 @@ internal object MarketingPopupRecordSerializer : Serializer<MarketingPopupRecord
                 string = input.readBytes().decodeToString(),
             )
         } catch (e: SerializationException) {
-            defaultValue
+            throw CorruptionException("Cannot read MarketingPopupRecord.", e)
         }
 
     override suspend fun writeTo(t: MarketingPopupRecord, output: OutputStream) {

@@ -3,6 +3,7 @@ package com.neki.android.core.data.local.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.neki.android.core.data.local.model.MarketingPopupRecord
@@ -50,6 +51,7 @@ internal object DataStoreModule {
         @ApplicationContext context: Context,
     ): DataStore<MarketingPopupRecord> = DataStoreFactory.create(
         serializer = MarketingPopupRecordSerializer,
+        corruptionHandler = ReplaceFileCorruptionHandler { MarketingPopupRecord() },
         produceFile = { File(context.filesDir, "datastore/marketing_popup_record.json") },
     )
 }
