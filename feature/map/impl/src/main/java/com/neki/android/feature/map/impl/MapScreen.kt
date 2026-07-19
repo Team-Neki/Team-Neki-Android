@@ -412,4 +412,3 @@ fun MapScreen(
         )
     }
 }
-
