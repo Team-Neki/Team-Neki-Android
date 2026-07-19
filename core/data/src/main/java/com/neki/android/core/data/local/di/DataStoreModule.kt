@@ -2,13 +2,17 @@ package com.neki.android.core.data.local.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.neki.android.core.data.local.model.MarketingPopupRecord
+import com.neki.android.core.data.local.serializer.MarketingPopupRecordSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.io.File
 import javax.inject.Singleton
 
 private const val AUTH_DATASTORE = "auth_datastore"
@@ -38,4 +42,14 @@ internal object DataStoreModule {
     @Singleton
     @Provides
     fun provideUserDataStore(@ApplicationContext context: Context): DataStore<Preferences> = context.userDataStore
+
+    @MarketingPopupDataStore
+    @Singleton
+    @Provides
+    fun provideMarketingPopupDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<MarketingPopupRecord> = DataStoreFactory.create(
+        serializer = MarketingPopupRecordSerializer,
+        produceFile = { File(context.filesDir, "datastore/marketing_popup_record.json") },
+    )
 }

@@ -11,6 +11,7 @@ interface UserRepository {
     val lastArchiveMarketingPopupTimestamp: Flow<Long>
     val archiveMarketingPopupShownCount: Flow<Int>
     suspend fun recordMarketingPopupShown()
+    suspend fun clearMarketingPopupRecord()
 
     suspend fun getUserInfo(): Result<UserInfo>
     suspend fun updateUserInfo(nickname: String): Result<Unit>
