@@ -9,8 +9,9 @@ import com.neki.android.core.model.PhotoBooth
  */
 internal data class PhotoBoothClusterItem(
     val photoBooth: PhotoBooth,
+    private val overridePosition: LatLng? = null,
 ) : ClusteringKey {
-    override fun getPosition(): LatLng = LatLng(
+    override fun getPosition(): LatLng = overridePosition ?: LatLng(
         photoBooth.latitude,
         photoBooth.longitude,
     )

@@ -3,9 +3,15 @@ package com.neki.android.feature.map.impl.util
 import android.content.Context
 import android.location.Geocoder
 import android.os.Build
+import com.naver.maps.geometry.LatLng
+import com.neki.android.core.model.PhotoBooth
+import com.neki.android.feature.map.impl.cluster.PhotoBoothClusterItem
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.Locale
 import kotlin.coroutines.resume
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 /** 위경도에 대한 지명 조회 **/
 internal suspend fun Context.getPlaceName(
@@ -68,5 +74,26 @@ internal fun Int.formatDistance(): String {
         } else {
             "${roundedKm}km"
         }
+    }
+}
+
+/** 같은 좌표에 겹치는 마커를 삼각함수로 분산 배치 **/
+internal fun List<PhotoBooth>.toJitteredClusterItems(): Map<Long, PhotoBoothClusterItem> {
+    val offsetRadius = 0.00005
+    val coordinateFrequency = mutableMapOf<Pair<Double, Double>, Int>()
+    return associate { booth ->
+        val key = booth.latitude to booth.longitude
+        val overlapIndex = coordinateFrequency.getOrDefault(key, 0)
+        coordinateFrequency[key] = overlapIndex + 1
+        val position = if (overlapIndex == 0) {
+            null
+        } else {
+            val angle = overlapIndex * (PI / 3)
+            LatLng(
+                booth.latitude + offsetRadius * cos(angle),
+                booth.longitude + offsetRadius * sin(angle),
+            )
+        }
+        booth.id to PhotoBoothClusterItem(booth, position)
     }
 }

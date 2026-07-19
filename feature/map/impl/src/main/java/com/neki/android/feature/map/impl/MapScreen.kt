@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.geometry.LatLngBounds
+import com.neki.android.feature.map.impl.util.toJitteredClusterItems
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
@@ -261,7 +262,9 @@ fun MapScreen(
                 prevMarkerMap.filterKeys { it !in newMarkerMap }.values.map { PhotoBoothClusterItem(it) },
             )
             clusterManager.addAll(
-                newMarkerMap.filterKeys { it !in prevMarkerMap }.values.associateBy { PhotoBoothClusterItem(it) },
+                newMarkerMap.filterKeys { it !in prevMarkerMap }.values
+                    .map { newMarkerMap.values.toList().toJitteredClusterItems()[it.id] ?: PhotoBoothClusterItem(it) }
+                    .associateBy { it },
             )
             newMarkerMap.forEach { (id, booth) ->
                 val prev = prevMarkerMap[id] ?: return@forEach
@@ -409,3 +412,4 @@ fun MapScreen(
         )
     }
 }
+
