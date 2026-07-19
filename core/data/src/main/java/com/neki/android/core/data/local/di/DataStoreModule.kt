@@ -51,7 +51,7 @@ internal object DataStoreModule {
         @ApplicationContext context: Context,
     ): DataStore<MarketingPopupRecord> = DataStoreFactory.create(
         serializer = MarketingPopupRecordSerializer,
-        corruptionHandler = ReplaceFileCorruptionHandler { MarketingPopupRecord() },
         produceFile = { File(context.filesDir, "datastore/marketing_popup_record.json") },
+        corruptionHandler = ReplaceFileCorruptionHandler { MarketingPopupRecord() },
     )
 }
