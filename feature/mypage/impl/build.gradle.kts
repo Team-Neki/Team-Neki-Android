@@ -9,6 +9,7 @@ android {
 dependencies {
     implementation(projects.feature.mypage.api)
     implementation(projects.feature.auth.api)
+    implementation(projects.feature.notification.api)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
