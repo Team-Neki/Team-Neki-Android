@@ -71,7 +71,7 @@ internal fun NotificationScreen(
                 )
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(32.dp),
-                    contentPadding = PaddingValues(bottom = 12.dp)
+                    contentPadding = PaddingValues(bottom = 12.dp),
                 ) {
                     items(uiState.notifications) { notification ->
                         NotificationListItem(
