@@ -64,12 +64,14 @@ internal fun NotificationScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Text(
+                    modifier = Modifier.padding(top = 12.dp),
                     text = "새로운 알림",
                     style = NekiTheme.typography.body14SemiBold,
                     color = NekiTheme.colorScheme.gray700,
                 )
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(32.dp),
+                    contentPadding = PaddingValues(bottom = 12.dp)
                 ) {
                     items(uiState.notifications) { notification ->
                         NotificationListItem(
