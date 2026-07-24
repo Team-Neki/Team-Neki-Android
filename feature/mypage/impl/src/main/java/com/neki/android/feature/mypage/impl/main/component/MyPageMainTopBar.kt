@@ -25,7 +25,7 @@ internal fun MyPageMainTopBar(
     NekiLeftTitleTopBar(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 8.dp),
+            .padding(start = 20.dp, end = 12.dp),
         title = {
             Text(
                 text = "마이페이지",
