@@ -71,7 +71,7 @@ private fun TermScreen(
             TermContent(
                 modifier = Modifier.weight(1f),
                 terms = uiState.terms,
-                isAllRequiredTermChecked = uiState.isAllRequiredTermChecked,
+                isAllTermChecked = uiState.isAllTermChecked,
                 onClickAgreeAll = { onIntent(TermIntent.ClickAgreeAll) },
                 onClickAgreeTerm = { onIntent(TermIntent.ClickAgreeTerm(it)) },
                 onClickTermDetail = { onIntent(TermIntent.ClickTermNavigateUrl(it)) },
