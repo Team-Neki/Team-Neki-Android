@@ -17,6 +17,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.notification.impl.component.NotificationEmptyContent
 import com.neki.android.feature.notification.impl.component.NotificationListItem
@@ -53,7 +54,9 @@ internal fun NotificationScreen(
             onClickBack = { onIntent(NotificationIntent.ClickBack) },
         )
 
-        if (uiState.notifications.isEmpty()) {
+        if (uiState.isLoading) {
+            LoadingDialog()
+        } else if (uiState.notifications.isEmpty()) {
             NotificationEmptyContent(modifier = Modifier.weight(1f))
         } else {
             Column(
@@ -89,6 +92,6 @@ internal fun NotificationScreen(
 @Composable
 private fun NotificationEmptyScreenPreview() {
     NekiTheme {
-        NotificationScreen(NotificationState())
+        NotificationScreen(NotificationState(isLoading = false))
     }
 }
