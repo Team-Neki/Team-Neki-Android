@@ -9,6 +9,7 @@ import com.neki.android.core.data.remote.api.NotificationService
 import com.neki.android.core.data.remote.model.request.UpdateNotificationRequest
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.NotificationRepository
+import com.neki.android.core.model.Notification
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -20,6 +21,10 @@ class NotificationRepositoryImpl @Inject constructor(
 
     companion object {
         private val PUSH_TOKEN = stringPreferencesKey("push_token")
+    }
+
+    override suspend fun getRecentNotifications(): Result<List<Notification>> = runSuspendCatching {
+        notificationService.getRecentNotifications().data.map { it.toModel() }
     }
 
     override suspend fun savePushToken(token: String) {
