@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.feature.notification.api)
     implementation(projects.feature.archive.api)
     implementation(projects.feature.photoUpload.api)
     implementation(projects.feature.selectAlbum.api)
