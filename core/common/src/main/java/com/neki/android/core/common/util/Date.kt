@@ -42,7 +42,7 @@ fun String.toRelativeTime(now: LocalDateTime = LocalDateTime.now()): String {
             elapsedSeconds < 60 * 60 -> "${elapsedSeconds / 60}분 전"
             elapsedSeconds < 60 * 60 * 24 -> "${elapsedSeconds / (60 * 60)}시간 전"
             elapsedSeconds < 60 * 60 * 24 * 30 -> "${elapsedSeconds / (60 * 60 * 24)}일 전"
-            elapsedSeconds < 60 * 60 * 24 * 365 -> "${elapsedSeconds / (60 * 60 * 24 * 30)}달전"
+            elapsedSeconds < 60 * 60 * 24 * 365 -> "${elapsedSeconds / (60 * 60 * 24 * 30)}달 전"
             else -> "${elapsedSeconds / (60 * 60 * 24 * 365)}년 전"
         }
     } catch (e: DateTimeParseException) {
