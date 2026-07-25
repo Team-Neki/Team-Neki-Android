@@ -24,6 +24,7 @@ internal fun NotificationListItem(
             text = notification.title,
             style = NekiTheme.typography.body16SemiBold,
             color = NekiTheme.colorScheme.gray800,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
         VerticalSpacer(4.dp)
@@ -31,6 +32,8 @@ internal fun NotificationListItem(
             text = notification.body,
             style = NekiTheme.typography.body14Medium,
             color = NekiTheme.colorScheme.gray500,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
         VerticalSpacer(6.dp)
         Text(

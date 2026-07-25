@@ -114,7 +114,7 @@ private fun NotificationScreenPreview() {
                     Notification(
                         id = 2L,
                         type = "POSE",
-                        title = "새로운 포즈를 추천해 드릴게요.새로운 포즈를 추천해 드릴게요.새로운 포즈를 추천해 드릴게요.",
+                        title = "새로운 포즈를 추천해 드릴게요.새로운 포즈를 추천해 드릴게요.새로운 포즈를 추천해 드릴게요.새로운 포즈를 추천해 드릴게요.",
                         body = "오늘의 포즈를 확인해 보세요.오늘의 포즈를 확인해 보세요.오늘의 포즈를 확인해 보세요.오늘의 포즈를 확인해 보세요.",
                         link = "neki://pose/456",
                         createdAt = "어제",
