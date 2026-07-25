@@ -3,7 +3,6 @@ package com.neki.android.feature.notification.impl.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
@@ -14,12 +13,9 @@ import com.neki.android.core.ui.compose.VerticalSpacer
 @Composable
 internal fun NotificationListItem(
     notification: Notification,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    Column(
-        modifier = modifier,
-    ) {
+    Column {
         Text(
             text = notification.title,
             style = NekiTheme.typography.body16SemiBold,
