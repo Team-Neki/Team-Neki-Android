@@ -9,7 +9,10 @@ data class TermState(
     val terms: ImmutableList<Term> = persistentListOf(),
 ) {
     val isAllRequiredTermChecked: Boolean
-        get() = terms.filter { it.isRequired }.all { it.isChecked }
+        get() = terms.any { it.isRequired } && terms.filter { it.isRequired }.all { it.isChecked }
+
+    val isAllTermChecked: Boolean
+        get() = terms.isNotEmpty() && terms.all { it.isChecked }
 }
 
 sealed interface TermIntent {
