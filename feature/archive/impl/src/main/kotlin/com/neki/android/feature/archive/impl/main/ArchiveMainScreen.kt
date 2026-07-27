@@ -51,6 +51,7 @@ import kotlinx.collections.immutable.persistentListOf
 internal fun ArchiveMainRoute(
     viewModel: ArchiveMainViewModel = hiltViewModel(),
     navigateToQRScan: () -> Unit,
+    navigateToNotification: () -> Unit,
     navigateToAllAlbum: () -> Unit,
     navigateToFavoriteAlbum: (Long) -> Unit,
     navigateToAlbumDetail: (Long, String) -> Unit,
@@ -69,6 +70,7 @@ internal fun ArchiveMainRoute(
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             ArchiveMainSideEffect.NavigateToQRScan -> navigateToQRScan()
+            ArchiveMainSideEffect.NavigateToNotification -> navigateToNotification()
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
             is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
@@ -104,6 +106,7 @@ internal fun ArchiveMainScreen(
             ArchiveMainTopBar(
                 showTooltip = uiState.isFirstEntered,
                 onClickQRCodeIcon = { onIntent(ArchiveMainIntent.ClickQRScanIcon) },
+                onClickNotificationIcon = { onIntent(ArchiveMainIntent.ClickNotificationIcon) },
                 onDismissToolTipPopup = { onIntent(ArchiveMainIntent.DismissToolTipPopup) },
             )
             ArchiveMainContent(

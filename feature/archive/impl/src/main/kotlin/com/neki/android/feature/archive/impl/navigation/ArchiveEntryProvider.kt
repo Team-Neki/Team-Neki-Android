@@ -35,6 +35,7 @@ import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailIntent
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailRoute
 import com.neki.android.feature.archive.impl.photo_detail.PhotoDetailViewModel
 import com.neki.android.feature.photo_upload.api.navigateToQRScan
+import com.neki.android.feature.notification.api.navigateToNotification
 import com.neki.android.feature.select_album.api.SelectAlbumAction
 import com.neki.android.feature.select_album.api.SelectAlbumCreatedResult
 import com.neki.android.feature.select_album.api.navigateToSelectAlbum
@@ -82,6 +83,7 @@ private fun EntryProviderScope<NavKey>.archiveEntry(navigator: MainNavigator) {
         ArchiveMainRoute(
             viewModel = viewModel,
             navigateToQRScan = navigator::navigateToQRScan,
+            navigateToNotification = navigator::navigateToNotification,
             navigateToAllAlbum = navigator::navigateToAllAlbum,
             navigateToFavoriteAlbum = { id ->
                 navigator.navigateToAlbumDetail(id = id, isFavorite = true)

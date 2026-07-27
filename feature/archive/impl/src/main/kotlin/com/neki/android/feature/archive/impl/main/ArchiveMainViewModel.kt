@@ -75,7 +75,7 @@ class ArchiveMainViewModel @Inject constructor(
             }
 
             ArchiveMainIntent.ClickQRScanIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
-            ArchiveMainIntent.ClickNotificationIcon -> {}
+            ArchiveMainIntent.ClickNotificationIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToNotification)
 
             // Album Intent
             ArchiveMainIntent.ClickAllAlbumText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllAlbum)

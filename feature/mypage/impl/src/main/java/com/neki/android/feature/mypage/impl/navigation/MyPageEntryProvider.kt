@@ -11,6 +11,7 @@ import com.neki.android.feature.mypage.api.MyPageNavKey
 import com.neki.android.feature.mypage.api.navigateToEditProfile
 import com.neki.android.feature.mypage.api.navigateToPermission
 import com.neki.android.feature.mypage.api.navigateToProfile
+import com.neki.android.feature.notification.api.navigateToNotification
 import com.neki.android.feature.mypage.impl.main.MyPageRoute
 import com.neki.android.feature.mypage.impl.permission.PermissionRoute
 import com.neki.android.feature.mypage.impl.profile.EditProfileRoute
@@ -43,6 +44,7 @@ private fun EntryProviderScope<NavKey>.myPageEntry(
         clazzContentKey = { key -> key.toString() },
     ) {
         MyPageRoute(
+            navigateToNotification = mainNavigator::navigateToNotification,
             navigateToPermission = mainNavigator::navigateToPermission,
             navigateToProfile = mainNavigator::navigateToProfile,
         )

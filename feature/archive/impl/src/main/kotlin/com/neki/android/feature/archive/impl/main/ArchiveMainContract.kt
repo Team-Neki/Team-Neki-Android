@@ -50,6 +50,7 @@ sealed interface ArchiveMainIntent {
 
 sealed interface ArchiveMainSideEffect {
     data object NavigateToQRScan : ArchiveMainSideEffect
+    data object NavigateToNotification : ArchiveMainSideEffect
     data object NavigateToAllAlbum : ArchiveMainSideEffect
     data class NavigateToFavoriteAlbum(val albumId: Long) : ArchiveMainSideEffect
     data class NavigateToAlbumDetail(val albumId: Long, val title: String) : ArchiveMainSideEffect

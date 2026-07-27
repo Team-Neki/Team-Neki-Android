@@ -24,13 +24,14 @@ import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
-import com.neki.android.feature.mypage.impl.main.component.MainTopBar
+import com.neki.android.feature.mypage.impl.main.component.MyPageMainTopBar
 import com.neki.android.feature.mypage.impl.main.component.ProfileCard
 import com.neki.android.feature.mypage.impl.main.const.ServiceInfoMenu
 
 @Composable
 internal fun MyPageRoute(
     viewModel: MyPageViewModel = hiltViewModel(),
+    navigateToNotification: () -> Unit = {},
     navigateToPermission: () -> Unit,
     navigateToProfile: () -> Unit,
 ) {
@@ -44,7 +45,7 @@ internal fun MyPageRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
         when (effect) {
-            MyPageEffect.NavigateToNotification -> {}
+            MyPageEffect.NavigateToNotification -> navigateToNotification()
             MyPageEffect.NavigateToProfile -> navigateToProfile()
             MyPageEffect.NavigateToPermission -> navigateToPermission()
             is MyPageEffect.OpenExternalLink -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(effect.url)))
@@ -71,8 +72,8 @@ fun MyPageScreen(
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        MainTopBar(
-//            onClickIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
+        MyPageMainTopBar(
+            onClickNotificationIcon = { onIntent(MyPageIntent.ClickNotificationIcon) },
         )
         ProfileCard(
             profileImageUrl = uiState.userInfo.profileImageUrl,

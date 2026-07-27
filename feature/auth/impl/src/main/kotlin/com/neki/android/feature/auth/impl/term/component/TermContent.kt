@@ -32,7 +32,7 @@ import kotlinx.collections.immutable.persistentListOf
 internal fun TermContent(
     modifier: Modifier = Modifier,
     terms: ImmutableList<Term> = persistentListOf(),
-    isAllRequiredTermChecked: Boolean = false,
+    isAllTermChecked: Boolean = false,
     onClickAgreeAll: () -> Unit = {},
     onClickAgreeTerm: (Term) -> Unit = {},
     onClickTermDetail: (Term) -> Unit = {},
@@ -59,7 +59,7 @@ internal fun TermContent(
                 .noRippleClickable(onClick = onClickAgreeAll)
                 .border(
                     width = 1.dp,
-                    color = if (isAllRequiredTermChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray100,
+                    color = if (isAllTermChecked) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray100,
                     shape = RoundedCornerShape(12.dp),
                 )
                 .background(
@@ -74,7 +74,7 @@ internal fun TermContent(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_check),
                 contentDescription = null,
-                tint = if (isAllRequiredTermChecked) NekiTheme.colorScheme.primary500
+                tint = if (isAllTermChecked) NekiTheme.colorScheme.primary500
                 else NekiTheme.colorScheme.gray200,
             )
             Text(
