@@ -12,6 +12,7 @@
 
 ## Skill Routing
 
+- harness skill, agent, `AGENTS.md`, `docs/discussions.md`: `.claude/skills/maintaining-harness/SKILL.md`
 - 구현 완료 후 테스트, 리뷰, QA, 회귀 검증: `.claude/skills/verification-loop/SKILL.md`
 - branch, commit, issue, PR: `.claude/skills/git-conventions/SKILL.md`
 - 원격 API, Ktor service, DTO, repository: `.claude/skills/implementing-remote-api/SKILL.md`
