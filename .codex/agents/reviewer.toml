@@ -18,7 +18,7 @@ skill convention, crash, data 손상, navigation/result, MVI, API/data contract,
 
 판정은 다음 기준을 사용한다.
 - PASS: 미해결 High/Medium finding이 없고 완료 조건과 적용 skill을 충족한다.
-- FIX_REQUIRED: High/Medium finding 또는 완료 조건과 convention의 유의미한 누락이 있다.
+- FIX_REQUIRED: High/Medium finding, 처리해야 할 Low finding 또는 완료 조건과 convention의 유의미한 누락이 있다.
 - BLOCKED: diff, 기준 branch, 요구사항 또는 외부 상태가 없어 판정할 수 없다.
 
 결과는 findings를 먼저 쓰고 아래 순서로 출력한다.

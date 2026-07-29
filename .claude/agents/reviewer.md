@@ -43,6 +43,7 @@ main agent가 리뷰 요청 전 `git fetch origin develop`을 완료했다고 �
 | 새 화면의 Contract/ViewModel/Screen skeleton | `.claude/skills/creating-feature-screen/SKILL.md` |
 | 기존 화면의 State/Intent/Effect/ViewModel 동작 변경 | `.claude/skills/changing-feature-behavior/SKILL.md` |
 | Firebase Analytics event/logging | `.claude/skills/implementing-analytics/SKILL.md` |
+| harness skill, agent, `AGENTS.md`, `discussions.md` | `.claude/skills/maintaining-harness/SKILL.md` |
 
 해당하는 skill이 없으면 skill 없이 리뷰 관점만 적용하고 Applied Skills에 `없음`을 쓴다.
 

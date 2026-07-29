@@ -45,7 +45,7 @@ skill 문서가 서술하는 패턴이 실제 코드와 맞는지 확인한다. 
 skill이나 agent 파일을 수정한 뒤 아래를 확인한다.
 
 - `.claude/agents/<name>.md`가 원본이므로, `.codex/agents/<name>.toml`의 `developer_instructions`가 같은 내용을 요약하고 있는지 확인한다. 서로 모순되면 안 된다.
-- 새로 언급한 skill/agent 경로가 `AGENTS.md`, `reviewer.md`, `qa.md`, `reviewer.toml`, `qa.toml`의 관련 표에도 반영됐는지 확인한다.
+- 새로 언급한 skill/agent 경로가 `AGENTS.md`, `reviewer.toml`, `qa.toml`에 반영됐는지 확인하고, `reviewer.md`와 `qa.md`의 Skill 선택 표에 모두 포함됐는지 확인한다.
 - `.claude/agents/*.md`의 frontmatter(`name`, `description`, `tools`)가 유효한지 확인한다.
 - `.codex/agents/*.toml`이 파싱되는지 확인한다.
 - `.agents/skills` 심볼릭 링크가 깨지지 않았는지 확인한다.

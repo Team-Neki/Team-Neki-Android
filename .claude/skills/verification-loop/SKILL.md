@@ -52,6 +52,8 @@ agent 간 왕복이 검증 비용의 대부분이므로 `LIGHT`는 어떤 경우
 - 변경 모듈 detekt
 - 관련 unit test가 있으면 실행. instrumentation test는 기기가 필요하므로 Runtime QA 결정에 따른다
 - 문서 작업은 별도 검증 도구가 없으므로 참조 경로와 명령의 실재 여부를 직접 확인
+- harness 변경은 `.codex/agents/*.toml` 파싱 여부를 확인
+- harness 변경은 `.agents/skills` 심볼릭 링크 대상과 skill·agent 문서가 참조하는 경로의 실재 여부를 확인
 
 변경과 관련 없는 전체 명령은 어떤 단계에도 추가하지 않는다. `FULL`도 영향 모듈 범위까지만 확장한다. 실패하면 원인을 수정하고 실패한 명령과 그 선행 검증부터 다시 실행한다.
 

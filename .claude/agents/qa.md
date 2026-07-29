@@ -42,6 +42,7 @@ Android 변경사항의 자동 검증, 기능·회귀 시나리오, 선택된 Ru
 | 새 화면 skeleton | `.claude/skills/creating-feature-screen/SKILL.md` |
 | 기존 화면 기능 추가/수정 | `.claude/skills/changing-feature-behavior/SKILL.md` |
 | Firebase Analytics | `.claude/skills/implementing-analytics/SKILL.md` |
+| harness skill, agent, `AGENTS.md`, `discussions.md` | `.claude/skills/maintaining-harness/SKILL.md` |
 
 ## 사전 확인
 
