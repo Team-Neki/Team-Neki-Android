@@ -1,5 +1,6 @@
 package com.neki.android.feature.archive.impl.main
 
+import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -99,8 +100,10 @@ internal fun ArchiveMainRoute(
             ArchiveMainSideEffect.RequestNotificationPermission -> {
                 if (NotificationPermissionManager.isGrantedNotificationPermission(context)) {
                     navigateToNotification()
-                } else {
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     notificationPermissionLauncher.launch(NotificationPermissionManager.NOTIFICATION_PERMISSION)
+                } else {
+                    viewModel.store.onIntent(ArchiveMainIntent.DenyNotificationPermissionPermanent)
                 }
             }
             ArchiveMainSideEffect.MoveAppSettingsForNotification ->
