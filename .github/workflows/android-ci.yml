@@ -42,13 +42,8 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Generate local.properties
-        env:
-          META_APP_ID: ${{ secrets.META_APP_ID }}
-          META_CLIENT_TOKEN: ${{ secrets.META_CLIENT_TOKEN }}
         run: |
           echo '${{ secrets.LOCAL_PROPERTIES }}' >> ./local.properties
-          printf 'META_APP_ID=%s\n' "$META_APP_ID" >> ./local.properties
-          printf 'META_CLIENT_TOKEN=%s\n' "$META_CLIENT_TOKEN" >> ./local.properties
 
       - name: Generate google-services.json (debug)
         run: |
