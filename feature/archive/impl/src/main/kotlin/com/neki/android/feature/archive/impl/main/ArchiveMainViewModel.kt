@@ -75,7 +75,16 @@ class ArchiveMainViewModel @Inject constructor(
             }
 
             ArchiveMainIntent.ClickQRScanIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToQRScan)
-            ArchiveMainIntent.ClickNotificationIcon -> postSideEffect(ArchiveMainSideEffect.NavigateToNotification)
+            ArchiveMainIntent.ClickNotificationIcon -> postSideEffect(ArchiveMainSideEffect.RequestNotificationPermission)
+
+            // Notification Permission Intent
+            ArchiveMainIntent.GrantNotificationPermission -> postSideEffect(ArchiveMainSideEffect.NavigateToNotification)
+            ArchiveMainIntent.DenyNotificationPermissionPermanent -> reduce { copy(showNotificationPermissionDeniedDialog = true) }
+            ArchiveMainIntent.DismissNotificationPermissionDialog -> reduce { copy(showNotificationPermissionDeniedDialog = false) }
+            ArchiveMainIntent.ClickMoveToNotificationAppSettings -> {
+                reduce { copy(showNotificationPermissionDeniedDialog = false) }
+                postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotification)
+            }
 
             // Album Intent
             ArchiveMainIntent.ClickAllAlbumText -> postSideEffect(ArchiveMainSideEffect.NavigateToAllAlbum)

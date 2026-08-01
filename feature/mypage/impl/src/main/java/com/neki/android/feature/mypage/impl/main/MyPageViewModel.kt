@@ -48,9 +48,18 @@ internal class MyPageViewModel @Inject constructor(
             is MyPageIntent.SetAppVersion -> reduce { copy(appVersion = intent.appVersion) }
 
             // MyPage Main
-            MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.NavigateToNotification)
+            MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.RequestNotificationPermission)
             MyPageIntent.ClickProfileCard -> postSideEffect(MyPageEffect.NavigateToProfile)
             MyPageIntent.ClickPermission -> postSideEffect(MyPageEffect.NavigateToPermission)
+
+            // Notification Permission Intent
+            MyPageIntent.GrantNotificationPermission -> postSideEffect(MyPageEffect.NavigateToNotification)
+            MyPageIntent.DenyNotificationPermissionPermanent -> reduce { copy(showNotificationPermissionDeniedDialog = true) }
+            MyPageIntent.DismissNotificationPermissionDialog -> reduce { copy(showNotificationPermissionDeniedDialog = false) }
+            MyPageIntent.ClickMoveToNotificationAppSettings -> {
+                reduce { copy(showNotificationPermissionDeniedDialog = false) }
+                postSideEffect(MyPageEffect.MoveAppSettingsForNotification)
+            }
             is MyPageIntent.ClickServiceInfoMenu -> postSideEffect(MyPageEffect.OpenExternalLink(intent.menu.url))
             MyPageIntent.ClickOpenSourceLicense -> postSideEffect(MyPageEffect.OpenOssLicenses)
 

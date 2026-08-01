@@ -2,6 +2,9 @@ package com.neki.android.feature.mypage.impl.main
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.neki.android.core.common.permission.NekiPermission
+import com.neki.android.core.common.permission.NotificationPermissionManager
 import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.compose.launchAppSettings
+import com.neki.android.core.ui.compose.rememberAppSettingsLauncher
 import com.neki.android.feature.mypage.impl.component.SectionArrowItem
 import com.neki.android.feature.mypage.impl.component.SectionTitleText
 import com.neki.android.feature.mypage.impl.component.SectionVersionItem
@@ -36,6 +44,7 @@ internal fun MyPageRoute(
     navigateToProfile: () -> Unit,
 ) {
     val context = LocalContext.current
+    val activity = LocalActivity.current!!
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -43,9 +52,34 @@ internal fun MyPageRoute(
         viewModel.store.onIntent(MyPageIntent.SetAppVersion(appVersion))
     }
 
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.store.onIntent(MyPageIntent.GrantNotificationPermission)
+        } else if (!NotificationPermissionManager.shouldShowNotificationRationale(activity)) {
+            viewModel.store.onIntent(MyPageIntent.DenyNotificationPermissionPermanent)
+        }
+    }
+
+    val notificationAppSettingsLauncher = rememberAppSettingsLauncher {
+        if (NotificationPermissionManager.isGrantedNotificationPermission(context)) {
+            navigateToNotification()
+        }
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { effect ->
         when (effect) {
             MyPageEffect.NavigateToNotification -> navigateToNotification()
+            MyPageEffect.RequestNotificationPermission -> {
+                if (NotificationPermissionManager.isGrantedNotificationPermission(context)) {
+                    navigateToNotification()
+                } else {
+                    notificationPermissionLauncher.launch(NotificationPermissionManager.NOTIFICATION_PERMISSION)
+                }
+            }
+            MyPageEffect.MoveAppSettingsForNotification ->
+                notificationAppSettingsLauncher.launchAppSettings(context, NekiPermission.NOTIFICATION)
             MyPageEffect.NavigateToProfile -> navigateToProfile()
             MyPageEffect.NavigateToPermission -> navigateToPermission()
             is MyPageEffect.OpenExternalLink -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(effect.url)))
@@ -112,6 +146,18 @@ fun MyPageScreen(
 
     if (uiState.isLoading) {
         LoadingDialog()
+    }
+
+    if (uiState.showNotificationPermissionDeniedDialog) {
+        DoubleButtonAlertDialog(
+            title = NekiPermission.NOTIFICATION_PERMANENT_DENIED_DIALOG_TITLE,
+            content = NekiPermission.NOTIFICATION_PERMANENT_DENIED_DIALOG_CONTENT,
+            grayButtonText = "나중에",
+            primaryButtonText = "설정으로 이동",
+            onDismissRequest = { onIntent(MyPageIntent.DismissNotificationPermissionDialog) },
+            onClickGrayButton = { onIntent(MyPageIntent.DismissNotificationPermissionDialog) },
+            onClickPrimaryButton = { onIntent(MyPageIntent.ClickMoveToNotificationAppSettings) },
+        )
     }
 }
 
