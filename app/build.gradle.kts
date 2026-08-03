@@ -16,8 +16,23 @@ val properties = Properties().apply {
     }
 }
 
+fun metaProperty(name: String): String = (
+    properties.getProperty(name)
+        ?: providers.gradleProperty(name).orNull
+        ?: error("$name must be configured in local.properties or as a Gradle property")
+    )
+    .trim()
+    .removeSurrounding("\"")
+    .takeIf { it.isNotEmpty() }
+    ?: error("$name must not be empty")
+
 android {
     namespace = "com.neki.android.app"
+
+    defaultConfig {
+        resValue("string", "facebook_app_id", metaProperty("META_APP_ID"))
+        resValue("string", "facebook_client_token", metaProperty("META_CLIENT_TOKEN"))
+    }
 
     buildFeatures {
         buildConfig = true
@@ -94,6 +109,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)
+    implementation(libs.facebook.core)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.ui)

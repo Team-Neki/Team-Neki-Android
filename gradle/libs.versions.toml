@@ -45,6 +45,7 @@ reorderable = "2.5.1"
 firebaseBom = "34.9.0"
 googleServices = "4.4.4"
 firebaseCrashlyticsPlugin = "3.0.6"
+facebookSdk = "18.2.3"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
@@ -126,6 +127,7 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+facebook-core = { module = "com.facebook.android:facebook-core", version.ref = "facebookSdk" }
 
 # Dependencies of the included build-logic
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
