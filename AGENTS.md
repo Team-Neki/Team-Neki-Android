@@ -22,7 +22,7 @@
 - Compose UI, component, preview, dialog, bottom sheet: `.claude/skills/implementing-ui/SKILL.md`
 - 새 화면 skeleton: `.claude/skills/creating-feature-screen/SKILL.md`
 - 기존 화면 기능 추가/수정: `.claude/skills/changing-feature-behavior/SKILL.md`
-- Firebase Analytics: `.claude/skills/implementing-analytics/SKILL.md`
+- Amplitude Analytics: `.claude/skills/implementing-analytics/SKILL.md`
 
 ## Agents
 

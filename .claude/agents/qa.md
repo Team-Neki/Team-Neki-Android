@@ -41,7 +41,7 @@ Android 변경사항의 자동 검증, 기능·회귀 시나리오, 선택된 Ru
 | Compose UI, component, preview, dialog, bottom sheet | `.claude/skills/implementing-ui/SKILL.md` |
 | 새 화면 skeleton | `.claude/skills/creating-feature-screen/SKILL.md` |
 | 기존 화면 기능 추가/수정 | `.claude/skills/changing-feature-behavior/SKILL.md` |
-| Firebase Analytics | `.claude/skills/implementing-analytics/SKILL.md` |
+| Amplitude Analytics | `.claude/skills/implementing-analytics/SKILL.md` |
 | harness skill, agent, `AGENTS.md`, `discussions.md` | `.claude/skills/maintaining-harness/SKILL.md` |
 
 ## 사전 확인
@@ -165,6 +165,7 @@ adb logcat -d -v threadtime AndroidRuntime:E '*:S'
 - 화면 진입 로그는 재구성, recomposition, 재진입에서 중복 전송되는지 본다.
 - 클릭/완료 로그는 실제 사용자 action 한 번에 한 번 전송되는지 본다.
 - parameter는 화면 상태나 선택값과 맞는 값으로 들어가는지 본다.
+- 신규 로그인과 토큰 기반 자동 로그인 이후 user ID가 설정되고 로그아웃, 탈퇴, 인증 만료 이후 해제되는지 본다.
 
 ## 판정
 
