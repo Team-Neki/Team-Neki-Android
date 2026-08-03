@@ -9,4 +9,6 @@ android {
 
 dependencies {
     implementation(libs.amplitude.analytics.android)
+
+    testImplementation(libs.junit)
 }
