@@ -66,7 +66,6 @@ class LoginViewModel @Inject constructor(
         userRepository.getUserInfo()
             .onSuccess { userInfo ->
                 analyticsLogger.setUserId(userInfo.id.toString())
-                analyticsLogger.setUserProperty("platform", "android")
                 if (userInfo.isRequiredTermsAgreed) {
                     authRepository.setCompletedOnboarding(true)
                     postSideEffect(LoginSideEffect.NavigateToMain)

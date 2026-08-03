@@ -162,6 +162,7 @@ class MainActivity : ComponentActivity() {
             authEventManager.authEvent.collect { event ->
                 when (event) {
                     AuthEvent.RefreshTokenExpired -> {
+                        analyticsLogger.clearUserId()
                         Toast.makeText(
                             this@MainActivity,
                             "RefreshToken이 만료되었습니다.",

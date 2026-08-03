@@ -3,7 +3,6 @@ package com.neki.android.core.analytics.logger
 import android.content.Context
 import com.amplitude.android.Amplitude
 import com.amplitude.android.AutocaptureOption
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.neki.android.core.analytics.initializer.AmplitudeApiKey
 import com.neki.android.core.analytics.initializer.AnalyticsInitializer
 import dagger.Binds
@@ -21,7 +20,11 @@ internal abstract class AnalyticsModule {
 
     @Binds
     @Singleton
-    abstract fun bindAnalyticsLogger(impl: FirebaseAnalyticsLogger): AnalyticsLogger
+    abstract fun bindAnalyticsLogger(impl: AmplitudeAnalyticsLogger): AnalyticsLogger
+
+    @Binds
+    @Singleton
+    abstract fun bindAmplitudeAnalyticsClient(impl: AmplitudeSdkAnalyticsClient): AmplitudeAnalyticsClient
 
     companion object {
         @Provides
@@ -38,11 +41,5 @@ internal abstract class AnalyticsModule {
         fun provideAnalyticsInitializer(
             amplitude: Lazy<Amplitude>,
         ): AnalyticsInitializer = AnalyticsInitializer(amplitude::get)
-
-        @Provides
-        @Singleton
-        fun provideFirebaseAnalytics(
-            @ApplicationContext context: Context,
-        ): FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
     }
 }

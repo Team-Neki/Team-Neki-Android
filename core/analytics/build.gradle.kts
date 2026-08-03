@@ -9,7 +9,4 @@ android {
 
 dependencies {
     implementation(libs.amplitude.analytics.android)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
 }

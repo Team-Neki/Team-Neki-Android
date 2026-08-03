@@ -158,6 +158,7 @@ internal class MyPageViewModel @Inject constructor(
             .onSuccess {
                 reduce { copy(isShowLogoutDialog = false) }
                 tokenRepository.clearTokensWithAuthCache()
+                analyticsLogger.clearUserId()
                 postSideEffect(MyPageEffect.LogoutWithKakao)
             }
             .onFailure { Timber.e(it, "Failed to logout from server") }
@@ -172,6 +173,7 @@ internal class MyPageViewModel @Inject constructor(
             .onSuccess {
                 analyticsLogger.log(MypageAnalyticsEvent.Withdraw)
                 tokenRepository.clearTokensWithAuthCache()
+                analyticsLogger.clearUserId()
                 authRepository.setCompletedOnboarding(false)
                 userRepository.clearMarketingPopupRecord()
                 reduce { copy(isLoading = false) }
