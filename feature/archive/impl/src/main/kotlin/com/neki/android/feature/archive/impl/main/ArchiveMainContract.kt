@@ -15,6 +15,7 @@ data class ArchiveMainState(
     val isShowAddAlbumBottomSheet: Boolean = false,
     val albumNameTextState: TextFieldState = TextFieldState(),
     val showMarketingAgreementDialog: Boolean = false,
+    val showNotificationPermissionDeniedDialog: Boolean = false,
 )
 
 sealed interface ArchiveMainIntent {
@@ -27,6 +28,12 @@ sealed interface ArchiveMainIntent {
     data object DismissToolTipPopup : ArchiveMainIntent
     data object ClickQRScanIcon : ArchiveMainIntent
     data object ClickNotificationIcon : ArchiveMainIntent
+
+    // Notification Permission Intent
+    data object GrantNotificationPermission : ArchiveMainIntent
+    data object DenyNotificationPermissionPermanent : ArchiveMainIntent
+    data object DismissNotificationPermissionDialog : ArchiveMainIntent
+    data object ClickMoveToNotificationAppSettings : ArchiveMainIntent
 
     // Album Intent
     data object ClickAllAlbumText : ArchiveMainIntent
@@ -51,6 +58,8 @@ sealed interface ArchiveMainIntent {
 sealed interface ArchiveMainSideEffect {
     data object NavigateToQRScan : ArchiveMainSideEffect
     data object NavigateToNotification : ArchiveMainSideEffect
+    data object RequestNotificationPermission : ArchiveMainSideEffect
+    data object MoveAppSettingsForNotification : ArchiveMainSideEffect
     data object NavigateToAllAlbum : ArchiveMainSideEffect
     data class NavigateToFavoriteAlbum(val albumId: Long) : ArchiveMainSideEffect
     data class NavigateToAlbumDetail(val albumId: Long, val title: String) : ArchiveMainSideEffect

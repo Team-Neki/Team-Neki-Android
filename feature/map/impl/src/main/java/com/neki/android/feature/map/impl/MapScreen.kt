@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.geometry.LatLngBounds
@@ -44,10 +43,12 @@ import com.neki.android.core.model.PhotoBooth
 import com.neki.android.feature.map.impl.cluster.PhotoBoothClusterItem
 import com.neki.android.feature.map.impl.cluster.PhotoBoothClusterer
 import com.neki.android.core.common.permission.LocationPermissionManager
-import com.neki.android.core.common.permission.navigateToAppSettings
+import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.core.designsystem.dialog.SingleButtonAlertDialog
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.compose.launchAppSettings
+import com.neki.android.core.ui.compose.rememberAppSettingsLauncher
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
@@ -82,7 +83,12 @@ fun MapRoute(
             MapConst.DEFAULT_ZOOM_LEVEL,
         )
     }
-    var isNavigatedToSettings by remember { mutableStateOf(false) }
+    val appSettingsLauncher = rememberAppSettingsLauncher {
+        if (LocationPermissionManager.isGrantedLocationPermission(context)) {
+            locationTrackingMode = LocationTrackingMode.NoFollow
+            viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
+        }
+    }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -120,17 +126,6 @@ fun MapRoute(
                     viewModel.store.onIntent(MapIntent.GestureOnMap)
                 }
             }
-    }
-
-    LifecycleResumeEffect(Unit) {
-        if (isNavigatedToSettings) {
-            if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-                locationTrackingMode = LocationTrackingMode.NoFollow
-                viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
-            }
-            isNavigatedToSettings = false
-        }
-        onPauseOrDispose { }
     }
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
@@ -179,10 +174,7 @@ fun MapRoute(
                 )
             }
 
-            is MapEffect.NavigateToAppSettings -> {
-                isNavigatedToSettings = true
-                navigateToAppSettings(context)
-            }
+            is MapEffect.NavigateToAppSettings -> appSettingsLauncher.launchAppSettings(context, NekiPermission.LOCATION)
 
             is MapEffect.LaunchLocationPermission -> {
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)

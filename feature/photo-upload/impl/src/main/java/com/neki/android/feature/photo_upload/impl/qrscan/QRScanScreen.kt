@@ -17,9 +17,11 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.permission.CameraPermissionManager
-import com.neki.android.core.common.permission.navigateToAppSettings
+import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.compose.launchAppSettings
+import com.neki.android.core.ui.compose.rememberAppSettingsLauncher
 import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.photo_upload.api.QRScanResult
 import com.neki.android.feature.photo_upload.impl.BuildConfig
@@ -50,6 +52,10 @@ internal fun QRScanRoute(
         cameraPermissionLauncher.launch(CameraPermissionManager.CAMERA_PERMISSION)
     }
 
+    val appSettingsLauncher = rememberAppSettingsLauncher {
+        viewModel.store.onIntent(QRScanIntent.RequestCameraPermission)
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             QRScanSideEffect.NavigateBack -> navigateBack()
@@ -70,7 +76,7 @@ internal fun QRScanRoute(
             }
 
             QRScanSideEffect.RequestCameraPermission -> cameraPermissionLauncher.launch(CameraPermissionManager.CAMERA_PERMISSION)
-            QRScanSideEffect.MoveAppSettings -> navigateToAppSettings(context)
+            QRScanSideEffect.MoveAppSettings -> appSettingsLauncher.launchAppSettings(context, NekiPermission.CAMERA)
         }
     }
 

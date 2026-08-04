@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +36,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.neki.android.core.common.permission.NekiPermission
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.button.NekiIconButton
@@ -62,16 +60,6 @@ internal fun QRScannerContent(
     var frameOffset: Offset? by remember { mutableStateOf(null) }
     var frameSize: IntSize? by remember { mutableStateOf(null) }
     var containerSize: IntSize? by remember { mutableStateOf(null) }
-    var isNavigatedToSettings by rememberSaveable { mutableStateOf(false) }
-
-    LifecycleResumeEffect(Unit) {
-        if (isNavigatedToSettings) {
-            onIntent(QRScanIntent.RequestCameraPermission)
-            isNavigatedToSettings = false
-        }
-
-        onPauseOrDispose { }
-    }
 
     Box(
         modifier = modifier
@@ -206,7 +194,6 @@ internal fun QRScannerContent(
             onClickGrayButton = { onIntent(QRScanIntent.ClickOpenAppSettingDialogCancel) },
             onClickPrimaryButton = {
                 onIntent(QRScanIntent.ClickOpenAppSettingDialogConfirm)
-                isNavigatedToSettings = true
             },
             properties = DialogProperties(
                 usePlatformDefaultWidth = false,
