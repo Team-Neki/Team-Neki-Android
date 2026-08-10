@@ -6,13 +6,21 @@ import android.app.NotificationManager
 import android.content.Context
 import com.kakao.sdk.common.KakaoSdk
 import com.naver.maps.map.NaverMapSdk
+import com.neki.android.core.analytics.initializer.AnalyticsInitializer
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 import timber.log.Timber
 
 @HiltAndroidApp
 class NekiApplication : Application() {
+
+    @Inject
+    lateinit var analyticsInitializer: AnalyticsInitializer
+
     override fun onCreate() {
         super.onCreate()
+
+        analyticsInitializer.initialize()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())

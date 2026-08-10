@@ -6,6 +6,7 @@ import com.neki.android.core.analytics.event.GlobalAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
+import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.auth.impl.splash.model.UpdateType
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val tokenRepository: TokenRepository,
     private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
     private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
@@ -46,7 +48,6 @@ class SplashViewModel @Inject constructor(
         reduce: (SplashState.() -> SplashState) -> Unit,
         postSideEffect: (SplashSideEffect) -> Unit,
     ) {
-        analyticsLogger.setUserProperty("app_version", currentAppVersion)
         viewModelScope.launch {
             authRepository.getAppVersion()
                 .onSuccess { appVersion ->
@@ -103,9 +104,10 @@ class SplashViewModel @Inject constructor(
             if (tokenRepository.hasTokens().first()) {
                 authRepository.updateAccessToken(
                     refreshToken = tokenRepository.getRefreshToken().first(),
-                ).onSuccess {
+                ).onSuccess { authResult ->
+                    tokenRepository.saveTokens(authResult.accessToken, authResult.refreshToken)
+                    restoreAnalyticsUserId()
                     analyticsLogger.log(GlobalAnalyticsEvent.AppOpen)
-                    tokenRepository.saveTokens(it.accessToken, it.refreshToken)
                     postSideEffect(SplashSideEffect.NavigateToMain)
                 }.onFailure { e ->
                     Timber.e(e)
@@ -115,6 +117,12 @@ class SplashViewModel @Inject constructor(
                 postSideEffect(SplashSideEffect.NavigateToLogin)
             }
         }
+    }
+
+    private suspend fun restoreAnalyticsUserId() {
+        userRepository.getUserInfo()
+            .onSuccess { userInfo -> analyticsLogger.setUserId(userInfo.id.toString()) }
+            .onFailure { e -> Timber.e(e, "Failed to restore analytics user ID") }
     }
 
     /**

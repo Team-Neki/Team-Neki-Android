@@ -57,6 +57,9 @@ android {
             val kakaoKey = properties["KAKAO_DEV_NATIVE_APP_KEY"].toString()
             manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
             buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
+
+            val amplitudeApiKey = properties["AMPLITUDE_DEV_API_KEY"].toString()
+            buildConfigField("String", "AMPLITUDE_API_KEY", amplitudeApiKey)
         }
         release {
             isMinifyEnabled = true
@@ -72,6 +75,9 @@ android {
             val kakaoKey = properties["KAKAO_NATIVE_APP_KEY"].toString()
             manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
             buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
+
+            val amplitudeApiKey = properties["AMPLITUDE_API_KEY"].toString()
+            buildConfigField("String", "AMPLITUDE_API_KEY", amplitudeApiKey)
         }
     }
 

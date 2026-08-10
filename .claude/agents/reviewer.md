@@ -42,7 +42,7 @@ main agent가 리뷰 요청 전 `git fetch origin develop`을 완료했다고 �
 | Compose Screen UI, component, preview, dialog, bottom sheet | `.claude/skills/implementing-ui/SKILL.md` |
 | 새 화면의 Contract/ViewModel/Screen skeleton | `.claude/skills/creating-feature-screen/SKILL.md` |
 | 기존 화면의 State/Intent/Effect/ViewModel 동작 변경 | `.claude/skills/changing-feature-behavior/SKILL.md` |
-| Firebase Analytics event/logging | `.claude/skills/implementing-analytics/SKILL.md` |
+| Amplitude Analytics event/logging | `.claude/skills/implementing-analytics/SKILL.md` |
 | harness skill, agent, `AGENTS.md`, `discussions.md` | `.claude/skills/maintaining-harness/SKILL.md` |
 
 해당하는 skill이 없으면 skill 없이 리뷰 관점만 적용하고 Applied Skills에 `없음`을 쓴다.
@@ -130,7 +130,8 @@ git diff --stat origin/develop...HEAD
 
 - event 이름과 parameter key가 snake_case인지 본다.
 - 화면 진입, 클릭, 완료 로그가 중복 전송되지 않는지 본다.
-- feature ViewModel은 `AnalyticsLogger`를 통해 Firebase Analytics event를 전송하는지 본다.
+- feature ViewModel은 `AnalyticsLogger`를 통해 Amplitude event를 전송하는지 본다.
+- 신규 로그인, 토큰 기반 자동 로그인, 로그아웃, 탈퇴, 인증 만료에서 Amplitude user ID 수명주기가 맞는지 본다.
 
 ### 보안/빌드
 
