@@ -1,0 +1,172 @@
+# encoding: utf-8
+
+default_platform(:android)
+
+# ─────────────────────────────────────────────
+#  Helpers
+# ─────────────────────────────────────────────
+
+BUILD_CONST_PATH = File.expand_path("../build-logic/src/main/java/com/neki/android/buildlogic/const/BuildConst.kt", __dir__)
+
+def read_version_code
+  content = File.read(BUILD_CONST_PATH)
+  match = content.match(/VERSION_CODE\s*=\s*(\d+)/)
+  raise "Could not parse VERSION_CODE from #{BUILD_CONST_PATH}" unless match
+  match[1].to_i
+end
+
+def read_version_name
+  content = File.read(BUILD_CONST_PATH)
+  match = content.match(/VERSION_NAME\s*=\s*"([^"]+)"/)
+  raise "Could not parse VERSION_NAME from #{BUILD_CONST_PATH}" unless match
+  match[1]
+end
+
+def write_version(new_code, new_name)
+  content = File.read(BUILD_CONST_PATH)
+  content = content.gsub(/VERSION_CODE\s*=\s*\d+/, "VERSION_CODE = #{new_code}")
+  content = content.gsub(/VERSION_NAME\s*=\s*"[^"]+"/, "VERSION_NAME = \"#{new_name}\"")
+  File.write(BUILD_CONST_PATH, content)
+  UI.success("Updated BuildConst.kt → versionCode=#{new_code}, versionName=#{new_name}")
+end
+
+# main 머지 커밋 메시지에서 release/X.Y.Z 패턴으로 버전 추출
+# ex) "Merge pull request #251 from Team-Neki/release/1.3.3" → "1.3.3"
+# 매칭 실패 시 BuildConst.kt의 현재 VERSION_NAME 반환
+def detect_version_name_from_branch
+  head_ref   = ENV["GITHUB_HEAD_REF"].to_s
+  github_ref = ENV["GITHUB_REF"].to_s
+  merge_msg  = sh("git log -1 --pretty=%s", log: false).strip
+
+  [head_ref, github_ref, merge_msg].each do |candidate|
+    if (m = candidate.match(%r{release/(\d+\.\d+\.\d+)}))
+      UI.message("Detected version #{m[1]} from: #{candidate}")
+      return m[1]
+    end
+  end
+
+  UI.message("No release branch detected, using current VERSION_NAME from BuildConst.kt")
+  read_version_name
+end
+
+# ─────────────────────────────────────────────
+#  Platform
+# ─────────────────────────────────────────────
+
+platform :android do
+
+  # ── Lane: bump_version ───────────────────────
+  desc "Bump versionCode (+1) and update versionName from release branch. Commits and pushes to main."
+  lane :bump_version do
+    new_code = read_version_code + 1
+    new_name = detect_version_name_from_branch
+
+    write_version(new_code, new_name)
+
+    sh("git add #{BUILD_CONST_PATH}")
+    sh("git commit -m \"[release] v#{new_name}: versionCode #{new_code}, versionName #{new_name}로 버전 업데이트\" --no-verify")
+    sh("git push origin HEAD:main")
+
+    UI.success("Version bumped → versionCode=#{new_code}, versionName=#{new_name}")
+  end
+
+  # ── Lane: internal ───────────────────────────
+  desc "Build release AAB and upload to Play Store Internal Test track"
+  lane :internal do
+    gradle(
+      task:          "bundle",
+      build_type:    "Release",
+      project_dir:   ".",
+      print_command: true,
+    )
+
+    aab_path = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    UI.message("AAB path: #{aab_path}")
+
+    upload_to_play_store(
+      track:                   "TEST",
+      aab:                     aab_path,
+      release_status:          "completed",
+      skip_upload_apk:         true,
+      skip_upload_metadata:    true,
+      skip_upload_changelogs:  true,
+      skip_upload_images:      true,
+      skip_upload_screenshots: true,
+    )
+
+    UI.success("AAB uploaded to Play Store Internal Test track.")
+  end
+
+  # ── Lane: firebase_distribute ────────────────
+  desc "Build debug APK and distribute via Firebase App Distribution"
+  lane :firebase_distribute do
+    gradle(
+      task:          "assemble",
+      build_type:    "Debug",
+      project_dir:   ".",
+      print_command: true,
+    )
+
+    apk_path = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+    UI.message("APK path: #{apk_path}")
+
+    commit_sha = sh("git rev-parse --short HEAD", log: false).strip
+
+    firebase_app_distribution(
+      app:                   ENV["FIREBASE_APP_ID_DEBUG"],
+      android_artifact_type: "APK",
+      android_artifact_path: apk_path,
+      groups:                ENV.fetch("FIREBASE_TESTER_GROUPS", "네키들"),
+      release_notes:         "#{read_version_name} (#{commit_sha})",
+      firebase_cli_token:    ENV["FIREBASE_TOKEN"],
+    )
+
+    UI.success("Debug APK distributed via Firebase App Distribution.")
+  end
+
+  # ── Lane: create_github_release ──────────────
+  desc "Create GitHub Release with version tag and release notes"
+  lane :create_github_release do
+    version_name  = read_version_name
+    tag           = "v#{version_name}"
+    repo          = ENV["GITHUB_REPOSITORY"]
+
+    # 직전 태그 찾기 (없으면 전체 로그)
+    prev_tag = sh("git tag --sort=-creatordate | grep -v #{tag} | head -1", log: false).strip
+    log_range = prev_tag.empty? ? "HEAD" : "#{prev_tag}...HEAD"
+
+    # 머지 커밋, [release] 버전 업데이트 커밋 제외하고 커밋 메시지 추출
+    commits = sh("git log #{log_range} --pretty=%s --no-merges", log: false).strip
+    changelog_lines = commits.lines
+      .map(&:strip)
+      .reject(&:empty?)
+      .reject { |line| line.start_with?("Merge ") || line.start_with?("[release]") }
+      .join("\n")
+
+    release_notes = <<~NOTES
+      ## What's Changed
+      #{changelog_lines}
+
+      **Full Changelog**: #{prev_tag.empty? ? tag : "#{prev_tag}...#{tag}"}
+    NOTES
+
+    sh("gh release create #{tag} --title \"#{version_name}\" --notes #{release_notes.shellescape} --repo #{repo}")
+
+    UI.success("GitHub Release #{tag} created.")
+  end
+
+  # ── Lane: deploy ─────────────────────────────
+  desc "Full deploy: bump version → upload to Play Store → create GitHub Release"
+  lane :deploy do
+    bump_version
+    internal
+    create_github_release
+  end
+
+  # ── Lane: deploy_qa ──────────────────────────
+  desc "QA deploy: distribute debug APK via Firebase (no version bump)"
+  lane :deploy_qa do
+    firebase_distribute
+  end
+
+end
