@@ -189,3 +189,16 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/android,androidstudio,kotlin
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/logs/
+fastlane/README.md
+
+# Bundler local config and gem cache
+.bundle/
+vendor/bundle
+
+# macOS
+.DS_Store
