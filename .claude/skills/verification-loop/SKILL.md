@@ -14,7 +14,7 @@ description: Use after implementing an Android code change, when verifying an ex
 3. 변경 파일에서 수정된 symbol, 직접 호출자, 공유 계약 사용처, 관련 화면과 진입 경로를 따라 영향 범위를 정한다.
 4. `AGENTS.md`의 Skill Routing에 따라 변경 범위에 해당하는 skill 전문을 읽는다.
 5. 위험도를 `LIGHT`, `STANDARD`, `FULL` 중 하나로 정한다.
-6. Android runtime 동작을 변경하거나 실제 기기 확인으로 성공을 판별할 수 있는 작업은 구현 전에 Runtime QA 진행 여부를 사용자에게 묻는다. 사용자가 이미 정했다면 그 답을 사용한다.
+6. `STANDARD` 또는 `FULL`로 분류된 작업 중 Android runtime 동작을 변경하거나 실제 기기 확인으로 성공을 판별해야 하는 경우 구현 전에 Runtime QA 진행 여부를 사용자에게 묻는다. `LIGHT`는 정적 검증으로 완료 조건을 판별할 수 있으면 Runtime QA 질문을 생략한다. 사용자가 실제 기기 확인을 요청하거나 정적 검증만으로 완료 조건을 판별할 수 없으면 `STANDARD`로 승격한다.
 7. 구현이 필요하면 선택한 skill을 적용해 구현하고 빠른 검증으로 이동한다. 구현이 끝난 작업은 바로 빠른 검증으로 이동한다.
 
 ## 위험도
@@ -23,13 +23,12 @@ description: Use after implementing an Android code change, when verifying an ex
 
 | 단계 | 기준 | 실행 |
 |---|---|---|
-| `LIGHT` | 문서, 주석, 내부 이름, 문구·시각 요소, 기계적 정리처럼 사용자 flow와 state/data/navigation 계약이 바뀌지 않는 국소 수정 | main agent가 빠른 검증(변경 모듈 compile·detekt 수준)과 점검만 실행. Reviewer/QA 호출 없음 |
-| `STANDARD` | feature 내부 UI interaction, ViewModel, API 사용, analytics 등 feature 동작이 바뀌는 수정 | 빠른 검증, Reviewer, QA, 최종 확인 |
+| `LIGHT` | 문서, 주석, 내부 이름, 문구·시각 요소, 기계적 정리 또는 한 모듈의 기존 설정·상수·의존성 wiring만 바꾸는 국소 수정. 공유 계약, 사용자 flow, state/data/navigation, API, 수동 analytics event 정의를 바꾸지 않아 정적 검증으로 완료 조건을 판별할 수 있는 경우(예: 기존 Amplitude autocapture 옵션 추가) | main agent가 빠른 검증(변경 모듈 compile·detekt, 관련 unit test가 있으면 실행)과 영향 점검만 실행. Reviewer/QA와 Runtime QA 질문은 생략 |
+| `STANDARD` | feature 내부 UI interaction, ViewModel, API 사용, 수동 analytics event/logging, 여러 파일의 기능 동작 변경 등 사용자 flow나 event 계약을 바꾸는 수정 | 빠른 검증, Reviewer, QA, 최종 확인 |
 | `FULL` | 공유 core 계약, navigation/result, auth/token, local 저장, permission, 여러 모듈에 걸친 변경 | 빠른 검증, Reviewer, QA, 영향 모듈 검증을 포함한 최종 확인 |
 
-작은 diff라도 공유 API나 navigation 계약을 바꾸면 `FULL`로 본다. 확인 과정에서 영향 범위가 넓어진 근거가 나오면 단계를 올린다.
-Runtime QA를 진행하기로 한 작업은 QA agent가 실행할 수 있도록 최소 `STANDARD`로 본다. 문서처럼 runtime 동작이 없는 `LIGHT` 작업은 Runtime QA를 제외한다.
-agent 간 왕복이 검증 비용의 대부분이므로 `LIGHT`는 어떤 경우에도 Reviewer와 QA를 호출하지 않는다.
+작은 diff라도 공유 API나 navigation 계약을 바꾸면 `FULL`로 본다. `LIGHT` 후보라도 실제 기기에서만 성공 여부를 판별할 수 있거나 사용자 flow/state/event 계약에 영향을 주면 `STANDARD` 이상으로 승격한다. Runtime QA를 진행하기로 한 작업은 QA agent가 실행할 수 있도록 최소 `STANDARD`로 본다.
+agent 간 왕복이 검증 비용의 대부분이므로 `LIGHT`는 Reviewer와 QA를 호출하지 않는다.
 
 ## 완료 조건
 
@@ -40,7 +39,7 @@ agent 간 왕복이 검증 비용의 대부분이므로 `LIGHT`는 어떤 경우
 - 변경된 계약의 직접 사용처와 영향받는 진입 경로
 - 적용할 project skill
 - 자동 검증 범위
-- Runtime QA 선택 결과와 대상 시나리오
+- `STANDARD`/`FULL`인 경우 Runtime QA 선택 결과와 대상 시나리오
 
 코드와 요청만으로 정할 수 없는 항목은 사용자에게 한 번에 하나씩 묻는다.
 
@@ -79,7 +78,7 @@ Reviewer와 QA를 호출할 때 아래 정보를 전달한다.
   -> 구현이 필요하면 Main 구현
   -> 빠른 검증
        ├─ 실패 -> Main 수정 -> 빠른 검증
-       ├─ LIGHT 통과 -> PASS 조건 확인
+       ├─ LIGHT 통과 -> Reviewer/QA 없이 PASS 조건 확인
        └─ STANDARD/FULL 통과 -> Reviewer
             ├─ FIX_REQUIRED -> Main 수정 -> 빠른 검증
             └─ PASS -> QA (선택한 Runtime QA 포함)
@@ -152,5 +151,5 @@ Reviewer와 QA 이후 PASS 증거가 모두 최신인지 확인한다. 같은 di
 - 변경 범위와 확인한 회귀 범위
 - 실행한 검증과 결과
 - Reviewer와 QA 판정 또는 `LIGHT` 제외 결과
-- Runtime QA 결과 또는 제외 사유
+- Runtime QA 결과 또는 제외 사유(`LIGHT`는 정적 검증으로 대체)
 - 남은 위험이나 blocker

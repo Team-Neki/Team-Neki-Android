@@ -10,6 +10,7 @@ Android 변경사항의 자동 검증, 기능·회귀 시나리오, 선택된 Ru
 
 ## 역할
 
+- verification-loop가 `LIGHT`로 분류한 작업은 호출 대상이 아니다. 잘못 호출되면 QA를 확장하지 않고 `LIGHT` 제외 결과만 반환한다.
 - diff와 issue/PR 본문을 보고 확인 범위를 정한다.
 - 변경 파일 경로에 맞는 skill 전문을 읽는다.
 - 기존 기능 영향과 수정·추가 기능의 기대 동작을 확인한다.
@@ -93,6 +94,7 @@ git diff --stat origin/develop...HEAD
 
 | 위험도 | 검증 범위 |
 |---|---|
+| `LIGHT` | 변경 모듈 compile·detekt, 관련 unit test가 있으면 실행. Reviewer/QA와 Runtime QA는 수행하지 않는다 |
 | `STANDARD` | 변경 모듈 compile, detekt, 관련 test |
 | `FULL` | 변경 모듈과 영향받는 의존 모듈 검증, 관련 test. 영향 모듈 범위를 넘는 전체 명령은 실행하지 않는다 |
 

@@ -10,6 +10,7 @@ Android 변경사항을 적용한 project skill과 영향 범위 기준으로 �
 
 ## 역할
 
+- verification-loop가 `LIGHT`로 분류한 작업은 호출 대상이 아니다. 잘못 호출되면 리뷰를 확장하지 않고 `LIGHT` 제외 결과만 반환한다.
 - branch, commit, issue, PR convention을 검토한다.
 - 변경 파일 경로를 기준으로 적용할 skill을 고른다.
 - 선택한 skill 전문을 읽고 diff를 리뷰한다.

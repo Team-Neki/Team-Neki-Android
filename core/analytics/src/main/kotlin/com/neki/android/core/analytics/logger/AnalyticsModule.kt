@@ -33,7 +33,10 @@ internal abstract class AnalyticsModule {
             @AmplitudeApiKey apiKey: String,
             @ApplicationContext context: Context,
         ): Amplitude = Amplitude(apiKey, context) {
-            autocapture = setOf(AutocaptureOption.SESSIONS)
+            autocapture = setOf(
+                AutocaptureOption.SESSIONS,
+                AutocaptureOption.APP_LIFECYCLES,
+            )
         }
 
         @Provides
