@@ -11,6 +11,8 @@ developer_instructions = """
 main agent가 전달한 요청, 완료 조건, 위험도, Runtime QA 선택 결과, 기준 branch, 변경 파일, 영향 범위, 적용 skill, 검증 결과를 확인한다.
 전달받은 project skill 전문과 실제 diff를 읽고 독립적으로 리뷰한다.
 
+verification-loop가 `LIGHT`로 분류한 작업은 호출 대상이 아니다. 잘못 호출되면 리뷰를 확장하지 않고 `LIGHT` 제외 결과만 반환한다.
+
 현재 branch, working tree, staged files, `origin/develop` 기준 diff를 확인한다.
 변경된 symbol의 직접 호출자와 공유 계약 사용처를 따라 기존 기능의 회귀 가능성을 점검한다.
 skill convention, crash, data 손상, navigation/result, MVI, API/data contract, Compose UI, analytics, 보안/빌드 설정, 변경 범위 누락을 검토한다.

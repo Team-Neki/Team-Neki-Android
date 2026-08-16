@@ -34,7 +34,7 @@
 - QA가 `PASS`를 반환하면 main agent는 verification loop의 완료 판정 기준으로 작업을 종료한다.
 - reviewer 또는 QA가 `FIX_REQUIRED`를 반환하면 main agent가 수정하고 verification loop의 복귀 지점부터 다시 실행한다.
 - agent 실행 후 코드가 변경되면 변경 전 Reviewer, QA, 검증 결과를 완료 근거로 사용하지 않는다.
-- `LIGHT` 작업은 verification loop에 따라 main agent가 관련 검증을 실행하고 종료한다.
+- `LIGHT` 작업은 Reviewer·QA를 호출하지 않고 main agent가 관련 compile·detekt·test와 영향 점검을 실행한 뒤 종료한다.
 - Reviewer와 QA agent는 코드를 수정하지 않고 finding, 검증 결과, 판정을 main agent에 반환한다.
 - Reviewer는 `.claude/agents/reviewer.md`를 기준으로 diff, 적용 skill, 영향 범위를 점검한다.
 - QA agent는 `.claude/agents/qa.md`를 기준으로 검증 결과와 QA 시나리오를 작성한다.
