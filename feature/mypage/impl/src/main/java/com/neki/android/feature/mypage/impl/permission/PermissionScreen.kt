@@ -21,13 +21,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.permission.CameraPermissionManager
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.common.permission.NotificationPermissionManager
 import com.neki.android.core.common.permission.NekiPermission
-import com.neki.android.core.common.permission.navigateToAppSettings
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
@@ -35,6 +33,8 @@ import com.neki.android.core.designsystem.topbar.BackTitleTopBar
 import com.neki.android.core.designsystem.toggle.NekiToggle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.compose.collectWithLifecycle
+import com.neki.android.core.ui.compose.launchAppSettings
+import com.neki.android.core.ui.compose.rememberAppSettingsLauncher
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.toast.NekiToast
@@ -70,9 +70,8 @@ internal fun PermissionRoute(
         checkPermissions()
     }
 
-    LifecycleResumeEffect(Unit) {
+    val appSettingsLauncher = rememberAppSettingsLauncher {
         checkPermissions()
-        onPauseOrDispose {}
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -117,7 +116,7 @@ internal fun PermissionRoute(
                     }
                 }
             }
-            is PermissionEffect.MoveAppSettings -> navigateToAppSettings(context)
+            is PermissionEffect.MoveAppSettings -> appSettingsLauncher.launchAppSettings(context, sideEffect.permission)
             is PermissionEffect.ShowToast -> nekiToast.showToast(text = sideEffect.message)
         }
     }

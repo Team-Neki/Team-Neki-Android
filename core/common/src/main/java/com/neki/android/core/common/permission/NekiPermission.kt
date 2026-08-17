@@ -27,7 +27,8 @@ enum class NekiPermission(
     ;
 
     companion object {
-        // TODO: 기획 정의 후 문구 수정
         const val CAMERA_PERMANENT_DENIED_DIALOG_CONTENT = "설정에서 카메라 접근을 허용하면 QR 스캔이 가능해요"
+        const val NOTIFICATION_PERMANENT_DENIED_DIALOG_TITLE = "알림이 꺼져있어요"
+        const val NOTIFICATION_PERMANENT_DENIED_DIALOG_CONTENT = "네키 알림을 받으려면 기기 설정에서 알림 권한을 허용해주세요."
     }
 }

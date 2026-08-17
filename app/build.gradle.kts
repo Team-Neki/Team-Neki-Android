@@ -16,11 +16,33 @@ val properties = Properties().apply {
     }
 }
 
+fun metaProperty(name: String): String = (
+    properties.getProperty(name)
+        ?: providers.gradleProperty(name).orNull
+        ?: error("$name must be configured in local.properties or as a Gradle property")
+    )
+    .trim()
+    .removeSurrounding("\"")
+    .takeIf { it.isNotEmpty() }
+    ?: error("$name must not be empty")
+
 android {
     namespace = "com.neki.android.app"
 
+    defaultConfig {
+        resValue("string", "facebook_app_id", metaProperty("META_APP_ID"))
+        resValue("string", "facebook_client_token", metaProperty("META_CLIENT_TOKEN"))
+    }
+
     buildFeatures {
         buildConfig = true
+    }
+
+    defaultConfig {
+        // CI가 -PversionCode / -PversionName 을 전달하면 convention plugin이 주입한
+        // BuildConst 기반 값을 override한다. 전달되지 않으면(로컬 빌드) 기존 값을 그대로 쓴다.
+        (project.findProperty("versionCode") as String?)?.toIntOrNull()?.let { versionCode = it }
+        (project.findProperty("versionName") as String?)?.let { versionName = it }
     }
 
     signingConfigs {
@@ -34,7 +56,11 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
+            // CI(Firebase 배포)는 -PversionName으로 이미 완성된 값("1.3.2-dev.42")을 넘기므로,
+            // Gradle Property가 없는 로컬 빌드에서만 suffix를 붙인다.
+            if (project.findProperty("versionName") == null) {
+                versionNameSuffix = "-dev"
+            }
 
             val naverMapClientId = properties["NAVER_MAP_DEV_CLIENT_ID"].toString()
             buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
@@ -42,6 +68,9 @@ android {
             val kakaoKey = properties["KAKAO_DEV_NATIVE_APP_KEY"].toString()
             manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
             buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
+
+            val amplitudeApiKey = properties["AMPLITUDE_DEV_API_KEY"].toString()
+            buildConfigField("String", "AMPLITUDE_API_KEY", amplitudeApiKey)
         }
         release {
             isMinifyEnabled = true
@@ -57,6 +86,9 @@ android {
             val kakaoKey = properties["KAKAO_NATIVE_APP_KEY"].toString()
             manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoKey.trim('"')
             buildConfigField("String", "KAKAO_NATIVE_APP_KEY", kakaoKey)
+
+            val amplitudeApiKey = properties["AMPLITUDE_API_KEY"].toString()
+            buildConfigField("String", "AMPLITUDE_API_KEY", amplitudeApiKey)
         }
     }
 
@@ -94,6 +126,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)
+    implementation(libs.facebook.core)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation3.ui)

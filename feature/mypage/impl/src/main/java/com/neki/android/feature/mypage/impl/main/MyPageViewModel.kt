@@ -48,9 +48,18 @@ internal class MyPageViewModel @Inject constructor(
             is MyPageIntent.SetAppVersion -> reduce { copy(appVersion = intent.appVersion) }
 
             // MyPage Main
-            MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.NavigateToNotification)
+            MyPageIntent.ClickNotificationIcon -> postSideEffect(MyPageEffect.RequestNotificationPermission)
             MyPageIntent.ClickProfileCard -> postSideEffect(MyPageEffect.NavigateToProfile)
             MyPageIntent.ClickPermission -> postSideEffect(MyPageEffect.NavigateToPermission)
+
+            // Notification Permission Intent
+            MyPageIntent.GrantNotificationPermission -> postSideEffect(MyPageEffect.NavigateToNotification)
+            MyPageIntent.DenyNotificationPermissionPermanent -> reduce { copy(showNotificationPermissionDeniedDialog = true) }
+            MyPageIntent.DismissNotificationPermissionDialog -> reduce { copy(showNotificationPermissionDeniedDialog = false) }
+            MyPageIntent.ClickMoveToNotificationAppSettings -> {
+                reduce { copy(showNotificationPermissionDeniedDialog = false) }
+                postSideEffect(MyPageEffect.MoveAppSettingsForNotification)
+            }
             is MyPageIntent.ClickServiceInfoMenu -> postSideEffect(MyPageEffect.OpenExternalLink(intent.menu.url))
             MyPageIntent.ClickOpenSourceLicense -> postSideEffect(MyPageEffect.OpenOssLicenses)
 
@@ -158,6 +167,7 @@ internal class MyPageViewModel @Inject constructor(
             .onSuccess {
                 reduce { copy(isShowLogoutDialog = false) }
                 tokenRepository.clearTokensWithAuthCache()
+                analyticsLogger.clearUserId()
                 postSideEffect(MyPageEffect.LogoutWithKakao)
             }
             .onFailure { Timber.e(it, "Failed to logout from server") }
@@ -172,6 +182,7 @@ internal class MyPageViewModel @Inject constructor(
             .onSuccess {
                 analyticsLogger.log(MypageAnalyticsEvent.Withdraw)
                 tokenRepository.clearTokensWithAuthCache()
+                analyticsLogger.clearUserId()
                 authRepository.setCompletedOnboarding(false)
                 userRepository.clearMarketingPopupRecord()
                 reduce { copy(isLoading = false) }

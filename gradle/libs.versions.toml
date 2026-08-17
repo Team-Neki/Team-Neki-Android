@@ -1,6 +1,7 @@
 [versions]
 agp = "8.13.1"
 annotationExperimental = "1.5.1"
+amplitude = "1.30.0"
 cameraX = "1.5.2"
 composeStableMarker = "1.0.7"
 kotlin = "2.3.0"
@@ -45,8 +46,10 @@ reorderable = "2.5.1"
 firebaseBom = "34.9.0"
 googleServices = "4.4.4"
 firebaseCrashlyticsPlugin = "3.0.6"
+facebookSdk = "18.2.3"
 
 [libraries]
+amplitude-analytics-android = { module = "com.amplitude:analytics-android", version.ref = "amplitude" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "cameraX" }
@@ -123,9 +126,9 @@ androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", 
 oss-licenses = { group = "com.google.android.gms", name = "play-services-oss-licenses", version.ref = "ossLicensesLib" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+facebook-core = { module = "com.facebook.android:facebook-core", version.ref = "facebookSdk" }
 
 # Dependencies of the included build-logic
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }

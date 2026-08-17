@@ -1,5 +1,9 @@
 package com.neki.android.feature.archive.impl.main
 
+import android.os.Build
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,11 +31,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.common.permission.NekiPermission
+import com.neki.android.core.common.permission.NotificationPermissionManager
+import com.neki.android.core.designsystem.dialog.DoubleButtonAlertDialog
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.core.ui.compose.launchAppSettings
+import com.neki.android.core.ui.compose.rememberAppSettingsLauncher
 import com.neki.android.feature.archive.api.ArchiveNavKey
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -60,6 +69,7 @@ internal fun ArchiveMainRoute(
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = LocalActivity.current!!
     val lazyState = rememberLazyStaggeredGridState()
     val nekiToast = remember { NekiToast(context) }
 
@@ -67,10 +77,37 @@ internal fun ArchiveMainRoute(
         viewModel.logArchivingView()
     }
 
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.store.onIntent(ArchiveMainIntent.GrantNotificationPermission)
+        } else if (!NotificationPermissionManager.shouldShowNotificationRationale(activity)) {
+            viewModel.store.onIntent(ArchiveMainIntent.DenyNotificationPermissionPermanent)
+        }
+    }
+
+    val notificationAppSettingsLauncher = rememberAppSettingsLauncher {
+        if (NotificationPermissionManager.isGrantedNotificationPermission(context)) {
+            navigateToNotification()
+        }
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             ArchiveMainSideEffect.NavigateToQRScan -> navigateToQRScan()
             ArchiveMainSideEffect.NavigateToNotification -> navigateToNotification()
+            ArchiveMainSideEffect.RequestNotificationPermission -> {
+                if (NotificationPermissionManager.isGrantedNotificationPermission(context)) {
+                    navigateToNotification()
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    notificationPermissionLauncher.launch(NotificationPermissionManager.NOTIFICATION_PERMISSION)
+                } else {
+                    viewModel.store.onIntent(ArchiveMainIntent.DenyNotificationPermissionPermanent)
+                }
+            }
+            ArchiveMainSideEffect.MoveAppSettingsForNotification ->
+                notificationAppSettingsLauncher.launchAppSettings(context, NekiPermission.NOTIFICATION)
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
             is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
@@ -140,6 +177,18 @@ internal fun ArchiveMainScreen(
             onDismissRequest = { onIntent(ArchiveMainIntent.DismissMarketingAgreementDialog) },
             onClickConfirm = { onIntent(ArchiveMainIntent.ConfirmMarketingAgreementDialog) },
             onClickDismiss = { onIntent(ArchiveMainIntent.DismissMarketingAgreementDialog) },
+        )
+    }
+
+    if (uiState.showNotificationPermissionDeniedDialog) {
+        DoubleButtonAlertDialog(
+            title = NekiPermission.NOTIFICATION_PERMANENT_DENIED_DIALOG_TITLE,
+            content = NekiPermission.NOTIFICATION_PERMANENT_DENIED_DIALOG_CONTENT,
+            grayButtonText = "나중에",
+            primaryButtonText = "설정으로 이동",
+            onDismissRequest = { onIntent(ArchiveMainIntent.DismissNotificationPermissionDialog) },
+            onClickGrayButton = { onIntent(ArchiveMainIntent.DismissNotificationPermissionDialog) },
+            onClickPrimaryButton = { onIntent(ArchiveMainIntent.ClickMoveToNotificationAppSettings) },
         )
     }
 

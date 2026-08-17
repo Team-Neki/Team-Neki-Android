@@ -12,6 +12,7 @@ data class MyPageState(
     val isShowLogoutDialog: Boolean = false,
     val isShowWithdrawDialog: Boolean = false,
     val isShowImageSelectDialog: Boolean = false,
+    val showNotificationPermissionDeniedDialog: Boolean = false,
 )
 
 sealed interface MyPageIntent {
@@ -23,6 +24,12 @@ sealed interface MyPageIntent {
     data object ClickNotificationIcon : MyPageIntent
     data object ClickProfileCard : MyPageIntent
     data object ClickPermission : MyPageIntent
+
+    // Notification Permission Intent
+    data object GrantNotificationPermission : MyPageIntent
+    data object DenyNotificationPermissionPermanent : MyPageIntent
+    data object DismissNotificationPermissionDialog : MyPageIntent
+    data object ClickMoveToNotificationAppSettings : MyPageIntent
     data class ClickServiceInfoMenu(val menu: ServiceInfoMenu) : MyPageIntent
     data object ClickOpenSourceLicense : MyPageIntent
 
@@ -43,6 +50,8 @@ sealed interface MyPageIntent {
 
 sealed interface MyPageEffect {
     data object NavigateToNotification : MyPageEffect
+    data object RequestNotificationPermission : MyPageEffect
+    data object MoveAppSettingsForNotification : MyPageEffect
     data object NavigateToProfile : MyPageEffect
     data object NavigateToEditProfile : MyPageEffect
     data object NavigateToPermission : MyPageEffect
