@@ -1,0 +1,156 @@
+# encoding: utf-8
+
+default_platform(:android)
+
+# ─────────────────────────────────────────────
+#  Helpers
+# ─────────────────────────────────────────────
+
+BUILD_CONST_PATH = File.expand_path("../build-logic/src/main/java/com/neki/android/buildlogic/const/BuildConst.kt", __dir__)
+PACKAGE_NAME = "com.neki.android"
+
+# Firebase 개발기 versionName의 major.minor.patch 부분(fallback 소스). BuildConst.kt를 읽기만 하고 쓰지 않는다.
+def read_base_version_name
+  content = File.read(BUILD_CONST_PATH)
+  match = content.match(/VERSION_NAME\s*=\s*"([^"]+)"/)
+  raise "Could not parse VERSION_NAME from #{BUILD_CONST_PATH}" unless match
+  match[1]
+end
+
+# ─────────────────────────────────────────────
+#  Platform
+# ─────────────────────────────────────────────
+
+platform :android do
+
+  # ── Lane: firebase_distribute ────────────────
+  desc "Build debug APK (CI run number 기반 버전) and distribute via Firebase App Distribution"
+  lane :firebase_distribute do
+    run_number = ENV.fetch("FASTLANE_VERSION_CODE") { UI.user_error!("FASTLANE_VERSION_CODE(GITHUB_RUN_NUMBER)가 필요합니다") }
+    version_name = "#{read_base_version_name}-dev.#{run_number}"
+
+    gradle(
+      task:        "assemble",
+      build_type:  "Debug",
+      project_dir: ".",
+      properties: {
+        "versionCode" => run_number.to_i,
+        "versionName" => version_name,
+      },
+      print_command: true,
+    )
+
+    apk_path = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+    UI.message("APK path: #{apk_path}")
+
+    commit_sha = sh("git rev-parse --short HEAD", log: false).strip
+
+    firebase_app_distribution(
+      app:                   ENV["FIREBASE_APP_ID_DEBUG"],
+      android_artifact_type: "APK",
+      android_artifact_path: apk_path,
+      groups:                ENV.fetch("FIREBASE_TESTER_GROUPS", "네키들"),
+      release_notes:         "#{version_name} (#{commit_sha})",
+      firebase_cli_token:    ENV["FIREBASE_TOKEN"],
+    )
+
+    UI.success("Debug APK #{version_name} distributed via Firebase App Distribution.")
+  end
+
+  # ── Lane: internal ───────────────────────────
+  desc "Resolve next Play Store versionCode, build release AAB with tag-based versionName, upload to Internal"
+  lane :internal do
+    version_name = ENV.fetch("FASTLANE_VERSION_NAME") { UI.user_error!("FASTLANE_VERSION_NAME(태그에서 파싱한 값)이 필요합니다") }
+
+    tracks = %w[production beta alpha internal]
+    # fail-closed: 트랙 조회 자체가 실패(인증/네트워크 오류)하면 즉시 배포를 중단한다.
+    # "조회 성공 + 결과 없음(빈 트랙)"과 "조회 실패"를 구분해야 한다 — 후자를 빈 배열로
+    # 취급하면 실제로는 더 높은 versionCode가 존재하는데도 낮은 값을 재사용해 충돌할 수 있다.
+    version_codes = tracks.flat_map do |track|
+      begin
+        google_play_track_version_codes(package_name: PACKAGE_NAME, track: track)
+      rescue => e
+        UI.user_error!("#{track} 트랙 versionCode 조회 실패 — 배포를 중단합니다: #{e.message}")
+      end
+    end
+    next_version_code = (version_codes.max || 0) + 1
+    UI.message("기존 최대 versionCode=#{version_codes.max.inspect} → 다음 versionCode=#{next_version_code}")
+
+    gradle(
+      task:        "bundle",
+      build_type:  "Release",
+      project_dir: ".",
+      properties: {
+        "versionCode" => next_version_code,
+        "versionName" => version_name,
+      },
+      print_command: true,
+    )
+
+    aab_path = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    UI.message("AAB path: #{aab_path}")
+
+    upload_to_play_store(
+      track:                   "internal",
+      aab:                     aab_path,
+      release_status:          "completed",
+      version_code:            next_version_code,
+      skip_upload_metadata:    true,
+      skip_upload_changelogs:  true,
+      skip_upload_images:      true,
+      skip_upload_screenshots: true,
+    )
+
+    UI.success("AAB versionCode=#{next_version_code} versionName=#{version_name} uploaded to Play Store Internal track.")
+  end
+
+  # ── Lane: create_github_release ──────────────
+  desc "Create GitHub Release for the pushed vX.Y.Z tag"
+  lane :create_github_release do
+    tag  = ENV.fetch("GITHUB_REF_NAME") { UI.user_error!("GITHUB_REF_NAME(tag)이 필요합니다") }
+    repo = ENV["GITHUB_REPOSITORY"]
+
+    existing = sh("gh release view #{tag.shellescape} --repo #{repo.shellescape} 2>/dev/null || true", log: false).strip
+    if !existing.empty?
+      UI.important("GitHub Release #{tag} 이미 존재함, 생성 스킵")
+      next
+    end
+
+    # 직전 태그 찾기 (없으면 전체 로그). v로 시작하는 릴리즈 태그만 대상으로 한다.
+    prev_tag = sh("git tag --list 'v*' --sort=-creatordate | grep -v '^#{tag}$' | head -1", log: false).strip
+    log_range = prev_tag.empty? ? "HEAD" : "#{prev_tag}...HEAD"
+
+    # 머지 커밋, [release] 버전 업데이트 커밋 제외하고 커밋 메시지 추출
+    commits = sh("git log #{log_range} --pretty=%s --no-merges", log: false).strip
+    changelog_lines = commits.lines
+      .map(&:strip)
+      .reject(&:empty?)
+      .reject { |line| line.start_with?("Merge ") || line.start_with?("[release]") }
+      .join("\n")
+
+    release_notes = <<~NOTES
+      ## What's Changed
+      #{changelog_lines}
+
+      **Full Changelog**: #{prev_tag.empty? ? tag : "#{prev_tag}...#{tag}"}
+    NOTES
+
+    sh("gh release create #{tag.shellescape} --title #{tag.shellescape} --notes #{release_notes.shellescape} --repo #{repo.shellescape}")
+
+    UI.success("GitHub Release #{tag} created.")
+  end
+
+  # ── Lane: deploy ─────────────────────────────
+  desc "Full Play Store Internal deploy: resolve versionCode → build/upload AAB → create GitHub Release"
+  lane :deploy do
+    internal
+    create_github_release
+  end
+
+  # ── Lane: deploy_qa ──────────────────────────
+  desc "QA deploy: distribute debug APK via Firebase (CI run number 기반 버전)"
+  lane :deploy_qa do
+    firebase_distribute
+  end
+
+end

@@ -1,0 +1,103 @@
+name: Deploy Play Store
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# 진행 중인 배포가 중단되지 않도록 cancel-in-progress: false
+concurrency:
+  group: deploy-playstore-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false"
+
+jobs:
+  deploy-playstore:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.DEPLOY_GITHUB_TOKEN }}
+
+      - name: Verify tag points to main HEAD
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          # actions/checkout은 트리거된 태그만 가져오므로, create_github_release가
+          # 직전 태그를 정확히 찾을 수 있도록 전체 태그를 명시적으로 fetch한다.
+          git fetch origin --tags --force
+          git fetch origin main --depth=1
+          MAIN_SHA=$(git rev-parse origin/main)
+          TAG_SHA=$(git rev-parse "${TAG_NAME}^{commit}")
+          echo "main HEAD  = $MAIN_SHA"
+          echo "tag commit = $TAG_SHA"
+          if [ "$MAIN_SHA" != "$TAG_SHA" ]; then
+            echo "::error::태그 ${TAG_NAME} 는 origin/main HEAD($MAIN_SHA)를 가리키지 않습니다 (실제: $TAG_SHA). main 브랜치의 최신 커밋에만 릴리즈 태그를 붙이세요."
+            exit 1
+          fi
+
+      - name: Extract version name from tag
+        id: version
+        run: |
+          VERSION_NAME="${GITHUB_REF_NAME#v}"
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'build-logic/**/*.kt') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Generate local.properties
+        run: echo '${{ secrets.LOCAL_PROPERTIES }}' >> ./local.properties
+
+      - name: Restore release keystore
+        run: echo '${{ secrets.RELEASE_KEYSTORE_BASE64 }}' | base64 -d > ./neki_key_store.jks
+
+      - name: Generate google-services.json (debug)
+        run: echo '${{ secrets.GOOGLE_SERVICES_DEBUG }}' > ./app/src/debug/google-services.json
+
+      - name: Generate google-services.json (release)
+        run: |
+          mkdir -p ./app/src/release
+          echo '${{ secrets.GOOGLE_SERVICES_RELEASE }}' > ./app/src/release/google-services.json
+
+      - name: Generate network_security_config.xml
+        run: echo '${{ secrets.NETWORK_SECURITY_CONFIG }}' > ./app/src/main/res/xml/network_security_config.xml
+
+      - name: Write Play Store service account key
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_KEY }}' > /tmp/play-store-key.json
+
+      - name: Run Fastlane deploy
+        env:
+          PLAY_STORE_JSON_KEY_PATH: /tmp/play-store-key.json
+          FASTLANE_VERSION_NAME:    ${{ steps.version.outputs.version_name }}
+          GITHUB_REF_NAME:          ${{ github.ref_name }}
+          GITHUB_REPOSITORY:        ${{ github.repository }}
+          GH_TOKEN:                 ${{ secrets.DEPLOY_GITHUB_TOKEN }}
+        run: bundle exec fastlane deploy
