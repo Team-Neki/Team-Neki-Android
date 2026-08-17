@@ -38,6 +38,13 @@ android {
         buildConfig = true
     }
 
+    defaultConfig {
+        // CI가 -PversionCode / -PversionName 을 전달하면 convention plugin이 주입한
+        // BuildConst 기반 값을 override한다. 전달되지 않으면(로컬 빌드) 기존 값을 그대로 쓴다.
+        (project.findProperty("versionCode") as String?)?.toIntOrNull()?.let { versionCode = it }
+        (project.findProperty("versionName") as String?)?.let { versionName = it }
+    }
+
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("neki_key_store.jks")
@@ -49,7 +56,11 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
+            // CI(Firebase 배포)는 -PversionName으로 이미 완성된 값("1.3.2-dev.42")을 넘기므로,
+            // Gradle Property가 없는 로컬 빌드에서만 suffix를 붙인다.
+            if (project.findProperty("versionName") == null) {
+                versionNameSuffix = "-dev"
+            }
 
             val naverMapClientId = properties["NAVER_MAP_DEV_CLIENT_ID"].toString()
             buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)

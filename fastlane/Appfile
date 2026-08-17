@@ -1,0 +1,2 @@
+json_key_file(ENV["PLAY_STORE_JSON_KEY_PATH"])
+package_name("com.neki.android")
