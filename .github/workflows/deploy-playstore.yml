@@ -28,6 +28,9 @@ jobs:
         env:
           TAG_NAME: ${{ github.ref_name }}
         run: |
+          # actions/checkout은 트리거된 태그만 가져오므로, create_github_release가
+          # 직전 태그를 정확히 찾을 수 있도록 전체 태그를 명시적으로 fetch한다.
+          git fetch origin --tags --force
           git fetch origin main --depth=1
           MAIN_SHA=$(git rev-parse origin/main)
           TAG_SHA=$(git rev-parse "${TAG_NAME}^{commit}")
