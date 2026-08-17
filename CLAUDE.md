@@ -22,6 +22,8 @@
 - 새 화면 skeleton: `.claude/skills/creating-feature-screen/SKILL.md`
 - 기존 화면 기능 추가/수정: `.claude/skills/changing-feature-behavior/SKILL.md`
 - Firebase Analytics: `.claude/skills/implementing-analytics/SKILL.md`
+- Play Store 내부테스트 배포: `.claude/skills/deploying-playstore-internal/SKILL.md`
+- Firebase App Distribution 배포: `.claude/skills/deploying-firebase/SKILL.md`
 
 ## Agents
 
