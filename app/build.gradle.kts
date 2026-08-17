@@ -59,6 +59,8 @@ android {
                 versionNameSuffix = "-dev"
             }
 
+            signingConfig = signingConfigs.getByName("release")
+
             val naverMapClientId = properties["NAVER_MAP_DEV_CLIENT_ID"].toString()
             buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
 
