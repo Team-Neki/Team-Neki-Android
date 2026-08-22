@@ -38,6 +38,11 @@ android {
         buildConfig = true
     }
 
+    defaultConfig {
+        (project.findProperty("versionCode") as String?)?.toIntOrNull()?.let { versionCode = it }
+        (project.findProperty("versionName") as String?)?.let { versionName = it }
+    }
+
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("neki_key_store.jks")
@@ -49,7 +54,12 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
+            // CI(Firebase 배포)는 -PversionName으로 완성된 값을 넘기므로, Gradle Property가 없는 로컬 빌드에서만 suffix를 붙인다.
+            if (project.findProperty("versionName") == null) {
+                versionNameSuffix = "-dev"
+            }
+
+            signingConfig = signingConfigs.getByName("release")
 
             val naverMapClientId = properties["NAVER_MAP_DEV_CLIENT_ID"].toString()
             buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)
