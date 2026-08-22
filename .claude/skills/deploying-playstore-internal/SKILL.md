@@ -15,7 +15,7 @@ description: Use when deploying to Play Store Internal Testing in this repositor
 
 ## 절차
 
-1. 태그명은 `v<versionName>` 형식을 쓴다 (예: `v1.3.5`). `versionCode`는 fastlane이 Play Store Internal 트랙의 기존 최대값을 조회해 자동으로 다음 값을 계산하므로 직접 지정하지 않는다.
+1. 태그명은 `v<versionName>` 형식을 쓴다 (예: `v1.3.5`). `versionCode`는 fastlane이 `production, beta, alpha, internal` 전체 트랙의 기존 최대값을 조회해 자동으로 다음 값을 계산하므로 직접 지정하지 않는다.
 2. 로컬 `main`을 최신 `origin/main`으로 맞춘 뒤 태그를 생성하고 push한다.
 
 ```bash
@@ -31,5 +31,5 @@ git push origin v<versionName>
 
 ## 흔한 실패 원인
 
-- 태그 커밋이 `main` HEAD와 다름 → 태그를 지우고(`git push origin --delete v<versionName>`) `main` 최신 커밋에 다시 붙인다.
+- 태그 커밋이 `main` HEAD와 다름 → 원격과 로컬 태그를 모두 지우고(`git push origin --delete v<versionName>`, `git tag -d v<versionName>`) `main` 최신 커밋에 다시 붙인다. 로컬 태그를 지우지 않으면 이후 `git tag v<versionName>`가 실패한다.
 - `neki_key_store.jks`를 찾지 못함 → "Restore release keystore" 단계(`secrets.RELEASE_KEYSTORE_BASE64`)가 워크플로우에 있는지 확인한다.
