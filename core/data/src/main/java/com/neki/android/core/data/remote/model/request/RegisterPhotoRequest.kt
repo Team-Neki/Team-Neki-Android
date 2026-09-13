@@ -12,6 +12,7 @@ data class RegisterPhotoRequest(
     @Serializable
     data class Upload(
         @SerialName("mediaId") val mediaId: Long,
+        @SerialName("uploadMethod") val uploadMethod: String,
         @SerialName("memo") val memo: String? = null,
     )
 }

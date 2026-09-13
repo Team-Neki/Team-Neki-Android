@@ -6,6 +6,7 @@ import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.extension.ContentTypeUtil
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.MediaType
+import com.neki.android.core.model.UploadType
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,6 +31,7 @@ class UploadSinglePhotoUseCase @Inject constructor(
 
         photoRepository.registerPhoto(
             mediaIds = listOf(mediaId),
+            uploadType = UploadType.QR_CODE,
             folderId = folderId,
         ).getOrThrow()
     }

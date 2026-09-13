@@ -1,6 +1,6 @@
 package com.neki.android.core.model
 
-enum class UploadType {
-    QR_CODE,
-    GALLERY,
+enum class UploadType(val value: String) {
+    QR_CODE("QR"),
+    GALLERY("DIRECT_UPLOAD"),
 }
