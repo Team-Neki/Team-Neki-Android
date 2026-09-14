@@ -17,6 +17,7 @@ data class MapState(
     val isVisibleRefreshButton: Boolean = false,
     val dragLevel: DragLevel = DragLevel.FIRST,
     val selectedTab: MapTab = MapTab.NEARBY,
+    val favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val brandImageCache: ImmutableMap<String, ImageBitmap> = persistentMapOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
@@ -65,6 +66,7 @@ sealed interface MapIntent {
     data class ClickPhotoBoothFavorite(val photoBooth: PhotoBooth) : MapIntent
     data class RevertFavoritePhotoBooth(val photoBooth: PhotoBooth) : MapIntent
     data class SelectTab(val tab: MapTab) : MapIntent
+    data class SelectFavoritePhotoBoothSort(val sort: FavoritePhotoBoothSort) : MapIntent
     data class ShowToast(val message: String) : MapIntent
 }
 
@@ -95,6 +97,8 @@ sealed interface MapEffect {
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
 
 enum class MapTab { NEARBY, FAVORITE }
+
+enum class FavoritePhotoBoothSort { SAVED, DISTANCE }
 
 data class MapBounds(
     val southWest: LocLatLng,
