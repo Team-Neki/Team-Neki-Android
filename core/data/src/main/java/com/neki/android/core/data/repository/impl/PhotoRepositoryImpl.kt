@@ -14,6 +14,7 @@ import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.PhotoPage
 import com.neki.android.core.model.SortOrder
+import com.neki.android.core.model.UploadType
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -37,13 +38,14 @@ class PhotoRepositoryImpl @Inject constructor(
 
     override suspend fun registerPhoto(
         mediaIds: List<Long>,
+        uploadType: UploadType,
         folderId: Long?,
         favorite: Boolean,
     ): Result<Unit> = runSuspendCatching {
         photoService.registerPhoto(
             requestBody = RegisterPhotoRequest(
                 folderId = folderId,
-                uploads = mediaIds.map { RegisterPhotoRequest.Upload(mediaId = it) },
+                uploads = mediaIds.map { RegisterPhotoRequest.Upload(mediaId = it, uploadMethod = uploadType.value) },
                 favorite = favorite,
             ),
         )

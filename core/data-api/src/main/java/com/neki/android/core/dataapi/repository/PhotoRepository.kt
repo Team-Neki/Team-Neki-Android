@@ -5,6 +5,7 @@ import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.PhotoPage
 import com.neki.android.core.model.SortOrder
+import com.neki.android.core.model.UploadType
 import kotlinx.coroutines.flow.Flow
 
 interface PhotoRepository {
@@ -16,6 +17,7 @@ interface PhotoRepository {
 
     suspend fun registerPhoto(
         mediaIds: List<Long>,
+        uploadType: UploadType,
         folderId: Long? = null,
         favorite: Boolean = false,
     ): Result<Unit>

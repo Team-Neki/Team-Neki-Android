@@ -7,6 +7,7 @@ import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.domain.extension.ContentTypeUtil.generateFileName
 import com.neki.android.core.model.ContentType
 import com.neki.android.core.model.MediaType
+import com.neki.android.core.model.UploadType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -42,6 +43,7 @@ class UploadMultiplePhotoUseCase @Inject constructor(
 
         photoRepository.registerPhoto(
             mediaIds = mediaIds,
+            uploadType = UploadType.GALLERY,
             folderId = folderId,
             favorite = favorite,
         ).getOrThrow()
