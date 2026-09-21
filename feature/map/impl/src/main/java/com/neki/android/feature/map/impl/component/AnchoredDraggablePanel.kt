@@ -19,13 +19,17 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,11 +56,13 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.button.NekiTextButton
 import com.neki.android.core.designsystem.modifier.dropdownShadow
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.map.impl.DragLevel
+import com.neki.android.feature.map.impl.FavoritePhotoBoothSort
 import com.neki.android.feature.map.impl.MapTab
 import com.neki.android.feature.map.impl.const.MapConst
 import kotlinx.collections.immutable.ImmutableList
@@ -69,10 +75,12 @@ internal fun AnchoredDraggablePanel(
     displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
     selectedTab: MapTab = MapTab.NEARBY,
+    favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     isCurrentLocation: Boolean = false,
     showFavoritePhotoBooth: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onTabSelected: (MapTab) -> Unit = {},
+    onFavoritePhotoBoothSortSelected: (FavoritePhotoBoothSort) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickShowFavoriteIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
@@ -157,7 +165,7 @@ internal fun AnchoredDraggablePanel(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, bottom = 8.dp),
+                    .padding(start = 20.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 ShowFavoritePhotoBoothButton(
@@ -182,9 +190,11 @@ internal fun AnchoredDraggablePanel(
                     orientation = Orientation.Vertical,
                 ),
             selectedTab = selectedTab,
+            favoritePhotoBoothSort = favoritePhotoBoothSort,
             brands = brands,
             displayPhotoBooths = displayPhotoBooths,
             onTabSelected = onTabSelected,
+            onFavoritePhotoBoothSortSelected = onFavoritePhotoBoothSortSelected,
             onClickBrand = onClickBrand,
             onClickPhotoBooth = onClickNearPhotoBooth,
             onClickBoothFavorite = onClickBoothFavorite,
@@ -197,9 +207,11 @@ internal fun AnchoredDraggablePanel(
 internal fun AnchoredPanelContent(
     modifier: Modifier = Modifier,
     selectedTab: MapTab = MapTab.NEARBY,
+    favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     brands: ImmutableList<Brand> = persistentListOf(),
     displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     onTabSelected: (MapTab) -> Unit = {},
+    onFavoritePhotoBoothSortSelected: (FavoritePhotoBoothSort) -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickPhotoBooth: (PhotoBooth) -> Unit = {},
     onClickBoothFavorite: (PhotoBooth) -> Unit = {},
@@ -264,15 +276,60 @@ internal fun AnchoredPanelContent(
         if (selectedTab == MapTab.FAVORITE) {
             val body14MediumSpan = NekiTheme.typography.body14Medium.toSpanStyle().copy(color = NekiTheme.colorScheme.gray300)
             val body14SemiBoldSpan = NekiTheme.typography.body14SemiBold.toSpanStyle().copy(color = NekiTheme.colorScheme.gray400)
-            Text(
+            Row(
                 modifier = Modifier
-                    .padding(start = 20.dp),
-                text = buildAnnotatedString {
-                    withStyle(body14MediumSpan) { append("저장한 포토부스 총 ") }
-                    withStyle(body14SemiBoldSpan) { append("${displayPhotoBooths.size}") }
-                    withStyle(body14MediumSpan) { append("곳") }
-                },
-            )
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(body14MediumSpan) { append("저장한 포토부스 총 ") }
+                        withStyle(body14SemiBoldSpan) { append("${displayPhotoBooths.size}") }
+                        withStyle(body14MediumSpan) { append("곳") }
+                    },
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    FavoritePhotoBoothSort.entries.forEachIndexed { index, sort ->
+                        if (index > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .height(12.dp)
+                                    .background(NekiTheme.colorScheme.gray100),
+                            )
+                        }
+                        val isSelected = favoritePhotoBoothSort == sort
+                        Box(
+                            modifier = Modifier
+                                .size(width = 38.dp, height = 22.dp)
+                                .noRippleClickable { onFavoritePhotoBoothSortSelected(sort) },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = when (sort) {
+                                    FavoritePhotoBoothSort.SAVED -> "저장순"
+                                    FavoritePhotoBoothSort.DISTANCE -> "거리순"
+                                },
+                                color = if (isSelected) {
+                                    NekiTheme.colorScheme.gray700
+                                } else {
+                                    NekiTheme.colorScheme.gray300
+                                },
+                                style = if (isSelected) {
+                                    NekiTheme.typography.caption12SemiBold
+                                } else {
+                                    NekiTheme.typography.caption12Regular
+                                },
+                            )
+                        }
+                    }
+                }
+            }
         }
         key(selectedTab) {
             if (displayPhotoBooths.isEmpty()) {
@@ -296,7 +353,16 @@ internal fun AnchoredPanelContent(
                     )
                 }
             } else {
+                val photoBoothListState = rememberLazyListState()
+
+                LaunchedEffect(favoritePhotoBoothSort) {
+                    if (selectedTab == MapTab.FAVORITE) {
+                        photoBoothListState.scrollToItem(0)
+                    }
+                }
+
                 LazyColumn(
+                    state = photoBoothListState,
                     modifier = Modifier
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -311,10 +377,14 @@ internal fun AnchoredPanelContent(
                     items(displayPhotoBooths, key = { it.id }) { photoBooth ->
                         HorizontalBrandItem(
                             modifier = Modifier.animateItem(
-                                placementSpec = spring(
-                                    stiffness = 152f,
-                                    dampingRatio = 14.9f / (2f * kotlin.math.sqrt(152f * 1f)),
-                                ),
+                                placementSpec = if (selectedTab == MapTab.FAVORITE) {
+                                    null
+                                } else {
+                                    spring(
+                                        stiffness = 152f,
+                                        dampingRatio = 14.9f / (2f * kotlin.math.sqrt(152f * 1f)),
+                                    )
+                                },
                             ),
                             photoBooth = photoBooth,
                             onClickItem = { onClickPhotoBooth(photoBooth) },

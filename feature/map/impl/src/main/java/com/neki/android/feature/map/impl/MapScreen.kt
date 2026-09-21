@@ -3,7 +3,9 @@ package com.neki.android.feature.map.impl
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -53,6 +55,7 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
+import com.neki.android.feature.map.impl.component.MapSearchBar
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailContent
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
@@ -306,13 +309,54 @@ fun MapScreen(
             }
         }
 
+        if (uiState.dragLevel != DragLevel.THIRD) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .padding(start = 20.dp, top = 8.dp, end = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                MapSearchBar()
+                if (
+                    (uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) &&
+                    uiState.isVisibleRefreshButton
+                ) {
+                    MapRefreshChip(
+                        onClick = {
+                            cameraPositionState.contentBounds?.let { bounds ->
+                                onIntent(
+                                    MapIntent.ClickRefreshButton(
+                                        mapBounds = MapBounds(
+                                            southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                                            northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                                            northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                                            southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
+                                        ),
+                                        center = LocLatLng(
+                                            cameraPositionState.position.target.latitude,
+                                            cameraPositionState.position.target.longitude,
+                                        ),
+                                        zoomLevel = cameraPositionState.position.zoom,
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                }
+            }
+        }
+
         AnchoredDraggablePanel(
             brands = uiState.brands,
             displayPhotoBooths = uiState.displayPhotoBooths,
             dragLevel = uiState.dragLevel,
             selectedTab = uiState.selectedTab,
+            favoritePhotoBoothSort = uiState.favoritePhotoBoothSort,
             onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
             onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
+            onFavoritePhotoBoothSortSelected = { onIntent(MapIntent.SelectFavoritePhotoBoothSort(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
             showFavoritePhotoBooth = uiState.showFavoritePhotoBooth,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
@@ -322,34 +366,6 @@ fun MapScreen(
             onClickBoothFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
             onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
         )
-
-        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && uiState.isVisibleRefreshButton) {
-            MapRefreshChip(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .statusBarsPadding()
-                    .padding(top = 12.dp),
-                onClick = {
-                    cameraPositionState.contentBounds?.let { bounds ->
-                        onIntent(
-                            MapIntent.ClickRefreshButton(
-                                mapBounds = MapBounds(
-                                    southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
-                                    northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
-                                    northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
-                                    southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
-                                ),
-                                center = LocLatLng(
-                                    cameraPositionState.position.target.latitude,
-                                    cameraPositionState.position.target.longitude,
-                                ),
-                                zoomLevel = cameraPositionState.position.zoom,
-                            ),
-                        )
-                    }
-                },
-            )
-        }
 
         if (uiState.dragLevel == DragLevel.THIRD) {
             ToMapChip(

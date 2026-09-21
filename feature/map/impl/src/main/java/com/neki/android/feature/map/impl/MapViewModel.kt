@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+@Suppress("LargeClass")
 @HiltViewModel
 class MapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -163,7 +164,28 @@ class MapViewModel @Inject constructor(
                         mapMarkers = mapMarkers.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
                         nearbyPhotoBooths = updatedNearby,
                         favoritePhotoBooths = updatedFavorite,
-                        displayPhotoBooths = displayPhotoBooths(intent.tab, updatedNearby, updatedFavorite),
+                        displayPhotoBooths = displayPhotoBooths(
+                            selectedTab = intent.tab,
+                            nearbyPhotoBooths = updatedNearby,
+                            favoritePhotoBooths = updatedFavorite,
+                            favoritePhotoBoothSort = favoritePhotoBoothSort,
+                            currentLocation = currentLocLatLng,
+                        ),
+                    )
+                }
+            }
+            is MapIntent.SelectFavoritePhotoBoothSort -> {
+                if (intent.sort == state.favoritePhotoBoothSort) return@onIntent
+                reduce {
+                    copy(
+                        favoritePhotoBoothSort = intent.sort,
+                        displayPhotoBooths = displayPhotoBooths(
+                            selectedTab = selectedTab,
+                            nearbyPhotoBooths = nearbyPhotoBooths,
+                            favoritePhotoBooths = favoritePhotoBooths,
+                            favoritePhotoBoothSort = intent.sort,
+                            currentLocation = currentLocLatLng,
+                        ),
                     )
                 }
             }
@@ -233,7 +255,13 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers,
                 nearbyPhotoBooths = updatedNearby,
                 favoritePhotoBooths = updatedFavorite,
-                displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
+                displayPhotoBooths = displayPhotoBooths(
+                    selectedTab = selectedTab,
+                    nearbyPhotoBooths = updatedNearby,
+                    favoritePhotoBooths = updatedFavorite,
+                    favoritePhotoBoothSort = favoritePhotoBoothSort,
+                    currentLocation = currentLocLatLng,
+                ),
             )
         }
     }
@@ -273,7 +301,18 @@ class MapViewModel @Inject constructor(
         locLatLng: LocLatLng,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
-        reduce { copy(currentLocLatLng = locLatLng) }
+        reduce {
+            copy(
+                currentLocLatLng = locLatLng,
+                displayPhotoBooths = displayPhotoBooths(
+                    selectedTab = selectedTab,
+                    nearbyPhotoBooths = nearbyPhotoBooths,
+                    favoritePhotoBooths = favoritePhotoBooths,
+                    favoritePhotoBoothSort = favoritePhotoBoothSort,
+                    currentLocation = locLatLng,
+                ),
+            )
+        }
 
         /** 위치가 이동하더라도 주변 네컷 사진 브랜드는 변경하지 않기 때문에 최초에만 요청 **/
         if (state.currentLocLatLng == null) {
@@ -343,7 +382,13 @@ class MapViewModel @Inject constructor(
                 mapMarkers = mapMarkers.map { it.copy(isCheckedBrand = isCheckedBrand(it.brandName)) }.toImmutableList(),
                 nearbyPhotoBooths = updatedNearby,
                 favoritePhotoBooths = updatedFavorite,
-                displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, updatedFavorite),
+                displayPhotoBooths = displayPhotoBooths(
+                    selectedTab = selectedTab,
+                    nearbyPhotoBooths = updatedNearby,
+                    favoritePhotoBooths = updatedFavorite,
+                    favoritePhotoBoothSort = favoritePhotoBoothSort,
+                    currentLocation = currentLocLatLng,
+                ),
             )
         }
     }
@@ -500,7 +545,17 @@ class MapViewModel @Inject constructor(
                             )
                         }
                         reduce {
-                            copy(favoritePhotoBooths = mappedBooths.toImmutableList())
+                            val updatedFavorite = mappedBooths.toImmutableList()
+                            copy(
+                                favoritePhotoBooths = updatedFavorite,
+                                displayPhotoBooths = displayPhotoBooths(
+                                    selectedTab = selectedTab,
+                                    nearbyPhotoBooths = nearbyPhotoBooths,
+                                    favoritePhotoBooths = updatedFavorite,
+                                    favoritePhotoBoothSort = favoritePhotoBoothSort,
+                                    currentLocation = currentLocLatLng,
+                                ),
+                            )
                         }
                     }.onFailure { Timber.e(it) }
                 }
@@ -565,7 +620,13 @@ class MapViewModel @Inject constructor(
                     }.toImmutableList()
                     copy(
                         nearbyPhotoBooths = updatedNearby,
-                        displayPhotoBooths = displayPhotoBooths(selectedTab, updatedNearby, favoritePhotoBooths),
+                        displayPhotoBooths = displayPhotoBooths(
+                            selectedTab = selectedTab,
+                            nearbyPhotoBooths = updatedNearby,
+                            favoritePhotoBooths = favoritePhotoBooths,
+                            favoritePhotoBoothSort = favoritePhotoBoothSort,
+                            currentLocation = currentLocLatLng,
+                        ),
                     )
                 }
             }
@@ -633,10 +694,31 @@ class MapViewModel @Inject constructor(
         selectedTab: MapTab,
         nearbyPhotoBooths: ImmutableList<PhotoBooth>,
         favoritePhotoBooths: ImmutableList<PhotoBooth>,
-    ): ImmutableList<PhotoBooth> = when (selectedTab) {
-        MapTab.NEARBY -> nearbyPhotoBooths.filter { it.isCheckedBrand }
-        MapTab.FAVORITE -> favoritePhotoBooths.filter { it.isCheckedBrand }
-    }.toImmutableList()
+        favoritePhotoBoothSort: FavoritePhotoBoothSort,
+        currentLocation: LocLatLng?,
+    ): ImmutableList<PhotoBooth> {
+        val filteredPhotoBooths = when (selectedTab) {
+            MapTab.NEARBY -> nearbyPhotoBooths
+            MapTab.FAVORITE -> favoritePhotoBooths
+        }.filter { it.isCheckedBrand }
+
+        if (selectedTab != MapTab.FAVORITE || favoritePhotoBoothSort == FavoritePhotoBoothSort.SAVED) {
+            return filteredPhotoBooths.toImmutableList()
+        }
+
+        val origin = currentLocation ?: LocLatLng(
+            latitude = MapConst.DEFAULT_LATITUDE,
+            longitude = MapConst.DEFAULT_LONGITUDE,
+        )
+        return filteredPhotoBooths.sortedBy { photoBooth ->
+            calculateDistance(
+                startLatitude = origin.latitude,
+                startLongitude = origin.longitude,
+                endLatitude = photoBooth.latitude,
+                endLongitude = photoBooth.longitude,
+            )
+        }.toImmutableList()
+    }
 
     private fun handleChangeDragLevel(
         dragLevel: DragLevel,
