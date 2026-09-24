@@ -87,21 +87,22 @@ fun MapRoute(
         )
     }
     val appSettingsLauncher = rememberAppSettingsLauncher {
-        if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-            locationTrackingMode = LocationTrackingMode.NoFollow
-            viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
-        }
+        val isGranted = LocationPermissionManager.isGrantedLocationPermission(context)
+        locationTrackingMode = if (isGranted) LocationTrackingMode.NoFollow else LocationTrackingMode.None
+        if (isGranted) viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
+        else viewModel.store.onIntent(MapIntent.SelectFavoritePhotoBoothSort(FavoritePhotoBoothSort.SAVED))
     }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
         val isGranted = permissions.values.any { it }
-
         if (isGranted) {
             locationTrackingMode = LocationTrackingMode.NoFollow
             viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
         } else {
+            locationTrackingMode = LocationTrackingMode.None
+            viewModel.store.onIntent(MapIntent.SelectFavoritePhotoBoothSort(FavoritePhotoBoothSort.SAVED))
             cameraPositionState.contentBounds?.let { bounds ->
                 viewModel.store.onIntent(
                     MapIntent.LoadPhotoBoothsByBounds(
@@ -349,6 +350,7 @@ fun MapScreen(
         }
 
         AnchoredDraggablePanel(
+            areaRegionName = uiState.areaRegionName,
             brands = uiState.brands,
             displayPhotoBooths = uiState.displayPhotoBooths,
             dragLevel = uiState.dragLevel,
@@ -358,11 +360,12 @@ fun MapScreen(
             onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
             onFavoritePhotoBoothSortSelected = { onIntent(MapIntent.SelectFavoritePhotoBoothSort(it)) },
             isCurrentLocation = uiState.isCameraOnCurrentLocation,
+            hasCurrentLocation = LocationPermissionManager.isGrantedLocationPermission(context) && uiState.currentLocLatLng != null,
             showFavoritePhotoBooth = uiState.showFavoritePhotoBooth,
             onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
             onClickShowFavoriteIcon = { onIntent(MapIntent.ClickShowFavoriteIcon) },
             onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
-            onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
+            onClickPhotoBoothListItem = { onIntent(MapIntent.ClickPhotoBoothListItem(it)) },
             onClickBoothFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
             onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
         )

@@ -35,9 +35,10 @@ import com.neki.android.feature.map.impl.MapTab
 internal fun PhotoBoothListToggle(
     selectedTab: MapTab,
     onTabSelected: (MapTab) -> Unit,
+    areaRegionName: String? = null,
 ) {
     val thumbFraction by animateFloatAsState(
-        targetValue = if (selectedTab == MapTab.NEARBY) 0f else 1f,
+        targetValue = if (selectedTab == MapTab.AREA) 0f else 1f,
         animationSpec = tween(durationMillis = 200),
         label = "tabThumbFraction",
     )
@@ -78,7 +79,7 @@ internal fun PhotoBoothListToggle(
                         modifier = Modifier.size(20.dp),
                         imageVector = ImageVector.vectorResource(
                             when (tab) {
-                                MapTab.NEARBY -> if (isSelected) R.drawable.icon_tabbar_pin_on else R.drawable.icon_tabbar_pin_off
+                                MapTab.AREA -> if (isSelected) R.drawable.icon_tabbar_pin_on else R.drawable.icon_tabbar_pin_off
                                 MapTab.FAVORITE -> if (isSelected) R.drawable.icon_tabbar_favorite_on else R.drawable.icon_tabbar_favorite_off
                             },
                         ),
@@ -86,7 +87,11 @@ internal fun PhotoBoothListToggle(
                         tint = Color.Unspecified,
                     )
                     Text(
-                        text = if (tab == MapTab.NEARBY) "이 지역 포토부스" else "저장한 포토부스",
+                        text = if (tab == MapTab.AREA) {
+                            areaRegionName?.let { "$it 주변" } ?: "이 지역 포토부스"
+                        } else {
+                            "저장한 포토부스"
+                        },
                         color = if (isSelected) NekiTheme.colorScheme.gray800 else NekiTheme.colorScheme.gray500,
                         style = if (isSelected) NekiTheme.typography.body14SemiBold else NekiTheme.typography.body14Medium,
                     )
@@ -98,10 +103,10 @@ internal fun PhotoBoothListToggle(
 
 @ComponentPreview
 @Composable
-private fun PhotoBoothListToggleNearbyPreview() {
+private fun PhotoBoothListToggleAreaPreview() {
     NekiTheme {
         PhotoBoothListToggle(
-            selectedTab = MapTab.NEARBY,
+            selectedTab = MapTab.AREA,
             onTabSelected = {},
         )
     }
