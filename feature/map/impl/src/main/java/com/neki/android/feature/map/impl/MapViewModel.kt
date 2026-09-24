@@ -21,6 +21,7 @@ import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
+import com.neki.android.feature.map.impl.util.getSecondDepthRegionName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
@@ -81,12 +82,12 @@ class MapViewModel @Inject constructor(
                 )
                 lastSearchCenter = intent.center
                 reduce { copy(isVisibleRefreshButton = false) }
-                loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
+                loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect, intent.center)
             }
-            is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(state, intent.locLatLng, reduce)
+            is MapIntent.UpdateCurrentLocation -> handleUpdateCurrentLocation(intent.locLatLng, reduce)
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, state, reduce)
-            is MapIntent.ClickNearPhotoBooth -> handleClickNearPhotoBooth(intent.photoBooth, reduce, postSideEffect)
+            is MapIntent.ClickPhotoBoothListItem -> handleClickPhotoBoothListItem(intent.photoBooth, reduce, postSideEffect)
             MapIntent.ClickClosePhotoBoothCard -> reduce {
                 copy(
                     dragLevel = DragLevel.SECOND,
@@ -156,17 +157,17 @@ class MapViewModel @Inject constructor(
                     analyticsLogger.log(MapAnalyticsEvent.FavoriteBoothView(favoriteBoothCount = state.favoritePhotoBooths.size))
                 }
                 reduce {
-                    val updatedNearby = nearbyPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
+                    val updatedArea = areaPhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
                     val updatedFavorite = favoritePhotoBooths.map { it.copy(isCheckedBrand = true) }.toImmutableList()
                     copy(
                         selectedTab = intent.tab,
                         brands = brands.map { it.copy(isChecked = false) }.toImmutableList(),
                         mapMarkers = mapMarkers.map { it.copy(isCheckedBrand = true) }.toImmutableList(),
-                        nearbyPhotoBooths = updatedNearby,
+                        areaPhotoBooths = updatedArea,
                         favoritePhotoBooths = updatedFavorite,
                         displayPhotoBooths = displayPhotoBooths(
                             selectedTab = intent.tab,
-                            nearbyPhotoBooths = updatedNearby,
+                            areaPhotoBooths = updatedArea,
                             favoritePhotoBooths = updatedFavorite,
                             favoritePhotoBoothSort = favoritePhotoBoothSort,
                             currentLocation = currentLocLatLng,
@@ -175,13 +176,17 @@ class MapViewModel @Inject constructor(
                 }
             }
             is MapIntent.SelectFavoritePhotoBoothSort -> {
-                if (intent.sort == state.favoritePhotoBoothSort) return@onIntent
+                val hasPermission = LocationPermissionManager.isGrantedLocationPermission(context)
+                if (intent.sort == FavoritePhotoBoothSort.DISTANCE) {
+                    if (!hasPermission) postSideEffect(MapEffect.LaunchLocationPermission)
+                    else if (state.currentLocLatLng == null) getCurrentLocation(reduce, postSideEffect)
+                }
                 reduce {
                     copy(
                         favoritePhotoBoothSort = intent.sort,
                         displayPhotoBooths = displayPhotoBooths(
                             selectedTab = selectedTab,
-                            nearbyPhotoBooths = nearbyPhotoBooths,
+                            areaPhotoBooths = areaPhotoBooths,
                             favoritePhotoBooths = favoritePhotoBooths,
                             favoritePhotoBoothSort = intent.sort,
                             currentLocation = currentLocLatLng,
@@ -233,7 +238,7 @@ class MapViewModel @Inject constructor(
         val id = photoBooth.id
         val isPolygonMarker = polygonMarkerIds.contains(id)
         reduce {
-            val updatedNearby = nearbyPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
+            val updatedArea = areaPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
             val updatedFavorite = when {
                 newFavorite && favoritePhotoBooths.none { it.id == id } -> {
                     val booth = photoBooth.copy(
@@ -253,11 +258,11 @@ class MapViewModel @Inject constructor(
             }
             copy(
                 mapMarkers = updatedMarkers,
-                nearbyPhotoBooths = updatedNearby,
+                areaPhotoBooths = updatedArea,
                 favoritePhotoBooths = updatedFavorite,
                 displayPhotoBooths = displayPhotoBooths(
                     selectedTab = selectedTab,
-                    nearbyPhotoBooths = updatedNearby,
+                    areaPhotoBooths = updatedArea,
                     favoritePhotoBooths = updatedFavorite,
                     favoritePhotoBoothSort = favoritePhotoBoothSort,
                     currentLocation = currentLocLatLng,
@@ -273,6 +278,8 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             LocationHelper.getCurrentLocation(context)
                 .onSuccess { location ->
+                    if (!LocationPermissionManager.isGrantedLocationPermission(context)) return@onSuccess
+                    handleUpdateCurrentLocation(location, reduce)
                     reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
                     postSideEffect(
                         MapEffect.MoveCameraToPosition(
@@ -297,30 +304,22 @@ class MapViewModel @Inject constructor(
     }
 
     private fun handleUpdateCurrentLocation(
-        state: MapState,
         locLatLng: LocLatLng,
         reduce: (MapState.() -> MapState) -> Unit,
     ) {
+        if (!LocationPermissionManager.isGrantedLocationPermission(context)) {
+            return
+        }
         reduce {
             copy(
                 currentLocLatLng = locLatLng,
                 displayPhotoBooths = displayPhotoBooths(
                     selectedTab = selectedTab,
-                    nearbyPhotoBooths = nearbyPhotoBooths,
+                    areaPhotoBooths = areaPhotoBooths,
                     favoritePhotoBooths = favoritePhotoBooths,
                     favoritePhotoBoothSort = favoritePhotoBoothSort,
                     currentLocation = locLatLng,
                 ),
-            )
-        }
-
-        /** 위치가 이동하더라도 주변 네컷 사진 브랜드는 변경하지 않기 때문에 최초에만 요청 **/
-        if (state.currentLocLatLng == null) {
-            loadNearbyPhotoBooths(
-                longitude = locLatLng.longitude,
-                latitude = locLatLng.latitude,
-                brandIds = state.brands.filter { it.isChecked }.map { it.id },
-                reduce = reduce,
             )
         }
     }
@@ -339,7 +338,7 @@ class MapViewModel @Inject constructor(
             }
         }
 
-        if (state.currentLocLatLng != null) {
+        if (state.currentLocLatLng != null && LocationPermissionManager.isGrantedLocationPermission(context)) {
             reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
             postSideEffect(
                 MapEffect.MoveCameraToPosition(
@@ -375,16 +374,16 @@ class MapViewModel @Inject constructor(
             val isCheckedBrand = { brandName: String ->
                 checkedBrandNames.isEmpty() || brandName in checkedBrandNames
             }
-            val updatedNearby = nearbyPhotoBooths.map { it.copy(isCheckedBrand = isCheckedBrand(it.brandName)) }.toImmutableList()
+            val updatedArea = areaPhotoBooths.map { it.copy(isCheckedBrand = isCheckedBrand(it.brandName)) }.toImmutableList()
             val updatedFavorite = favoritePhotoBooths.map { it.copy(isCheckedBrand = isCheckedBrand(it.brandName)) }.toImmutableList()
             copy(
                 brands = updatedBrands.toImmutableList(),
                 mapMarkers = mapMarkers.map { it.copy(isCheckedBrand = isCheckedBrand(it.brandName)) }.toImmutableList(),
-                nearbyPhotoBooths = updatedNearby,
+                areaPhotoBooths = updatedArea,
                 favoritePhotoBooths = updatedFavorite,
                 displayPhotoBooths = displayPhotoBooths(
                     selectedTab = selectedTab,
-                    nearbyPhotoBooths = updatedNearby,
+                    areaPhotoBooths = updatedArea,
                     favoritePhotoBooths = updatedFavorite,
                     favoritePhotoBoothSort = favoritePhotoBoothSort,
                     currentLocation = currentLocLatLng,
@@ -393,7 +392,7 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleClickNearPhotoBooth(
+    private fun handleClickPhotoBoothListItem(
         photoBooth: PhotoBooth,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
@@ -534,7 +533,17 @@ class MapViewModel @Inject constructor(
 
             brandsResult
                 .onSuccess { loadedBrands ->
-                    reduce { copy(brands = loadedBrands.toImmutableList()) }
+                    reduce {
+                        val withBrandImage: (PhotoBooth) -> PhotoBooth = { booth ->
+                            booth.copy(imageUrl = loadedBrands.find { it.name == booth.brandName }?.imageUrl.orEmpty())
+                        }
+                        copy(
+                            brands = loadedBrands.toImmutableList(),
+                            areaPhotoBooths = areaPhotoBooths.map(withBrandImage).toImmutableList(),
+                            mapMarkers = mapMarkers.map(withBrandImage).toImmutableList(),
+                            displayPhotoBooths = displayPhotoBooths.map(withBrandImage).toImmutableList(),
+                        )
+                    }
                     cacheBrandImages(loadedBrands, reduce)
 
                     favoritesResult.onSuccess { favoriteBooths ->
@@ -546,11 +555,15 @@ class MapViewModel @Inject constructor(
                         }
                         reduce {
                             val updatedFavorite = mappedBooths.toImmutableList()
+                            val favoriteIds = updatedFavorite.map { it.id }.toSet()
+                            val updatedArea = areaPhotoBooths.map { it.copy(favorite = it.id in favoriteIds) }.toImmutableList()
                             copy(
+                                areaPhotoBooths = updatedArea,
+                                mapMarkers = mapMarkers.map { it.copy(favorite = it.id in favoriteIds) }.toImmutableList(),
                                 favoritePhotoBooths = updatedFavorite,
                                 displayPhotoBooths = displayPhotoBooths(
                                     selectedTab = selectedTab,
-                                    nearbyPhotoBooths = nearbyPhotoBooths,
+                                    areaPhotoBooths = updatedArea,
                                     favoritePhotoBooths = updatedFavorite,
                                     favoritePhotoBoothSort = favoritePhotoBoothSort,
                                     currentLocation = currentLocLatLng,
@@ -598,41 +611,6 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun loadNearbyPhotoBooths(
-        longitude: Double?,
-        latitude: Double?,
-        radiusInMeters: Int = 1000,
-        brandIds: List<Long> = emptyList(),
-        reduce: (MapState.() -> MapState) -> Unit,
-    ) {
-        viewModelScope.launch {
-            mapRepository.getPhotoBoothsByPoint(
-                longitude = longitude,
-                latitude = latitude,
-                radiusInMeters = radiusInMeters,
-                brandIds = brandIds,
-            ).onSuccess { photoBooths ->
-                reduce {
-                    val updatedNearby = photoBooths.map { photoBooth ->
-                        photoBooth.copy(
-                            imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
-                        )
-                    }.toImmutableList()
-                    copy(
-                        nearbyPhotoBooths = updatedNearby,
-                        displayPhotoBooths = displayPhotoBooths(
-                            selectedTab = selectedTab,
-                            nearbyPhotoBooths = updatedNearby,
-                            favoritePhotoBooths = favoritePhotoBooths,
-                            favoritePhotoBoothSort = favoritePhotoBoothSort,
-                            currentLocation = currentLocLatLng,
-                        ),
-                    )
-                }
-            }
-        }
-    }
-
     private fun isRegionChanged(currentCenter: LocLatLng, zoomLevel: Double): Boolean {
         val prev = lastSearchCenter ?: return false
         val distance = calculateDistance(prev.latitude, prev.longitude, currentCenter.latitude, currentCenter.longitude)
@@ -650,9 +628,8 @@ class MapViewModel @Inject constructor(
         state: MapState,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
+        searchCenter: LocLatLng? = null,
     ) {
-        val checkedBrandNames = state.brands.filter { it.isChecked }.map { it.name }
-
         // 좌상단 -> 우상단 -> 우하단 -> 좌하단 -> 좌상단 (닫힌 다각형)
         val coordinates = listOf(
             mapBounds.northWest.longitude to mapBounds.northWest.latitude,
@@ -671,16 +648,37 @@ class MapViewModel @Inject constructor(
             ).onSuccess { photoBooths ->
                 polygonMarkerIds = photoBooths.map { it.id }.toSet()
                 reduce {
+                    val checkedBrandNames = brands.filter { it.isChecked }.map { it.name }
+                    val updatedArea = photoBooths.map { photoBooth ->
+                        photoBooth.copy(
+                            imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
+                            isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
+                            favorite = favoritePhotoBooths.any { it.id == photoBooth.id },
+                        )
+                    }.toImmutableList()
                     copy(
                         isLoading = false,
-                        mapMarkers = photoBooths.map { photoBooth ->
-                            photoBooth.copy(
-                                imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
-                                isCheckedBrand = checkedBrandNames.isEmpty() || photoBooth.brandName in checkedBrandNames,
-                                favorite = favoritePhotoBooths.any { it.id == photoBooth.id },
-                            )
-                        }.toImmutableList(),
+                        mapMarkers = updatedArea,
+                        areaPhotoBooths = updatedArea,
+                        displayPhotoBooths = displayPhotoBooths(
+                            selectedTab = selectedTab,
+                            areaPhotoBooths = updatedArea,
+                            favoritePhotoBooths = favoritePhotoBooths,
+                            favoritePhotoBoothSort = favoritePhotoBoothSort,
+                            currentLocation = currentLocLatLng,
+                        ),
                     )
+                }
+                if (searchCenter != null || state.areaRegionName != null || lastSearchCenter != null) {
+                    val center = searchCenter ?: LocLatLng(
+                        latitude = (mapBounds.northEast.latitude + mapBounds.southWest.latitude) / 2,
+                        longitude = (mapBounds.northEast.longitude + mapBounds.southWest.longitude) / 2,
+                    )
+                    viewModelScope.launch {
+                        context.getSecondDepthRegionName(center.latitude, center.longitude)
+                            .onSuccess { regionName -> reduce { copy(areaRegionName = regionName) } }
+                            .onFailure { Timber.w(it, "지도 지역명 조회 실패") }
+                    }
                 }
             }.onFailure { e ->
                 Timber.e(e)
@@ -692,32 +690,36 @@ class MapViewModel @Inject constructor(
 
     private fun displayPhotoBooths(
         selectedTab: MapTab,
-        nearbyPhotoBooths: ImmutableList<PhotoBooth>,
+        areaPhotoBooths: ImmutableList<PhotoBooth>,
         favoritePhotoBooths: ImmutableList<PhotoBooth>,
         favoritePhotoBoothSort: FavoritePhotoBoothSort,
         currentLocation: LocLatLng?,
     ): ImmutableList<PhotoBooth> {
         val filteredPhotoBooths = when (selectedTab) {
-            MapTab.NEARBY -> nearbyPhotoBooths
+            MapTab.AREA -> areaPhotoBooths
             MapTab.FAVORITE -> favoritePhotoBooths
         }.filter { it.isCheckedBrand }
 
-        if (selectedTab != MapTab.FAVORITE || favoritePhotoBoothSort == FavoritePhotoBoothSort.SAVED) {
+        if (
+            currentLocation == null ||
+            !LocationPermissionManager.isGrantedLocationPermission(context) ||
+            (selectedTab == MapTab.FAVORITE && favoritePhotoBoothSort == FavoritePhotoBoothSort.SAVED)
+        ) {
             return filteredPhotoBooths.toImmutableList()
         }
 
-        val origin = currentLocation ?: LocLatLng(
-            latitude = MapConst.DEFAULT_LATITUDE,
-            longitude = MapConst.DEFAULT_LONGITUDE,
-        )
-        return filteredPhotoBooths.sortedBy { photoBooth ->
-            calculateDistance(
-                startLatitude = origin.latitude,
-                startLongitude = origin.longitude,
-                endLatitude = photoBooth.latitude,
-                endLongitude = photoBooth.longitude,
+        val boothsWithDistance = filteredPhotoBooths.map { photoBooth ->
+            photoBooth.copy(
+                distance = calculateDistance(
+                    currentLocation.latitude,
+                    currentLocation.longitude,
+                    photoBooth.latitude,
+                    photoBooth.longitude,
+                ),
             )
-        }.toImmutableList()
+        }
+        return if (selectedTab == MapTab.FAVORITE) boothsWithDistance.sortedBy { it.distance }.toImmutableList()
+        else boothsWithDistance.toImmutableList()
     }
 
     private fun handleChangeDragLevel(

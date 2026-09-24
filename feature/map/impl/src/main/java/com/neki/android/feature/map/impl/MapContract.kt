@@ -16,12 +16,13 @@ data class MapState(
     val isCameraOnCurrentLocation: Boolean = false,
     val isVisibleRefreshButton: Boolean = false,
     val dragLevel: DragLevel = DragLevel.FIRST,
-    val selectedTab: MapTab = MapTab.NEARBY,
+    val selectedTab: MapTab = MapTab.AREA,
+    val areaRegionName: String? = null,
     val favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val brandImageCache: ImmutableMap<String, ImageBitmap> = persistentMapOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
-    val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
+    val areaPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val isShowDirectionBottomSheet: Boolean = false,
@@ -46,7 +47,7 @@ sealed interface MapIntent {
     data object ClickCurrentLocationIcon : MapIntent
     data object ClickToMapChip : MapIntent
     data class ClickVerticalBrand(val brand: Brand) : MapIntent
-    data class ClickNearPhotoBooth(val photoBooth: PhotoBooth) : MapIntent
+    data class ClickPhotoBoothListItem(val photoBooth: PhotoBooth) : MapIntent
     data class ClickPhotoBoothCard(val locLatLng: LocLatLng) : MapIntent
     data object ClickClosePhotoBoothCard : MapIntent
     data object OpenDirectionBottomSheet : MapIntent
@@ -96,7 +97,7 @@ sealed interface MapEffect {
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
 
-enum class MapTab { NEARBY, FAVORITE }
+enum class MapTab { AREA, FAVORITE }
 
 enum class FavoritePhotoBoothSort { SAVED, DISTANCE }
 

@@ -14,7 +14,12 @@ internal object MapConst {
     internal const val DEFAULT_CAMERA_ANIMATION_DURATIONS_MS = 800
 
     internal const val BOTTOM_NAVIGATION_BAR_HEIGHT = 52
+
+    // BottomNavigationFab: 44dp 크기 + 22dp 위쪽 이동 - 52dp 내비게이션 높이
+    internal const val BOTTOM_NAVIGATION_FAB_OVERLAP_HEIGHT = 14
+
+    internal const val PANEL_DRAG_LEVEL_SECOND_HEIGHT_REDUCTION = 4
     internal const val PANEL_DRAG_LOCATION_HEIGHT = 100
     internal const val PANEL_DRAG_LEVEL_FIRST_HEIGHT = 96
-    internal const val PANEL_DRAG_LEVEL_SECOND_HEIGHT = 218
+    internal const val PANEL_DRAG_LEVEL_SECOND_HEIGHT = 284
 }

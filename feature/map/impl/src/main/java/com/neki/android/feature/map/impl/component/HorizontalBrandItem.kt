@@ -109,7 +109,7 @@ internal fun DistanceInfo(distance: Int) {
 
 @ComponentPreview
 @Composable
-private fun HorizontalBrandItemNearbyPreview() {
+private fun HorizontalBrandItemAreaPreview() {
     NekiTheme {
         HorizontalBrandItem(
             photoBooth = PhotoBooth(
@@ -124,7 +124,7 @@ private fun HorizontalBrandItemNearbyPreview() {
 
 @ComponentPreview
 @Composable
-private fun HorizontalBrandItemNearbyFavoritePreview() {
+private fun HorizontalBrandItemAreaFavoritePreview() {
     NekiTheme {
         HorizontalBrandItem(
             photoBooth = PhotoBooth(
