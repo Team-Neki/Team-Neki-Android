@@ -669,7 +669,7 @@ class MapViewModel @Inject constructor(
                         ),
                     )
                 }
-                if (searchCenter != null || state.areaRegionName != null) {
+                if (searchCenter != null || state.areaRegionName != null || lastSearchCenter != null) {
                     val center = searchCenter ?: LocLatLng(
                         latitude = (mapBounds.northEast.latitude + mapBounds.southWest.latitude) / 2,
                         longitude = (mapBounds.northEast.longitude + mapBounds.southWest.longitude) / 2,
