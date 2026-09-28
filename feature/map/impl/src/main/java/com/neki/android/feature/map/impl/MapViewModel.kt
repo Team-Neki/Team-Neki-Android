@@ -43,6 +43,7 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
+    private var latestRegionNameRequestId = 0L
     private var polygonMarkerIds = emptySet<Long>()
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
@@ -630,6 +631,8 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
         searchCenter: LocLatLng? = null,
     ) {
+        val regionNameRequestId = ++latestRegionNameRequestId
+
         // 좌상단 -> 우상단 -> 우하단 -> 좌하단 -> 좌상단 (닫힌 다각형)
         val coordinates = listOf(
             mapBounds.northWest.longitude to mapBounds.northWest.latitude,
@@ -669,14 +672,21 @@ class MapViewModel @Inject constructor(
                         ),
                     )
                 }
-                if (searchCenter != null || state.areaRegionName != null || lastSearchCenter != null) {
+                if (
+                    regionNameRequestId == latestRegionNameRequestId &&
+                    (searchCenter != null || state.areaRegionName != null || lastSearchCenter != null)
+                ) {
                     val center = searchCenter ?: LocLatLng(
                         latitude = (mapBounds.northEast.latitude + mapBounds.southWest.latitude) / 2,
                         longitude = (mapBounds.northEast.longitude + mapBounds.southWest.longitude) / 2,
                     )
                     viewModelScope.launch {
                         context.getSecondDepthRegionName(center.latitude, center.longitude)
-                            .onSuccess { regionName -> reduce { copy(areaRegionName = regionName) } }
+                            .onSuccess { regionName ->
+                                if (regionNameRequestId == latestRegionNameRequestId) {
+                                    reduce { copy(areaRegionName = regionName) }
+                                }
+                            }
                             .onFailure { Timber.w(it, "지도 지역명 조회 실패") }
                     }
                 }
