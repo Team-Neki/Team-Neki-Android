@@ -71,12 +71,14 @@ import kotlin.math.roundToInt
 
 @Composable
 internal fun AnchoredDraggablePanel(
+    areaRegionName: String? = null,
     brands: ImmutableList<Brand> = persistentListOf(),
     displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
-    selectedTab: MapTab = MapTab.NEARBY,
+    selectedTab: MapTab = MapTab.AREA,
     favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     isCurrentLocation: Boolean = false,
+    hasCurrentLocation: Boolean = false,
     showFavoritePhotoBooth: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onTabSelected: (MapTab) -> Unit = {},
@@ -84,7 +86,7 @@ internal fun AnchoredDraggablePanel(
     onClickCurrentLocation: () -> Unit = {},
     onClickShowFavoriteIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
-    onClickNearPhotoBooth: (PhotoBooth) -> Unit = {},
+    onClickPhotoBoothListItem: (PhotoBooth) -> Unit = {},
     onClickBoothFavorite: (PhotoBooth) -> Unit = {},
     onClickEditBrandOrder: () -> Unit = {},
 ) {
@@ -105,7 +107,9 @@ internal fun AnchoredDraggablePanel(
     }
     val centerPanelHeightPx = with(density) {
         (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
-            MapConst.PANEL_DRAG_LOCATION_HEIGHT +
+            MapConst.BOTTOM_NAVIGATION_FAB_OVERLAP_HEIGHT +
+            MapConst.PANEL_DRAG_LOCATION_HEIGHT -
+            MapConst.PANEL_DRAG_LEVEL_SECOND_HEIGHT_REDUCTION +
             MapConst.PANEL_DRAG_LEVEL_SECOND_HEIGHT).dp.toPx() + navigationBarHeightPx
     }
     var isProgrammaticTransition by remember { mutableStateOf(false) }
@@ -179,6 +183,8 @@ internal fun AnchoredDraggablePanel(
             }
         }
         AnchoredPanelContent(
+            hasCurrentLocation = hasCurrentLocation,
+            areaRegionName = areaRegionName,
             modifier = Modifier
                 .graphicsLayer {
                     val currentOffset = state.requireOffset()
@@ -196,7 +202,7 @@ internal fun AnchoredDraggablePanel(
             onTabSelected = onTabSelected,
             onFavoritePhotoBoothSortSelected = onFavoritePhotoBoothSortSelected,
             onClickBrand = onClickBrand,
-            onClickPhotoBooth = onClickNearPhotoBooth,
+            onClickPhotoBooth = onClickPhotoBoothListItem,
             onClickBoothFavorite = onClickBoothFavorite,
             onClickEditBrandOrder = onClickEditBrandOrder,
         )
@@ -206,7 +212,9 @@ internal fun AnchoredDraggablePanel(
 @Composable
 internal fun AnchoredPanelContent(
     modifier: Modifier = Modifier,
-    selectedTab: MapTab = MapTab.NEARBY,
+    hasCurrentLocation: Boolean = false,
+    areaRegionName: String? = null,
+    selectedTab: MapTab = MapTab.AREA,
     favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     brands: ImmutableList<Brand> = persistentListOf(),
     displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
@@ -268,6 +276,7 @@ internal fun AnchoredPanelContent(
         VerticalSpacer(24.dp)
         Box(modifier = Modifier.padding(horizontal = 20.dp)) {
             PhotoBoothListToggle(
+                areaRegionName = areaRegionName,
                 selectedTab = selectedTab,
                 onTabSelected = onTabSelected,
             )
@@ -346,7 +355,11 @@ internal fun AnchoredPanelContent(
                         contentDescription = null,
                     )
                     Text(
-                        text = if (selectedTab == MapTab.NEARBY) "1km 이내에 가까운\n네컷 사진관이 없어요!" else "저장한 포토부스가\n없어요.",
+                        text = if (selectedTab == MapTab.AREA) {
+                            "지금 보고 있는 곳에는 네컷 사진관이 없어요\n지도를 살짝 옮겨볼까요?"
+                        } else {
+                            "저장한 포토부스가\n없어요."
+                        },
                         color = NekiTheme.colorScheme.gray500,
                         style = NekiTheme.typography.body16Medium,
                         textAlign = TextAlign.Center,
@@ -389,7 +402,10 @@ internal fun AnchoredPanelContent(
                             photoBooth = photoBooth,
                             onClickItem = { onClickPhotoBooth(photoBooth) },
                             onClickFavorite = { onClickBoothFavorite(photoBooth) },
-                            extraInfo = if (selectedTab == MapTab.NEARBY) {
+                            extraInfo = if (
+                                hasCurrentLocation &&
+                                (selectedTab == MapTab.AREA || favoritePhotoBoothSort == FavoritePhotoBoothSort.DISTANCE)
+                            ) {
                                 { DistanceInfo(photoBooth.distance) }
                             } else null,
                         )
