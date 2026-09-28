@@ -148,7 +148,7 @@ private fun SearchContent(
                     }
                 }
             } else {
-                itemsIndexed(uiState.results, key = { _, result -> result.key }) { index, result ->
+                itemsIndexed(uiState.results) { index, result ->
                     SearchPlaceItem(
                         result = result,
                         distanceMeters = result.distanceMeters?.takeIf {

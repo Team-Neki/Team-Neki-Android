@@ -31,9 +31,7 @@ internal data class SearchResult(
     val keyword: String,
     val type: SearchResultType,
     val distanceMeters: Int? = null,
-) {
-    val key: String get() = "${type.name}:$keyword"
-}
+)
 
 internal enum class SearchResultType {
     REGION,
