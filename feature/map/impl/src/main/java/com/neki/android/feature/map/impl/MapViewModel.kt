@@ -28,6 +28,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -43,7 +44,7 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
-    private var latestRegionNameRequestId = 0L
+    private var mapSearchJob: Job? = null
     private var polygonMarkerIds = emptySet<Long>()
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
@@ -631,7 +632,7 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
         searchCenter: LocLatLng? = null,
     ) {
-        val regionNameRequestId = ++latestRegionNameRequestId
+        mapSearchJob?.cancel()
 
         // 좌상단 -> 우상단 -> 우하단 -> 좌하단 -> 좌상단 (닫힌 다각형)
         val coordinates = listOf(
@@ -642,7 +643,7 @@ class MapViewModel @Inject constructor(
             mapBounds.northWest.longitude to mapBounds.northWest.latitude,
         )
 
-        viewModelScope.launch {
+        mapSearchJob = viewModelScope.launch {
             reduce { copy(isLoading = true) }
 
             mapRepository.getPhotoBoothsByPolygon(
@@ -672,23 +673,14 @@ class MapViewModel @Inject constructor(
                         ),
                     )
                 }
-                if (
-                    regionNameRequestId == latestRegionNameRequestId &&
-                    (searchCenter != null || state.areaRegionName != null || lastSearchCenter != null)
-                ) {
+                if (searchCenter != null || state.areaRegionName != null || lastSearchCenter != null) {
                     val center = searchCenter ?: LocLatLng(
                         latitude = (mapBounds.northEast.latitude + mapBounds.southWest.latitude) / 2,
                         longitude = (mapBounds.northEast.longitude + mapBounds.southWest.longitude) / 2,
                     )
-                    viewModelScope.launch {
-                        context.getSecondDepthRegionName(center.latitude, center.longitude)
-                            .onSuccess { regionName ->
-                                if (regionNameRequestId == latestRegionNameRequestId) {
-                                    reduce { copy(areaRegionName = regionName) }
-                                }
-                            }
-                            .onFailure { Timber.w(it, "지도 지역명 조회 실패") }
-                    }
+                    context.getSecondDepthRegionName(center.latitude, center.longitude)
+                        .onSuccess { regionName -> reduce { copy(areaRegionName = regionName) } }
+                        .onFailure { Timber.w(it, "지도 지역명 조회 실패") }
                 }
             }.onFailure { e ->
                 Timber.e(e)
