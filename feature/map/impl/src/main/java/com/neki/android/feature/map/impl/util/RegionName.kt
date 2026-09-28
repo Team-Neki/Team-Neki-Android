@@ -13,6 +13,12 @@ import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+private val whitespacePattern = Regex("\\s+")
+private val provincePattern = Regex(
+    "(?:[가-힣]+(?:시|도)|서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)",
+)
+private val secondDepthRegionPattern = Regex("[가-힣]+[시군구]")
+
 internal suspend fun Context.getSecondDepthRegionName(latitude: Double, longitude: Double): Result<String> =
     try {
         val regionName = withContext(Dispatchers.IO) {
@@ -49,13 +55,10 @@ internal suspend fun Context.getSecondDepthRegionName(latitude: Double, longitud
 
 /** 한국어 주소의 시·도 바로 다음 행정구역만 사용한다. 읍·면·동으로 대체하지 않는다. */
 internal fun extractSecondDepthRegionName(address: String?): String? {
-    val parts = address?.trim()?.split(Regex("\\s+"))
+    val parts = address?.trim()?.split(whitespacePattern)
         ?.dropWhile { it == "대한민국" || it == "한국" }
         ?: return null
     val province = parts.firstOrNull() ?: return null
     val region = parts.getOrNull(1) ?: return null
-    val provincePattern = Regex(
-        "(?:[가-힣]+(?:시|도)|서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)",
-    )
-    return region.takeIf { province.matches(provincePattern) && it.matches(Regex("[가-힣]+[시군구]")) }
+    return region.takeIf { province.matches(provincePattern) && it.matches(secondDepthRegionPattern) }
 }
