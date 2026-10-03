@@ -2,7 +2,6 @@ package com.neki.android.feature.map.impl.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,13 +23,13 @@ import com.neki.android.core.designsystem.modifier.cardShadow
 import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PhotoBooth
-import com.neki.android.feature.map.impl.util.formatDistance
 
 @Composable
 internal fun PhotoBoothDetailContent(
     photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
     isFavorite: Boolean = false,
+    showDistance: Boolean = true,
     onClickFavorite: () -> Unit = {},
     onClickCloseCard: () -> Unit = {},
     onClickCard: () -> Unit = {},
@@ -54,6 +53,7 @@ internal fun PhotoBoothDetailContent(
             onClick = onClickCard,
             onClickFavorite = onClickFavorite,
             onClickDirection = onClickDirection,
+            showDistance = showDistance,
         )
     }
 }
@@ -63,6 +63,7 @@ private fun PhotoBoothDetailCard(
     photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
     isFavorite: Boolean = false,
+    showDistance: Boolean = true,
     onClick: () -> Unit = {},
     onClickFavorite: () -> Unit = {},
     onClickDirection: () -> Unit = {},
@@ -112,16 +113,9 @@ private fun PhotoBoothDetailCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Box(
-                    modifier = Modifier
-                        .size(width = 1.dp, height = 10.dp)
-                        .background(color = NekiTheme.colorScheme.gray100),
-                )
-                Text(
-                    text = photoBooth.distance.formatDistance(),
-                    color = NekiTheme.colorScheme.gray700,
-                    style = NekiTheme.typography.body14SemiBold,
-                )
+                if (showDistance) {
+                    DistanceInfo(photoBooth.distance)
+                }
             }
         }
         Column(
@@ -176,6 +170,20 @@ private fun PhotoBoothDetailContentPreview() {
                 branchName = "사당역점",
                 distance = 300,
             ),
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun PhotoBoothDetailWithoutDistancePreview() {
+    NekiTheme {
+        PhotoBoothDetailContent(
+            photoBooth = PhotoBooth(
+                brandName = "인생네컷",
+                branchName = "강남역점",
+            ),
+            showDistance = false,
         )
     }
 }
