@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,8 +26,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.ui.component.LoadingIndicator
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.search.component.SearchEmptyContent
@@ -80,6 +81,7 @@ internal fun SearchScreen(
         modifier = modifier
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white)
+            .statusBarsPadding()
             .imePadding(),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -121,11 +123,7 @@ private fun SearchContent(
             modifier = modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                color = NekiTheme.colorScheme.primary400,
-                strokeWidth = 2.dp,
-            )
+            LoadingIndicator(size = 200.dp)
         }
     } else {
         LazyColumn(
@@ -186,7 +184,7 @@ private fun previewResults() = persistentListOf(
     ),
 )
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun SearchEmptyPreview() {
     NekiTheme {
@@ -194,7 +192,7 @@ private fun SearchEmptyPreview() {
     }
 }
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun SearchResultsPreview() {
     NekiTheme {
@@ -209,7 +207,7 @@ private fun SearchResultsPreview() {
     }
 }
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun SearchRegionPreview() {
     NekiTheme {
@@ -223,7 +221,7 @@ private fun SearchRegionPreview() {
     }
 }
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun SearchPhotoBoothPreview() {
     NekiTheme {
@@ -254,7 +252,7 @@ private fun SearchPhotoBoothPreview() {
     }
 }
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun SearchNoPermissionPreview() {
     NekiTheme {
@@ -268,7 +266,7 @@ private fun SearchNoPermissionPreview() {
     }
 }
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun SearchNoResultsPreview() {
     NekiTheme {
@@ -281,7 +279,7 @@ private fun SearchNoResultsPreview() {
     }
 }
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun SearchNetworkErrorPreview() {
     NekiTheme {
@@ -295,7 +293,7 @@ private fun SearchNetworkErrorPreview() {
     }
 }
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun SearchLoadingPreview() {
     NekiTheme {

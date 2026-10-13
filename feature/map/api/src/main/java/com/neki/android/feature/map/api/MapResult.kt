@@ -4,4 +4,5 @@ import com.neki.android.core.model.Brand
 
 sealed interface MapResult {
     data class BrandOrderChanged(val orderedBrands: List<Brand>) : MapResult
+    data class SearchSelected(val keyword: String) : MapResult
 }

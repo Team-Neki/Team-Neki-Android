@@ -10,11 +10,14 @@ import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.feature.map.api.MapResult
 import com.neki.android.feature.map.api.MapNavKey
 import com.neki.android.feature.map.api.navigateToPhotoBoothOrderChange
+import com.neki.android.feature.map.api.navigateToSearch
 import com.neki.android.feature.map.impl.MapIntent
 import com.neki.android.feature.map.impl.MapRoute
 import com.neki.android.feature.map.impl.MapViewModel
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeRoute
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeViewModel
+import com.neki.android.feature.map.impl.search.SearchResultPanelIntent
+import com.neki.android.feature.map.impl.search.SearchRoute
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,20 +37,36 @@ object MapEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
-    entry<MapNavKey.Map> {
+    entry<MapNavKey.Map>(clazzContentKey = { it.toString() }) {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<MapViewModel>()
 
         ResultEffect<MapResult>(resultBus) { result ->
             when (result) {
                 is MapResult.BrandOrderChanged -> viewModel.store.onIntent(MapIntent.UpdateBrandOrder(result.orderedBrands))
+                is MapResult.SearchSelected -> viewModel.store.onIntent(
+                    MapIntent.SearchPanel(SearchResultPanelIntent.ShowResults(result.keyword)),
+                )
             }
         }
 
         MapRoute(
             viewModel = viewModel,
+            isVisible = navigator.state.currentKey == MapNavKey.Map,
+            navigateToSearch = navigator::navigateToSearch,
             navigateToPhotoBoothOrderChange = { brands ->
                 navigator.navigateToPhotoBoothOrderChange(brands)
+            },
+        )
+    }
+
+    entry<MapNavKey.Search>(clazzContentKey = { it.toString() }) {
+        val resultBus = LocalResultEventBus.current
+        SearchRoute(
+            navigateBack = navigator::goBack,
+            onResultSelected = { result ->
+                resultBus.sendResult<MapResult>(result = MapResult.SearchSelected(result.keyword), allowDuplicate = false)
+                navigator.goBack()
             },
         )
     }

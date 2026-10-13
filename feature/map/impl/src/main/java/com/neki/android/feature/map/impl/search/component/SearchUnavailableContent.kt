@@ -48,6 +48,7 @@ internal fun SearchNetworkErrorContent(
 @Composable
 internal fun SearchNoResultsContent(
     modifier: Modifier = Modifier,
+    message: String = "조건에 맞는 포토부스가 없어요.\n다른 지역이나 브랜드로 검색해보세요.",
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -65,7 +66,7 @@ internal fun SearchNoResultsContent(
             )
         }
         Text(
-            text = "조건에 맞는 포토부스가 없어요.\n다른 지역이나 브랜드로 검색해보세요.",
+            text = message,
             style = NekiTheme.typography.body16Medium,
             color = NekiTheme.colorScheme.gray500,
             textAlign = TextAlign.Center,

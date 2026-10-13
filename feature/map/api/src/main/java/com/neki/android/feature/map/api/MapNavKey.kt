@@ -11,11 +11,18 @@ sealed interface MapNavKey : NavKey {
     data object Map : MapNavKey
 
     @Serializable
+    data object Search : MapNavKey
+
+    @Serializable
     data class PhotoBoothOrderChange(val brands: List<Brand>) : MapNavKey
 }
 
 fun MainNavigator.navigateToMap() {
     navigate(MapNavKey.Map)
+}
+
+fun MainNavigator.navigateToSearch() {
+    navigate(MapNavKey.Search)
 }
 
 fun MainNavigator.navigateToPhotoBoothOrderChange(brands: List<Brand>) {

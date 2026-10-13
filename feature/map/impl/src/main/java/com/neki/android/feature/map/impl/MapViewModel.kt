@@ -19,6 +19,8 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.feature.map.impl.search.SearchResultPanelIntent
+import com.neki.android.feature.map.impl.search.SearchResultPanelState
 import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
 import com.neki.android.feature.map.impl.util.getSecondDepthRegionName
@@ -27,6 +29,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -65,6 +68,8 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> fetchInitialData(reduce)
+            MapIntent.ClickSearch -> postSideEffect(MapEffect.NavigateToSearch)
+            is MapIntent.SearchPanel -> handleSearchPanelIntent(intent.intent, reduce)
             is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> {
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
@@ -90,18 +95,7 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, state, reduce)
             is MapIntent.ClickPhotoBoothListItem -> handleClickPhotoBoothListItem(intent.photoBooth, reduce, postSideEffect)
-            MapIntent.ClickClosePhotoBoothCard -> reduce {
-                copy(
-                    dragLevel = DragLevel.SECOND,
-                    mapMarkers = mapMarkers
-                        .filter { polygonMarkerIds.contains(it.id) }
-                        .map { it.copy(isFocused = false) }
-                        .toImmutableList(),
-                    favoritePhotoBooths = favoritePhotoBooths
-                        .map { it.copy(isFocused = false) }
-                        .toImmutableList(),
-                )
-            }
+            MapIntent.ClickClosePhotoBoothCard -> handleClosePhotoBoothCard(reduce)
 
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
@@ -200,6 +194,52 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    private fun handleClosePhotoBoothCard(reduce: (MapState.() -> MapState) -> Unit) {
+        reduce {
+            copy(
+                dragLevel = if (searchResults == null) DragLevel.SECOND else dragLevel,
+                searchResults = searchResults?.copy(focusedBoothId = null),
+                mapMarkers = mapMarkers
+                    .filter { polygonMarkerIds.contains(it.id) }
+                    .map { it.copy(isFocused = false) }
+                    .toImmutableList(),
+                favoritePhotoBooths = favoritePhotoBooths
+                    .map { it.copy(isFocused = false) }
+                    .toImmutableList(),
+            )
+        }
+    }
+
+    private fun handleSearchPanelIntent(
+        intent: SearchResultPanelIntent,
+        reduce: (MapState.() -> MapState) -> Unit,
+    ) {
+        when (intent) {
+            is SearchResultPanelIntent.ShowResults -> reduce {
+                copy(searchResults = SearchResultPanelState(keyword = intent.keyword))
+            }
+            SearchResultPanelIntent.CloseResults -> reduce { copy(searchResults = null) }
+            is SearchResultPanelIntent.ChangeDragLevel -> reduce {
+                copy(searchResults = searchResults?.copy(dragLevel = intent.level))
+            }
+            SearchResultPanelIntent.OpenFilter -> reduce {
+                copy(searchResults = searchResults?.copy(showFilter = true, draftBrandIds = searchResults.selectedBrandIds))
+            }
+            SearchResultPanelIntent.DismissFilter -> reduce {
+                copy(searchResults = searchResults?.copy(showFilter = false))
+            }
+            is SearchResultPanelIntent.ToggleBrand -> reduce {
+                val search = searchResults ?: return@reduce this
+                val ids = search.draftBrandIds
+                val updated = if (intent.brandId in ids) ids - intent.brandId else ids + intent.brandId
+                copy(searchResults = search.copy(draftBrandIds = updated.toImmutableSet()))
+            }
+            SearchResultPanelIntent.ApplyFilter -> reduce {
+                copy(searchResults = searchResults?.copy(showFilter = false, selectedBrandIds = searchResults.draftBrandIds))
+            }
+        }
+    }
+
     private fun updateFavorite(photoBooth: PhotoBooth) {
         viewModelScope.launch {
             mapRepository.updatePhotoBoothFavorite(photoBooth.id, photoBooth.favorite)
@@ -262,6 +302,11 @@ class MapViewModel @Inject constructor(
                 mapMarkers = updatedMarkers,
                 areaPhotoBooths = updatedArea,
                 favoritePhotoBooths = updatedFavorite,
+                searchResults = searchResults?.copy(
+                    photoBooths = searchResults.photoBooths.map {
+                        if (it.id == id) it.copy(favorite = newFavorite) else it
+                    }.toImmutableList(),
+                ),
                 displayPhotoBooths = displayPhotoBooths(
                     selectedTab = selectedTab,
                     areaPhotoBooths = updatedArea,
@@ -424,7 +469,8 @@ class MapViewModel @Inject constructor(
                 mapMarkers.map { it.copy(isFocused = false) } + photoBooth.copy(isFocused = true, distance = distance)
             }
             copy(
-                dragLevel = DragLevel.INVISIBLE,
+                dragLevel = if (searchResults == null) DragLevel.INVISIBLE else dragLevel,
+                searchResults = searchResults?.copy(focusedBoothId = photoBooth.id),
                 mapMarkers = updatedMarkers.toImmutableList(),
                 favoritePhotoBooths = favoritePhotoBooths.map { marker ->
                     marker.copy(isFocused = marker.id == photoBooth.id, distance = if (marker.id == photoBooth.id) distance else marker.distance)
