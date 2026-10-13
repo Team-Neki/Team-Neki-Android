@@ -218,7 +218,7 @@ class MapViewModel @Inject constructor(
             is SearchResultPanelIntent.ShowResults -> reduce {
                 copy(searchResults = SearchResultPanelState(keyword = intent.keyword))
             }
-            SearchResultPanelIntent.CloseResults -> reduce { copy(searchResults = null) }
+            SearchResultPanelIntent.CloseResults -> handleCloseSearchResults(reduce)
             is SearchResultPanelIntent.ChangeDragLevel -> reduce {
                 copy(searchResults = searchResults?.copy(dragLevel = intent.level))
             }
@@ -237,6 +237,23 @@ class MapViewModel @Inject constructor(
             SearchResultPanelIntent.ApplyFilter -> reduce {
                 copy(searchResults = searchResults?.copy(showFilter = false, selectedBrandIds = searchResults.draftBrandIds))
             }
+        }
+    }
+
+    private fun handleCloseSearchResults(reduce: (MapState.() -> MapState) -> Unit) {
+        reduce {
+            if (searchResults == null) return@reduce this
+            copy(
+                searchResults = null,
+                dragLevel = if (dragLevel == DragLevel.INVISIBLE) DragLevel.SECOND else dragLevel,
+                mapMarkers = mapMarkers
+                    .filter { it.id in polygonMarkerIds }
+                    .map { it.copy(isFocused = false) }
+                    .toImmutableList(),
+                favoritePhotoBooths = favoritePhotoBooths
+                    .map { it.copy(isFocused = false) }
+                    .toImmutableList(),
+            )
         }
     }
 

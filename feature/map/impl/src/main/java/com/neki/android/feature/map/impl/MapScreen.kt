@@ -1,5 +1,6 @@
 package com.neki.android.feature.map.impl
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -230,6 +231,10 @@ fun MapScreen(
     },
 ) {
     val context = LocalContext.current
+    // 검색 화면 뒤에 유지된 지도는 뒤로가기를 소비하지 않는다.
+    BackHandler(enabled = isVisible && uiState.searchResults != null) {
+        onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.CloseResults))
+    }
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
             locationTrackingMode = locationTrackingMode,
