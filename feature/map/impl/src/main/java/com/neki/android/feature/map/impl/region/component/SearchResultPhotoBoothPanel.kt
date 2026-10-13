@@ -206,22 +206,12 @@ internal fun SearchResultPhotoBoothPanel(
             listState = listState,
             listModifier = Modifier.nestedScroll(nestedScroll),
             isCollapsed = isCollapsed,
-            filterLabel = resultBrandLabel(photoBooths),
             isLoading = isLoading,
             isError = isError,
             onFilterClick = onFilterClick,
             onBoothClick = onBoothClick,
             onFavoriteClick = onFavoriteClick,
         )
-    }
-}
-
-private fun resultBrandLabel(photoBooths: ImmutableList<PhotoBooth>): String {
-    val names = photoBooths.map { it.brandName }.distinct()
-    return when (names.size) {
-        0 -> "브랜드"
-        1 -> names.first()
-        else -> "${names.first()} 외 ${names.size - 1}개"
     }
 }
 
@@ -261,13 +251,13 @@ private fun SearchResultPanelContent(
     listModifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     isCollapsed: Boolean = false,
-    filterLabel: String = "브랜드",
     isLoading: Boolean = false,
     isError: Boolean = false,
     onFilterClick: () -> Unit = {},
     onBoothClick: (PhotoBooth) -> Unit = {},
     onFavoriteClick: (PhotoBooth) -> Unit = {},
 ) {
+    val brandNames = photoBooths.map { it.brandName }.distinct()
     Column(modifier = modifier.background(NekiTheme.colorScheme.white), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Column(modifier = headerModifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             BottomSheetDragHandle(color = NekiTheme.colorScheme.gray100)
@@ -283,8 +273,8 @@ private fun SearchResultPanelContent(
                 color = NekiTheme.colorScheme.gray400,
             )
             BrandFilterChip(
-                text = if (photoBooths.isEmpty()) "브랜드" else filterLabel,
-                highlightBrand = photoBooths.isNotEmpty(),
+                brandName = brandNames.firstOrNull(),
+                extraCount = (brandNames.size - 1).coerceAtLeast(0),
                 enabled = !isLoading && !isError,
                 modifier = Modifier.padding(horizontal = 20.dp),
                 onClick = onFilterClick,
@@ -364,13 +354,12 @@ private fun ShowSearchListButton(
 
 @Composable
 private fun BrandFilterChip(
-    text: String,
-    highlightBrand: Boolean,
+    brandName: String?,
+    extraCount: Int = 0,
     enabled: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val color = if (highlightBrand) NekiTheme.colorScheme.primary500 else NekiTheme.colorScheme.gray600
     Row(
         modifier = modifier
             .padding(vertical = 8.dp)
@@ -382,17 +371,17 @@ private fun BrandFilterChip(
     ) {
         Text(
             text = buildAnnotatedString {
-                append(text)
-                Regex(" 외 \\d+개$").find(text)?.let { suffix ->
-                    addStyle(
-                        style = SpanStyle(color = NekiTheme.colorScheme.gray600),
-                        start = suffix.range.first,
-                        end = text.length,
-                    )
+                if (brandName == null) {
+                    append("브랜드")
+                } else {
+                    withStyle(SpanStyle(color = NekiTheme.colorScheme.primary500)) {
+                        append(brandName)
+                    }
+                    if (extraCount > 0) append(" 외 ${extraCount}개")
                 }
             },
             style = NekiTheme.typography.body14SemiBold,
-            color = color,
+            color = NekiTheme.colorScheme.gray600,
         )
         Icon(
             painter = painterResource(R.drawable.icon_chip_down),
@@ -508,10 +497,10 @@ private fun ShowSearchListButtonPreview() {
 private fun BrandFilterChipStatesPreview() {
     NekiTheme {
         Column(Modifier.padding(16.dp)) {
-            BrandFilterChip(text = "브랜드", highlightBrand = false, enabled = true, onClick = {})
-            BrandFilterChip(text = "인생네컷", highlightBrand = true, enabled = true, onClick = {})
-            BrandFilterChip(text = "포토시그니처 외 10개", highlightBrand = true, enabled = true, onClick = {})
-            BrandFilterChip(text = "브랜드", highlightBrand = false, enabled = false, onClick = {})
+            BrandFilterChip(brandName = null, enabled = true, onClick = {})
+            BrandFilterChip(brandName = "인생네컷", enabled = true, onClick = {})
+            BrandFilterChip(brandName = "포토시그니처", extraCount = 10, enabled = true, onClick = {})
+            BrandFilterChip(brandName = null, enabled = false, onClick = {})
         }
     }
 }
