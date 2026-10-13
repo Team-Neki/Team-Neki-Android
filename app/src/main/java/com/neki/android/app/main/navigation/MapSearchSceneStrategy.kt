@@ -13,16 +13,18 @@ import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.map.api.MapNavKey
+import com.neki.android.feature.map.api.MapSceneMetadata
 
 internal class MapSearchSceneStrategy(
     private val bottomBar: @Composable () -> Unit,
 ) : SceneStrategy<NavKey> {
     override fun SceneStrategyScope<NavKey>.calculateScene(entries: List<NavEntry<NavKey>>): Scene<NavKey>? {
         val lastEntry = entries.lastOrNull() ?: return null
-        val searchEntry = lastEntry.takeIf { it.contentKey == MapNavKey.Search.toString() }
+        val searchEntry = lastEntry.takeIf {
+            it.metadata[MapSceneMetadata.ROLE] == MapSceneMetadata.Role.SEARCH
+        }
         val mapEntry = if (searchEntry != null) entries.getOrNull(entries.lastIndex - 1) else lastEntry
-        if (mapEntry?.contentKey != MapNavKey.Map.toString()) return null
+        if (mapEntry?.metadata?.get(MapSceneMetadata.ROLE) != MapSceneMetadata.Role.MAP) return null
 
         return MapSearchScene(
             key = mapEntry.contentKey,

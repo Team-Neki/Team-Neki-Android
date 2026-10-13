@@ -9,6 +9,7 @@ import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.feature.map.api.MapResult
 import com.neki.android.feature.map.api.MapNavKey
+import com.neki.android.feature.map.api.MapSceneMetadata
 import com.neki.android.feature.map.api.navigateToPhotoBoothOrderChange
 import com.neki.android.feature.map.api.navigateToSearch
 import com.neki.android.feature.map.impl.MapIntent
@@ -37,7 +38,10 @@ object MapEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
-    entry<MapNavKey.Map>(clazzContentKey = { it.toString() }) {
+    entry<MapNavKey.Map>(
+        clazzContentKey = { "neki.map.main" },
+        metadata = mapOf(MapSceneMetadata.ROLE to MapSceneMetadata.Role.MAP),
+    ) {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<MapViewModel>()
 
@@ -60,7 +64,10 @@ private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
         )
     }
 
-    entry<MapNavKey.Search>(clazzContentKey = { it.toString() }) {
+    entry<MapNavKey.Search>(
+        clazzContentKey = { "neki.map.search" },
+        metadata = mapOf(MapSceneMetadata.ROLE to MapSceneMetadata.Role.SEARCH),
+    ) {
         val resultBus = LocalResultEventBus.current
         SearchRoute(
             navigateBack = navigator::goBack,
