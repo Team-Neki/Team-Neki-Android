@@ -17,7 +17,7 @@ data class SearchResultPanelState(
     val selectedBrandIds: ImmutableSet<Long> = persistentSetOf(),
     val draftBrandIds: ImmutableSet<Long> = persistentSetOf(),
     val showFilter: Boolean = false,
-    val focusedBoothId: Long? = null,
+    val focusedBoothId: String? = null,
 ) {
     fun visibleBooths(brands: ImmutableList<Brand>): ImmutableList<PhotoBooth> {
         val selectedNames = brands.filter { it.id in selectedBrandIds }.map { it.name }

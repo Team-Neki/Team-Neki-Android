@@ -252,7 +252,7 @@ fun MapScreen(
 
     var clusterer by remember { mutableStateOf<Clusterer<PhotoBoothClusterItem>?>(null) }
     val currentBrandImageCache by rememberUpdatedState(uiState.brandImageCache)
-    var prevMarkerMap by remember { mutableStateOf<Map<Long, PhotoBooth>>(emptyMap()) }
+    var prevMarkerMap by remember { mutableStateOf<Map<String, PhotoBooth>>(emptyMap()) }
 
     // 마커 데이터 변경 시 클러스터 증분 업데이트
     LaunchedEffect(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoritePhotoBooth, clusterer) {

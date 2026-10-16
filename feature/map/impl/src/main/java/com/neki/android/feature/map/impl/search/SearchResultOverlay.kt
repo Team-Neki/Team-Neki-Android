@@ -81,8 +81,8 @@ internal fun SearchResultOverlay(
 }
 
 private val PreviewSearchBooths = persistentListOf(
-    PhotoBooth(id = 1, brandName = "인생네컷", branchName = "사당역점", address = "서울 동작구 동작대로 27", distance = 150),
-    PhotoBooth(id = 2, brandName = "포토그레이", branchName = "사당점", address = "서울 동작구 동작대로 43", distance = 300, favorite = true),
+    PhotoBooth(id = "source:LIFEFOURCUTS:1", brandName = "인생네컷", branchName = "사당역점", address = "서울 동작구 동작대로 27", distance = 150),
+    PhotoBooth(id = "source:PHOTOGRAY:2", brandName = "포토그레이", branchName = "사당점", address = "서울 동작구 동작대로 43", distance = 300, favorite = true),
 )
 
 @ComponentPreview
@@ -101,7 +101,7 @@ private fun SearchResultOverlayEmptyPreview() {
 @Composable
 private fun SearchResultOverlayDetailPreview() {
     SearchResultOverlayPreviewContent(
-        SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, focusedBoothId = 2),
+        SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, focusedBoothId = "source:PHOTOGRAY:2"),
     )
 }
 

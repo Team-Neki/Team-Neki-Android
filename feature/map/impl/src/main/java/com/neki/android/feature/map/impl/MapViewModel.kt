@@ -48,7 +48,7 @@ class MapViewModel @Inject constructor(
 
     private var lastSearchCenter: LocLatLng? = null
     private var mapSearchJob: Job? = null
-    private var polygonMarkerIds = emptySet<Long>()
+    private var polygonMarkerIds = emptySet<String>()
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
         initialState = MapState(),

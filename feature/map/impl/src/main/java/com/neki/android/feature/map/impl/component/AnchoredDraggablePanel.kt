@@ -432,6 +432,7 @@ private fun AnchoredPanelContentPreview() {
             ),
             displayPhotoBooths = persistentListOf(
                 PhotoBooth(
+                    id = "source:LIFEFOURCUTS:1",
                     brandName = "인생네컷",
                     branchName = "가산디지털점",
                     distance = 25,
@@ -439,6 +440,7 @@ private fun AnchoredPanelContentPreview() {
                     longitude = 126.8864,
                 ),
                 PhotoBooth(
+                    id = "source:PHOTOGRAY:1",
                     brandName = "포토그레이",
                     branchName = "가산역점",
                     distance = 38,
@@ -446,6 +448,7 @@ private fun AnchoredPanelContentPreview() {
                     longitude = 126.8867,
                 ),
                 PhotoBooth(
+                    id = "source:PHOTOISM:1",
                     brandName = "포토이즘",
                     branchName = "마리오점",
                     distance = 52,
