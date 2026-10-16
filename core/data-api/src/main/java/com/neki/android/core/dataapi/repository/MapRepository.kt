@@ -22,5 +22,5 @@ interface MapRepository {
 
     suspend fun getFavoritePhotoBooths(): Result<List<PhotoBooth>>
 
-    suspend fun updatePhotoBoothFavorite(locationId: Long, favorite: Boolean): Result<Unit>
+    suspend fun updatePhotoBoothFavorite(locationId: String, favorite: Boolean): Result<Unit>
 }

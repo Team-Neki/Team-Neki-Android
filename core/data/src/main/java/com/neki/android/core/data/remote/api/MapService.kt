@@ -27,7 +27,7 @@ class MapService @Inject constructor(
     suspend fun getPhotoBoothsByPoint(
         request: PhotoBoothPointRequest,
     ): BasicResponse<PhotoBoothResponse> {
-        return client.post("/api/photo-booths/point") {
+        return client.post("/api/v2/photo-booths/point") {
             setBody(request)
         }.body()
     }
@@ -35,7 +35,7 @@ class MapService @Inject constructor(
     suspend fun getPhotoBoothsByPolygon(
         request: PhotoBoothPolygonRequest,
     ): BasicResponse<PhotoBoothResponse> {
-        return client.post("/api/photo-booths/polygon") {
+        return client.post("/api/v2/photo-booths/polygon") {
             setBody(request)
         }.body()
     }
@@ -49,14 +49,14 @@ class MapService @Inject constructor(
     }
 
     suspend fun getFavoritePhotoBooths(): BasicResponse<PhotoBoothResponse> {
-        return client.get("/api/photo-booths/favorite").body()
+        return client.get("/api/v2/photo-booths/favorite").body()
     }
 
     suspend fun updatePhotoBoothFavorite(
-        locationId: Long,
+        locationId: String,
         request: UpdateFavoriteRequest,
     ): BasicNullableResponse<Unit> {
-        return client.patch("/api/photo-booths/$locationId/favorite") {
+        return client.patch("/api/v2/photo-booths/$locationId/favorite") {
             setBody(request)
         }.body()
     }

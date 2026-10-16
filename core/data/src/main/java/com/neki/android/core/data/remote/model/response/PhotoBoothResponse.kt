@@ -10,7 +10,7 @@ data class PhotoBoothResponse(
 ) {
     @Serializable
     data class Item(
-        @SerialName("id") val id: Long,
+        @SerialName("id") val id: String,
         @SerialName("brandName") val brandName: String,
         @SerialName("branchName") val branchName: String,
         @SerialName("address") val address: String,

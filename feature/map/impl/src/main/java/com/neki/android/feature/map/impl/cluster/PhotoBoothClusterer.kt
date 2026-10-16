@@ -38,7 +38,7 @@ internal object PhotoBoothClusterer {
 
     private val clusterIconCache = mutableMapOf<Int, OverlayImage>()
     private val leafIconCache = mutableMapOf<Triple<String, Boolean, Boolean>, Pair<OverlayImage, PointF>>()
-    private val leafMarkerMap = mutableMapOf<Long, Marker>()
+    private val leafMarkerMap = mutableMapOf<String, Marker>()
 
     /**
      * @param getBrandImage 브랜드 이미지 캐시에서 이미지를 가져오는 함수

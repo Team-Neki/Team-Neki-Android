@@ -191,7 +191,7 @@ private fun SearchResultPhotoBoothPreview() {
         SearchResultPhotoBoothBottomSheetContent(
             photoBooths = persistentListOf(
                 PhotoBooth(
-                    id = 1,
+                    id = "source:LIFEFOURCUTS:1",
                     brandName = "인생네컷",
                     branchName = "강남역점",
                     distance = 300,
@@ -210,7 +210,7 @@ private fun SearchResultPhotoBoothSingleBrandSelectedPreview() {
         SearchResultPhotoBoothBottomSheetContent(
             photoBooths = persistentListOf(
                 PhotoBooth(
-                    id = 1,
+                    id = "source:HARUFILM:1",
                     brandName = "하루필름",
                     branchName = "강남점",
                 ),
@@ -230,12 +230,12 @@ private fun SearchResultPhotoBoothMultipleBrandsSelectedPreview() {
         SearchResultPhotoBoothBottomSheetContent(
             photoBooths = persistentListOf(
                 PhotoBooth(
-                    id = 1,
+                    id = "source:PHOTOSIGNATURE:1",
                     brandName = "포토시그니처",
                     branchName = "강남점",
                 ),
                 PhotoBooth(
-                    id = 2,
+                    id = "source:HARUFILM:2",
                     brandName = "하루필름",
                     branchName = "강남점",
                 ),
