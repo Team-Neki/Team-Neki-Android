@@ -84,7 +84,9 @@ internal fun SearchScreen(
             .statusBarsPadding()
             .imePadding(),
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
             SearchField(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                 query = uiState.query,

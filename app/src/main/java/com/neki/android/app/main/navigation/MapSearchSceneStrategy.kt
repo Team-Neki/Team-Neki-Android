@@ -46,19 +46,28 @@ private data class MapSearchScene(
     override val entries: List<NavEntry<NavKey>> = listOfNotNull(mapEntry, searchEntry)
 
     override val content: @Composable () -> Unit = {
-        Box(Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+        ) {
             Column(
-                Modifier.fillMaxSize().then(
-                    if (searchEntry != null) Modifier.clearAndSetSemantics {} else Modifier,
-                ),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (searchEntry != null) Modifier.clearAndSetSemantics {} else Modifier,
+                    ),
             ) {
-                Box(Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier.weight(1f),
+                ) {
                     mapEntry.Content()
                 }
                 bottomBar()
             }
             searchEntry?.let { entry ->
-                Surface(modifier = Modifier.fillMaxSize(), color = NekiTheme.colorScheme.white) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = NekiTheme.colorScheme.white,
+                ) {
                     entry.Content()
                 }
             }

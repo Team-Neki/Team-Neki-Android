@@ -14,7 +14,6 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
-import com.neki.android.feature.map.impl.DragLevel
 import com.neki.android.feature.map.impl.LocLatLng
 import com.neki.android.feature.map.impl.MapIntent
 import com.neki.android.feature.map.impl.component.MapSearchBar
@@ -44,14 +43,15 @@ internal fun SearchResultOverlay(
             showDistance = showDistance,
             isCurrentLocation = isCurrentLocation,
             onDragLevelChanged = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.ChangeDragLevel(it))) },
-            onShowList = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.ChangeDragLevel(DragLevel.SECOND))) },
             onCurrentLocationClick = { onIntent(MapIntent.ClickCurrentLocationIcon) },
             onFilterClick = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.OpenFilter)) },
             onBoothClick = { onIntent(MapIntent.ClickPhotoBoothListItem(it)) },
             onFavoriteClick = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
         )
     } else {
-        Box(Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+        ) {
             PhotoBoothDetailContent(
                 photoBooth = focusedBooth,
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -70,7 +70,7 @@ internal fun SearchResultOverlay(
         BrandFilterBottomSheet(
             filters = brands.mapNotNull { brand ->
                 val count = state.photoBooths.count { it.brandName == brand.name }
-                if (count > 0) SearchBrandFilter(brand, count) else null
+                if (count > 0) SearchBrandFilter(brand = brand, count = count) else null
             }.toImmutableList(),
             selectedBrandIds = state.draftBrandIds,
             onDismiss = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.DismissFilter)) },
@@ -88,20 +88,25 @@ private val PreviewSearchBooths = persistentListOf(
 @ComponentPreview
 @Composable
 private fun SearchResultOverlayResultsPreview() {
-    SearchResultOverlayPreviewContent(SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths))
+    SearchResultOverlayPreviewContent(
+        state = SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths),
+    )
 }
 
 @ComponentPreview
 @Composable
 private fun SearchResultOverlayEmptyPreview() {
-    SearchResultOverlayPreviewContent(SearchResultPanelState(keyword = "사당"), showDistance = false)
+    SearchResultOverlayPreviewContent(
+        state = SearchResultPanelState(keyword = "사당"),
+        showDistance = false,
+    )
 }
 
 @ComponentPreview
 @Composable
 private fun SearchResultOverlayDetailPreview() {
     SearchResultOverlayPreviewContent(
-        SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, focusedBoothId = 2),
+        state = SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, focusedBoothId = 2),
     )
 }
 
@@ -109,7 +114,7 @@ private fun SearchResultOverlayDetailPreview() {
 @Composable
 private fun SearchResultOverlayFilteredPreview() {
     SearchResultOverlayPreviewContent(
-        SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, selectedBrandIds = persistentSetOf(2L)),
+        state = SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, selectedBrandIds = persistentSetOf(2L)),
     )
 }
 
@@ -117,10 +122,16 @@ private fun SearchResultOverlayFilteredPreview() {
 private fun SearchResultOverlayPreviewContent(state: SearchResultPanelState, showDistance: Boolean = true) {
     NekiTheme {
         // 지도 SDK 없이 검색바와 결과 오버레이의 배치를 확인한다.
-        Box(Modifier.size(375.dp, 760.dp).background(NekiTheme.colorScheme.gray50)) {
+        Box(
+            modifier = Modifier
+                .size(width = 375.dp, height = 760.dp)
+                .background(NekiTheme.colorScheme.gray50),
+        ) {
             MapSearchBar(
                 query = state.keyword,
-                modifier = Modifier.statusBarsPadding().padding(horizontal = 20.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
             )
             SearchResultOverlay(
                 state = state,
