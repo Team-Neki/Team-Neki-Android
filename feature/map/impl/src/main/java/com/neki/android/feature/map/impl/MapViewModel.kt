@@ -13,14 +13,14 @@ import com.neki.android.core.analytics.event.MapAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
+import com.neki.android.feature.map.impl.search.SearchMapIntent
+import com.neki.android.feature.map.impl.search.SearchMapState
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.const.MapConst
-import com.neki.android.feature.map.impl.search.SearchResultPanelIntent
-import com.neki.android.feature.map.impl.search.SearchResultPanelState
 import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
 import com.neki.android.feature.map.impl.util.getSecondDepthRegionName
@@ -48,6 +48,7 @@ class MapViewModel @Inject constructor(
 
     private var lastSearchCenter: LocLatLng? = null
     private var mapSearchJob: Job? = null
+    private var searchResultJob: Job? = null
     private var polygonMarkerIds = emptySet<String>()
 
     val store: MviIntentStore<MapState, MapIntent, MapEffect> = mviIntentStore(
@@ -67,19 +68,26 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
     ) {
         when (intent) {
+            MapIntent.ClickSearch -> {
+                val location = state.currentLocLatLng.takeIf { LocationPermissionManager.isGrantedLocationPermission(context) }
+                postSideEffect(
+                    MapEffect.NavigateToSearch(
+                        initialQuery = state.search?.keyword.orEmpty(),
+                        latitude = location?.latitude,
+                        longitude = location?.longitude,
+                    ),
+                )
+            }
+            is MapIntent.SelectSearchKeyword -> loadSearchPhotoBooths(intent, state, reduce, postSideEffect)
+            is MapIntent.SearchAction -> handleSearchAction(intent.action, state, reduce, postSideEffect)
             MapIntent.EnterMapScreen -> fetchInitialData(reduce)
-            MapIntent.ClickSearch -> postSideEffect(MapEffect.NavigateToSearch(state.searchResults?.keyword.orEmpty()))
-            is MapIntent.SearchPanel -> handleSearchPanelIntent(intent.intent, reduce)
             is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> {
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
-            MapIntent.ClickCurrentLocationIcon -> {
-                if (LocationPermissionManager.isGrantedLocationPermission(context)) moveCurrentLocation(state, reduce, postSideEffect)
-                else postSideEffect(MapEffect.LaunchLocationPermission)
-            }
+            MapIntent.ClickCurrentLocationIcon -> handleClickCurrentLocation(state, reduce, postSideEffect)
 
-            MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false, isVisibleRefreshButton = true) }
+            MapIntent.GestureOnMap -> reduce { copy(isCameraOnCurrentLocation = false, isVisibleRefreshButton = search == null) }
             is MapIntent.ClickRefreshButton -> {
                 analyticsLogger.log(
                     MapAnalyticsEvent.MapReSearch(
@@ -95,7 +103,18 @@ class MapViewModel @Inject constructor(
             MapIntent.ClickToMapChip -> reduce { copy(dragLevel = DragLevel.FIRST) }
             is MapIntent.ClickVerticalBrand -> handleClickBrand(intent.brand, state, reduce)
             is MapIntent.ClickPhotoBoothListItem -> handleClickPhotoBoothListItem(intent.photoBooth, reduce, postSideEffect)
-            MapIntent.ClickClosePhotoBoothCard -> handleClosePhotoBoothCard(reduce)
+            MapIntent.ClickClosePhotoBoothCard -> reduce {
+                copy(
+                    dragLevel = DragLevel.SECOND,
+                    mapMarkers = mapMarkers
+                        .filter { polygonMarkerIds.contains(it.id) }
+                        .map { it.copy(isFocused = false) }
+                        .toImmutableList(),
+                    favoritePhotoBooths = favoritePhotoBooths
+                        .map { it.copy(isFocused = false) }
+                        .toImmutableList(),
+                )
+            }
 
             MapIntent.OpenDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = true) }
             MapIntent.CloseDirectionBottomSheet -> reduce { copy(isShowDirectionBottomSheet = false) }
@@ -194,57 +213,112 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun handleClosePhotoBoothCard(reduce: (MapState.() -> MapState) -> Unit) {
-        reduce {
-            copy(
-                dragLevel = if (searchResults == null) DragLevel.SECOND else dragLevel,
-                searchResults = searchResults?.copy(focusedBoothId = null),
-                mapMarkers = mapMarkers
-                    .filter { polygonMarkerIds.contains(it.id) }
-                    .map { it.copy(isFocused = false) }
-                    .toImmutableList(),
-                favoritePhotoBooths = favoritePhotoBooths
-                    .map { it.copy(isFocused = false) }
-                    .toImmutableList(),
-            )
-        }
-    }
-
-    private fun handleSearchPanelIntent(
-        intent: SearchResultPanelIntent,
+    private fun handleSearchAction(
+        action: SearchMapIntent,
+        state: MapState,
         reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
     ) {
-        when (intent) {
-            is SearchResultPanelIntent.ShowResults -> reduce {
-                copy(searchResults = SearchResultPanelState(keyword = intent.keyword))
+        val search = state.search ?: return
+        when (action) {
+            SearchMapIntent.Close -> closeSearch(reduce)
+            is SearchMapIntent.ChangeDragLevel -> if (action.level != DragLevel.INVISIBLE) {
+                reduce { copy(search = this.search?.copy(dragLevel = action.level)) }
             }
-            SearchResultPanelIntent.CloseResults -> handleCloseSearchResults(reduce)
-            is SearchResultPanelIntent.ChangeDragLevel -> reduce {
-                copy(searchResults = searchResults?.copy(dragLevel = intent.level))
+            SearchMapIntent.OpenFilter -> reduce {
+                copy(search = this.search?.copy(showFilter = true, draftBrandIds = search.selectedBrandIds))
             }
-            SearchResultPanelIntent.OpenFilter -> reduce {
-                copy(searchResults = searchResults?.copy(showFilter = true, draftBrandIds = searchResults.selectedBrandIds))
-            }
-            SearchResultPanelIntent.DismissFilter -> reduce {
-                copy(searchResults = searchResults?.copy(showFilter = false))
-            }
-            is SearchResultPanelIntent.ToggleBrand -> reduce {
-                val search = searchResults ?: return@reduce this
+            SearchMapIntent.DismissFilter -> reduce { copy(search = this.search?.copy(showFilter = false)) }
+            is SearchMapIntent.ToggleBrand -> reduce {
                 val ids = search.draftBrandIds
-                val updated = if (intent.brandId in ids) ids - intent.brandId else ids + intent.brandId
-                copy(searchResults = search.copy(draftBrandIds = updated.toImmutableSet()))
+                val changed = if (action.id in ids) ids - action.id else ids + action.id
+                copy(search = this.search?.copy(draftBrandIds = changed.toImmutableSet()))
             }
-            SearchResultPanelIntent.ApplyFilter -> reduce {
-                copy(searchResults = searchResults?.copy(showFilter = false, selectedBrandIds = searchResults.draftBrandIds))
+            SearchMapIntent.ApplyFilter -> reduce {
+                copy(
+                    search = this.search?.copy(
+                        selectedBrandIds = search.draftBrandIds,
+                        showFilter = false,
+                        focusedId = null,
+                    ),
+                )
             }
+            is SearchMapIntent.SelectBooth -> {
+                val booth = search.visibleBooths().find { it.id == action.id } ?: return
+                analyticsLogger.log(MapAnalyticsEvent.BoothSelect(entryPoint = action.entryPoint, brandName = booth.brandName))
+                reduce { copy(search = this.search?.copy(focusedId = booth.id)) }
+                postSideEffect(
+                    MapEffect.MoveCameraToPosition(
+                        LocLatLng(booth.latitude, booth.longitude),
+                        zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
+                    ),
+                )
+            }
+            SearchMapIntent.CloseBooth -> reduce { copy(search = this.search?.copy(focusedId = null)) }
         }
     }
 
-    private fun handleCloseSearchResults(reduce: (MapState.() -> MapState) -> Unit) {
+    private fun loadSearchPhotoBooths(
+        intent: MapIntent.SelectSearchKeyword,
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        mapSearchJob?.cancel()
+        searchResultJob?.cancel()
+        val location = state.currentLocLatLng.takeIf { LocationPermissionManager.isGrantedLocationPermission(context) }
+        reduce { copy(search = SearchMapState(keyword = intent.keyword), isLoading = false) }
+        searchResultJob = viewModelScope.launch {
+            mapRepository.getPhotoBoothsByKeyword(
+                keyword = intent.keyword,
+                latitude = location?.latitude,
+                longitude = location?.longitude,
+                filterGroup = intent.filterGroup,
+            ).onSuccess { booths ->
+                reduce {
+                    copy(
+                        search = search?.copy(
+                            booths = booths.map { booth ->
+                                booth.copy(imageUrl = brands.find { it.name == booth.brandName }?.imageUrl.orEmpty())
+                            }.toImmutableList(),
+                            isLoading = false,
+                            showDistance = location != null,
+                        ),
+                    )
+                }
+                if (booths.size == 1) {
+                    val booth = booths.first()
+                    postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(booth.latitude, booth.longitude)))
+                } else if (booths.isNotEmpty()) {
+                    postSideEffect(
+                        MapEffect.ZoomToClusterBounds(
+                            southWest = LocLatLng(booths.minOf { it.latitude }, booths.minOf { it.longitude }),
+                            northEast = LocLatLng(booths.maxOf { it.latitude }, booths.maxOf { it.longitude }),
+                        ),
+                    )
+                }
+                mapRepository.getSearchBrandFilters(intent.keyword, intent.filterGroup)
+                    .onSuccess { filters ->
+                        reduce {
+                            copy(search = search?.copy(filters = filters.toImmutableList()))
+                        }
+                    }
+                    .onFailure { error -> Timber.e(error) }
+            }.onFailure { error -> handleSearchLoadFailure(error, reduce) }
+        }
+    }
+
+    private fun handleSearchLoadFailure(error: Throwable, reduce: (MapState.() -> MapState) -> Unit) {
+        Timber.e(error)
+        reduce { copy(search = search?.copy(isLoading = false, isError = true)) }
+    }
+
+    private fun closeSearch(reduce: (MapState.() -> MapState) -> Unit) {
+        searchResultJob?.cancel()
         reduce {
-            if (searchResults == null) return@reduce this
             copy(
-                searchResults = null,
+                search = null,
+                isShowDirectionBottomSheet = false,
                 dragLevel = if (dragLevel == DragLevel.INVISIBLE) DragLevel.SECOND else dragLevel,
                 mapMarkers = mapMarkers
                     .filter { it.id in polygonMarkerIds }
@@ -289,6 +363,20 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    private fun MapState.updatedFavoriteBooths(photoBooth: PhotoBooth, favorite: Boolean): ImmutableList<PhotoBooth> {
+        if (!favorite) return favoritePhotoBooths.filter { it.id != photoBooth.id }.toImmutableList()
+        if (favoritePhotoBooths.any { it.id == photoBooth.id }) return favoritePhotoBooths
+
+        val selectedNames = brands.filter { it.isChecked }.map { it.name }
+        val booth = photoBooth.copy(
+            favorite = true,
+            isCheckedBrand = selectedNames.isEmpty() || photoBooth.brandName in selectedNames,
+            isFocused = mapMarkers.any { it.id == photoBooth.id && it.isFocused },
+            imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl ?: photoBooth.imageUrl,
+        )
+        return (favoritePhotoBooths + booth).toImmutableList()
+    }
+
     private fun toggleFavorite(
         photoBooth: PhotoBooth,
         newFavorite: Boolean,
@@ -298,17 +386,7 @@ class MapViewModel @Inject constructor(
         val isPolygonMarker = polygonMarkerIds.contains(id)
         reduce {
             val updatedArea = areaPhotoBooths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
-            val updatedFavorite = when {
-                newFavorite && favoritePhotoBooths.none { it.id == id } -> {
-                    val booth = photoBooth.copy(
-                        favorite = true,
-                        imageUrl = brands.find { it.name == photoBooth.brandName }?.imageUrl.orEmpty(),
-                    )
-                    (favoritePhotoBooths + booth).toImmutableList()
-                }
-                !newFavorite -> favoritePhotoBooths.filter { it.id != id }.toImmutableList()
-                else -> favoritePhotoBooths
-            }
+            val updatedFavorite = updatedFavoriteBooths(photoBooth, newFavorite)
             val isFocusedMarker = mapMarkers.any { it.id == id && it.isFocused }
             val updatedMarkers = if (!newFavorite && !isPolygonMarker && !isFocusedMarker) {
                 mapMarkers.filter { it.id != id }.toImmutableList()
@@ -316,14 +394,12 @@ class MapViewModel @Inject constructor(
                 mapMarkers.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList()
             }
             copy(
+                search = search?.copy(
+                    booths = search.booths.map { if (it.id == id) it.copy(favorite = newFavorite) else it }.toImmutableList(),
+                ),
                 mapMarkers = updatedMarkers,
                 areaPhotoBooths = updatedArea,
                 favoritePhotoBooths = updatedFavorite,
-                searchResults = searchResults?.copy(
-                    photoBooths = searchResults.photoBooths.map {
-                        if (it.id == id) it.copy(favorite = newFavorite) else it
-                    }.toImmutableList(),
-                ),
                 displayPhotoBooths = displayPhotoBooths(
                     selectedTab = selectedTab,
                     areaPhotoBooths = updatedArea,
@@ -344,6 +420,7 @@ class MapViewModel @Inject constructor(
                 .onSuccess { location ->
                     if (!LocationPermissionManager.isGrantedLocationPermission(context)) return@onSuccess
                     handleUpdateCurrentLocation(location, reduce)
+                    if (store.uiState.value.search != null) return@onSuccess
                     reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
                     postSideEffect(
                         MapEffect.MoveCameraToPosition(
@@ -355,6 +432,7 @@ class MapViewModel @Inject constructor(
                 }
                 .onFailure { e ->
                     Timber.e(e)
+                    if (store.uiState.value.search != null) return@onFailure
                     // 위치 조회 실패 시 강남역으로 카메라 이동
                     postSideEffect(
                         MapEffect.MoveCameraToPosition(
@@ -388,12 +466,21 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    private fun handleClickCurrentLocation(
+        state: MapState,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        if (LocationPermissionManager.isGrantedLocationPermission(context)) moveCurrentLocation(state, reduce, postSideEffect)
+        else postSideEffect(MapEffect.LaunchLocationPermission)
+    }
+
     private fun moveCurrentLocation(
         state: MapState,
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        if (state.dragLevel == DragLevel.INVISIBLE) {
+        if (state.search == null && state.dragLevel == DragLevel.INVISIBLE) {
             reduce {
                 copy(
                     dragLevel = DragLevel.FIRST,
@@ -407,7 +494,7 @@ class MapViewModel @Inject constructor(
             postSideEffect(
                 MapEffect.MoveCameraToPosition(
                     locLatLng = LocLatLng(state.currentLocLatLng.latitude, state.currentLocLatLng.longitude),
-                    isRequiredLoadPhotoBooths = true,
+                    isRequiredLoadPhotoBooths = state.search == null,
                     zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
                 ),
             )
@@ -486,8 +573,7 @@ class MapViewModel @Inject constructor(
                 mapMarkers.map { it.copy(isFocused = false) } + photoBooth.copy(isFocused = true, distance = distance)
             }
             copy(
-                dragLevel = if (searchResults == null) DragLevel.INVISIBLE else dragLevel,
-                searchResults = searchResults?.copy(focusedBoothId = photoBooth.id),
+                dragLevel = DragLevel.INVISIBLE,
                 mapMarkers = updatedMarkers.toImmutableList(),
                 favoritePhotoBooths = favoritePhotoBooths.map { marker ->
                     marker.copy(isFocused = marker.id == photoBooth.id, distance = if (marker.id == photoBooth.id) distance else marker.distance)
@@ -523,7 +609,7 @@ class MapViewModel @Inject constructor(
             postSideEffect(MapEffect.ShowToastMessage("현재 위치를 가져올 수 없습니다."))
             return
         }
-        state.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
+        (state.search?.visibleBooths() ?: state.mapMarkers).find { it.isFocused }?.let { focusedPhotoBooth ->
             postSideEffect(
                 MapEffect.LaunchDirectionApp(
                     app = app,
@@ -567,8 +653,7 @@ class MapViewModel @Inject constructor(
                 calculateDistance(it.latitude, it.longitude, locLatLng.latitude, locLatLng.longitude)
             } ?: 0
             copy(
-                dragLevel = if (searchResults == null) DragLevel.INVISIBLE else dragLevel,
-                searchResults = searchResults?.copy(focusedBoothId = baseMarkers.find(isClicked)?.id),
+                dragLevel = DragLevel.INVISIBLE,
                 mapMarkers = baseMarkers.map { marker ->
                     marker.copy(isFocused = isClicked(marker), distance = if (isClicked(marker)) distance else marker.distance)
                 }.toImmutableList(),
@@ -605,6 +690,7 @@ class MapViewModel @Inject constructor(
                         }
                         copy(
                             brands = loadedBrands.toImmutableList(),
+                            search = search?.copy(booths = search.booths.map(withBrandImage).toImmutableList()),
                             areaPhotoBooths = areaPhotoBooths.map(withBrandImage).toImmutableList(),
                             mapMarkers = mapMarkers.map(withBrandImage).toImmutableList(),
                             displayPhotoBooths = displayPhotoBooths.map(withBrandImage).toImmutableList(),
@@ -696,6 +782,7 @@ class MapViewModel @Inject constructor(
         postSideEffect: (MapEffect) -> Unit,
         searchCenter: LocLatLng? = null,
     ) {
+        if (state.search != null) return
         mapSearchJob?.cancel()
 
         // 좌상단 -> 우상단 -> 우하단 -> 좌하단 -> 좌상단 (닫힌 다각형)

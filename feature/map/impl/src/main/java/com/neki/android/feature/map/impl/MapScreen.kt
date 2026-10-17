@@ -1,6 +1,8 @@
 package com.neki.android.feature.map.impl
 
 import androidx.activity.compose.BackHandler
+import com.neki.android.feature.map.impl.search.SearchMapIntent
+import com.neki.android.feature.map.impl.search.SearchResultOverlay
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,18 +63,17 @@ import com.neki.android.feature.map.impl.component.PhotoBoothDetailContent
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.core.model.Brand
-import com.neki.android.feature.map.impl.search.SearchResultOverlay
-import com.neki.android.feature.map.impl.search.SearchResultPanelIntent
 import com.neki.android.feature.map.impl.util.DirectionHelper
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
-    navigateToPhotoBoothOrderChange: (List<Brand>) -> Unit = {},
-    navigateToSearch: (String) -> Unit = {},
     isVisible: Boolean = true,
+    navigateToSearch: (String, Double?, Double?) -> Unit = { _, _, _ -> },
+    navigateToPhotoBoothOrderChange: (List<Brand>) -> Unit = {},
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -139,7 +140,11 @@ fun MapRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            is MapEffect.NavigateToSearch -> navigateToSearch(sideEffect.initialQuery)
+            is MapEffect.NavigateToSearch -> navigateToSearch(
+                sideEffect.initialQuery,
+                sideEffect.latitude,
+                sideEffect.longitude,
+            )
             is MapEffect.OpenDirectionBottomSheet -> {
                 viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
             }
@@ -232,8 +237,8 @@ fun MapScreen(
 ) {
     val context = LocalContext.current
     // 검색 화면 뒤에 유지된 지도는 뒤로가기를 소비하지 않는다.
-    BackHandler(enabled = isVisible && uiState.searchResults != null) {
-        onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.CloseResults))
+    BackHandler(enabled = isVisible && uiState.search != null) {
+        onIntent(MapIntent.SearchAction(SearchMapIntent.Close))
     }
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
@@ -252,32 +257,41 @@ fun MapScreen(
 
     var clusterer by remember { mutableStateOf<Clusterer<PhotoBoothClusterItem>?>(null) }
     val currentBrandImageCache by rememberUpdatedState(uiState.brandImageCache)
+    val currentSearch by rememberUpdatedState(uiState.search)
     var prevMarkerMap by remember { mutableStateOf<Map<String, PhotoBooth>>(emptyMap()) }
+    val search = uiState.search
+    val searchBooths = remember(search?.booths, search?.filters, search?.selectedBrandIds, search?.focusedId) {
+        search?.visibleBooths()
+    }
 
-    // 마커 데이터 변경 시 클러스터 증분 업데이트
-    LaunchedEffect(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoritePhotoBooth, clusterer) {
+    val markerMap = remember(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoritePhotoBooth, searchBooths) {
+        (if (searchBooths != null) {
+            searchBooths
+        } else if (uiState.showFavoritePhotoBooth) {
+            val focusedNonFavorite = uiState.mapMarkers.filter { it.isFocused && !it.favorite }
+            (uiState.favoritePhotoBooths.filter { it.isCheckedBrand } + focusedNonFavorite)
+                .distinctBy { it.id }
+        } else {
+            uiState.mapMarkers.filter { it.isCheckedBrand }
+        }).associateBy { it.id }
+    }
+    val currentMarkerMap by rememberUpdatedState(markerMap)
+
+    LaunchedEffect(markerMap, clusterer) {
         clusterer?.let { clusterManager ->
-            val newMarkerMap = if (uiState.showFavoritePhotoBooth) {
-                val focusedNonFavorite = uiState.mapMarkers.filter { it.isFocused && !it.favorite }
-                (uiState.favoritePhotoBooths.filter { it.isCheckedBrand } + focusedNonFavorite)
-                    .distinctBy { it.id }
-            } else {
-                uiState.mapMarkers.filter { it.isCheckedBrand }
-            }.associateBy { it.id }
-
             clusterManager.removeAll(
-                prevMarkerMap.filterKeys { it !in newMarkerMap }.values.map { PhotoBoothClusterItem(it) },
+                prevMarkerMap.filterKeys { it !in markerMap }.values.map { PhotoBoothClusterItem(it) },
             )
             clusterManager.addAll(
-                newMarkerMap.filterKeys { it !in prevMarkerMap }.values.associateBy { PhotoBoothClusterItem(it) },
+                markerMap.filterKeys { it !in prevMarkerMap }.values.associateBy { PhotoBoothClusterItem(it) },
             )
-            newMarkerMap.forEach { (id, booth) ->
+            markerMap.forEach { (id, booth) ->
                 val prev = prevMarkerMap[id] ?: return@forEach
                 if (prev.favorite != booth.favorite || prev.isFocused != booth.isFocused) {
                     PhotoBoothClusterer.updateMarkerIcon(context, booth) { uiState.brandImageCache[it] }
                 }
             }
-            prevMarkerMap = newMarkerMap
+            prevMarkerMap = markerMap
         }
     }
 
@@ -308,11 +322,16 @@ fun MapScreen(
                         )
                     },
                     onLeafMarkerClick = { photoBooth ->
-                        onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
+                        if (currentSearch != null) {
+                            onIntent(MapIntent.SearchAction(SearchMapIntent.SelectBooth(photoBooth.id, entryPoint = "map")))
+                        } else {
+                            onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
+                        }
                     },
                     getBrandImage = { imageUrl ->
                         currentBrandImageCache[imageUrl]
                     },
+                    getPhotoBooth = { id -> currentMarkerMap[id] },
                 )
 
                 onDispose {
@@ -322,7 +341,7 @@ fun MapScreen(
             }
         }
 
-        if (uiState.searchResults != null || uiState.dragLevel != DragLevel.THIRD) {
+        if (uiState.search != null || uiState.dragLevel != DragLevel.THIRD) {
             Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -332,14 +351,14 @@ fun MapScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 MapSearchBar(
-                    query = uiState.searchResults?.keyword,
+                    query = uiState.search?.keyword,
                     onClick = { onIntent(MapIntent.ClickSearch) },
                     onBack = { onIntent(MapIntent.ClickSearch) },
-                    onClear = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.CloseResults)) },
+                    onClear = { onIntent(MapIntent.SearchAction(SearchMapIntent.Close)) },
                 )
                 if (
                     (uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) &&
-                    uiState.isVisibleRefreshButton && uiState.searchResults == null
+                    uiState.isVisibleRefreshButton && uiState.search == null
                 ) {
                     MapRefreshChip(
                         onClick = {
@@ -366,17 +385,7 @@ fun MapScreen(
             }
         }
 
-        val searchResults = uiState.searchResults
-        if (searchResults != null) {
-            SearchResultOverlay(
-                state = searchResults,
-                mapMarkers = uiState.mapMarkers,
-                brands = uiState.brands,
-                showDistance = LocationPermissionManager.isGrantedLocationPermission(context) && uiState.currentLocLatLng != null,
-                isCurrentLocation = uiState.isCameraOnCurrentLocation,
-                onIntent = onIntent,
-            )
-        } else {
+        if (uiState.search == null) {
             AnchoredDraggablePanel(
                 areaRegionName = uiState.areaRegionName,
                 brands = uiState.brands,
@@ -420,6 +429,16 @@ fun MapScreen(
                     )
                 }
             }
+        }
+        uiState.search?.takeIf { isVisible }?.let { search ->
+            SearchResultOverlay(
+                state = search,
+                visibleBooths = searchBooths ?: persistentListOf(),
+                brands = uiState.brands,
+                hasLocationPermission = LocationPermissionManager.isGrantedLocationPermission(context),
+                isCurrentLocation = uiState.isCameraOnCurrentLocation,
+                onIntent = onIntent,
+            )
         }
     }
 
