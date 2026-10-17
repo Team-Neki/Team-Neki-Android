@@ -29,7 +29,6 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.ui.component.LoadingIndicator
 import com.neki.android.core.ui.compose.collectWithLifecycle
-import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.search.component.SearchEmptyContent
 import com.neki.android.feature.map.impl.search.component.SearchField
 import com.neki.android.feature.map.impl.search.component.SearchNetworkErrorContent
@@ -100,12 +99,6 @@ internal fun SearchScreen(
                 onResultClick = { onIntent(SearchIntent.ClickResult(it)) },
             )
         }
-        ToMapChip(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 12.dp),
-            onClick = { onIntent(SearchIntent.ClickBack) },
-        )
     }
 }
 
