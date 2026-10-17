@@ -71,7 +71,6 @@ import com.neki.android.feature.map.impl.DragLevel
 import com.neki.android.feature.map.impl.component.CurrentLocationButton
 import com.neki.android.feature.map.impl.component.DistanceInfo
 import com.neki.android.feature.map.impl.component.HorizontalBrandItem
-import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.search.component.SearchNoResultsContent
 import com.neki.android.feature.map.impl.util.rememberAnchoredPanelState
 import kotlinx.collections.immutable.ImmutableList
@@ -209,14 +208,6 @@ internal fun SearchResultPhotoBoothPanel(
             onBoothClick = onBoothClick,
             onFavoriteClick = onFavoriteClick,
         )
-        if (dragLevel == DragLevel.THIRD) {
-            ToMapChip(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 24.dp),
-                onClick = { onDragLevelChanged(DragLevel.FIRST) },
-            )
-        }
     }
 }
 
