@@ -43,6 +43,7 @@ internal fun SearchField(
     query: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    isSearchEnabled: Boolean = true,
     focusRequester: FocusRequester = remember { FocusRequester() },
     onQueryChange: (String) -> Unit = {},
     onSubmit: () -> Unit = {},
@@ -95,7 +96,7 @@ internal fun SearchField(
             textStyle = NekiTheme.typography.body16Medium.copy(color = NekiTheme.colorScheme.gray800),
             cursorBrush = SolidColor(NekiTheme.colorScheme.gray800),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+            keyboardActions = KeyboardActions(onDone = { if (enabled && isSearchEnabled) onSubmit() }),
             decorationBox = { innerTextField ->
                 Box {
                     if (query.isEmpty()) {
@@ -113,7 +114,7 @@ internal fun SearchField(
         )
         NekiIconButton(
             modifier = Modifier.size(48.dp),
-            enabled = enabled && query.isNotBlank(),
+            enabled = enabled && isSearchEnabled && query.isNotBlank(),
             onClick = onSubmit,
         ) {
             Icon(

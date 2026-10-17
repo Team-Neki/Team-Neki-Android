@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.neki.android.feature.map.impl.DragLevel
 
-/** 일반 지도와 검색 결과 패널이 같은 드래그 임계값과 애니메이션을 사용한다. */
 @Composable
 internal fun rememberAnchoredPanelState(
     initialValue: DragLevel,
