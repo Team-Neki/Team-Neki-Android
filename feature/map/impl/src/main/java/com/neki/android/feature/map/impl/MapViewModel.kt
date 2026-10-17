@@ -330,6 +330,7 @@ class MapViewModel @Inject constructor(
         reduce {
             copy(
                 search = null,
+                isVisibleRefreshButton = true,
                 isShowDirectionBottomSheet = false,
                 dragLevel = if (dragLevel == DragLevel.INVISIBLE) DragLevel.SECOND else dragLevel,
                 mapMarkers = mapMarkers
