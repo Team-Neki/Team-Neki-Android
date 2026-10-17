@@ -73,7 +73,7 @@ internal class SearchViewModel @AssistedInject constructor(
         reduce: (SearchState.() -> SearchState) -> Unit,
         postSideEffect: (SearchEffect) -> Unit,
     ) {
-        val keyword = state.query.trim().replace(Regex("\\s+"), " ")
+        val keyword = state.query
         if (keyword.isBlank()) return
         val hasLocation = key.latitude != null && key.longitude != null && LocationPermissionManager.isGrantedLocationPermission(context)
         postSideEffect(SearchEffect.HideKeyboard)
