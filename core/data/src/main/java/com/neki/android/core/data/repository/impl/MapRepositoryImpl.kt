@@ -60,7 +60,7 @@ class MapRepositoryImpl @Inject constructor(
         mapService.getFavoritePhotoBooths().data.toModels()
     }
 
-    override suspend fun updatePhotoBoothFavorite(locationId: Long, favorite: Boolean): Result<Unit> = runSuspendCatching {
+    override suspend fun updatePhotoBoothFavorite(locationId: String, favorite: Boolean): Result<Unit> = runSuspendCatching {
         mapService.updatePhotoBoothFavorite(
             locationId = locationId,
             request = UpdateFavoriteRequest(favorite = favorite),

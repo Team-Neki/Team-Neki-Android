@@ -390,9 +390,9 @@ private fun BrandFilterChip(
 }
 
 private val PreviewBooths = persistentListOf(
-    PhotoBooth(id = 1, brandName = "인생네컷", branchName = "사당역점", distance = 300),
-    PhotoBooth(id = 2, brandName = "포토시그니처", branchName = "사당점", distance = 300),
-    PhotoBooth(id = 3, brandName = "포토그레이", branchName = "사당역점", distance = 300),
+    PhotoBooth(id = "source:LIFEFOURCUTS:1", brandName = "인생네컷", branchName = "사당역점", distance = 300),
+    PhotoBooth(id = "source:PHOTOSIGNATURE:1", brandName = "포토시그니처", branchName = "사당점", distance = 300),
+    PhotoBooth(id = "source:PHOTOGRAY:1", brandName = "포토그레이", branchName = "사당역점", distance = 300),
 )
 
 @ComponentPreview
