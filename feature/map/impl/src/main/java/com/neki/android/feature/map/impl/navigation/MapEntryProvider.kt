@@ -49,7 +49,11 @@ private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
             when (result) {
                 is MapResult.BrandOrderChanged -> viewModel.store.onIntent(MapIntent.UpdateBrandOrder(result.orderedBrands))
                 is MapResult.SearchSelected -> viewModel.store.onIntent(
-                    MapIntent.SelectSearchKeyword(result.keyword, result.filterGroup),
+                    MapIntent.SelectSearchKeyword(
+                        keyword = result.keyword,
+                        type = result.type,
+                        filterGroup = result.filterGroup,
+                    ),
                 )
             }
         }
@@ -76,7 +80,14 @@ private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
             viewModel = viewModel,
             navigateBack = navigator::goBack,
             onResultSelected = { result ->
-                resultBus.sendResult<MapResult>(result = MapResult.SearchSelected(result.keyword, result.filterGroup), allowDuplicate = false)
+                resultBus.sendResult<MapResult>(
+                    result = MapResult.SearchSelected(
+                        keyword = result.keyword,
+                        type = result.type,
+                        filterGroup = result.filterGroup,
+                    ),
+                    allowDuplicate = false,
+                )
                 navigator.goBack()
             },
         )

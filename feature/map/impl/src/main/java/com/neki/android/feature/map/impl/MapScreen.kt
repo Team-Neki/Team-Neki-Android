@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -86,6 +87,7 @@ fun MapRoute(
     }
 
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
+    var moveToCurrentLocationOnGrant by rememberSaveable { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(
             LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
@@ -95,7 +97,7 @@ fun MapRoute(
     val appSettingsLauncher = rememberAppSettingsLauncher {
         val isGranted = LocationPermissionManager.isGrantedLocationPermission(context)
         locationTrackingMode = if (isGranted) LocationTrackingMode.NoFollow else LocationTrackingMode.None
-        if (isGranted) viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
+        if (isGranted) viewModel.store.onIntent(MapIntent.GrantedLocationPermission(moveToCurrentLocationOnGrant))
         else viewModel.store.onIntent(MapIntent.SelectFavoritePhotoBoothSort(FavoritePhotoBoothSort.SAVED))
     }
 
@@ -105,7 +107,7 @@ fun MapRoute(
         val isGranted = permissions.values.any { it }
         if (isGranted) {
             locationTrackingMode = LocationTrackingMode.NoFollow
-            viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
+            viewModel.store.onIntent(MapIntent.GrantedLocationPermission(moveToCurrentLocationOnGrant))
         } else {
             locationTrackingMode = LocationTrackingMode.None
             viewModel.store.onIntent(MapIntent.SelectFavoritePhotoBoothSort(FavoritePhotoBoothSort.SAVED))
@@ -192,6 +194,7 @@ fun MapRoute(
             is MapEffect.NavigateToAppSettings -> appSettingsLauncher.launchAppSettings(context, NekiPermission.LOCATION)
 
             is MapEffect.LaunchLocationPermission -> {
+                moveToCurrentLocationOnGrant = sideEffect.moveToCurrentLocation
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }
 

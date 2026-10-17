@@ -17,6 +17,7 @@ import com.neki.android.feature.map.impl.search.SearchMapIntent
 import com.neki.android.feature.map.impl.search.SearchMapState
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
+import com.neki.android.core.model.SearchCompletionType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.map.impl.const.DirectionApp
@@ -81,7 +82,11 @@ class MapViewModel @Inject constructor(
             is MapIntent.SelectSearchKeyword -> loadSearchPhotoBooths(intent, state, reduce, postSideEffect)
             is MapIntent.SearchAction -> handleSearchAction(intent.action, state, reduce, postSideEffect)
             MapIntent.EnterMapScreen -> fetchInitialData(reduce)
-            is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
+            is MapIntent.GrantedLocationPermission -> getCurrentLocation(
+                reduce = reduce,
+                postSideEffect = postSideEffect,
+                moveToCurrentLocation = intent.moveToCurrentLocation,
+            )
             is MapIntent.LoadPhotoBoothsByBounds -> {
                 loadPhotoBoothsByPolygon(intent.mapBounds, state, reduce, postSideEffect)
             }
@@ -128,12 +133,12 @@ class MapViewModel @Inject constructor(
                     if (LocationPermissionManager.isGrantedLocationPermission(context)) {
                         MapEffect.OpenDirectionBottomSheet
                     } else {
-                        MapEffect.LaunchLocationPermission
+                        MapEffect.LaunchLocationPermission()
                     },
                 )
             }
 
-            MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.LaunchLocationPermission)
+            MapIntent.RequestLocationPermission -> postSideEffect(MapEffect.LaunchLocationPermission())
             MapIntent.ShowLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = true) }
             MapIntent.DismissLocationPermissionDialog -> reduce { copy(isShowLocationPermissionDialog = false) }
             MapIntent.ConfirmLocationPermissionDialog -> {
@@ -193,7 +198,7 @@ class MapViewModel @Inject constructor(
             is MapIntent.SelectFavoritePhotoBoothSort -> {
                 val hasPermission = LocationPermissionManager.isGrantedLocationPermission(context)
                 if (intent.sort == FavoritePhotoBoothSort.DISTANCE) {
-                    if (!hasPermission) postSideEffect(MapEffect.LaunchLocationPermission)
+                    if (!hasPermission) postSideEffect(MapEffect.LaunchLocationPermission())
                     else if (state.currentLocLatLng == null) getCurrentLocation(reduce, postSideEffect)
                 }
                 reduce {
@@ -275,6 +280,7 @@ class MapViewModel @Inject constructor(
                 longitude = location?.longitude,
                 filterGroup = intent.filterGroup,
             ).onSuccess { booths ->
+                val focusedBooth = booths.singleOrNull().takeIf { intent.type == SearchCompletionType.PHOTO_BOOTH }
                 reduce {
                     copy(
                         search = search?.copy(
@@ -283,12 +289,18 @@ class MapViewModel @Inject constructor(
                             }.toImmutableList(),
                             isLoading = false,
                             showDistance = location != null,
+                            focusedId = focusedBooth?.id,
                         ),
                     )
                 }
                 if (booths.size == 1) {
                     val booth = booths.first()
-                    postSideEffect(MapEffect.MoveCameraToPosition(LocLatLng(booth.latitude, booth.longitude)))
+                    postSideEffect(
+                        MapEffect.MoveCameraToPosition(
+                            locLatLng = LocLatLng(booth.latitude, booth.longitude),
+                            zoomLevel = if (focusedBooth != null) MapConst.MARKER_SELECTED_ZOOM_LEVEL else MapConst.DEFAULT_ZOOM_LEVEL,
+                        ),
+                    )
                 } else if (booths.isNotEmpty()) {
                     postSideEffect(
                         MapEffect.ZoomToClusterBounds(
@@ -414,18 +426,20 @@ class MapViewModel @Inject constructor(
     private fun getCurrentLocation(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
+        moveToCurrentLocation: Boolean = false,
     ) {
         viewModelScope.launch {
             LocationHelper.getCurrentLocation(context)
                 .onSuccess { location ->
                     if (!LocationPermissionManager.isGrantedLocationPermission(context)) return@onSuccess
                     handleUpdateCurrentLocation(location, reduce)
-                    if (store.uiState.value.search != null) return@onSuccess
+                    val isSearching = store.uiState.value.search != null
+                    if (isSearching && !moveToCurrentLocation) return@onSuccess
                     reduce { copy(isCameraOnCurrentLocation = true, isVisibleRefreshButton = false) }
                     postSideEffect(
                         MapEffect.MoveCameraToPosition(
                             locLatLng = location,
-                            isRequiredLoadPhotoBooths = true,
+                            isRequiredLoadPhotoBooths = !isSearching,
                             zoomLevel = MapConst.MARKER_SELECTED_ZOOM_LEVEL,
                         ),
                     )
@@ -471,8 +485,17 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
-        if (LocationPermissionManager.isGrantedLocationPermission(context)) moveCurrentLocation(state, reduce, postSideEffect)
-        else postSideEffect(MapEffect.LaunchLocationPermission)
+        if (!LocationPermissionManager.isGrantedLocationPermission(context)) {
+            postSideEffect(MapEffect.LaunchLocationPermission(moveToCurrentLocation = true))
+        } else if (state.currentLocLatLng == null) {
+            getCurrentLocation(
+                reduce = reduce,
+                postSideEffect = postSideEffect,
+                moveToCurrentLocation = true,
+            )
+        } else {
+            moveCurrentLocation(state, reduce, postSideEffect)
+        }
     }
 
     private fun moveCurrentLocation(

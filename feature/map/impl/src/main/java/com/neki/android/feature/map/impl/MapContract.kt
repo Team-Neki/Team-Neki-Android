@@ -1,6 +1,7 @@
 package com.neki.android.feature.map.impl
 
 import com.neki.android.core.model.SearchFilterGroup
+import com.neki.android.core.model.SearchCompletionType
 
 import com.neki.android.feature.map.impl.search.SearchMapState
 import com.neki.android.feature.map.impl.search.SearchMapIntent
@@ -37,13 +38,17 @@ data class MapState(
 
 sealed interface MapIntent {
     data object ClickSearch : MapIntent
-    data class SelectSearchKeyword(val keyword: String, val filterGroup: SearchFilterGroup) : MapIntent
+    data class SelectSearchKeyword(
+        val keyword: String,
+        val type: SearchCompletionType,
+        val filterGroup: SearchFilterGroup,
+    ) : MapIntent
     data class SearchAction(val action: SearchMapIntent) : MapIntent
     data object EnterMapScreen : MapIntent
 
     // in 지도
     data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
-    data object GrantedLocationPermission : MapIntent
+    data class GrantedLocationPermission(val moveToCurrentLocation: Boolean) : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickClusterMarker(val southWest: LocLatLng, val northEast: LocLatLng) : MapIntent
@@ -104,7 +109,7 @@ sealed interface MapEffect {
     ) : MapEffect
 
     data object NavigateToAppSettings : MapEffect
-    data object LaunchLocationPermission : MapEffect
+    data class LaunchLocationPermission(val moveToCurrentLocation: Boolean = false) : MapEffect
     data object NavigateToPhotoBoothOrderChange : MapEffect
 }
 

@@ -3,7 +3,6 @@ package com.neki.android.feature.map.impl.search
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
@@ -16,9 +15,9 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel(assistedFactory = SearchViewModel.Factory::class)
@@ -37,11 +36,13 @@ internal class SearchViewModel @AssistedInject constructor(
         val latitude: Double?,
         val longitude: Double?,
     )
-    private val request = MutableStateFlow<Request?>(null)
+    private val request = MutableSharedFlow<Request>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
 
     val results = request.flatMapLatest { query ->
-        if (query == null) flowOf(PagingData.empty())
-        else mapRepository.getSearchCompletionsFlow(
+        mapRepository.getSearchCompletionsFlow(
             keyword = query.keyword,
             latitude = query.latitude,
             longitude = query.longitude,
@@ -77,10 +78,12 @@ internal class SearchViewModel @AssistedInject constructor(
         val hasLocation = key.latitude != null && key.longitude != null && LocationPermissionManager.isGrantedLocationPermission(context)
         postSideEffect(SearchEffect.HideKeyboard)
         reduce { copy(submittedKeyword = keyword, showDistance = hasLocation) }
-        request.value = Request(
-            keyword = keyword,
-            latitude = key.latitude.takeIf { hasLocation },
-            longitude = key.longitude.takeIf { hasLocation },
+        request.tryEmit(
+            Request(
+                keyword = keyword,
+                latitude = key.latitude.takeIf { hasLocation },
+                longitude = key.longitude.takeIf { hasLocation },
+            ),
         )
     }
 }
