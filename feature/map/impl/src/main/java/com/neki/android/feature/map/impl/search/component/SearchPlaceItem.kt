@@ -26,24 +26,24 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
-import com.neki.android.feature.map.impl.search.SearchResult
-import com.neki.android.feature.map.impl.search.SearchResultType
+import com.neki.android.core.model.SearchCompletion
+import com.neki.android.core.model.SearchCompletionType
 import com.neki.android.feature.map.impl.util.formatDistance
 
 @Composable
 internal fun SearchPlaceItem(
-    result: SearchResult,
+    result: SearchCompletion,
     distanceMeters: Int?,
     query: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onClick: () -> Unit = {},
 ) {
-    val isPhotoBooth = result.type == SearchResultType.PHOTO_BOOTH
+    val isPhotoBooth = result.type == SearchCompletionType.PHOTO_BOOTH
     val icon = when (result.type) {
-        SearchResultType.REGION -> R.drawable.icon_map_filled
-        SearchResultType.STATION -> R.drawable.icon_subway
-        SearchResultType.PHOTO_BOOTH -> R.drawable.icon_camera_filled
+        SearchCompletionType.REGION -> R.drawable.icon_map_filled
+        SearchCompletionType.STATION -> R.drawable.icon_subway
+        SearchCompletionType.PHOTO_BOOTH -> R.drawable.icon_camera_filled
     }
     val name = remember(result.keyword, query) {
         buildAnnotatedString {
@@ -119,9 +119,9 @@ internal fun SearchPlaceItem(
 private fun SearchPlaceItemPreview() {
     NekiTheme {
         SearchPlaceItem(
-            result = SearchResult(
+            result = SearchCompletion(
                 keyword = "강남역 2호선",
-                type = SearchResultType.STATION,
+                type = SearchCompletionType.STATION,
             ),
             distanceMeters = 16000,
             query = "강남",
