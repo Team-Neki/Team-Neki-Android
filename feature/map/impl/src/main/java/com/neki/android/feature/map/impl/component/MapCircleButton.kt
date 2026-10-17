@@ -51,7 +51,7 @@ internal fun CurrentLocationButton(
     MapCircleButton(
         iconRes = R.drawable.icon_current_position,
         tint = if (isActiveCurrentLocation) NekiTheme.colorScheme.primary500
-        else NekiTheme.colorScheme.gray800,
+        else NekiTheme.colorScheme.gray600,
         iconSize = 28.dp,
         modifier = modifier
             .buttonShadow()

@@ -19,6 +19,7 @@ import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeRoute
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeViewModel
 import com.neki.android.feature.map.impl.search.SearchResultPanelIntent
 import com.neki.android.feature.map.impl.search.SearchRoute
+import com.neki.android.feature.map.impl.search.SearchViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -67,9 +68,13 @@ private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
     entry<MapNavKey.Search>(
         clazzContentKey = { "neki.map.search" },
         metadata = mapOf(MapSceneMetadata.ROLE to MapSceneMetadata.Role.SEARCH),
-    ) {
+    ) { key ->
         val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+            creationCallback = { factory -> factory.create(key) },
+        )
         SearchRoute(
+            viewModel = viewModel,
             navigateBack = navigator::goBack,
             onResultSelected = { result ->
                 resultBus.sendResult<MapResult>(result = MapResult.SearchSelected(result.keyword), allowDuplicate = false)

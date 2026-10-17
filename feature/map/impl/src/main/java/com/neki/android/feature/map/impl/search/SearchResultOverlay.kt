@@ -41,6 +41,7 @@ internal fun SearchResultOverlay(
     if (focusedBooth == null) {
         SearchResultPhotoBoothPanel(
             photoBooths = visibleBooths,
+            selectedBrandNames = brands.filter { it.id in state.selectedBrandIds }.map { it.name }.toImmutableList(),
             dragLevel = state.dragLevel,
             showDistance = showDistance,
             isCurrentLocation = isCurrentLocation,
