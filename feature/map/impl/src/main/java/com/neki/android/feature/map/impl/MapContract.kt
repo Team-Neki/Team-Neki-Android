@@ -5,6 +5,8 @@ import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.feature.map.impl.search.SearchResultPanelIntent
+import com.neki.android.feature.map.impl.search.SearchResultPanelState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -28,10 +30,13 @@ data class MapState(
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
     val showFavoritePhotoBooth: Boolean = false,
+    val searchResults: SearchResultPanelState? = null,
 )
 
 sealed interface MapIntent {
     data object EnterMapScreen : MapIntent
+    data object ClickSearch : MapIntent
+    data class SearchPanel(val intent: SearchResultPanelIntent) : MapIntent
 
     // in 지도
     data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
@@ -93,6 +98,7 @@ sealed interface MapEffect {
     data object NavigateToAppSettings : MapEffect
     data object LaunchLocationPermission : MapEffect
     data object NavigateToPhotoBoothOrderChange : MapEffect
+    data object NavigateToSearch : MapEffect
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }

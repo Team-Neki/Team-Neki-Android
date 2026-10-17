@@ -1,11 +1,8 @@
 package com.neki.android.feature.map.impl.component
 
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
@@ -65,6 +62,7 @@ import com.neki.android.feature.map.impl.DragLevel
 import com.neki.android.feature.map.impl.FavoritePhotoBoothSort
 import com.neki.android.feature.map.impl.MapTab
 import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.feature.map.impl.util.rememberAnchoredPanelState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.roundToInt
@@ -114,37 +112,32 @@ internal fun AnchoredDraggablePanel(
     }
     var isProgrammaticTransition by remember { mutableStateOf(false) }
 
-    val state = remember {
-        val anchors = DraggableAnchors {
+    val state = rememberAnchoredPanelState(
+        initialValue = dragLevel,
+        anchors = DraggableAnchors {
             DragLevel.FIRST at screenHeightPx - bottomPanelHeightPx
             DragLevel.SECOND at screenHeightPx - centerPanelHeightPx
             DragLevel.THIRD at statusBarHeightPx
             DragLevel.INVISIBLE at screenHeightPx
-        }
+        },
+        confirmValueChange = { newValue ->
+            newValue != DragLevel.INVISIBLE || isProgrammaticTransition
+        },
+    )
 
-        AnchoredDraggableState(
-            initialValue = DragLevel.FIRST,
-            anchors = anchors,
-            positionalThreshold = { distance -> distance * 0.5f },
-            velocityThreshold = { with(density) { 100.dp.toPx() } },
-            snapAnimationSpec = tween(),
-            decayAnimationSpec = splineBasedDecay(density),
-            confirmValueChange = { newValue ->
-                newValue != DragLevel.INVISIBLE || isProgrammaticTransition
-            },
-        )
-    }
-
-    LaunchedEffect(state.settledValue) {
-        if (state.settledValue != dragLevel) {
+    LaunchedEffect(state, state.settledValue) {
+        if (!isProgrammaticTransition && state.settledValue != dragLevel) {
             onDragLevelChanged(state.settledValue)
         }
     }
 
-    LaunchedEffect(dragLevel) {
+    LaunchedEffect(state, dragLevel) {
         isProgrammaticTransition = true
-        state.animateTo(dragLevel)
-        isProgrammaticTransition = false
+        try {
+            state.animateTo(dragLevel)
+        } finally {
+            isProgrammaticTransition = false
+        }
     }
 
     val buttonAreaHeightPx = with(density) { MapConst.PANEL_DRAG_LOCATION_HEIGHT.dp.toPx() }
