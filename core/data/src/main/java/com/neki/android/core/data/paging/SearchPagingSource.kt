@@ -18,6 +18,7 @@ internal class SearchPagingSource(
     private val keyword: String,
     private val latitude: Double?,
     private val longitude: Double?,
+    private val onSearchSuccess: (Boolean, Int, Boolean) -> Unit,
 ) : PagingSource<SearchPageKey, SearchCompletion>() {
     override fun getRefreshKey(state: PagingState<SearchPageKey, SearchCompletion>): SearchPageKey? = null
 
@@ -27,6 +28,9 @@ internal class SearchPagingSource(
             var page = fetchPage(params.key ?: SearchPageKey(SearchCompletionType.REGION), params.loadSize)
             while (page.data.isEmpty() && page.nextKey != null) {
                 page = fetchPage(checkNotNull(page.nextKey), params.loadSize)
+            }
+            if (params is LoadParams.Refresh || page.data.isNotEmpty()) {
+                onSearchSuccess(params is LoadParams.Refresh, page.data.size, page.nextKey != null)
             }
             page
         } catch (e: CancellationException) {

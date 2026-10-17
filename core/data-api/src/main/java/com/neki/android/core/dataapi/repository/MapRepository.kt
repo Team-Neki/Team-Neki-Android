@@ -29,7 +29,12 @@ interface MapRepository {
 
     suspend fun updatePhotoBoothFavorite(locationId: String, favorite: Boolean): Result<Unit>
 
-    fun getSearchCompletionsFlow(keyword: String, latitude: Double?, longitude: Double?): Flow<PagingData<SearchCompletion>>
+    fun getSearchCompletionsFlow(
+        keyword: String,
+        latitude: Double?,
+        longitude: Double?,
+        onSearchSuccess: (isInitial: Boolean, resultCount: Int, hasNextPage: Boolean) -> Unit,
+    ): Flow<PagingData<SearchCompletion>>
 
     suspend fun getPhotoBoothsByKeyword(
         keyword: String,

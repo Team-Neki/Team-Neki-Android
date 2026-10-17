@@ -78,14 +78,27 @@ class MapRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getSearchCompletionsFlow(keyword: String, latitude: Double?, longitude: Double?) = Pager(
+    override fun getSearchCompletionsFlow(
+        keyword: String,
+        latitude: Double?,
+        longitude: Double?,
+        onSearchSuccess: (Boolean, Int, Boolean) -> Unit,
+    ) = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
             initialLoadSize = PAGE_SIZE,
             prefetchDistance = PREFETCH_DISTANCE,
             enablePlaceholders = false,
         ),
-        pagingSourceFactory = { SearchPagingSource(mapService, keyword, latitude = latitude, longitude = longitude) },
+        pagingSourceFactory = {
+            SearchPagingSource(
+                mapService = mapService,
+                keyword = keyword,
+                latitude = latitude,
+                longitude = longitude,
+                onSearchSuccess = onSearchSuccess,
+            )
+        },
     ).flow
 
     override suspend fun getPhotoBoothsByKeyword(

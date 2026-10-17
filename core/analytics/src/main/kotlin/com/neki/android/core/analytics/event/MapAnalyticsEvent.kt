@@ -6,6 +6,46 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
         override val name = "map_view"
     }
 
+    data object MapSearchView : MapAnalyticsEvent {
+        override val name = "map_search_view"
+    }
+
+    data class MapSearchResult(val query: String, val resultStatus: String) : MapAnalyticsEvent {
+        override val name = "map_search_result"
+        override val params = mapOf(
+            "query" to query,
+            "result_status" to resultStatus,
+        )
+    }
+
+    data class MapSearchCandidateSelect(
+        val query: String,
+        val candidateType: String,
+        val candidateName: String,
+    ) : MapAnalyticsEvent {
+        override val name = "map_search_candidate_select"
+        override val params = mapOf(
+            "query" to query,
+            "candidate_type" to candidateType,
+            "candidate_name" to candidateName,
+        )
+    }
+
+    data class MapSearchLoadMore(
+        val query: String,
+        val page: Int,
+        val pageResultCount: Int,
+        val hasNextPage: Boolean,
+    ) : MapAnalyticsEvent {
+        override val name = "map_search_load_more"
+        override val params = mapOf(
+            "query" to query,
+            "page" to page,
+            "page_result_count" to pageResultCount,
+            "has_next_page" to hasNextPage,
+        )
+    }
+
     data class MapReSearch(val hasFilter: Boolean, val regionChanged: Boolean) : MapAnalyticsEvent {
         override val name = "map_re_search"
         override val params = mapOf(
@@ -27,11 +67,12 @@ sealed interface MapAnalyticsEvent : AnalyticsEvent {
         )
     }
 
-    data class BoothSelect(val entryPoint: String, val brandName: String) : MapAnalyticsEvent {
+    data class BoothSelect(val entryPoint: String, val brandName: String, val source: String = "map") : MapAnalyticsEvent {
         override val name = "booth_select"
         override val params = mapOf(
             "entry_point" to entryPoint,
             "brand_name" to brandName,
+            "source" to source,
         )
     }
 
