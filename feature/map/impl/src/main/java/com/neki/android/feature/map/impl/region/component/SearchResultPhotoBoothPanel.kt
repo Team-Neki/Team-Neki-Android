@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
-import com.neki.android.core.designsystem.modifier.buttonShadow
 import com.neki.android.core.designsystem.modifier.clickableSingle
 import com.neki.android.core.designsystem.modifier.dropdownShadow
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -72,6 +71,7 @@ import com.neki.android.feature.map.impl.DragLevel
 import com.neki.android.feature.map.impl.component.CurrentLocationButton
 import com.neki.android.feature.map.impl.component.DistanceInfo
 import com.neki.android.feature.map.impl.component.HorizontalBrandItem
+import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.search.component.SearchNoResultsContent
 import com.neki.android.feature.map.impl.util.rememberAnchoredPanelState
 import kotlinx.collections.immutable.ImmutableList
@@ -93,7 +93,6 @@ internal fun SearchResultPhotoBoothPanel(
     isLoading: Boolean = false,
     isError: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
-    onShowList: () -> Unit = {},
     onCurrentLocationClick: () -> Unit = {},
     onFilterClick: () -> Unit = {},
     onBoothClick: (PhotoBooth) -> Unit = {},
@@ -102,7 +101,11 @@ internal fun SearchResultPhotoBoothPanel(
     val density = LocalDensity.current
     val statusBarHeight = WindowInsets.statusBars.getTop(density)
     val listState = rememberLazyListState()
-    BoxWithConstraints(modifier.fillMaxSize().clipToBounds()) {
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .clipToBounds(),
+    ) {
         // 이 영역은 이미 하단 탭바와 navigation bar를 제외한 지도 viewport다.
         val viewportHeight = with(density) { maxHeight.toPx() }
         val first = (viewportHeight - with(density) { FirstPanelHeight.toPx() }).coerceAtLeast(0f)
@@ -159,14 +162,6 @@ internal fun SearchResultPhotoBoothPanel(
                 onClick = onCurrentLocationClick,
             )
         }
-        if (isCollapsed && dragLevel == DragLevel.FIRST) {
-            ShowSearchListButton(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = panelHeight + PanelButtonGap),
-                onClick = onShowList,
-            )
-        }
         SearchResultPanelContent(
             photoBooths = photoBooths,
             showDistance = showDistance,
@@ -178,7 +173,7 @@ internal fun SearchResultPhotoBoothPanel(
                 .clip(shape)
                 .background(NekiTheme.colorScheme.white),
             headerModifier = Modifier
-                .anchoredDraggable(state, Orientation.Vertical)
+                .anchoredDraggable(state = state, orientation = Orientation.Vertical)
                 .semantics {
                     stateDescription = when (dragLevel) {
                         DragLevel.FIRST -> "검색 결과 패널 접힘"
@@ -212,6 +207,14 @@ internal fun SearchResultPhotoBoothPanel(
             onBoothClick = onBoothClick,
             onFavoriteClick = onFavoriteClick,
         )
+        if (dragLevel == DragLevel.THIRD) {
+            ToMapChip(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 24.dp),
+                onClick = { onDragLevelChanged(DragLevel.FIRST) },
+            )
+        }
     }
 }
 
@@ -258,9 +261,17 @@ private fun SearchResultPanelContent(
     onFavoriteClick: (PhotoBooth) -> Unit = {},
 ) {
     val brandNames = photoBooths.map { it.brandName }.distinct()
-    Column(modifier = modifier.background(NekiTheme.colorScheme.white), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Column(modifier = headerModifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            BottomSheetDragHandle(color = NekiTheme.colorScheme.gray100)
+    Column(
+        modifier = modifier.background(NekiTheme.colorScheme.white),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Column(
+            modifier = headerModifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            BottomSheetDragHandle(
+                color = NekiTheme.colorScheme.gray100,
+            )
             Text(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 text = buildAnnotatedString {
@@ -282,7 +293,7 @@ private fun SearchResultPanelContent(
         }
         // 접힘 도중에도 스크롤/드래그 노드를 유지해 정착 처리를 끝낸다.
         Box(
-            bodyModifier
+            modifier = bodyModifier
                 .fillMaxWidth()
                 .weight(1f)
                 .clipToBounds()
@@ -290,15 +301,22 @@ private fun SearchResultPanelContent(
                 .then(if (isCollapsed) Modifier.clearAndSetSemantics {} else Modifier),
         ) {
             when {
-                isLoading -> LoadingIndicator(Modifier.align(Alignment.Center), size = 200.dp)
+                isLoading -> LoadingIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    size = 200.dp,
+                )
                 isError -> Text(
                     text = "검색 결과를 불러오지 못했어요.",
-                    modifier = Modifier.align(Alignment.Center).padding(horizontal = 20.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 20.dp),
                     style = NekiTheme.typography.body14Medium,
                     color = NekiTheme.colorScheme.gray500,
                     textAlign = TextAlign.Center,
                 )
-                photoBooths.isEmpty() -> BoxWithConstraints(Modifier.fillMaxSize()) {
+                photoBooths.isEmpty() -> BoxWithConstraints(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
                     // 3단계는 Figma의 100dp 상단 여백, 2단계는 안내 전체가 보이는 여백으로 조정한다.
                     val topPadding = ((maxHeight - 136.dp) / 2).coerceIn(0.dp, 100.dp)
                     SearchNoResultsContent(
@@ -328,27 +346,6 @@ private fun SearchResultPanelContent(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ShowSearchListButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .buttonShadow()
-            .clip(CircleShape)
-            .background(NekiTheme.colorScheme.white)
-            .clickableSingle(onClick = onClick)
-            .size(width = 97.dp, height = 40.dp)
-            .padding(horizontal = 13.dp),
-        horizontalArrangement = Arrangement.spacedBy(7.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(painterResource(R.drawable.icon_list), contentDescription = null, modifier = Modifier.size(16.dp), tint = NekiTheme.colorScheme.gray400)
-        Text("목록보기", style = NekiTheme.typography.body14SemiBold, color = NekiTheme.colorScheme.gray800)
     }
 }
 
@@ -394,8 +391,8 @@ private fun BrandFilterChip(
 
 private val PreviewBooths = persistentListOf(
     PhotoBooth(id = "source:LIFEFOURCUTS:1", brandName = "인생네컷", branchName = "사당역점", distance = 300),
-    PhotoBooth(id = "source:PHOTOSIGNATURE:2", brandName = "포토시그니처", branchName = "사당점", distance = 300),
-    PhotoBooth(id = "source:PHOTOGRAY:3", brandName = "포토그레이", branchName = "사당역점", distance = 300),
+    PhotoBooth(id = "source:PHOTOSIGNATURE:1", brandName = "포토시그니처", branchName = "사당점", distance = 300),
+    PhotoBooth(id = "source:PHOTOGRAY:1", brandName = "포토그레이", branchName = "사당역점", distance = 300),
 )
 
 @ComponentPreview
@@ -407,7 +404,7 @@ private fun SearchResultFirstLevelPreview() {
             dragLevel = DragLevel.FIRST,
             showDistance = true,
             isCurrentLocation = false,
-            modifier = Modifier.size(375.dp, 760.dp),
+            modifier = Modifier.size(width = 375.dp, height = 760.dp),
         )
     }
 }
@@ -421,7 +418,7 @@ private fun SearchResultSecondLevelPreview() {
             dragLevel = DragLevel.SECOND,
             showDistance = true,
             isCurrentLocation = true,
-            modifier = Modifier.size(375.dp, 760.dp),
+            modifier = Modifier.size(width = 375.dp, height = 760.dp),
         )
     }
 }
@@ -435,7 +432,7 @@ private fun SearchResultThirdLevelPreview() {
             dragLevel = DragLevel.THIRD,
             showDistance = true,
             isCurrentLocation = false,
-            modifier = Modifier.size(375.dp, 760.dp),
+            modifier = Modifier.size(width = 375.dp, height = 760.dp),
         )
     }
 }
@@ -444,7 +441,11 @@ private fun SearchResultThirdLevelPreview() {
 @Composable
 private fun SearchResultEmptyPreview() {
     NekiTheme {
-        SearchResultPanelContent(photoBooths = persistentListOf(), showDistance = false, modifier = Modifier.size(375.dp, SecondPanelHeight))
+        SearchResultPanelContent(
+            photoBooths = persistentListOf(),
+            showDistance = false,
+            modifier = Modifier.size(width = 375.dp, height = SecondPanelHeight),
+        )
     }
 }
 
@@ -452,7 +453,13 @@ private fun SearchResultEmptyPreview() {
 @Composable
 private fun SearchResultEmptyExpandedPreview() {
     NekiTheme {
-        SearchResultPanelContent(photoBooths = persistentListOf(), showDistance = false, modifier = Modifier.size(375.dp, 648.dp))
+        SearchResultPhotoBoothPanel(
+            photoBooths = persistentListOf(),
+            dragLevel = DragLevel.THIRD,
+            showDistance = false,
+            isCurrentLocation = false,
+            modifier = Modifier.size(width = 375.dp, height = 760.dp),
+        )
     }
 }
 
@@ -463,7 +470,7 @@ private fun SearchResultLoadingPreview() {
         SearchResultPanelContent(
             photoBooths = persistentListOf(),
             showDistance = false,
-            modifier = Modifier.size(375.dp, SecondPanelHeight),
+            modifier = Modifier.size(width = 375.dp, height = SecondPanelHeight),
             isLoading = true,
         )
     }
@@ -476,7 +483,7 @@ private fun SearchResultErrorPreview() {
         SearchResultPanelContent(
             photoBooths = persistentListOf(),
             showDistance = false,
-            modifier = Modifier.size(375.dp, SecondPanelHeight),
+            modifier = Modifier.size(width = 375.dp, height = SecondPanelHeight),
             isError = true,
         )
     }
@@ -484,23 +491,32 @@ private fun SearchResultErrorPreview() {
 
 @ComponentPreview
 @Composable
-private fun ShowSearchListButtonPreview() {
-    NekiTheme {
-        Box(Modifier.padding(16.dp)) {
-            ShowSearchListButton(onClick = {})
-        }
-    }
-}
-
-@ComponentPreview
-@Composable
 private fun BrandFilterChipStatesPreview() {
     NekiTheme {
-        Column(Modifier.padding(16.dp)) {
-            BrandFilterChip(brandName = null, enabled = true, onClick = {})
-            BrandFilterChip(brandName = "인생네컷", enabled = true, onClick = {})
-            BrandFilterChip(brandName = "포토시그니처", extraCount = 10, enabled = true, onClick = {})
-            BrandFilterChip(brandName = null, enabled = false, onClick = {})
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            BrandFilterChip(
+                brandName = null,
+                enabled = true,
+                onClick = {},
+            )
+            BrandFilterChip(
+                brandName = "인생네컷",
+                enabled = true,
+                onClick = {},
+            )
+            BrandFilterChip(
+                brandName = "포토시그니처",
+                extraCount = 10,
+                enabled = true,
+                onClick = {},
+            )
+            BrandFilterChip(
+                brandName = null,
+                enabled = false,
+                onClick = {},
+            )
         }
     }
 }
