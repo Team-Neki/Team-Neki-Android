@@ -211,7 +211,7 @@ internal fun SearchResultPhotoBoothPanel(
             ToMapChip(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 10.dp),
+                    .padding(bottom = 24.dp),
                 onClick = { onDragLevelChanged(DragLevel.FIRST) },
             )
         }
