@@ -68,7 +68,7 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.EnterMapScreen -> fetchInitialData(reduce)
-            MapIntent.ClickSearch -> postSideEffect(MapEffect.NavigateToSearch)
+            MapIntent.ClickSearch -> postSideEffect(MapEffect.NavigateToSearch(state.searchResults?.keyword.orEmpty()))
             is MapIntent.SearchPanel -> handleSearchPanelIntent(intent.intent, reduce)
             is MapIntent.GrantedLocationPermission -> getCurrentLocation(reduce, postSideEffect)
             is MapIntent.LoadPhotoBoothsByBounds -> {

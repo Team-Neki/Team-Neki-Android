@@ -127,7 +127,7 @@ fun MainScreen(
     onBack: () -> Unit,
     onIntent: (MainIntent) -> Unit,
 ) {
-    val isMapScene = currentKey == MapNavKey.Map || currentKey == MapNavKey.Search
+    val isMapScene = currentKey == MapNavKey.Map || currentKey is MapNavKey.Search
     val mapBottomBar by rememberUpdatedState<@Composable () -> Unit> {
         BottomNavigationBar(
             currentTab = MapNavKey.Map,
@@ -165,7 +165,7 @@ fun MainScreen(
                 when (currentKey) {
                     ArchiveNavKey.Archive, PoseNavKey.PoseMain, MyPageNavKey.MyPage -> innerPadding
                     is PoseNavKey.RandomPose -> PaddingValues(bottom = innerPadding.calculateBottomPadding())
-                    MapNavKey.Map, MapNavKey.Search -> PaddingValues.Zero
+                    MapNavKey.Map, is MapNavKey.Search -> PaddingValues.Zero
                     PhotoUploadNavKey.QRScan -> PaddingValues.Zero
                     else -> PaddingValues(top = innerPadding.calculateTopPadding())
                 },

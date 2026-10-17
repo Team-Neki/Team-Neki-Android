@@ -3,15 +3,25 @@ package com.neki.android.feature.map.impl.search
 import androidx.lifecycle.ViewModel
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
+import com.neki.android.feature.map.api.MapNavKey
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-internal class SearchViewModel @Inject constructor() : ViewModel() {
+@HiltViewModel(assistedFactory = SearchViewModel.Factory::class)
+internal class SearchViewModel @AssistedInject constructor(
+    @Assisted private val key: MapNavKey.Search,
+) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(key: MapNavKey.Search): SearchViewModel
+    }
 
     val store: MviIntentStore<SearchState, SearchIntent, SearchEffect> =
         mviIntentStore(
-            initialState = SearchState(),
+            initialState = SearchState(query = key.initialQuery),
             onIntent = ::onIntent,
         )
 

@@ -66,7 +66,7 @@ internal fun MapSearchBar(
                     modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_arrow_left),
                     contentDescription = "검색으로 돌아가기",
-                    tint = Color.Unspecified,
+                    tint = NekiTheme.colorScheme.gray800,
                 )
             }
         }
@@ -84,7 +84,7 @@ internal fun MapSearchBar(
                 .size(24.dp),
             imageVector = ImageVector.vectorResource(R.drawable.icon_search),
             contentDescription = "검색",
-            tint = Color.Unspecified,
+            tint = if (query == null) Color.Unspecified else NekiTheme.colorScheme.gray800,
         )
         if (query != null) {
             NekiIconButton(
@@ -93,7 +93,7 @@ internal fun MapSearchBar(
             ) {
                 Icon(
                     modifier = Modifier.size(24.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.icon_close),
+                    imageVector = ImageVector.vectorResource(R.drawable.icon_close_24),
                     contentDescription = "지역 검색 닫기",
                     tint = NekiTheme.colorScheme.gray800,
                 )
