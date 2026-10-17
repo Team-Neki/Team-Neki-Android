@@ -14,7 +14,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -24,7 +28,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
@@ -42,6 +48,16 @@ internal fun SearchField(
     onSubmit: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = query, selection = TextRange(query.length)))
+    }
+    val value = textFieldValue.copy(text = query)
+    SideEffect {
+        if (value.selection != textFieldValue.selection || value.composition != textFieldValue.composition) {
+            textFieldValue = value
+        }
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -63,8 +79,13 @@ internal fun SearchField(
             )
         }
         BasicTextField(
-            value = query,
-            onValueChange = onQueryChange,
+            value = value,
+            onValueChange = {
+                textFieldValue = it
+                if (query != it.text) {
+                    onQueryChange(it.text)
+                }
+            },
             modifier = Modifier
                 .weight(1f)
                 .focusRequester(focusRequester)
