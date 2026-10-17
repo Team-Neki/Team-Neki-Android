@@ -38,7 +38,6 @@ internal class SearchViewModel @AssistedInject constructor(
 
     private data class Request(
         val keyword: String,
-        val rawQuery: String,
         val latitude: Double?,
         val longitude: Double?,
     )
@@ -58,12 +57,12 @@ internal class SearchViewModel @AssistedInject constructor(
                 analyticsLogger.log(
                     if (isInitial) {
                         MapAnalyticsEvent.MapSearchResult(
-                            query = query.rawQuery,
+                            query = query.keyword,
                             resultStatus = if (resultCount > 0) "matched" else "unmatched",
                         )
                     } else {
                         MapAnalyticsEvent.MapSearchLoadMore(
-                            query = query.rawQuery,
+                            query = query.keyword,
                             page = loadedPage,
                             pageResultCount = resultCount,
                             hasNextPage = hasNextPage,
@@ -106,7 +105,6 @@ internal class SearchViewModel @AssistedInject constructor(
         request.tryEmit(
             Request(
                 keyword = keyword,
-                rawQuery = state.query,
                 latitude = key.latitude.takeIf { hasLocation },
                 longitude = key.longitude.takeIf { hasLocation },
             ),
@@ -117,7 +115,7 @@ internal class SearchViewModel @AssistedInject constructor(
         request.replayCache.lastOrNull()?.let { request ->
             analyticsLogger.log(
                 MapAnalyticsEvent.MapSearchCandidateSelect(
-                    query = request.rawQuery,
+                    query = request.keyword,
                     candidateType = when (result.type) {
                         SearchCompletionType.REGION -> "district"
                         SearchCompletionType.STATION -> "subway_station"
