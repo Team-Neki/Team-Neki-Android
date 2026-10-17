@@ -256,7 +256,7 @@ internal fun AnchoredPanelContent(
             }
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
-                contentPadding = PaddingValues(start = 20.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp),
             ) {
                 items(brands) { brand ->
                     VerticalBrandItem(
