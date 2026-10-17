@@ -17,7 +17,6 @@ import com.neki.android.feature.map.impl.MapRoute
 import com.neki.android.feature.map.impl.MapViewModel
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeRoute
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeViewModel
-import com.neki.android.feature.map.impl.search.SearchResultPanelIntent
 import com.neki.android.feature.map.impl.search.SearchRoute
 import com.neki.android.feature.map.impl.search.SearchViewModel
 import dagger.Module
@@ -50,7 +49,11 @@ private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
             when (result) {
                 is MapResult.BrandOrderChanged -> viewModel.store.onIntent(MapIntent.UpdateBrandOrder(result.orderedBrands))
                 is MapResult.SearchSelected -> viewModel.store.onIntent(
-                    MapIntent.SearchPanel(SearchResultPanelIntent.ShowResults(result.keyword)),
+                    MapIntent.SelectSearchKeyword(
+                        keyword = result.keyword,
+                        type = result.type,
+                        filterGroup = result.filterGroup,
+                    ),
                 )
             }
         }
@@ -77,7 +80,14 @@ private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
             viewModel = viewModel,
             navigateBack = navigator::goBack,
             onResultSelected = { result ->
-                resultBus.sendResult<MapResult>(result = MapResult.SearchSelected(result.keyword), allowDuplicate = false)
+                resultBus.sendResult<MapResult>(
+                    result = MapResult.SearchSelected(
+                        keyword = result.keyword,
+                        type = result.type,
+                        filterGroup = result.filterGroup,
+                    ),
+                    allowDuplicate = false,
+                )
                 navigator.goBack()
             },
         )

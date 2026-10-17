@@ -1,18 +1,22 @@
 package com.neki.android.feature.map.impl
 
+import com.neki.android.core.model.SearchFilterGroup
+import com.neki.android.core.model.SearchCompletionType
+
+import com.neki.android.feature.map.impl.search.SearchMapState
+import com.neki.android.feature.map.impl.search.SearchMapIntent
 import androidx.compose.ui.graphics.ImageBitmap
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.const.MapConst
-import com.neki.android.feature.map.impl.search.SearchResultPanelIntent
-import com.neki.android.feature.map.impl.search.SearchResultPanelState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 
 data class MapState(
+    val search: SearchMapState? = null,
     val isLoading: Boolean = false,
     val currentLocLatLng: LocLatLng? = null,
     val isCameraOnCurrentLocation: Boolean = false,
@@ -30,17 +34,21 @@ data class MapState(
     val isShowDirectionBottomSheet: Boolean = false,
     val isShowLocationPermissionDialog: Boolean = false,
     val showFavoritePhotoBooth: Boolean = false,
-    val searchResults: SearchResultPanelState? = null,
 )
 
 sealed interface MapIntent {
-    data object EnterMapScreen : MapIntent
     data object ClickSearch : MapIntent
-    data class SearchPanel(val intent: SearchResultPanelIntent) : MapIntent
+    data class SelectSearchKeyword(
+        val keyword: String,
+        val type: SearchCompletionType,
+        val filterGroup: SearchFilterGroup,
+    ) : MapIntent
+    data class SearchAction(val action: SearchMapIntent) : MapIntent
+    data object EnterMapScreen : MapIntent
 
     // in 지도
     data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
-    data object GrantedLocationPermission : MapIntent
+    data class GrantedLocationPermission(val moveToCurrentLocation: Boolean) : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickClusterMarker(val southWest: LocLatLng, val northEast: LocLatLng) : MapIntent
@@ -77,6 +85,11 @@ sealed interface MapIntent {
 }
 
 sealed interface MapEffect {
+    data class NavigateToSearch(
+        val initialQuery: String,
+        val latitude: Double?,
+        val longitude: Double?,
+    ) : MapEffect
     data class MoveCameraToPosition(
         val locLatLng: LocLatLng,
         val isRequiredLoadPhotoBooths: Boolean = false,
@@ -96,9 +109,8 @@ sealed interface MapEffect {
     ) : MapEffect
 
     data object NavigateToAppSettings : MapEffect
-    data object LaunchLocationPermission : MapEffect
+    data class LaunchLocationPermission(val moveToCurrentLocation: Boolean = false) : MapEffect
     data object NavigateToPhotoBoothOrderChange : MapEffect
-    data class NavigateToSearch(val initialQuery: String) : MapEffect
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
