@@ -11,7 +11,11 @@ sealed interface MapNavKey : NavKey {
     data object Map : MapNavKey
 
     @Serializable
-    data class Search(val initialQuery: String = "") : MapNavKey
+    data class Search(
+        val initialQuery: String = "",
+        val latitude: Double? = null,
+        val longitude: Double? = null,
+    ) : MapNavKey
 
     @Serializable
     data class PhotoBoothOrderChange(val brands: List<Brand>) : MapNavKey
@@ -21,8 +25,18 @@ fun MainNavigator.navigateToMap() {
     navigate(MapNavKey.Map)
 }
 
-fun MainNavigator.navigateToSearch(initialQuery: String = "") {
-    navigate(MapNavKey.Search(initialQuery = initialQuery))
+fun MainNavigator.navigateToSearch(
+    initialQuery: String = "",
+    latitude: Double? = null,
+    longitude: Double? = null,
+) {
+    navigate(
+        MapNavKey.Search(
+            initialQuery = initialQuery,
+            latitude = latitude,
+            longitude = longitude,
+        ),
+    )
 }
 
 fun MainNavigator.navigateToPhotoBoothOrderChange(brands: List<Brand>) {
