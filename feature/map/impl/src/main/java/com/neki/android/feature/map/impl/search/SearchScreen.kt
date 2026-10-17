@@ -24,7 +24,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -40,7 +39,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 internal fun SearchRoute(
-    viewModel: SearchViewModel = hiltViewModel(),
+    viewModel: SearchViewModel,
     navigateBack: () -> Unit,
     onResultSelected: (SearchResult) -> Unit,
 ) {

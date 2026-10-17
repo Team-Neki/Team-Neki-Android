@@ -230,7 +230,7 @@ internal fun AnchoredPanelContent(
         Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            BottomSheetDragHandle()
+            BottomSheetDragHandle(color = NekiTheme.colorScheme.gray100)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -98,7 +98,7 @@ sealed interface MapEffect {
     data object NavigateToAppSettings : MapEffect
     data object LaunchLocationPermission : MapEffect
     data object NavigateToPhotoBoothOrderChange : MapEffect
-    data object NavigateToSearch : MapEffect
+    data class NavigateToSearch(val initialQuery: String) : MapEffect
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }

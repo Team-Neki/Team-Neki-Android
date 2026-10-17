@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
     navigateToPhotoBoothOrderChange: (List<Brand>) -> Unit = {},
-    navigateToSearch: () -> Unit = {},
+    navigateToSearch: (String) -> Unit = {},
     isVisible: Boolean = true,
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
@@ -139,7 +139,7 @@ fun MapRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
-            MapEffect.NavigateToSearch -> navigateToSearch()
+            is MapEffect.NavigateToSearch -> navigateToSearch(sideEffect.initialQuery)
             is MapEffect.OpenDirectionBottomSheet -> {
                 viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
             }

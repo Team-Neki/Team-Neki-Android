@@ -89,6 +89,7 @@ internal fun SearchResultPhotoBoothPanel(
     showDistance: Boolean,
     isCurrentLocation: Boolean,
     modifier: Modifier = Modifier,
+    selectedBrandNames: ImmutableList<String> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.SECOND,
     isLoading: Boolean = false,
     isError: Boolean = false,
@@ -164,6 +165,7 @@ internal fun SearchResultPhotoBoothPanel(
         }
         SearchResultPanelContent(
             photoBooths = photoBooths,
+            selectedBrandNames = selectedBrandNames,
             showDistance = showDistance,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -249,6 +251,7 @@ private fun SearchResultPanelContent(
     photoBooths: ImmutableList<PhotoBooth>,
     showDistance: Boolean,
     modifier: Modifier = Modifier,
+    selectedBrandNames: ImmutableList<String> = persistentListOf(),
     headerModifier: Modifier = Modifier,
     bodyModifier: Modifier = Modifier,
     listModifier: Modifier = Modifier,
@@ -260,7 +263,6 @@ private fun SearchResultPanelContent(
     onBoothClick: (PhotoBooth) -> Unit = {},
     onFavoriteClick: (PhotoBooth) -> Unit = {},
 ) {
-    val brandNames = photoBooths.map { it.brandName }.distinct()
     Column(
         modifier = modifier.background(NekiTheme.colorScheme.white),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -284,8 +286,8 @@ private fun SearchResultPanelContent(
                 color = NekiTheme.colorScheme.gray400,
             )
             BrandFilterChip(
-                brandName = brandNames.firstOrNull(),
-                extraCount = (brandNames.size - 1).coerceAtLeast(0),
+                brandName = selectedBrandNames.firstOrNull(),
+                extraCount = (selectedBrandNames.size - 1).coerceAtLeast(0),
                 enabled = !isLoading && !isError,
                 modifier = Modifier.padding(horizontal = 20.dp),
                 onClick = onFilterClick,

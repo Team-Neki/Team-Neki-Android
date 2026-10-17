@@ -99,7 +99,7 @@ internal fun SearchField(
                 modifier = Modifier.size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.icon_search),
                 contentDescription = "검색",
-                tint = NekiTheme.colorScheme.gray900,
+                tint = NekiTheme.colorScheme.gray800,
             )
         }
     }
