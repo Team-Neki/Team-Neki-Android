@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.paging.compose)
     implementation(projects.feature.map.api)
     api(libs.map.sdk)
     implementation(libs.naver.map.compose)
