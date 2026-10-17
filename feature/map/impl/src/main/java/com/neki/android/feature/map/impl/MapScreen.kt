@@ -370,6 +370,7 @@ fun MapScreen(
         if (searchResults != null) {
             SearchResultOverlay(
                 state = searchResults,
+                mapMarkers = uiState.mapMarkers,
                 brands = uiState.brands,
                 showDistance = LocationPermissionManager.isGrantedLocationPermission(context) && uiState.currentLocLatLng != null,
                 isCurrentLocation = uiState.isCameraOnCurrentLocation,

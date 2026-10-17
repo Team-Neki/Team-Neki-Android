@@ -29,13 +29,15 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 internal fun SearchResultOverlay(
     state: SearchResultPanelState,
+    mapMarkers: ImmutableList<PhotoBooth>,
     brands: ImmutableList<Brand>,
     showDistance: Boolean,
     isCurrentLocation: Boolean,
     onIntent: (MapIntent) -> Unit,
 ) {
     val visibleBooths = state.visibleBooths(brands)
-    val focusedBooth = visibleBooths.find { it.id == state.focusedBoothId }
+    val focusedBooth = mapMarkers.find { it.id == state.focusedBoothId }
+        ?: visibleBooths.find { it.id == state.focusedBoothId }
     if (focusedBooth == null) {
         SearchResultPhotoBoothPanel(
             photoBooths = visibleBooths,
@@ -112,6 +114,19 @@ private fun SearchResultOverlayDetailPreview() {
 
 @ComponentPreview
 @Composable
+private fun SearchResultOverlayMarkerDetailPreview() {
+    SearchResultOverlayPreviewContent(
+        state = SearchResultPanelState(
+            keyword = "사당",
+            photoBooths = persistentListOf(PreviewSearchBooths.first()),
+            focusedBoothId = 2,
+        ),
+        mapMarkers = PreviewSearchBooths,
+    )
+}
+
+@ComponentPreview
+@Composable
 private fun SearchResultOverlayFilteredPreview() {
     SearchResultOverlayPreviewContent(
         state = SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, selectedBrandIds = persistentSetOf(2L)),
@@ -119,7 +134,11 @@ private fun SearchResultOverlayFilteredPreview() {
 }
 
 @Composable
-private fun SearchResultOverlayPreviewContent(state: SearchResultPanelState, showDistance: Boolean = true) {
+private fun SearchResultOverlayPreviewContent(
+    state: SearchResultPanelState,
+    showDistance: Boolean = true,
+    mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
+) {
     NekiTheme {
         // 지도 SDK 없이 검색바와 결과 오버레이의 배치를 확인한다.
         Box(
@@ -135,6 +154,7 @@ private fun SearchResultOverlayPreviewContent(state: SearchResultPanelState, sho
             )
             SearchResultOverlay(
                 state = state,
+                mapMarkers = mapMarkers,
                 brands = persistentListOf(Brand(id = 1, name = "인생네컷"), Brand(id = 2, name = "포토그레이")),
                 showDistance = showDistance,
                 isCurrentLocation = false,

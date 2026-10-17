@@ -567,7 +567,8 @@ class MapViewModel @Inject constructor(
                 calculateDistance(it.latitude, it.longitude, locLatLng.latitude, locLatLng.longitude)
             } ?: 0
             copy(
-                dragLevel = DragLevel.INVISIBLE,
+                dragLevel = if (searchResults == null) DragLevel.INVISIBLE else dragLevel,
+                searchResults = searchResults?.copy(focusedBoothId = baseMarkers.find(isClicked)?.id),
                 mapMarkers = baseMarkers.map { marker ->
                     marker.copy(isFocused = isClicked(marker), distance = if (isClicked(marker)) distance else marker.distance)
                 }.toImmutableList(),
