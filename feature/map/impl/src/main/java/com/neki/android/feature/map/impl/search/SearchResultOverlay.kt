@@ -14,6 +14,7 @@ import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
+import com.neki.android.core.model.SearchBrand
 import com.neki.android.feature.map.impl.LocLatLng
 import com.neki.android.feature.map.impl.MapIntent
 import com.neki.android.feature.map.impl.component.MapSearchBar
@@ -28,27 +29,29 @@ import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun SearchResultOverlay(
-    state: SearchResultPanelState,
-    mapMarkers: ImmutableList<PhotoBooth>,
+    state: SearchMapState,
+    visibleBooths: ImmutableList<PhotoBooth>,
     brands: ImmutableList<Brand>,
-    showDistance: Boolean,
+    hasLocationPermission: Boolean,
     isCurrentLocation: Boolean,
     onIntent: (MapIntent) -> Unit,
 ) {
-    val visibleBooths = state.visibleBooths(brands)
-    val focusedBooth = mapMarkers.find { it.id == state.focusedBoothId }
-        ?: visibleBooths.find { it.id == state.focusedBoothId }
+    val onSearch: (SearchMapIntent) -> Unit = { onIntent(MapIntent.SearchAction(it)) }
+    val showDistance = state.showDistance && hasLocationPermission
+    val focusedBooth = visibleBooths.find { it.id == state.focusedId }
     if (focusedBooth == null) {
         SearchResultPhotoBoothPanel(
             photoBooths = visibleBooths,
-            selectedBrandNames = brands.filter { it.id in state.selectedBrandIds }.map { it.name }.toImmutableList(),
+            selectedBrandNames = state.filters.filter { it.id in state.selectedBrandIds }.map { it.name }.toImmutableList(),
             dragLevel = state.dragLevel,
+            isLoading = state.isLoading,
+            isError = state.isError,
             showDistance = showDistance,
             isCurrentLocation = isCurrentLocation,
-            onDragLevelChanged = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.ChangeDragLevel(it))) },
+            onDragLevelChanged = { onSearch(SearchMapIntent.ChangeDragLevel(it)) },
             onCurrentLocationClick = { onIntent(MapIntent.ClickCurrentLocationIcon) },
-            onFilterClick = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.OpenFilter)) },
-            onBoothClick = { onIntent(MapIntent.ClickPhotoBoothListItem(it)) },
+            onFilterClick = { if (!state.isLoading && !state.isError) onSearch(SearchMapIntent.OpenFilter) },
+            onBoothClick = { onSearch(SearchMapIntent.SelectBooth(it.id, entryPoint = "bottom_sheet")) },
             onFavoriteClick = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
         )
     } else {
@@ -61,7 +64,7 @@ internal fun SearchResultOverlay(
                 isFavorite = focusedBooth.favorite,
                 showDistance = showDistance,
                 onClickFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(focusedBooth)) },
-                onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
+                onClickCloseCard = { onSearch(SearchMapIntent.CloseBooth) },
                 onClickCard = {
                     onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedBooth.latitude, focusedBooth.longitude)))
                 },
@@ -71,14 +74,17 @@ internal fun SearchResultOverlay(
     }
     if (state.showFilter) {
         BrandFilterBottomSheet(
-            filters = brands.mapNotNull { brand ->
-                val count = state.photoBooths.count { it.brandName == brand.name }
-                if (count > 0) SearchBrandFilter(brand = brand, count = count) else null
+            filters = state.filters.map { filter ->
+                SearchBrandFilter(
+                    brand = brands.find { it.id == filter.id }
+                        ?: Brand(id = filter.id, name = filter.name, code = filter.code),
+                    count = filter.count,
+                )
             }.toImmutableList(),
             selectedBrandIds = state.draftBrandIds,
-            onDismiss = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.DismissFilter)) },
-            onBrandClick = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.ToggleBrand(it))) },
-            onApply = { onIntent(MapIntent.SearchPanel(SearchResultPanelIntent.ApplyFilter)) },
+            onDismiss = { onSearch(SearchMapIntent.DismissFilter) },
+            onBrandClick = { onSearch(SearchMapIntent.ToggleBrand(it)) },
+            onApply = { onSearch(SearchMapIntent.ApplyFilter) },
         )
     }
 }
@@ -92,7 +98,7 @@ private val PreviewSearchBooths = persistentListOf(
 @Composable
 private fun SearchResultOverlayResultsPreview() {
     SearchResultOverlayPreviewContent(
-        state = SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths),
+        state = SearchMapState(keyword = "사당", booths = PreviewSearchBooths, isLoading = false, showDistance = true),
     )
 }
 
@@ -100,7 +106,7 @@ private fun SearchResultOverlayResultsPreview() {
 @Composable
 private fun SearchResultOverlayEmptyPreview() {
     SearchResultOverlayPreviewContent(
-        state = SearchResultPanelState(keyword = "사당"),
+        state = SearchMapState(keyword = "사당", isLoading = false),
         showDistance = false,
     )
 }
@@ -109,20 +115,13 @@ private fun SearchResultOverlayEmptyPreview() {
 @Composable
 private fun SearchResultOverlayDetailPreview() {
     SearchResultOverlayPreviewContent(
-        state = SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, focusedBoothId = "source:PHOTOGRAY:1"),
-    )
-}
-
-@ComponentPreview
-@Composable
-private fun SearchResultOverlayMarkerDetailPreview() {
-    SearchResultOverlayPreviewContent(
-        state = SearchResultPanelState(
+        state = SearchMapState(
             keyword = "사당",
-            photoBooths = persistentListOf(PreviewSearchBooths.first()),
-            focusedBoothId = "source:PHOTOGRAY:1",
+            booths = PreviewSearchBooths,
+            focusedId = PreviewSearchBooths[1].id,
+            isLoading = false,
+            showDistance = true,
         ),
-        mapMarkers = PreviewSearchBooths,
     )
 }
 
@@ -130,18 +129,20 @@ private fun SearchResultOverlayMarkerDetailPreview() {
 @Composable
 private fun SearchResultOverlayFilteredPreview() {
     SearchResultOverlayPreviewContent(
-        state = SearchResultPanelState(keyword = "사당", photoBooths = PreviewSearchBooths, selectedBrandIds = persistentSetOf(2L)),
+        SearchMapState(
+            keyword = "사당",
+            booths = PreviewSearchBooths,
+            filters = persistentListOf(SearchBrand(id = 2, name = "포토그레이", code = "", count = 1)),
+            selectedBrandIds = persistentSetOf(2L),
+            isLoading = false,
+            showDistance = true,
+        ),
     )
 }
 
 @Composable
-private fun SearchResultOverlayPreviewContent(
-    state: SearchResultPanelState,
-    showDistance: Boolean = true,
-    mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
-) {
+private fun SearchResultOverlayPreviewContent(state: SearchMapState, showDistance: Boolean = true) {
     NekiTheme {
-        // 지도 SDK 없이 검색바와 결과 오버레이의 배치를 확인한다.
         Box(
             modifier = Modifier
                 .size(width = 375.dp, height = 760.dp)
@@ -155,9 +156,9 @@ private fun SearchResultOverlayPreviewContent(
             )
             SearchResultOverlay(
                 state = state,
-                mapMarkers = mapMarkers,
+                visibleBooths = state.visibleBooths(),
                 brands = persistentListOf(Brand(id = 1, name = "인생네컷"), Brand(id = 2, name = "포토그레이")),
-                showDistance = showDistance,
+                hasLocationPermission = showDistance,
                 isCurrentLocation = false,
                 onIntent = {},
             )

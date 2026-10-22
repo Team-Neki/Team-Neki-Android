@@ -1,17 +1,28 @@
 package com.neki.android.core.data.repository.impl
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import com.neki.android.core.data.paging.SearchPagingSource
 import com.neki.android.core.data.remote.api.MapService
 import com.neki.android.core.data.remote.model.request.BrandOrderChangeRequest
 import com.neki.android.core.data.remote.model.request.Coordinate
 import com.neki.android.core.data.remote.model.request.PhotoBoothPointRequest
 import com.neki.android.core.data.remote.model.request.PhotoBoothPolygonRequest
 import com.neki.android.core.data.remote.model.request.UpdateFavoriteRequest
+import com.neki.android.core.data.remote.model.request.SearchLocationRequest
+import com.neki.android.core.data.remote.model.request.SearchRequest
+import com.neki.android.core.data.remote.model.request.toRequest
 import com.neki.android.core.data.remote.model.response.toModels
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
+import com.neki.android.core.model.SearchBrand
+import com.neki.android.core.model.SearchFilterGroup
 import javax.inject.Inject
+
+private const val PAGE_SIZE = 20
+private const val PREFETCH_DISTANCE = 10
 
 class MapRepositoryImpl @Inject constructor(
     private val mapService: MapService,
@@ -65,5 +76,40 @@ class MapRepositoryImpl @Inject constructor(
             locationId = locationId,
             request = UpdateFavoriteRequest(favorite = favorite),
         )
+    }
+
+    override fun getSearchCompletionsFlow(keyword: String, latitude: Double?, longitude: Double?) = Pager(
+        config = PagingConfig(
+            pageSize = PAGE_SIZE,
+            initialLoadSize = PAGE_SIZE,
+            prefetchDistance = PREFETCH_DISTANCE,
+            enablePlaceholders = false,
+        ),
+        pagingSourceFactory = { SearchPagingSource(mapService, keyword, latitude = latitude, longitude = longitude) },
+    ).flow
+
+    override suspend fun getPhotoBoothsByKeyword(
+        keyword: String,
+        latitude: Double?,
+        longitude: Double?,
+        filterGroup: SearchFilterGroup,
+    ): Result<List<PhotoBooth>> = runSuspendCatching {
+        mapService.getPhotoBoothsByKeyword(
+            SearchRequest(
+                keyword = keyword,
+                filterGroup = filterGroup.toRequest(),
+                userLocation = if (latitude != null && longitude != null) {
+                    SearchLocationRequest(latitude = latitude, longitude = longitude)
+                } else {
+                    null
+                },
+            ),
+        ).data.items.map { it.toModel() }
+    }
+
+    override suspend fun getSearchBrandFilters(keyword: String, filterGroup: SearchFilterGroup): Result<List<SearchBrand>> = runSuspendCatching {
+        mapService.getSearchBrandFilters(
+            SearchRequest(keyword = keyword, filterGroup = filterGroup.toRequest()),
+        ).data.brandFilter.map { it.toModel() }
     }
 }
