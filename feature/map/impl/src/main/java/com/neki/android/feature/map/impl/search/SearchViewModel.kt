@@ -4,8 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.neki.android.core.analytics.event.MapAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
+import com.neki.android.core.model.SearchCompletion
+import com.neki.android.core.model.SearchCompletionType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.map.api.MapNavKey
@@ -24,6 +28,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 internal class SearchViewModel @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     private val mapRepository: MapRepository,
+    private val analyticsLogger: AnalyticsLogger,
     @Assisted private val key: MapNavKey.Search,
 ) : ViewModel() {
     @AssistedFactory
@@ -42,10 +47,29 @@ internal class SearchViewModel @AssistedInject constructor(
     )
 
     val results = request.flatMapLatest { query ->
+        var loadedPage = 1
         mapRepository.getSearchCompletionsFlow(
             keyword = query.keyword,
             latitude = query.latitude,
             longitude = query.longitude,
+            onSearchSuccess = { isInitial, resultCount, hasNextPage ->
+                loadedPage = if (isInitial) 1 else loadedPage + 1
+                analyticsLogger.log(
+                    if (isInitial) {
+                        MapAnalyticsEvent.MapSearchResult(
+                            query = query.keyword,
+                            resultStatus = if (resultCount > 0) "matched" else "unmatched",
+                        )
+                    } else {
+                        MapAnalyticsEvent.MapSearchLoadMore(
+                            query = query.keyword,
+                            page = loadedPage,
+                            pageResultCount = resultCount,
+                            hasNextPage = hasNextPage,
+                        )
+                    },
+                )
+            },
         )
     }.cachedIn(viewModelScope)
 
@@ -63,7 +87,7 @@ internal class SearchViewModel @AssistedInject constructor(
         when (intent) {
             is SearchIntent.UpdateQuery -> reduce { copy(query = intent.query) }
             SearchIntent.SubmitSearch -> handleSubmitSearch(state, reduce, postSideEffect)
-            is SearchIntent.ClickResult -> postSideEffect(SearchEffect.SelectResult(intent.result))
+            is SearchIntent.ClickResult -> handleClickResult(intent.result, postSideEffect)
             SearchIntent.ClickBack -> postSideEffect(SearchEffect.NavigateBack)
         }
     }
@@ -85,5 +109,22 @@ internal class SearchViewModel @AssistedInject constructor(
                 longitude = key.longitude.takeIf { hasLocation },
             ),
         )
+    }
+
+    private fun handleClickResult(result: SearchCompletion, postSideEffect: (SearchEffect) -> Unit) {
+        request.replayCache.lastOrNull()?.let { request ->
+            analyticsLogger.log(
+                MapAnalyticsEvent.MapSearchCandidateSelect(
+                    query = request.keyword,
+                    candidateType = when (result.type) {
+                        SearchCompletionType.REGION -> "district"
+                        SearchCompletionType.STATION -> "subway_station"
+                        SearchCompletionType.PHOTO_BOOTH -> "booth"
+                    },
+                    candidateName = result.keyword,
+                ),
+            )
+        }
+        postSideEffect(SearchEffect.SelectResult(result))
     }
 }

@@ -36,7 +36,6 @@ internal fun SearchResultOverlay(
     isCurrentLocation: Boolean,
     onIntent: (MapIntent) -> Unit,
 ) {
-    val onSearch: (SearchMapIntent) -> Unit = { onIntent(MapIntent.SearchAction(it)) }
     val showDistance = state.showDistance && hasLocationPermission
     val focusedBooth = visibleBooths.find { it.id == state.focusedId }
     if (focusedBooth == null) {
@@ -48,10 +47,10 @@ internal fun SearchResultOverlay(
             isError = state.isError,
             showDistance = showDistance,
             isCurrentLocation = isCurrentLocation,
-            onDragLevelChanged = { onSearch(SearchMapIntent.ChangeDragLevel(it)) },
+            onDragLevelChanged = { onIntent(MapIntent.SearchAction(SearchMapIntent.ChangeDragLevel(it))) },
             onCurrentLocationClick = { onIntent(MapIntent.ClickCurrentLocationIcon) },
-            onFilterClick = { if (!state.isLoading && !state.isError) onSearch(SearchMapIntent.OpenFilter) },
-            onBoothClick = { onSearch(SearchMapIntent.SelectBooth(it.id, entryPoint = "bottom_sheet")) },
+            onFilterClick = { if (!state.isLoading && !state.isError) onIntent(MapIntent.SearchAction(SearchMapIntent.OpenFilter)) },
+            onBoothClick = { onIntent(MapIntent.SearchAction(SearchMapIntent.SelectBooth(it.id, entryPoint = "bottom_sheet"))) },
             onFavoriteClick = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
         )
     } else {
@@ -64,7 +63,7 @@ internal fun SearchResultOverlay(
                 isFavorite = focusedBooth.favorite,
                 showDistance = showDistance,
                 onClickFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(focusedBooth)) },
-                onClickCloseCard = { onSearch(SearchMapIntent.CloseBooth) },
+                onClickCloseCard = { onIntent(MapIntent.SearchAction(SearchMapIntent.CloseBooth)) },
                 onClickCard = {
                     onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedBooth.latitude, focusedBooth.longitude)))
                 },
@@ -82,9 +81,9 @@ internal fun SearchResultOverlay(
                 )
             }.toImmutableList(),
             selectedBrandIds = state.draftBrandIds,
-            onDismiss = { onSearch(SearchMapIntent.DismissFilter) },
-            onBrandClick = { onSearch(SearchMapIntent.ToggleBrand(it)) },
-            onApply = { onSearch(SearchMapIntent.ApplyFilter) },
+            onDismiss = { onIntent(MapIntent.SearchAction(SearchMapIntent.DismissFilter)) },
+            onBrandClick = { onIntent(MapIntent.SearchAction(SearchMapIntent.ToggleBrand(it))) },
+            onApply = { onIntent(MapIntent.SearchAction(SearchMapIntent.ApplyFilter)) },
         )
     }
 }

@@ -62,6 +62,10 @@ class MapViewModel @Inject constructor(
         analyticsLogger.log(MapAnalyticsEvent.MapView)
     }
 
+    private fun logSearchView(state: MapState) {
+        if (state.search == null) analyticsLogger.log(MapAnalyticsEvent.MapSearchView)
+    }
+
     private fun onIntent(
         intent: MapIntent,
         state: MapState,
@@ -70,6 +74,7 @@ class MapViewModel @Inject constructor(
     ) {
         when (intent) {
             MapIntent.ClickSearch -> {
+                logSearchView(state)
                 val location = state.currentLocLatLng.takeIf { LocationPermissionManager.isGrantedLocationPermission(context) }
                 postSideEffect(
                     MapEffect.NavigateToSearch(
@@ -250,7 +255,13 @@ class MapViewModel @Inject constructor(
             }
             is SearchMapIntent.SelectBooth -> {
                 val booth = search.visibleBooths().find { it.id == action.id } ?: return
-                analyticsLogger.log(MapAnalyticsEvent.BoothSelect(entryPoint = action.entryPoint, brandName = booth.brandName))
+                analyticsLogger.log(
+                    MapAnalyticsEvent.BoothSelect(
+                        entryPoint = action.entryPoint,
+                        brandName = booth.brandName,
+                        source = "search",
+                    ),
+                )
                 reduce { copy(search = this.search?.copy(focusedId = booth.id)) }
                 postSideEffect(
                     MapEffect.MoveCameraToPosition(
@@ -576,6 +587,7 @@ class MapViewModel @Inject constructor(
             MapAnalyticsEvent.BoothSelect(
                 entryPoint = "bottom_sheet",
                 brandName = photoBooth.brandName,
+                source = "map",
             ),
         )
 
@@ -660,6 +672,7 @@ class MapViewModel @Inject constructor(
                 MapAnalyticsEvent.BoothSelect(
                     entryPoint = "map",
                     brandName = booth.brandName,
+                    source = "map",
                 ),
             )
         }
