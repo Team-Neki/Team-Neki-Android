@@ -72,7 +72,7 @@ internal class PermissionViewModel @Inject constructor(
             PermissionIntent.ClickBackIcon -> postSideEffect(PermissionEffect.NavigateBack)
 
             is PermissionIntent.ClickPermissionItem ->
-                postSideEffect(PermissionEffect.RequestPermission(intent.permission))
+                handleClickPermissionItem(intent.permission, state, postSideEffect)
 
             PermissionIntent.DismissPermissionDialog ->
                 reduce { copy(isShowPermissionDialog = false, clickedPermission = null) }
@@ -108,6 +108,22 @@ internal class PermissionViewModel @Inject constructor(
             is PermissionIntent.RevertMarketingNotification ->
                 reduce { copy(isMarketingTermAgreed = intent.originalValue) }
         }
+    }
+
+    private fun handleClickPermissionItem(
+        permission: NekiPermission,
+        state: PermissionState,
+        postSideEffect: (PermissionEffect) -> Unit,
+    ) {
+        val isGranted = when (permission) {
+            NekiPermission.CAMERA -> state.isGrantedCamera
+            NekiPermission.LOCATION -> state.isGrantedLocation
+            NekiPermission.NOTIFICATION -> state.isGrantedNotification
+        }
+        postSideEffect(
+            if (isGranted) PermissionEffect.MoveAppSettings(permission)
+            else PermissionEffect.RequestPermission(permission),
+        )
     }
 
     private fun fetchUserInfo(reduce: (PermissionState.() -> PermissionState) -> Unit) =
