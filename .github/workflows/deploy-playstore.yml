@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 # 진행 중인 배포가 중단되지 않도록 cancel-in-progress: false
 concurrency:
   group: deploy-playstore-${{ github.ref }}
@@ -99,5 +102,5 @@ jobs:
           FASTLANE_VERSION_NAME:    ${{ steps.version.outputs.version_name }}
           GITHUB_REF_NAME:          ${{ github.ref_name }}
           GITHUB_REPOSITORY:        ${{ github.repository }}
-          GH_TOKEN:                 ${{ secrets.DEPLOY_GITHUB_TOKEN }}
+          GH_TOKEN:                 ${{ github.token }}
         run: bundle exec fastlane deploy
