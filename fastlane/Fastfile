@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require "tempfile"
+
 default_platform(:android)
 
 # ─────────────────────────────────────────────
@@ -135,7 +137,11 @@ platform :android do
       **Full Changelog**: #{prev_tag.empty? ? tag : "#{prev_tag}...#{tag}"}
     NOTES
 
-    sh("gh release create #{tag.shellescape} --title #{tag.shellescape} --notes #{release_notes.shellescape} --repo #{repo.shellescape}")
+    Tempfile.create(["neki-release-notes-", ".md"]) do |notes_file|
+      notes_file.write(release_notes)
+      notes_file.flush
+      sh("gh release create #{tag.shellescape} --title #{tag.shellescape} --notes-file #{notes_file.path.shellescape} --repo #{repo.shellescape}")
+    end
 
     UI.success("GitHub Release #{tag} created.")
   end
