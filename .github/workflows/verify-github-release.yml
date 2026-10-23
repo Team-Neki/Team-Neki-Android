@@ -1,0 +1,49 @@
+name: Verify GitHub Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify-release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      FASTLANE_SKIP_UPDATE_CHECK: "true"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Create draft through release lane
+        env:
+          GITHUB_REF_NAME: release-notes-check-${{ github.run_id }}
+          GITHUB_RELEASE_DRAFT: "true"
+        run: bundle exec fastlane create_github_release
+
+      - name: Verify existing release is skipped
+        env:
+          GITHUB_REF_NAME: release-notes-check-${{ github.run_id }}
+          GITHUB_RELEASE_DRAFT: "true"
+        run: |
+          test "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq '.isDraft')" = true
+          bundle exec fastlane create_github_release
+
+      - name: Delete verification draft
+        if: always()
+        env:
+          GITHUB_REF_NAME: release-notes-check-${{ github.run_id }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" --json tagName > /dev/null 2>&1; then
+            gh release delete "$GITHUB_REF_NAME" --yes
+          fi

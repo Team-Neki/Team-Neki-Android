@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require "tempfile"
+require "open3"
 
 default_platform(:android)
 
@@ -112,10 +113,13 @@ platform :android do
     tag  = ENV.fetch("GITHUB_REF_NAME") { UI.user_error!("GITHUB_REF_NAME(tag)이 필요합니다") }
     repo = ENV["GITHUB_REPOSITORY"]
 
-    existing = sh("gh release view #{tag.shellescape} --repo #{repo.shellescape} 2>/dev/null || true", log: false).strip
-    if !existing.empty?
+    _output, error, status = Open3.capture3("gh", "release", "view", tag, "--repo", repo, "--json", "tagName")
+    if status.success?
       UI.important("GitHub Release #{tag} 이미 존재함, 생성 스킵")
       next
+    end
+    unless error.strip == "release not found"
+      UI.user_error!("GitHub Release 조회 실패: #{error.strip}")
     end
 
     # 직전 태그 찾기 (없으면 전체 로그). v로 시작하는 릴리즈 태그만 대상으로 한다.
@@ -140,7 +144,8 @@ platform :android do
     Tempfile.create(["neki-release-notes-", ".md"]) do |notes_file|
       notes_file.write(release_notes)
       notes_file.flush
-      sh("gh release create #{tag.shellescape} --title #{tag.shellescape} --notes-file #{notes_file.path.shellescape} --repo #{repo.shellescape}")
+      draft_option = ENV["GITHUB_RELEASE_DRAFT"] == "true" ? " --draft" : ""
+      sh("gh release create #{tag.shellescape} --title #{tag.shellescape} --notes-file #{notes_file.path.shellescape} --repo #{repo.shellescape}#{draft_option}")
     end
 
     UI.success("GitHub Release #{tag} created.")
