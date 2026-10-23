@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -33,6 +34,7 @@ import com.neki.android.feature.map.impl.util.formatDistance
 internal fun HorizontalBrandItem(
     photoBooth: PhotoBooth,
     modifier: Modifier = Modifier,
+    titleStyle: TextStyle = NekiTheme.typography.title20SemiBold,
     onClickItem: () -> Unit = {},
     onClickFavorite: () -> Unit = {},
     extraInfo: @Composable (() -> Unit)? = null,
@@ -59,7 +61,7 @@ internal fun HorizontalBrandItem(
         ) {
             Text(
                 text = photoBooth.brandName,
-                style = NekiTheme.typography.title20SemiBold,
+                style = titleStyle,
                 color = NekiTheme.colorScheme.gray900,
             )
             Row(
@@ -80,7 +82,11 @@ internal fun HorizontalBrandItem(
         HorizontalSpacer(12.dp)
         NekiIconButton(
             onClick = onClickFavorite,
-            contentColor = if (photoBooth.favorite) NekiTheme.colorScheme.primary400 else NekiTheme.colorScheme.gray100,
+            contentColor = if (photoBooth.favorite) {
+                NekiTheme.colorScheme.primary400
+            } else {
+                NekiTheme.colorScheme.gray100
+            },
         ) {
             Icon(
                 modifier = Modifier.size(24.dp),
@@ -109,7 +115,7 @@ internal fun DistanceInfo(distance: Int) {
 
 @ComponentPreview
 @Composable
-private fun HorizontalBrandItemNearbyPreview() {
+private fun HorizontalBrandItemAreaPreview() {
     NekiTheme {
         HorizontalBrandItem(
             photoBooth = PhotoBooth(
@@ -124,7 +130,7 @@ private fun HorizontalBrandItemNearbyPreview() {
 
 @ComponentPreview
 @Composable
-private fun HorizontalBrandItemNearbyFavoritePreview() {
+private fun HorizontalBrandItemAreaFavoritePreview() {
     NekiTheme {
         HorizontalBrandItem(
             photoBooth = PhotoBooth(

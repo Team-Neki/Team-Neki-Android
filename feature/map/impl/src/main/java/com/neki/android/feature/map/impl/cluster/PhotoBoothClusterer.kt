@@ -38,7 +38,7 @@ internal object PhotoBoothClusterer {
 
     private val clusterIconCache = mutableMapOf<Int, OverlayImage>()
     private val leafIconCache = mutableMapOf<Triple<String, Boolean, Boolean>, Pair<OverlayImage, PointF>>()
-    private val leafMarkerMap = mutableMapOf<Long, Marker>()
+    private val leafMarkerMap = mutableMapOf<String, Marker>()
 
     /**
      * @param getBrandImage 브랜드 이미지 캐시에서 이미지를 가져오는 함수
@@ -49,6 +49,7 @@ internal object PhotoBoothClusterer {
         onClusterClick: (LatLngBounds) -> Unit,
         onLeafMarkerClick: (PhotoBooth) -> Unit,
         getBrandImage: (String) -> ImageBitmap?,
+        getPhotoBooth: (String) -> PhotoBooth?,
     ): Clusterer<PhotoBoothClusterItem> {
         return Clusterer.ComplexBuilder<PhotoBoothClusterItem>()
             .minClusteringZoom(ClustererConst.MIN_CLUSTERING_ZOOM)
@@ -78,6 +79,7 @@ internal object PhotoBoothClusterer {
                             captionText = ""
                             subCaptionText = ""
                             anchor = Marker.DEFAULT_ANCHOR
+                            tag = null
                             onClickListener = Overlay.OnClickListener {
                                 val photoBooths = info.tag as? List<PhotoBooth> ?: emptyList()
                                 if (photoBooths.isNotEmpty()) {
@@ -95,7 +97,8 @@ internal object PhotoBoothClusterer {
             .leafMarkerUpdater(
                 object : DefaultLeafMarkerUpdater() {
                     override fun updateLeafMarker(info: LeafMarkerInfo, marker: Marker) {
-                        val photoBooth = (info.key as PhotoBoothClusterItem).photoBooth
+                        val id = (info.key as PhotoBoothClusterItem).photoBooth.id
+                        val photoBooth = getPhotoBooth(id) ?: return
                         val brandImage = getBrandImage(photoBooth.imageUrl)
                         val cacheKey = Triple(photoBooth.imageUrl, photoBooth.isFocused, photoBooth.favorite)
 
@@ -128,7 +131,7 @@ internal object PhotoBoothClusterer {
         photoBooth: PhotoBooth,
         getBrandImage: (String) -> ImageBitmap?,
     ) {
-        val marker = leafMarkerMap[photoBooth.id] ?: return
+        val marker = leafMarkerMap[photoBooth.id]?.takeIf { (it.tag as? PhotoBooth)?.id == photoBooth.id } ?: return
         val cacheKey = Triple(photoBooth.imageUrl, photoBooth.isFocused, photoBooth.favorite)
         val (markerIcon, markerAnchor) = leafIconCache.getOrPut(cacheKey) {
             createLeafMarkerIcon(context, getBrandImage(photoBooth.imageUrl), photoBooth.isFocused, photoBooth.favorite)

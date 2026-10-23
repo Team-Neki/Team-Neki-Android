@@ -1,9 +1,14 @@
 package com.neki.android.feature.map.impl
 
+import androidx.activity.compose.BackHandler
+import com.neki.android.feature.map.impl.search.SearchMapIntent
+import com.neki.android.feature.map.impl.search.SearchResultOverlay
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -14,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -53,17 +59,21 @@ import com.neki.android.core.ui.toast.NekiToast
 import com.neki.android.feature.map.impl.component.AnchoredDraggablePanel
 import com.neki.android.feature.map.impl.component.DirectionBottomSheet
 import com.neki.android.feature.map.impl.component.MapRefreshChip
+import com.neki.android.feature.map.impl.component.MapSearchBar
 import com.neki.android.feature.map.impl.component.PhotoBoothDetailContent
 import com.neki.android.feature.map.impl.component.ToMapChip
 import com.neki.android.feature.map.impl.const.MapConst
 import com.neki.android.core.model.Brand
 import com.neki.android.feature.map.impl.util.DirectionHelper
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun MapRoute(
     viewModel: MapViewModel = hiltViewModel(),
+    isVisible: Boolean = true,
+    navigateToSearch: (String, Double?, Double?) -> Unit = { _, _, _ -> },
     navigateToPhotoBoothOrderChange: (List<Brand>) -> Unit = {},
 ) {
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
@@ -77,6 +87,7 @@ fun MapRoute(
     }
 
     var locationTrackingMode by remember { mutableStateOf(LocationTrackingMode.None) }
+    var moveToCurrentLocationOnGrant by rememberSaveable { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(
             LatLng(MapConst.DEFAULT_LATITUDE, MapConst.DEFAULT_LONGITUDE),
@@ -84,21 +95,22 @@ fun MapRoute(
         )
     }
     val appSettingsLauncher = rememberAppSettingsLauncher {
-        if (LocationPermissionManager.isGrantedLocationPermission(context)) {
-            locationTrackingMode = LocationTrackingMode.NoFollow
-            viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
-        }
+        val isGranted = LocationPermissionManager.isGrantedLocationPermission(context)
+        locationTrackingMode = if (isGranted) LocationTrackingMode.NoFollow else LocationTrackingMode.None
+        if (isGranted) viewModel.store.onIntent(MapIntent.GrantedLocationPermission(moveToCurrentLocationOnGrant))
+        else viewModel.store.onIntent(MapIntent.SelectFavoritePhotoBoothSort(FavoritePhotoBoothSort.SAVED))
     }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
         val isGranted = permissions.values.any { it }
-
         if (isGranted) {
             locationTrackingMode = LocationTrackingMode.NoFollow
-            viewModel.store.onIntent(MapIntent.GrantedLocationPermission)
+            viewModel.store.onIntent(MapIntent.GrantedLocationPermission(moveToCurrentLocationOnGrant))
         } else {
+            locationTrackingMode = LocationTrackingMode.None
+            viewModel.store.onIntent(MapIntent.SelectFavoritePhotoBoothSort(FavoritePhotoBoothSort.SAVED))
             cameraPositionState.contentBounds?.let { bounds ->
                 viewModel.store.onIntent(
                     MapIntent.LoadPhotoBoothsByBounds(
@@ -130,6 +142,11 @@ fun MapRoute(
 
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
+            is MapEffect.NavigateToSearch -> navigateToSearch(
+                sideEffect.initialQuery,
+                sideEffect.latitude,
+                sideEffect.longitude,
+            )
             is MapEffect.OpenDirectionBottomSheet -> {
                 viewModel.store.onIntent(MapIntent.OpenDirectionBottomSheet)
             }
@@ -177,6 +194,7 @@ fun MapRoute(
             is MapEffect.NavigateToAppSettings -> appSettingsLauncher.launchAppSettings(context, NekiPermission.LOCATION)
 
             is MapEffect.LaunchLocationPermission -> {
+                moveToCurrentLocationOnGrant = sideEffect.moveToCurrentLocation
                 locationPermissionLauncher.launch(LocationPermissionManager.LOCATION_PERMISSIONS)
             }
 
@@ -202,6 +220,7 @@ fun MapRoute(
 
     MapScreen(
         uiState = uiState,
+        isVisible = isVisible,
         onIntent = viewModel.store::onIntent,
         locationTrackingMode = locationTrackingMode,
         cameraPositionState = cameraPositionState,
@@ -212,6 +231,7 @@ fun MapRoute(
 @Composable
 fun MapScreen(
     uiState: MapState = MapState(),
+    isVisible: Boolean = true,
     onIntent: (MapIntent) -> Unit = {},
     locationTrackingMode: LocationTrackingMode = LocationTrackingMode.None,
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
@@ -219,6 +239,10 @@ fun MapScreen(
     },
 ) {
     val context = LocalContext.current
+    // 검색 화면 뒤에 유지된 지도는 뒤로가기를 소비하지 않는다.
+    BackHandler(enabled = isVisible && uiState.search != null) {
+        onIntent(MapIntent.SearchAction(SearchMapIntent.Close))
+    }
     val mapProperties = remember(locationTrackingMode) {
         MapProperties(
             locationTrackingMode = locationTrackingMode,
@@ -236,32 +260,41 @@ fun MapScreen(
 
     var clusterer by remember { mutableStateOf<Clusterer<PhotoBoothClusterItem>?>(null) }
     val currentBrandImageCache by rememberUpdatedState(uiState.brandImageCache)
-    var prevMarkerMap by remember { mutableStateOf<Map<Long, PhotoBooth>>(emptyMap()) }
+    val currentSearch by rememberUpdatedState(uiState.search)
+    var prevMarkerMap by remember { mutableStateOf<Map<String, PhotoBooth>>(emptyMap()) }
+    val search = uiState.search
+    val searchBooths = remember(search?.booths, search?.filters, search?.selectedBrandIds, search?.focusedId) {
+        search?.visibleBooths()
+    }
 
-    // 마커 데이터 변경 시 클러스터 증분 업데이트
-    LaunchedEffect(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoritePhotoBooth, clusterer) {
+    val markerMap = remember(uiState.mapMarkers, uiState.favoritePhotoBooths, uiState.showFavoritePhotoBooth, searchBooths) {
+        (if (searchBooths != null) {
+            searchBooths
+        } else if (uiState.showFavoritePhotoBooth) {
+            val focusedNonFavorite = uiState.mapMarkers.filter { it.isFocused && !it.favorite }
+            (uiState.favoritePhotoBooths.filter { it.isCheckedBrand } + focusedNonFavorite)
+                .distinctBy { it.id }
+        } else {
+            uiState.mapMarkers.filter { it.isCheckedBrand }
+        }).associateBy { it.id }
+    }
+    val currentMarkerMap by rememberUpdatedState(markerMap)
+
+    LaunchedEffect(markerMap, clusterer) {
         clusterer?.let { clusterManager ->
-            val newMarkerMap = if (uiState.showFavoritePhotoBooth) {
-                val focusedNonFavorite = uiState.mapMarkers.filter { it.isFocused && !it.favorite }
-                (uiState.favoritePhotoBooths.filter { it.isCheckedBrand } + focusedNonFavorite)
-                    .distinctBy { it.id }
-            } else {
-                uiState.mapMarkers.filter { it.isCheckedBrand }
-            }.associateBy { it.id }
-
             clusterManager.removeAll(
-                prevMarkerMap.filterKeys { it !in newMarkerMap }.values.map { PhotoBoothClusterItem(it) },
+                prevMarkerMap.filterKeys { it !in markerMap }.values.map { PhotoBoothClusterItem(it) },
             )
             clusterManager.addAll(
-                newMarkerMap.filterKeys { it !in prevMarkerMap }.values.associateBy { PhotoBoothClusterItem(it) },
+                markerMap.filterKeys { it !in prevMarkerMap }.values.associateBy { PhotoBoothClusterItem(it) },
             )
-            newMarkerMap.forEach { (id, booth) ->
+            markerMap.forEach { (id, booth) ->
                 val prev = prevMarkerMap[id] ?: return@forEach
                 if (prev.favorite != booth.favorite || prev.isFocused != booth.isFocused) {
                     PhotoBoothClusterer.updateMarkerIcon(context, booth) { uiState.brandImageCache[it] }
                 }
             }
-            prevMarkerMap = newMarkerMap
+            prevMarkerMap = markerMap
         }
     }
 
@@ -292,11 +325,16 @@ fun MapScreen(
                         )
                     },
                     onLeafMarkerClick = { photoBooth ->
-                        onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
+                        if (currentSearch != null) {
+                            onIntent(MapIntent.SearchAction(SearchMapIntent.SelectBooth(photoBooth.id, entryPoint = "map")))
+                        } else {
+                            onIntent(MapIntent.ClickPhotoBoothMarker(LocLatLng(photoBooth.latitude, photoBooth.longitude)))
+                        }
                     },
                     getBrandImage = { imageUrl ->
                         currentBrandImageCache[imageUrl]
                     },
+                    getPhotoBooth = { id -> currentMarkerMap[id] },
                 )
 
                 onDispose {
@@ -306,83 +344,115 @@ fun MapScreen(
             }
         }
 
-        AnchoredDraggablePanel(
-            brands = uiState.brands,
-            displayPhotoBooths = uiState.displayPhotoBooths,
-            dragLevel = uiState.dragLevel,
-            selectedTab = uiState.selectedTab,
-            onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
-            onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
-            isCurrentLocation = uiState.isCameraOnCurrentLocation,
-            showFavoritePhotoBooth = uiState.showFavoritePhotoBooth,
-            onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
-            onClickShowFavoriteIcon = { onIntent(MapIntent.ClickShowFavoriteIcon) },
-            onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
-            onClickNearPhotoBooth = { onIntent(MapIntent.ClickNearPhotoBooth(it)) },
-            onClickBoothFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
-            onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
-        )
-
-        if ((uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) && uiState.isVisibleRefreshButton) {
-            MapRefreshChip(
+        if (uiState.search != null || uiState.dragLevel != DragLevel.THIRD) {
+            Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
-                    .padding(top = 12.dp),
-                onClick = {
-                    cameraPositionState.contentBounds?.let { bounds ->
-                        onIntent(
-                            MapIntent.ClickRefreshButton(
-                                mapBounds = MapBounds(
-                                    southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
-                                    northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
-                                    northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
-                                    southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
-                                ),
-                                center = LocLatLng(
-                                    cameraPositionState.position.target.latitude,
-                                    cameraPositionState.position.target.longitude,
-                                ),
-                                zoomLevel = cameraPositionState.position.zoom,
-                            ),
-                        )
-                    }
-                },
-            )
+                    .padding(start = 20.dp, top = 8.dp, end = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                MapSearchBar(
+                    query = uiState.search?.keyword,
+                    onClick = { onIntent(MapIntent.ClickSearch) },
+                    onBack = { onIntent(MapIntent.ClickSearch) },
+                    onClear = { onIntent(MapIntent.SearchAction(SearchMapIntent.Close)) },
+                )
+                if (
+                    (uiState.dragLevel == DragLevel.FIRST || uiState.dragLevel == DragLevel.SECOND) &&
+                    uiState.isVisibleRefreshButton && uiState.search == null
+                ) {
+                    MapRefreshChip(
+                        onClick = {
+                            cameraPositionState.contentBounds?.let { bounds ->
+                                onIntent(
+                                    MapIntent.ClickRefreshButton(
+                                        mapBounds = MapBounds(
+                                            southWest = LocLatLng(bounds.southWest.latitude, bounds.southWest.longitude),
+                                            northWest = LocLatLng(bounds.northWest.latitude, bounds.northWest.longitude),
+                                            northEast = LocLatLng(bounds.northEast.latitude, bounds.northEast.longitude),
+                                            southEast = LocLatLng(bounds.southEast.latitude, bounds.southEast.longitude),
+                                        ),
+                                        center = LocLatLng(
+                                            cameraPositionState.position.target.latitude,
+                                            cameraPositionState.position.target.longitude,
+                                        ),
+                                        zoomLevel = cameraPositionState.position.zoom,
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                }
+            }
         }
 
-        if (uiState.dragLevel == DragLevel.THIRD) {
-            ToMapChip(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp),
-                onClick = { onIntent(MapIntent.ClickToMapChip) },
+        if (uiState.search == null) {
+            AnchoredDraggablePanel(
+                areaRegionName = uiState.areaRegionName,
+                brands = uiState.brands,
+                displayPhotoBooths = uiState.displayPhotoBooths,
+                dragLevel = uiState.dragLevel,
+                selectedTab = uiState.selectedTab,
+                favoritePhotoBoothSort = uiState.favoritePhotoBoothSort,
+                onDragLevelChanged = { onIntent(MapIntent.ChangeDragLevel(it)) },
+                onTabSelected = { onIntent(MapIntent.SelectTab(it)) },
+                onFavoritePhotoBoothSortSelected = { onIntent(MapIntent.SelectFavoritePhotoBoothSort(it)) },
+                isCurrentLocation = uiState.isCameraOnCurrentLocation,
+                hasCurrentLocation = LocationPermissionManager.isGrantedLocationPermission(context) && uiState.currentLocLatLng != null,
+                showFavoritePhotoBooth = uiState.showFavoritePhotoBooth,
+                onClickCurrentLocation = { onIntent(MapIntent.ClickCurrentLocationIcon) },
+                onClickShowFavoriteIcon = { onIntent(MapIntent.ClickShowFavoriteIcon) },
+                onClickBrand = { onIntent(MapIntent.ClickVerticalBrand(it)) },
+                onClickPhotoBoothListItem = { onIntent(MapIntent.ClickPhotoBoothListItem(it)) },
+                onClickBoothFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(it)) },
+                onClickEditBrandOrder = { onIntent(MapIntent.ClickEditBrandOrder) },
             )
-        } else if (uiState.dragLevel == DragLevel.INVISIBLE) {
-            uiState.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
-                PhotoBoothDetailContent(
-                    photoBooth = focusedPhotoBooth,
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    isFavorite = focusedPhotoBooth.favorite,
-                    onClickFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(focusedPhotoBooth)) },
-                    onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
-                    onClickCard = {
-                        onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))
-                    },
-                    onClickDirection = { onIntent(MapIntent.ClickDirectionIcon) },
+
+            if (uiState.dragLevel == DragLevel.THIRD) {
+                ToMapChip(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 32.dp),
+                    onClick = { onIntent(MapIntent.ClickToMapChip) },
                 )
+            } else if (uiState.dragLevel == DragLevel.INVISIBLE) {
+                uiState.mapMarkers.find { it.isFocused }?.let { focusedPhotoBooth ->
+                    PhotoBoothDetailContent(
+                        photoBooth = focusedPhotoBooth,
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        isFavorite = focusedPhotoBooth.favorite,
+                        onClickFavorite = { onIntent(MapIntent.ClickPhotoBoothFavorite(focusedPhotoBooth)) },
+                        onClickCloseCard = { onIntent(MapIntent.ClickClosePhotoBoothCard) },
+                        onClickCard = {
+                            onIntent(MapIntent.ClickPhotoBoothCard(LocLatLng(focusedPhotoBooth.latitude, focusedPhotoBooth.longitude)))
+                        },
+                        onClickDirection = { onIntent(MapIntent.ClickDirectionIcon) },
+                    )
+                }
             }
+        }
+        uiState.search?.takeIf { isVisible }?.let { search ->
+            SearchResultOverlay(
+                state = search,
+                visibleBooths = searchBooths ?: persistentListOf(),
+                brands = uiState.brands,
+                hasLocationPermission = LocationPermissionManager.isGrantedLocationPermission(context),
+                isCurrentLocation = uiState.isCameraOnCurrentLocation,
+                onIntent = onIntent,
+            )
         }
     }
 
-    if (uiState.isShowDirectionBottomSheet) {
+    if (isVisible && uiState.isShowDirectionBottomSheet) {
         DirectionBottomSheet(
             onDismissRequest = { onIntent(MapIntent.CloseDirectionBottomSheet) },
             onClickDirectionItem = { onIntent(MapIntent.ClickDirectionItem(it)) },
         )
     }
 
-    if (uiState.isShowLocationPermissionDialog) {
+    if (isVisible && uiState.isShowLocationPermissionDialog) {
         SingleButtonAlertDialog(
             title = "위치 권한",
             content = "설정에서 위치 권한을 허용해주세요.",
@@ -392,7 +462,7 @@ fun MapScreen(
         )
     }
 
-    if (uiState.isLoading) {
+    if (isVisible && uiState.isLoading) {
         LoadingDialog(
             properties = DialogProperties(
                 dismissOnBackPress = false,

@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 data class PhotoBooth(
     val isFocused: Boolean = false,
     val isCheckedBrand: Boolean = true,
-    val id: Long = 0L,
+    val id: String = "",
     val brandName: String = "",
     val branchName: String = "",
     val address: String = "",

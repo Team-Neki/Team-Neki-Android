@@ -52,7 +52,7 @@ internal fun MapRefreshChip(
             tint = NekiTheme.colorScheme.primary400,
         )
         Text(
-            text = "이 지역 재검색",
+            text = "이 지역 재탐색",
             style = NekiTheme.typography.body14SemiBold,
             color = NekiTheme.colorScheme.gray800,
         )

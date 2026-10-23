@@ -1,5 +1,10 @@
 package com.neki.android.feature.map.impl
 
+import com.neki.android.core.model.SearchFilterGroup
+import com.neki.android.core.model.SearchCompletionType
+
+import com.neki.android.feature.map.impl.search.SearchMapState
+import com.neki.android.feature.map.impl.search.SearchMapIntent
 import androidx.compose.ui.graphics.ImageBitmap
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
@@ -11,16 +16,19 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 
 data class MapState(
+    val search: SearchMapState? = null,
     val isLoading: Boolean = false,
     val currentLocLatLng: LocLatLng? = null,
     val isCameraOnCurrentLocation: Boolean = false,
     val isVisibleRefreshButton: Boolean = false,
     val dragLevel: DragLevel = DragLevel.FIRST,
-    val selectedTab: MapTab = MapTab.NEARBY,
+    val selectedTab: MapTab = MapTab.AREA,
+    val areaRegionName: String? = null,
+    val favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     val brands: ImmutableList<Brand> = persistentListOf(),
     val brandImageCache: ImmutableMap<String, ImageBitmap> = persistentMapOf(),
     val mapMarkers: ImmutableList<PhotoBooth> = persistentListOf(),
-    val nearbyPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
+    val areaPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val favoritePhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     val isShowDirectionBottomSheet: Boolean = false,
@@ -29,11 +37,18 @@ data class MapState(
 )
 
 sealed interface MapIntent {
+    data object ClickSearch : MapIntent
+    data class SelectSearchKeyword(
+        val keyword: String,
+        val type: SearchCompletionType,
+        val filterGroup: SearchFilterGroup,
+    ) : MapIntent
+    data class SearchAction(val action: SearchMapIntent) : MapIntent
     data object EnterMapScreen : MapIntent
 
     // in 지도
     data class UpdateCurrentLocation(val locLatLng: LocLatLng) : MapIntent
-    data object GrantedLocationPermission : MapIntent
+    data class GrantedLocationPermission(val moveToCurrentLocation: Boolean) : MapIntent
     data class LoadPhotoBoothsByBounds(val mapBounds: MapBounds) : MapIntent
     data class ClickPhotoBoothMarker(val locLatLng: LocLatLng) : MapIntent
     data class ClickClusterMarker(val southWest: LocLatLng, val northEast: LocLatLng) : MapIntent
@@ -45,7 +60,7 @@ sealed interface MapIntent {
     data object ClickCurrentLocationIcon : MapIntent
     data object ClickToMapChip : MapIntent
     data class ClickVerticalBrand(val brand: Brand) : MapIntent
-    data class ClickNearPhotoBooth(val photoBooth: PhotoBooth) : MapIntent
+    data class ClickPhotoBoothListItem(val photoBooth: PhotoBooth) : MapIntent
     data class ClickPhotoBoothCard(val locLatLng: LocLatLng) : MapIntent
     data object ClickClosePhotoBoothCard : MapIntent
     data object OpenDirectionBottomSheet : MapIntent
@@ -65,10 +80,16 @@ sealed interface MapIntent {
     data class ClickPhotoBoothFavorite(val photoBooth: PhotoBooth) : MapIntent
     data class RevertFavoritePhotoBooth(val photoBooth: PhotoBooth) : MapIntent
     data class SelectTab(val tab: MapTab) : MapIntent
+    data class SelectFavoritePhotoBoothSort(val sort: FavoritePhotoBoothSort) : MapIntent
     data class ShowToast(val message: String) : MapIntent
 }
 
 sealed interface MapEffect {
+    data class NavigateToSearch(
+        val initialQuery: String,
+        val latitude: Double?,
+        val longitude: Double?,
+    ) : MapEffect
     data class MoveCameraToPosition(
         val locLatLng: LocLatLng,
         val isRequiredLoadPhotoBooths: Boolean = false,
@@ -88,13 +109,15 @@ sealed interface MapEffect {
     ) : MapEffect
 
     data object NavigateToAppSettings : MapEffect
-    data object LaunchLocationPermission : MapEffect
+    data class LaunchLocationPermission(val moveToCurrentLocation: Boolean = false) : MapEffect
     data object NavigateToPhotoBoothOrderChange : MapEffect
 }
 
 enum class DragLevel { FIRST, SECOND, THIRD, INVISIBLE }
 
-enum class MapTab { NEARBY, FAVORITE }
+enum class MapTab { AREA, FAVORITE }
+
+enum class FavoritePhotoBoothSort { SAVED, DISTANCE }
 
 data class MapBounds(
     val southWest: LocLatLng,

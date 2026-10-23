@@ -9,12 +9,16 @@ import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
 import com.neki.android.feature.map.api.MapResult
 import com.neki.android.feature.map.api.MapNavKey
+import com.neki.android.feature.map.api.MapSceneMetadata
 import com.neki.android.feature.map.api.navigateToPhotoBoothOrderChange
+import com.neki.android.feature.map.api.navigateToSearch
 import com.neki.android.feature.map.impl.MapIntent
 import com.neki.android.feature.map.impl.MapRoute
 import com.neki.android.feature.map.impl.MapViewModel
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeRoute
 import com.neki.android.feature.map.impl.photobooth.PhotoBoothOrderChangeViewModel
+import com.neki.android.feature.map.impl.search.SearchRoute
+import com.neki.android.feature.map.impl.search.SearchViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,20 +38,57 @@ object MapEntryProviderModule {
 }
 
 private fun EntryProviderScope<NavKey>.mapEntry(navigator: MainNavigator) {
-    entry<MapNavKey.Map> {
+    entry<MapNavKey.Map>(
+        clazzContentKey = { "neki.map.main" },
+        metadata = mapOf(MapSceneMetadata.ROLE to MapSceneMetadata.Role.MAP),
+    ) {
         val resultBus = LocalResultEventBus.current
         val viewModel = hiltViewModel<MapViewModel>()
 
         ResultEffect<MapResult>(resultBus) { result ->
             when (result) {
                 is MapResult.BrandOrderChanged -> viewModel.store.onIntent(MapIntent.UpdateBrandOrder(result.orderedBrands))
+                is MapResult.SearchSelected -> viewModel.store.onIntent(
+                    MapIntent.SelectSearchKeyword(
+                        keyword = result.keyword,
+                        type = result.type,
+                        filterGroup = result.filterGroup,
+                    ),
+                )
             }
         }
 
         MapRoute(
             viewModel = viewModel,
+            isVisible = navigator.state.currentKey == MapNavKey.Map,
+            navigateToSearch = navigator::navigateToSearch,
             navigateToPhotoBoothOrderChange = { brands ->
                 navigator.navigateToPhotoBoothOrderChange(brands)
+            },
+        )
+    }
+
+    entry<MapNavKey.Search>(
+        clazzContentKey = { "neki.map.search" },
+        metadata = mapOf(MapSceneMetadata.ROLE to MapSceneMetadata.Role.SEARCH),
+    ) { key ->
+        val resultBus = LocalResultEventBus.current
+        val viewModel = hiltViewModel<SearchViewModel, SearchViewModel.Factory>(
+            creationCallback = { factory -> factory.create(key) },
+        )
+        SearchRoute(
+            viewModel = viewModel,
+            navigateBack = navigator::goBack,
+            onResultSelected = { result ->
+                resultBus.sendResult<MapResult>(
+                    result = MapResult.SearchSelected(
+                        keyword = result.keyword,
+                        type = result.type,
+                        filterGroup = result.filterGroup,
+                    ),
+                    allowDuplicate = false,
+                )
+                navigator.goBack()
             },
         )
     }

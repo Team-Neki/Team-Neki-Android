@@ -1,11 +1,8 @@
 package com.neki.android.feature.map.impl.component
 
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
@@ -19,13 +16,17 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,31 +53,38 @@ import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.bottomsheet.BottomSheetDragHandle
 import com.neki.android.core.designsystem.button.NekiTextButton
 import com.neki.android.core.designsystem.modifier.dropdownShadow
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.ui.compose.VerticalSpacer
 import com.neki.android.feature.map.impl.DragLevel
+import com.neki.android.feature.map.impl.FavoritePhotoBoothSort
 import com.neki.android.feature.map.impl.MapTab
 import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.feature.map.impl.util.rememberAnchoredPanelState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.roundToInt
 
 @Composable
 internal fun AnchoredDraggablePanel(
+    areaRegionName: String? = null,
     brands: ImmutableList<Brand> = persistentListOf(),
     displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     dragLevel: DragLevel = DragLevel.FIRST,
-    selectedTab: MapTab = MapTab.NEARBY,
+    selectedTab: MapTab = MapTab.AREA,
+    favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     isCurrentLocation: Boolean = false,
+    hasCurrentLocation: Boolean = false,
     showFavoritePhotoBooth: Boolean = false,
     onDragLevelChanged: (DragLevel) -> Unit = {},
     onTabSelected: (MapTab) -> Unit = {},
+    onFavoritePhotoBoothSortSelected: (FavoritePhotoBoothSort) -> Unit = {},
     onClickCurrentLocation: () -> Unit = {},
     onClickShowFavoriteIcon: () -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
-    onClickNearPhotoBooth: (PhotoBooth) -> Unit = {},
+    onClickPhotoBoothListItem: (PhotoBooth) -> Unit = {},
     onClickBoothFavorite: (PhotoBooth) -> Unit = {},
     onClickEditBrandOrder: () -> Unit = {},
 ) {
@@ -97,42 +105,39 @@ internal fun AnchoredDraggablePanel(
     }
     val centerPanelHeightPx = with(density) {
         (MapConst.BOTTOM_NAVIGATION_BAR_HEIGHT +
-            MapConst.PANEL_DRAG_LOCATION_HEIGHT +
+            MapConst.BOTTOM_NAVIGATION_FAB_OVERLAP_HEIGHT +
+            MapConst.PANEL_DRAG_LOCATION_HEIGHT -
+            MapConst.PANEL_DRAG_LEVEL_SECOND_HEIGHT_REDUCTION +
             MapConst.PANEL_DRAG_LEVEL_SECOND_HEIGHT).dp.toPx() + navigationBarHeightPx
     }
     var isProgrammaticTransition by remember { mutableStateOf(false) }
 
-    val state = remember {
-        val anchors = DraggableAnchors {
+    val state = rememberAnchoredPanelState(
+        initialValue = dragLevel,
+        anchors = DraggableAnchors {
             DragLevel.FIRST at screenHeightPx - bottomPanelHeightPx
             DragLevel.SECOND at screenHeightPx - centerPanelHeightPx
             DragLevel.THIRD at statusBarHeightPx
             DragLevel.INVISIBLE at screenHeightPx
-        }
+        },
+        confirmValueChange = { newValue ->
+            newValue != DragLevel.INVISIBLE || isProgrammaticTransition
+        },
+    )
 
-        AnchoredDraggableState(
-            initialValue = DragLevel.FIRST,
-            anchors = anchors,
-            positionalThreshold = { distance -> distance * 0.5f },
-            velocityThreshold = { with(density) { 100.dp.toPx() } },
-            snapAnimationSpec = tween(),
-            decayAnimationSpec = splineBasedDecay(density),
-            confirmValueChange = { newValue ->
-                newValue != DragLevel.INVISIBLE || isProgrammaticTransition
-            },
-        )
-    }
-
-    LaunchedEffect(state.settledValue) {
-        if (state.settledValue != dragLevel) {
+    LaunchedEffect(state, state.settledValue) {
+        if (!isProgrammaticTransition && state.settledValue != dragLevel) {
             onDragLevelChanged(state.settledValue)
         }
     }
 
-    LaunchedEffect(dragLevel) {
+    LaunchedEffect(state, dragLevel) {
         isProgrammaticTransition = true
-        state.animateTo(dragLevel)
-        isProgrammaticTransition = false
+        try {
+            state.animateTo(dragLevel)
+        } finally {
+            isProgrammaticTransition = false
+        }
     }
 
     val buttonAreaHeightPx = with(density) { MapConst.PANEL_DRAG_LOCATION_HEIGHT.dp.toPx() }
@@ -157,7 +162,7 @@ internal fun AnchoredDraggablePanel(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, bottom = 8.dp),
+                    .padding(start = 20.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 ShowFavoritePhotoBoothButton(
@@ -171,6 +176,8 @@ internal fun AnchoredDraggablePanel(
             }
         }
         AnchoredPanelContent(
+            hasCurrentLocation = hasCurrentLocation,
+            areaRegionName = areaRegionName,
             modifier = Modifier
                 .graphicsLayer {
                     val currentOffset = state.requireOffset()
@@ -182,11 +189,13 @@ internal fun AnchoredDraggablePanel(
                     orientation = Orientation.Vertical,
                 ),
             selectedTab = selectedTab,
+            favoritePhotoBoothSort = favoritePhotoBoothSort,
             brands = brands,
             displayPhotoBooths = displayPhotoBooths,
             onTabSelected = onTabSelected,
+            onFavoritePhotoBoothSortSelected = onFavoritePhotoBoothSortSelected,
             onClickBrand = onClickBrand,
-            onClickPhotoBooth = onClickNearPhotoBooth,
+            onClickPhotoBooth = onClickPhotoBoothListItem,
             onClickBoothFavorite = onClickBoothFavorite,
             onClickEditBrandOrder = onClickEditBrandOrder,
         )
@@ -196,10 +205,14 @@ internal fun AnchoredDraggablePanel(
 @Composable
 internal fun AnchoredPanelContent(
     modifier: Modifier = Modifier,
-    selectedTab: MapTab = MapTab.NEARBY,
+    hasCurrentLocation: Boolean = false,
+    areaRegionName: String? = null,
+    selectedTab: MapTab = MapTab.AREA,
+    favoritePhotoBoothSort: FavoritePhotoBoothSort = FavoritePhotoBoothSort.SAVED,
     brands: ImmutableList<Brand> = persistentListOf(),
     displayPhotoBooths: ImmutableList<PhotoBooth> = persistentListOf(),
     onTabSelected: (MapTab) -> Unit = {},
+    onFavoritePhotoBoothSortSelected: (FavoritePhotoBoothSort) -> Unit = {},
     onClickBrand: (Brand) -> Unit = {},
     onClickPhotoBooth: (PhotoBooth) -> Unit = {},
     onClickBoothFavorite: (PhotoBooth) -> Unit = {},
@@ -217,7 +230,7 @@ internal fun AnchoredPanelContent(
         Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            BottomSheetDragHandle()
+            BottomSheetDragHandle(color = NekiTheme.colorScheme.gray100)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -243,7 +256,7 @@ internal fun AnchoredPanelContent(
             }
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
-                contentPadding = PaddingValues(start = 20.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp),
             ) {
                 items(brands) { brand ->
                     VerticalBrandItem(
@@ -256,6 +269,7 @@ internal fun AnchoredPanelContent(
         VerticalSpacer(24.dp)
         Box(modifier = Modifier.padding(horizontal = 20.dp)) {
             PhotoBoothListToggle(
+                areaRegionName = areaRegionName,
                 selectedTab = selectedTab,
                 onTabSelected = onTabSelected,
             )
@@ -264,15 +278,60 @@ internal fun AnchoredPanelContent(
         if (selectedTab == MapTab.FAVORITE) {
             val body14MediumSpan = NekiTheme.typography.body14Medium.toSpanStyle().copy(color = NekiTheme.colorScheme.gray300)
             val body14SemiBoldSpan = NekiTheme.typography.body14SemiBold.toSpanStyle().copy(color = NekiTheme.colorScheme.gray400)
-            Text(
+            Row(
                 modifier = Modifier
-                    .padding(start = 20.dp),
-                text = buildAnnotatedString {
-                    withStyle(body14MediumSpan) { append("저장한 포토부스 총 ") }
-                    withStyle(body14SemiBoldSpan) { append("${displayPhotoBooths.size}") }
-                    withStyle(body14MediumSpan) { append("곳") }
-                },
-            )
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(body14MediumSpan) { append("저장한 포토부스 총 ") }
+                        withStyle(body14SemiBoldSpan) { append("${displayPhotoBooths.size}") }
+                        withStyle(body14MediumSpan) { append("곳") }
+                    },
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    FavoritePhotoBoothSort.entries.forEachIndexed { index, sort ->
+                        if (index > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .height(12.dp)
+                                    .background(NekiTheme.colorScheme.gray100),
+                            )
+                        }
+                        val isSelected = favoritePhotoBoothSort == sort
+                        Box(
+                            modifier = Modifier
+                                .size(width = 38.dp, height = 22.dp)
+                                .noRippleClickable { onFavoritePhotoBoothSortSelected(sort) },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = when (sort) {
+                                    FavoritePhotoBoothSort.SAVED -> "저장순"
+                                    FavoritePhotoBoothSort.DISTANCE -> "거리순"
+                                },
+                                color = if (isSelected) {
+                                    NekiTheme.colorScheme.gray700
+                                } else {
+                                    NekiTheme.colorScheme.gray300
+                                },
+                                style = if (isSelected) {
+                                    NekiTheme.typography.caption12SemiBold
+                                } else {
+                                    NekiTheme.typography.caption12Regular
+                                },
+                            )
+                        }
+                    }
+                }
+            }
         }
         key(selectedTab) {
             if (displayPhotoBooths.isEmpty()) {
@@ -289,14 +348,27 @@ internal fun AnchoredPanelContent(
                         contentDescription = null,
                     )
                     Text(
-                        text = if (selectedTab == MapTab.NEARBY) "1km 이내에 가까운\n네컷 사진관이 없어요!" else "저장한 포토부스가\n없어요.",
+                        text = if (selectedTab == MapTab.AREA) {
+                            "지금 보고 있는 곳에는 네컷 사진관이 없어요\n지도를 살짝 옮겨볼까요?"
+                        } else {
+                            "저장한 포토부스가\n없어요."
+                        },
                         color = NekiTheme.colorScheme.gray500,
                         style = NekiTheme.typography.body16Medium,
                         textAlign = TextAlign.Center,
                     )
                 }
             } else {
+                val photoBoothListState = rememberLazyListState()
+
+                LaunchedEffect(favoritePhotoBoothSort) {
+                    if (selectedTab == MapTab.FAVORITE) {
+                        photoBoothListState.scrollToItem(0)
+                    }
+                }
+
                 LazyColumn(
+                    state = photoBoothListState,
                     modifier = Modifier
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -311,15 +383,22 @@ internal fun AnchoredPanelContent(
                     items(displayPhotoBooths, key = { it.id }) { photoBooth ->
                         HorizontalBrandItem(
                             modifier = Modifier.animateItem(
-                                placementSpec = spring(
-                                    stiffness = 152f,
-                                    dampingRatio = 14.9f / (2f * kotlin.math.sqrt(152f * 1f)),
-                                ),
+                                placementSpec = if (selectedTab == MapTab.FAVORITE) {
+                                    null
+                                } else {
+                                    spring(
+                                        stiffness = 152f,
+                                        dampingRatio = 14.9f / (2f * kotlin.math.sqrt(152f * 1f)),
+                                    )
+                                },
                             ),
                             photoBooth = photoBooth,
                             onClickItem = { onClickPhotoBooth(photoBooth) },
                             onClickFavorite = { onClickBoothFavorite(photoBooth) },
-                            extraInfo = if (selectedTab == MapTab.NEARBY) {
+                            extraInfo = if (
+                                hasCurrentLocation &&
+                                (selectedTab == MapTab.AREA || favoritePhotoBoothSort == FavoritePhotoBoothSort.DISTANCE)
+                            ) {
                                 { DistanceInfo(photoBooth.distance) }
                             } else null,
                         )
@@ -353,6 +432,7 @@ private fun AnchoredPanelContentPreview() {
             ),
             displayPhotoBooths = persistentListOf(
                 PhotoBooth(
+                    id = "source:LIFEFOURCUTS:1",
                     brandName = "인생네컷",
                     branchName = "가산디지털점",
                     distance = 25,
@@ -360,6 +440,7 @@ private fun AnchoredPanelContentPreview() {
                     longitude = 126.8864,
                 ),
                 PhotoBooth(
+                    id = "source:PHOTOGRAY:1",
                     brandName = "포토그레이",
                     branchName = "가산역점",
                     distance = 38,
@@ -367,6 +448,7 @@ private fun AnchoredPanelContentPreview() {
                     longitude = 126.8867,
                 ),
                 PhotoBooth(
+                    id = "source:PHOTOISM:1",
                     brandName = "포토이즘",
                     branchName = "마리오점",
                     distance = 52,

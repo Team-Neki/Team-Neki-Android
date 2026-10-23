@@ -20,7 +20,7 @@ fun BottomSheetDragHandle(
     modifier: Modifier = Modifier.Companion,
     width: Dp = 45.dp,
     height: Dp = 4.dp,
-    color: Color = NekiTheme.colorScheme.gray300,
+    color: Color = NekiTheme.colorScheme.gray100,
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),

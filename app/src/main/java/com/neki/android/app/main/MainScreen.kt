@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +29,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.neki.android.app.main.component.AddPhotoBottomSheet
 import com.neki.android.app.main.component.AlbumUploadOption
 import com.neki.android.app.main.component.SelectWithAlbumDialog
+import com.neki.android.app.main.navigation.MapSearchSceneStrategy
 import com.neki.android.app.ui.BottomNavigationBar
 import com.neki.android.core.navigation.result.LocalResultEventBus
 import com.neki.android.core.navigation.result.ResultEffect
@@ -125,6 +127,16 @@ fun MainScreen(
     onBack: () -> Unit,
     onIntent: (MainIntent) -> Unit,
 ) {
+    val isMapScene = currentKey == MapNavKey.Map || currentKey is MapNavKey.Search
+    val mapBottomBar by rememberUpdatedState<@Composable () -> Unit> {
+        BottomNavigationBar(
+            currentTab = MapNavKey.Map,
+            currentKey = MapNavKey.Map,
+            onTabSelected = { onTabSelected(it.navKey) },
+            onClickFab = { onIntent(MainIntent.ClickAddPhotoFab) },
+        )
+    }
+    val sceneStrategy = remember { MapSearchSceneStrategy { mapBottomBar() } }
     val shouldShowBottomBar by remember(currentKey) {
         mutableStateOf(currentKey in topLevelKeys)
     }
@@ -138,7 +150,7 @@ fun MainScreen(
                 },
             ),
         bottomBar = {
-            if (shouldShowBottomBar) {
+            if (shouldShowBottomBar && !isMapScene) {
                 BottomNavigationBar(
                     currentTab = currentTopLevelKey,
                     currentKey = currentKey,
@@ -152,12 +164,14 @@ fun MainScreen(
             modifier = Modifier.padding(
                 when (currentKey) {
                     ArchiveNavKey.Archive, PoseNavKey.PoseMain, MyPageNavKey.MyPage -> innerPadding
-                    is PoseNavKey.RandomPose, MapNavKey.Map -> PaddingValues(bottom = innerPadding.calculateBottomPadding())
+                    is PoseNavKey.RandomPose -> PaddingValues(bottom = innerPadding.calculateBottomPadding())
+                    MapNavKey.Map, is MapNavKey.Search -> PaddingValues.Zero
                     PhotoUploadNavKey.QRScan -> PaddingValues.Zero
                     else -> PaddingValues(top = innerPadding.calculateTopPadding())
                 },
             ),
             entries = entries,
+            sceneStrategy = sceneStrategy,
             onBack = onBack,
             transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
             popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
