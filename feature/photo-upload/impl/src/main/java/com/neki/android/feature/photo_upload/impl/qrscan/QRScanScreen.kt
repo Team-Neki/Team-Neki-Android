@@ -6,10 +6,12 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,6 +29,7 @@ import com.neki.android.feature.photo_upload.api.QRScanResult
 import com.neki.android.feature.photo_upload.impl.BuildConfig
 import com.neki.android.feature.photo_upload.impl.qrscan.component.PhotoWebViewContent
 import com.neki.android.feature.photo_upload.impl.qrscan.component.QRScannerContent
+import com.neki.android.feature.photo_upload.impl.qrscan.component.QrHtmlDumpContent
 
 @Composable
 internal fun QRScanRoute(
@@ -91,29 +94,39 @@ internal fun QRScanScreen(
     uiState: QRScanState = QRScanState(),
     onIntent: (QRScanIntent) -> Unit = {},
 ) {
-    when (uiState.viewType) {
-        QRScanViewType.QR_SCAN -> {
-            QRScannerContent(
-                modifier = Modifier.fillMaxSize(),
-                isPermissionRationaleDialogShown = uiState.isPermissionRationaleDialogShown,
-                isOpenAppSettingDialogShown = uiState.isOpenAppSettingDialogShown,
-                isDownloadNeededDialogShown = uiState.isDownloadNeededDialogShown,
-                isUnSupportedBrandDialogShown = uiState.isUnSupportedBrandDialogShown,
-                isTorchEnabled = uiState.isTorchEnabled,
-                onIntent = onIntent,
-            )
-        }
-
-        QRScanViewType.WEB_VIEW -> {
-            if (uiState.scannedUrl != null)
-                PhotoWebViewContent(
-                    scannedUrl = uiState.scannedUrl,
-                    onDetectImageUrl = { imageUrl -> onIntent(QRScanIntent.DetectImageUrl(imageUrl)) },
-                    onPageError = { onIntent(QRScanIntent.WebViewError) },
+    Box(modifier = Modifier.fillMaxSize()) {
+        uiState.qrDumpUrl?.let { sourceUrl ->
+            key(sourceUrl) {
+                QrHtmlDumpContent(
+                    sourceUrl = sourceUrl,
+                    onCaptured = { html -> onIntent(QRScanIntent.CaptureQrHtml(sourceUrl, html)) },
                 )
-            else {
-                LaunchedEffect(Unit) {
-                    onIntent(QRScanIntent.SetViewType(viewType = QRScanViewType.QR_SCAN))
+            }
+        }
+        when (uiState.viewType) {
+            QRScanViewType.QR_SCAN -> {
+                QRScannerContent(
+                    modifier = Modifier.fillMaxSize(),
+                    isPermissionRationaleDialogShown = uiState.isPermissionRationaleDialogShown,
+                    isOpenAppSettingDialogShown = uiState.isOpenAppSettingDialogShown,
+                    isDownloadNeededDialogShown = uiState.isDownloadNeededDialogShown,
+                    isUnSupportedBrandDialogShown = uiState.isUnSupportedBrandDialogShown,
+                    isTorchEnabled = uiState.isTorchEnabled,
+                    onIntent = onIntent,
+                )
+            }
+
+            QRScanViewType.WEB_VIEW -> {
+                if (uiState.scannedUrl != null)
+                    PhotoWebViewContent(
+                        scannedUrl = uiState.scannedUrl,
+                        onDetectImageUrl = { imageUrl -> onIntent(QRScanIntent.DetectImageUrl(imageUrl)) },
+                        onPageError = { onIntent(QRScanIntent.WebViewError) },
+                    )
+                else {
+                    LaunchedEffect(Unit) {
+                        onIntent(QRScanIntent.SetViewType(viewType = QRScanViewType.QR_SCAN))
+                    }
                 }
             }
         }

@@ -13,6 +13,7 @@ data class QRScanState(
     val isDownloadNeededDialogShown: Boolean = false,
     val isUnSupportedBrandDialogShown: Boolean = false,
     val isTorchEnabled: Boolean = false,
+    val qrDumpUrl: String? = null,
 )
 
 sealed interface QRScanIntent {
@@ -32,6 +33,7 @@ sealed interface QRScanIntent {
     data object ToggleTorch : QRScanIntent
     data object ClickCloseQRScan : QRScanIntent
     data class ScanQRCode(val scannedUrl: String) : QRScanIntent
+    data class CaptureQrHtml(val sourceUrl: String, val html: String?) : QRScanIntent
     data class SetViewType(val viewType: QRScanViewType) : QRScanIntent
     data class DetectImageUrl(val imageUrl: String) : QRScanIntent
     data object WebViewError : QRScanIntent
