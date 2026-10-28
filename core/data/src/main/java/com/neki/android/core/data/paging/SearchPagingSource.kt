@@ -23,7 +23,7 @@ internal class SearchPagingSource(
     override fun getRefreshKey(state: PagingState<SearchPageKey, SearchCompletion>): SearchPageKey? = null
 
     override suspend fun load(params: LoadParams<SearchPageKey>): LoadResult<SearchPageKey, SearchCompletion> {
-        if (keyword.trim().length < 2) return LoadResult.Page(emptyList(), null, null)
+        if (keyword.isBlank()) return LoadResult.Page(emptyList(), null, null)
         return try {
             var page = fetchPage(params.key ?: SearchPageKey(SearchCompletionType.REGION), params.loadSize)
             while (page.data.isEmpty() && page.nextKey != null) {
@@ -44,7 +44,7 @@ internal class SearchPagingSource(
         cursor: SearchPageKey,
         size: Int,
     ): LoadResult.Page<SearchPageKey, SearchCompletion> {
-        if (cursor.type == SearchCompletionType.PHOTO_BOOTH && keyword.count { !it.isWhitespace() && it != '-' && it != '_' } < 2) {
+        if (cursor.type == SearchCompletionType.PHOTO_BOOTH && keyword.none { !it.isWhitespace() && it != '-' && it != '_' }) {
             return LoadResult.Page(emptyList(), null, null)
         }
         val response = mapService.getSearchCompletions(
