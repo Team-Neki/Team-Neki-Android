@@ -19,6 +19,8 @@ analytics 구현은 `core:analytics`의 이벤트 정의와 feature ViewModel의
 
 ## 구현 흐름
 
+이벤트 정의 작업과 서버 전송 작업(logger 구현, 로그 저장·전송)이 함께 있으면 이벤트 정의와 ViewModel 로깅 호출부터 끝낸 뒤 서버 전송 작업을 한다.
+
 1. 이벤트가 속한 기능 단위 `*AnalyticsEvent`를 고른다.
 2. parameter 없는 이벤트는 `data object`, parameter 있는 이벤트는 `data class`로 추가한다.
 3. event `name`과 parameter key는 snake_case로 둔다. 클래스명이 곧 이벤트명은 아니므로(`Logout` → `"mypage_logout"`) 도메인별 기존 네이밍 관례를 따른다.
