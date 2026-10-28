@@ -2,6 +2,7 @@ package com.neki.android.core.data.remote.di
 
 import com.neki.android.core.common.const.Const.TAG_REST_API
 import com.neki.android.core.data.BuildConfig
+import com.neki.android.core.data.remote.api.QrDumpService
 import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
@@ -127,6 +128,7 @@ internal object NetworkModule {
             }
 
             install(Logging) {
+                filter { it.url.encodedPath != QrDumpService.UPLOAD_TICKET_PATH }
                 logger = object : Logger {
                     override fun log(message: String) {
                         Timber.tag(TAG_REST_API).d(message)
@@ -189,6 +191,7 @@ internal object NetworkModule {
                 }
 
                 level = LogLevel.HEADERS
+                filter { !it.url.parameters.contains("X-Amz-Signature") }
             }
 
             install(HttpTimeout) {

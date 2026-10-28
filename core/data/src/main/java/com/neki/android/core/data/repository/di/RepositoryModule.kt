@@ -24,6 +24,8 @@ import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.dataapi.repository.TermRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
+import com.neki.android.core.data.repository.impl.QrDumpRepositoryImpl
+import com.neki.android.core.dataapi.repository.QrDumpRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,6 +35,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 internal interface RepositoryModule {
+
+    @Binds
+    @Singleton
+    fun bindQrDumpRepository(impl: QrDumpRepositoryImpl): QrDumpRepository
 
     @Binds
     @Singleton
