@@ -5,7 +5,7 @@ import org.gradle.api.JavaVersion
 object BuildConst {
     const val APPLICATION_ID = "com.neki.android"
 
-    const val VERSION_CODE = 33
+    const val VERSION_CODE = 38
     const val VERSION_NAME = "1.4.0"
 
     const val MIN_SDK = 29
