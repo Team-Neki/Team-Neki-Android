@@ -4,17 +4,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.dataapi.repository.DiscordWebhookRepository
+import com.neki.android.core.dataapi.repository.QrDumpRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.photo_upload.impl.qrscan.util.QRUrlMatcher
+import com.neki.android.feature.photo_upload.impl.qrscan.util.QrHtmlCapture
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import java.net.URI
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import timber.log.Timber
 
 @HiltViewModel
 internal class QRScanViewModel @Inject constructor(
     private val discordWebhookRepository: DiscordWebhookRepository,
+    private val qrDumpRepository: QrDumpRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
@@ -22,6 +29,8 @@ internal class QRScanViewModel @Inject constructor(
     private var imageDetected: Boolean = false
     private var isDownloadRequiredBrand: Boolean = false
     private val loggedUnsupportedUrls = mutableSetOf<String>()
+    private val capturedQrUrls = ConcurrentHashMap.newKeySet<String>()
+    private val qrDumpInProgress = AtomicBoolean(false)
 
     val store: MviIntentStore<QRScanState, QRScanIntent, QRScanSideEffect> =
         mviIntentStore(
@@ -77,6 +86,7 @@ internal class QRScanViewModel @Inject constructor(
             QRScanIntent.ToggleTorch -> reduce { copy(isTorchEnabled = !this.isTorchEnabled) }
             QRScanIntent.ClickCloseQRScan -> postSideEffect(QRScanSideEffect.NavigateBack)
             is QRScanIntent.ScanQRCode -> {
+                if (state.isUnSupportedBrandDialogShown || state.isDownloadNeededDialogShown || state.viewType != QRScanViewType.QR_SCAN) return
                 val scannedUrl = intent.scannedUrl
 
                 if (isSupportedBrand(scannedUrl)) {
@@ -104,8 +114,11 @@ internal class QRScanViewModel @Inject constructor(
                         }
                     }
                     reduce { copy(isUnSupportedBrandDialogShown = true) }
+                    performQrHtmlCapture(scannedUrl, reduce)
                 }
             }
+
+            is QRScanIntent.CaptureQrHtml -> handleCapturedQrHtml(intent, state, reduce)
 
             is QRScanIntent.SetViewType -> {
                 reduce { copy(viewType = intent.viewType) }
@@ -141,6 +154,43 @@ internal class QRScanViewModel @Inject constructor(
             QRScanIntent.DismissUnSupportedBrandDialog -> reduce { copy(isUnSupportedBrandDialogShown = false) }
             QRScanIntent.ClickUploadGallery -> postSideEffect(QRScanSideEffect.SetOpenGalleryResult)
             QRScanIntent.ClickProposeBrand -> postSideEffect(QRScanSideEffect.OpenBrandProposalUrl)
+        }
+    }
+
+    private fun performQrHtmlCapture(sourceUrl: String, reduce: (QRScanState.() -> QRScanState) -> Unit) {
+        if (!QrHtmlCapture.isHttpUrl(sourceUrl) || sourceUrl in capturedQrUrls || !qrDumpInProgress.compareAndSet(false, true)) return
+        capturedQrUrls.add(sourceUrl)
+        Timber.tag("QrDump").d("HTML capture started: host=%s", URI(sourceUrl).host)
+        reduce { copy(qrDumpUrl = sourceUrl) }
+    }
+
+    private fun handleCapturedQrHtml(
+        intent: QRScanIntent.CaptureQrHtml,
+        state: QRScanState,
+        reduce: (QRScanState.() -> QRScanState) -> Unit,
+    ) {
+        if (state.qrDumpUrl != intent.sourceUrl) return
+        reduce { copy(qrDumpUrl = null) }
+        val html = intent.html
+        if (html.isNullOrBlank()) {
+            capturedQrUrls.remove(intent.sourceUrl)
+            qrDumpInProgress.set(false)
+            return
+        }
+        Timber.tag("QrDump").d("HTML captured")
+        applicationScope.launch {
+            var uploaded = false
+            try {
+                qrDumpRepository.uploadHtml(intent.sourceUrl, html)
+                    .onSuccess {
+                        uploaded = true
+                        Timber.tag("QrDump").d("HTML upload completed")
+                    }
+                    .onFailure { Timber.tag("QrDump").w("HTML upload failed: %s", it.javaClass.simpleName) }
+            } finally {
+                if (!uploaded) capturedQrUrls.remove(intent.sourceUrl)
+                qrDumpInProgress.set(false)
+            }
         }
     }
 
