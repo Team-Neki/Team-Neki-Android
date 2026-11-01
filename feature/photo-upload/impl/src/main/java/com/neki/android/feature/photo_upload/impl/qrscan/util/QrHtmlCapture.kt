@@ -1,16 +1,17 @@
 package com.neki.android.feature.photo_upload.impl.qrscan.util
 
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
-import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import java.net.URI
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.json.JSONTokener
 import timber.log.Timber
@@ -65,7 +66,7 @@ internal object QrHtmlCapture {
             }
         }
         webView.loadUrl(sourceUrl)
-        var lastHtml: String? = null
+        var lastVersion: Long? = null
         var lastNavigation = -1
         var stableSamples = 0
         var samples = 0
@@ -74,38 +75,62 @@ internal object QrHtmlCapture {
             check(!failed) { "QR HTML main frame failed to load" }
             if (!pageFinished) continue
             val currentNavigation = navigation
-            val html = webView.readHtml() ?: continue
+            val version = webView.readDomVersion() ?: continue
             if (!pageFinished || currentNavigation != navigation) continue
             if (lastNavigation != currentNavigation) {
                 samples = 0
                 stableSamples = 0
-                lastHtml = null
+                lastVersion = null
             }
-            stableSamples = if (html == lastHtml) stableSamples + 1 else 0
-            lastHtml = html
+            stableSamples = if (version == lastVersion) stableSamples + 1 else 0
+            lastVersion = version
             lastNavigation = currentNavigation
             samples++
-            if (samples >= MIN_SAMPLES && stableSamples >= 2) return@withTimeout html
+            if (samples >= MAX_SAMPLES || (samples >= MIN_SAMPLES && stableSamples >= 2)) {
+                val html = webView.readHtml()
+                check(!failed) { "QR HTML main frame failed to load" }
+                if (pageFinished && currentNavigation == navigation && html != null) return@withTimeout html
+                samples = 0
+            }
         }
-        checkNotNull(lastHtml)
+        error("QR HTML capture did not complete")
     }
 
-    private suspend fun WebView.readHtml(): String? = suspendCancellableCoroutine { continuation ->
-        val script = """
+    // Poll only a small mutation counter, transferring the full DOM once at capture time.
+    private suspend fun WebView.readDomVersion(): Long? = evaluateScript(
+        """
             (function() {
                 if (document.readyState !== 'complete' || !document.documentElement) return null;
-                var html = document.documentElement.outerHTML;
-                return html;
-            })()
-        """.trimIndent()
-        evaluateJavascript(script) { result ->
-            if (continuation.isActive) {
-                try {
-                    continuation.resume((JSONTokener(result).nextValue() as? String)?.takeIf { it.isNotBlank() })
-                } catch (exception: Exception) {
-                    continuation.resumeWithException(exception)
+                if (!window.__nekiQrDumpObserver) {
+                    var state = { version: 0 };
+                    state.observer = new MutationObserver(function() { state.version++; });
+                    state.observer.observe(document.documentElement, {
+                        subtree: true, childList: true, attributes: true, characterData: true
+                    });
+                    window.__nekiQrDumpObserver = state;
                 }
-            }
+                return window.__nekiQrDumpObserver.version;
+            })()
+        """.trimIndent(),
+    ).toLongOrNull()
+
+    private suspend fun WebView.readHtml(): String? {
+        val result = evaluateScript(
+            """
+                (function() {
+                    if (document.readyState !== 'complete' || !document.documentElement) return null;
+                    return document.documentElement.outerHTML;
+                })()
+            """.trimIndent(),
+        )
+        return withContext(Dispatchers.Default) {
+            (JSONTokener(result).nextValue() as? String)?.takeIf { it.isNotBlank() }
+        }
+    }
+
+    private suspend fun WebView.evaluateScript(script: String): String = suspendCancellableCoroutine { continuation ->
+        evaluateJavascript(script) { result ->
+            if (continuation.isActive) continuation.resume(result)
         }
     }
 }

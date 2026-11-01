@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import java.net.URI
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import timber.log.Timber
 
@@ -28,7 +29,7 @@ internal class QRScanViewModel @Inject constructor(
     private var imageDetected: Boolean = false
     private var isDownloadRequiredBrand: Boolean = false
     private val loggedUnsupportedUrls = mutableSetOf<String>()
-    private val capturedQrUrls = mutableSetOf<String>()
+    private val capturedQrUrls = ConcurrentHashMap.newKeySet<String>()
     private val qrDumpInProgress = AtomicBoolean(false)
 
     val store: MviIntentStore<QRScanState, QRScanIntent, QRScanSideEffect> =
@@ -172,16 +173,22 @@ internal class QRScanViewModel @Inject constructor(
         reduce { copy(qrDumpUrl = null) }
         val html = intent.html
         if (html.isNullOrBlank()) {
+            capturedQrUrls.remove(intent.sourceUrl)
             qrDumpInProgress.set(false)
             return
         }
-        Timber.tag("QrDump").d("HTML captured: bytes=%d", html.toByteArray(Charsets.UTF_8).size)
+        Timber.tag("QrDump").d("HTML captured")
         applicationScope.launch {
+            var uploaded = false
             try {
                 qrDumpRepository.uploadHtml(intent.sourceUrl, html)
-                    .onSuccess { Timber.tag("QrDump").d("HTML upload completed") }
+                    .onSuccess {
+                        uploaded = true
+                        Timber.tag("QrDump").d("HTML upload completed")
+                    }
                     .onFailure { Timber.tag("QrDump").w("HTML upload failed: %s", it.javaClass.simpleName) }
             } finally {
+                if (!uploaded) capturedQrUrls.remove(intent.sourceUrl)
                 qrDumpInProgress.set(false)
             }
         }

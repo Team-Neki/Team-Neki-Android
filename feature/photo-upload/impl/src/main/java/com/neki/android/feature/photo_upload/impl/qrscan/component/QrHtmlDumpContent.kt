@@ -2,7 +2,7 @@ package com.neki.android.feature.photo_upload.impl.qrscan.component
 
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.neki.android.feature.photo_upload.impl.qrscan.util.QrHtmlCapture
 import kotlin.coroutines.cancellation.CancellationException
@@ -32,6 +31,8 @@ internal fun QrHtmlDumpContent(
         WebView(context).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
             settings.allowFileAccess = false
             settings.allowContentAccess = false
             settings.javaScriptCanOpenWindowsAutomatically = false
@@ -51,7 +52,7 @@ internal fun QrHtmlDumpContent(
 
     AndroidView(
         factory = { webView },
-        modifier = Modifier.size(1.dp).alpha(0f).clearAndSetSemantics {},
+        modifier = Modifier.fillMaxSize().alpha(0f).clearAndSetSemantics {},
     )
 
     LaunchedEffect(webView) {

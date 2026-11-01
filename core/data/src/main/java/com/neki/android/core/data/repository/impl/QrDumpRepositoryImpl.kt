@@ -5,14 +5,19 @@ import com.neki.android.core.data.remote.model.response.QrDumpUploadTicketRespon
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.QrDumpRepository
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
+import java.io.IOException
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeParseException
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 class QrDumpRepositoryImpl @Inject constructor(
@@ -20,15 +25,26 @@ class QrDumpRepositoryImpl @Inject constructor(
 ) : QrDumpRepository {
     override suspend fun uploadHtml(sourceUrl: String, html: String): Result<Unit> = runSuspendCatching {
         val bytes = withContext(Dispatchers.Default) { createPayload(sourceUrl, html) }
-        var ticket = getValidTicket()
-        try {
-            service.uploadHtml(ticket, bytes)
-        } catch (exception: ClientRequestException) {
-            // A ticket can expire between validation and PUT. Refresh only once in that case.
-            if (exception.response.status != HttpStatusCode.Forbidden || !ticket.isExpired()) throw exception
-            ticket = getValidTicket()
-            service.uploadHtml(ticket, bytes)
+        repeat(2) { attempt ->
+            var ticket: QrDumpUploadTicketResponse? = null
+            try {
+                ticket = getValidTicket()
+                service.uploadHtml(ticket, bytes)
+                return@runSuspendCatching
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                if (attempt == 1 || !isRetryable(exception, ticket)) throw exception
+                delay(500L)
+            }
         }
+    }
+
+    private fun isRetryable(exception: Exception, ticket: QrDumpUploadTicketResponse?): Boolean = when (exception) {
+        is ClientRequestException -> exception.response.status == HttpStatusCode.RequestTimeout ||
+            (exception.response.status == HttpStatusCode.Forbidden && ticket?.isExpired() == true)
+        is ServerResponseException, is HttpRequestTimeoutException, is IOException -> true
+        else -> false
     }
 
     private suspend fun getValidTicket(): QrDumpUploadTicketResponse {
