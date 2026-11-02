@@ -18,12 +18,23 @@ class AmplitudeAnalyticsLoggerTest {
 
         existingEvents.forEach(logger::log)
 
-        assertEquals(31, existingEvents.size)
-        assertEquals(31, existingEvents.map(AnalyticsEvent::name).toSet().size)
+        assertEquals(32, existingEvents.size)
+        assertEquals(32, existingEvents.map(AnalyticsEvent::name).toSet().size)
         assertEquals(
             existingEvents.map { TrackedEvent(it.name, it.params) },
             client.trackedEvents,
         )
+    }
+
+    @Test
+    fun `브랜드 ID를 모르면 brand_id 속성을 보내지 않는다`() {
+        val events = listOf(
+            MapAnalyticsEvent.BoothSelect(entryPoint = "map", brandName = "인생네컷", brandId = null),
+            MapAnalyticsEvent.BoothFavoriteAdd(boothName = "건대점", brandName = "인생네컷", brandId = null),
+            MapAnalyticsEvent.BoothFavoriteRemove(boothName = "건대점", brandName = "인생네컷", brandId = null),
+        )
+
+        events.forEach { assertEquals(false, "brand_id" in it.params) }
     }
 
     @Test
@@ -75,25 +86,30 @@ class AmplitudeAnalyticsLoggerTest {
                 action = "select",
                 selectedCount = 1,
                 brandName = "인생네컷",
+                brandId = "12",
             ),
-            MapAnalyticsEvent.BoothSelect(entryPoint = "map", brandName = "인생네컷"),
+            MapAnalyticsEvent.BoothSelect(entryPoint = "map", brandName = "인생네컷", brandId = "12"),
             MapAnalyticsEvent.MapRouteClick(mapType = "kakao_map"),
             MapAnalyticsEvent.BrandOrderSave(
                 priorityBrand1 = "인생네컷",
                 priorityBrand2 = "포토이즘",
                 priorityBrand3 = "포토그레이",
+                priorityBrandId1 = "12",
+                priorityBrandId2 = "3",
+                priorityBrandId3 = "",
             ),
             MapAnalyticsEvent.FavoriteBoothView(favoriteBoothCount = 3),
             MapAnalyticsEvent.FavoriteBoothFilterOn(favoriteBoothCount = 3),
             MapAnalyticsEvent.FavoriteBoothFilterOff,
-            MapAnalyticsEvent.BoothFavoriteAdd(boothName = "건대점", brandName = "인생네컷"),
-            MapAnalyticsEvent.BoothFavoriteRemove(boothName = "건대점", brandName = "인생네컷"),
+            MapAnalyticsEvent.BoothFavoriteAdd(boothName = "건대점", brandName = "인생네컷", brandId = "12"),
+            MapAnalyticsEvent.BoothFavoriteRemove(boothName = "건대점", brandName = "인생네컷", brandId = "12"),
             PoseAnalyticsEvent.PoseView,
             PoseAnalyticsEvent.PoseRandomStart,
             PoseAnalyticsEvent.PoseRandomSessionEnd(totalSwipeCount = 4),
             PoseAnalyticsEvent.PoseFilterToggle(peopleCount = 2),
             PoseAnalyticsEvent.PoseBookmarkFilter,
             PoseAnalyticsEvent.PoseBookmark,
+            PoseAnalyticsEvent.PoseDetailClick(poseId = "128", peopleCount = 2, entryPoint = "list"),
             MypageAnalyticsEvent.Logout,
             MypageAnalyticsEvent.Withdraw,
         )

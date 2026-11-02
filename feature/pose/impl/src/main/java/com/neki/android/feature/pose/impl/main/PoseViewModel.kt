@@ -109,6 +109,13 @@ internal class PoseViewModel @Inject constructor(
             }
 
             is PoseIntent.ClickPoseItem -> {
+                analyticsLogger.log(
+                    PoseAnalyticsEvent.PoseDetailClick(
+                        poseId = intent.item.id.toString(),
+                        peopleCount = intent.item.peopleCount,
+                        entryPoint = if (state.isShowBookmarkedPose) "bookmark" else "list",
+                    ),
+                )
                 postSideEffect(
                     PoseEffect.NavigateToPoseDetail(
                         PoseNavKey.PoseDetail(
@@ -136,12 +143,12 @@ internal class PoseViewModel @Inject constructor(
             }
 
             is PoseIntent.ClickBookmarkIcon -> {
-                analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
                 val pose = intent.pose
                 val newBookmarked = !pose.isBookmarked
                 updatedBookmarks.update { it + (pose.id to newBookmarked) }
                 viewModelScope.launch {
                     poseRepository.updateBookmark(pose.id, newBookmarked)
+                        .onSuccess { analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark) }
                         .onFailure { e ->
                             Timber.e(e)
                             updatedBookmarks.update { it + (pose.id to pose.isBookmarked) }
