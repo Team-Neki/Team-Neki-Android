@@ -96,7 +96,11 @@ class TermViewModel @Inject constructor(
             .onSuccess {
                 authRepository.setCompletedOnboarding(true)
                 metaAnalyticsLogger.log(MetaAnalyticsEvent.CompleteRegistration)
-                postSideEffect(TermSideEffect.NavigateToMain)
+                if (state.isMarketingTermChecked) {
+                    postSideEffect(TermSideEffect.RequestNotificationPermission)
+                } else {
+                    postSideEffect(TermSideEffect.NavigateToMain)
+                }
             }
             .onFailure { e ->
                 isSubmittingTerms = false
