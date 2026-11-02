@@ -17,4 +17,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     implementation(libs.androidx.exifinterface)
+
+    testImplementation(libs.junit)
 }
