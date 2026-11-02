@@ -6,12 +6,12 @@ description: Use when adding or changing Amplitude Analytics events, AnalyticsEv
 # Implementing Analytics
 
 analytics 구현은 `core:analytics`의 이벤트 정의와 feature ViewModel의 로깅 호출을 함께 맞춘다.
-이벤트는 `AmplitudeAnalyticsLogger`를 통해 Amplitude로 전달한다.
+이벤트는 `NekiAnalyticsLogger`를 통해 Amplitude와 서버(`POST /api/logs`)로 함께 전달한다.
 
 ## 작업 범위
 
 - `core/analytics/src/main/kotlin/com/neki/android/core/analytics/event/*AnalyticsEvent.kt`
-- `core/analytics/src/main/kotlin/com/neki/android/core/analytics/logger/AmplitudeAnalyticsLogger.kt`
+- `core/analytics/src/main/kotlin/com/neki/android/core/analytics/logger/NekiAnalyticsLogger.kt`
 - analytics를 호출하는 `feature/<feature-name>/impl/src/main/.../*ViewModel.kt`
 - 화면 진입 로그 호출 지점이 있는 `feature/<feature-name>/impl/src/main/.../*Screen.kt`
 - 앱 수준 이벤트(노티피케이션 클릭 등)를 로깅하는 `app/src/main/java/com/neki/android/app/MainActivity.kt`
@@ -32,7 +32,9 @@ analytics 구현은 `core:analytics`의 이벤트 정의와 feature ViewModel의
 
 ## Logger
 
-`AmplitudeAnalyticsLogger`는 `AnalyticsEvent.name`과 `AnalyticsEvent.params`를 Amplitude의 `track(...)`으로 그대로 전달한다.
+`AnalyticsLogger` 구현체는 `NekiAnalyticsLogger`다. 이벤트마다 `eventId`와 발생 시각을 한 번 만들어 `AmplitudeAnalyticsLogger`와 `ServerAnalyticsLogger`에 같이 넘긴다.
+`AmplitudeAnalyticsLogger`는 `AnalyticsEvent.name`과 `AnalyticsEvent.params`를 Amplitude `track(...)`으로 전달하고, `eventId`·발생 시각을 `insert_id`·`timestamp`로 넣는다.
+`ServerAnalyticsLogger`는 같은 이벤트를 영속 큐에 저장한 뒤 서버로 보낸다. `sessionId`는 `AmplitudeSessionPlugin`이 넘겨주는 Amplitude 세션을 쓴다.
 feature ViewModel은 `AnalyticsLogger`를 주입받아 호출한다.
 
 ## Event 정의
