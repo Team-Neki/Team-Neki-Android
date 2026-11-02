@@ -6,6 +6,8 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.neki.android.core.data.local.model.ClientLogStore
+import com.neki.android.core.data.local.serializer.ClientLogStoreSerializer
 import com.neki.android.core.data.local.model.MarketingPopupRecord
 import com.neki.android.core.data.local.serializer.MarketingPopupRecordSerializer
 import dagger.Module
@@ -28,6 +30,17 @@ private val Context.userDataStore: DataStore<Preferences> by preferencesDataStor
 @InstallIn(SingletonComponent::class)
 @Module
 internal object DataStoreModule {
+
+    @ClientLogDataStore
+    @Singleton
+    @Provides
+    fun provideClientLogDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<ClientLogStore> = DataStoreFactory.create(
+        serializer = ClientLogStoreSerializer,
+        produceFile = { File(context.noBackupFilesDir, "analytics/client_logs.json") },
+        corruptionHandler = ReplaceFileCorruptionHandler { ClientLogStore() },
+    )
 
     @AuthDataStore
     @Singleton

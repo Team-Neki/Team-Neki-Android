@@ -12,6 +12,7 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -26,6 +27,8 @@ internal class MyPageViewModel @Inject constructor(
     private val tokenRepository: TokenRepository,
     private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
+
+    private var logoutJob: Job? = null
 
     val store: MviIntentStore<MyPageState, MyPageIntent, MyPageEffect> =
         mviIntentStore(
@@ -80,7 +83,7 @@ internal class MyPageViewModel @Inject constructor(
 
             MyPageIntent.ClickLogout -> reduce { copy(isShowLogoutDialog = true) }
             MyPageIntent.DismissLogoutDialog -> reduce { copy(isShowLogoutDialog = false) }
-            MyPageIntent.ConfirmLogout -> logout(reduce, postSideEffect)
+            MyPageIntent.ConfirmLogout -> if (logoutJob?.isActive != true) logoutJob = logout(reduce, postSideEffect)
 
             MyPageIntent.ClickWithdraw -> reduce { copy(isShowWithdrawDialog = true) }
             MyPageIntent.DismissWithdrawDialog -> reduce { copy(isShowWithdrawDialog = false) }
@@ -163,6 +166,7 @@ internal class MyPageViewModel @Inject constructor(
         postSideEffect: (MyPageEffect) -> Unit,
     ) = viewModelScope.launch {
         analyticsLogger.log(MypageAnalyticsEvent.Logout)
+        analyticsLogger.flush()
         authRepository.logout()
             .onSuccess {
                 reduce { copy(isShowLogoutDialog = false) }
@@ -178,6 +182,7 @@ internal class MyPageViewModel @Inject constructor(
         postSideEffect: (MyPageEffect) -> Unit,
     ) = viewModelScope.launch {
         reduce { copy(isLoading = true) }
+        analyticsLogger.flush()
         authRepository.withdrawAccount()
             .onSuccess {
                 analyticsLogger.log(MypageAnalyticsEvent.Withdraw)

@@ -6,4 +6,5 @@ interface AnalyticsLogger {
     fun log(event: AnalyticsEvent)
     fun setUserId(userId: String)
     fun clearUserId()
+    suspend fun flush() {}
 }

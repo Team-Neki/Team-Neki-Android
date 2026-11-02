@@ -1,10 +1,10 @@
 package com.neki.android.core.data.remote.di
 
 import com.neki.android.core.common.const.Const.TAG_REST_API
+import com.neki.android.core.data.analytics.clientLogJson
+import com.neki.android.core.data.auth.TokenRefreshCoordinator
 import com.neki.android.core.data.BuildConfig
-import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
-import com.neki.android.core.data.remote.model.response.AuthResponse
-import com.neki.android.core.data.remote.model.response.BasicResponse
+import com.neki.android.core.data.remote.qualifier.ClientLogHttpClient
 import com.neki.android.core.data.remote.qualifier.UploadHttpClient
 import com.neki.android.core.data.remote.qualifier.WebhookHttpClient
 import com.neki.android.core.dataapi.auth.AuthEventManager
@@ -14,7 +14,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpTimeout
@@ -26,13 +25,11 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.flow.first
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Singleton
@@ -64,6 +61,7 @@ internal object NetworkModule {
     fun provideHttpClient(
         tokenRepository: TokenRepository,
         authEventManager: AuthEventManager,
+        tokenRefreshCoordinator: TokenRefreshCoordinator,
     ): HttpClient {
         return HttpClient(Android) {
             install(DefaultRequest) {
@@ -76,41 +74,24 @@ internal object NetworkModule {
                     cacheTokens = !BuildConfig.DEBUG
 
                     loadTokens {
-                        if (tokenRepository.hasTokens().first()) {
-                            BearerTokens(
-                                accessToken = tokenRepository.getAccessToken().first(),
-                                refreshToken = tokenRepository.getRefreshToken().first(),
-                            )
-                        } else null
+                        tokenRepository.getTokens()?.let { BearerTokens(it.accessToken, it.refreshToken) }
                     }
 
                     refreshTokens {
-                        if (oldTokens != null) {
-                            return@refreshTokens try {
-                                val response = client.post("/api/auth/refresh") {
-                                    setBody(
-                                        RefreshTokenRequest(
-                                            refreshToken = tokenRepository.getRefreshToken().first(),
-                                        ),
-                                    )
-                                }.body<BasicResponse<AuthResponse>>()
-
-                                tokenRepository.saveTokens(
-                                    accessToken = response.data.accessToken,
-                                    refreshToken = response.data.refreshToken,
-                                )
-
-                                BearerTokens(
-                                    accessToken = response.data.accessToken,
-                                    refreshToken = response.data.refreshToken,
-                                )
-                            } catch (e: Exception) {
-                                Timber.e(e)
-                                tokenRepository.clearTokensWithAuthCache()
+                        val previousTokens = oldTokens ?: return@refreshTokens null
+                        val previousRefreshToken = previousTokens.refreshToken ?: return@refreshTokens null
+                        try {
+                            tokenRefreshCoordinator.refresh(previousTokens.accessToken, previousRefreshToken)
+                                ?.let { BearerTokens(it.accessToken, it.refreshToken) }
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Timber.e(e)
+                            if (tokenRepository.clearTokensIfCurrent(previousTokens.accessToken)) {
                                 authEventManager.emitTokenExpired()
-                                null
                             }
-                        } else null
+                            null
+                        }
                     }
 
                     sendWithoutRequest { request ->
@@ -143,6 +124,24 @@ internal object NetworkModule {
 
             expectSuccess = true
         }
+    }
+
+    // Log requests must never inherit another account's cached Bearer credentials or retry anonymous batches with auth.
+    @ClientLogHttpClient
+    @Provides
+    @Singleton
+    fun provideClientLogHttpClient(): HttpClient = HttpClient(Android) {
+        install(DefaultRequest) {
+            url(BASE_URL)
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+        }
+        install(ContentNegotiation) { json(clientLogJson) }
+        install(HttpTimeout) {
+            connectTimeoutMillis = TIME_OUT
+            requestTimeoutMillis = TIME_OUT
+        }
+        // No BODY logging: the queue contains user and device identifiers.
+        expectSuccess = true
     }
 
     @WebhookHttpClient

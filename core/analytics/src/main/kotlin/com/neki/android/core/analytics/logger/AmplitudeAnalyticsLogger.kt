@@ -14,6 +14,15 @@ internal class AmplitudeAnalyticsLogger @Inject constructor(
         )
     }
 
+    fun log(event: AnalyticsEvent, eventId: String, occurredAt: Long) {
+        amplitudeClient.track(
+            eventName = event.name,
+            eventProperties = event.params,
+            insertId = eventId,
+            timestamp = occurredAt,
+        )
+    }
+
     override fun setUserId(userId: String) {
         amplitudeClient.setUserId(userId)
     }
