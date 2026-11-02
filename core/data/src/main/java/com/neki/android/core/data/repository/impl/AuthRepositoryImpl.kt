@@ -13,6 +13,7 @@ import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.model.AppVersion
 import com.neki.android.core.model.Auth
+import com.neki.android.core.model.LoginType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -73,8 +74,20 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override val lastLoginType: Flow<LoginType?> =
+        dataStore.data.map { preferences ->
+            LoginType.entries.find { it.name == preferences[LAST_LOGIN_TYPE] }
+        }
+
+    override suspend fun setLastLoginType(type: LoginType) {
+        dataStore.edit { preferences ->
+            preferences[LAST_LOGIN_TYPE] = type.name
+        }
+    }
+
     companion object {
         private val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
         private val DISMISSED_VERSION = stringPreferencesKey("dismissed_version")
+        private val LAST_LOGIN_TYPE = stringPreferencesKey("last_login_type")
     }
 }
