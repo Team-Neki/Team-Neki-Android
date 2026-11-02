@@ -66,7 +66,7 @@ fun FilterBar(
 }
 
 @Composable
-private fun DownIconFilterChip(
+fun DownIconFilterChip(
     isSelected: Boolean,
     displayText: String,
     modifier: Modifier = Modifier,
@@ -101,7 +101,7 @@ private fun DownIconFilterChip(
 }
 
 @Composable
-private fun DefaultFilterChip(
+fun DefaultFilterChip(
     isSelected: Boolean,
     displayText: String,
     modifier: Modifier = Modifier,

@@ -9,12 +9,28 @@ import kotlinx.collections.immutable.persistentListOf
 data class PoseState(
     val isLoading: Boolean = false,
     val selectedPeopleCount: PeopleCount? = null,
+    val selectedRelationTag: PoseRelationTag? = null,
+    val selectedSortType: PoseSortType = PoseSortType.LATEST,
+    val totalPoseCount: Int? = null,
     val selectedRandomPosePeopleCount: PeopleCount? = null,
     val isShowBookmarkedPose: Boolean = false,
     val bookmarkedPoseList: ImmutableList<Pose> = persistentListOf(),
     val isShowPeopleCountBottomSheet: Boolean = false,
     val isShowRandomPosePeopleCountBottomSheet: Boolean = false,
+    val isShowSortDropdown: Boolean = false,
 )
+
+enum class PoseRelationTag(val displayText: String) {
+    FRIEND("친구"),
+    COUPLE("커플"),
+    CRUSH("썸"),
+}
+
+enum class PoseSortType(val displayText: String) {
+    POPULAR("인기순"),
+    LATEST("최신순"),
+    RECOMMENDED("추천순"),
+}
 
 sealed interface PoseIntent {
     data object EnterPoseScreen : PoseIntent
@@ -24,6 +40,10 @@ sealed interface PoseIntent {
     data object DismissPeopleCountBottomSheet : PoseIntent
     data object DismissRandomPosePeopleCountBottomSheet : PoseIntent
     data object ClickBookmarkChip : PoseIntent
+    data class ClickRelationTagChip(val relationTag: PoseRelationTag) : PoseIntent
+    data object ClickSortDropdown : PoseIntent
+    data object DismissSortDropdown : PoseIntent
+    data class ClickSortDropdownItem(val sortType: PoseSortType) : PoseIntent
     data class ClickPoseItem(val item: Pose, val index: Int) : PoseIntent
     data class ClickPeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseRecommendation : PoseIntent
