@@ -26,6 +26,8 @@ import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.data.repository.impl.ClientLogRepositoryImpl
 import com.neki.android.core.dataapi.repository.ClientLogRepository
+import com.neki.android.core.data.repository.impl.QrDumpRepositoryImpl
+import com.neki.android.core.dataapi.repository.QrDumpRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -39,6 +41,10 @@ internal interface RepositoryModule {
     @Binds
     @Singleton
     fun bindClientLogRepository(impl: ClientLogRepositoryImpl): ClientLogRepository
+
+    @Binds
+    @Singleton
+    fun bindQrDumpRepository(impl: QrDumpRepositoryImpl): QrDumpRepository
 
     @Binds
     @Singleton
