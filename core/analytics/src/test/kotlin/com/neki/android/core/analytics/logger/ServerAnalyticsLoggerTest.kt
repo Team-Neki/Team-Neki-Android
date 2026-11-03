@@ -96,6 +96,18 @@ class ServerAnalyticsLoggerTest {
     }
 
     @Test
+    fun `사용자 복원 전에 탈퇴해도 Amplitude에 저장된 회원의 남은 로그를 지운다`() = runTest {
+        val repository = RecordingRepository()
+        val logger = serverLogger(RecordingClient().apply { restoredUser = "A" }, repository)
+        logger.log(GlobalAnalyticsEvent.AppOpen)
+        logger.deletePendingUserEvents()
+        logger.log(MypageAnalyticsEvent.Withdraw)
+        runCurrent()
+        assertEquals(listOf("mypage_withdraw"), repository.events.map { it.eventType })
+        assertEquals(listOf<String?>("A"), repository.events.map { it.userIdAtOccurrence })
+    }
+
+    @Test
     fun `영속 저장 실패가 기존 Amplitude 전송을 막지 않는다`() = runTest {
         val repository = RecordingRepository().apply { failWrites = true }
         val client = RecordingClient()

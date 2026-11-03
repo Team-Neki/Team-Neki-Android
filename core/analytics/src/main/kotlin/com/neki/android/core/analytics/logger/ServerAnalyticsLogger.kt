@@ -110,7 +110,7 @@ internal class ServerAnalyticsLogger(
     @Synchronized
     override fun deletePendingUserEvents() {
         // Queued in order, so logs recorded before this are deleted and the next event (withdraw) is kept.
-        userId?.let { commands.trySend(Command.DeleteUser(it)) }
+        commands.trySend(Command.DeleteUser(userId, userKnown))
     }
 
     override suspend fun flush() {
@@ -138,7 +138,11 @@ internal class ServerAnalyticsLogger(
                     pendingCommands.decrementAndGet()
                 }
             }
-            is Command.DeleteUser -> repository.deleteUserEvents(command.userId)
+            is Command.DeleteUser -> {
+                // Before the user is restored, logs carry the ID Amplitude persisted, so delete those.
+                val target = command.userId ?: if (command.userKnown) null else restoredUserId.await()
+                target?.let { repository.deleteUserEvents(it) }
+            }
             is Command.User -> {
                 repository.setUserId(command.userId)
                 if (command.userId != null) wakeSender.trySend(Unit)
@@ -177,7 +181,7 @@ internal class ServerAnalyticsLogger(
             val userKnown: Boolean,
         ) : Command
         data class User(val userId: String?) : Command
-        data class DeleteUser(val userId: String) : Command
+        data class DeleteUser(val userId: String?, val userKnown: Boolean) : Command
         data class Barrier(val done: CompletableDeferred<Unit>) : Command
     }
 

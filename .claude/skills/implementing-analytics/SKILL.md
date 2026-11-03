@@ -105,6 +105,10 @@ repository.request(...)
 
 로그아웃 이벤트는 기존 사용자 ID로 먼저 전송하고, 로그아웃 성공 후 `clearUserId()`를 호출한다. 회원 탈퇴 성공과 refresh token 만료에서도 사용자 ID를 해제한다.
 
+세션은 로그인한 회원 기준이다. `clearUserId()`나 다른 회원으로의 `setUserId(...)`는 Amplitude와 서버 로그에 새 세션을 열고, 로그아웃 상태에서의 로그인은 세션을 잇는다.
+
+회원 탈퇴는 `flush()` → 탈퇴 API → 성공 시 `deletePendingUserEvents()` → `log(Withdraw)` → 토큰 삭제 → `clearUserId()` 순서로 호출한다. 삭제는 탈퇴 이벤트보다 먼저 호출해야 탈퇴 이벤트가 남는다.
+
 ```kotlin
 analyticsLogger.setUserId(userId.toString())
 analyticsLogger.log(MypageAnalyticsEvent.Logout)

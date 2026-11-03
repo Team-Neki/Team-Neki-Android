@@ -222,6 +222,21 @@ class ClientLogRepositoryTest {
     }
 
     @Test
+    fun `401 뒤 토큰 없이 다시 보낼 때 그사이 지운 로그는 보내지 않는다`() = runBlocking {
+        val repository = repository()
+        tokenRepository.saveTokens("token-A", "refresh-A")
+        repository.setUserId("A")
+        repository.enqueue(draft(user = "A")).getOrThrow()
+        status = {
+            repository.deleteUserEvents("A")
+            HttpStatusCode.Unauthorized
+        }
+        repository.flush().getOrThrow()
+        assertEquals(1, requests.size)
+        assertTrue(store.data.first().events.isEmpty())
+    }
+
+    @Test
     fun `403이면 그 토큰은 더 쓰지 않고 토큰 없이 다시 보낸다`() = runBlocking {
         val repository = repository()
         tokenRepository.saveTokens("token-A", "refresh-A")

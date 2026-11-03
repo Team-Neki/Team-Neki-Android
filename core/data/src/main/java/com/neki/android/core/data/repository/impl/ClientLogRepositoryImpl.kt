@@ -117,7 +117,10 @@ internal class ClientLogRepositoryImpl @Inject constructor(
                     if (accessToken == null) error("Anonymous client log request was rejected")
                     blockedAccessToken = accessToken
                     Timber.w("Client log token was rejected; sending without it")
-                    sendBatch(events, null)
+                    // Logs deleted in the meantime (account withdrawal) must not be resent.
+                    val queued = store.data.first().events.mapTo(mutableSetOf()) { it.eventId }
+                    val remaining = events.filter { it.eventId in queued }
+                    if (remaining.isNotEmpty()) sendBatch(remaining, null)
                 }
                 else -> throw e
             }
