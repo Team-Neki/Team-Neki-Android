@@ -60,7 +60,6 @@ class PoseDetailViewModel @AssistedInject constructor(
                         poseRepository.updateBookmark(poseId, newBookmark)
                             .onSuccess {
                                 Timber.d("updateBookmark success")
-                                analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
                                 store.onIntent(PoseDetailIntent.BookmarkCommitted(poseId, newBookmark))
                             }
                             .onFailure { e ->
@@ -111,6 +110,7 @@ class PoseDetailViewModel @AssistedInject constructor(
         reduce: (PoseDetailState.() -> PoseDetailState) -> Unit,
         postSideEffect: (PoseDetailSideEffect) -> Unit,
     ) {
+        analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
         val currentPose = state.pose
         if (currentPose.id == 0L) return
 
@@ -203,7 +203,6 @@ class PoseDetailViewModel @AssistedInject constructor(
             if (committedBookmark != null && pose.isBookmarked != committedBookmark) {
                 applicationScope.launch {
                     poseRepository.updateBookmark(pose.id, pose.isBookmarked)
-                        .onSuccess { analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark) }
                 }
             }
         }

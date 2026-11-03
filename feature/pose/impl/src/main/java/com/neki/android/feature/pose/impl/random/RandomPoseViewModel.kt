@@ -35,7 +35,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val bookmarkJobs = mutableMapOf<Long, Job>()
-    private val clickedBookmarkPoseIds = mutableSetOf<Long>()
     private var totalSwipeCount = 0
 
     @AssistedFactory
@@ -60,7 +59,10 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         postSideEffect: (RandomPoseEffect) -> Unit,
     ) {
         when (intent) {
-            RandomPoseIntent.EnterRandomPoseScreen -> fetchInitialData(state, reduce, postSideEffect)
+            RandomPoseIntent.EnterRandomPoseScreen -> {
+                analyticsLogger.log(PoseAnalyticsEvent.PoseRandomStart)
+                fetchInitialData(state, reduce, postSideEffect)
+            }
 
             // 튜토리얼
             RandomPoseIntent.ClickLeftSwipe -> {
@@ -85,8 +87,9 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             RandomPoseIntent.ClickCloseIcon -> postSideEffect(RandomPoseEffect.NavigateBack)
 
             RandomPoseIntent.ClickBookmarkIcon -> {
+                analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
                 val currentPost = state.currentPose ?: return
-                handleBookmarkToggle(currentPost.id, !currentPost.isBookmarked, reduce, shouldLogBookmark = true)
+                handleBookmarkToggle(currentPost.id, !currentPost.isBookmarked, reduce)
             }
 
             is RandomPoseIntent.BookmarkChanged -> handleBookmarkToggle(intent.poseId, intent.isBookmarked, reduce)
@@ -97,10 +100,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
         poseId: Long,
         newBookmarkStatus: Boolean,
         reduce: (RandomPoseState.() -> RandomPoseState) -> Unit,
-        shouldLogBookmark: Boolean = false,
     ) {
-        if (shouldLogBookmark) clickedBookmarkPoseIds += poseId else clickedBookmarkPoseIds -= poseId
-
         // UI 즉시 업데이트
         reduce {
             copy(
@@ -124,7 +124,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             poseRepository.updateBookmark(poseId, newBookmarkStatus)
                 .onSuccess {
                     Timber.d("updateBookmark success for poseId: $poseId")
-                    if (shouldLogBookmark) analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark)
                     reduce {
                         copy(committedBookmarks = committedBookmarks + (poseId to newBookmarkStatus))
                     }
@@ -216,7 +215,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                         currentPage = 0,
                     )
                 }
-                if (data.isNotEmpty()) analyticsLogger.log(PoseAnalyticsEvent.PoseRandomStart)
             }.onFailure { e ->
                 reduce { copy(isLoading = false) }
                 postSideEffect(RandomPoseEffect.ShowToast("포즈를 불러오는데 실패했어요"))
@@ -236,10 +234,8 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             val committedBookmark = state.committedBookmarks[pose.id]
 
             if (committedBookmark != null && currentBookmark != committedBookmark) {
-                val shouldLogBookmark = pose.id in clickedBookmarkPoseIds
                 applicationScope.launch {
                     poseRepository.updateBookmark(pose.id, currentBookmark)
-                        .onSuccess { if (shouldLogBookmark) analyticsLogger.log(PoseAnalyticsEvent.PoseBookmark) }
                 }
             }
         }
