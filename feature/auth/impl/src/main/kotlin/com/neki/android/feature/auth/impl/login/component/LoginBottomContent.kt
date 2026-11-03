@@ -20,6 +20,9 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.clickableSingle
+import com.neki.android.core.designsystem.popup.ArrowDirection
+import com.neki.android.core.designsystem.popup.ToolTip
+import com.neki.android.core.designsystem.popup.ToolTipSize
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.LoginType
 
@@ -43,10 +46,16 @@ internal fun LoginBottomContent(
                 onClick = onClick,
             )
             if (lastLoginType == LoginType.KAKAO) {
-                RecentLoginTooltip(
+                ToolTip(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .offset(x = (-9).dp, y = (-14).dp),
+                    tooltipText = "최근 로그인",
+                    arrowDirection = ArrowDirection.Down,
+                    arrowAlignment = Alignment.CenterEnd,
+                    arrowPosition = 13.5.dp,
+                    toolTipSize = ToolTipSize.Small,
+                    leadingIcon = ImageVector.vectorResource(R.drawable.icon_clock),
                 )
             }
         }
