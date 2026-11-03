@@ -109,6 +109,13 @@ internal class PoseViewModel @Inject constructor(
             }
 
             is PoseIntent.ClickPoseItem -> {
+                analyticsLogger.log(
+                    PoseAnalyticsEvent.PoseDetailClick(
+                        poseId = intent.item.id.toString(),
+                        peopleCount = intent.item.peopleCount,
+                        entryPoint = if (state.isShowBookmarkedPose) "bookmark" else "list",
+                    ),
+                )
                 postSideEffect(
                     PoseEffect.NavigateToPoseDetail(
                         PoseNavKey.PoseDetail(

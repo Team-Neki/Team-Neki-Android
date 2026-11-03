@@ -76,7 +76,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             }
 
             is RandomPoseIntent.PageChanged -> {
-                totalSwipeCount++
+                if (intent.page != state.currentPage) totalSwipeCount++
                 reduce { copy(currentPage = intent.page) }
                 prefetchIfNeeded(reduce)
             }
