@@ -40,4 +40,8 @@ internal class NekiAnalyticsLogger(
     override suspend fun flush() {
         serverLogger.flush()
     }
+
+    override fun deletePendingUserEvents() {
+        serverLogger.deletePendingUserEvents()
+    }
 }

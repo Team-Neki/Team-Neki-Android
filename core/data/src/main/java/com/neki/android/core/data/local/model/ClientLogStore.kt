@@ -5,11 +5,16 @@ import com.neki.android.core.model.analytics.ClientLogEvent
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 internal const val LOG_RETENTION_MILLIS = 7L * 24 * 60 * 60 * 1000
 internal const val MAX_STORED_LOGS = 5_000
 internal const val MAX_STORE_BYTES = 10 * 1024 * 1024
 internal const val MAX_LOG_BYTES = 999 * 1024 // Leave room for the server's NDJSON envelope.
+
+// Always three fraction digits, as iOS sends; Instant.toString() drops them on whole seconds.
+private val OCCURRED_AT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC)
 
 @Serializable
 internal data class ClientLogStore(
@@ -27,7 +32,7 @@ internal data class ClientLogStore(
             eventId = draft.eventId,
             eventType = draft.eventType,
             eventProperties = draft.eventProperties,
-            occurredAt = Instant.ofEpochMilli(draft.occurredAtMillis).toString(),
+            occurredAt = OCCURRED_AT_FORMAT.format(Instant.ofEpochMilli(draft.occurredAtMillis)),
             sessionId = draft.sessionId,
             sequenceNumber = if (sameSession) sequenceNumber + 1 else 1,
             deviceId = draft.deviceId,

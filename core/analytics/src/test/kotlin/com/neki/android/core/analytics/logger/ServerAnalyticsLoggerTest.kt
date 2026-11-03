@@ -119,24 +119,26 @@ class ServerAnalyticsLoggerTest {
     }
 
     @Test
-    fun `전송이 멈춰도 로그아웃 flush는 1점5초 후 반환한다`() = runTest {
+    fun `전송이 멈춰도 로그아웃 flush는 3초 후 반환한다`() = runTest {
         val repository = RecordingRepository().apply { flushGate = CompletableDeferred() }
         val logger = serverLogger(RecordingClient(), repository)
         logger.log(GlobalAnalyticsEvent.AppOpen)
         val flush = launch { logger.flush() }
         runCurrent()
         assertFalse(flush.isCompleted)
-        advanceTimeBy(1_501)
+        advanceTimeBy(3_001)
         runCurrent()
         assertTrue(flush.isCompleted)
         assertEquals(1, repository.events.size)
     }
 
     @Test
-    fun `탈퇴 이벤트는 사용자 ID 해제 후에도 서버 큐에 남는다`() = runTest {
+    fun `탈퇴하면 그 회원의 남은 로그는 지우고 탈퇴 이벤트만 남긴다`() = runTest {
         val repository = RecordingRepository()
         val logger = serverLogger(RecordingClient(), repository)
         logger.setUserId("A")
+        logger.log(GlobalAnalyticsEvent.AppOpen)
+        logger.deletePendingUserEvents()
         logger.log(MypageAnalyticsEvent.Withdraw)
         logger.clearUserId()
         logger.log(GlobalAnalyticsEvent.AppOpen)
@@ -198,7 +200,10 @@ class ServerAnalyticsLoggerTest {
             )
         }
         override suspend fun pendingCount() = events.size
-        override suspend fun flush(): Result<Unit> {
+        override suspend fun deleteUserEvents(userId: String) {
+            events.removeAll { it.userIdAtOccurrence == userId }
+        }
+        override suspend fun flush(ignoreBackoff: Boolean): Result<Unit> {
             countAtFlush = events.size
             flushGate?.await()
             return Result.success(Unit)

@@ -107,6 +107,12 @@ internal class ServerAnalyticsLogger(
         commands.trySend(Command.User(null))
     }
 
+    @Synchronized
+    override fun deletePendingUserEvents() {
+        // Queued in order, so logs recorded before this are deleted and the next event (withdraw) is kept.
+        userId?.let { commands.trySend(Command.DeleteUser(it)) }
+    }
+
     override suspend fun flush() {
         // Logout/withdraw should only wait for a bounded best-effort attempt.
         withTimeoutOrNull(BOUNDARY_FLUSH_MILLIS) {
@@ -117,8 +123,9 @@ internal class ServerAnalyticsLogger(
         }
     }
 
+    // The app may be killed in the background, so send once even while waiting to retry, as iOS does.
     override fun onStop(owner: LifecycleOwner) {
-        wakeSender.trySend(Unit)
+        scope.launch { repository.flush(ignoreBackoff = true) }
     }
 
     private suspend fun process(command: Command) {
@@ -131,6 +138,7 @@ internal class ServerAnalyticsLogger(
                     pendingCommands.decrementAndGet()
                 }
             }
+            is Command.DeleteUser -> repository.deleteUserEvents(command.userId)
             is Command.User -> {
                 repository.setUserId(command.userId)
                 if (command.userId != null) wakeSender.trySend(Unit)
@@ -169,13 +177,14 @@ internal class ServerAnalyticsLogger(
             val userKnown: Boolean,
         ) : Command
         data class User(val userId: String?) : Command
+        data class DeleteUser(val userId: String) : Command
         data class Barrier(val done: CompletableDeferred<Unit>) : Command
     }
 
     private companion object {
         const val FLUSH_COUNT = 100
         const val FLUSH_INTERVAL_MILLIS = 30_000L
-        const val BOUNDARY_FLUSH_MILLIS = 1_500L
+        const val BOUNDARY_FLUSH_MILLIS = 3_000L
         const val MAX_PENDING_COMMANDS = 5_000
     }
 }

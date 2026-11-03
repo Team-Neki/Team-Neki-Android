@@ -12,6 +12,8 @@ internal interface AmplitudeAnalyticsClient {
     suspend fun awaitDeviceId(): String = error("SDK device ID unavailable")
     suspend fun awaitUserId(): String? = null
     fun currentSessionId(): Long = -1
+    fun currentUserId(): String? = null
+    fun startNewSession() {}
     fun setUserId(userId: String?)
 }
 
@@ -36,6 +38,20 @@ internal class AmplitudeSdkAnalyticsClient @Inject constructor(
     }
 
     override fun currentSessionId(): Long = amplitude.sessionId
+
+    override fun currentUserId(): String? = amplitude.getUserId()
+
+    // The Android SDK has no public setSessionId; the timeline switches to the session_start event's session.
+    override fun startNewSession() {
+        val now = System.currentTimeMillis()
+        amplitude.track(
+            Amplitude.START_SESSION_EVENT,
+            options = EventOptions().apply {
+                sessionId = now
+                timestamp = now
+            },
+        )
+    }
 
     override suspend fun awaitUserId(): String? {
         amplitude.isBuilt.await()

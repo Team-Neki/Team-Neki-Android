@@ -5,8 +5,6 @@ import androidx.datastore.core.DataStoreFactory
 import com.neki.android.core.data.analytics.ClientLogStoreTest.Companion.draft
 import com.neki.android.core.data.local.model.ClientLogStore
 import com.neki.android.core.data.local.serializer.ClientLogStoreSerializer
-import com.neki.android.core.data.auth.TokenRefreshCoordinator
-import com.neki.android.core.data.remote.api.TokenRefreshService
 import com.neki.android.core.data.remote.api.ClientLogService
 import com.neki.android.core.data.remote.model.request.ClientLogRequest
 import com.neki.android.core.data.repository.impl.ClientLogRepositoryImpl
@@ -21,18 +19,15 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.async
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -42,32 +37,22 @@ import org.junit.rules.TemporaryFolder
 class ClientLogRepositoryTest {
     @get:Rule val directory = TemporaryFolder()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val auth = ClientLogAuthState()
     private val requests = mutableListOf<HttpRequestData>()
     private lateinit var store: DataStore<ClientLogStore>
     private lateinit var client: HttpClient
     private var status: suspend (HttpRequestData) -> HttpStatusCode = { HttpStatusCode.OK }
     private var badRequestCode = "D-01"
-    private var tokensReadable = true
+    private var accessToken: String? = null
     private val tokenRepository = object : TokenRepository {
-        override suspend fun saveTokens(accessToken: String, refreshToken: String) = auth.updateTokens(accessToken, refreshToken, false)
-        override suspend fun replaceTokensIfCurrent(expectedAccessToken: String, accessToken: String, refreshToken: String): Boolean {
-            if (auth.snapshot()?.accessToken != expectedAccessToken) return false
-            auth.updateTokens(accessToken, refreshToken, true)
-            return true
+        override suspend fun saveTokens(accessToken: String, refreshToken: String) {
+            this@ClientLogRepositoryTest.accessToken = accessToken
         }
-        override suspend fun clearTokensIfCurrent(expectedAccessToken: String): Boolean {
-            if (auth.snapshot()?.accessToken != expectedAccessToken) return false
-            auth.clear()
-            return true
+        override fun hasTokens() = flowOf(accessToken != null)
+        override fun getAccessToken() = flowOf(accessToken.orEmpty())
+        override fun getRefreshToken() = flowOf("")
+        override suspend fun clearTokensWithAuthCache() {
+            accessToken = null
         }
-        override suspend fun getTokens() = auth.snapshot()
-            ?.takeIf { tokensReadable }
-            ?.let { com.neki.android.core.model.Auth(it.accessToken, it.refreshToken) }
-        override fun hasTokens() = flowOf(auth.snapshot() != null)
-        override fun getAccessToken() = flowOf(auth.snapshot()?.accessToken.orEmpty())
-        override fun getRefreshToken() = flowOf(auth.snapshot()?.refreshToken.orEmpty())
-        override suspend fun clearTokensWithAuthCache() = auth.clear()
     }
 
     @Before
@@ -78,16 +63,12 @@ class ClientLogRepositoryTest {
         client = HttpClient(MockEngine { request ->
             requests += request
             val code = status(request)
-            val body = if (request.url.encodedPath == "/api/auth/refresh") {
-                """{"resultCode":"D-0","message":"OK","data":{"accessToken":"new-A","refreshToken":"refresh-A","isNewUser":false}}"""
-            } else {
-                val resultCode = when (code) {
-                    HttpStatusCode.OK -> "D-0"
-                    HttpStatusCode.BadRequest -> badRequestCode
-                    else -> "D-15"
-                }
-                """{"resultCode":"$resultCode","message":"test","data":null}"""
+            val resultCode = when (code) {
+                HttpStatusCode.OK -> "D-0"
+                HttpStatusCode.BadRequest -> badRequestCode
+                else -> "D-15"
             }
+            val body = """{"resultCode":"$resultCode","message":"test","data":null}"""
             respond(body, code, headersOf(HttpHeaders.ContentType, "application/json"))
         }) {
             install(ContentNegotiation) { json(clientLogJson) }
@@ -101,12 +82,7 @@ class ClientLogRepositoryTest {
         client.close()
     }
 
-    private fun repository() = ClientLogRepositoryImpl(
-        store,
-        ClientLogService(client),
-        TokenRefreshCoordinator(tokenRepository, TokenRefreshService(client)),
-        auth,
-    )
+    private fun repository() = ClientLogRepositoryImpl(store, ClientLogService(client), tokenRepository)
     private fun HttpRequestData.logs() = clientLogJson.decodeFromString<ClientLogRequest>((body as TextContent).text).logs
 
     @Test
@@ -155,6 +131,20 @@ class ClientLogRepositoryTest {
     }
 
     @Test
+    fun `재시도 대기 중에는 보내지 않지만 백그라운드 전환 때는 바로 보낸다`() = runBlocking {
+        val repository = repository()
+        repository.enqueue(draft()).getOrThrow()
+        status = { HttpStatusCode.ServiceUnavailable }
+        assertTrue(repository.flush().isFailure)
+        status = { HttpStatusCode.OK }
+        repository.flush().getOrThrow()
+        assertEquals(1, requests.size)
+        repository.flush(ignoreBackoff = true).getOrThrow()
+        assertEquals(2, requests.size)
+        assertTrue(store.data.first().events.isEmpty())
+    }
+
+    @Test
     fun `413 배치를 분할하고 원래 순번을 보존한다`() = runBlocking {
         val repository = repository()
         repeat(3) { repository.enqueue(draft()).getOrThrow() }
@@ -193,6 +183,16 @@ class ClientLogRepositoryTest {
     }
 
     @Test
+    fun `탈퇴 회원 로그를 지워도 익명과 다른 회원의 로그는 남긴다`() = runBlocking {
+        val repository = repository()
+        repository.enqueue(draft(user = "A")).getOrThrow()
+        repository.enqueue(draft(user = "B")).getOrThrow()
+        repository.enqueue(draft()).getOrThrow()
+        repository.deleteUserEvents("A")
+        assertEquals(listOf("B", null), store.data.first().events.map { it.userIdAtOccurrence })
+    }
+
+    @Test
     fun `D01이 아닌 400은 서버 오류로 보고 이벤트를 버리지 않고 나중에 재시도한다`() = runBlocking {
         val repository = repository()
         val events = List(2) { repository.enqueue(draft()).getOrThrow() }
@@ -205,76 +205,20 @@ class ClientLogRepositoryTest {
     }
 
     @Test
-    fun `토큰 갱신이 진행되지 않으면 같은 요청을 반복하지 않고 토큰 없이 보낸다`() = runBlocking {
-        val repository = repository()
-        tokenRepository.saveTokens("token-A", "refresh-A")
-        repository.setUserId("A")
-        repository.enqueue(draft(user = "A")).getOrThrow()
-        tokensReadable = false
-        status = { if (it.headers[HttpHeaders.Authorization] != null) HttpStatusCode.Unauthorized else HttpStatusCode.OK }
-        repository.flush().getOrThrow()
-        assertEquals(listOf("Bearer token-A", null), requests.map { it.headers[HttpHeaders.Authorization] })
-        assertTrue(store.data.first().events.isEmpty())
-    }
-
-    @Test
-    fun `토큰 갱신 중 호출자가 취소돼도 회전된 토큰을 저장한다`() = runBlocking {
-        tokenRepository.saveTokens("token-A", "refresh-A")
-        auth.setUserId("A")
-        val coordinator = TokenRefreshCoordinator(tokenRepository, TokenRefreshService(client))
-        val entered = kotlinx.coroutines.CompletableDeferred<Unit>()
-        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
-        status = {
-            entered.complete(Unit)
-            release.await()
-            HttpStatusCode.OK
-        }
-        val refresh = launch { coordinator.refresh("token-A", "refresh-A") }
-        entered.await()
-        refresh.cancel()
-        release.complete(Unit)
-        refresh.join()
-        assertEquals("new-A", auth.snapshot()?.accessToken)
-    }
-
-    @Test
-    fun `401이면 같은 계정 토큰만 갱신하고 원본 이벤트를 재전송한다`() = runBlocking {
+    fun `401이면 토큰만 빼고 같은 로그를 바로 다시 보내고 그 토큰은 더 쓰지 않는다`() = runBlocking {
         val repository = repository()
         tokenRepository.saveTokens("token-A", "refresh-A")
         repository.setUserId("A")
         val event = repository.enqueue(draft(user = "A")).getOrThrow()
-        status = { if (it.headers[HttpHeaders.Authorization] == "Bearer token-A") HttpStatusCode.Unauthorized else HttpStatusCode.OK }
+        status = { if (it.headers[HttpHeaders.Authorization] != null) HttpStatusCode.Unauthorized else HttpStatusCode.OK }
         repository.flush().getOrThrow()
-        assertEquals(3, requests.size)
-        assertEquals("/api/auth/refresh", requests[1].url.encodedPath)
-        assertEquals("Bearer new-A", requests[2].headers[HttpHeaders.Authorization])
-        assertEquals(listOf(event), requests[2].logs())
+        assertEquals(listOf("Bearer token-A", null), requests.map { it.headers[HttpHeaders.Authorization] })
+        assertEquals(listOf(event), requests[1].logs())
         assertTrue(store.data.first().events.isEmpty())
-    }
-
-    @Test
-    fun `갱신 중 계정 전환 시 새 계정 토큰을 덮어쓰거나 이전 로그에 쓰지 않는다`() = runBlocking {
-        val repository = repository()
-        tokenRepository.saveTokens("token-A", "refresh-A")
-        repository.setUserId("A")
         repository.enqueue(draft(user = "A")).getOrThrow()
-        status = {
-            if (it.url.encodedPath == "/api/auth/refresh") {
-                auth.updateTokens("token-B", "refresh-B", false)
-                auth.setUserId("B")
-                HttpStatusCode.OK
-            } else if (it.headers[HttpHeaders.Authorization] != null) {
-                HttpStatusCode.Unauthorized
-            } else {
-                HttpStatusCode.OK
-            }
-        }
         repository.flush().getOrThrow()
+        assertEquals(null, requests.last().headers[HttpHeaders.Authorization])
         assertEquals(3, requests.size)
-        assertEquals("token-B", auth.snapshot()?.accessToken)
-        assertEquals(null, requests[2].headers[HttpHeaders.Authorization])
-        assertTrue(store.data.first().events.isEmpty())
-        assertFalse(requests.any { it.headers[HttpHeaders.Authorization] == "Bearer token-B" })
     }
 
     @Test
@@ -289,42 +233,6 @@ class ClientLogRepositoryTest {
         assertEquals(listOf("Bearer token-A", null, null), requests.map { it.headers[HttpHeaders.Authorization] })
         assertEquals(listOf<String?>("A"), requests[1].logs().map { it.userIdAtOccurrence })
         assertTrue(store.data.first().events.isEmpty())
-    }
-
-    @Test
-    fun `일반 API와 로그가 같은 만료 토큰으로 갱신하면 한 번만 회전시킨다`() = runBlocking {
-        tokenRepository.saveTokens("token-A", "refresh-A")
-        auth.setUserId("A")
-        val coordinator = TokenRefreshCoordinator(tokenRepository, TokenRefreshService(client))
-        val entered = kotlinx.coroutines.CompletableDeferred<Unit>()
-        val release = kotlinx.coroutines.CompletableDeferred<Unit>()
-        status = {
-            entered.complete(Unit)
-            release.await()
-            HttpStatusCode.OK
-        }
-        val apiRefresh = async {
-            coordinator.refresh("token-A", "refresh-A")
-        }
-        entered.await()
-        val logRefresh = async {
-            coordinator.refresh("token-A", "refresh-A")
-        }
-        release.complete(Unit)
-        assertEquals(apiRefresh.await(), logRefresh.await())
-        assertEquals(1, requests.size)
-        assertEquals("new-A", auth.snapshot()?.accessToken)
-        assertEquals("A", auth.snapshot()?.userId)
-    }
-
-    @Test
-    fun `A 요청이 실패한 뒤 B로 전환됐으면 B refresh token을 사용하지 않는다`() = runBlocking {
-        tokenRepository.saveTokens("token-B", "refresh-B")
-        auth.setUserId("B")
-        val coordinator = TokenRefreshCoordinator(tokenRepository, TokenRefreshService(client))
-        assertEquals(null, coordinator.refresh("token-A", "refresh-A"))
-        assertTrue(requests.isEmpty())
-        assertEquals("refresh-B", auth.snapshot()?.refreshToken)
     }
 
     @Test

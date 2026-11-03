@@ -23,11 +23,17 @@ internal class AmplitudeAnalyticsLogger @Inject constructor(
         )
     }
 
+    // Sessions belong to the signed-in member: signing out or switching members opens a new session, as on iOS.
+    // Signing in from a signed-out state keeps the session.
     override fun setUserId(userId: String) {
+        val previous = amplitudeClient.currentUserId()
         amplitudeClient.setUserId(userId)
+        if (previous != null && previous != userId) amplitudeClient.startNewSession()
     }
 
     override fun clearUserId() {
+        val previous = amplitudeClient.currentUserId()
         amplitudeClient.setUserId(null)
+        if (previous != null) amplitudeClient.startNewSession()
     }
 }

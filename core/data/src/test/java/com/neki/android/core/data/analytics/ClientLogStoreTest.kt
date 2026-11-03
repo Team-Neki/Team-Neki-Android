@@ -22,7 +22,8 @@ class ClientLogStoreTest {
         assertEquals(2, second.second.sequenceNumber)
         assertEquals(JsonPrimitive(true), second.second.eventProperties["enabled"])
         assertEquals(JsonPrimitive(2), second.second.eventProperties["count"])
-        assertEquals("1970-01-01T00:00:02Z", second.second.occurredAt)
+        assertEquals("1970-01-01T00:00:02.000Z", second.second.occurredAt)
+        assertEquals("1970-01-01T00:00:01.000Z", first.second.occurredAt)
     }
 
     @Test

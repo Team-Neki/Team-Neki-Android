@@ -166,7 +166,6 @@ internal class MyPageViewModel @Inject constructor(
         postSideEffect: (MyPageEffect) -> Unit,
     ) = viewModelScope.launch {
         analyticsLogger.log(MypageAnalyticsEvent.Logout)
-        analyticsLogger.flush()
         authRepository.logout()
             .onSuccess {
                 reduce { copy(isShowLogoutDialog = false) }
@@ -185,6 +184,7 @@ internal class MyPageViewModel @Inject constructor(
         analyticsLogger.flush()
         authRepository.withdrawAccount()
             .onSuccess {
+                analyticsLogger.deletePendingUserEvents()
                 analyticsLogger.log(MypageAnalyticsEvent.Withdraw)
                 tokenRepository.clearTokensWithAuthCache()
                 analyticsLogger.clearUserId()

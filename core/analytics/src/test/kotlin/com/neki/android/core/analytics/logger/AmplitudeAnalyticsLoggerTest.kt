@@ -48,12 +48,36 @@ class AmplitudeAnalyticsLoggerTest {
         assertEquals(listOf("123", null), client.userIds)
     }
 
+    @Test
+    fun `로그아웃하거나 다른 회원으로 바뀌면 새 세션을 열고 로그인은 세션을 잇는다`() {
+        val client = RecordingAmplitudeAnalyticsClient()
+        val logger = AmplitudeAnalyticsLogger(client)
+
+        logger.setUserId("A")
+        logger.setUserId("A")
+        assertEquals(0, client.newSessions)
+        logger.clearUserId()
+        logger.clearUserId()
+        assertEquals(1, client.newSessions)
+        logger.setUserId("B")
+        assertEquals(1, client.newSessions)
+        logger.setUserId("C")
+        assertEquals(2, client.newSessions)
+    }
+
     private class RecordingAmplitudeAnalyticsClient : AmplitudeAnalyticsClient {
         val trackedEvents = mutableListOf<TrackedEvent>()
         val userIds = mutableListOf<String?>()
+        var newSessions = 0
 
         override fun track(eventName: String, eventProperties: Map<String, Any?>) {
             trackedEvents += TrackedEvent(eventName, eventProperties)
+        }
+
+        override fun currentUserId() = userIds.lastOrNull()
+
+        override fun startNewSession() {
+            newSessions++
         }
 
         override fun setUserId(userId: String?) {
