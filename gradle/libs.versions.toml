@@ -1,22 +1,21 @@
 [versions]
-agp = "8.13.1"
+agp = "9.3.3"
 annotationExperimental = "1.5.1"
 amplitude = "1.30.0"
 cameraX = "1.5.2"
 composeStableMarker = "1.0.7"
-kotlin = "2.3.0"
+kotlin = "2.4.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.6.1"
-activityCompose = "1.9.3"
+activityCompose = "1.10.1"
 composeBom = "2025.08.01"
-jetbrainsKotlinJvm = "2.3.0"
-ksp = "2.3.0"
+ksp = "2.3.13"
 appcompat = "1.7.1"
 kotlinxSerializationJson = "1.9.0"
-hilt = "2.58"
+hilt = "2.60.1"
 ktor = "3.4.0"
 androidxDatastore = "1.1.2"
 kotlinxCoroutines = "1.8.1"
@@ -32,7 +31,7 @@ androidxNavigation3 = "1.0.0"
 androidxLifecycleViewModel = "2.10.0"
 androidxHiltLifecycleViewmodelCompose = "1.3.0-alpha02"
 material = "1.13.0"
-detekt = "1.23.8"
+detekt = "2.0.0-alpha.6"
 barcodeScanning = "17.3.0"
 kakao = "2.23.1"
 coil = "3.3.0"
@@ -41,7 +40,7 @@ haze = "1.7.1"
 lottie = "6.7.1"
 exifinterface = "1.4.2"
 ossLicensesLib = "17.2.1"
-ossLicensesPlugin = "0.10.7"
+ossLicensesPlugin = "0.13.0"
 reorderable = "2.5.1"
 firebaseBom = "34.9.0"
 googleServices = "4.4.4"
@@ -105,7 +104,7 @@ naver-map-compose = { module = "io.github.fornewid:naver-map-compose", version.r
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
-detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+detekt-formatting = { group = "dev.detekt", name = "detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "barcodeScanning" }
 
@@ -150,14 +149,13 @@ neki-kotlin-library = { id = "neki.kotlin.library", version = "unspecified" }
 neki-hilt = { id = "neki.hilt", version = "unspecified" }
 
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 oss-licenses = { id = "com.google.android.gms.oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }

@@ -1,0 +1,7 @@
+# Release-only app rules. AGP 9.3 includes the default Android optimization rules.
+# AndroidX, Hilt, Ktor, Coroutines, Serialization, Coil, OkHttp, ML Kit and Naver
+# Maps ship their required consumer rules, including reflection and JNI entry points.
+
+# Kakao's documented model-field rule; its SDK consumer rules keep lifecycle hooks.
+# https://developers.kakao.com/docs/ko/android/getting-started#proguard
+-keep class com.kakao.sdk.**.model.* { <fields>; }
