@@ -92,10 +92,18 @@ class ArchiveMainViewModel @Inject constructor(
                 viewModelScope.launch { userRepository.setNotificationPermissionRequested() }
             ArchiveMainIntent.GrantNotificationPermission -> postSideEffect(ArchiveMainSideEffect.NavigateToNotification)
             ArchiveMainIntent.DenyNotificationPermissionPermanent -> reduce { copy(showNotificationPermissionDeniedDialog = true) }
-            ArchiveMainIntent.DismissNotificationPermissionDialog -> reduce { copy(showNotificationPermissionDeniedDialog = false) }
+            ArchiveMainIntent.DismissNotificationPermissionDialog -> reduce {
+                copy(showNotificationPermissionDeniedDialog = false, isNotificationDeniedDialogFromGuide = false)
+            }
             ArchiveMainIntent.ClickMoveToNotificationAppSettings -> {
-                reduce { copy(showNotificationPermissionDeniedDialog = false) }
-                postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotification)
+                reduce { copy(showNotificationPermissionDeniedDialog = false, isNotificationDeniedDialogFromGuide = false) }
+                postSideEffect(
+                    if (state.isNotificationDeniedDialogFromGuide) {
+                        ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide
+                    } else {
+                        ArchiveMainSideEffect.MoveAppSettingsForNotification
+                    },
+                )
             }
 
             // Album Intent
@@ -117,6 +125,9 @@ class ArchiveMainViewModel @Inject constructor(
             is ArchiveMainIntent.CheckNotificationGuide -> checkNotificationGuide(intent, reduce)
             ArchiveMainIntent.ClickNotificationGuideConfirm -> handleNotificationGuideConfirm(state, reduce, postSideEffect)
             ArchiveMainIntent.DismissNotificationGuide -> reduce { copy(notificationGuideType = null) }
+            ArchiveMainIntent.DenyNotificationGuidePermissionPermanent -> reduce {
+                copy(showNotificationPermissionDeniedDialog = true, isNotificationDeniedDialogFromGuide = true)
+            }
             is ArchiveMainIntent.CompleteNotificationGuidePermission -> completeNotificationGuidePermission(intent.isGranted, postSideEffect)
         }
     }
@@ -173,7 +184,7 @@ class ArchiveMainViewModel @Inject constructor(
             if (guideType == null) return@launch
 
             userRepository.setAutoNotificationGuideShown(today)
-            reduce { copy(notificationGuideType = guideType, isMarketingTermAgreed = userInfo.isMarketingTermAgreed) }
+            reduce { copy(notificationGuideType = guideType) }
         }
     }
 
@@ -200,8 +211,10 @@ class ArchiveMainViewModel @Inject constructor(
                     }
                 }
 
-                NotificationGuideType.OPEN_SETTINGS -> {
-                    if (!state.isMarketingTermAgreed) hasPendingAgreementToast = agreeMarketingTerm()
+                NotificationGuideType.OPEN_SETTINGS -> postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide)
+
+                NotificationGuideType.OPEN_SETTINGS_WITH_CONSENT -> {
+                    hasPendingAgreementToast = agreeMarketingTerm()
                     postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide)
                 }
             }

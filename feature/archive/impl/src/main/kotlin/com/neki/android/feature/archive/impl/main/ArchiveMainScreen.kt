@@ -98,6 +98,9 @@ internal fun ArchiveMainRoute(
     val notificationGuidePermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
+        if (!isGranted && !NotificationPermissionManager.shouldShowNotificationRationale(activity)) {
+            viewModel.store.onIntent(ArchiveMainIntent.DenyNotificationGuidePermissionPermanent)
+        }
         viewModel.store.onIntent(ArchiveMainIntent.CompleteNotificationGuidePermission(isGranted))
     }
 

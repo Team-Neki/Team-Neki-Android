@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
+import com.neki.android.core.data.local.di.NotificationGuideDataStore
 import com.neki.android.core.data.local.di.UserDataStore
 import com.neki.android.core.data.remote.api.UserService
 import com.neki.android.core.data.remote.model.request.UpdateProfileImageRequest
@@ -18,6 +19,7 @@ import javax.inject.Inject
 
 internal class UserRepositoryImpl @Inject constructor(
     @UserDataStore private val dataStore: DataStore<Preferences>,
+    @NotificationGuideDataStore private val notificationGuideDataStore: DataStore<Preferences>,
     private val userService: UserService,
 ) : UserRepository {
     override val hasVisitedRandomPose: Flow<Boolean> =
@@ -43,40 +45,40 @@ internal class UserRepositoryImpl @Inject constructor(
     }
 
     override val lastAutoNotificationGuideEpochDay: Flow<Long> =
-        dataStore.data.map { preferences ->
+        notificationGuideDataStore.data.map { preferences ->
             preferences[LAST_AUTO_NOTIFICATION_GUIDE_EPOCH_DAY] ?: -1L
         }
 
     override suspend fun setAutoNotificationGuideShown(epochDay: Long) {
-        dataStore.edit { preferences ->
+        notificationGuideDataStore.edit { preferences ->
             preferences[LAST_AUTO_NOTIFICATION_GUIDE_EPOCH_DAY] = epochDay
         }
     }
 
     override val updateNotificationGuideVersionCode: Flow<Long> =
-        dataStore.data.map { preferences ->
+        notificationGuideDataStore.data.map { preferences ->
             preferences[UPDATE_NOTIFICATION_GUIDE_VERSION_CODE] ?: -1L
         }
 
     override suspend fun setUpdateNotificationGuideChecked(versionCode: Long) {
-        dataStore.edit { preferences ->
+        notificationGuideDataStore.edit { preferences ->
             preferences[UPDATE_NOTIFICATION_GUIDE_VERSION_CODE] = versionCode
         }
     }
 
     override val hasRequestedNotificationPermission: Flow<Boolean> =
-        dataStore.data.map { preferences ->
+        notificationGuideDataStore.data.map { preferences ->
             preferences[HAS_REQUESTED_NOTIFICATION_PERMISSION] ?: false
         }
 
     override suspend fun setNotificationPermissionRequested() {
-        dataStore.edit { preferences ->
+        notificationGuideDataStore.edit { preferences ->
             preferences[HAS_REQUESTED_NOTIFICATION_PERMISSION] = true
         }
     }
 
     override suspend fun clearNotificationGuideRecord() {
-        dataStore.edit { preferences ->
+        notificationGuideDataStore.edit { preferences ->
             preferences.remove(LAST_AUTO_NOTIFICATION_GUIDE_EPOCH_DAY)
             preferences.remove(UPDATE_NOTIFICATION_GUIDE_VERSION_CODE)
         }

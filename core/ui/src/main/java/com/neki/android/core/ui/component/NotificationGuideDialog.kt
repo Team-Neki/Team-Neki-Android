@@ -32,11 +32,14 @@ private val NotificationGuideType.content: String
         NotificationGuideType.ENABLE_NOTIFICATION -> "새로운 소식과 콘텐츠를 놓치지 않도록\n기기 알림을 켜주세요."
         NotificationGuideType.MARKETING_CONSENT -> "새로운 브랜드·이벤트 소식을\n알림으로 받아보세요.\n(광고성 정보 수신 동의 포함)"
         NotificationGuideType.OPEN_SETTINGS -> "설정 > 알림에서 켤 수 있어요."
+        NotificationGuideType.OPEN_SETTINGS_WITH_CONSENT -> "설정 > 알림에서 켤 수 있어요.\n(광고성 정보 수신 동의 포함)"
     }
 
 private val NotificationGuideType.confirmButtonText: String
     get() = when (this) {
-        NotificationGuideType.OPEN_SETTINGS -> "설정에서 켜기"
+        NotificationGuideType.OPEN_SETTINGS,
+        NotificationGuideType.OPEN_SETTINGS_WITH_CONSENT,
+        -> "설정에서 켜기"
         else -> "알림 받기"
     }
 
@@ -69,5 +72,13 @@ private fun NotificationGuideDialogMarketingConsentPreview() {
 private fun NotificationGuideDialogOpenSettingsPreview() {
     NekiTheme {
         NotificationGuideDialog(type = NotificationGuideType.OPEN_SETTINGS)
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun NotificationGuideDialogOpenSettingsWithConsentPreview() {
+    NekiTheme {
+        NotificationGuideDialog(type = NotificationGuideType.OPEN_SETTINGS_WITH_CONSENT)
     }
 }

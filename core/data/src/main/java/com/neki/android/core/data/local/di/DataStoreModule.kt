@@ -20,6 +20,12 @@ private val Context.tokenDataStore: DataStore<Preferences> by preferencesDataSto
 private const val USER_DATASTORE = "user_datastore"
 private val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name = USER_DATASTORE)
 
+// 기기 OS 상태와 묶인 값이라 data_extraction_rules / backup_rules에서 백업 대상에서 제외한다
+private const val NOTIFICATION_GUIDE_DATASTORE = "notification_guide_datastore"
+private val Context.notificationGuideDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = NOTIFICATION_GUIDE_DATASTORE,
+)
+
 @InstallIn(SingletonComponent::class)
 @Module
 internal object DataStoreModule {
@@ -38,4 +44,10 @@ internal object DataStoreModule {
     @Singleton
     @Provides
     fun provideUserDataStore(@ApplicationContext context: Context): DataStore<Preferences> = context.userDataStore
+
+    @NotificationGuideDataStore
+    @Singleton
+    @Provides
+    fun provideNotificationGuideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        context.notificationGuideDataStore
 }

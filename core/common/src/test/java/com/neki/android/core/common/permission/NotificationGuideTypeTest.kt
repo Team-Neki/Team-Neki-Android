@@ -59,16 +59,25 @@ class NotificationGuideTypeTest {
     }
 
     @Test
-    fun `OS 알림이 꺼져 있고 OS 팝업을 띄울 수 없으면 동의 여부와 관계없이 설정 모달을 띄운다`() {
-        listOf(true, false).forEach { isMarketingAgreed ->
-            val result = NotificationGuideType.resolve(
-                isNotificationGranted = false,
-                isMarketingAgreed = isMarketingAgreed,
-                canRequestNotificationPermission = false,
-            )
+    fun `OS 알림이 꺼져 있고 OS 팝업을 띄울 수 없으며 동의했으면 설정 모달을 띄운다`() {
+        val result = NotificationGuideType.resolve(
+            isNotificationGranted = false,
+            isMarketingAgreed = true,
+            canRequestNotificationPermission = false,
+        )
 
-            assertEquals(NotificationGuideType.OPEN_SETTINGS, result)
-        }
+        assertEquals(NotificationGuideType.OPEN_SETTINGS, result)
+    }
+
+    @Test
+    fun `OS 알림이 꺼져 있고 OS 팝업을 띄울 수 없으며 미동의면 동의를 포함한 설정 모달을 띄운다`() {
+        val result = NotificationGuideType.resolve(
+            isNotificationGranted = false,
+            isMarketingAgreed = false,
+            canRequestNotificationPermission = false,
+        )
+
+        assertEquals(NotificationGuideType.OPEN_SETTINGS_WITH_CONSENT, result)
     }
 
     @Test
