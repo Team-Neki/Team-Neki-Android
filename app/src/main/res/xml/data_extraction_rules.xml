@@ -4,16 +4,11 @@
    for details.
 -->
 <data-extraction-rules>
+    <!-- 알림 권한 요청 이력·안내 판정 기록은 기기 OS 상태와 묶여 있어 복원하지 않는다 -->
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="file" path="datastore/notification_guide_datastore.preferences_pb" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="file" path="datastore/notification_guide_datastore.preferences_pb" />
     </device-transfer>
-    -->
 </data-extraction-rules>

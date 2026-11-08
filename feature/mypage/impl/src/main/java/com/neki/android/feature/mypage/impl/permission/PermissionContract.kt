@@ -21,6 +21,7 @@ sealed interface PermissionIntent {
     data object DismissPermissionDialog : PermissionIntent
     data object ConfirmPermissionDialog : PermissionIntent
     data class UpdatePermissionState(val permission: NekiPermission, val isGranted: Boolean) : PermissionIntent
+    data object RequestedNotificationPermission : PermissionIntent
     data class ShowPermissionDeniedDialog(val permission: NekiPermission) : PermissionIntent
 
     data object ToggleMarketingNotification : PermissionIntent

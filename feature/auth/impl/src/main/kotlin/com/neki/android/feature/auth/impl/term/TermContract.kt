@@ -1,5 +1,6 @@
 package com.neki.android.feature.auth.impl.term
 
+import com.neki.android.core.common.const.TermConst
 import com.neki.android.core.model.Term
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -13,6 +14,9 @@ data class TermState(
 
     val isAllTermChecked: Boolean
         get() = terms.isNotEmpty() && terms.all { it.isChecked }
+
+    val isMarketingTermChecked: Boolean
+        get() = terms.any { it.id == TermConst.MARKETING_TERM_ID && it.isChecked }
 }
 
 sealed interface TermIntent {
@@ -26,6 +30,7 @@ sealed interface TermIntent {
 
 sealed interface TermSideEffect {
     data object NavigateToMain : TermSideEffect
+    data object RequestNotificationPermission : TermSideEffect
     data object NavigateBack : TermSideEffect
     data class NavigateUrl(val url: String) : TermSideEffect
     data class ShowToastMessage(val message: String) : TermSideEffect

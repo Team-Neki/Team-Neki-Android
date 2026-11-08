@@ -53,6 +53,8 @@ internal class MyPageViewModel @Inject constructor(
             MyPageIntent.ClickPermission -> postSideEffect(MyPageEffect.NavigateToPermission)
 
             // Notification Permission Intent
+            MyPageIntent.RequestedNotificationPermission ->
+                viewModelScope.launch { userRepository.setNotificationPermissionRequested() }
             MyPageIntent.GrantNotificationPermission -> postSideEffect(MyPageEffect.NavigateToNotification)
             MyPageIntent.DenyNotificationPermissionPermanent -> reduce { copy(showNotificationPermissionDeniedDialog = true) }
             MyPageIntent.DismissNotificationPermissionDialog -> reduce { copy(showNotificationPermissionDeniedDialog = false) }
@@ -184,7 +186,7 @@ internal class MyPageViewModel @Inject constructor(
                 tokenRepository.clearTokensWithAuthCache()
                 analyticsLogger.clearUserId()
                 authRepository.setCompletedOnboarding(false)
-                userRepository.clearMarketingPopupRecord()
+                userRepository.clearNotificationGuideRecord()
                 reduce { copy(isLoading = false) }
                 postSideEffect(MyPageEffect.UnlinkWithKakao)
             }
