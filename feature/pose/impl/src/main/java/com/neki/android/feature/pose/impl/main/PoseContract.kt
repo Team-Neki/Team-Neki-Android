@@ -2,6 +2,7 @@ package com.neki.android.feature.pose.impl.main
 
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
+import com.neki.android.feature.pose.impl.const.PoseConst.TEMP_TOTAL_POSE_COUNT
 import com.neki.android.feature.pose.api.PoseNavKey
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -11,7 +12,7 @@ data class PoseState(
     val selectedPeopleCount: PeopleCount? = null,
     val selectedRelationTag: PoseRelationTag? = null,
     val selectedSortType: PoseSortType = PoseSortType.LATEST,
-    val totalPoseCount: Int? = null,
+    val totalPoseCount: Int? = TEMP_TOTAL_POSE_COUNT,
     val selectedRandomPosePeopleCount: PeopleCount? = null,
     val isShowBookmarkedPose: Boolean = false,
     val bookmarkedPoseList: ImmutableList<Pose> = persistentListOf(),
