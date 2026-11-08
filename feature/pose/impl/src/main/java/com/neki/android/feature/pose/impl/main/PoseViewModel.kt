@@ -103,15 +103,6 @@ internal class PoseViewModel @Inject constructor(
                 updatePoseFilter(state, state.toggleRelationTagFilter(intent.relationTag), reduce, postSideEffect)
             }
 
-            PoseIntent.ClickSortDropdown -> reduce { copy(isShowSortDropdown = true) }
-            PoseIntent.DismissSortDropdown -> reduce { copy(isShowSortDropdown = false) }
-            is PoseIntent.ClickSortDropdownItem -> reduce {
-                copy(
-                    selectedSortType = intent.sortType,
-                    isShowSortDropdown = false,
-                )
-            }
-
             is PoseIntent.ClickPoseItem -> {
                 postSideEffect(
                     PoseEffect.NavigateToPoseDetail(

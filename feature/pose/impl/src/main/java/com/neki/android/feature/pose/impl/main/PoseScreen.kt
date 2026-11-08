@@ -123,9 +123,6 @@ fun PoseScreen(
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickBookmark = { onIntent(PoseIntent.ClickBookmarkChip) },
             onClickRelationTag = { onIntent(PoseIntent.ClickRelationTagChip(it)) },
-            onClickSortDropdown = { onIntent(PoseIntent.ClickSortDropdown) },
-            onDismissSortDropdown = { onIntent(PoseIntent.DismissSortDropdown) },
-            onClickSortDropdownItem = { onIntent(PoseIntent.ClickSortDropdownItem(it)) },
             onClickPoseItem = { pose, index -> onIntent(PoseIntent.ClickPoseItem(pose, index)) },
             onClickBookmarkIcon = { onIntent(PoseIntent.ClickBookmarkIcon(it)) },
         )
@@ -170,9 +167,6 @@ fun PoseContent(
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
     onClickRelationTag: (PoseRelationTag) -> Unit = {},
-    onClickSortDropdown: () -> Unit = {},
-    onDismissSortDropdown: () -> Unit = {},
-    onClickSortDropdownItem: (PoseSortType) -> Unit = {},
     onClickPoseItem: (Pose, Int) -> Unit = { _, _ -> },
     onClickBookmarkIcon: (Pose) -> Unit = {},
 ) {
@@ -210,16 +204,11 @@ fun PoseContent(
                 peopleCount = uiState.selectedPeopleCount,
                 relationTag = uiState.selectedRelationTag,
                 isBookmarkSelected = uiState.isShowBookmarkedPose,
-                sortType = uiState.selectedSortType,
                 totalPoseCount = uiState.totalPoseCount,
-                isShowSortDropdown = uiState.isShowSortDropdown,
                 visible = showFilterBar,
                 onClickPeopleCount = onClickPeopleCount,
                 onClickBookmark = onClickBookmark,
                 onClickRelationTag = onClickRelationTag,
-                onClickSortDropdown = onClickSortDropdown,
-                onDismissSortDropdown = onDismissSortDropdown,
-                onClickSortDropdownItem = onClickSortDropdownItem,
             )
         }
     }
@@ -250,7 +239,6 @@ private fun PoseScreenRelationTagSelectedPreview() {
             uiState = PoseState(
                 selectedPeopleCount = PeopleCount.TWO,
                 selectedRelationTag = PoseRelationTag.FRIEND,
-                selectedSortType = PoseSortType.POPULAR,
                 totalPoseCount = 20,
             ),
             posePagingItems = posePagingItems,
