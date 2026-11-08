@@ -52,8 +52,4 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.paging.runtime)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.ktor.client.mock)
 }
