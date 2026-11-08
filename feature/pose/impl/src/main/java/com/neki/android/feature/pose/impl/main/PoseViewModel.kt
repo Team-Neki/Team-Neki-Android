@@ -96,16 +96,11 @@ internal class PoseViewModel @Inject constructor(
             PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
             PoseIntent.ClickBookmarkChip -> {
                 analyticsLogger.log(PoseAnalyticsEvent.PoseBookmarkFilter)
-                val newValue = !state.isShowBookmarkedPose
-                _isBookmarkOnly.value = newValue
-                _headCountFilter.value = null
-                reduce {
-                    copy(
-                        isShowBookmarkedPose = newValue,
-                        selectedPeopleCount = null,
-                    )
-                }
-                postSideEffect(PoseEffect.ScrollToTop)
+                updatePoseFilter(state, state.toggleBookmarkFilter(), reduce, postSideEffect)
+            }
+
+            is PoseIntent.ClickRelationTagChip -> {
+                updatePoseFilter(state, state.toggleRelationTagFilter(intent.relationTag), reduce, postSideEffect)
             }
 
             is PoseIntent.ClickPoseItem -> {
@@ -161,27 +156,31 @@ internal class PoseViewModel @Inject constructor(
         reduce: (PoseState.() -> PoseState) -> Unit,
         postSideEffect: (PoseEffect) -> Unit,
     ) {
-        _isBookmarkOnly.value = false
-        if (intent.peopleCount == state.selectedPeopleCount) {
-            _headCountFilter.value = null
-            reduce {
-                copy(
-                    isShowBookmarkedPose = false,
-                    isShowPeopleCountBottomSheet = false,
-                    selectedPeopleCount = null,
-                )
-            }
-        } else {
+        if (intent.peopleCount != state.selectedPeopleCount) {
             analyticsLogger.log(PoseAnalyticsEvent.PoseFilterToggle(peopleCount = intent.peopleCount.value))
-            _headCountFilter.value = intent.peopleCount
-            reduce {
-                copy(
-                    isShowBookmarkedPose = false,
-                    selectedPeopleCount = intent.peopleCount,
-                    isShowPeopleCountBottomSheet = false,
-                )
-            }
         }
-        postSideEffect(PoseEffect.ScrollToTop)
+        reduce { copy(isShowPeopleCountBottomSheet = false) }
+        updatePoseFilter(state, state.togglePeopleCountFilter(intent.peopleCount), reduce, postSideEffect)
+    }
+
+    // 관계 태그는 서버 필터가 없어 목록 조회 조건에 포함하지 않는다
+    private fun updatePoseFilter(
+        state: PoseState,
+        filteredState: PoseState,
+        reduce: (PoseState.() -> PoseState) -> Unit,
+        postSideEffect: (PoseEffect) -> Unit,
+    ) {
+        _headCountFilter.value = filteredState.selectedPeopleCount
+        _isBookmarkOnly.value = filteredState.isShowBookmarkedPose
+        reduce {
+            copy(
+                isShowBookmarkedPose = filteredState.isShowBookmarkedPose,
+                selectedPeopleCount = filteredState.selectedPeopleCount,
+                selectedRelationTag = filteredState.selectedRelationTag,
+            )
+        }
+        val isQueryChanged = filteredState.selectedPeopleCount != state.selectedPeopleCount ||
+            filteredState.isShowBookmarkedPose != state.isShowBookmarkedPose
+        if (isQueryChanged) postSideEffect(PoseEffect.ScrollToTop)
     }
 }
