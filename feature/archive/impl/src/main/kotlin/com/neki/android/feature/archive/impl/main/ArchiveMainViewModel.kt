@@ -47,7 +47,7 @@ class ArchiveMainViewModel @Inject constructor(
             onIntent = ::onIntent,
         )
     private var fetchJob: Job? = null
-    private var hasCheckedNotificationGuide = false
+    private var lastNotificationGuideCheckEpochDay = -1L
     private var pendingAgreementToastMessage: String? = null
     private var checkedVersionCodeBeforeGuide = -1L
 
@@ -156,11 +156,12 @@ class ArchiveMainViewModel @Inject constructor(
         intent: ArchiveMainIntent.CheckNotificationGuide,
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
     ) {
-        if (hasCheckedNotificationGuide) return
-        hasCheckedNotificationGuide = true
+        // 같은 화면 인스턴스에서는 하루 1번만 판정한다. 날짜가 바뀌면 재진입 시 다시 판정한다.
+        val today = LocalDate.now().toEpochDay()
+        if (lastNotificationGuideCheckEpochDay == today) return
+        lastNotificationGuideCheckEpochDay = today
 
         viewModelScope.launch {
-            val today = LocalDate.now().toEpochDay()
             val checkedVersionCode = userRepository.updateNotificationGuideVersionCode.first()
             val shouldCheck = NotificationGuideType.shouldCheckUpdateGuide(
                 todayEpochDay = today,
