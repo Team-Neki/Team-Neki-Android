@@ -184,7 +184,7 @@ class ArchiveMainViewModel @Inject constructor(
             if (guideType == null) return@launch
 
             userRepository.setAutoNotificationGuideShown(today)
-            reduce { copy(notificationGuideType = guideType) }
+            reduce { copy(notificationGuideType = guideType, isMarketingTermAgreed = userInfo.isMarketingTermAgreed) }
         }
     }
 
@@ -211,10 +211,8 @@ class ArchiveMainViewModel @Inject constructor(
                     }
                 }
 
-                NotificationGuideType.OPEN_SETTINGS -> postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide)
-
-                NotificationGuideType.OPEN_SETTINGS_WITH_CONSENT -> {
-                    hasPendingAgreementToast = agreeMarketingTerm()
+                NotificationGuideType.OPEN_SETTINGS -> {
+                    if (!state.isMarketingTermAgreed) hasPendingAgreementToast = agreeMarketingTerm()
                     postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide)
                 }
             }

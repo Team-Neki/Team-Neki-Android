@@ -17,11 +17,8 @@ enum class NotificationGuideType {
     /** OS 알림 켜짐 + 이벤트·혜택 미동의: 동의만 저장 */
     MARKETING_CONSENT,
 
-    /** OS 알림 팝업을 더 띄울 수 없음 + 이벤트·혜택 동의: 설정 이동 */
+    /** OS 알림 팝업을 더 띄울 수 없음: 설정 이동 (미동의면 동의도 저장) */
     OPEN_SETTINGS,
-
-    /** OS 알림 팝업을 더 띄울 수 없음 + 이벤트·혜택 미동의: 동의 저장 후 설정 이동 */
-    OPEN_SETTINGS_WITH_CONSENT,
     ;
 
     companion object {
@@ -40,8 +37,7 @@ enum class NotificationGuideType {
         ): NotificationGuideType? = when {
             isNotificationGranted && isMarketingAgreed -> null
             isNotificationGranted -> MARKETING_CONSENT
-            !canRequestNotificationPermission && isMarketingAgreed -> OPEN_SETTINGS
-            !canRequestNotificationPermission -> OPEN_SETTINGS_WITH_CONSENT
+            !canRequestNotificationPermission -> OPEN_SETTINGS
             isMarketingAgreed -> ENABLE_NOTIFICATION
             else -> INTEGRATED
         }
