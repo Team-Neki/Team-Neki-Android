@@ -88,6 +88,8 @@ class ArchiveMainViewModel @Inject constructor(
             ArchiveMainIntent.ClickNotificationIcon -> postSideEffect(ArchiveMainSideEffect.RequestNotificationPermission)
 
             // Notification Permission Intent
+            ArchiveMainIntent.RequestedNotificationPermission ->
+                viewModelScope.launch { userRepository.setNotificationPermissionRequested() }
             ArchiveMainIntent.GrantNotificationPermission -> postSideEffect(ArchiveMainSideEffect.NavigateToNotification)
             ArchiveMainIntent.DenyNotificationPermissionPermanent -> reduce { copy(showNotificationPermissionDeniedDialog = true) }
             ArchiveMainIntent.DismissNotificationPermissionDialog -> reduce { copy(showNotificationPermissionDeniedDialog = false) }

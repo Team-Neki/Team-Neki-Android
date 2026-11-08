@@ -32,6 +32,7 @@ sealed interface ArchiveMainIntent {
     data object ClickNotificationIcon : ArchiveMainIntent
 
     // Notification Permission Intent
+    data object RequestedNotificationPermission : ArchiveMainIntent
     data object GrantNotificationPermission : ArchiveMainIntent
     data object DenyNotificationPermissionPermanent : ArchiveMainIntent
     data object DismissNotificationPermissionDialog : ArchiveMainIntent

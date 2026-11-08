@@ -91,6 +91,9 @@ internal class PermissionViewModel @Inject constructor(
                 }
             }
 
+            PermissionIntent.RequestedNotificationPermission ->
+                viewModelScope.launch { userRepository.setNotificationPermissionRequested() }
+
             is PermissionIntent.ShowPermissionDeniedDialog ->
                 reduce { copy(isShowPermissionDialog = true, clickedPermission = intent.permission) }
 
