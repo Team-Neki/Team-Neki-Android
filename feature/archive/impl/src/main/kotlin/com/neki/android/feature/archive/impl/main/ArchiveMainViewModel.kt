@@ -48,8 +48,9 @@ class ArchiveMainViewModel @Inject constructor(
         )
     private var fetchJob: Job? = null
     private var lastNotificationGuideCheckEpochDay = -1L
-    private var pendingAgreementToastMessage: String? = null
+    private var isMarketingAgreedAtGuide = false
     private var checkedVersionCodeBeforeGuide = -1L
+    private var pendingAgreementToastMessage: String? = null
 
     init {
         store.onIntent(ArchiveMainIntent.EnterArchiveMainScreen)
@@ -189,7 +190,8 @@ class ArchiveMainViewModel @Inject constructor(
             if (guideType == null) return@launch
 
             userRepository.setAutoNotificationGuideShown(today)
-            reduce { copy(notificationGuideType = guideType, isMarketingTermAgreed = userInfo.isMarketingTermAgreed) }
+            isMarketingAgreedAtGuide = userInfo.isMarketingTermAgreed
+            reduce { copy(notificationGuideType = guideType) }
         }
     }
 
@@ -215,7 +217,7 @@ class ArchiveMainViewModel @Inject constructor(
                 }
 
                 NotificationGuideType.OPEN_SETTINGS -> {
-                    if (!state.isMarketingTermAgreed) pendingAgreementToastMessage = agreeMarketingTermForGuide()
+                    if (!isMarketingAgreedAtGuide) pendingAgreementToastMessage = agreeMarketingTermForGuide()
                     postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide)
                 }
             }
@@ -226,11 +228,16 @@ class ArchiveMainViewModel @Inject constructor(
      * 알림 안내 모달에서 이벤트·혜택 알림 동의를 저장하고 띄울 토스트 문구를 반환한다.
      * 저장에 실패하면 판정 버전을 되돌려, 다음 판정 때 안내를 다시 띄울 수 있게 한다.
      */
-    private suspend fun agreeMarketingTermForGuide(): String {
-        if (agreeMarketingTerm()) return marketingAgreementToastMessage()
-        userRepository.setUpdateNotificationGuideChecked(checkedVersionCodeBeforeGuide)
-        return MARKETING_AGREEMENT_FAILED_MESSAGE
-    }
+    private suspend fun agreeMarketingTermForGuide(): String =
+        termRepository.updateTermAgreement(termId = TermConst.MARKETING_TERM_ID, agreed = true)
+            .fold(
+                onSuccess = { marketingAgreementToastMessage() },
+                onFailure = { e ->
+                    Timber.e(e)
+                    userRepository.setUpdateNotificationGuideChecked(checkedVersionCodeBeforeGuide)
+                    MARKETING_AGREEMENT_FAILED_MESSAGE
+                },
+            )
 
     private suspend fun requestNotificationGuidePermission(postSideEffect: (ArchiveMainSideEffect) -> Unit) {
         userRepository.setNotificationPermissionRequested()
@@ -321,11 +328,6 @@ class ArchiveMainViewModel @Inject constructor(
                 }
         }
     }
-
-    private suspend fun agreeMarketingTerm(): Boolean =
-        termRepository.updateTermAgreement(termId = TermConst.MARKETING_TERM_ID, agreed = true)
-            .onFailure { e -> Timber.e(e) }
-            .isSuccess
 
     private fun handleAddAlbum(
         albumName: String,

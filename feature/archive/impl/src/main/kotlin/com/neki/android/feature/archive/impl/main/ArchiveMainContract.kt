@@ -16,7 +16,6 @@ data class ArchiveMainState(
     val isShowAddAlbumBottomSheet: Boolean = false,
     val albumNameTextState: TextFieldState = TextFieldState(),
     val notificationGuideType: NotificationGuideType? = null,
-    val isMarketingTermAgreed: Boolean = false,
     val showNotificationPermissionDeniedDialog: Boolean = false,
     val isNotificationDeniedDialogFromGuide: Boolean = false,
 )
