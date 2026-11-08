@@ -8,12 +8,12 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -36,10 +36,8 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.ui.component.DefaultFilterChip
 import com.neki.android.core.ui.component.DownIconFilterChip
-import com.neki.android.core.ui.component.DropdownPopup
 import com.neki.android.feature.pose.impl.main.PoseRelationTag
 import com.neki.android.feature.pose.impl.main.PoseSortType
-import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun PoseFilterBar(
@@ -120,6 +118,7 @@ private fun PoseTagChips(
         DownIconFilterChip(
             isSelected = peopleCount != null,
             displayText = peopleCount?.displayText ?: "인원수",
+            contentPadding = PaddingValues(start = 12.dp, end = 8.dp, top = 7.dp, bottom = 7.dp),
             onClick = onClickPeopleCount,
         )
         PoseRelationTag.entries.forEach { tag ->
@@ -189,15 +188,11 @@ private fun PoseCountSortRow(
             if (isShowSortDropdown) {
                 val popupOffsetY = with(LocalDensity.current) { 26.dp.roundToPx() }
 
-                DropdownPopup(
-                    items = PoseSortType.entries.toImmutableList(),
-                    selectedItem = sortType,
-                    onSelect = onClickSortDropdownItem,
+                PoseSortDropdown(
+                    selectedSortType = sortType,
                     onDismissRequest = onDismissSortDropdown,
-                    itemLabel = { it.displayText },
-                    modifier = Modifier.width(106.dp),
+                    onClickItem = onClickSortDropdownItem,
                     offset = IntOffset(x = 0, y = popupOffsetY),
-                    alignment = Alignment.TopEnd,
                 )
             }
         }
