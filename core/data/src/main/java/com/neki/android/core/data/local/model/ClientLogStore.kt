@@ -45,18 +45,31 @@ internal data class ClientLogStore(
             events = events + event,
             sessionId = event.sessionId,
             sequenceNumber = event.sequenceNumber,
-        ).prune(draft.occurredAtMillis) to event
+        ) to event
     }
 
-    fun prune(now: Long): ClientLogStore {
-        val retained = events.filter {
+    fun prune(now: Long): ClientLogPruneResult {
+        val unexpired = events.filter {
             Instant.parse(it.occurredAt).toEpochMilli() >= now - LOG_RETENTION_MILLIS
-        }.takeLast(MAX_STORED_LOGS)
+        }
+        val retained = unexpired.takeLast(MAX_STORED_LOGS)
         var bytes = 1024
         val bounded = retained.asReversed().takeWhile {
             bytes += Json.encodeToString(it).toByteArray().size + 1
             bytes <= MAX_STORE_BYTES
         }.asReversed()
-        return copy(events = bounded)
+        return ClientLogPruneResult(
+            store = copy(events = bounded),
+            expired = events.size - unexpired.size,
+            overCount = unexpired.size - retained.size,
+            overSize = retained.size - bounded.size,
+        )
     }
 }
+
+internal data class ClientLogPruneResult(
+    val store: ClientLogStore,
+    val expired: Int,
+    val overCount: Int,
+    val overSize: Int,
+)

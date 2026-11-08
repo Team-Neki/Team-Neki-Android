@@ -13,9 +13,11 @@ import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.mypage.impl.profile.model.EditProfileImageType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -184,10 +186,9 @@ internal class MyPageViewModel @Inject constructor(
         analyticsLogger.flush()
         authRepository.withdrawAccount()
             .onSuccess {
-                analyticsLogger.deletePendingUserEvents()
-                analyticsLogger.log(MypageAnalyticsEvent.Withdraw)
-                tokenRepository.clearTokensWithAuthCache()
-                analyticsLogger.clearUserId()
+                withContext(NonCancellable) {
+                    tokenRepository.clearTokensWithAuthCache(analyticsLogger.completeWithdrawal())
+                }
                 authRepository.setCompletedOnboarding(false)
                 userRepository.clearMarketingPopupRecord()
                 reduce { copy(isLoading = false) }

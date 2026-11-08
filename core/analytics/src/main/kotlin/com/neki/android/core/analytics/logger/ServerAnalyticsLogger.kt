@@ -4,12 +4,15 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.neki.android.core.analytics.event.AnalyticsEvent
+import com.neki.android.core.analytics.event.MypageAnalyticsEvent
 import com.neki.android.core.analytics.server.toJsonObject
 import com.neki.android.core.dataapi.repository.ClientLogRepository
 import com.neki.android.core.model.analytics.ClientLogDraft
+import com.neki.android.core.model.analytics.ClientLogWithdrawal
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -108,9 +111,32 @@ internal class ServerAnalyticsLogger(
     }
 
     @Synchronized
-    override fun deletePendingUserEvents() {
-        // Queued in order, so logs recorded before this are deleted and the next event (withdraw) is kept.
-        commands.trySend(Command.DeleteUser(userId, userKnown))
+    fun completeWithdrawal(eventId: String, occurredAt: Long): Deferred<ClientLogWithdrawal?> {
+        val event = Command.Log(
+            MypageAnalyticsEvent.Withdraw.name,
+            JsonObject(emptyMap()),
+            eventId,
+            occurredAt,
+            userId,
+            userKnown,
+        )
+        repository.beginWithdrawal()
+        userId = null
+        userKnown = true
+        val marker = scope.async {
+            val knownUser = if (event.userKnown) event.userId else null
+            val owner = repository.storedTokenOwner() ?: knownUser ?: if (event.userKnown) {
+                null
+            } else {
+                withTimeoutOrNull(BOUNDARY_FLUSH_MILLIS) { restoredUserId.await() }
+            }
+            owner?.let { ClientLogWithdrawal(it, eventId) }
+        }
+        if (commands.trySend(Command.Withdrawal(event, marker)).isFailure) {
+            repository.endWithdrawal()
+            sessions.cancel(eventId)
+        }
+        return marker
     }
 
     override suspend fun flush() {
@@ -138,16 +164,27 @@ internal class ServerAnalyticsLogger(
                     pendingCommands.decrementAndGet()
                 }
             }
-            is Command.DeleteUser -> {
-                // Before the user is restored, logs carry the ID Amplitude persisted, so delete those.
-                val target = command.userId ?: if (command.userKnown) null else restoredUserId.await()
-                target?.let { repository.deleteUserEvents(it) }
-            }
+            is Command.Withdrawal -> finishWithdrawal(command)
             is Command.User -> {
                 repository.setUserId(command.userId)
                 if (command.userId != null) wakeSender.trySend(Unit)
             }
             is Command.Barrier -> command.done.complete(Unit)
+        }
+    }
+
+    private suspend fun finishWithdrawal(command: Command.Withdrawal) {
+        try {
+            repository.setUserId(null)
+            val event = command.event
+            val marker = command.marker.await()
+            if (marker != null) {
+                repository.deleteUserEvents(marker.userId, marker.eventId)
+                    .onFailure { Timber.w("Client log withdrawal cleanup failed (%s)", it.javaClass.simpleName) }
+            }
+            record(event.copy(userId = marker?.userId, userKnown = true))
+        } finally {
+            repository.endWithdrawal()
         }
     }
 
@@ -181,7 +218,7 @@ internal class ServerAnalyticsLogger(
             val userKnown: Boolean,
         ) : Command
         data class User(val userId: String?) : Command
-        data class DeleteUser(val userId: String?, val userKnown: Boolean) : Command
+        data class Withdrawal(val event: Log, val marker: Deferred<ClientLogWithdrawal?>) : Command
         data class Barrier(val done: CompletableDeferred<Unit>) : Command
     }
 

@@ -28,3 +28,5 @@ data class ClientLogDraft(
     val appVersion: String,
     val context: JsonObject,
 )
+
+data class ClientLogWithdrawal(val userId: String, val eventId: String)

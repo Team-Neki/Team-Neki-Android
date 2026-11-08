@@ -13,7 +13,7 @@ internal interface AmplitudeAnalyticsClient {
     suspend fun awaitUserId(): String? = null
     fun currentSessionId(): Long = -1
     fun currentUserId(): String? = null
-    fun startNewSession() {}
+    fun startNewSession(previousUserId: String) {}
     fun setUserId(userId: String?)
 }
 
@@ -29,6 +29,7 @@ internal class AmplitudeSdkAnalyticsClient @Inject constructor(
         amplitude.track(eventName, eventProperties, EventOptions().apply {
             this.insertId = insertId
             this.timestamp = timestamp
+            this.userId = amplitude.getUserId()
         })
     }
 
@@ -43,14 +44,19 @@ internal class AmplitudeSdkAnalyticsClient @Inject constructor(
 
     // The Android SDK has no public setSessionId; the timeline switches to the session_start event's session.
     // Like iOS setSessionId, the previous session gets a session_end first.
-    override fun startNewSession() {
+    override fun startNewSession(previousUserId: String) {
         val now = System.currentTimeMillis()
-        if (amplitude.sessionId > 0) amplitude.track(Amplitude.END_SESSION_EVENT)
+        if (amplitude.sessionId > 0) {
+            amplitude.track(Amplitude.END_SESSION_EVENT, options = EventOptions().apply {
+                userId = previousUserId
+            })
+        }
         amplitude.track(
             Amplitude.START_SESSION_EVENT,
             options = EventOptions().apply {
                 sessionId = now
                 timestamp = now
+                userId = amplitude.getUserId()
             },
         )
     }

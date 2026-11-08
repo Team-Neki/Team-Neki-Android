@@ -28,12 +28,12 @@ internal class AmplitudeAnalyticsLogger @Inject constructor(
     override fun setUserId(userId: String) {
         val previous = amplitudeClient.currentUserId()
         amplitudeClient.setUserId(userId)
-        if (previous != null && previous != userId) amplitudeClient.startNewSession()
+        if (previous != null && previous != userId) amplitudeClient.startNewSession(previous)
     }
 
     override fun clearUserId() {
         val previous = amplitudeClient.currentUserId()
         amplitudeClient.setUserId(null)
-        if (previous != null) amplitudeClient.startNewSession()
+        if (previous != null) amplitudeClient.startNewSession(previous)
     }
 }

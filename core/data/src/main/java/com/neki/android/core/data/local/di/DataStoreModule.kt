@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.neki.android.core.data.analytics.ClientLogDiagnostics
 import com.neki.android.core.data.local.model.ClientLogStore
 import com.neki.android.core.data.local.serializer.ClientLogStoreSerializer
 import com.neki.android.core.data.local.model.MarketingPopupRecord
@@ -36,10 +37,11 @@ internal object DataStoreModule {
     @Provides
     fun provideClientLogDataStore(
         @ApplicationContext context: Context,
+        diagnostics: ClientLogDiagnostics,
     ): DataStore<ClientLogStore> = DataStoreFactory.create(
         serializer = ClientLogStoreSerializer,
         produceFile = { File(context.noBackupFilesDir, "analytics/client_logs.json") },
-        corruptionHandler = ReplaceFileCorruptionHandler { ClientLogStore() },
+        corruptionHandler = ClientLogStoreSerializer.corruptionHandler(diagnostics),
     )
 
     @AuthDataStore

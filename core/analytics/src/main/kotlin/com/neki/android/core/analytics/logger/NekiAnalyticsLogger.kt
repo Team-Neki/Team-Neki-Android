@@ -1,6 +1,8 @@
 package com.neki.android.core.analytics.logger
 
 import com.neki.android.core.analytics.event.AnalyticsEvent
+import com.neki.android.core.analytics.event.MypageAnalyticsEvent
+import com.neki.android.core.model.analytics.ClientLogWithdrawal
 import java.util.UUID
 import javax.inject.Inject
 
@@ -19,6 +21,7 @@ internal class NekiAnalyticsLogger(
         sessions: AmplitudeSessionRegistry,
     ) : this(amplitudeLogger, serverLogger, sessions, System::currentTimeMillis)
 
+    @Synchronized
     override fun log(event: AnalyticsEvent) {
         val eventId = UUID.randomUUID().toString()
         val occurredAt = now()
@@ -27,11 +30,13 @@ internal class NekiAnalyticsLogger(
         serverLogger.log(event, eventId, occurredAt)
     }
 
+    @Synchronized
     override fun setUserId(userId: String) {
         amplitudeLogger.setUserId(userId)
         serverLogger.setUserId(userId)
     }
 
+    @Synchronized
     override fun clearUserId() {
         amplitudeLogger.clearUserId()
         serverLogger.clearUserId()
@@ -41,7 +46,16 @@ internal class NekiAnalyticsLogger(
         serverLogger.flush()
     }
 
-    override fun deletePendingUserEvents() {
-        serverLogger.deletePendingUserEvents()
+    override suspend fun completeWithdrawal(): ClientLogWithdrawal? {
+        val marker = synchronized(this) {
+            val eventId = UUID.randomUUID().toString()
+            val occurredAt = now()
+            sessions.expect(eventId)
+            val result = serverLogger.completeWithdrawal(eventId, occurredAt)
+            amplitudeLogger.log(MypageAnalyticsEvent.Withdraw, eventId, occurredAt)
+            amplitudeLogger.clearUserId()
+            result
+        }
+        return marker.await()
     }
 }
