@@ -39,6 +39,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.LoadingDialog
+import com.neki.android.core.ui.component.NotificationGuideDialog
 import com.neki.android.core.ui.compose.launchAppSettings
 import com.neki.android.core.ui.compose.rememberAppSettingsLauncher
 import com.neki.android.feature.archive.api.ArchiveNavKey
@@ -53,7 +54,6 @@ import com.neki.android.feature.archive.impl.main.component.ArchiveMainTitleRow
 import com.neki.android.feature.archive.impl.main.component.ArchiveMainTopBar
 import com.neki.android.feature.archive.impl.component.EmptyPhotoContent
 import com.neki.android.feature.archive.impl.main.component.GotoTopButton
-import com.neki.android.feature.archive.impl.main.component.MarketingAgreementDialog
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
@@ -75,6 +75,13 @@ internal fun ArchiveMainRoute(
 
     LaunchedEffect(Unit) {
         viewModel.logArchivingView()
+        viewModel.store.onIntent(
+            ArchiveMainIntent.CheckNotificationGuide(
+                isNotificationGranted = NotificationPermissionManager.isGrantedNotificationPermission(context),
+                shouldShowNotificationRationale = NotificationPermissionManager.shouldShowNotificationRationale(activity),
+                appVersionCode = context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode,
+            ),
+        )
     }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -85,6 +92,20 @@ internal fun ArchiveMainRoute(
         } else if (!NotificationPermissionManager.shouldShowNotificationRationale(activity)) {
             viewModel.store.onIntent(ArchiveMainIntent.DenyNotificationPermissionPermanent)
         }
+    }
+
+    val notificationGuidePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        viewModel.store.onIntent(ArchiveMainIntent.CompleteNotificationGuidePermission(isGranted))
+    }
+
+    val notificationGuideAppSettingsLauncher = rememberAppSettingsLauncher {
+        viewModel.store.onIntent(
+            ArchiveMainIntent.CompleteNotificationGuidePermission(
+                NotificationPermissionManager.isGrantedNotificationPermission(context),
+            ),
+        )
     }
 
     val notificationAppSettingsLauncher = rememberAppSettingsLauncher {
@@ -108,6 +129,21 @@ internal fun ArchiveMainRoute(
             }
             ArchiveMainSideEffect.MoveAppSettingsForNotification ->
                 notificationAppSettingsLauncher.launchAppSettings(context, NekiPermission.NOTIFICATION)
+            ArchiveMainSideEffect.RequestNotificationGuidePermission -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    !NotificationPermissionManager.isGrantedNotificationPermission(context)
+                ) {
+                    notificationGuidePermissionLauncher.launch(NotificationPermissionManager.NOTIFICATION_PERMISSION)
+                } else {
+                    viewModel.store.onIntent(
+                        ArchiveMainIntent.CompleteNotificationGuidePermission(
+                            NotificationPermissionManager.isGrantedNotificationPermission(context),
+                        ),
+                    )
+                }
+            }
+            ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide ->
+                notificationGuideAppSettingsLauncher.launchAppSettings(context, NekiPermission.NOTIFICATION)
             ArchiveMainSideEffect.NavigateToAllAlbum -> navigateToAllAlbum()
             is ArchiveMainSideEffect.NavigateToFavoriteAlbum -> navigateToFavoriteAlbum(sideEffect.albumId)
             is ArchiveMainSideEffect.NavigateToAlbumDetail -> navigateToAlbumDetail(sideEffect.albumId, sideEffect.title)
@@ -172,11 +208,12 @@ internal fun ArchiveMainScreen(
         LoadingDialog()
     }
 
-    if (uiState.showMarketingAgreementDialog) {
-        MarketingAgreementDialog(
-            onDismissRequest = { onIntent(ArchiveMainIntent.DismissMarketingAgreementDialog) },
-            onClickConfirm = { onIntent(ArchiveMainIntent.ConfirmMarketingAgreementDialog) },
-            onClickDismiss = { onIntent(ArchiveMainIntent.DismissMarketingAgreementDialog) },
+    uiState.notificationGuideType?.let { guideType ->
+        NotificationGuideDialog(
+            type = guideType,
+            onDismissRequest = { onIntent(ArchiveMainIntent.DismissNotificationGuide) },
+            onClickConfirm = { onIntent(ArchiveMainIntent.ClickNotificationGuideConfirm) },
+            onClickDismiss = { onIntent(ArchiveMainIntent.DismissNotificationGuide) },
         )
     }
 

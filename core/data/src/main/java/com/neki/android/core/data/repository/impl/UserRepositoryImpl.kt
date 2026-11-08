@@ -4,9 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import com.neki.android.core.data.local.di.MarketingPopupDataStore
+import androidx.datastore.preferences.core.longPreferencesKey
 import com.neki.android.core.data.local.di.UserDataStore
-import com.neki.android.core.data.local.model.MarketingPopupRecord
 import com.neki.android.core.data.remote.api.UserService
 import com.neki.android.core.data.remote.model.request.UpdateProfileImageRequest
 import com.neki.android.core.data.remote.model.request.UpdateUserInfoRequest
@@ -19,7 +18,6 @@ import javax.inject.Inject
 
 internal class UserRepositoryImpl @Inject constructor(
     @UserDataStore private val dataStore: DataStore<Preferences>,
-    @MarketingPopupDataStore private val marketingPopupDataStore: DataStore<MarketingPopupRecord>,
     private val userService: UserService,
 ) : UserRepository {
     override val hasVisitedRandomPose: Flow<Boolean> =
@@ -44,21 +42,44 @@ internal class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override val lastArchiveMarketingPopupTimestamp: Flow<Long> = marketingPopupDataStore.data.map { it.lastShownAt }
+    override val lastAutoNotificationGuideEpochDay: Flow<Long> =
+        dataStore.data.map { preferences ->
+            preferences[LAST_AUTO_NOTIFICATION_GUIDE_EPOCH_DAY] ?: -1L
+        }
 
-    override val archiveMarketingPopupShownCount: Flow<Int> = marketingPopupDataStore.data.map { it.shownCount }
-
-    override suspend fun recordMarketingPopupShown() {
-        marketingPopupDataStore.updateData { current ->
-            current.copy(
-                lastShownAt = System.currentTimeMillis(),
-                shownCount = current.shownCount + 1,
-            )
+    override suspend fun setAutoNotificationGuideShown(epochDay: Long) {
+        dataStore.edit { preferences ->
+            preferences[LAST_AUTO_NOTIFICATION_GUIDE_EPOCH_DAY] = epochDay
         }
     }
 
-    override suspend fun clearMarketingPopupRecord() {
-        marketingPopupDataStore.updateData { MarketingPopupRecord() }
+    override val updateNotificationGuideVersionCode: Flow<Long> =
+        dataStore.data.map { preferences ->
+            preferences[UPDATE_NOTIFICATION_GUIDE_VERSION_CODE] ?: -1L
+        }
+
+    override suspend fun setUpdateNotificationGuideChecked(versionCode: Long) {
+        dataStore.edit { preferences ->
+            preferences[UPDATE_NOTIFICATION_GUIDE_VERSION_CODE] = versionCode
+        }
+    }
+
+    override val hasRequestedNotificationPermission: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[HAS_REQUESTED_NOTIFICATION_PERMISSION] ?: false
+        }
+
+    override suspend fun setNotificationPermissionRequested() {
+        dataStore.edit { preferences ->
+            preferences[HAS_REQUESTED_NOTIFICATION_PERMISSION] = true
+        }
+    }
+
+    override suspend fun clearNotificationGuideRecord() {
+        dataStore.edit { preferences ->
+            preferences.remove(LAST_AUTO_NOTIFICATION_GUIDE_EPOCH_DAY)
+            preferences.remove(UPDATE_NOTIFICATION_GUIDE_VERSION_CODE)
+        }
     }
 
     override suspend fun getUserInfo(): Result<UserInfo> = runSuspendCatching {
@@ -76,5 +97,8 @@ internal class UserRepositoryImpl @Inject constructor(
     companion object {
         private val HAS_VISITED_RANDOM_POSE = booleanPreferencesKey("is_first_visit_random_pose")
         private val HAS_SHOWN_QR_INFO_TOOLTIP = booleanPreferencesKey("is_first_visit_archive")
+        private val LAST_AUTO_NOTIFICATION_GUIDE_EPOCH_DAY = longPreferencesKey("last_auto_notification_guide_epoch_day")
+        private val UPDATE_NOTIFICATION_GUIDE_VERSION_CODE = longPreferencesKey("update_notification_guide_version_code")
+        private val HAS_REQUESTED_NOTIFICATION_PERMISSION = booleanPreferencesKey("has_requested_notification_permission")
     }
 }

@@ -13,7 +13,3 @@ annotation class TokenDataStore
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class UserDataStore
-
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class MarketingPopupDataStore

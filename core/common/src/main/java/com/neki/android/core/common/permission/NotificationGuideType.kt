@@ -1,5 +1,6 @@
 package com.neki.android.core.common.permission
 
+import android.os.Build
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -40,6 +41,28 @@ enum class NotificationGuideType {
             isMarketingAgreed -> ENABLE_NOTIFICATION
             else -> INTEGRATED
         }
+
+        /**
+         * 업데이트 후 첫 진입 안내를 판정할지 결정한다.
+         * 오늘 이미 자동 안내를 띄웠거나 이번 버전에서 이미 판정했으면 판정하지 않는다.
+         */
+        fun shouldCheckUpdateGuide(
+            todayEpochDay: Long,
+            lastAutoGuideEpochDay: Long,
+            currentVersionCode: Long,
+            checkedVersionCode: Long,
+        ): Boolean = todayEpochDay != lastAutoGuideEpochDay && currentVersionCode != checkedVersionCode
+
+        /**
+         * OS 알림 팝업을 아직 띄울 수 있는지 판정한다.
+         * Android 13 미만은 런타임 권한이 없어 팝업을 띄울 수 없다.
+         * Android 13 이상은 거부를 2번 하면 rationale이 false가 되므로, 요청 이력이 있는데 rationale이 false면 불가로 본다.
+         */
+        fun canRequestNotificationPermission(
+            sdkInt: Int,
+            hasRequestedBefore: Boolean,
+            shouldShowRationale: Boolean,
+        ): Boolean = sdkInt >= Build.VERSION_CODES.TIRAMISU && (!hasRequestedBefore || shouldShowRationale)
     }
 }
 

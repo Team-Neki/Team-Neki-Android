@@ -1,23 +1,29 @@
 package com.neki.android.feature.auth.impl.term
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.analytics.event.MetaAnalyticsEvent
 import com.neki.android.core.analytics.logger.MetaAnalyticsLogger
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TermRepository
+import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class TermViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val termRepository: TermRepository,
     private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
     private val metaAnalyticsLogger: MetaAnalyticsLogger,
 ) : ViewModel() {
     private var isSubmittingTerms = false
@@ -96,7 +102,13 @@ class TermViewModel @Inject constructor(
             .onSuccess {
                 authRepository.setCompletedOnboarding(true)
                 metaAnalyticsLogger.log(MetaAnalyticsEvent.CompleteRegistration)
+                // 신규 가입자는 업데이트 후 첫 진입 알림 안내 대상이 아니다
+                userRepository.setUpdateNotificationGuideChecked(
+                    context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode,
+                )
                 if (state.isMarketingTermChecked) {
+                    userRepository.setAutoNotificationGuideShown(LocalDate.now().toEpochDay())
+                    userRepository.setNotificationPermissionRequested()
                     postSideEffect(TermSideEffect.RequestNotificationPermission)
                 } else {
                     postSideEffect(TermSideEffect.NavigateToMain)
