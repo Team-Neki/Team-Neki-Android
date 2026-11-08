@@ -29,6 +29,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 private const val DEFAULT_PHOTOS_SIZE = 20
+private const val MARKETING_AGREEMENT_FAILED_MESSAGE = "알림 동의에 실패했어요"
 
 @HiltViewModel
 class ArchiveMainViewModel @Inject constructor(
@@ -47,7 +48,8 @@ class ArchiveMainViewModel @Inject constructor(
         )
     private var fetchJob: Job? = null
     private var hasCheckedNotificationGuide = false
-    private var hasPendingAgreementToast = false
+    private var pendingAgreementToastMessage: String? = null
+    private var checkedVersionCodeBeforeGuide = -1L
 
     init {
         store.onIntent(ArchiveMainIntent.EnterArchiveMainScreen)
@@ -159,13 +161,15 @@ class ArchiveMainViewModel @Inject constructor(
 
         viewModelScope.launch {
             val today = LocalDate.now().toEpochDay()
+            val checkedVersionCode = userRepository.updateNotificationGuideVersionCode.first()
             val shouldCheck = NotificationGuideType.shouldCheckUpdateGuide(
                 todayEpochDay = today,
                 lastAutoGuideEpochDay = userRepository.lastAutoNotificationGuideEpochDay.first(),
                 currentVersionCode = intent.appVersionCode,
-                checkedVersionCode = userRepository.updateNotificationGuideVersionCode.first(),
+                checkedVersionCode = checkedVersionCode,
             )
             if (!shouldCheck) return@launch
+            checkedVersionCodeBeforeGuide = checkedVersionCode
 
             val userInfo = userRepository.getUserInfo()
                 .onFailure { e -> Timber.e(e) }
@@ -199,24 +203,32 @@ class ArchiveMainViewModel @Inject constructor(
         viewModelScope.launch {
             when (guideType) {
                 NotificationGuideType.INTEGRATED -> {
-                    hasPendingAgreementToast = agreeMarketingTerm()
+                    pendingAgreementToastMessage = agreeMarketingTermForGuide()
                     requestNotificationGuidePermission(postSideEffect)
                 }
 
                 NotificationGuideType.ENABLE_NOTIFICATION -> requestNotificationGuidePermission(postSideEffect)
 
                 NotificationGuideType.MARKETING_CONSENT -> {
-                    if (agreeMarketingTerm()) {
-                        postSideEffect(ArchiveMainSideEffect.ShowToastMessage(marketingAgreementToastMessage()))
-                    }
+                    postSideEffect(ArchiveMainSideEffect.ShowToastMessage(agreeMarketingTermForGuide()))
                 }
 
                 NotificationGuideType.OPEN_SETTINGS -> {
-                    if (!state.isMarketingTermAgreed) hasPendingAgreementToast = agreeMarketingTerm()
+                    if (!state.isMarketingTermAgreed) pendingAgreementToastMessage = agreeMarketingTermForGuide()
                     postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide)
                 }
             }
         }
+    }
+
+    /**
+     * 알림 안내 모달에서 이벤트·혜택 알림 동의를 저장하고 띄울 토스트 문구를 반환한다.
+     * 저장에 실패하면 판정 버전을 되돌려, 다음 판정 때 안내를 다시 띄울 수 있게 한다.
+     */
+    private suspend fun agreeMarketingTermForGuide(): String {
+        if (agreeMarketingTerm()) return marketingAgreementToastMessage()
+        userRepository.setUpdateNotificationGuideChecked(checkedVersionCodeBeforeGuide)
+        return MARKETING_AGREEMENT_FAILED_MESSAGE
     }
 
     private suspend fun requestNotificationGuidePermission(postSideEffect: (ArchiveMainSideEffect) -> Unit) {
@@ -228,9 +240,9 @@ class ArchiveMainViewModel @Inject constructor(
         isGranted: Boolean,
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
-        if (hasPendingAgreementToast) {
-            hasPendingAgreementToast = false
-            postSideEffect(ArchiveMainSideEffect.ShowToastMessage(marketingAgreementToastMessage()))
+        pendingAgreementToastMessage?.let { message ->
+            pendingAgreementToastMessage = null
+            postSideEffect(ArchiveMainSideEffect.ShowToastMessage(message))
         }
         updatePushAgreement(isGranted)
     }
