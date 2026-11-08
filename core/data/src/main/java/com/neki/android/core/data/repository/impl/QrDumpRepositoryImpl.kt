@@ -12,7 +12,8 @@ import java.io.IOException
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -63,10 +64,10 @@ class QrDumpRepositoryImpl @Inject constructor(
 
     private fun QrDumpUploadTicketResponse.isExpired(): Boolean {
         val expiresAt = try {
-            Instant.parse(expiresIn)
+            OffsetDateTime.parse(expiresIn).toInstant()
         } catch (_: DateTimeParseException) {
-            // Server InstantCustomSerializer emits UTC without an offset; never use the device timezone.
-            LocalDateTime.parse(expiresIn).toInstant(ZoneOffset.UTC)
+            // Server #366 emits KST without an offset; never use the device timezone.
+            LocalDateTime.parse(expiresIn).atZone(ZoneId.of("Asia/Seoul")).toInstant()
         }
         return !expiresAt.isAfter(Instant.now())
     }
