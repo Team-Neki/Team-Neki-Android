@@ -57,6 +57,7 @@ internal class AmplitudeSessionPlugin(
     override lateinit var amplitude: Amplitude
 
     override fun execute(event: BaseEvent): BaseEvent {
+        if (event is AmplitudeOccurrenceEvent) event.restoreUserIdAtOccurrence()
         val eventId = event.insertId
         val sessionId = event.sessionId
         if (eventId != null && sessionId != null && sessionId > 0) registry.complete(eventId, sessionId)

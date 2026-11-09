@@ -1,6 +1,7 @@
 package com.neki.android.core.analytics.logger
 
 import com.amplitude.android.Amplitude
+import com.amplitude.core.events.BaseEvent
 import com.amplitude.core.events.EventOptions
 import javax.inject.Inject
 
@@ -10,7 +11,7 @@ internal interface AmplitudeAnalyticsClient {
         track(eventName, eventProperties)
     }
     suspend fun awaitDeviceId(): String = error("SDK device ID unavailable")
-    suspend fun awaitUserId(): String? = null
+    suspend fun awaitInitialUserId(): String? = null
     fun currentSessionId(): Long = -1
     fun currentUserId(): String? = null
     fun startNewSession(previousUserId: String) {}
@@ -21,16 +22,24 @@ internal class AmplitudeSdkAnalyticsClient @Inject constructor(
     private val amplitude: Amplitude,
 ) : AmplitudeAnalyticsClient {
 
+    @Volatile
+    private var initialUser: InitialUser? = null
+
     override fun track(eventName: String, eventProperties: Map<String, Any?>) {
         amplitude.track(eventName, eventProperties)
     }
 
     override fun track(eventName: String, eventProperties: Map<String, Any?>, insertId: String, timestamp: Long) {
-        amplitude.track(eventName, eventProperties, EventOptions().apply {
+        val identityKnown = amplitude.isBuilt.isCompleted || initialUser != null
+        val userId = amplitude.getUserId()
+        val resolveInitialUser = if (!identityKnown && userId == null) ::captureInitialUserId else null
+        val event = AmplitudeOccurrenceEvent(userId, resolveInitialUser).apply {
+            eventType = eventName
+            this.eventProperties = eventProperties.toMutableMap()
             this.insertId = insertId
             this.timestamp = timestamp
-            this.userId = amplitude.getUserId()
-        })
+        }
+        amplitude.track(event)
     }
 
     override suspend fun awaitDeviceId(): String {
@@ -51,22 +60,43 @@ internal class AmplitudeSdkAnalyticsClient @Inject constructor(
                 userId = previousUserId
             })
         }
-        amplitude.track(
-            Amplitude.START_SESSION_EVENT,
-            options = EventOptions().apply {
-                sessionId = now
-                timestamp = now
-                userId = amplitude.getUserId()
-            },
-        )
+        amplitude.track(AmplitudeOccurrenceEvent(amplitude.getUserId()).apply {
+            eventType = Amplitude.START_SESSION_EVENT
+            sessionId = now
+            timestamp = now
+        })
     }
 
-    override suspend fun awaitUserId(): String? {
+    override suspend fun awaitInitialUserId(): String? {
         amplitude.isBuilt.await()
-        return amplitude.getUserId()
+        return captureInitialUserId()
     }
 
     override fun setUserId(userId: String?) {
+        // Startup events may still be queued when the app sets or clears its first user ID.
+        captureInitialUserId()
         amplitude.setUserId(userId)
+    }
+
+    @Synchronized
+    private fun captureInitialUserId(): String? {
+        initialUser?.let { return it.id }
+        return amplitude.getUserId().also { initialUser = InitialUser(it) }
+    }
+
+    private class InitialUser(val id: String?)
+}
+
+internal class AmplitudeOccurrenceEvent(
+    private val userIdAtOccurrence: String?,
+    private val resolveInitialUser: (() -> String?)? = null,
+) : BaseEvent() {
+    init {
+        userId = userIdAtOccurrence
+    }
+
+    fun restoreUserIdAtOccurrence() {
+        // The SDK's context plugin fills an empty user ID from the current identity.
+        userId = userIdAtOccurrence ?: resolveInitialUser?.invoke()
     }
 }

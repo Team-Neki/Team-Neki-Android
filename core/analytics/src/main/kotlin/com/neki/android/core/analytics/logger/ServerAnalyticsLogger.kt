@@ -47,7 +47,7 @@ internal class ServerAnalyticsLogger(
 
     // Until login restores the user, use the ID Amplitude persisted from the previous launch, as Amplitude does.
     private var userKnown = false
-    private val restoredUserId = scope.async { amplitudeClient.awaitUserId() }
+    private val restoredUserId = scope.async { amplitudeClient.awaitInitialUserId() }
 
     init {
         scope.launch {
@@ -142,16 +142,23 @@ internal class ServerAnalyticsLogger(
     override suspend fun flush() {
         // Logout/withdraw should only wait for a bounded best-effort attempt.
         withTimeoutOrNull(BOUNDARY_FLUSH_MILLIS) {
-            val done = CompletableDeferred<Unit>()
-            commands.send(Command.Barrier(done))
-            done.await()
+            awaitQueuedCommands()
             repository.flush()
         }
     }
 
     // The app may be killed in the background, so send once even while waiting to retry, as iOS does.
     override fun onStop(owner: LifecycleOwner) {
-        scope.launch { repository.flush(ignoreBackoff = true) }
+        scope.launch {
+            withTimeoutOrNull(BOUNDARY_FLUSH_MILLIS) { awaitQueuedCommands() }
+            repository.flush(ignoreBackoff = true)
+        }
+    }
+
+    private suspend fun awaitQueuedCommands() {
+        val done = CompletableDeferred<Unit>()
+        commands.send(Command.Barrier(done))
+        done.await()
     }
 
     private suspend fun process(command: Command) {
