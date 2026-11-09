@@ -2,13 +2,18 @@ package com.neki.android.core.data.local.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.neki.android.core.data.analytics.ClientLogDiagnostics
+import com.neki.android.core.data.local.model.ClientLogStore
+import com.neki.android.core.data.local.serializer.ClientLogStoreSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.io.File
 import javax.inject.Singleton
 
 private const val AUTH_DATASTORE = "auth_datastore"
@@ -29,6 +34,18 @@ private val Context.notificationGuideDataStore: DataStore<Preferences> by prefer
 @InstallIn(SingletonComponent::class)
 @Module
 internal object DataStoreModule {
+
+    @ClientLogDataStore
+    @Singleton
+    @Provides
+    fun provideClientLogDataStore(
+        @ApplicationContext context: Context,
+        diagnostics: ClientLogDiagnostics,
+    ): DataStore<ClientLogStore> = DataStoreFactory.create(
+        serializer = ClientLogStoreSerializer,
+        produceFile = { File(context.noBackupFilesDir, "analytics/client_logs.json") },
+        corruptionHandler = ClientLogStoreSerializer.corruptionHandler(diagnostics),
+    )
 
     @AuthDataStore
     @Singleton

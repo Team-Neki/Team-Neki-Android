@@ -8,6 +8,11 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.dataApi)
+    implementation(projects.core.model)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.amplitude.analytics.android)
     implementation(libs.facebook.core)
     implementation(libs.timber)

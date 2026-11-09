@@ -1,11 +1,13 @@
 package com.neki.android.core.data.remote.di
 
 import com.neki.android.core.common.const.Const.TAG_REST_API
+import com.neki.android.core.data.analytics.clientLogJson
 import com.neki.android.core.data.BuildConfig
 import com.neki.android.core.data.remote.api.QrDumpService
 import com.neki.android.core.data.remote.model.request.RefreshTokenRequest
 import com.neki.android.core.data.remote.model.response.AuthResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
+import com.neki.android.core.data.remote.qualifier.ClientLogHttpClient
 import com.neki.android.core.data.remote.qualifier.UploadHttpClient
 import com.neki.android.core.data.remote.qualifier.WebhookHttpClient
 import com.neki.android.core.dataapi.auth.AuthEventManager
@@ -145,6 +147,24 @@ internal object NetworkModule {
 
             expectSuccess = true
         }
+    }
+
+    // Log requests must never inherit another account's cached Bearer credentials or retry anonymous batches with auth.
+    @ClientLogHttpClient
+    @Provides
+    @Singleton
+    fun provideClientLogHttpClient(): HttpClient = HttpClient(Android) {
+        install(DefaultRequest) {
+            url(BASE_URL)
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+        }
+        install(ContentNegotiation) { json(clientLogJson) }
+        install(HttpTimeout) {
+            connectTimeoutMillis = TIME_OUT
+            requestTimeoutMillis = TIME_OUT
+        }
+        // No BODY logging: the queue contains user and device identifiers.
+        expectSuccess = true
     }
 
     @WebhookHttpClient

@@ -27,4 +27,17 @@ sealed interface PoseAnalyticsEvent : AnalyticsEvent {
     data object PoseBookmark : PoseAnalyticsEvent {
         override val name = "pose_bookmark"
     }
+
+    data class PoseDetailClick(
+        val poseId: String,
+        val peopleCount: Int,
+        val entryPoint: String,
+    ) : PoseAnalyticsEvent {
+        override val name = "pose_detail_click"
+        override val params = mapOf(
+            "pose_id" to poseId,
+            "people_count" to peopleCount,
+            "entry_point" to entryPoint,
+        )
+    }
 }
