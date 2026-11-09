@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Geocoder
 import android.os.Build
 import kotlinx.coroutines.suspendCancellableCoroutine
+import timber.log.Timber
 import java.util.Locale
 import kotlin.coroutines.resume
 
@@ -33,7 +34,7 @@ internal suspend fun Context.getPlaceName(
                 ?: fallback
             coroutine.resume(address)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Timber.e(e)
             coroutine.resume(fallback)
         }
     }

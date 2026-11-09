@@ -397,6 +397,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 folderId = albumId.takeUnless { isFavoriteAlbum },
                 favorite = isFavoriteAlbum,
             ).onSuccess {
+                analyticsLogger.log(ArchiveAnalyticsEvent.PhotoUpload(method = "gallery", count = imageUris.size))
                 reduce { copy(isLoading = false) }
                 postSideEffect(AlbumDetailSideEffect.RefreshPhotos)
                 postSideEffect(AlbumDetailSideEffect.ShowToastMessage("새로운 사진을 추가했어요"))

@@ -63,6 +63,9 @@ internal class PhotoBoothOrderChangeViewModel @AssistedInject constructor(
                             priorityBrand1 = state.brands.getOrNull(0)?.name.orEmpty(),
                             priorityBrand2 = state.brands.getOrNull(1)?.name.orEmpty(),
                             priorityBrand3 = state.brands.getOrNull(2)?.name.orEmpty(),
+                            priorityBrandId1 = state.brands.getOrNull(0)?.id?.toString().orEmpty(),
+                            priorityBrandId2 = state.brands.getOrNull(1)?.id?.toString().orEmpty(),
+                            priorityBrandId3 = state.brands.getOrNull(2)?.id?.toString().orEmpty(),
                         ),
                     )
                     reduce { copy(isLoading = false) }

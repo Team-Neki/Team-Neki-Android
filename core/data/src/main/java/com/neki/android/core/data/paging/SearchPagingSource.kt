@@ -18,19 +18,20 @@ internal class SearchPagingSource(
     private val keyword: String,
     private val latitude: Double?,
     private val longitude: Double?,
-    private val onSearchSuccess: (Boolean, Int, Boolean) -> Unit,
+    private val onSearchSuccess: (Int) -> Unit,
+    private val onLoadMoreSuccess: (SearchCompletionType, Int, Int, Boolean) -> Unit,
 ) : PagingSource<SearchPageKey, SearchCompletion>() {
     override fun getRefreshKey(state: PagingState<SearchPageKey, SearchCompletion>): SearchPageKey? = null
 
     override suspend fun load(params: LoadParams<SearchPageKey>): LoadResult<SearchPageKey, SearchCompletion> {
-        if (keyword.trim().length < 2) return LoadResult.Page(emptyList(), null, null)
+        if (keyword.isBlank()) return LoadResult.Page(emptyList(), null, null)
         return try {
             var page = fetchPage(params.key ?: SearchPageKey(SearchCompletionType.REGION), params.loadSize)
             while (page.data.isEmpty() && page.nextKey != null) {
                 page = fetchPage(checkNotNull(page.nextKey), params.loadSize)
             }
-            if (params is LoadParams.Refresh || page.data.isNotEmpty()) {
-                onSearchSuccess(params is LoadParams.Refresh, page.data.size, page.nextKey != null)
+            if (params is LoadParams.Refresh) {
+                onSearchSuccess(page.data.size)
             }
             page
         } catch (e: CancellationException) {
@@ -44,7 +45,7 @@ internal class SearchPagingSource(
         cursor: SearchPageKey,
         size: Int,
     ): LoadResult.Page<SearchPageKey, SearchCompletion> {
-        if (cursor.type == SearchCompletionType.PHOTO_BOOTH && keyword.count { !it.isWhitespace() && it != '-' && it != '_' } < 2) {
+        if (cursor.type == SearchCompletionType.PHOTO_BOOTH && keyword.none { !it.isWhitespace() && it != '-' && it != '_' }) {
             return LoadResult.Page(emptyList(), null, null)
         }
         val response = mapService.getSearchCompletions(
@@ -55,6 +56,9 @@ internal class SearchPagingSource(
             latitude = latitude,
             longitude = longitude,
         ).data
+        if (cursor.page > 0) {
+            onLoadMoreSuccess(cursor.type, cursor.page + 1, response.items.size, response.hasNext)
+        }
         val next = if (response.hasNext) {
             cursor.copy(page = cursor.page + 1)
         } else {

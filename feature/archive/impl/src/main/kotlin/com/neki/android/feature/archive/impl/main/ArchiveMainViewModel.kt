@@ -1,12 +1,16 @@
 package com.neki.android.feature.archive.impl.main
 
+import android.os.Build
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.const.TermConst
+import com.neki.android.core.common.permission.NotificationGuideType
+import com.neki.android.core.common.permission.marketingAgreementToastMessage
 import com.neki.android.core.dataapi.repository.FolderRepository
+import com.neki.android.core.dataapi.repository.NotificationRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.dataapi.repository.TermRepository
 import com.neki.android.core.dataapi.repository.UserRepository
@@ -21,9 +25,11 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.time.LocalDate
 import javax.inject.Inject
 
 private const val DEFAULT_PHOTOS_SIZE = 20
+private const val MARKETING_AGREEMENT_FAILED_MESSAGE = "알림 동의에 실패했어요"
 
 @HiltViewModel
 class ArchiveMainViewModel @Inject constructor(
@@ -31,6 +37,7 @@ class ArchiveMainViewModel @Inject constructor(
     private val folderRepository: FolderRepository,
     private val userRepository: UserRepository,
     private val termRepository: TermRepository,
+    private val notificationRepository: NotificationRepository,
     private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
@@ -40,6 +47,10 @@ class ArchiveMainViewModel @Inject constructor(
             onIntent = ::onIntent,
         )
     private var fetchJob: Job? = null
+    private var lastNotificationGuideCheckEpochDay = -1L
+    private var isMarketingAgreedAtGuide = false
+    private var checkedVersionCodeBeforeGuide = -1L
+    private var pendingAgreementToastMessage: String? = null
 
     init {
         store.onIntent(ArchiveMainIntent.EnterArchiveMainScreen)
@@ -55,7 +66,9 @@ class ArchiveMainViewModel @Inject constructor(
         reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) {
-        if (intent != ArchiveMainIntent.EnterArchiveMainScreen) reduce { copy(isFirstEntered = false) }
+        if (intent != ArchiveMainIntent.EnterArchiveMainScreen && intent !is ArchiveMainIntent.CheckNotificationGuide) {
+            reduce { copy(isFirstEntered = false) }
+        }
         when (intent) {
             ArchiveMainIntent.EnterArchiveMainScreen -> fetchInitialData(reduce)
             ArchiveMainIntent.RefreshArchiveMain -> viewModelScope.launch {
@@ -78,12 +91,22 @@ class ArchiveMainViewModel @Inject constructor(
             ArchiveMainIntent.ClickNotificationIcon -> postSideEffect(ArchiveMainSideEffect.RequestNotificationPermission)
 
             // Notification Permission Intent
+            ArchiveMainIntent.RequestedNotificationPermission ->
+                viewModelScope.launch { userRepository.setNotificationPermissionRequested() }
             ArchiveMainIntent.GrantNotificationPermission -> postSideEffect(ArchiveMainSideEffect.NavigateToNotification)
             ArchiveMainIntent.DenyNotificationPermissionPermanent -> reduce { copy(showNotificationPermissionDeniedDialog = true) }
-            ArchiveMainIntent.DismissNotificationPermissionDialog -> reduce { copy(showNotificationPermissionDeniedDialog = false) }
+            ArchiveMainIntent.DismissNotificationPermissionDialog -> reduce {
+                copy(showNotificationPermissionDeniedDialog = false, isNotificationDeniedDialogFromGuide = false)
+            }
             ArchiveMainIntent.ClickMoveToNotificationAppSettings -> {
-                reduce { copy(showNotificationPermissionDeniedDialog = false) }
-                postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotification)
+                reduce { copy(showNotificationPermissionDeniedDialog = false, isNotificationDeniedDialogFromGuide = false) }
+                postSideEffect(
+                    if (state.isNotificationDeniedDialogFromGuide) {
+                        ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide
+                    } else {
+                        ArchiveMainSideEffect.MoveAppSettingsForNotification
+                    },
+                )
             }
 
             // Album Intent
@@ -101,12 +124,14 @@ class ArchiveMainViewModel @Inject constructor(
             ArchiveMainIntent.DismissAddAlbumBottomSheet -> reduce { copy(isShowAddAlbumBottomSheet = false) }
             ArchiveMainIntent.ClickAddAlbumButton -> handleAddAlbum(state.albumNameTextState.text.trim().toString(), reduce, postSideEffect)
 
-            // Marketing Agreement Dialog Intent
-            ArchiveMainIntent.DismissMarketingAgreementDialog -> reduce { copy(showMarketingAgreementDialog = false) }
-            ArchiveMainIntent.ConfirmMarketingAgreementDialog -> {
-                reduce { copy(showMarketingAgreementDialog = false) }
-                agreeMarketingTerm(postSideEffect)
+            // Notification Guide Intent
+            is ArchiveMainIntent.CheckNotificationGuide -> checkNotificationGuide(intent, reduce)
+            ArchiveMainIntent.ClickNotificationGuideConfirm -> handleNotificationGuideConfirm(state, reduce, postSideEffect)
+            ArchiveMainIntent.DismissNotificationGuide -> reduce { copy(notificationGuideType = null) }
+            ArchiveMainIntent.DenyNotificationGuidePermissionPermanent -> reduce {
+                copy(showNotificationPermissionDeniedDialog = true, isNotificationDeniedDialogFromGuide = true)
             }
+            is ArchiveMainIntent.CompleteNotificationGuidePermission -> completeNotificationGuidePermission(intent.isGranted, postSideEffect)
         }
     }
 
@@ -121,7 +146,6 @@ class ArchiveMainViewModel @Inject constructor(
                     async { fetchFavoriteSummary(reduce) },
                     async { fetchPhotos(reduce) },
                     async { fetchFolders(reduce) },
-                    async { checkMarketingPopup(reduce) },
                 )
             } finally {
                 reduce { copy(isLoading = false) }
@@ -129,21 +153,113 @@ class ArchiveMainViewModel @Inject constructor(
         }
     }
 
-    private suspend fun checkMarketingPopup(reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit) {
-        val userInfo = userRepository.getUserInfo().getOrNull() ?: return
-        if (userInfo.isMarketingTermAgreed) return
+    private fun checkNotificationGuide(
+        intent: ArchiveMainIntent.CheckNotificationGuide,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+    ) {
+        // 같은 화면 인스턴스에서는 하루 1번만 판정한다. 날짜가 바뀌면 재진입 시 다시 판정한다.
+        val today = LocalDate.now().toEpochDay()
+        if (lastNotificationGuideCheckEpochDay == today) return
+        lastNotificationGuideCheckEpochDay = today
 
-        val shownCount = userRepository.archiveMarketingPopupShownCount.first()
-        if (shownCount >= 2) return
+        viewModelScope.launch {
+            val checkedVersionCode = userRepository.updateNotificationGuideVersionCode.first()
+            val shouldCheck = NotificationGuideType.shouldCheckUpdateGuide(
+                todayEpochDay = today,
+                lastAutoGuideEpochDay = userRepository.lastAutoNotificationGuideEpochDay.first(),
+                currentVersionCode = intent.appVersionCode,
+                checkedVersionCode = checkedVersionCode,
+            )
+            if (!shouldCheck) return@launch
+            checkedVersionCodeBeforeGuide = checkedVersionCode
 
-        val lastTimestamp = userRepository.lastArchiveMarketingPopupTimestamp.first()
-        val isFirstTime = shownCount == 0
-        val isSevenDaysElapsed = (System.currentTimeMillis() - lastTimestamp) >= TermConst.MARKETING_POPUP_INTERVAL_MS
-        val shouldShow = isFirstTime || isSevenDaysElapsed
+            val userInfo = userRepository.getUserInfo()
+                .onFailure { e -> Timber.e(e) }
+                .getOrNull() ?: return@launch
+            val guideType = NotificationGuideType.resolve(
+                isNotificationGranted = intent.isNotificationGranted,
+                isMarketingAgreed = userInfo.isMarketingTermAgreed,
+                canRequestNotificationPermission = NotificationGuideType.canRequestNotificationPermission(
+                    sdkInt = Build.VERSION.SDK_INT,
+                    hasRequestedBefore = userRepository.hasRequestedNotificationPermission.first(),
+                    shouldShowRationale = intent.shouldShowNotificationRationale,
+                ),
+            )
 
-        if (shouldShow) {
-            userRepository.recordMarketingPopupShown()
-            reduce { copy(showMarketingAgreementDialog = true) }
+            userRepository.setUpdateNotificationGuideChecked(intent.appVersionCode)
+            if (guideType == null) return@launch
+
+            userRepository.setAutoNotificationGuideShown(today)
+            isMarketingAgreedAtGuide = userInfo.isMarketingTermAgreed
+            reduce { copy(notificationGuideType = guideType) }
+        }
+    }
+
+    private fun handleNotificationGuideConfirm(
+        state: ArchiveMainState,
+        reduce: (ArchiveMainState.() -> ArchiveMainState) -> Unit,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+    ) {
+        val guideType = state.notificationGuideType ?: return
+        reduce { copy(notificationGuideType = null) }
+
+        viewModelScope.launch {
+            when (guideType) {
+                NotificationGuideType.INTEGRATED -> {
+                    pendingAgreementToastMessage = agreeMarketingTermForGuide()
+                    requestNotificationGuidePermission(postSideEffect)
+                }
+
+                NotificationGuideType.ENABLE_NOTIFICATION -> requestNotificationGuidePermission(postSideEffect)
+
+                NotificationGuideType.MARKETING_CONSENT -> {
+                    postSideEffect(ArchiveMainSideEffect.ShowToastMessage(agreeMarketingTermForGuide()))
+                }
+
+                NotificationGuideType.OPEN_SETTINGS -> {
+                    if (!isMarketingAgreedAtGuide) pendingAgreementToastMessage = agreeMarketingTermForGuide()
+                    postSideEffect(ArchiveMainSideEffect.MoveAppSettingsForNotificationGuide)
+                }
+            }
+        }
+    }
+
+    /**
+     * 알림 안내 모달에서 이벤트·혜택 알림 동의를 저장하고 띄울 토스트 문구를 반환한다.
+     * 저장에 실패하면 판정 버전을 되돌려, 다음 판정 때 안내를 다시 띄울 수 있게 한다.
+     */
+    private suspend fun agreeMarketingTermForGuide(): String =
+        termRepository.updateTermAgreement(termId = TermConst.MARKETING_TERM_ID, agreed = true)
+            .fold(
+                onSuccess = { marketingAgreementToastMessage() },
+                onFailure = { e ->
+                    Timber.e(e)
+                    userRepository.setUpdateNotificationGuideChecked(checkedVersionCodeBeforeGuide)
+                    MARKETING_AGREEMENT_FAILED_MESSAGE
+                },
+            )
+
+    private suspend fun requestNotificationGuidePermission(postSideEffect: (ArchiveMainSideEffect) -> Unit) {
+        userRepository.setNotificationPermissionRequested()
+        postSideEffect(ArchiveMainSideEffect.RequestNotificationGuidePermission)
+    }
+
+    private fun completeNotificationGuidePermission(
+        isGranted: Boolean,
+        postSideEffect: (ArchiveMainSideEffect) -> Unit,
+    ) {
+        pendingAgreementToastMessage?.let { message ->
+            pendingAgreementToastMessage = null
+            postSideEffect(ArchiveMainSideEffect.ShowToastMessage(message))
+        }
+        updatePushAgreement(isGranted)
+    }
+
+    private fun updatePushAgreement(isGranted: Boolean) {
+        viewModelScope.launch {
+            val token = notificationRepository.getPushToken() ?: return@launch
+            notificationRepository.updateNotification(token, isGranted)
+                .onFailure { e -> Timber.e(e) }
         }
     }
 
@@ -211,18 +327,6 @@ class ArchiveMainViewModel @Inject constructor(
                     }
                 }
         }
-    }
-
-    private fun agreeMarketingTerm(
-        postSideEffect: (ArchiveMainSideEffect) -> Unit,
-    ) = viewModelScope.launch {
-        termRepository.updateTermAgreement(termId = TermConst.MARKETING_TERM_ID, agreed = true)
-            .onSuccess {
-                postSideEffect(ArchiveMainSideEffect.ShowToastMessage("마케팅 알림 수신에 동의했어요."))
-            }
-            .onFailure { e ->
-                Timber.e(e)
-            }
     }
 
     private fun handleAddAlbum(

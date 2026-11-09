@@ -18,6 +18,7 @@ import com.neki.android.core.dataapi.repository.MapRepository
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.model.SearchBrand
+import com.neki.android.core.model.SearchCompletionType
 import com.neki.android.core.model.SearchFilterGroup
 import javax.inject.Inject
 
@@ -82,7 +83,8 @@ class MapRepositoryImpl @Inject constructor(
         keyword: String,
         latitude: Double?,
         longitude: Double?,
-        onSearchSuccess: (Boolean, Int, Boolean) -> Unit,
+        onSearchSuccess: (Int) -> Unit,
+        onLoadMoreSuccess: (SearchCompletionType, Int, Int, Boolean) -> Unit,
     ) = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
@@ -97,6 +99,7 @@ class MapRepositoryImpl @Inject constructor(
                 latitude = latitude,
                 longitude = longitude,
                 onSearchSuccess = onSearchSuccess,
+                onLoadMoreSuccess = onLoadMoreSuccess,
             )
         },
     ).flow
