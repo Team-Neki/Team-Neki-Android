@@ -16,7 +16,7 @@ annotation class UserDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class MarketingPopupDataStore
+annotation class NotificationGuideDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

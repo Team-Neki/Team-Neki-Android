@@ -3,14 +3,11 @@ package com.neki.android.core.data.local.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
-import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.neki.android.core.data.analytics.ClientLogDiagnostics
 import com.neki.android.core.data.local.model.ClientLogStore
 import com.neki.android.core.data.local.serializer.ClientLogStoreSerializer
-import com.neki.android.core.data.local.model.MarketingPopupRecord
-import com.neki.android.core.data.local.serializer.MarketingPopupRecordSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,6 +24,12 @@ private val Context.tokenDataStore: DataStore<Preferences> by preferencesDataSto
 
 private const val USER_DATASTORE = "user_datastore"
 private val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name = USER_DATASTORE)
+
+// 기기 OS 상태와 묶인 값이라 data_extraction_rules / backup_rules에서 백업 대상에서 제외한다
+private const val NOTIFICATION_GUIDE_DATASTORE = "notification_guide_datastore"
+private val Context.notificationGuideDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = NOTIFICATION_GUIDE_DATASTORE,
+)
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -59,14 +62,9 @@ internal object DataStoreModule {
     @Provides
     fun provideUserDataStore(@ApplicationContext context: Context): DataStore<Preferences> = context.userDataStore
 
-    @MarketingPopupDataStore
+    @NotificationGuideDataStore
     @Singleton
     @Provides
-    fun provideMarketingPopupDataStore(
-        @ApplicationContext context: Context,
-    ): DataStore<MarketingPopupRecord> = DataStoreFactory.create(
-        serializer = MarketingPopupRecordSerializer,
-        produceFile = { File(context.filesDir, "datastore/marketing_popup_record.json") },
-        corruptionHandler = ReplaceFileCorruptionHandler { MarketingPopupRecord() },
-    )
+    fun provideNotificationGuideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        context.notificationGuideDataStore
 }

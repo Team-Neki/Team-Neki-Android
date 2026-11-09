@@ -8,10 +8,13 @@ interface UserRepository {
     suspend fun setRandomPoseVisited()
     val hasShownQRInfoToolTip: Flow<Boolean>
     suspend fun setQRInfoToolTipShown()
-    val lastArchiveMarketingPopupTimestamp: Flow<Long>
-    val archiveMarketingPopupShownCount: Flow<Int>
-    suspend fun recordMarketingPopupShown()
-    suspend fun clearMarketingPopupRecord()
+    val lastAutoNotificationGuideEpochDay: Flow<Long>
+    suspend fun setAutoNotificationGuideShown(epochDay: Long)
+    val updateNotificationGuideVersionCode: Flow<Long>
+    suspend fun setUpdateNotificationGuideChecked(versionCode: Long)
+    val hasRequestedNotificationPermission: Flow<Boolean>
+    suspend fun setNotificationPermissionRequested()
+    suspend fun clearNotificationGuideRecord()
 
     suspend fun getUserInfo(): Result<UserInfo>
     suspend fun updateUserInfo(nickname: String): Result<Unit>

@@ -1,6 +1,7 @@
 package com.neki.android.feature.archive.impl.main
 
 import androidx.compose.foundation.text.input.TextFieldState
+import com.neki.android.core.common.permission.NotificationGuideType
 import com.neki.android.core.model.AlbumPreview
 import com.neki.android.core.model.Photo
 import kotlinx.collections.immutable.ImmutableList
@@ -14,8 +15,9 @@ data class ArchiveMainState(
     val recentPhotos: ImmutableList<Photo> = persistentListOf(),
     val isShowAddAlbumBottomSheet: Boolean = false,
     val albumNameTextState: TextFieldState = TextFieldState(),
-    val showMarketingAgreementDialog: Boolean = false,
+    val notificationGuideType: NotificationGuideType? = null,
     val showNotificationPermissionDeniedDialog: Boolean = false,
+    val isNotificationDeniedDialogFromGuide: Boolean = false,
 )
 
 sealed interface ArchiveMainIntent {
@@ -30,6 +32,7 @@ sealed interface ArchiveMainIntent {
     data object ClickNotificationIcon : ArchiveMainIntent
 
     // Notification Permission Intent
+    data object RequestedNotificationPermission : ArchiveMainIntent
     data object GrantNotificationPermission : ArchiveMainIntent
     data object DenyNotificationPermissionPermanent : ArchiveMainIntent
     data object DismissNotificationPermissionDialog : ArchiveMainIntent
@@ -50,9 +53,16 @@ sealed interface ArchiveMainIntent {
     data object DismissAddAlbumBottomSheet : ArchiveMainIntent
     data object ClickAddAlbumButton : ArchiveMainIntent
 
-    // Marketing Agreement Dialog Intent
-    data object DismissMarketingAgreementDialog : ArchiveMainIntent
-    data object ConfirmMarketingAgreementDialog : ArchiveMainIntent
+    // Notification Guide Intent
+    data class CheckNotificationGuide(
+        val isNotificationGranted: Boolean,
+        val shouldShowNotificationRationale: Boolean,
+        val appVersionCode: Long,
+    ) : ArchiveMainIntent
+    data object ClickNotificationGuideConfirm : ArchiveMainIntent
+    data object DismissNotificationGuide : ArchiveMainIntent
+    data class CompleteNotificationGuidePermission(val isGranted: Boolean) : ArchiveMainIntent
+    data object DenyNotificationGuidePermissionPermanent : ArchiveMainIntent
 }
 
 sealed interface ArchiveMainSideEffect {
@@ -60,6 +70,8 @@ sealed interface ArchiveMainSideEffect {
     data object NavigateToNotification : ArchiveMainSideEffect
     data object RequestNotificationPermission : ArchiveMainSideEffect
     data object MoveAppSettingsForNotification : ArchiveMainSideEffect
+    data object RequestNotificationGuidePermission : ArchiveMainSideEffect
+    data object MoveAppSettingsForNotificationGuide : ArchiveMainSideEffect
     data object NavigateToAllAlbum : ArchiveMainSideEffect
     data class NavigateToFavoriteAlbum(val albumId: Long) : ArchiveMainSideEffect
     data class NavigateToAlbumDetail(val albumId: Long, val title: String) : ArchiveMainSideEffect

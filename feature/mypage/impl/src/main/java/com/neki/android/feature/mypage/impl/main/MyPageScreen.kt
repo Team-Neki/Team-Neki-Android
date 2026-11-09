@@ -56,6 +56,7 @@ internal fun MyPageRoute(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
+        viewModel.store.onIntent(MyPageIntent.RequestedNotificationPermission)
         if (isGranted) {
             viewModel.store.onIntent(MyPageIntent.GrantNotificationPermission)
         } else if (!NotificationPermissionManager.shouldShowNotificationRationale(activity)) {

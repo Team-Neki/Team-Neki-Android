@@ -2,6 +2,9 @@ package com.neki.android.feature.auth.impl.term
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.neki.android.core.common.permission.NotificationPermissionManager
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.button.CTAButtonPrimary
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
@@ -33,9 +37,24 @@ internal fun TermRoute(
     val uiState by viewModel.store.uiState.collectAsStateWithLifecycle()
     val nekiToast = remember { NekiToast(context) }
 
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) {
+        navigateToMain()
+    }
+
     viewModel.store.sideEffects.collectWithLifecycle { sideEffect ->
         when (sideEffect) {
             TermSideEffect.NavigateToMain -> navigateToMain()
+            TermSideEffect.RequestNotificationPermission -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    !NotificationPermissionManager.isGrantedNotificationPermission(context)
+                ) {
+                    notificationPermissionLauncher.launch(NotificationPermissionManager.NOTIFICATION_PERMISSION)
+                } else {
+                    navigateToMain()
+                }
+            }
             TermSideEffect.NavigateBack -> navigateBack()
             is TermSideEffect.NavigateUrl -> {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(sideEffect.url))
