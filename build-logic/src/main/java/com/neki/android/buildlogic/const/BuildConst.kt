@@ -6,7 +6,7 @@ object BuildConst {
     const val APPLICATION_ID = "com.neki.android"
 
     const val VERSION_CODE = 38
-    const val VERSION_NAME = "1.4.1"
+    const val VERSION_NAME = "1.4.2"
 
     const val MIN_SDK = 29
     const val TARGET_SDK = 36
