@@ -5,7 +5,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -67,12 +66,11 @@ fun FilterBar(
 }
 
 @Composable
-fun DownIconFilterChip(
+private fun DownIconFilterChip(
     isSelected: Boolean,
     displayText: String,
     modifier: Modifier = Modifier,
     chipShape: Shape = CircleShape,
-    contentPadding: PaddingValues = PaddingValues(vertical = 7.dp, horizontal = 12.dp),
     onClick: () -> Unit = {},
 ) {
     Row(
@@ -82,7 +80,7 @@ fun DownIconFilterChip(
                 color = if (isSelected) NekiTheme.colorScheme.gray800
                 else NekiTheme.colorScheme.gray50,
             )
-            .padding(contentPadding)
+            .padding(vertical = 7.dp, horizontal = 12.dp)
             .noRippleClickable(onClick = onClick),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -103,7 +101,7 @@ fun DownIconFilterChip(
 }
 
 @Composable
-fun DefaultFilterChip(
+private fun DefaultFilterChip(
     isSelected: Boolean,
     displayText: String,
     modifier: Modifier = Modifier,
