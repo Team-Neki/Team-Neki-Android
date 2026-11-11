@@ -27,3 +27,5 @@ internal fun PoseState.toggleRelationTagFilter(relationTag: PoseRelationTag): Po
             selectedRelationTag = relationTag,
         )
     }
+
+internal fun PeopleCount?.isRelationTagVisible(): Boolean = this == null || this == PeopleCount.TWO
