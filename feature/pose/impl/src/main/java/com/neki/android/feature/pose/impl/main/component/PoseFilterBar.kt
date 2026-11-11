@@ -29,6 +29,7 @@ import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.ui.component.DefaultFilterChip
 import com.neki.android.core.ui.component.DownIconFilterChip
 import com.neki.android.feature.pose.impl.main.PoseRelationTag
+import com.neki.android.feature.pose.impl.main.isRelationTagVisible
 
 @Composable
 internal fun PoseFilterBar(
@@ -100,12 +101,14 @@ private fun PoseTagChips(
             contentPadding = PaddingValues(start = 12.dp, end = 8.dp, top = 7.dp, bottom = 7.dp),
             onClick = onClickPeopleCount,
         )
-        PoseRelationTag.entries.forEach { tag ->
-            DefaultFilterChip(
-                isSelected = tag == relationTag,
-                displayText = tag.displayText,
-                onClick = { onClickRelationTag(tag) },
-            )
+        if (peopleCount.isRelationTagVisible()) {
+            PoseRelationTag.entries.forEach { tag ->
+                DefaultFilterChip(
+                    isSelected = tag == relationTag,
+                    displayText = tag.displayText,
+                    onClick = { onClickRelationTag(tag) },
+                )
+            }
         }
     }
 }
@@ -169,6 +172,19 @@ private fun PoseFilterBarRelationSelectedPreview() {
         PoseFilterBar(
             peopleCount = PeopleCount.TWO,
             relationTag = PoseRelationTag.FRIEND,
+            isBookmarkSelected = false,
+            totalPoseCount = 20,
+        )
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun PoseFilterBarRelationHiddenPreview() {
+    NekiTheme {
+        PoseFilterBar(
+            peopleCount = PeopleCount.THREE,
+            relationTag = null,
             isBookmarkSelected = false,
             totalPoseCount = 20,
         )

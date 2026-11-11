@@ -88,4 +88,13 @@ class PoseFilterReducerTest {
         assertNull(state.selectedRelationTag)
         assertNull(state.selectedPeopleCount)
     }
+
+    @Test
+    fun `인원수 미선택과 2인일 때만 관계 태그를 노출한다`() {
+        assertTrue(null.isRelationTagVisible())
+        assertTrue(PeopleCount.TWO.isRelationTagVisible())
+        assertFalse(PeopleCount.ONE.isRelationTagVisible())
+        assertFalse(PeopleCount.THREE.isRelationTagVisible())
+        assertFalse(PeopleCount.FOUR.isRelationTagVisible())
+    }
 }
