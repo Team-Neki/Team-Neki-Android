@@ -26,22 +26,22 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PeopleCount
+import com.neki.android.core.model.PoseRelation
 import com.neki.android.core.ui.component.DefaultFilterChip
 import com.neki.android.core.ui.component.DownIconFilterChip
-import com.neki.android.feature.pose.impl.main.PoseRelationTag
 import com.neki.android.feature.pose.impl.main.isRelationTagVisible
 
 @Composable
 internal fun PoseFilterBar(
     peopleCount: PeopleCount?,
-    relationTag: PoseRelationTag?,
+    relationTag: PoseRelation?,
     isBookmarkSelected: Boolean,
     totalPoseCount: Int?,
     modifier: Modifier = Modifier,
     visible: Boolean = true,
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
-    onClickRelationTag: (PoseRelationTag) -> Unit = {},
+    onClickRelationTag: (PoseRelation) -> Unit = {},
 ) {
     AnimatedVisibility(
         modifier = modifier
@@ -70,12 +70,12 @@ internal fun PoseFilterBar(
 @Composable
 private fun PoseTagChips(
     peopleCount: PeopleCount?,
-    relationTag: PoseRelationTag?,
+    relationTag: PoseRelation?,
     isBookmarkSelected: Boolean,
     modifier: Modifier = Modifier,
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
-    onClickRelationTag: (PoseRelationTag) -> Unit = {},
+    onClickRelationTag: (PoseRelation) -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -102,7 +102,7 @@ private fun PoseTagChips(
             onClick = onClickPeopleCount,
         )
         if (peopleCount.isRelationTagVisible()) {
-            PoseRelationTag.entries.forEach { tag ->
+            PoseRelation.entries.forEach { tag ->
                 DefaultFilterChip(
                     isSelected = tag == relationTag,
                     displayText = tag.displayText,
@@ -171,7 +171,7 @@ private fun PoseFilterBarRelationSelectedPreview() {
     NekiTheme {
         PoseFilterBar(
             peopleCount = PeopleCount.TWO,
-            relationTag = PoseRelationTag.FRIEND,
+            relationTag = PoseRelation.FRIEND,
             isBookmarkSelected = false,
             totalPoseCount = 20,
         )

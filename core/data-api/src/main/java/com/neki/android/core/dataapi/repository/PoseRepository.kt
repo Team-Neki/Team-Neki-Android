@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.PosePage
+import com.neki.android.core.model.PoseRelation
 import com.neki.android.core.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 
@@ -11,7 +12,9 @@ interface PoseRepository {
 
     fun getPosesFlow(
         headCount: PeopleCount? = null,
+        relation: PoseRelation? = null,
         sortOrder: SortOrder = SortOrder.DESC,
+        onTotalCountLoaded: (Int) -> Unit = {},
     ): Flow<PagingData<Pose>>
 
     fun getBookmarkedPosesFlow(
@@ -20,6 +23,7 @@ interface PoseRepository {
 
     suspend fun getPosesPage(
         headCount: PeopleCount? = null,
+        relation: PoseRelation? = null,
         page: Int = 0,
         size: Int = 20,
         sortOrder: SortOrder = SortOrder.DESC,
