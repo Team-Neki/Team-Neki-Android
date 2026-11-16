@@ -5,12 +5,15 @@ import androidx.paging.PagingState
 import com.neki.android.core.data.remote.api.PoseService
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
+import com.neki.android.core.model.PoseRelation
 import com.neki.android.core.model.SortOrder
 
 class PosePagingSource(
     private val poseService: PoseService,
     private val headCount: PeopleCount?,
+    private val relation: PoseRelation?,
     private val sortOrder: SortOrder,
+    private val onTotalCountLoaded: (Int) -> Unit,
 ) : PagingSource<Int, Pose>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Pose> {
@@ -20,8 +23,10 @@ class PosePagingSource(
                 page = page,
                 size = params.loadSize,
                 headCount = headCount?.name,
+                relation = relation?.name,
                 sortOrder = sortOrder.name,
             )
+            response.data.totalCount?.let(onTotalCountLoaded)
             val poses = response.data.toModels()
             val hasNext = response.data.hasNext
 

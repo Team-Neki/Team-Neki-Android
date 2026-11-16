@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 data class PoseResponse(
     @SerialName("hasNext") val hasNext: Boolean,
     @SerialName("items") val items: List<Item>,
+    @SerialName("totalCount") val totalCount: Int? = null,
 ) {
     @Serializable
     data class Item(

@@ -13,6 +13,7 @@ import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.PosePage
+import com.neki.android.core.model.PoseRelation
 import com.neki.android.core.model.SortOrder
 import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +28,9 @@ class PoseRepositoryImpl @Inject constructor(
 
     override fun getPosesFlow(
         headCount: PeopleCount?,
+        relation: PoseRelation?,
         sortOrder: SortOrder,
+        onTotalCountLoaded: (Int) -> Unit,
     ): Flow<PagingData<Pose>> {
         return Pager(
             config = PagingConfig(
@@ -40,7 +43,9 @@ class PoseRepositoryImpl @Inject constructor(
                 PosePagingSource(
                     poseService = poseService,
                     headCount = headCount,
+                    relation = relation,
                     sortOrder = sortOrder,
+                    onTotalCountLoaded = onTotalCountLoaded,
                 )
             },
         ).flow
@@ -67,6 +72,7 @@ class PoseRepositoryImpl @Inject constructor(
 
     override suspend fun getPosesPage(
         headCount: PeopleCount?,
+        relation: PoseRelation?,
         page: Int,
         size: Int,
         sortOrder: SortOrder,
@@ -75,6 +81,7 @@ class PoseRepositoryImpl @Inject constructor(
             page = page,
             size = size,
             headCount = headCount?.name,
+            relation = relation?.name,
             sortOrder = sortOrder.name,
         ).data
         PosePage(poses = response.toModels(), hasNext = response.hasNext)

@@ -21,12 +21,14 @@ class PoseService @Inject constructor(
         page: Int = 0,
         size: Int = 20,
         headCount: String? = null,
+        relation: String? = null,
         sortOrder: String = "DESC",
     ): BasicResponse<PoseResponse> {
         return client.get("/api/poses") {
             parameter("page", page)
             parameter("size", size)
             parameter("headCount", headCount)
+            parameter("relation", relation)
             parameter("sortOrder", sortOrder)
         }.body()
     }
