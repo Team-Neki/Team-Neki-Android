@@ -11,7 +11,6 @@ import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.PendingUpdate
 import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
-import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.dataapi.repository.UpdateRejectedException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
@@ -30,7 +29,6 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
-import timber.log.Timber
 
 private const val UPDATE_DELAY_MILLIS = 300L
 
@@ -64,14 +62,11 @@ class WorkManagerOptimisticUpdateScheduler @Inject constructor(
                         workManager.enqueueUniqueWork(name, ExistingWorkPolicy.REPLACE, request).result.get()
                     }
                 } catch (e: CancellationException) {
-                    Timber.tag("OptimisticUpdate").d("등록 취소 [%s]", name)
                     throw e
                 } catch (e: Exception) {
-                    Timber.tag("OptimisticUpdate").d("등록 실패 [%s] %s", name, e.javaClass.simpleName)
                     throw UpdateRejectedException(ledger.value(name)).apply { initCause(e) }
                 }
                 latest[name] = request.id
-                Timber.tag("OptimisticUpdate").d("등록 [%s] 작업=%s", name, request.id.toString().take(8))
                 request.id
             }
         }
@@ -84,15 +79,8 @@ class WorkManagerOptimisticUpdateScheduler @Inject constructor(
         val name = "${update.kind}:${update.targetId}"
         val version = versions.computeIfAbsent(name) { AtomicLong() }
         val ticket = version.incrementAndGet()
-        Timber.tag("OptimisticUpdate").d(
-            "요청 [%s] #%d 값=%s",
-            name,
-            ticket,
-            if (update.kind == UpdateKind.MEMO) "${update.value.length}자" else update.value,
-        )
         val id = enqueue(update).getOrElse {
             if (version.get() != ticket) {
-                Timber.tag("OptimisticUpdate").d("이전 요청 무시 [%s] #%d", name, ticket)
                 throw CancellationException("Update replaced")
             }
             return Result.failure(it)
@@ -102,21 +90,12 @@ class WorkManagerOptimisticUpdateScheduler @Inject constructor(
         }
         return enqueueMutex.withLock {
             if (version.get() != ticket || latest[name] != id || status == null || status == WorkInfo.State.CANCELLED) {
-                Timber.tag("OptimisticUpdate").d("이전·취소 요청 무시 [%s] #%d", name, ticket)
                 throw CancellationException("Update replaced or cancelled")
             }
             if (status == WorkInfo.State.SUCCEEDED) {
-                Timber.tag("OptimisticUpdate").d("반영 완료 [%s] #%d", name, ticket)
                 Result.success(Unit)
             } else {
-                val committedValue = ledger.value(name)
-                Timber.tag("OptimisticUpdate").d(
-                    "실패 [%s] #%d 복구값=%s",
-                    name,
-                    ticket,
-                    if (update.kind == UpdateKind.MEMO) committedValue?.let { "${it.length}자" } else committedValue,
-                )
-                Result.failure(UpdateRejectedException(committedValue))
+                Result.failure(UpdateRejectedException(ledger.value(name)))
             }
         }
     }

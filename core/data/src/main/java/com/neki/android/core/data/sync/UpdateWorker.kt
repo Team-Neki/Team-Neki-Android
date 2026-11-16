@@ -29,7 +29,6 @@ class UpdateWorker @AssistedInject constructor(
         val value = inputData.getString("value") ?: return Result.failure()
         val kind = inputData.getString("kind")?.let { raw -> UpdateKind.entries.find { it.name == raw } }
             ?: return Result.failure()
-        Timber.tag("OptimisticUpdate").d("저장 시작 [%s:%s] 작업=%s", kind, target, id.toString().take(8))
         return try {
             val result = when (kind) {
                 UpdateKind.PHOTO_FAVORITE -> photos.updateFavorite(target.toLong(), value.toBooleanStrict())
@@ -40,13 +39,11 @@ class UpdateWorker @AssistedInject constructor(
             }
             result.getOrThrow()
             ledger.commit("$kind:$target", value)
-            Timber.tag("OptimisticUpdate").d("저장 완료 작업=%s", id.toString().take(8))
             Result.success()
         } catch (e: CancellationException) {
-            Timber.tag("OptimisticUpdate").d("저장 취소 작업=%s", id.toString().take(8))
             throw e
         } catch (e: Exception) {
-            Timber.tag("OptimisticUpdate").e(e, "저장 실패 작업=%s", id.toString().take(8))
+            Timber.e(e, "백그라운드 업데이트 실패")
             Result.failure()
         }
     }
