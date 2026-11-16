@@ -25,8 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.neki.android.core.designsystem.DevicePreview
+import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.compose.collectWithLifecycle
@@ -42,6 +45,7 @@ import com.neki.android.feature.pose.impl.main.component.RandomPosePeopleCountBo
 import com.neki.android.feature.pose.impl.main.component.RecommendationChip
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 @Composable
@@ -111,14 +115,14 @@ fun PoseScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         PoseContent(
-            selectedPeopleCount = uiState.selectedPeopleCount,
-            isBookmarkSelected = uiState.isShowBookmarkedPose,
+            uiState = uiState,
             posePagingItems = posePagingItems,
             lazyState = lazyState,
             onClickQRCodeIcon = { onIntent(PoseIntent.ClickQRScanIcon) },
 //            onClickAlarmIcon = { onIntent(PoseIntent.ClickAlarmIcon) },
             onClickPeopleCount = { onIntent(PoseIntent.ClickPeopleCountChip) },
             onClickBookmark = { onIntent(PoseIntent.ClickBookmarkChip) },
+            onClickRelationTag = { onIntent(PoseIntent.ClickRelationTagChip(it)) },
             onClickPoseItem = { pose, index -> onIntent(PoseIntent.ClickPoseItem(pose, index)) },
             onClickBookmarkIcon = { onIntent(PoseIntent.ClickBookmarkIcon(it)) },
         )
@@ -156,13 +160,13 @@ fun PoseScreen(
 @Composable
 fun PoseContent(
     modifier: Modifier = Modifier,
-    selectedPeopleCount: PeopleCount?,
-    isBookmarkSelected: Boolean,
+    uiState: PoseState,
     posePagingItems: LazyPagingItems<Pose>,
     lazyState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     onClickQRCodeIcon: () -> Unit = {},
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
+    onClickRelationTag: (PoseRelationTag) -> Unit = {},
     onClickPoseItem: (Pose, Int) -> Unit = { _, _ -> },
     onClickBookmarkIcon: (Pose) -> Unit = {},
 ) {
@@ -197,12 +201,47 @@ fun PoseContent(
                         if (filterBarHeightPx != 0) return@onSizeChanged
                         else filterBarHeightPx = size.height
                     },
-                peopleCount = selectedPeopleCount,
-                isBookmarkSelected = isBookmarkSelected,
+                peopleCount = uiState.selectedPeopleCount,
+                relationTag = uiState.selectedRelationTag,
+                isBookmarkSelected = uiState.isShowBookmarkedPose,
+                totalPoseCount = uiState.totalPoseCount,
                 visible = showFilterBar,
                 onClickPeopleCount = onClickPeopleCount,
                 onClickBookmark = onClickBookmark,
+                onClickRelationTag = onClickRelationTag,
             )
         }
+    }
+}
+
+@DevicePreview
+@Composable
+private fun PoseScreenPreview() {
+    val poses = (1..6).map { Pose(id = it.toLong(), width = 162, height = 242) }
+    val posePagingItems = flowOf(PagingData.from(poses)).collectAsLazyPagingItems()
+
+    NekiTheme {
+        PoseScreen(
+            uiState = PoseState(totalPoseCount = 98),
+            posePagingItems = posePagingItems,
+        )
+    }
+}
+
+@DevicePreview
+@Composable
+private fun PoseScreenRelationTagSelectedPreview() {
+    val poses = (1..6).map { Pose(id = it.toLong(), width = 162, height = 242) }
+    val posePagingItems = flowOf(PagingData.from(poses)).collectAsLazyPagingItems()
+
+    NekiTheme {
+        PoseScreen(
+            uiState = PoseState(
+                selectedPeopleCount = PeopleCount.TWO,
+                selectedRelationTag = PoseRelationTag.FRIEND,
+                totalPoseCount = 20,
+            ),
+            posePagingItems = posePagingItems,
+        )
     }
 }

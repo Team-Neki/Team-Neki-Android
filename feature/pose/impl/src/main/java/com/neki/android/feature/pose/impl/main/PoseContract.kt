@@ -2,6 +2,7 @@ package com.neki.android.feature.pose.impl.main
 
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
+import com.neki.android.feature.pose.impl.const.PoseConst.TEMP_TOTAL_POSE_COUNT
 import com.neki.android.feature.pose.api.PoseNavKey
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -9,12 +10,20 @@ import kotlinx.collections.immutable.persistentListOf
 data class PoseState(
     val isLoading: Boolean = false,
     val selectedPeopleCount: PeopleCount? = null,
+    val selectedRelationTag: PoseRelationTag? = null,
+    val totalPoseCount: Int? = TEMP_TOTAL_POSE_COUNT,
     val selectedRandomPosePeopleCount: PeopleCount? = null,
     val isShowBookmarkedPose: Boolean = false,
     val bookmarkedPoseList: ImmutableList<Pose> = persistentListOf(),
     val isShowPeopleCountBottomSheet: Boolean = false,
     val isShowRandomPosePeopleCountBottomSheet: Boolean = false,
 )
+
+enum class PoseRelationTag(val displayText: String) {
+    FRIEND("친구"),
+    COUPLE("커플"),
+    CRUSH("썸"),
+}
 
 sealed interface PoseIntent {
     data object EnterPoseScreen : PoseIntent
@@ -24,6 +33,7 @@ sealed interface PoseIntent {
     data object DismissPeopleCountBottomSheet : PoseIntent
     data object DismissRandomPosePeopleCountBottomSheet : PoseIntent
     data object ClickBookmarkChip : PoseIntent
+    data class ClickRelationTagChip(val relationTag: PoseRelationTag) : PoseIntent
     data class ClickPoseItem(val item: Pose, val index: Int) : PoseIntent
     data class ClickPeopleCountSheetItem(val peopleCount: PeopleCount) : PoseIntent
     data object ClickRandomPoseRecommendation : PoseIntent
