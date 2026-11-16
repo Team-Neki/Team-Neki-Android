@@ -176,6 +176,8 @@ adb logcat -d -v threadtime AndroidRuntime:E '*:S'
 - `FIX_REQUIRED`: 검증 실패, 기능 오류, 회귀 또는 완료 조건 불일치가 있다.
 - `BLOCKED`: 계정, 서버, 기기, 권한, 테스트 데이터 또는 외부 환경이 있어야 확인할 수 있다.
 
+Runtime QA가 10분 상한으로 끝나지 않으면 `PASS`를 반환하지 않는다. `BLOCKED`로 완료한 결과와 남은 시나리오를 반환하고, main agent는 남은 시나리오부터 재개한다.
+
 Runtime QA를 제외한 작업의 수동 시나리오는 후속 확인 항목으로 기록하며 PASS 판정에는 포함하지 않는다.
 
 ## 출력 형식
