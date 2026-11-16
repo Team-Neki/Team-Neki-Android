@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -19,11 +20,16 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.clickableSingle
+import com.neki.android.core.designsystem.popup.ArrowDirection
+import com.neki.android.core.designsystem.popup.ToolTip
+import com.neki.android.core.designsystem.popup.ToolTipSize
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.LoginType
 
 @Composable
 internal fun LoginBottomContent(
     modifier: Modifier = Modifier,
+    lastLoginType: LoginType? = null,
     onClick: () -> Unit = {},
 ) {
     Column(
@@ -35,9 +41,24 @@ internal fun LoginBottomContent(
             )
             .padding(top = 32.dp, bottom = 56.dp, start = 20.dp, end = 20.dp),
     ) {
-        KakaoLoginButton(
-            onClick = onClick,
-        )
+        Box {
+            KakaoLoginButton(
+                onClick = onClick,
+            )
+            if (lastLoginType == LoginType.KAKAO) {
+                ToolTip(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = (-9).dp, y = (-14).dp),
+                    tooltipText = "최근 로그인",
+                    arrowDirection = ArrowDirection.Down,
+                    arrowAlignment = Alignment.CenterEnd,
+                    arrowPosition = 13.5.dp,
+                    toolTipSize = ToolTipSize.Small,
+                    leadingIcon = ImageVector.vectorResource(R.drawable.icon_clock),
+                )
+            }
+        }
     }
 }
 
@@ -76,6 +97,14 @@ private fun KakaoLoginButton(
 private fun LoginBottomContentPreview() {
     NekiTheme {
         LoginBottomContent()
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun LoginBottomContentRecentKakaoPreview() {
+    NekiTheme {
+        LoginBottomContent(lastLoginType = LoginType.KAKAO)
     }
 }
 

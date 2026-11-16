@@ -10,8 +10,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neki.android.core.common.kakao.KakaoAuthHelper
-import com.neki.android.core.designsystem.ComponentPreview
+import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
+import com.neki.android.core.model.LoginType
 import com.neki.android.core.ui.component.LoadingDialog
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.core.ui.toast.NekiToast
@@ -66,6 +67,7 @@ private fun LoginScreen(
         LoginBackground()
         LoginBottomContent(
             modifier = Modifier.align(Alignment.BottomCenter),
+            lastLoginType = uiState.lastLoginType,
             onClick = { onIntent(LoginIntent.ClickKakaoLogin) },
         )
     }
@@ -75,10 +77,20 @@ private fun LoginScreen(
     }
 }
 
-@ComponentPreview
+@DevicePreview
 @Composable
 private fun LoginScreenPreview() {
     NekiTheme {
         LoginScreen()
+    }
+}
+
+@DevicePreview
+@Composable
+private fun LoginScreenRecentKakaoPreview() {
+    NekiTheme {
+        LoginScreen(
+            uiState = LoginState(lastLoginType = LoginType.KAKAO),
+        )
     }
 }

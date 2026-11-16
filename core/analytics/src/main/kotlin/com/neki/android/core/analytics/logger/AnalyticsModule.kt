@@ -4,6 +4,8 @@ import android.content.Context
 import com.amplitude.android.Amplitude
 import com.amplitude.android.AutocaptureOption
 import com.facebook.appevents.AppEventsLogger
+import com.neki.android.core.analytics.server.AnalyticsEnvironment
+import com.neki.android.core.dataapi.repository.ClientLogRepository
 import com.neki.android.core.analytics.initializer.AmplitudeApiKey
 import com.neki.android.core.analytics.initializer.AnalyticsInitializer
 import dagger.Binds
@@ -21,7 +23,7 @@ internal abstract class AnalyticsModule {
 
     @Binds
     @Singleton
-    abstract fun bindAnalyticsLogger(impl: AmplitudeAnalyticsLogger): AnalyticsLogger
+    abstract fun bindAnalyticsLogger(impl: NekiAnalyticsLogger): AnalyticsLogger
 
     @Binds
     @Singleton
@@ -38,16 +40,32 @@ internal abstract class AnalyticsModule {
     companion object {
         @Provides
         @Singleton
+        fun provideServerAnalyticsLogger(
+            client: AmplitudeAnalyticsClient,
+            sessions: AmplitudeSessionRegistry,
+            repository: Lazy<ClientLogRepository>,
+            environment: Lazy<AnalyticsEnvironment>,
+        ): ServerAnalyticsLogger = ServerAnalyticsLogger(
+            client,
+            sessions,
+            lazy { repository.get() },
+            lazy { environment.get().appVersion },
+            lazy { environment.get().context },
+        )
+
+        @Provides
+        @Singleton
         fun provideAmplitude(
             @AmplitudeApiKey apiKey: String,
             @ApplicationContext context: Context,
+            sessions: AmplitudeSessionRegistry,
         ): Amplitude = Amplitude(apiKey, context) {
             minIdLength = 1
             autocapture = setOf(
                 AutocaptureOption.SESSIONS,
                 AutocaptureOption.APP_LIFECYCLES,
             )
-        }
+        }.apply { add(AmplitudeSessionPlugin(sessions)) }
 
         @Provides
         @Singleton
@@ -59,6 +77,10 @@ internal abstract class AnalyticsModule {
         @Singleton
         fun provideAnalyticsInitializer(
             amplitude: Lazy<Amplitude>,
-        ): AnalyticsInitializer = AnalyticsInitializer(amplitude::get)
+            logger: Lazy<ServerAnalyticsLogger>,
+        ): AnalyticsInitializer = AnalyticsInitializer {
+            amplitude.get()
+            logger.get().initialize()
+        }
     }
 }

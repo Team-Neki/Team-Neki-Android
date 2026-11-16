@@ -18,7 +18,8 @@ internal class SearchPagingSource(
     private val keyword: String,
     private val latitude: Double?,
     private val longitude: Double?,
-    private val onSearchSuccess: (Boolean, Int, Boolean) -> Unit,
+    private val onSearchSuccess: (Int) -> Unit,
+    private val onLoadMoreSuccess: (SearchCompletionType, Int, Int, Boolean) -> Unit,
 ) : PagingSource<SearchPageKey, SearchCompletion>() {
     override fun getRefreshKey(state: PagingState<SearchPageKey, SearchCompletion>): SearchPageKey? = null
 
@@ -29,8 +30,8 @@ internal class SearchPagingSource(
             while (page.data.isEmpty() && page.nextKey != null) {
                 page = fetchPage(checkNotNull(page.nextKey), params.loadSize)
             }
-            if (params is LoadParams.Refresh || page.data.isNotEmpty()) {
-                onSearchSuccess(params is LoadParams.Refresh, page.data.size, page.nextKey != null)
+            if (params is LoadParams.Refresh) {
+                onSearchSuccess(page.data.size)
             }
             page
         } catch (e: CancellationException) {
@@ -55,6 +56,9 @@ internal class SearchPagingSource(
             latitude = latitude,
             longitude = longitude,
         ).data
+        if (cursor.page > 0) {
+            onLoadMoreSuccess(cursor.type, cursor.page + 1, response.items.size, response.hasNext)
+        }
         val next = if (response.hasNext) {
             cursor.copy(page = cursor.page + 1)
         } else {

@@ -5,6 +5,7 @@ import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.model.SearchBrand
 import com.neki.android.core.model.SearchCompletion
+import com.neki.android.core.model.SearchCompletionType
 import com.neki.android.core.model.SearchFilterGroup
 import kotlinx.coroutines.flow.Flow
 
@@ -33,7 +34,8 @@ interface MapRepository {
         keyword: String,
         latitude: Double?,
         longitude: Double?,
-        onSearchSuccess: (isInitial: Boolean, resultCount: Int, hasNextPage: Boolean) -> Unit,
+        onSearchSuccess: (resultCount: Int) -> Unit,
+        onLoadMoreSuccess: (type: SearchCompletionType, page: Int, resultCount: Int, hasNextPage: Boolean) -> Unit,
     ): Flow<PagingData<SearchCompletion>>
 
     suspend fun getPhotoBoothsByKeyword(

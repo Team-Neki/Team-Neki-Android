@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
+import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.permission.NotificationPermissionManager
 import com.neki.android.core.dataapi.repository.NotificationRepository
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
@@ -25,6 +27,7 @@ class MainViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
     private val uploadSinglePhotoUseCase: UploadSinglePhotoUseCase,
     private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
     val store: MviIntentStore<MainState, MainIntent, MainSideEffect> =
@@ -124,6 +127,7 @@ class MainViewModel @Inject constructor(
 
             uploadSinglePhotoUseCase(imageUrl = imageUrl, folderId = null)
                 .onSuccess {
+                    analyticsLogger.log(ArchiveAnalyticsEvent.PhotoUpload(method = "qr", count = 1))
                     reduce { copy(isLoading = false, scannedImageUrl = null) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
                     postSideEffect(MainSideEffect.RefreshArchive)
@@ -146,6 +150,7 @@ class MainViewModel @Inject constructor(
 
             uploadMultiplePhotoUseCase(imageUris = imageUris, folderId = null)
                 .onSuccess {
+                    analyticsLogger.log(ArchiveAnalyticsEvent.PhotoUpload(method = "gallery", count = imageUris.size))
                     reduce { copy(isLoading = false, selectedUris = persistentListOf()) }
                     postSideEffect(MainSideEffect.ShowToast("이미지를 추가했어요"))
                     postSideEffect(MainSideEffect.RefreshArchive)

@@ -10,7 +10,6 @@ class AndroidApplicationConventionPlugin: Plugin<Project> {
         with(target) {
             with(plugins) {
                 apply("com.android.application")
-                apply("org.jetbrains.kotlin.android")
                 apply("neki.hilt")
             }
 

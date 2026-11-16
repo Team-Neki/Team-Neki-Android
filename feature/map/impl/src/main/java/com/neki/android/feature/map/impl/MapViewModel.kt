@@ -259,6 +259,7 @@ class MapViewModel @Inject constructor(
                     MapAnalyticsEvent.BoothSelect(
                         entryPoint = action.entryPoint,
                         brandName = booth.brandName,
+                        brandId = state.brandIdOf(booth.brandName),
                         source = "search",
                     ),
                 )
@@ -360,6 +361,7 @@ class MapViewModel @Inject constructor(
         reduce: (MapState.() -> MapState) -> Unit,
         postSideEffect: (MapEffect) -> Unit,
     ) {
+        val brandId = store.uiState.value.brandIdOf(photoBooth.brandName)
         val newFavorite = !photoBooth.favorite
         toggleFavorite(photoBooth, newFavorite, reduce)
         postSideEffect(
@@ -382,6 +384,7 @@ class MapViewModel @Inject constructor(
                             MapAnalyticsEvent.BoothFavoriteAdd(
                                 boothName = photoBooth.branchName,
                                 brandName = photoBooth.brandName,
+                                brandId = brandId,
                             ),
                         )
                     } else {
@@ -389,6 +392,7 @@ class MapViewModel @Inject constructor(
                             MapAnalyticsEvent.BoothFavoriteRemove(
                                 boothName = photoBooth.branchName,
                                 brandName = photoBooth.brandName,
+                                brandId = brandId,
                             ),
                         )
                     }
@@ -570,6 +574,7 @@ class MapViewModel @Inject constructor(
                 action = if (clickedBrand.isChecked) "deselect" else "select",
                 selectedCount = updatedBrands.count { it.isChecked },
                 brandName = clickedBrand.name,
+                brandId = clickedBrand.id.toString(),
             ),
         )
         reduce {
@@ -604,6 +609,7 @@ class MapViewModel @Inject constructor(
             MapAnalyticsEvent.BoothSelect(
                 entryPoint = "bottom_sheet",
                 brandName = photoBooth.brandName,
+                brandId = store.uiState.value.brandIdOf(photoBooth.brandName),
                 source = "map",
             ),
         )
@@ -689,6 +695,7 @@ class MapViewModel @Inject constructor(
                 MapAnalyticsEvent.BoothSelect(
                     entryPoint = "map",
                     brandName = booth.brandName,
+                    brandId = state.brandIdOf(booth.brandName),
                     source = "map",
                 ),
             )
@@ -816,6 +823,9 @@ class MapViewModel @Inject constructor(
             reduce { copy(brandImageCache = cache.toImmutableMap()) }
         }
     }
+
+    private fun MapState.brandIdOf(brandName: String): String? =
+        brands.find { it.name == brandName }?.id?.toString()
 
     private fun isRegionChanged(currentCenter: LocLatLng, zoomLevel: Double): Boolean {
         val prev = lastSearchCenter ?: return false

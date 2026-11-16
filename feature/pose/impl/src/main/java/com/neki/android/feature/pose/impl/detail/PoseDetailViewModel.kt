@@ -162,6 +162,7 @@ class PoseDetailViewModel @AssistedInject constructor(
                 } else {
                     poseRepository.getPosesPage(
                         headCount = key.headCount,
+                        relation = key.relation,
                         page = nextPage,
                         size = PAGE_SIZE,
                         sortOrder = key.sortOrder,

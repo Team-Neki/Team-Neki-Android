@@ -1,5 +1,6 @@
 package com.neki.android.core.designsystem.dialog
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ fun DoubleButtonAlertDialog(
     onClickPrimaryButton: () -> Unit,
     onClickGrayButton: () -> Unit,
     modifier: Modifier = Modifier,
+    @DrawableRes imageRes: Int = R.drawable.image_dialog_alert,
     properties: DialogProperties = DialogProperties(
         usePlatformDefaultWidth = false,
     ),
@@ -57,7 +59,7 @@ fun DoubleButtonAlertDialog(
         ) {
             Image(
                 modifier = Modifier.size(64.dp),
-                painter = painterResource(R.drawable.image_dialog_alert),
+                painter = painterResource(imageRes),
                 contentDescription = null,
             )
             Column(

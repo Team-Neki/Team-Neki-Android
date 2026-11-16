@@ -1,6 +1,7 @@
 package com.neki.android.core.designsystem.popup
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.neki.android.core.designsystem.ComponentPreview
@@ -42,6 +44,20 @@ enum class ToolTipColor {
     Gray800, Gray25
 }
 
+enum class ToolTipSize {
+    Medium, Small
+}
+
+private data class ToolTipSizeSpec(
+    val cornerRadius: Dp,
+    val horizontalPadding: Dp,
+    val verticalPadding: Dp,
+    val spacing: Dp,
+    val iconSize: Dp,
+    val arrowWidth: Dp,
+    val arrowHeight: Dp,
+)
+
 @Composable
 fun ToolTipPopup(
     tooltipText: String,
@@ -51,6 +67,8 @@ fun ToolTipPopup(
     arrowAlignment: Alignment,
     arrowPosition: Dp = DEFAULT_ARROW_POSITION.dp,
     toolTipColor: ToolTipColor = ToolTipColor.Gray800,
+    toolTipSize: ToolTipSize = ToolTipSize.Medium,
+    leadingIcon: ImageVector? = null,
     hasCloseButton: Boolean = false,
     properties: PopupProperties = PopupProperties(),
     onDismissRequest: () -> Unit = {},
@@ -62,9 +80,11 @@ fun ToolTipPopup(
         onDismissRequest = onDismissRequest,
         properties = properties,
     ) {
-        ToolTipContent(
+        ToolTip(
             tooltipText = tooltipText,
             toolTipColor = toolTipColor,
+            toolTipSize = toolTipSize,
+            leadingIcon = leadingIcon,
             arrowDirection = arrowDirection,
             arrowPosition = arrowPosition,
             arrowAlignment = arrowAlignment,
@@ -107,17 +127,48 @@ private fun TriangleArrow(
     }
 }
 
+// Popup 없이 레이아웃 안에 그리는 툴팁. leadingIcon은 tint 없이 아이콘 고유 색으로 그린다.
 @Composable
-private fun ToolTipContent(
+fun ToolTip(
     tooltipText: String,
     arrowDirection: ArrowDirection,
     arrowAlignment: Alignment,
     modifier: Modifier = Modifier,
     toolTipColor: ToolTipColor = ToolTipColor.Gray800,
+    toolTipSize: ToolTipSize = ToolTipSize.Medium,
+    leadingIcon: ImageVector? = null,
     arrowPosition: Dp = DEFAULT_ARROW_POSITION.dp,
     hasCloseButton: Boolean = false,
     onClickCloseButton: () -> Unit = {},
 ) {
+    val sizeSpec = when (toolTipSize) {
+        ToolTipSize.Medium -> ToolTipSizeSpec(
+            cornerRadius = 8.dp,
+            horizontalPadding = 12.dp,
+            verticalPadding = 8.dp,
+            spacing = 2.dp,
+            iconSize = 16.dp,
+            arrowWidth = 10.dp,
+            arrowHeight = 8.dp,
+        )
+
+        ToolTipSize.Small -> ToolTipSizeSpec(
+            cornerRadius = 6.dp,
+            horizontalPadding = 8.dp,
+            verticalPadding = 6.dp,
+            spacing = 4.dp,
+            iconSize = 12.dp,
+            arrowWidth = 7.5.dp,
+            arrowHeight = 6.dp,
+        )
+    }
+    val textStyle = when (toolTipSize) {
+        ToolTipSize.Medium -> NekiTheme.typography.body14Medium
+        ToolTipSize.Small -> NekiTheme.typography.caption11Medium.copy(
+            fontSize = 10.5.sp,
+            lineHeight = 15.sp,
+        )
+    }
     val backgroundColor = when (toolTipColor) {
         ToolTipColor.Gray800 -> NekiTheme.colorScheme.gray800
         ToolTipColor.Gray25 -> NekiTheme.colorScheme.gray25
@@ -140,24 +191,38 @@ private fun ToolTipContent(
                     .fillMaxWidth()
                     .padding(horizontal = arrowPosition),
                 contentAlignment = arrowAlignment,
-            ) { TriangleArrow(direction = arrowDirection, color = backgroundColor) }
+            ) {
+                TriangleArrow(
+                    direction = arrowDirection,
+                    color = backgroundColor,
+                    width = sizeSpec.arrowWidth,
+                    height = sizeSpec.arrowHeight,
+                )
+            }
         }
         Row(
             modifier = Modifier
-                .background(color = backgroundColor, shape = RoundedCornerShape(8.dp))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                .background(color = backgroundColor, shape = RoundedCornerShape(sizeSpec.cornerRadius))
+                .padding(horizontal = sizeSpec.horizontalPadding, vertical = sizeSpec.verticalPadding),
+            horizontalArrangement = Arrangement.spacedBy(sizeSpec.spacing),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (leadingIcon != null) {
+                Image(
+                    modifier = Modifier.size(sizeSpec.iconSize),
+                    imageVector = leadingIcon,
+                    contentDescription = null,
+                )
+            }
             Text(
                 text = tooltipText,
-                style = NekiTheme.typography.body14Medium,
+                style = textStyle,
                 color = textColor,
             )
             if (hasCloseButton) {
                 Icon(
                     modifier = Modifier
-                        .size(16.dp)
+                        .size(sizeSpec.iconSize)
                         .noRippleClickableSingle(onClick = onClickCloseButton),
                     imageVector = ImageVector.vectorResource(R.drawable.icon_close),
                     tint = iconTint,
@@ -171,7 +236,14 @@ private fun ToolTipContent(
                     .fillMaxWidth()
                     .padding(horizontal = arrowPosition),
                 contentAlignment = arrowAlignment,
-            ) { TriangleArrow(direction = arrowDirection, color = backgroundColor) }
+            ) {
+                TriangleArrow(
+                    direction = arrowDirection,
+                    color = backgroundColor,
+                    width = sizeSpec.arrowWidth,
+                    height = sizeSpec.arrowHeight,
+                )
+            }
         }
     }
 }
@@ -184,34 +256,34 @@ private fun ToolTipArrowUpPreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterStart,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.Center,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterEnd,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterStart,
                 hasCloseButton = true,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.Center,
                 hasCloseButton = true,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterEnd,
@@ -229,34 +301,34 @@ private fun ToolTipArrowDownPreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.CenterStart,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.Center,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.CenterEnd,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.CenterStart,
                 hasCloseButton = true,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.Center,
                 hasCloseButton = true,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.CenterEnd,
@@ -274,39 +346,39 @@ private fun ToolTipArrowUpGrayPreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterStart,
                 toolTipColor = ToolTipColor.Gray25,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.Center,
                 toolTipColor = ToolTipColor.Gray25,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterEnd,
                 toolTipColor = ToolTipColor.Gray25,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterStart,
                 toolTipColor = ToolTipColor.Gray25,
                 hasCloseButton = true,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.Center,
                 toolTipColor = ToolTipColor.Gray25,
                 hasCloseButton = true,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Up,
                 arrowAlignment = Alignment.CenterEnd,
@@ -325,39 +397,39 @@ private fun ToolTipArrowDownGrayPreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.CenterStart,
                 toolTipColor = ToolTipColor.Gray25,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.Center,
                 toolTipColor = ToolTipColor.Gray25,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.CenterEnd,
                 toolTipColor = ToolTipColor.Gray25,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.CenterStart,
                 toolTipColor = ToolTipColor.Gray25,
                 hasCloseButton = true,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.Center,
                 toolTipColor = ToolTipColor.Gray25,
                 hasCloseButton = true,
             )
-            ToolTipContent(
+            ToolTip(
                 tooltipText = "텍스트",
                 arrowDirection = ArrowDirection.Down,
                 arrowAlignment = Alignment.CenterEnd,
@@ -379,6 +451,32 @@ private fun TriangleArrowPreview() {
         ) {
             TriangleArrow(direction = ArrowDirection.Up, color = NekiTheme.colorScheme.gray800)
             TriangleArrow(direction = ArrowDirection.Down, color = NekiTheme.colorScheme.gray800)
+        }
+    }
+}
+
+@ComponentPreview
+@Composable
+private fun ToolTipSmallPreview() {
+    NekiTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ToolTip(
+                tooltipText = "최근 로그인",
+                arrowDirection = ArrowDirection.Down,
+                arrowAlignment = Alignment.CenterEnd,
+                arrowPosition = 13.5.dp,
+                toolTipSize = ToolTipSize.Small,
+                leadingIcon = ImageVector.vectorResource(R.drawable.icon_clock),
+            )
+            ToolTip(
+                tooltipText = "텍스트",
+                arrowDirection = ArrowDirection.Up,
+                arrowAlignment = Alignment.Center,
+                toolTipSize = ToolTipSize.Small,
+            )
         }
     }
 }

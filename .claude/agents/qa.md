@@ -15,7 +15,8 @@ Android 변경사항의 자동 검증, 기능·회귀 시나리오, 선택된 Ru
 - 변경 파일 경로에 맞는 skill 전문을 읽는다.
 - 기존 기능 영향과 수정·추가 기능의 기대 동작을 확인한다.
 - main agent의 최신 검증 결과를 확인하고 누락된 Gradle 검증을 실행한다.
-- Runtime QA를 진행하기로 한 변경은 adb로 앱 상태와 로그를 확인한다.
+- Runtime QA를 진행하기로 한 변경은 main agent가 전달한 대상 시나리오만 adb로 확인한다. main agent가 이미 기기에서 확인한 항목은 다시 실행하지 않는다.
+- Runtime QA가 10분을 넘으면 멈추고 그때까지의 결과와 남은 시나리오를 반환한다.
 - 화면, navigation, result, API 실패, local 저장, analytics 변경에 맞는 QA 시나리오를 작성한다.
 - PR의 테스트 내역, 스크린샷 또는 시연 영상, 리뷰 포인트에 들어갈 내용을 정리한다.
 - 코드는 읽기 전용으로 확인하고 실패 근거와 수정 지점을 main agent에 반환한다.
@@ -115,7 +116,7 @@ adb shell pidof com.neki.android.dev
 adb logcat --pid="$(adb shell pidof com.neki.android.dev)" -d -v threadtime
 ```
 
-연결 기기와 설치된 build variant를 확인한 뒤 해당 package를 기준으로 실행한다. crash 확인은 아래 명령을 사용한다.
+연결 기기와 설치된 build variant를 확인한 뒤 해당 package를 기준으로 실행한다. API 요청 파라미터와 응답은 화면 조작 대신 debug Ktor 로그(`adb logcat -d -s TAG_REST_API`)로 먼저 확인하고, 화면 캡처는 UI 변경 증거와 PR 자료에 필요한 만큼만 남긴다. crash 확인은 아래 명령을 사용한다.
 
 ```bash
 adb logcat -d -v threadtime AndroidRuntime:E '*:S'

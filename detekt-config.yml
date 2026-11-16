@@ -1,22 +1,22 @@
 complexity:
     LongMethod:
-        threshold: 150
+        allowedLines: 150
         ignoreAnnotated: [ 'Composable' ]
     CyclomaticComplexMethod:
-        threshold: 43
+        allowedComplexity: 43
         ignoreAnnotated: [ 'Composable' ]
     LongParameterList:
         active: false
     TooManyFunctions:
         active: false
     ComplexCondition:
-        threshold: 7
+        allowedConditions: 7
 
 performance:
     SpreadOperator:
         active: false
 
-formatting:
+ktlint:
     TrailingCommaOnCallSite:
         active: true
     TrailingCommaOnDeclarationSite:
@@ -50,6 +50,61 @@ formatting:
         active: false
     AnnotationOnSeparateLine:
         active: false
+    # Keep the 1.x rule selection while migrating the build tools.
+    BackingPropertyNaming:
+        active: false
+    BinaryExpressionWrapping:
+        active: false
+    BlankLineBetweenWhenConditions:
+        active: false
+    ClassSignature:
+        active: false
+    ConditionWrapping:
+        active: false
+    ContextReceiverListWrapping:
+        active: false
+    ContextReceiverMapping:
+        active: false
+    EnumWrapping:
+        active: false
+    FunctionExpressionBody:
+        active: false
+    FunctionLiteral:
+        active: false
+    FunctionSignature:
+        active: false
+    FunctionTypeModifierSpacing:
+        active: false
+    Kdoc:
+        active: false
+    MixedConditionOperators:
+        active: false
+    MultilineLoop:
+        active: false
+    NoEmptyFile:
+        active: false
+    ParameterListSpacing:
+        active: false
+    PropertyName:
+        active: false
+    SpacingAroundSquareBrackets:
+        active: false
+    StatementWrapping:
+        active: false
+    ThenSpacing:
+        active: false
+    TypeArgumentComment:
+        active: false
+    TypeArgumentListSpacing:
+        active: false
+    TypeParameterComment:
+        active: false
+    TypeParameterListSpacing:
+        active: false
+    ValueArgumentComment:
+        active: false
+    ValueParameterComment:
+        active: false
 
 exceptions:
     TooGenericExceptionCaught:
@@ -58,6 +113,8 @@ exceptions:
         active: false
 
 style:
+    ExplicitItLambdaMultipleParameters:
+        active: false
     FunctionOnlyReturningConstant:
         active: false
     UnusedParameter:
@@ -67,7 +124,9 @@ style:
         ignoreAnnotated: [ 'AllowMagicNumber' ]
     ForbiddenComment:
         active: false
-    UnusedPrivateMember:
+    UnusedPrivateFunction:
+        ignoreAnnotated: [ 'Preview', 'ComponentPreview', 'DevicePreview' ]
+    UnusedPrivateProperty:
         ignoreAnnotated: [ 'Preview', 'ComponentPreview', 'DevicePreview' ]
     ThrowsCount:
         active: false

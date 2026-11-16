@@ -36,6 +36,7 @@ android {
 
     buildFeatures {
         buildConfig = true
+        resValues = true
     }
 
     defaultConfig {
@@ -72,12 +73,10 @@ android {
             buildConfigField("String", "AMPLITUDE_API_KEY", amplitudeApiKey)
         }
         release {
-            isMinifyEnabled = true
+            optimization {
+                enable = true
+            }
             signingConfig = signingConfigs.getByName("release")
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
 
             val naverMapClientId = properties["NAVER_MAP_CLIENT_ID"].toString()
             buildConfigField("String", "NAVER_MAP_CLIENT_ID", naverMapClientId)

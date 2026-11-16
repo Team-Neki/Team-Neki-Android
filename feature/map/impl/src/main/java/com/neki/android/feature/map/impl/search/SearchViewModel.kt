@@ -47,28 +47,31 @@ internal class SearchViewModel @AssistedInject constructor(
     )
 
     val results = request.flatMapLatest { query ->
-        var loadedPage = 1
+        val loggedPages = mutableSetOf<Pair<SearchCompletionType, Int>>()
         mapRepository.getSearchCompletionsFlow(
             keyword = query.keyword,
             latitude = query.latitude,
             longitude = query.longitude,
-            onSearchSuccess = { isInitial, resultCount, hasNextPage ->
-                loadedPage = if (isInitial) 1 else loadedPage + 1
+            onSearchSuccess = { resultCount ->
                 analyticsLogger.log(
-                    if (isInitial) {
-                        MapAnalyticsEvent.MapSearchResult(
-                            query = query.keyword,
-                            resultStatus = if (resultCount > 0) "matched" else "unmatched",
-                        )
-                    } else {
+                    MapAnalyticsEvent.MapSearchResult(
+                        query = query.keyword,
+                        resultStatus = if (resultCount > 0) "matched" else "unmatched",
+                    ),
+                )
+            },
+            onLoadMoreSuccess = { type, page, resultCount, hasNextPage ->
+                if (loggedPages.add(type to page)) {
+                    analyticsLogger.log(
                         MapAnalyticsEvent.MapSearchLoadMore(
                             query = query.keyword,
-                            page = loadedPage,
+                            candidateType = type.toCandidateType(),
+                            page = page,
                             pageResultCount = resultCount,
                             hasNextPage = hasNextPage,
-                        )
-                    },
-                )
+                        ),
+                    )
+                }
             },
         )
     }.cachedIn(viewModelScope)
@@ -116,15 +119,17 @@ internal class SearchViewModel @AssistedInject constructor(
             analyticsLogger.log(
                 MapAnalyticsEvent.MapSearchCandidateSelect(
                     query = request.keyword,
-                    candidateType = when (result.type) {
-                        SearchCompletionType.REGION -> "district"
-                        SearchCompletionType.STATION -> "subway_station"
-                        SearchCompletionType.PHOTO_BOOTH -> "booth"
-                    },
+                    candidateType = result.type.toCandidateType(),
                     candidateName = result.keyword,
                 ),
             )
         }
         postSideEffect(SearchEffect.SelectResult(result))
+    }
+
+    private fun SearchCompletionType.toCandidateType(): String = when (this) {
+        SearchCompletionType.REGION -> "district"
+        SearchCompletionType.STATION -> "subway_station"
+        SearchCompletionType.PHOTO_BOOTH -> "booth"
     }
 }

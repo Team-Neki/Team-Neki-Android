@@ -8,16 +8,16 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 internal fun Project.configureAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
         compileSdk = BuildConst.COMPILE_SDK
 
-        defaultConfig {
+        defaultConfig.apply {
             minSdk = BuildConst.MIN_SDK
         }
 
-        compileOptions {
+        compileOptions.apply {
             sourceCompatibility = BuildConst.JAVA_VERSION
             targetCompatibility = BuildConst.JAVA_VERSION
         }

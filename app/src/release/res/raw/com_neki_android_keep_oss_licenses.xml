@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- OSS Licenses 17.2.1 loads these layouts by name through Resources.getIdentifier(). -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@layout/libraries_social_licenses_license,@layout/libraries_social_licenses_license_activity,@layout/libraries_social_licenses_license_menu_activity" />

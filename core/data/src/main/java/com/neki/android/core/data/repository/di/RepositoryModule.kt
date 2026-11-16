@@ -24,6 +24,8 @@ import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.dataapi.repository.TermRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
+import com.neki.android.core.data.repository.impl.ClientLogRepositoryImpl
+import com.neki.android.core.dataapi.repository.ClientLogRepository
 import com.neki.android.core.data.repository.impl.QrDumpRepositoryImpl
 import com.neki.android.core.dataapi.repository.QrDumpRepository
 import dagger.Binds
@@ -35,6 +37,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 internal interface RepositoryModule {
+
+    @Binds
+    @Singleton
+    fun bindClientLogRepository(impl: ClientLogRepositoryImpl): ClientLogRepository
 
     @Binds
     @Singleton

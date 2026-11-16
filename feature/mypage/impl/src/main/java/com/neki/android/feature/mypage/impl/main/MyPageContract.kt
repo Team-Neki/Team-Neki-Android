@@ -26,6 +26,7 @@ sealed interface MyPageIntent {
     data object ClickPermission : MyPageIntent
 
     // Notification Permission Intent
+    data object RequestedNotificationPermission : MyPageIntent
     data object GrantNotificationPermission : MyPageIntent
     data object DenyNotificationPermissionPermanent : MyPageIntent
     data object DismissNotificationPermissionDialog : MyPageIntent

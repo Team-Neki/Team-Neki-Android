@@ -84,6 +84,9 @@ internal fun PermissionRoute(
             else -> return@rememberLauncherForActivityResult
         }
         val isGranted = permissions.values.any { it }
+        if (permission == NekiPermission.NOTIFICATION) {
+            viewModel.store.onIntent(PermissionIntent.RequestedNotificationPermission)
+        }
         viewModel.store.onIntent(PermissionIntent.UpdatePermissionState(permission, isGranted))
 
         if (!isGranted) {

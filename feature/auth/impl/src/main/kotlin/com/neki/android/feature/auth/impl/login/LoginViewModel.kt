@@ -6,6 +6,7 @@ import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.AuthRepository
 import com.neki.android.core.dataapi.repository.TokenRepository
 import com.neki.android.core.dataapi.repository.UserRepository
+import com.neki.android.core.model.LoginType
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,10 @@ class LoginViewModel @Inject constructor(
             onIntent = ::onIntent,
         )
 
+    init {
+        store.onIntent(LoginIntent.EnterLoginScreen)
+    }
+
     private fun onIntent(
         intent: LoginIntent,
         state: LoginState,
@@ -33,9 +38,18 @@ class LoginViewModel @Inject constructor(
         postSideEffect: (LoginSideEffect) -> Unit,
     ) {
         when (intent) {
+            LoginIntent.EnterLoginScreen -> loadLastLoginType(reduce)
             LoginIntent.ClickKakaoLogin -> postSideEffect(LoginSideEffect.NavigateToKakaoRedirectingUri)
             is LoginIntent.SuccessKakaoLogin -> signUp(intent.idToken, reduce, postSideEffect)
             LoginIntent.FailKakaoLogin -> postSideEffect(LoginSideEffect.ShowToastMessage("카카오 로그인에 실패했습니다."))
+        }
+    }
+
+    private fun loadLastLoginType(
+        reduce: (LoginState.() -> LoginState) -> Unit,
+    ) = viewModelScope.launch {
+        authRepository.lastLoginType.collect { lastLoginType ->
+            reduce { copy(lastLoginType = lastLoginType) }
         }
     }
 
@@ -51,6 +65,7 @@ class LoginViewModel @Inject constructor(
                     accessToken = authResult.accessToken,
                     refreshToken = authResult.refreshToken,
                 )
+                authRepository.setLastLoginType(LoginType.KAKAO)
                 checkTermAgreementState(postSideEffect)
             }
             .onFailure { e ->
