@@ -7,13 +7,17 @@ import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.const.TermConst
 import com.neki.android.core.dataapi.repository.FolderRepository
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
 import com.neki.android.core.dataapi.repository.PhotoRepository
-import com.neki.android.core.dataapi.repository.TermRepository
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -21,7 +25,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 private const val DEFAULT_PHOTOS_SIZE = 20
 
@@ -30,8 +33,8 @@ class ArchiveMainViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val folderRepository: FolderRepository,
     private val userRepository: UserRepository,
-    private val termRepository: TermRepository,
     private val analyticsLogger: AnalyticsLogger,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
     val store: MviIntentStore<ArchiveMainState, ArchiveMainIntent, ArchiveMainSideEffect> =
@@ -196,7 +199,14 @@ class ArchiveMainViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            photoRepository.updateFavorite(photo.id, newFavorite)
+            optimisticUpdateScheduler.update(
+                PendingUpdate(
+                    UpdateKind.PHOTO_FAVORITE,
+                    photo.id.toString(),
+                    newFavorite.toString(),
+                    previousValue = photo.isFavorite.toString(),
+                ),
+            )
                 .onSuccess {
                     fetchFavoriteSummary(reduce)
                 }
@@ -205,7 +215,7 @@ class ArchiveMainViewModel @Inject constructor(
                     reduce {
                         copy(
                             recentPhotos = recentPhotos.map {
-                                if (it.id == photo.id) it.copy(isFavorite = photo.isFavorite) else it
+                                if (it.id == photo.id) it.copy(isFavorite = e.committedBoolean(photo.isFavorite)) else it
                             }.toImmutableList(),
                         )
                     }
@@ -216,7 +226,9 @@ class ArchiveMainViewModel @Inject constructor(
     private fun agreeMarketingTerm(
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
     ) = viewModelScope.launch {
-        termRepository.updateTermAgreement(termId = TermConst.MARKETING_TERM_ID, agreed = true)
+        optimisticUpdateScheduler.update(
+            PendingUpdate(UpdateKind.MARKETING, TermConst.MARKETING_TERM_ID.toString(), true.toString()),
+        )
             .onSuccess {
                 postSideEffect(ArchiveMainSideEffect.ShowToastMessage("마케팅 알림 수신에 동의했어요."))
             }

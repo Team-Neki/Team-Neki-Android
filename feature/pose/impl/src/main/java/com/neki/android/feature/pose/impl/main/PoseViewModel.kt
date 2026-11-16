@@ -8,7 +8,11 @@ import androidx.paging.filter
 import androidx.paging.map
 import com.neki.android.core.analytics.event.PoseAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
 import com.neki.android.core.dataapi.repository.PoseRepository
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
@@ -16,6 +20,7 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.pose.api.PoseNavKey
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,12 +29,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltViewModel
 internal class PoseViewModel @Inject constructor(
     private val poseRepository: PoseRepository,
     private val analyticsLogger: AnalyticsLogger,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
     private val _headCountFilter = MutableStateFlow<PeopleCount?>(null)
@@ -141,10 +146,17 @@ internal class PoseViewModel @Inject constructor(
                 val newBookmarked = !pose.isBookmarked
                 updatedBookmarks.update { it + (pose.id to newBookmarked) }
                 viewModelScope.launch {
-                    poseRepository.updateBookmark(pose.id, newBookmarked)
+                    optimisticUpdateScheduler.update(
+                        PendingUpdate(
+                            UpdateKind.POSE_BOOKMARK,
+                            pose.id.toString(),
+                            newBookmarked.toString(),
+                            previousValue = pose.isBookmarked.toString(),
+                        ),
+                    )
                         .onFailure { e ->
                             Timber.e(e)
-                            updatedBookmarks.update { it + (pose.id to pose.isBookmarked) }
+                            updatedBookmarks.update { it + (pose.id to e.committedBoolean(pose.isBookmarked)) }
                         }
                 }
             }

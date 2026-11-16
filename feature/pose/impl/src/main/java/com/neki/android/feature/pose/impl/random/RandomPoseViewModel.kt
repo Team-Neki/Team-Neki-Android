@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.analytics.event.PoseAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
-import com.neki.android.core.common.coroutine.di.ApplicationScope
 import com.neki.android.core.common.exception.ApiErrorCode.NO_MORE_RANDOM_POSE
 import com.neki.android.core.common.exception.NoMorePoseException
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
 import com.neki.android.core.dataapi.repository.PoseRepository
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.ui.MviIntentStore
@@ -18,9 +21,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -30,11 +30,10 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     @Assisted private val peopleCount: PeopleCount,
     private val poseRepository: PoseRepository,
     private val userRepository: UserRepository,
-    @ApplicationScope private val applicationScope: CoroutineScope,
     private val analyticsLogger: AnalyticsLogger,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
-    private val bookmarkJobs = mutableMapOf<Long, Job>()
     private var totalSwipeCount = 0
 
     @AssistedFactory
@@ -114,14 +113,20 @@ internal class RandomPoseViewModel @AssistedInject constructor(
             )
         }
 
-        // 해당 포즈의 이전 Job 취소 후 새로운 Job 시작
-        bookmarkJobs[poseId]?.cancel()
-        bookmarkJobs[poseId] = viewModelScope.launch {
-            delay(500)
+        // Persist each desired value immediately; WorkManager replaces pending work per pose.
+        viewModelScope.launch {
             val committedBookmark = store.uiState.value.committedBookmarks[poseId]
-            if (committedBookmark == newBookmarkStatus || committedBookmark == null) return@launch
+            if (committedBookmark == null) return@launch
 
-            poseRepository.updateBookmark(poseId, newBookmarkStatus)
+            optimisticUpdateScheduler.update(
+                PendingUpdate(
+                    UpdateKind.POSE_BOOKMARK,
+                    poseId.toString(),
+                    newBookmarkStatus.toString(),
+                    500,
+                    committedBookmark.toString(),
+                ),
+            )
                 .onSuccess {
                     Timber.d("updateBookmark success for poseId: $poseId")
                     reduce {
@@ -134,7 +139,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                         copy(
                             poseList = poseList.map { pose ->
                                 if (pose.id == poseId) {
-                                    pose.copy(isBookmarked = committedBookmark)
+                                    pose.copy(isBookmarked = e.committedBoolean(committedBookmark))
                                 } else {
                                     pose
                                 }
@@ -226,18 +231,6 @@ internal class RandomPoseViewModel @AssistedInject constructor(
     override fun onCleared() {
         super.onCleared()
 
-        val state = store.uiState.value
         analyticsLogger.log(PoseAnalyticsEvent.PoseRandomSessionEnd(totalSwipeCount = totalSwipeCount))
-
-        state.poseList.forEach { pose ->
-            val currentBookmark = pose.isBookmarked
-            val committedBookmark = state.committedBookmarks[pose.id]
-
-            if (committedBookmark != null && currentBookmark != committedBookmark) {
-                applicationScope.launch {
-                    poseRepository.updateBookmark(pose.id, currentBookmark)
-                }
-            }
-        }
     }
 }
