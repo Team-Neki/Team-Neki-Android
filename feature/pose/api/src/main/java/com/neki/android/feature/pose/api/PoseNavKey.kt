@@ -3,6 +3,7 @@ package com.neki.android.feature.pose.api
 import androidx.navigation3.runtime.NavKey
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
+import com.neki.android.core.model.PoseRelation
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.navigation.main.MainNavigator
 import kotlinx.serialization.Serializable
@@ -22,6 +23,7 @@ sealed interface PoseNavKey : NavKey {
         val initialIndex: Int = 0,
         val hasNext: Boolean = false,
         val headCount: PeopleCount? = null,
+        val relation: PoseRelation? = null,
         val sortOrder: SortOrder = SortOrder.DESC,
         val isBookmarkOnly: Boolean = false,
     ) : PoseNavKey

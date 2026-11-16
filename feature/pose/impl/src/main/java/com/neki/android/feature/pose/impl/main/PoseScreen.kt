@@ -32,6 +32,7 @@ import com.neki.android.core.designsystem.DevicePreview
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
+import com.neki.android.core.model.PoseRelation
 import com.neki.android.core.ui.compose.collectWithLifecycle
 import com.neki.android.feature.pose.impl.const.PoseConst.POSE_LAYOUT_DEFAULT_TOP_PADDING
 import com.neki.android.feature.pose.api.PoseNavKey
@@ -166,7 +167,7 @@ fun PoseContent(
     onClickQRCodeIcon: () -> Unit = {},
     onClickPeopleCount: () -> Unit = {},
     onClickBookmark: () -> Unit = {},
-    onClickRelationTag: (PoseRelationTag) -> Unit = {},
+    onClickRelationTag: (PoseRelation) -> Unit = {},
     onClickPoseItem: (Pose, Int) -> Unit = { _, _ -> },
     onClickBookmarkIcon: (Pose) -> Unit = {},
 ) {
@@ -238,7 +239,7 @@ private fun PoseScreenRelationTagSelectedPreview() {
         PoseScreen(
             uiState = PoseState(
                 selectedPeopleCount = PeopleCount.TWO,
-                selectedRelationTag = PoseRelationTag.FRIEND,
+                selectedRelationTag = PoseRelation.FRIEND,
                 totalPoseCount = 20,
             ),
             posePagingItems = posePagingItems,
