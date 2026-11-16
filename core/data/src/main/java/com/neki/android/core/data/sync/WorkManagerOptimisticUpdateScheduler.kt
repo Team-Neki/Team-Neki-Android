@@ -32,7 +32,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import timber.log.Timber
 
-private const val UPDATE_DELAY_MILLIS = 500L
+private const val UPDATE_DELAY_MILLIS = 300L
 
 @Singleton
 class WorkManagerOptimisticUpdateScheduler @Inject constructor(
