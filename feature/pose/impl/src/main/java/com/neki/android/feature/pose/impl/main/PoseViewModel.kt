@@ -9,7 +9,6 @@ import androidx.paging.map
 import com.neki.android.core.analytics.event.PoseAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.PoseRepository
-import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
@@ -32,32 +31,32 @@ internal class PoseViewModel @Inject constructor(
     private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
 
-    private val _headCountFilter = MutableStateFlow<PeopleCount?>(null)
-    private val _isBookmarkOnly = MutableStateFlow(false)
+    private val poseListQuery = MutableStateFlow(PoseListQuery())
     private val updatedBookmarks = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val originalPagingData: Flow<PagingData<Pose>> = combine(
-        _headCountFilter,
-        _isBookmarkOnly,
-    ) { headCount, isBookmarkOnly ->
-        headCount to isBookmarkOnly
-    }.flatMapLatest { (headCount, isBookmarkOnly) ->
-        if (isBookmarkOnly) {
-            poseRepository.getBookmarkedPosesFlow()
-        } else {
-            poseRepository.getPosesFlow(
-                headCount = headCount,
-                sortOrder = SortOrder.DESC,
-            )
-        }
-    }.cachedIn(viewModelScope)
+    private val originalPagingData: Flow<PagingData<Pose>> = poseListQuery
+        .flatMapLatest { query ->
+            if (query.isBookmarkOnly) {
+                poseRepository.getBookmarkedPosesFlow()
+            } else {
+                poseRepository.getPosesFlow(
+                    headCount = query.headCount,
+                    relation = query.relation,
+                    sortOrder = SortOrder.DESC,
+                    onTotalCountLoaded = { totalCount ->
+                        // 조건이 바뀐 뒤 늦게 도착한 이전 조건의 개수는 반영하지 않는다
+                        if (poseListQuery.value == query) store.onIntent(PoseIntent.TotalPoseCountLoaded(totalCount))
+                    },
+                )
+            }
+        }.cachedIn(viewModelScope)
 
     val posePagingData: Flow<PagingData<Pose>> = combine(
         originalPagingData,
         updatedBookmarks,
     ) { pagingData, bookmarks ->
-        val isBookmarkOnly = _isBookmarkOnly.value
+        val isBookmarkOnly = poseListQuery.value.isBookmarkOnly
         pagingData
             .map { pose ->
                 bookmarks[pose.id]?.let { isBookmarked ->
@@ -96,16 +95,11 @@ internal class PoseViewModel @Inject constructor(
             PoseIntent.DismissRandomPosePeopleCountBottomSheet -> reduce { copy(isShowRandomPosePeopleCountBottomSheet = false) }
             PoseIntent.ClickBookmarkChip -> {
                 analyticsLogger.log(PoseAnalyticsEvent.PoseBookmarkFilter)
-                val newValue = !state.isShowBookmarkedPose
-                _isBookmarkOnly.value = newValue
-                _headCountFilter.value = null
-                reduce {
-                    copy(
-                        isShowBookmarkedPose = newValue,
-                        selectedPeopleCount = null,
-                    )
-                }
-                postSideEffect(PoseEffect.ScrollToTop)
+                updatePoseFilter(state, state.toggleBookmarkFilter(), reduce, postSideEffect)
+            }
+
+            is PoseIntent.ClickRelationTagChip -> {
+                updatePoseFilter(state, state.toggleRelationTagFilter(intent.relationTag), reduce, postSideEffect)
             }
 
             is PoseIntent.ClickPoseItem -> {
@@ -122,6 +116,7 @@ internal class PoseViewModel @Inject constructor(
                             poseId = intent.item.id,
                             initialIndex = intent.index,
                             headCount = state.selectedPeopleCount,
+                            relation = state.selectedRelationTag,
                             sortOrder = SortOrder.DESC,
                             isBookmarkOnly = state.isShowBookmarkedPose,
                         ),
@@ -159,6 +154,8 @@ internal class PoseViewModel @Inject constructor(
             is PoseIntent.BookmarkChanged -> {
                 updatedBookmarks.update { it + (intent.poseId to intent.isBookmarked) }
             }
+
+            is PoseIntent.TotalPoseCountLoaded -> reduce { copy(totalPoseCount = intent.totalPoseCount) }
         }
     }
 
@@ -168,27 +165,32 @@ internal class PoseViewModel @Inject constructor(
         reduce: (PoseState.() -> PoseState) -> Unit,
         postSideEffect: (PoseEffect) -> Unit,
     ) {
-        _isBookmarkOnly.value = false
-        if (intent.peopleCount == state.selectedPeopleCount) {
-            _headCountFilter.value = null
-            reduce {
-                copy(
-                    isShowBookmarkedPose = false,
-                    isShowPeopleCountBottomSheet = false,
-                    selectedPeopleCount = null,
-                )
-            }
-        } else {
+        if (intent.peopleCount != state.selectedPeopleCount) {
             analyticsLogger.log(PoseAnalyticsEvent.PoseFilterToggle(peopleCount = intent.peopleCount.value))
-            _headCountFilter.value = intent.peopleCount
-            reduce {
-                copy(
-                    isShowBookmarkedPose = false,
-                    selectedPeopleCount = intent.peopleCount,
-                    isShowPeopleCountBottomSheet = false,
-                )
-            }
         }
-        postSideEffect(PoseEffect.ScrollToTop)
+        reduce { copy(isShowPeopleCountBottomSheet = false) }
+        updatePoseFilter(state, state.togglePeopleCountFilter(intent.peopleCount), reduce, postSideEffect)
+    }
+
+    private fun updatePoseFilter(
+        state: PoseState,
+        filteredState: PoseState,
+        reduce: (PoseState.() -> PoseState) -> Unit,
+        postSideEffect: (PoseEffect) -> Unit,
+    ) {
+        val newQuery = filteredState.toPoseListQuery()
+        // 조회 조건이 같으면 목록이 갱신되지 않아 ScrollToTop이 갱신을 기다리며 남으므로 보내지 않는다
+        val isQueryChanged = newQuery != state.toPoseListQuery()
+        poseListQuery.value = newQuery
+        reduce {
+            copy(
+                isShowBookmarkedPose = filteredState.isShowBookmarkedPose,
+                selectedPeopleCount = filteredState.selectedPeopleCount,
+                selectedRelationTag = filteredState.selectedRelationTag,
+                // 개수 영역이 깜빡이지 않도록 새 개수가 올 때까지 이전 값을 유지하고, 북마크 모드에서만 숨긴다
+                totalPoseCount = if (newQuery.isBookmarkOnly) null else totalPoseCount,
+            )
+        }
+        if (isQueryChanged) postSideEffect(PoseEffect.ScrollToTop)
     }
 }
