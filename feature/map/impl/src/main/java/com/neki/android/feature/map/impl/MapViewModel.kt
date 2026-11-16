@@ -159,11 +159,7 @@ class MapViewModel @Inject constructor(
                 postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             }
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
-            is MapIntent.ClickPhotoBoothFavorite -> {
-                val newFavorite = !intent.photoBooth.favorite
-                toggleFavorite(intent.photoBooth, newFavorite, reduce)
-                updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
-            }
+            is MapIntent.ClickPhotoBoothFavorite -> updateFavorite(intent.photoBooth, reduce, postSideEffect)
             is MapIntent.RevertFavoritePhotoBooth -> {
                 toggleFavorite(intent.photoBooth, intent.photoBooth.favorite, reduce)
             }
@@ -224,7 +220,6 @@ class MapViewModel @Inject constructor(
                     )
                 }
             }
-            is MapIntent.ShowToast -> postSideEffect(MapEffect.ShowToastMessage(intent.message))
         }
     }
 
@@ -360,18 +355,29 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun updateFavorite(photoBooth: PhotoBooth) {
+    private fun updateFavorite(
+        photoBooth: PhotoBooth,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
+        val newFavorite = !photoBooth.favorite
+        toggleFavorite(photoBooth, newFavorite, reduce)
+        postSideEffect(
+            MapEffect.ShowToastMessage(
+                if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
+            ),
+        )
         viewModelScope.launch {
             optimisticUpdateScheduler.update(
                 PendingUpdate(
                     UpdateKind.BOOTH_FAVORITE,
                     photoBooth.id.toString(),
-                    photoBooth.favorite.toString(),
-                    previousValue = (!photoBooth.favorite).toString(),
+                    newFavorite.toString(),
+                    previousValue = photoBooth.favorite.toString(),
                 ),
             )
                 .onSuccess {
-                    if (photoBooth.favorite) {
+                    if (newFavorite) {
                         analyticsLogger.log(
                             MapAnalyticsEvent.BoothFavoriteAdd(
                                 boothName = photoBooth.branchName,
@@ -386,17 +392,12 @@ class MapViewModel @Inject constructor(
                             ),
                         )
                     }
-                    store.onIntent(
-                        MapIntent.ShowToast(
-                            message = if (photoBooth.favorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
-                        ),
-                    )
                 }
                 .onFailure { e ->
                     Timber.e(e)
                     store.onIntent(
                         MapIntent.RevertFavoritePhotoBooth(
-                            photoBooth.copy(favorite = e.committedBoolean(!photoBooth.favorite)),
+                            photoBooth.copy(favorite = e.committedBoolean(photoBooth.favorite)),
                         ),
                     )
                 }

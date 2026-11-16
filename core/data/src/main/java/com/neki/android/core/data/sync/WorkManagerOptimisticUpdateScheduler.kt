@@ -32,6 +32,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import timber.log.Timber
 
+private const val UPDATE_DELAY_MILLIS = 500L
+
 @Singleton
 class WorkManagerOptimisticUpdateScheduler @Inject constructor(
     private val workManager: WorkManager,
@@ -53,7 +55,7 @@ class WorkManagerOptimisticUpdateScheduler @Inject constructor(
                         "target" to update.targetId,
                         "value" to update.value,
                     ))
-                    .setInitialDelay(update.delayMillis, TimeUnit.MILLISECONDS)
+                    .setInitialDelay(UPDATE_DELAY_MILLIS, TimeUnit.MILLISECONDS)
                     .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                     .addTag("pending-save")
                     .build()

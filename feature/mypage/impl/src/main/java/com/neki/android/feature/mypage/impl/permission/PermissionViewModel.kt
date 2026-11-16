@@ -68,6 +68,12 @@ internal class PermissionViewModel @Inject constructor(
             PermissionIntent.ToggleMarketingNotification -> {
                 val newValue = !state.isMarketingTermAgreed
                 reduce { copy(isMarketingTermAgreed = newValue) }
+                val message = if (newValue) {
+                    "마케팅 알림 수신에 동의했어요."
+                } else {
+                    "마케팅 알림 수신을 거부했어요.\n마이페이지에서 언제든지 변경할 수 있어요."
+                }
+                postSideEffect(PermissionEffect.ShowToast(message))
                 viewModelScope.launch {
                     val committed = store.uiState.value.committedMarketingNotification
 
@@ -76,17 +82,11 @@ internal class PermissionViewModel @Inject constructor(
                             UpdateKind.MARKETING,
                             TermConst.MARKETING_TERM_ID.toString(),
                             newValue.toString(),
-                            300,
-                            committed.toString(),
+                            previousValue = committed.toString(),
                         ),
                     )
                         .onSuccess {
-                            val message = if (newValue) {
-                                "마케팅 알림 수신에 동의했어요."
-                            } else {
-                                "마케팅 알림 수신을 거부했어요.\n마이페이지에서 언제든지 변경할 수 있어요."
-                            }
-                            store.onIntent(PermissionIntent.MarketingNotificationCommitted(newValue, message))
+                            store.onIntent(PermissionIntent.MarketingNotificationCommitted(newValue))
                         }
                         .onFailure { e ->
                             Timber.e(e, "updateMarketingTerm failed")
@@ -97,7 +97,6 @@ internal class PermissionViewModel @Inject constructor(
 
             is PermissionIntent.MarketingNotificationCommitted -> {
                 reduce { copy(committedMarketingNotification = intent.newValue) }
-                postSideEffect(PermissionEffect.ShowToast(intent.toastMessage))
             }
 
             is PermissionIntent.RevertMarketingNotification ->

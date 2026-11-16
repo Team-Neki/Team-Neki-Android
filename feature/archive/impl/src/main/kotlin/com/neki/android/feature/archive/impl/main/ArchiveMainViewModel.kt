@@ -225,16 +225,16 @@ class ArchiveMainViewModel @Inject constructor(
 
     private fun agreeMarketingTerm(
         postSideEffect: (ArchiveMainSideEffect) -> Unit,
-    ) = viewModelScope.launch {
-        optimisticUpdateScheduler.update(
-            PendingUpdate(UpdateKind.MARKETING, TermConst.MARKETING_TERM_ID.toString(), true.toString()),
-        )
-            .onSuccess {
-                postSideEffect(ArchiveMainSideEffect.ShowToastMessage("마케팅 알림 수신에 동의했어요."))
-            }
-            .onFailure { e ->
-                Timber.e(e)
-            }
+    ) {
+        postSideEffect(ArchiveMainSideEffect.ShowToastMessage("마케팅 알림 수신에 동의했어요."))
+        viewModelScope.launch {
+            optimisticUpdateScheduler.update(
+                PendingUpdate(UpdateKind.MARKETING, TermConst.MARKETING_TERM_ID.toString(), true.toString()),
+            )
+                .onFailure { e ->
+                    Timber.e(e)
+                }
+        }
     }
 
     private fun handleAddAlbum(

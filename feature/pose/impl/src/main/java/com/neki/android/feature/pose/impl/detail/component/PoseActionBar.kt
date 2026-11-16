@@ -27,6 +27,7 @@ internal fun PoseActionBar(
         NekiIconButton(
             modifier = Modifier.padding(8.dp),
             onClick = onClickBookmark,
+            singleClick = false,
         ) {
             Icon(
                 modifier = Modifier.size(28.dp),

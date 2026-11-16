@@ -214,8 +214,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
                     UpdateKind.PHOTO_FAVORITE,
                     currentPhoto.id.toString(),
                     newFavoriteStatus.toString(),
-                    500,
-                    committedFavorites[currentPhoto.id]?.toString(),
+                    previousValue = committedFavorites[currentPhoto.id]?.toString(),
                 ),
             )
                 .onSuccess { store.onIntent(PhotoDetailIntent.FavoriteCommitted(currentPhoto.id, newFavoriteStatus)) }

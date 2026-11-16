@@ -2,6 +2,7 @@ package com.neki.android.feature.map.impl.component
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -115,7 +116,7 @@ internal fun CardFavoriteButton(
             .size(32.dp)
             .background(shape = CircleShape, color = NekiTheme.colorScheme.gray25)
             .clip(CircleShape)
-            .clickableSingle(onClick = onClick),
+            .clickable(onClick = onClick),
     )
 }
 

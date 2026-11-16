@@ -6,7 +6,6 @@ data class PendingUpdate(
     val kind: UpdateKind,
     val targetId: String,
     val value: String,
-    val delayMillis: Long = 0,
     val previousValue: String? = null,
 )
 

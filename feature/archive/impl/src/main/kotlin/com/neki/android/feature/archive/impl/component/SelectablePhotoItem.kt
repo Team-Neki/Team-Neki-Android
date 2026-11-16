@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.PhotoComponent
@@ -57,7 +56,7 @@ internal fun SelectablePhotoItem(
         Icon(
             modifier = Modifier
                 .then(
-                    if (!isSelectMode) Modifier.noRippleClickableSingle { onClickFavorite(photo) }
+                    if (!isSelectMode) Modifier.noRippleClickable { onClickFavorite(photo) }
                     else Modifier,
                 )
                 .align(Alignment.TopEnd)

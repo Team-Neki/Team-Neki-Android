@@ -101,8 +101,7 @@ class PoseDetailViewModel @AssistedInject constructor(
                     UpdateKind.POSE_BOOKMARK,
                     currentPose.id.toString(),
                     newBookmarkStatus.toString(),
-                    500,
-                    committedBookmarks[currentPose.id]?.toString(),
+                    previousValue = committedBookmarks[currentPose.id]?.toString(),
                 ),
             )
                 .onSuccess { store.onIntent(PoseDetailIntent.BookmarkCommitted(currentPose.id, newBookmarkStatus)) }

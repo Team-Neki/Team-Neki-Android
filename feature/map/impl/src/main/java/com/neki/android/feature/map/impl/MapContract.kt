@@ -81,7 +81,6 @@ sealed interface MapIntent {
     data class RevertFavoritePhotoBooth(val photoBooth: PhotoBooth) : MapIntent
     data class SelectTab(val tab: MapTab) : MapIntent
     data class SelectFavoritePhotoBoothSort(val sort: FavoritePhotoBoothSort) : MapIntent
-    data class ShowToast(val message: String) : MapIntent
 }
 
 sealed interface MapEffect {

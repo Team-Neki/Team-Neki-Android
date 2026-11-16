@@ -123,8 +123,7 @@ internal class RandomPoseViewModel @AssistedInject constructor(
                     UpdateKind.POSE_BOOKMARK,
                     poseId.toString(),
                     newBookmarkStatus.toString(),
-                    500,
-                    committedBookmark.toString(),
+                    previousValue = committedBookmark.toString(),
                 ),
             )
                 .onSuccess {
