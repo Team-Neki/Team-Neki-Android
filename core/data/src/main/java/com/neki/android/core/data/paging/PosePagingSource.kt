@@ -3,6 +3,7 @@ package com.neki.android.core.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.neki.android.core.data.remote.api.PoseService
+import com.neki.android.core.data.remote.api.toPoseSort
 import com.neki.android.core.model.PeopleCount
 import com.neki.android.core.model.Pose
 import com.neki.android.core.model.PoseRelation
@@ -24,7 +25,7 @@ class PosePagingSource(
                 size = params.loadSize,
                 headCount = headCount?.name,
                 relation = relation?.name,
-                sortOrder = sortOrder.name,
+                sort = sortOrder.toPoseSort(),
             )
             response.data.totalCount?.let(onTotalCountLoaded)
             val poses = response.data.toModels()

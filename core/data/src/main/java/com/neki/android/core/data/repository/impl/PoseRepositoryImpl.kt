@@ -8,6 +8,7 @@ import com.neki.android.core.common.exception.NoMorePoseException
 import com.neki.android.core.data.paging.PosePagingSource
 import com.neki.android.core.data.paging.BookmarkPosePagingSource
 import com.neki.android.core.data.remote.api.PoseService
+import com.neki.android.core.data.remote.api.toPoseSort
 import com.neki.android.core.data.util.runSuspendCatching
 import com.neki.android.core.dataapi.repository.PoseRepository
 import com.neki.android.core.model.PeopleCount
@@ -82,7 +83,7 @@ class PoseRepositoryImpl @Inject constructor(
             size = size,
             headCount = headCount?.name,
             relation = relation?.name,
-            sortOrder = sortOrder.name,
+            sort = sortOrder.toPoseSort(),
         ).data
         PosePage(poses = response.toModels(), hasNext = response.hasNext)
     }
