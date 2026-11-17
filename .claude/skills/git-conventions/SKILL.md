@@ -57,7 +57,7 @@ refactor/#196-photo-detail-memo-outside-pager
 docs/#45-create-md
 ```
 
-이슈 번호가 없는 작업은 `<type>/<summary>` 형식을 쓴다. 릴리즈 브랜치는 `release/<version>`을 쓴다.
+이슈 번호가 없는 작업은 `<type>/<summary>` 형식을 쓴다. 릴리즈는 별도 브랜치 없이 `develop` → `main` PR로 진행한다. develop에 아직 출시하면 안 되는 변경이 있을 때만 `main`에서 `release/<version>`을 만든다.
 
 ```text
 docs/readme

@@ -9,6 +9,7 @@ description: Use when deploying to Play Store Internal Testing in this repositor
 
 ## 사전 확인
 
+- 배포 전 `develop` → `main` 릴리즈 PR(`[release] v<versionName>`)이 merge commit으로 머지돼 있어야 한다(`.claude/skills/git-conventions/references/pull-request.md`의 Release PR 참고).
 - 배포 대상은 항상 `main` 브랜치의 HEAD여야 한다. 워크플로우의 "Verify tag points to main HEAD" 단계가 태그 커밋과 `origin/main` HEAD가 다르면 배포를 실패시킨다.
 - 배포 전 `main`의 CI(`android-ci.yml`)가 통과했는지 확인한다.
 - 태그 push는 되돌리기 어려운 동작이므로 실행 전 사용자에게 확인받는다.
@@ -28,6 +29,12 @@ git push origin v<versionName>
 3. push 후 `gh run list --repo Team-Neki/Team-Neki-Android --workflow=deploy-playstore.yml --limit 1`로 워크플로우가 트리거됐는지 확인한다.
 4. `gh run view <run-id> --repo Team-Neki/Team-Neki-Android`로 진행 상태를 확인하고, 실패 시 `gh run view <run-id> --log-failed`로 원인을 파악한다.
 5. 완료되면 `create_github_release` lane이 직전 태그 대비 커밋 로그로 GitHub Release도 함께 생성한다.
+6. 배포가 끝나면 `develop`을 `main`으로 fast-forward해 릴리즈 PR 머지 커밋을 develop에도 맞춘다. develop에 main에 없는 커밋이 생겼다면 fast-forward하지 않고 사용자에게 알린다.
+
+```bash
+git fetch origin develop main
+git merge-base --is-ancestor origin/develop origin/main && git push origin origin/main:refs/heads/develop
+```
 
 ## 흔한 실패 원인
 
