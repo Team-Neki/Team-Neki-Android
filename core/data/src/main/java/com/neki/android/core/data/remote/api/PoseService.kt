@@ -5,6 +5,7 @@ import com.neki.android.core.data.remote.model.response.BasicNullableResponse
 import com.neki.android.core.data.remote.model.response.BasicResponse
 import com.neki.android.core.data.remote.model.response.PoseDetailResponse
 import com.neki.android.core.data.remote.model.response.PoseResponse
+import com.neki.android.core.model.SortOrder
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -22,14 +23,14 @@ class PoseService @Inject constructor(
         size: Int = 20,
         headCount: String? = null,
         relation: String? = null,
-        sortOrder: String = "DESC",
+        sort: String = SortOrder.DESC.toPoseSort(),
     ): BasicResponse<PoseResponse> {
         return client.get("/api/poses") {
             parameter("page", page)
             parameter("size", size)
             parameter("headCount", headCount)
             parameter("relation", relation)
-            parameter("sortOrder", sortOrder)
+            parameter("sort", sort)
         }.body()
     }
 
@@ -65,4 +66,10 @@ class PoseService @Inject constructor(
             setBody(UpdateBookmarkRequest(bookmark))
         }.body()
     }
+}
+
+// 포즈 목록 API는 정렬을 sort(LATEST/OLDEST)로 받는다
+internal fun SortOrder.toPoseSort(): String = when (this) {
+    SortOrder.DESC -> "LATEST"
+    SortOrder.ASC -> "OLDEST"
 }

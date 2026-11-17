@@ -39,7 +39,7 @@ agent 간 왕복이 검증 비용의 대부분이므로 `LIGHT`는 Reviewer와 Q
 - 변경된 계약의 직접 사용처와 영향받는 진입 경로
 - 적용할 project skill
 - 자동 검증 범위
-- `STANDARD`/`FULL`인 경우 Runtime QA 선택 결과와 대상 시나리오
+- `STANDARD`/`FULL`인 경우 Runtime QA 선택 결과와 대상 시나리오. 대상 시나리오는 코드·unit test·로그로 판별할 수 없는 핵심 동작만 최대 3개로 정한다
 
 코드와 요청만으로 정할 수 없는 항목은 사용자에게 한 번에 하나씩 묻는다.
 
@@ -67,6 +67,7 @@ Reviewer와 QA를 호출할 때 아래 정보를 전달한다.
 - 변경 파일과 영향 범위
 - 적용한 project skill
 - 마지막으로 성공한 검증 명령과 결과
+- main agent가 마지막 관련 코드 변경 이후 기기에서 확인한 시나리오와 결과(QA는 다시 실행하지 않는다). 그 이전 결과는 전달하지 않으며 QA가 관련 시나리오를 다시 실행한다
 
 두 agent는 전달받은 skill 전문과 실제 diff를 함께 확인한다.
 
@@ -95,7 +96,7 @@ Reviewer와 QA를 호출할 때 아래 정보를 전달한다.
 - QA `FIX_REQUIRED`: main agent가 수정한 뒤 빠른 검증, Reviewer, QA 순서로 다시 실행한다.
 - 최종 확인에서 누락된 검증이 실패하면 main agent가 수정한 뒤 빠른 검증, Reviewer, QA, 최종 확인 순서로 다시 실행한다.
 - Reviewer 또는 QA `BLOCKED`: main agent가 필요한 조건을 사용자에게 보고하고, 확보되면 중단 지점부터 다시 호출한다.
-- 코드가 변경되면 변경 전에 얻은 compile, test, review, QA 결과는 PASS 근거에서 제외한다.
+- 코드가 변경되면 변경 전에 얻은 compile, test, review, QA 결과는 PASS 근거에서 제외한다. 단 Runtime QA는 수정과 관련된 시나리오만 다시 실행하고, 한두 줄의 UI·상태 수정은 main agent가 기기에서 직접 확인한 결과로 대신한다.
 - 코드가 변경되지 않았으면 이미 통과한 검증을 다시 실행하지 않는다.
 
 Reviewer와 QA는 첫 통과에서 각각 한 번 호출한다. 반복 횟수를 채우기 위한 재호출은 없으며 실패, finding, 검증 후 코드 변경이 있을 때만 다시 호출한다.
