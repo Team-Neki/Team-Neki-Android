@@ -104,7 +104,10 @@
 ## Release PR
 
 - 릴리즈 PR은 제목을 `[release] v<version>`으로 쓰고, 본문은 템플릿 하단 주석의 Release 양식을 사용한다.
-- base는 `main`이다. 그 외 PR은 base가 `develop`이다.
+- head는 `develop`, base는 `main`이다. release 브랜치를 만들지 않는다. 그 외 PR은 base가 `develop`이다.
+- PR 전에 `build-logic/src/main/java/com/neki/android/buildlogic/const/BuildConst.kt`의 `VERSION_NAME`을 올린 커밋 `[chore] 앱 기본 버전명을 <version>으로 업데이트`를 develop에 바로 push한다.
+- 머지는 merge commit으로 한다. squash·rebase 머지는 develop과 main 히스토리를 갈라지게 한다.
+- develop에 아직 출시하면 안 되는 변경이 섞여 있으면 예외로 `main`에서 `release/<version>`을 만들어 PR한다.
 
 ## 생성
 
