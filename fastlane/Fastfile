@@ -66,7 +66,9 @@ platform :android do
   # ── Lane: internal ───────────────────────────
   desc "Explicit internal testing upload (no production tag or GitHub Release)"
   lane :internal do
-    upload_play_build(track: "internal", version_name: read_base_version_name)
+    version = read_base_version_name
+    tree = PlayRelease.capture("git", "rev-parse", "HEAD^{tree}").strip
+    upload_play_build(track: "internal", version_name: version, release_name: PlayRelease.candidate_name(version, tree))
   end
 
   private_lane :upload_play_build do |options|
@@ -107,7 +109,7 @@ platform :android do
     UI.message("AAB path: #{aab_path}")
 
     upload_to_play_store(
-      track:                   options.fetch(:track),
+      track:                   options[:source_track] || options.fetch(:track),
       aab:                     aab_path,
       skip_upload_aab:          !existing_code.nil?,
       skip_upload_apk:          true,
@@ -137,14 +139,15 @@ platform :android do
     UI.user_error!("Checked-out source differs from release merge SHA") unless actual_sha == sha
 
     runner = PlayRelease::Production.new(
-      config: config, sha: sha, github: PlayRelease::GitHub.new, play: PlayRelease::Play.new,
+      config: config, sha: sha, tree: PlayRelease.capture("git", "rev-parse", "HEAD^{tree}").strip,
+      github: PlayRelease::GitHub.new, play: PlayRelease::Play.new,
     )
-    data = runner.run do |existing_code|
+    data = runner.run do |existing_code, source_track|
       Dir.mktmpdir("neki-play-notes-") do |directory|
         config.write_metadata(directory)
         upload_play_build(
           track: "production", version_name: config.version, release_name: config.release_name(sha),
-          existing_code: existing_code, metadata_path: directory,
+          existing_code: existing_code, source_track: source_track, metadata_path: directory,
         )
       end
     end

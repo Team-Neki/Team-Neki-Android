@@ -37,6 +37,14 @@ module PlayRelease
       raise("VERSION_NAME must be a stable major.minor.patch version")
   end
 
+  def self.candidate_name(version, tree)
+    raise "Invalid source tree" unless tree.match?(/\A[0-9a-f]{40}\z/)
+    name = "#{version} tree:#{tree[0, 32]}"
+    raise "Play release name exceeds 50 characters" if name.length > 50
+
+    name
+  end
+
   class Config
     attr_reader :version, :notes
 
@@ -204,10 +212,11 @@ module PlayRelease
   end
 
   class Production
-    def initialize(config:, sha:, github:, play:, sleeper: -> { sleep 15 }, clock: -> { Time.now.utc.iso8601 })
+    def initialize(config:, sha:, tree:, github:, play:, sleeper: -> { sleep 15 }, clock: -> { Time.now.utc.iso8601 })
       raise "Invalid release SHA" unless sha.match?(/\A[0-9a-f]{40}\z/)
 
-      @config, @sha, @github, @play, @sleeper, @clock = config, sha, github, play, sleeper, clock
+      @candidate_name = PlayRelease.candidate_name(config.version, tree)
+      @config, @sha, @tree, @github, @play, @sleeper, @clock = config, sha, tree, github, play, sleeper, clock
     end
 
     # upload receives an existing versionCode for a retry, or nil for a new build.
@@ -223,9 +232,10 @@ module PlayRelease
 
       releases = @play.releases
       name = @config.release_name(@sha)
-      same_version = releases.select { |release| release.fetch("releaseName").start_with?("#{@config.version} (") }
-      raise "Version already uploaded from a different source" if same_version.any? { |release| release.fetch("releaseName") != name }
-      existing = releases.find { |release| release.fetch("releaseName") == name }
+      names = [name, @candidate_name]
+      same_version = releases.select { |release| release.fetch("releaseName").start_with?("#{@config.version} (", "#{@config.version} tree:") }
+      raise "Version already uploaded from a different source" if same_version.any? { |release| !names.include?(release.fetch("releaseName")) }
+      existing = releases.find { |release| names.include?(release.fetch("releaseName")) }
       raise "Tagged release is not visible in Play; refusing to upload it again" if tagged && existing.nil?
       if existing && PlayRelease.state(existing) == "NOT_APPROVED"
         raise "This version was rejected; prepare a corrected release PR"
@@ -233,9 +243,16 @@ module PlayRelease
       submitted = existing && SUBMITTED.include?(PlayRelease.state(existing))
       unless submitted
         raise "Another production release is in review" if releases.any? { |release| PlayRelease.state(release) == "IN_REVIEW" && release != existing }
-        code = upload.call(existing && PlayRelease.version_code(existing))
+        candidate = unless existing
+          @play.releases("internal")
+            .select { |release| release.fetch("releaseName") == @candidate_name && PlayRelease.state(release) == "PUBLISHED" }
+            .max_by { |release| PlayRelease.version_code(release) }
+        end
+        source = existing || candidate
+        source_track = existing ? "production" : (candidate && "internal")
+        code = upload.call(source && PlayRelease.version_code(source), source_track)
         12.times do
-          existing = @play.releases.find { |release| release.fetch("releaseName") == name && PlayRelease.version_code(release) == code }
+          existing = @play.releases.find { |release| names.include?(release.fetch("releaseName")) && PlayRelease.version_code(release) == code }
           break if existing && SUBMITTED.include?(PlayRelease.state(existing))
           raise "Production release was rejected" if existing && PlayRelease.state(existing) == "NOT_APPROVED"
           @sleeper.call
@@ -245,7 +262,8 @@ module PlayRelease
 
       data = {
         "schema" => 1, "version" => @config.version, "version_code" => PlayRelease.version_code(existing),
-        "sha" => @sha, "release_name" => name, "state" => PlayRelease.state(existing), "updated_at" => @clock.call
+        "sha" => @sha, "artifact_tree" => @tree, "release_name" => existing.fetch("releaseName"),
+        "state" => PlayRelease.state(existing), "updated_at" => @clock.call
       }
       @github.ensure_tag!(@config.tag, @sha)
       technical = @github.generated_notes(@config.tag, @sha)

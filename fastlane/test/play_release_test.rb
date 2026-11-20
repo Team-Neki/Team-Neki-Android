@@ -8,6 +8,7 @@ require_relative "../lib/play_review_guard"
 class PlayReleaseTest < Minitest::Test
   SHA = "a" * 40
   OTHER_SHA = "b" * 40
+  TREE = "c" * 40
 
   class FakeGitHub
     attr_accessor :existing, :tagged, :all_releases, :tag_error
@@ -51,13 +52,15 @@ class PlayReleaseTest < Minitest::Test
   class FakePlay
     attr_reader :calls
 
-    def initialize(*responses)
-      @responses, @calls = responses, 0
+    def initialize(*responses, internal: [])
+      @responses, @internal, @calls, @production_calls = responses, internal, 0, 0
     end
 
-    def releases
-      response = @responses[[@calls, @responses.length - 1].min]
+    def releases(track = "production")
       @calls += 1
+      return @internal if track == "internal"
+      response = @responses[[@production_calls, @responses.length - 1].min]
+      @production_calls += 1
       raise response if response.is_a?(Exception)
       response
     end
@@ -89,11 +92,11 @@ class PlayReleaseTest < Minitest::Test
   end
 
   def runner(play)
-    PlayRelease::Production.new(config: @config, sha: SHA, github: @github, play: play, sleeper: -> {}, clock: @clock)
+    PlayRelease::Production.new(config: @config, sha: SHA, tree: TREE, github: @github, play: play, sleeper: -> {}, clock: @clock)
   end
 
   def no_upload
-    ->(_code) { flunk "Must not upload another binary" }
+    ->(_code, _track) { flunk "Must not upload another binary" }
   end
 
   def data(state = "IN_REVIEW")
@@ -179,6 +182,48 @@ class PlayReleaseTest < Minitest::Test
     result = runner(FakePlay.new([summary("NOT_SENT_FOR_REVIEW")], [summary])).run { |code| codes << code; code }
     assert_equal [44], codes
     assert_equal "IN_REVIEW", result["state"]
+  end
+
+  def test_identical_internal_candidate_is_promoted_without_rebuilding
+    name = PlayRelease.candidate_name(@config.version, TREE)
+    candidate = summary("PUBLISHED", name: name)
+    play = FakePlay.new([], [summary(name: name)], internal: [candidate])
+    uploads = []
+    result = runner(play).run { |code, track| uploads << [code, track]; code }
+    assert_equal [[44, "internal"]], uploads
+    assert_equal 44, result["version_code"]
+    assert_equal name, result["release_name"]
+    assert_equal TREE, result["artifact_tree"]
+  end
+
+  def test_changed_internal_source_requires_a_new_build
+    candidate = summary("PUBLISHED", name: PlayRelease.candidate_name(@config.version, OTHER_SHA))
+    uploads = []
+    runner(FakePlay.new([], [summary], internal: [candidate])).run { |code, track| uploads << [code, track]; 44 }
+    assert_equal [[nil, nil]], uploads
+  end
+
+  def test_unpublished_internal_candidate_is_not_promoted
+    candidate = summary("DRAFT", name: PlayRelease.candidate_name(@config.version, TREE))
+    uploads = []
+    runner(FakePlay.new([], [summary], internal: [candidate])).run { |code, track| uploads << [code, track]; 44 }
+    assert_equal [[nil, nil]], uploads
+  end
+
+  def test_highest_matching_internal_candidate_is_selected
+    name = PlayRelease.candidate_name(@config.version, TREE)
+    candidates = [summary("PUBLISHED", name: name, code: 42), summary("PUBLISHED", name: name, code: 44)]
+    runner(FakePlay.new([], [summary(name: name)], internal: candidates)).run do |code, track|
+      assert_equal 44, code
+      assert_equal "internal", track
+      code
+    end
+  end
+
+  def test_promoted_production_retry_does_not_promote_again
+    candidate_name = PlayRelease.candidate_name(@config.version, TREE)
+    runner(FakePlay.new([summary(name: candidate_name)])).run(&no_upload)
+    assert_equal 44, PlayRelease.manifest(@github.created_body)["version_code"]
   end
 
   def test_already_created_release_is_idempotent
