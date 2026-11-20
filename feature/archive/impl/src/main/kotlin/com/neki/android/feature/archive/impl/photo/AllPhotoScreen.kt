@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
+import androidx.paging.LoadStates
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
@@ -59,6 +61,7 @@ import com.neki.android.feature.archive.impl.photo.component.AllPhotoTopBar
 import com.neki.android.feature.archive.impl.util.ImageDownloader
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -153,18 +156,13 @@ internal fun AllPhotoScreen(
         onIntent(AllPhotoIntent.OnBackPressed)
     }
 
-    if (isEmpty) {
-        EmptyAllPhotoContent(
-            onBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
-        )
-    } else {
-        AllPhotoContent(
-            uiState = uiState,
-            pagingItems = pagingItems,
-            lazyState = lazyState,
-            onIntent = onIntent,
-        )
-    }
+    AllPhotoContent(
+        uiState = uiState,
+        pagingItems = pagingItems,
+        lazyState = lazyState,
+        isEmpty = isEmpty,
+        onIntent = onIntent,
+    )
 
     if (isRefreshing || uiState.isLoading) {
         LoadingDialog()
@@ -184,15 +182,17 @@ private fun AllPhotoContent(
     uiState: AllPhotoState,
     pagingItems: LazyPagingItems<Photo>,
     lazyState: LazyStaggeredGridState,
+    isEmpty: Boolean,
     modifier: Modifier = Modifier,
     onIntent: (AllPhotoIntent) -> Unit = {},
 ) {
     val density = LocalDensity.current
     var filterBarHeightPx by remember { mutableIntStateOf(0) }
     val topPadding = with(density) { filterBarHeightPx.toDp() }
-    val showFilterBar by remember {
+    val showFilterBar by remember(lazyState, uiState.selectMode, isEmpty) {
         derivedStateOf {
-            !lazyState.canScrollBackward ||
+            isEmpty ||
+                !lazyState.canScrollBackward ||
                 lazyState.lastScrolledBackward ||
                 uiState.selectMode == SelectMode.SELECTING
         }
@@ -203,12 +203,19 @@ private fun AllPhotoContent(
             .fillMaxSize()
             .background(NekiTheme.colorScheme.white),
     ) {
-        AllPhotoTopBar(
-            selectMode = uiState.selectMode,
-            onClickBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
-            onClickSelect = { onIntent(AllPhotoIntent.ClickTopBarSelectIcon) },
-            onClickCancel = { onIntent(AllPhotoIntent.ClickTopBarCancelIcon) },
-        )
+        if (isEmpty && uiState.selectMode == SelectMode.DEFAULT) {
+            BackTitleTopBar(
+                title = "모든 사진",
+                onBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
+            )
+        } else {
+            AllPhotoTopBar(
+                selectMode = uiState.selectMode,
+                onClickBack = { onIntent(AllPhotoIntent.ClickTopBarBackIcon) },
+                onClickSelect = { onIntent(AllPhotoIntent.ClickTopBarSelectIcon) },
+                onClickCancel = { onIntent(AllPhotoIntent.ClickTopBarCancelIcon) },
+            )
+        }
 
         Box(
             modifier = Modifier
@@ -262,6 +269,19 @@ private fun AllPhotoContent(
                 }
             }
 
+            if (isEmpty) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = if (uiState.selectMode == SelectMode.DEFAULT) topPadding else 0.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    EmptyPhotoContent(
+                        emptyText = "아직 등록된 사진이 없어요\n찍은 네컷을 네키에 저장해보세요!",
+                    )
+                }
+            }
+
             AllPhotoFilterBar(
                 showFilterPopup = uiState.isShowFilterDialog,
                 modifier = Modifier
@@ -289,29 +309,36 @@ private fun AllPhotoContent(
     }
 }
 
+@DevicePreview
 @Composable
-private fun EmptyAllPhotoContent(
-    modifier: Modifier = Modifier,
-    onBack: () -> Unit = {},
-) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-    ) {
-        BackTitleTopBar(
-            title = "모든 사진",
-            onBack = onBack,
-        )
-        EmptyPhotoContent(
-            modifier = Modifier.align(Alignment.Center),
-            emptyText = "아직 등록된 사진이 없어요\n찍은 네컷을 네키에 저장해보세요!",
-        )
-    }
+private fun EmptyAllPhotoScreenPreview() {
+    EmptyAllPhotoPreview(isFavoriteSelected = false)
 }
 
 @DevicePreview
 @Composable
-private fun EmptyAllPhotoScreenPreview() {
+private fun EmptyFavoriteAllPhotoScreenPreview() {
+    EmptyAllPhotoPreview(isFavoriteSelected = true)
+}
+
+@Composable
+private fun EmptyAllPhotoPreview(isFavoriteSelected: Boolean) {
+    val pagingData = remember {
+        flowOf(
+            PagingData.empty<Photo>(
+                sourceLoadStates = LoadStates(
+                    refresh = LoadState.NotLoading(endOfPaginationReached = true),
+                    prepend = LoadState.NotLoading(endOfPaginationReached = true),
+                    append = LoadState.NotLoading(endOfPaginationReached = true),
+                ),
+            ),
+        )
+    }
+
     NekiTheme {
-        EmptyAllPhotoContent()
+        AllPhotoScreen(
+            uiState = AllPhotoState(isFavoriteChipSelected = isFavoriteSelected),
+            pagingItems = pagingData.collectAsLazyPagingItems(),
+        )
     }
 }
