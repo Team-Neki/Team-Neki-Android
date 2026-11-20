@@ -4,6 +4,8 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import com.kakao.sdk.common.KakaoSdk
 import com.naver.maps.map.NaverMapSdk
 import com.neki.android.core.analytics.initializer.AnalyticsInitializer
@@ -12,7 +14,13 @@ import javax.inject.Inject
 import timber.log.Timber
 
 @HiltAndroidApp
-class NekiApplication : Application() {
+class NekiApplication : Application(), Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     @Inject
     lateinit var analyticsInitializer: AnalyticsInitializer

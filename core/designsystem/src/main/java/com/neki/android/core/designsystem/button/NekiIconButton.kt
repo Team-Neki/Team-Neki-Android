@@ -2,6 +2,7 @@ package com.neki.android.core.designsystem.button
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -27,7 +28,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
 
 /**
  * 아이콘 전용 버튼 컴포넌트.
- * Box + clickableSingle 기반으로, 500ms 중복 클릭 방지와 리플 효과를 포함한다.
+ * 기본적으로 500ms 중복 클릭 방지와 리플 효과를 포함한다.
  *
  * @param onClick 클릭 이벤트 핸들러
  * @param modifier 이 버튼에 적용할 [Modifier]
@@ -37,6 +38,7 @@ import com.neki.android.core.designsystem.ui.theme.NekiTheme
  * @param disabledContentColor 비활성 상태의 콘텐츠 색상
  * @param border 테두리. null이면 테두리 없음
  * @param contentPadding 버튼 내부 패딩. 기본값 8.dp
+ * @param singleClick false이면 클릭 간격 제한 없이 연속 클릭을 허용
  * @param content 버튼 내부 콘텐츠. 일반적으로 [Icon]
  */
 @Composable
@@ -49,6 +51,7 @@ fun NekiIconButton(
     disabledContentColor: Color = Color.Unspecified,
     border: BorderStroke? = null,
     contentPadding: PaddingValues = PaddingValues(8.dp),
+    singleClick: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val resolvedContentColor = if (enabled) contentColor else disabledContentColor
@@ -57,10 +60,22 @@ fun NekiIconButton(
         modifier = modifier
             .clip(shape)
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
-            .clickableSingle(
-                enabled = enabled,
-                role = Role.Button,
-                onClick = onClick,
+            .then(
+                if (singleClick) {
+                    Modifier
+                        .clickableSingle(
+                            enabled = enabled,
+                            role = Role.Button,
+                            onClick = onClick,
+                        )
+                } else {
+                    Modifier
+                        .clickable(
+                            enabled = enabled,
+                            role = Role.Button,
+                            onClick = onClick,
+                        )
+                },
             )
             .padding(contentPadding),
         contentAlignment = Alignment.Center,

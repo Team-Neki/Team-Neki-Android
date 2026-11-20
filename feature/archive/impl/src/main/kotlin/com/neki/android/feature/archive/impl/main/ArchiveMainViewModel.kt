@@ -10,14 +10,20 @@ import com.neki.android.core.common.const.TermConst
 import com.neki.android.core.common.permission.NotificationGuideType
 import com.neki.android.core.common.permission.marketingAgreementToastMessage
 import com.neki.android.core.dataapi.repository.FolderRepository
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
 import com.neki.android.core.dataapi.repository.NotificationRepository
 import com.neki.android.core.dataapi.repository.PhotoRepository
 import com.neki.android.core.dataapi.repository.TermRepository
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.dataapi.repository.UserRepository
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDate
+import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -25,8 +31,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.LocalDate
-import javax.inject.Inject
 
 private const val DEFAULT_PHOTOS_SIZE = 20
 private const val MARKETING_AGREEMENT_FAILED_MESSAGE = "알림 동의에 실패했어요"
@@ -39,6 +43,7 @@ class ArchiveMainViewModel @Inject constructor(
     private val termRepository: TermRepository,
     private val notificationRepository: NotificationRepository,
     private val analyticsLogger: AnalyticsLogger,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
     val store: MviIntentStore<ArchiveMainState, ArchiveMainIntent, ArchiveMainSideEffect> =
@@ -312,7 +317,14 @@ class ArchiveMainViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            photoRepository.updateFavorite(photo.id, newFavorite)
+            optimisticUpdateScheduler.update(
+                PendingUpdate(
+                    UpdateKind.PHOTO_FAVORITE,
+                    photo.id.toString(),
+                    newFavorite.toString(),
+                    previousValue = photo.isFavorite.toString(),
+                ),
+            )
                 .onSuccess {
                     fetchFavoriteSummary(reduce)
                 }
@@ -321,7 +333,7 @@ class ArchiveMainViewModel @Inject constructor(
                     reduce {
                         copy(
                             recentPhotos = recentPhotos.map {
-                                if (it.id == photo.id) it.copy(isFavorite = photo.isFavorite) else it
+                                if (it.id == photo.id) it.copy(isFavorite = e.committedBoolean(photo.isFavorite)) else it
                             }.toImmutableList(),
                         )
                     }

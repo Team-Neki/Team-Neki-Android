@@ -36,7 +36,6 @@ import coil3.compose.AsyncImage
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
 import com.neki.android.core.designsystem.modifier.noRippleClickable
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Pose
 import com.neki.android.core.ui.component.GridItemOverlay
@@ -138,7 +137,7 @@ private fun PoseItem(
         Icon(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .noRippleClickableSingle { onClickBookmark(pose) }
+                .noRippleClickable { onClickBookmark(pose) }
                 .padding(10.dp)
                 .size(20.dp),
             imageVector = ImageVector.vectorResource(

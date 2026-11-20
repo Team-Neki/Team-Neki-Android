@@ -117,6 +117,7 @@ private fun RandomPoseFloatingBar(
             RandomPoseButton(
                 onClick = onClickBookmark,
                 backgroundColor = NekiTheme.colorScheme.primary400,
+                singleClick = false,
             ) {
                 Icon(
                     modifier = Modifier.size(24.dp),
@@ -137,6 +138,7 @@ private fun RandomPoseButton(
     onClick: () -> Unit,
     backgroundColor: Color,
     modifier: Modifier = Modifier,
+    singleClick: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     NekiIconButton(
@@ -145,6 +147,7 @@ private fun RandomPoseButton(
             .clip(CircleShape)
             .background(backgroundColor),
         onClick = onClick,
+        singleClick = singleClick,
         contentPadding = PaddingValues(10.dp),
         content = content,
     )

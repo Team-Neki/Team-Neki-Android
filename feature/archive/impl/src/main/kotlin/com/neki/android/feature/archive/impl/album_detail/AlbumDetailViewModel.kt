@@ -11,7 +11,11 @@ import androidx.paging.map
 import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.dataapi.repository.FolderRepository
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.domain.usecase.UploadMultiplePhotoUseCase
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.MviIntentStore
@@ -44,6 +48,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     private val folderRepository: FolderRepository,
     private val uploadMultiplePhotoUseCase: UploadMultiplePhotoUseCase,
     private val analyticsLogger: AnalyticsLogger,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -279,13 +284,20 @@ class AlbumDetailViewModel @AssistedInject constructor(
         val newFavorite = !photo.isFavorite
         updatedFavorites.update { it + (photo.id to newFavorite) }
         viewModelScope.launch {
-            photoRepository.updateFavorite(photo.id, newFavorite)
+            optimisticUpdateScheduler.update(
+                PendingUpdate(
+                    UpdateKind.PHOTO_FAVORITE,
+                    photo.id.toString(),
+                    newFavorite.toString(),
+                    previousValue = photo.isFavorite.toString(),
+                ),
+            )
                 .onSuccess {
                     postSideEffect(AlbumDetailSideEffect.NotifyResult)
                 }
                 .onFailure { e ->
                     Timber.e(e)
-                    updatedFavorites.update { it + (photo.id to photo.isFavorite) }
+                    updatedFavorites.update { it + (photo.id to e.committedBoolean(photo.isFavorite)) }
                 }
         }
     }

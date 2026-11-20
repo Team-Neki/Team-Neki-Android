@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.analytics.event.PoseAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
-import com.neki.android.core.common.coroutine.di.ApplicationScope
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
 import com.neki.android.core.dataapi.repository.PoseRepository
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.pose.api.PoseNavKey
@@ -13,23 +16,17 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-@OptIn(FlowPreview::class)
 @HiltViewModel(assistedFactory = PoseDetailViewModel.Factory::class)
 class PoseDetailViewModel @AssistedInject constructor(
     @param:Assisted private val key: PoseNavKey.PoseDetail,
     private val poseRepository: PoseRepository,
-    @param:ApplicationScope private val applicationScope: CoroutineScope,
     private val analyticsLogger: AnalyticsLogger,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
-    private val bookmarkRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
     private val committedBookmarks = key.poses.associate { it.id to it.isBookmarked }.toMutableMap()
     private var hasNext: Boolean = key.hasNext
     private var nextPage: Int = key.poses.size / PAGE_SIZE
@@ -51,24 +48,6 @@ class PoseDetailViewModel @AssistedInject constructor(
 
     init {
         store.onIntent(PoseDetailIntent.EnterPoseDetailScreen)
-        viewModelScope.launch {
-            bookmarkRequests
-                .debounce(500)
-                .collect { (poseId, newBookmark) ->
-                    val committedBookmark = committedBookmarks[poseId] ?: return@collect
-                    if (committedBookmark != newBookmark) {
-                        poseRepository.updateBookmark(poseId, newBookmark)
-                            .onSuccess {
-                                Timber.d("updateBookmark success")
-                                store.onIntent(PoseDetailIntent.BookmarkCommitted(poseId, newBookmark))
-                            }
-                            .onFailure { e ->
-                                Timber.e(e, "updateBookmark failed")
-                                store.onIntent(PoseDetailIntent.RevertBookmark(poseId, committedBookmark))
-                            }
-                    }
-                }
-        }
     }
 
     private fun onIntent(
@@ -101,6 +80,7 @@ class PoseDetailViewModel @AssistedInject constructor(
                     )
                 }
                 postSideEffect(PoseDetailSideEffect.NotifyBookmarkChanged(intent.poseId, intent.originalBookmark))
+                postSideEffect(PoseDetailSideEffect.ShowToast("북마크 변경에 실패했어요"))
             }
         }
     }
@@ -115,7 +95,21 @@ class PoseDetailViewModel @AssistedInject constructor(
         if (currentPose.id == 0L) return
 
         val newBookmarkStatus = !currentPose.isBookmarked
-        viewModelScope.launch { bookmarkRequests.emit(currentPose.id to newBookmarkStatus) }
+        viewModelScope.launch {
+            optimisticUpdateScheduler.update(
+                PendingUpdate(
+                    UpdateKind.POSE_BOOKMARK,
+                    currentPose.id.toString(),
+                    newBookmarkStatus.toString(),
+                    previousValue = committedBookmarks[currentPose.id]?.toString(),
+                ),
+            )
+                .onSuccess { store.onIntent(PoseDetailIntent.BookmarkCommitted(currentPose.id, newBookmarkStatus)) }
+                .onFailure { e ->
+                    val original = committedBookmarks[currentPose.id] ?: return@onFailure
+                    store.onIntent(PoseDetailIntent.RevertBookmark(currentPose.id, e.committedBoolean(original)))
+                }
+        }
         reduce {
             copy(
                 poses = poses.map { pose ->
@@ -191,20 +185,6 @@ class PoseDetailViewModel @AssistedInject constructor(
                     }
             } finally {
                 isLoadingMore = false
-            }
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-
-        val state = store.uiState.value
-        state.poses.forEach { pose ->
-            val committedBookmark = committedBookmarks[pose.id]
-            if (committedBookmark != null && pose.isBookmarked != committedBookmark) {
-                applicationScope.launch {
-                    poseRepository.updateBookmark(pose.id, pose.isBookmarked)
-                }
             }
         }
     }

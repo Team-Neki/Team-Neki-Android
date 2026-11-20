@@ -4,8 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neki.android.core.analytics.event.ArchiveAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
-import com.neki.android.core.common.coroutine.di.ApplicationScope
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedText
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.archive.api.ArchiveNavKey
@@ -13,23 +17,17 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-@OptIn(FlowPreview::class)
 @HiltViewModel(assistedFactory = PhotoDetailViewModel.Factory::class)
 class PhotoDetailViewModel @AssistedInject constructor(
     @Assisted private val key: ArchiveNavKey.PhotoDetail,
     private val photoRepository: PhotoRepository,
-    @ApplicationScope private val applicationScope: CoroutineScope,
     private val analyticsLogger: AnalyticsLogger,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
-    private val favoriteRequests = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 64)
     private val committedFavorites = key.photos.associate { it.id to it.isFavorite }.toMutableMap()
     private var hasNext: Boolean = key.hasNext
     private var nextPage: Int = key.photos.size / PAGE_SIZE
@@ -46,25 +44,6 @@ class PhotoDetailViewModel @AssistedInject constructor(
 
     init {
         analyticsLogger.log(ArchiveAnalyticsEvent.PhotoDetailView)
-
-        viewModelScope.launch {
-            favoriteRequests
-                .debounce(500)
-                .collect { (photoId, newFavorite) ->
-                    val committedFavorite = committedFavorites[photoId] ?: return@collect
-                    if (committedFavorite != newFavorite) {
-                        photoRepository.updateFavorite(photoId, newFavorite)
-                            .onSuccess {
-                                Timber.d("updateFavorite success")
-                                store.onIntent(PhotoDetailIntent.FavoriteCommitted(photoId, newFavorite))
-                            }
-                            .onFailure { e ->
-                                Timber.e(e, "updateFavorite failed")
-                                store.onIntent(PhotoDetailIntent.RevertFavorite(photoId, committedFavorite))
-                            }
-                    }
-                }
-        }
     }
 
     @AssistedFactory
@@ -133,6 +112,7 @@ class PhotoDetailViewModel @AssistedInject constructor(
                         },
                     )
                 }
+                postSideEffect(PhotoDetailSideEffect.ShowToastMessage("즐겨찾기 변경에 실패했어요"))
             }
 
             // Memo Intent
@@ -200,7 +180,9 @@ class PhotoDetailViewModel @AssistedInject constructor(
             )
         }
         viewModelScope.launch {
-            photoRepository.updateMemo(photoId, newMemo)
+            optimisticUpdateScheduler.update(
+                PendingUpdate(UpdateKind.MEMO, photoId.toString(), newMemo.toString(), previousValue = oldMemo),
+            )
                 .onSuccess {
                     analyticsLogger.log(ArchiveAnalyticsEvent.PhotoMemoCreate)
                     postSideEffect(PhotoDetailSideEffect.NotifyPhotoUpdated)
@@ -209,9 +191,9 @@ class PhotoDetailViewModel @AssistedInject constructor(
                     Timber.e(e, "updateMemo failed")
                     reduce {
                         copy(
-                            memo = oldMemo,
+                            memo = if (photo.id == photoId && memoMode != MemoMode.Editing) e.committedText(oldMemo) else memo,
                             photos = photos.map { p ->
-                                if (p.id == photoId) p.copy(memo = oldMemo) else p
+                                if (p.id == photoId) p.copy(memo = e.committedText(oldMemo)) else p
                             },
                         )
                     }
@@ -226,7 +208,21 @@ class PhotoDetailViewModel @AssistedInject constructor(
     ) {
         val currentPhoto = state.photo
         val newFavoriteStatus = !currentPhoto.isFavorite
-        viewModelScope.launch { favoriteRequests.emit(currentPhoto.id to newFavoriteStatus) }
+        viewModelScope.launch {
+            optimisticUpdateScheduler.update(
+                PendingUpdate(
+                    UpdateKind.PHOTO_FAVORITE,
+                    currentPhoto.id.toString(),
+                    newFavoriteStatus.toString(),
+                    previousValue = committedFavorites[currentPhoto.id]?.toString(),
+                ),
+            )
+                .onSuccess { store.onIntent(PhotoDetailIntent.FavoriteCommitted(currentPhoto.id, newFavoriteStatus)) }
+                .onFailure { e ->
+                    val original = committedFavorites[currentPhoto.id] ?: return@onFailure
+                    store.onIntent(PhotoDetailIntent.RevertFavorite(currentPhoto.id, e.committedBoolean(original)))
+                }
+        }
         reduce {
             copy(
                 photos = photos.map { p ->
@@ -291,19 +287,6 @@ class PhotoDetailViewModel @AssistedInject constructor(
                     }
             } finally {
                 isLoadingMore = false
-            }
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        val state = store.uiState.value
-        state.photos.forEach { photo ->
-            val committedFavorite = committedFavorites[photo.id]
-            if (committedFavorite != null && photo.isFavorite != committedFavorite) {
-                applicationScope.launch {
-                    photoRepository.updateFavorite(photo.id, photo.isFavorite)
-                }
             }
         }
     }

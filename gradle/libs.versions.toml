@@ -1,4 +1,6 @@
 [versions]
+work = "2.11.2"
+hiltWork = "1.3.0"
 agp = "9.3.3"
 annotationExperimental = "1.5.1"
 amplitude = "1.30.0"
@@ -48,6 +50,9 @@ firebaseCrashlyticsPlugin = "3.0.6"
 facebookSdk = "18.2.3"
 
 [libraries]
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
 amplitude-analytics-android = { module = "com.amplitude:analytics-android", version.ref = "amplitude" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraX" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraX" }

@@ -13,7 +13,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neki.android.core.designsystem.ComponentPreview
 import com.neki.android.core.designsystem.R
-import com.neki.android.core.designsystem.modifier.noRippleClickableSingle
+import com.neki.android.core.designsystem.modifier.noRippleClickable
 import com.neki.android.core.designsystem.ui.theme.NekiTheme
 import com.neki.android.core.model.Photo
 import com.neki.android.core.ui.component.PhotoComponent
@@ -42,7 +42,7 @@ internal fun ArchiveMainPhotoItem(
         Icon(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .noRippleClickableSingle { onClickFavorite(photo) }
+                .noRippleClickable { onClickFavorite(photo) }
                 .padding(10.dp)
                 .size(20.dp),
             imageVector = ImageVector.vectorResource(

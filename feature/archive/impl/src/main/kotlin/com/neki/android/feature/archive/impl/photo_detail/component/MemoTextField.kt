@@ -260,6 +260,7 @@ private fun MemoEditingContent(
             NekiTextButton(
                 onClick = { onClickMemoDone(memoState.text.toString()) },
                 contentPadding = PaddingValues(10.dp),
+                singleClick = false,
             ) {
                 Text(
                     text = "완료",

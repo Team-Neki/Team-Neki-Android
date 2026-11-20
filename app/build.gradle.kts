@@ -93,6 +93,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
     implementation(projects.core.common)
     implementation(projects.core.dataApi)
     implementation(projects.core.data)

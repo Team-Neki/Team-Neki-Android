@@ -82,6 +82,7 @@ internal fun HorizontalBrandItem(
         HorizontalSpacer(12.dp)
         NekiIconButton(
             onClick = onClickFavorite,
+            singleClick = false,
             contentColor = if (photoBooth.favorite) {
                 NekiTheme.colorScheme.primary400
             } else {

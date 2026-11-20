@@ -13,8 +13,10 @@ import com.neki.android.core.analytics.event.MapAnalyticsEvent
 import com.neki.android.core.analytics.logger.AnalyticsLogger
 import com.neki.android.core.common.permission.LocationPermissionManager
 import com.neki.android.core.dataapi.repository.MapRepository
-import com.neki.android.feature.map.impl.search.SearchMapIntent
-import com.neki.android.feature.map.impl.search.SearchMapState
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.model.Brand
 import com.neki.android.core.model.PhotoBooth
 import com.neki.android.core.model.SearchCompletionType
@@ -22,11 +24,14 @@ import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.map.impl.const.DirectionApp
 import com.neki.android.feature.map.impl.const.MapConst
+import com.neki.android.feature.map.impl.search.SearchMapIntent
+import com.neki.android.feature.map.impl.search.SearchMapState
 import com.neki.android.feature.map.impl.util.LocationHelper
 import com.neki.android.feature.map.impl.util.calculateDistance
 import com.neki.android.feature.map.impl.util.getSecondDepthRegionName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -37,7 +42,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 @Suppress("LargeClass")
 @HiltViewModel
@@ -45,6 +49,7 @@ class MapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val mapRepository: MapRepository,
     private val analyticsLogger: AnalyticsLogger,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
     private var lastSearchCenter: LocLatLng? = null
@@ -154,11 +159,7 @@ class MapViewModel @Inject constructor(
                 postSideEffect(MapEffect.NavigateToPhotoBoothOrderChange)
             }
             is MapIntent.UpdateBrandOrder -> reduce { copy(brands = intent.orderedBrands.toImmutableList()) }
-            is MapIntent.ClickPhotoBoothFavorite -> {
-                val newFavorite = !intent.photoBooth.favorite
-                toggleFavorite(intent.photoBooth, newFavorite, reduce)
-                updateFavorite(intent.photoBooth.copy(favorite = newFavorite))
-            }
+            is MapIntent.ClickPhotoBoothFavorite -> updateFavorite(intent.photoBooth, reduce, postSideEffect)
             is MapIntent.RevertFavoritePhotoBooth -> {
                 toggleFavorite(intent.photoBooth, intent.photoBooth.favorite, reduce)
             }
@@ -219,7 +220,6 @@ class MapViewModel @Inject constructor(
                     )
                 }
             }
-            is MapIntent.ShowToast -> postSideEffect(MapEffect.ShowToastMessage(intent.message))
         }
     }
 
@@ -356,12 +356,30 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun updateFavorite(photoBooth: PhotoBooth) {
+    private fun updateFavorite(
+        photoBooth: PhotoBooth,
+        reduce: (MapState.() -> MapState) -> Unit,
+        postSideEffect: (MapEffect) -> Unit,
+    ) {
         val brandId = store.uiState.value.brandIdOf(photoBooth.brandName)
+        val newFavorite = !photoBooth.favorite
+        toggleFavorite(photoBooth, newFavorite, reduce)
+        postSideEffect(
+            MapEffect.ShowToastMessage(
+                if (newFavorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
+            ),
+        )
         viewModelScope.launch {
-            mapRepository.updatePhotoBoothFavorite(photoBooth.id, photoBooth.favorite)
+            optimisticUpdateScheduler.update(
+                PendingUpdate(
+                    UpdateKind.BOOTH_FAVORITE,
+                    photoBooth.id.toString(),
+                    newFavorite.toString(),
+                    previousValue = photoBooth.favorite.toString(),
+                ),
+            )
                 .onSuccess {
-                    if (photoBooth.favorite) {
+                    if (newFavorite) {
                         analyticsLogger.log(
                             MapAnalyticsEvent.BoothFavoriteAdd(
                                 boothName = photoBooth.branchName,
@@ -378,15 +396,14 @@ class MapViewModel @Inject constructor(
                             ),
                         )
                     }
-                    store.onIntent(
-                        MapIntent.ShowToast(
-                            message = if (photoBooth.favorite) "저장한 포토 부스에 추가됐어요!" else "저장한 포토 부스에서 삭제됐어요!",
-                        ),
-                    )
                 }
                 .onFailure { e ->
                     Timber.e(e)
-                    store.onIntent(MapIntent.RevertFavoritePhotoBooth(photoBooth.copy(favorite = !photoBooth.favorite)))
+                    store.onIntent(
+                        MapIntent.RevertFavoritePhotoBooth(
+                            photoBooth.copy(favorite = e.committedBoolean(photoBooth.favorite)),
+                        ),
+                    )
                 }
         }
     }

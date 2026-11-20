@@ -6,13 +6,18 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
+import com.neki.android.core.dataapi.repository.PendingUpdate
+import com.neki.android.core.dataapi.repository.committedBoolean
+import com.neki.android.core.dataapi.repository.OptimisticUpdateScheduler
 import com.neki.android.core.dataapi.repository.PhotoRepository
+import com.neki.android.core.dataapi.repository.UpdateKind
 import com.neki.android.core.model.Photo
 import com.neki.android.core.model.SortOrder
 import com.neki.android.core.ui.MviIntentStore
 import com.neki.android.core.ui.mviIntentStore
 import com.neki.android.feature.archive.impl.model.SelectMode
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,11 +28,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltViewModel
 class AllPhotoViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
+    private val optimisticUpdateScheduler: OptimisticUpdateScheduler,
 ) : ViewModel() {
 
     private val deletedPhotoIds = MutableStateFlow<Set<Long>>(emptySet())
@@ -120,13 +125,20 @@ class AllPhotoViewModel @Inject constructor(
                 val newFavorite = !photo.isFavorite
                 updatedFavorites.update { it + (photo.id to newFavorite) }
                 viewModelScope.launch {
-                    photoRepository.updateFavorite(photo.id, newFavorite)
+                    optimisticUpdateScheduler.update(
+                        PendingUpdate(
+                            UpdateKind.PHOTO_FAVORITE,
+                            photo.id.toString(),
+                            newFavorite.toString(),
+                            previousValue = photo.isFavorite.toString(),
+                        ),
+                    )
                         .onSuccess {
                             postSideEffect(AllPhotoSideEffect.NotifyResult)
                         }
                         .onFailure { e ->
                             Timber.e(e)
-                            updatedFavorites.update { it + (photo.id to photo.isFavorite) }
+                            updatedFavorites.update { it + (photo.id to e.committedBoolean(photo.isFavorite)) }
                             postSideEffect(AllPhotoSideEffect.ShowToastMessage("즐겨찾기 변경에 실패했어요"))
                         }
                 }

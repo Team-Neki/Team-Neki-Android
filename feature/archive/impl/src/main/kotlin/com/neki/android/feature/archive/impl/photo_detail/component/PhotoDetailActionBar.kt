@@ -45,6 +45,7 @@ internal fun PhotoDetailActionBar(
                 }
                 NekiIconButton(
                     onClick = onClickFavorite,
+                    singleClick = false,
                 ) {
                     Icon(
                         modifier = Modifier.size(28.dp),
