@@ -1,49 +1,50 @@
-name: Verify GitHub Release
+name: Verify Release Automation
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
       GITHUB_REPOSITORY: ${{ github.repository }}
-      FASTLANE_SKIP_UPDATE_CHECK: "true"
+      PLAY_STORE_JSON_KEY_PATH: /tmp/play-store-key.json
+      FASTLANE_SKIP_UPDATE_CHECK: 'true'
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
           bundler-cache: true
-
-      - name: Create draft through release lane
+      - name: Test orchestration without publishing
+        run: bundle exec ruby fastlane/test/play_release_test.rb
+      - name: Parse Fastlane lanes without running a deploy
+        run: bundle exec fastlane lanes
+      - name: Verify read-only Google Play lifecycle API
         env:
-          GITHUB_REF_NAME: release-notes-check-${{ github.run_id }}
-          GITHUB_RELEASE_DRAFT: "true"
-        run: bundle exec fastlane create_github_release
-
-      - name: Verify existing release is skipped
-        env:
-          GITHUB_REF_NAME: release-notes-check-${{ github.run_id }}
-          GITHUB_RELEASE_DRAFT: "true"
+          PLAY_STORE_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_KEY }}
         run: |
-          test "$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq '.isDraft')" = true
-          bundle exec fastlane create_github_release
-
-      - name: Delete verification draft
+          printf '%s' "$PLAY_STORE_KEY" > "$PLAY_STORE_JSON_KEY_PATH"
+          bundle exec ruby -r ./fastlane/lib/play_release -e '
+            play = PlayRelease::Play.new
+            %w[production internal].each do |track|
+              releases = play.releases(track)
+              raise "No releases returned for #{track}" if releases.empty?
+              states = releases.map do |release|
+                release.fetch("releaseName")
+                PlayRelease.version_code(release)
+                PlayRelease.state(release)
+              end
+              puts "#{track}: #{states.uniq.sort.join(", ")}"
+            end
+          '
+      - name: Remove restored credentials
         if: always()
-        env:
-          GITHUB_REF_NAME: release-notes-check-${{ github.run_id }}
-        run: |
-          if gh release view "$GITHUB_REF_NAME" --json tagName > /dev/null 2>&1; then
-            gh release delete "$GITHUB_REF_NAME" --yes
-          fi
+        run: rm -f "$PLAY_STORE_JSON_KEY_PATH"

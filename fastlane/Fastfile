@@ -2,6 +2,9 @@
 
 require "tempfile"
 require "open3"
+require "tmpdir"
+require_relative "lib/play_release"
+require_relative "lib/play_review_guard"
 
 default_platform(:android)
 
@@ -61,50 +64,91 @@ platform :android do
   end
 
   # ── Lane: internal ───────────────────────────
-  desc "Resolve next Play Store versionCode, build release AAB with tag-based versionName, upload to Internal"
+  desc "Explicit internal testing upload (no production tag or GitHub Release)"
   lane :internal do
-    version_name = ENV.fetch("FASTLANE_VERSION_NAME") { UI.user_error!("FASTLANE_VERSION_NAME(태그에서 파싱한 값)이 필요합니다") }
+    upload_play_build(track: "internal", version_name: read_base_version_name)
+  end
+
+  private_lane :upload_play_build do |options|
+    require "google/apis/androidpublisher_v3"
+    service = Google::Apis::AndroidpublisherV3::AndroidPublisherService
+    service.prepend(PlayReviewGuard) unless service.ancestors.include?(PlayReviewGuard)
+    version_name = options.fetch(:version_name)
+    existing_code = options[:existing_code]
 
     tracks = %w[production beta alpha internal]
     # fail-closed: 트랙 조회 자체가 실패(인증/네트워크 오류)하면 즉시 배포를 중단한다.
     # "조회 성공 + 결과 없음(빈 트랙)"과 "조회 실패"를 구분해야 한다 — 후자를 빈 배열로
     # 취급하면 실제로는 더 높은 versionCode가 존재하는데도 낮은 값을 재사용해 충돌할 수 있다.
-    version_codes = tracks.flat_map do |track|
+    version_codes = existing_code ? [] : tracks.flat_map do |track|
       begin
         google_play_track_version_codes(package_name: PACKAGE_NAME, track: track)
       rescue => e
         UI.user_error!("#{track} 트랙 versionCode 조회 실패 — 배포를 중단합니다: #{e.message}")
       end
     end
-    next_version_code = (version_codes.max || 0) + 1
+    next_version_code = existing_code || (version_codes.max || 0) + 1
     UI.message("기존 최대 versionCode=#{version_codes.max.inspect} → 다음 versionCode=#{next_version_code}")
 
-    gradle(
-      task:        "bundle",
-      build_type:  "Release",
-      project_dir: ".",
-      properties: {
-        "versionCode" => next_version_code,
-        "versionName" => version_name,
-      },
-      print_command: true,
-    )
+    unless existing_code
+      gradle(
+        task:        "bundle",
+        build_type:  "Release",
+        project_dir: ".",
+        properties: {
+          "versionCode" => next_version_code,
+          "versionName" => version_name,
+        },
+        print_command: true,
+      )
+    end
 
-    aab_path = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    aab_path = existing_code ? nil : lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
     UI.message("AAB path: #{aab_path}")
 
     upload_to_play_store(
-      track:                   "internal",
+      track:                   options.fetch(:track),
       aab:                     aab_path,
+      skip_upload_aab:          !existing_code.nil?,
+      skip_upload_apk:          true,
+      version_name:            options.fetch(:release_name, version_name),
       release_status:          "completed",
+      track_promote_to:        existing_code ? options.fetch(:track) : nil,
+      track_promote_release_status: "completed",
       version_code:            next_version_code,
+      metadata_path:           options[:metadata_path],
       skip_upload_metadata:    true,
-      skip_upload_changelogs:  true,
+      skip_upload_changelogs:  options[:metadata_path].nil?,
       skip_upload_images:      true,
       skip_upload_screenshots: true,
+      changes_not_sent_for_review: false,
+      rescue_changes_not_sent_for_review: false,
     )
 
-    UI.success("AAB versionCode=#{next_version_code} versionName=#{version_name} uploaded to Play Store Internal track.")
+    UI.success("AAB versionCode=#{next_version_code} versionName=#{version_name} uploaded to #{options.fetch(:track)}.")
+    next_version_code
+  end
+
+  desc "Submit production release, then create the exact source tag and tracked GitHub Release"
+  lane :deploy_production do
+    config = PlayRelease::Config.new
+    sha = ENV.fetch("RELEASE_SHA")
+    actual_sha = PlayRelease.capture("git", "rev-parse", "HEAD").strip
+    UI.user_error!("Checked-out source differs from release merge SHA") unless actual_sha == sha
+
+    runner = PlayRelease::Production.new(
+      config: config, sha: sha, github: PlayRelease::GitHub.new, play: PlayRelease::Play.new,
+    )
+    data = runner.run do |existing_code|
+      Dir.mktmpdir("neki-play-notes-") do |directory|
+        config.write_metadata(directory)
+        upload_play_build(
+          track: "production", version_name: config.version, release_name: config.release_name(sha),
+          existing_code: existing_code, metadata_path: directory,
+        )
+      end
+    end
+    UI.success("Production #{config.tag} (#{data.fetch('version_code')}): #{data.fetch('state')}")
   end
 
   # ── Lane: create_github_release ──────────────
@@ -152,10 +196,9 @@ platform :android do
   end
 
   # ── Lane: deploy ─────────────────────────────
-  desc "Full Play Store Internal deploy: resolve versionCode → build/upload AAB → create GitHub Release"
+  desc "Production deploy (release PR merge workflow)"
   lane :deploy do
-    internal
-    create_github_release
+    deploy_production
   end
 
   # ── Lane: deploy_qa ──────────────────────────

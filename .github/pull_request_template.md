@@ -26,7 +26,11 @@
 
 <!-- Release 용 PR 본문!
 ## ✅ 버전명
-ex) 8 (1.0.0)
+ex) 1.4.6 — BuildConst.VERSION_NAME과 일치
+
+## 📝 Play Store 출시 노트
+- release-notes/1.4.6/ko-KR.txt (사용자용 문구 1~500자)
+- release 라벨 필수. main 머지 후 프로덕션 자동 제출, 성공 후 태그·GitHub Release 자동 생성
 
 ## 📙 업데이트 사항 (작업 PR 및 작업 내용)
 -

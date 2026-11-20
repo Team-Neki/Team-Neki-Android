@@ -1,0 +1,25 @@
+name: Validate Release PR
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  release-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require release label, matching version and release notes
+        env:
+          RELEASE_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          RELEASE_PR_TITLE: ${{ github.event.pull_request.title }}
+          RELEASE_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          ruby -rjson -e 'abort "main release PR requires the release label" unless JSON.parse(ENV.fetch("RELEASE_LABELS")).include?("release")'
+          ruby fastlane/release_cli.rb validate
