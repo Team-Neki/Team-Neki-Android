@@ -115,6 +115,10 @@ module PlayRelease
       api("releases?per_page=100", paginate: true)
     end
 
+    def main_sha
+      api("git/ref/heads/main").fetch("object").fetch("sha")
+    end
+
     def check_tag!(tag, sha)
       ref = api("git/ref/tags/#{tag}", missing: true)
       if ref
@@ -165,6 +169,10 @@ module PlayRelease
 
   def self.state(release)
     release.fetch("releaseLifecycleState").delete_prefix("RELEASE_LIFECYCLE_STATE_")
+  end
+
+  def self.ensure_current_main!(github, sha)
+    raise "A newer main commit superseded this release; refusing a stale upload" unless github.main_sha == sha
   end
 
   def self.version_code(release)
@@ -242,6 +250,7 @@ module PlayRelease
       end
       submitted = existing && SUBMITTED.include?(PlayRelease.state(existing))
       unless submitted
+        PlayRelease.ensure_current_main!(@github, @sha)
         raise "Another production release is in review" if releases.any? { |release| PlayRelease.state(release) == "IN_REVIEW" && release != existing }
         candidate = unless existing
           @play.releases("internal")

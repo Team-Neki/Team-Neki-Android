@@ -108,6 +108,10 @@ platform :android do
     aab_path = existing_code ? nil : lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
     UI.message("AAB path: #{aab_path}")
 
+    if options.fetch(:track) == "production"
+      PlayRelease.ensure_current_main!(PlayRelease::GitHub.new, ENV.fetch("RELEASE_SHA"))
+    end
+
     upload_to_play_store(
       track:                   options[:source_track] || options.fetch(:track),
       aab:                     aab_path,

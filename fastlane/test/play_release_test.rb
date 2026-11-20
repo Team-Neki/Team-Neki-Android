@@ -11,7 +11,7 @@ class PlayReleaseTest < Minitest::Test
   TREE = "c" * 40
 
   class FakeGitHub
-    attr_accessor :existing, :tagged, :all_releases, :tag_error
+    attr_accessor :existing, :tagged, :all_releases, :tag_error, :current_main
     attr_reader :events, :created_body, :updates
 
     def initialize
@@ -42,6 +42,10 @@ class PlayReleaseTest < Minitest::Test
 
     def releases
       all_releases
+    end
+
+    def main_sha
+      current_main || PlayReleaseTest::SHA
     end
 
     def update_release(release, body)
@@ -259,6 +263,13 @@ class PlayReleaseTest < Minitest::Test
   def test_other_review_is_not_cancelled_by_a_new_release
     releases = [summary(name: "1.4.5 (previous)")]
     assert_raises(RuntimeError) { runner(FakePlay.new(releases)).run(&no_upload) }
+    assert_empty @github.events
+  end
+
+  def test_superseded_main_commit_cannot_upload_an_older_release
+    @github.current_main = OTHER_SHA
+    error = assert_raises(RuntimeError) { runner(FakePlay.new([])).run(&no_upload) }
+    assert_includes error.message, "superseded"
     assert_empty @github.events
   end
 
