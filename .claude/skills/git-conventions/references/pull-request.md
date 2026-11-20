@@ -105,7 +105,9 @@
 
 - 릴리즈 PR은 제목을 `[release] v<version>`으로 쓰고, 본문은 템플릿 하단 주석의 Release 양식을 사용한다.
 - head는 `develop`, base는 `main`이다. release 브랜치를 만들지 않는다. 그 외 PR은 base가 `develop`이다.
-- PR 전에 `build-logic/src/main/java/com/neki/android/buildlogic/const/BuildConst.kt`의 `VERSION_NAME`을 올린 커밋 `[chore] 앱 기본 버전명을 <version>으로 업데이트`를 develop에 바로 push한다.
+- 릴리즈 PR에는 `build-logic/src/main/java/com/neki/android/buildlogic/const/BuildConst.kt`의 `VERSION_NAME`과 `release-notes/<version>/ko-KR.txt`를 함께 포함한다. 제목의 버전과 일치해야 하고, 버전은 이전 main보다 높아야 한다. 출시 노트는 사용자에게 표시할 문구 1~500자로 작성한다.
+- `release` 라벨을 붙인다. 이 라벨이 있는 main PR을 머지하면 프로덕션 배포가 자동 시작된다. 제출 성공 후 태그·GitHub Release가 생성되므로 태그를 먼저 만들지 않는다.
+- 내부테스트는 별도 수동 워크플로우로 요청한다. Firebase QA와 프로덕션 배포를 구분한다.
 - 머지는 merge commit으로 한다. squash·rebase 머지는 develop과 main 히스토리를 갈라지게 한다.
 - develop에 아직 출시하면 안 되는 변경이 섞여 있으면 예외로 `main`에서 `release/<version>`을 만들어 PR한다.
 

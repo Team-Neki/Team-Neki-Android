@@ -9,6 +9,8 @@
 - PR 생성 전 리뷰는 `.claude/agents/reviewer.md`를 따른다.
 - 문서 변경도 같은 harness 기준으로 검토한다.
 - harness 자체(skill, agent, `AGENTS.md`, `docs/discussions.md`) 수정은 `.claude/skills/maintaining-harness/SKILL.md`를 따른다.
+- 별도 트랙 지정 없이 "배포"라고 하면 Play Store 프로덕션 배포를 뜻한다. 내부테스트는 "내부테스트 배포"라고 명시한 경우에만 진행한다.
+- `release` 라벨이 있는 main 대상 PR을 머지하면 프로덕션 배포가 자동 시작된다. 버전·출시 노트는 PR에서 확정하고 태그는 제출 성공 후 자동 생성한다. GitHub Release의 검토·게시 상태를 구분해 보고한다.
 
 ## Skill Routing
 
@@ -23,7 +25,7 @@
 - 새 화면 skeleton: `.claude/skills/creating-feature-screen/SKILL.md`
 - 기존 화면 기능 추가/수정: `.claude/skills/changing-feature-behavior/SKILL.md`
 - Amplitude Analytics: `.claude/skills/implementing-analytics/SKILL.md`
-- Play Store 내부테스트 배포: `.claude/skills/deploying-playstore-internal/SKILL.md`
+- Play Store 배포(기본 프로덕션, 내부테스트는 명시 시): `.claude/skills/deploying-playstore-internal/SKILL.md`
 - Firebase App Distribution 배포: `.claude/skills/deploying-firebase/SKILL.md`
 
 ## Agents

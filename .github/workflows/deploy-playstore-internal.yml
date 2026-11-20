@@ -1,0 +1,77 @@
+name: Deploy Play Store Internal Testing
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: '내부테스트에 올릴 브랜치 또는 커밋'
+        required: true
+        default: develop
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  ci:
+    needs: resolve
+    uses: ./.github/workflows/android-ci.yml
+    with:
+      ref: ${{ needs.resolve.outputs.sha }}
+    secrets: inherit
+
+  internal:
+    needs: [resolve, ci]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: playstore-upload
+      cancel-in-progress: false
+    env:
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false'
+      PLAY_STORE_JSON_KEY_PATH: /tmp/play-store-key.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: gradle
+      - uses: android-actions/setup-android@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+      - name: Restore build credentials
+        env:
+          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          GOOGLE_SERVICES_DEBUG: ${{ secrets.GOOGLE_SERVICES_DEBUG }}
+          GOOGLE_SERVICES_RELEASE: ${{ secrets.GOOGLE_SERVICES_RELEASE }}
+          NETWORK_SECURITY_CONFIG: ${{ secrets.NETWORK_SECURITY_CONFIG }}
+          PLAY_STORE_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_KEY }}
+        run: |
+          printf '%s' "$LOCAL_PROPERTIES" > local.properties
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > neki_key_store.jks
+          printf '%s' "$GOOGLE_SERVICES_DEBUG" > app/src/debug/google-services.json
+          mkdir -p app/src/release
+          printf '%s' "$GOOGLE_SERVICES_RELEASE" > app/src/release/google-services.json
+          printf '%s' "$NETWORK_SECURITY_CONFIG" > app/src/main/res/xml/network_security_config.xml
+          printf '%s' "$PLAY_STORE_KEY" > "$PLAY_STORE_JSON_KEY_PATH"
+      - name: Upload internal testing build
+        run: bundle exec fastlane internal
+      - name: Remove restored credentials
+        if: always()
+        run: rm -f "$PLAY_STORE_JSON_KEY_PATH" neki_key_store.jks

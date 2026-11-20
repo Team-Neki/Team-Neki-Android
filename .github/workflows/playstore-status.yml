@@ -1,0 +1,37 @@
+name: Sync Play Store Release Status
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: playstore-release-status
+  cancel-in-progress: false
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      PLAY_STORE_JSON_KEY_PATH: /tmp/play-store-key.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+      - name: Read Play lifecycle and update GitHub Releases
+        env:
+          PLAY_STORE_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_KEY }}
+        run: |
+          printf '%s' "$PLAY_STORE_KEY" > "$PLAY_STORE_JSON_KEY_PATH"
+          bundle exec ruby fastlane/release_cli.rb status
+      - name: Remove restored credentials
+        if: always()
+        run: rm -f "$PLAY_STORE_JSON_KEY_PATH"
